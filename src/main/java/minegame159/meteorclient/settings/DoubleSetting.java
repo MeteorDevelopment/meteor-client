@@ -5,23 +5,25 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WDoubleEdit;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
 public class DoubleSetting extends Setting<Double> {
-    private final Double min, max;
+    public final Double min, max;
+    private final Double sliderMin, sliderMax;
 
-    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean noSlider, int decimalPlaces) {
+    public final int decimalPlaces;
+    public final boolean onSliderRelease;
+
+    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean onSliderRelease, int decimalPlaces) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
         this.min = min;
         this.max = max;
-
-        widget = new WDoubleEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10, decimalPlaces, noSlider, 200);
-        ((WDoubleEdit) widget).action = () -> {
-            if (!set(((WDoubleEdit) widget).get())) ((WDoubleEdit) widget).set(get());
-        };
+        this.sliderMin = sliderMin;
+        this.sliderMax = sliderMax;
+        this.decimalPlaces = decimalPlaces;
+        this.onSliderRelease = onSliderRelease;
     }
 
     @Override
@@ -34,13 +36,16 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    public void resetWidget() {
-        ((WDoubleEdit) widget).set(get());
-    }
-
-    @Override
     protected boolean isValueValid(Double value) {
         return (min == null || value >= min) && (max == null || value <= max);
+    }
+
+    public double getSliderMin() {
+        return sliderMin != null ? sliderMin : 0;
+    }
+
+    public double getSliderMax() {
+        return sliderMax != null ? sliderMax : 10;
     }
 
     @Override
@@ -64,8 +69,8 @@ public class DoubleSetting extends Setting<Double> {
         private Consumer<Setting<Double>> onModuleActivated;
         private Double min, max;
         private Double sliderMin, sliderMax;
-        private boolean noSlider;
-        private int decimalPlaces = 2;
+        private boolean onSliderRelease;
+        private int decimalPlaces = 3;
 
         public Builder name(String name) {
             this.name = name;
@@ -112,8 +117,8 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
-        public Builder noSlider() {
-            noSlider = true;
+        public Builder onSliderRelease() {
+            onSliderRelease = true;
             return this;
         }
 
@@ -123,7 +128,7 @@ public class DoubleSetting extends Setting<Double> {
         }
 
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, noSlider, decimalPlaces);
+            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, onSliderRelease, decimalPlaces);
         }
     }
 }

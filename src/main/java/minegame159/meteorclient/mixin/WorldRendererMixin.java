@@ -5,11 +5,13 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.*;
-import minegame159.meteorclient.modules.world.Ambience;
+import minegame159.meteorclient.rendering.Blur;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.*;
+import minegame159.meteorclient.systems.modules.world.Ambience;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -63,6 +65,11 @@ public abstract class WorldRendererMixin {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
 
+    @Inject(method = "render", at = @At("TAIL"))
+    private void onRenderTail(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
+        Blur.render();
+    }
+
     // Outlines
 
     @Inject(method = "render", at = @At("HEAD"))
@@ -109,33 +116,19 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
     private void onBlockBreakingInfo(int entityId, BlockPos pos, int stage, CallbackInfo ci) {
-        BreakIndicators bi = Modules.get().get(BreakIndicators.class);
-        if(!bi.isActive())
-            return;
-
-        if(!bi.multiple.get() && entityId != client.player.getEntityId())
-            return;
-
         if (0 <= stage && stage <= 8) {
             BlockBreakingInfo info = new BlockBreakingInfo(entityId, pos);
             info.setStage(stage);
-            bi.blocks.put(entityId, info);
+            BlockUtils.breakingBlocks.put(entityId, info);
 
-            if (bi.hideVanillaIndicators.get()) {
-                ci.cancel();
-            }
-
+            if (Modules.get().isActive(BreakIndicators.class) && Modules.get().get(BreakIndicators.class).hideVanillaIndicators.get()) ci.cancel();
         } else {
-            bi.blocks.remove(entityId);
+            BlockUtils.breakingBlocks.remove(entityId);
         }
     }
     @Inject(method = "removeBlockBreakingInfo", at = @At("TAIL"))
     private void onBlockBreakingInfoRemoval(BlockBreakingInfo info, CallbackInfo ci) {
-        BreakIndicators bi = Modules.get().get(BreakIndicators.class);
-        if(!bi.isActive())
-            return;
-
-        bi.blocks.values().removeIf(info::equals);
+        BlockUtils.breakingBlocks.values().removeIf(info::equals);
     }
 
     // Break Indicators end

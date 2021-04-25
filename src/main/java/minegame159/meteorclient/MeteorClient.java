@@ -12,14 +12,18 @@ import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.screens.topbar.TopBarModules;
-import minegame159.meteorclient.modules.Categories;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.misc.DiscordPresence;
+import minegame159.meteorclient.gui.GuiThemes;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.tabs.Tabs;
+import minegame159.meteorclient.rendering.Blur;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
+import minegame159.meteorclient.systems.modules.Categories;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.misc.DiscordPresence;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
@@ -34,8 +38,8 @@ import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.world.BlockIterator;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
@@ -63,8 +67,6 @@ public class MeteorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         if (INSTANCE == null) {
-            KeyBinds.Register();
-
             INSTANCE = this;
             return;
         }
@@ -98,6 +100,10 @@ public class MeteorClient implements ClientModInitializer {
         Names.init();
         MeteorPlayers.init();
         FakeClientPlayer.init();
+        PostProcessRenderer.init();
+        Blur.init();
+        Tabs.init();
+        GuiThemes.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -110,6 +116,7 @@ public class MeteorClient implements ClientModInitializer {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Systems.save();
             OnlinePlayers.leave();
+            GuiThemes.save();
         }));
 
         EVENT_BUS.subscribe(this);
@@ -120,10 +127,15 @@ public class MeteorClient implements ClientModInitializer {
 
         Modules.get().sortModules();
         Systems.load();
+
+        GuiRenderer.init();
+        GuiThemes.postInit();
+
+        EVENT_BUS.subscribe(BlockUtils.class);
     }
 
     private void openClickGui() {
-        mc.openScreen(new TopBarModules());
+        Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
     @EventHandler
@@ -148,7 +160,7 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler
     private void onKey(KeyEvent event) {
         // Click GUI
-        if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
             if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
         }
     }

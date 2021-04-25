@@ -6,7 +6,6 @@
 package minegame159.meteorclient.settings;
 
 import com.google.common.collect.ImmutableList;
-import minegame159.meteorclient.gui.widgets.WCheckbox;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.List;
@@ -17,9 +16,6 @@ public class BoolSetting extends Setting<Boolean> {
 
     private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
-
-        widget = new WCheckbox(get());
-        ((WCheckbox) widget).action = () -> set(((WCheckbox) widget).checked);
     }
 
     @Override
@@ -28,11 +24,6 @@ public class BoolSetting extends Setting<Boolean> {
         else if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0")) return false;
         else if (str.equalsIgnoreCase("toggle")) return !get();
         return null;
-    }
-
-    @Override
-    public void resetWidget() {
-        ((WCheckbox) widget).checked = get();
     }
 
     @Override

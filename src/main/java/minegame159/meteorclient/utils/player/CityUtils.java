@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.utils.player;
 
-import minegame159.meteorclient.friends.Friends;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
+import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.FakePlayerUtils;
@@ -21,6 +21,12 @@ import java.util.ArrayList;
 
 public class CityUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
+    private static final BlockPos[] surround = {
+            new BlockPos(0, 0, -1),
+            new BlockPos(1, 0, 0),
+            new BlockPos(0, 0, 1),
+            new BlockPos(-1, 0, 0)
+    };
 
     public static PlayerEntity getPlayerTarget(double range) {
         if (mc.player.isDead()) return null;
@@ -111,11 +117,4 @@ public class CityUtils {
         if (toAdd == null) return new BlockPos(v.x, v.y, v.z);
         return new BlockPos(v.x, v.y, v.z).add(toAdd);
     }
-
-    private static final BlockPos[] surround = {
-            new BlockPos(0, 0, -1),
-            new BlockPos(1, 0, 0),
-            new BlockPos(0, 0, 1),
-            new BlockPos(-1, 0, 0)
-    };
 }

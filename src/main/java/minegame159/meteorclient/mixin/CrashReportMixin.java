@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.Config;
-import minegame159.meteorclient.modules.Category;
-import minegame159.meteorclient.modules.Module;
-import minegame159.meteorclient.modules.Modules;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.systems.modules.Category;
+import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
 import net.minecraft.util.crash.CrashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

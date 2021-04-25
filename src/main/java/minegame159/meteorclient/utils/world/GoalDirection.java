@@ -22,8 +22,25 @@ public class GoalDirection implements Goal {
         recalculate(origin);
     }
 
+    public static double calculate(double xDiff, double zDiff) {
+        double x = Math.abs(xDiff);
+        double z = Math.abs(zDiff);
+        double straight;
+        double diagonal;
+        if (x < z) {
+            straight = z - x;
+            diagonal = x;
+        } else {
+            straight = x - z;
+            diagonal = z;
+        }
+
+        diagonal *= SQRT_2;
+        return (diagonal + straight) * BaritoneAPI.getSettings().costHeuristic.value;
+    }
+
     public void recalculate(Vec3d origin) {
-        float theta = (float)Math.toRadians(yaw);
+        float theta = (float) Math.toRadians(yaw);
         x = (int) Math.floor(origin.x - (double) MathHelper.sin(theta) * 100);
         z = (int) Math.floor(origin.z + (double) MathHelper.cos(theta) * 100);
     }
@@ -40,23 +57,6 @@ public class GoalDirection implements Goal {
 
     public String toString() {
         return String.format("GoalXZ{x=%s,z=%s}", SettingsUtil.maybeCensor(this.x), SettingsUtil.maybeCensor(this.z));
-    }
-
-    public static double calculate(double xDiff, double zDiff) {
-        double x = Math.abs(xDiff);
-        double z = Math.abs(zDiff);
-        double straight;
-        double diagonal;
-        if (x < z) {
-            straight = z - x;
-            diagonal = x;
-        } else {
-            straight = x - z;
-            diagonal = z;
-        }
-
-        diagonal *= SQRT_2;
-        return (diagonal + straight) * BaritoneAPI.getSettings().costHeuristic.value;
     }
 
     public int getX() {

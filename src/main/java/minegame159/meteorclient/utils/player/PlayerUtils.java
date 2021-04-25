@@ -8,9 +8,12 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.Rotation;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.BaritoneUtils;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.world.BlockUtils;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.PotionItem;
@@ -140,16 +143,15 @@ public class PlayerUtils {
 
         ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
         ((IVec3d) vec2).set(entity.getX(), entity.getY(), entity.getZ());
-        boolean canSeeFeet =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        boolean canSeeFeet = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
-        boolean canSeeEyes =  mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+        boolean canSeeEyes = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
 
         return canSeeFeet || canSeeEyes;
     }
 
     public static float[] calculateAngle(Vec3d target) {
-        assert mc.player != null;
         Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
         double dX = target.x - eyesPos.x;
@@ -158,7 +160,7 @@ public class PlayerUtils {
 
         double dist = MathHelper.sqrt(dX * dX + dZ * dZ);
 
-        return new float[] { (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist))) };
+        return new float[]{(float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist)))};
     }
 
     public static boolean shouldPause(boolean ifBreaking, boolean ifEating, boolean ifDrinking) {
@@ -188,9 +190,7 @@ public class PlayerUtils {
             if (side >= 1.0f) {
                 yaw += (float) (forward > 0.0f ? -45 : 45);
                 side = 0.0f;
-            }
-
-            else if (side <= -1.0f) {
+            } else if (side <= -1.0f) {
                 yaw += (float) (forward > 0.0f ? 45 : -45);
                 side = 0.0f;
             }
@@ -211,11 +211,34 @@ public class PlayerUtils {
         return new Vector2(velX, velZ);
     }
 
-    public static boolean isInHole() {
-        return !mc.world.getBlockState(mc.player.getBlockPos().add(1, 0, 0)).isAir()
-                && !mc.world.getBlockState(mc.player.getBlockPos().add(-1, 0, 0)).isAir()
-                && !mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, 1)).isAir()
-                && !mc.world.getBlockState(mc.player.getBlockPos().add(0, 0, -1)).isAir()
-                && !mc.world.getBlockState(mc.player.getBlockPos().add(0, -1, 0)).isAir();
+    public static boolean isInHole(boolean doubles) {
+        if (!Utils.canUpdate()) return false;
+
+        BlockPos blockPos = mc.player.getBlockPos();
+        int air = 0;
+
+        for (Direction direction : Direction.values()) {
+            if (direction == Direction.UP) continue;
+
+            BlockState state = mc.world.getBlockState(blockPos.offset(direction));
+
+            if (state.getBlock() != Blocks.BEDROCK && state.getBlock() != Blocks.OBSIDIAN) {
+                if (!doubles || direction == Direction.DOWN) return false;
+
+                air++;
+
+                for (Direction dir : Direction.values()) {
+                    if (dir == direction.getOpposite() || dir == Direction.UP) continue;
+
+                    BlockState blockState1 = mc.world.getBlockState(blockPos.offset(direction).offset(dir));
+
+                    if (blockState1.getBlock() != Blocks.BEDROCK && blockState1.getBlock() != Blocks.OBSIDIAN) {
+                        return false;
+                    }
+                }
+            }
+        }
+
+        return air < 2;
     }
 }

@@ -5,29 +5,21 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.BlockSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
-import minegame159.meteorclient.gui.widgets.WItem;
-import minegame159.meteorclient.gui.widgets.WTable;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class BlockSetting extends Setting<Block> {
-    private final WItem itemWidget;
+    public final Predicate<Block> filter;
 
-    public BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated) {
+    public BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated, Predicate<Block> filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
-        WTable table = new WTable();
-        itemWidget = table.add(new WItem(get().asItem().getDefaultStack())).getWidget();
-        table.add(new WButton("Select")).getWidget().action = () -> MinecraftClient.getInstance().openScreen(new BlockSettingScreen(this));
-
-        widget = table;
+        this.filter = filter;
     }
 
     @Override
@@ -36,13 +28,8 @@ public class BlockSetting extends Setting<Block> {
     }
 
     @Override
-    public void resetWidget() {
-        itemWidget.set(get().asItem().getDefaultStack());
-    }
-
-    @Override
     protected boolean isValueValid(Block value) {
-        return true;
+        return filter == null || filter.test(value);
     }
 
     @Override
@@ -63,6 +50,15 @@ public class BlockSetting extends Setting<Block> {
     public Block fromTag(CompoundTag tag) {
         value = Registry.BLOCK.get(new Identifier(tag.getString("value")));
 
+        if (filter != null && !filter.test(value)) {
+            for (Block block : Registry.BLOCK) {
+                if (filter.test(block)) {
+                    value = block;
+                    break;
+                }
+            }
+        }
+
         changed();
         return get();
     }
@@ -72,6 +68,7 @@ public class BlockSetting extends Setting<Block> {
         private Block defaultValue;
         private Consumer<Block> onChanged;
         private Consumer<Setting<Block>> onModuleActivated;
+        private Predicate<Block> filter;
 
         public Builder name(String name) {
             this.name = name;
@@ -98,8 +95,13 @@ public class BlockSetting extends Setting<Block> {
             return this;
         }
 
+        public Builder filter(Predicate<Block> filter) {
+            this.filter = filter;
+            return this;
+        }
+
         public BlockSetting build() {
-            return new BlockSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new BlockSetting(name, description, defaultValue, onChanged, onModuleActivated, filter);
         }
     }
 }

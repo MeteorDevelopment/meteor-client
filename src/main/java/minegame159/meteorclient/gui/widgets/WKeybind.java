@@ -5,45 +5,42 @@
 
 package minegame159.meteorclient.gui.widgets;
 
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.utils.misc.Keybind;
 
-public class WKeybind extends WTable {
+public class WKeybind extends WHorizontalList {
     public Runnable action;
     public Runnable actionOnSet;
 
-    private final WLabel label;
-    private final boolean addBindText;
+    private WLabel label;
 
     private final Keybind keybind;
+    private final int defaultValue;
     private boolean listening;
 
-    public WKeybind(Keybind keybind, boolean addBindText) {
+    public WKeybind(Keybind keybind, int defaultValue) {
         this.keybind = keybind;
-        this.addBindText = addBindText;
+        this.defaultValue = defaultValue;
+    }
 
-        label = add(new WLabel("")).getWidget();
-        WButton set = add(new WButton("Set")).getWidget();
-        WButton reset = add(new WButton("Reset")).getWidget();
+    @Override
+    public void init() {
+        label = add(theme.label("")).widget();
 
+        WButton set = add(theme.button("Set")).widget();
         set.action = () -> {
             listening = true;
-            label.setText(appendBindText("Press any key or mouse button"));
+            label.set(appendBindText("..."));
 
             if (actionOnSet != null) actionOnSet.run();
         };
 
-        reset.action = () -> {
-            keybind.set(true, -1);
-            reset();
-
-            if (action != null) action.run();
-        };
+        WButton reset = add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+        reset.action = this::resetBind;
 
         refreshLabel();
-    }
-
-    public WKeybind(Keybind keybind) {
-        this(keybind, true);
     }
 
     public boolean onAction(boolean isKey, int value) {
@@ -58,16 +55,21 @@ public class WKeybind extends WTable {
         return false;
     }
 
+    public void resetBind() {
+        keybind.set(true, defaultValue);
+        reset();
+    }
+
     public void reset() {
         listening = false;
         refreshLabel();
     }
 
     private void refreshLabel() {
-        label.setText(appendBindText(keybind.toString()));
+        label.set(appendBindText(keybind.toString()));
     }
 
     private String appendBindText(String text) {
-        return addBindText ? "Bind: " + text : text;
+        return "Bind: " + text;
     }
 }

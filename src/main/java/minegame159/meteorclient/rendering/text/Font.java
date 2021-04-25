@@ -47,7 +47,7 @@ public class Font {
         STBTruetype.stbtt_PackEnd(packContext);
 
         // Create texture object and get font scale
-        texture = new ByteTexture(2048, 2048, bitmap, true);
+        texture = new ByteTexture(2048, 2048, bitmap, ByteTexture.Format.A, ByteTexture.Filter.Linear, ByteTexture.Filter.Linear);
         scale = STBTruetype.stbtt_ScaleForPixelHeight(fontInfo, height);
 
         // Get font vertical ascent

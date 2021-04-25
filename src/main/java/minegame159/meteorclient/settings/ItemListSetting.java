@@ -5,9 +5,6 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.ItemListSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -29,9 +26,6 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         this.value = new ArrayList<>(defaultValue);
         this.filter = filter;
-
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new ItemListSettingScreen(this));
     }
 
     @Override
@@ -52,15 +46,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
-    }
-
-    @Override
-    public void resetWidget() {
-
+        if (callbacks) changed();
     }
 
     @Override

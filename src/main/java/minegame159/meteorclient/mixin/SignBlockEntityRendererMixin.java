@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.NoRender;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.render.block.entity.SignBlockEntityRenderer;
 import net.minecraft.text.OrderedText;

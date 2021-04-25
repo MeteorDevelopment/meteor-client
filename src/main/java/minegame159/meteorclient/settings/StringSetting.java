@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WTextBox;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
@@ -15,11 +14,6 @@ public class StringSetting extends Setting<String> {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
         value = defaultValue;
-
-        widget = new WTextBox(get(), 400);
-        ((WTextBox) widget).action = () -> {
-            if (!set(((WTextBox) widget).getText())) ((WTextBox) widget).setText(get());
-        };
     }
 
     @Override
@@ -30,15 +24,7 @@ public class StringSetting extends Setting<String> {
     @Override
     public void reset(boolean callbacks) {
         value = defaultValue;
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
-    }
-
-    @Override
-    public void resetWidget() {
-        ((WTextBox) widget).setText(get());
+        if (callbacks) changed();
     }
 
     @Override

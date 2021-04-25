@@ -5,13 +5,12 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WIntEdit;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.function.Consumer;
 
 public class IntSetting extends Setting<Integer> {
-    private final Integer min, max;
+    public final Integer min, max;
     private final Integer sliderMin, sliderMax;
 
     private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max, Integer sliderMin, Integer sliderMax) {
@@ -20,11 +19,6 @@ public class IntSetting extends Setting<Integer> {
         this.max = max;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
-
-        widget = new WIntEdit(get(), sliderMin != null ? sliderMin : 0, sliderMax != null ? sliderMax : 10);
-        ((WIntEdit) widget).action = () -> {
-            if (!set(((WIntEdit) widget).get())) ((WIntEdit) widget).set(get());
-        };
     }
 
     @Override
@@ -37,13 +31,16 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    public void resetWidget() {
-        ((WIntEdit) widget).set(get());
-    }
-
-    @Override
     protected boolean isValueValid(Integer value) {
         return (min == null || value >= min) && (max == null || value <= max);
+    }
+
+    public int getSliderMin() {
+        return sliderMin != null ? sliderMin : 0;
+    }
+
+    public int getSliderMax() {
+        return sliderMax != null ? sliderMax : 10;
     }
 
     @Override

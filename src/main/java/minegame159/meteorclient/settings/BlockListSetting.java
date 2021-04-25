@@ -5,10 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.screens.settings.BlockListSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -19,24 +16,22 @@ import net.minecraft.util.registry.Registry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class BlockListSetting extends Setting<List<Block>> {
-    public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated) {
+    public final Predicate<Block> filter;
+
+    public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated, Predicate<Block> filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
 
-        value = new ArrayList<>(defaultValue);
-
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new BlockListSettingScreen(this));
+        this.filter = filter;
+        this.value = new ArrayList<>(defaultValue);
     }
 
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
 
     @Override
@@ -47,16 +42,11 @@ public class BlockListSetting extends Setting<List<Block>> {
         try {
             for (String value : values) {
                 Block block = parseId(Registry.BLOCK, value);
-                if (block != null) blocks.add(block);
+                if (block != null && (filter == null || filter.test(block))) blocks.add(block);
             }
         } catch (Exception ignored) {}
 
         return blocks;
-    }
-
-    @Override
-    public void resetWidget() {
-
     }
 
     @Override
@@ -88,7 +78,9 @@ public class BlockListSetting extends Setting<List<Block>> {
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.BLOCK.get(new Identifier(tagI.asString())));
+            Block block = Registry.BLOCK.get(new Identifier(tagI.asString()));
+
+            if (filter == null || filter.test(block)) get().add(block);
         }
 
         changed();
@@ -100,6 +92,7 @@ public class BlockListSetting extends Setting<List<Block>> {
         private List<Block> defaultValue;
         private Consumer<List<Block>> onChanged;
         private Consumer<Setting<List<Block>>> onModuleActivated;
+        private Predicate<Block> filter;
 
         public Builder name(String name) {
             this.name = name;
@@ -126,8 +119,13 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
+        public Builder filter(Predicate<Block> filter) {
+            this.filter = filter;
+            return this;
+        }
+
         public BlockListSetting build() {
-            return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter);
         }
     }
 }

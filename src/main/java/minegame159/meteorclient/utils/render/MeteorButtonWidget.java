@@ -15,7 +15,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
 public class MeteorButtonWidget extends AbstractPressableButtonWidget {
-    public static final Identifier BUTTON_TEXTURE = new Identifier("meteor-client", "meteor-button.png");
+    public static final Identifier BUTTON_TEXTURE = new Identifier("meteor-client", "textures/button.png");
 
     public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {};
     protected final MeteorButtonWidget.PressAction onPress;

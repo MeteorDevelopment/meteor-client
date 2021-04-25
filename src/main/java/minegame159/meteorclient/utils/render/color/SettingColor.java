@@ -28,6 +28,10 @@ public class SettingColor extends Color {
         super(r, g, b, a);
     }
 
+    public SettingColor(float r, float g, float b, float a) {
+        super(r, g, b, a);
+    }
+
     public SettingColor(int r, int g, int b, int a, double rainbowSpeed) {
         super(r, g, b, a);
 
@@ -52,12 +56,16 @@ public class SettingColor extends Color {
     }
 
     @Override
-    public void set(Color value) {
+    public SettingColor set(Color value) {
         super.set(value);
+        if (value instanceof SettingColor) rainbowSpeed = ((SettingColor) value).rainbowSpeed;
 
-        if (value instanceof SettingColor) {
-            rainbowSpeed = ((SettingColor) value).rainbowSpeed;
-        }
+        return this;
+    }
+
+    @Override
+    public Color copy() {
+        return new SettingColor(r, g, b, a, rainbowSpeed);
     }
 
     @Override

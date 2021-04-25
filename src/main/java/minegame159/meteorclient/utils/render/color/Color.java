@@ -5,11 +5,12 @@
 
 package minegame159.meteorclient.utils.render.color;
 
+import minegame159.meteorclient.utils.misc.ICopyable;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.Vec3d;
 
-public class Color implements ISerializable<Color> {
+public class Color implements ICopyable<Color>, ISerializable<Color> {
     public int r, g, b, a;
 
     public Color() {
@@ -30,6 +31,15 @@ public class Color implements ISerializable<Color> {
         this.g = g;
         this.b = b;
         this.a = a;
+
+        validate();
+    }
+
+    public Color(float r, float g, float b, float a) {
+        this.r = (int)(r*255);
+        this.g = (int)(g*255);
+        this.b = (int)(b*255);
+        this.a = (int)(a*255);
 
         validate();
     }
@@ -55,22 +65,133 @@ public class Color implements ISerializable<Color> {
         this.a = color.getAlpha();
     }
 
-    public void set(int r, int g, int b, int a) {
+    public static int fromRGBA(int r, int g, int b, int a) {
+        return (r << 16) + (g << 8) + (b) + (a << 24);
+    }
+
+    public static int toRGBAR(int color) {
+        return (color >> 16) & 0x000000FF;
+    }
+
+    public static int toRGBAG(int color) {
+        return (color >> 8) & 0x000000FF;
+    }
+
+    public static int toRGBAB(int color) {
+        return (color) & 0x000000FF;
+    }
+
+    public static int toRGBAA(int color) {
+        return (color >> 24) & 0x000000FF;
+    }
+
+    public static Color fromHsv(double h, double s, double v) {
+        double hh, p, q, t, ff;
+        int i;
+        double r, g, b;
+
+        if (s <= 0.0) {       // < is bogus, just shuts up warnings
+            r = v;
+            g = v;
+            b = v;
+            return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+        }
+        hh = h;
+        if (hh >= 360.0) hh = 0.0;
+        hh /= 60.0;
+        i = (int) hh;
+        ff = hh - i;
+        p = v * (1.0 - s);
+        q = v * (1.0 - (s * ff));
+        t = v * (1.0 - (s * (1.0 - ff)));
+
+        switch (i) {
+            case 0:
+                r = v;
+                g = t;
+                b = p;
+                break;
+            case 1:
+                r = q;
+                g = v;
+                b = p;
+                break;
+            case 2:
+                r = p;
+                g = v;
+                b = t;
+                break;
+
+            case 3:
+                r = p;
+                g = q;
+                b = v;
+                break;
+            case 4:
+                r = t;
+                g = p;
+                b = v;
+                break;
+            case 5:
+            default:
+                r = v;
+                g = p;
+                b = q;
+                break;
+        }
+        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+    }
+
+    public Color set(int r, int g, int b, int a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
 
         validate();
+
+        return this;
     }
 
-    public void set(Color value) {
+    public Color r(int r) {
+        this.r = r;
+        validate();
+        return this;
+    }
+
+    public Color g(int g) {
+        this.g = g;
+        validate();
+        return this;
+    }
+
+    public Color b(int b) {
+        this.b = b;
+        validate();
+        return this;
+    }
+
+    public Color a(int a) {
+        this.a = a;
+        validate();
+        return this;
+    }
+
+    @Override
+    public Color set(Color value) {
         r = value.r;
         g = value.g;
         b = value.b;
         a = value.a;
 
         validate();
+
+        return this;
+    }
+
+    @Override
+    public Color copy() {
+        return new Color(r, g, b, a);
     }
 
     public void validate() {
@@ -121,78 +242,5 @@ public class Color implements ISerializable<Color> {
     @Override
     public String toString() {
         return r + " " + g + " " + b + " " + a;
-    }
-
-    public static int fromRGBA(int r, int g, int b, int a) {
-        return (r << 16) + (g << 8) + (b) + (a << 24);
-    }
-    public static int toRGBAR(int color) {
-        return (color >> 16) & 0x000000FF;
-    }
-    public static int toRGBAG(int color) {
-        return (color >> 8) & 0x000000FF;
-    }
-    public static int toRGBAB(int color) {
-        return (color) & 0x000000FF;
-    }
-    public static int toRGBAA(int color) {
-        return (color >> 24) & 0x000000FF;
-    }
-
-    public static Color fromHsv(double h, double s, double v) {
-        double      hh, p, q, t, ff;
-        int        i;
-        double      r, g, b;
-
-        if(s <= 0.0) {       // < is bogus, just shuts up warnings
-            r = v;
-            g = v;
-            b = v;
-            return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
-        }
-        hh = h;
-        if(hh >= 360.0) hh = 0.0;
-        hh /= 60.0;
-        i = (int) hh;
-        ff = hh - i;
-        p = v * (1.0 - s);
-        q = v * (1.0 - (s * ff));
-        t = v * (1.0 - (s * (1.0 - ff)));
-
-        switch(i) {
-            case 0:
-                r = v;
-                g = t;
-                b = p;
-                break;
-            case 1:
-                r = q;
-                g = v;
-                b = p;
-                break;
-            case 2:
-                r = p;
-                g = v;
-                b = t;
-                break;
-
-            case 3:
-                r = p;
-                g = q;
-                b = v;
-                break;
-            case 4:
-                r = t;
-                g = p;
-                b = v;
-                break;
-            case 5:
-            default:
-                r = v;
-                g = p;
-                b = q;
-                break;
-        }
-        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
     }
 }

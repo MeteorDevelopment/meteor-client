@@ -7,10 +7,7 @@ package minegame159.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import minegame159.meteorclient.gui.screens.settings.StatusEffectSettingScreen;
-import minegame159.meteorclient.gui.widgets.WButton;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
@@ -21,18 +18,12 @@ import java.util.function.Consumer;
 public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
     public StatusEffectSetting(String name, String description, Object2IntMap<StatusEffect> defaultValue, Consumer<Object2IntMap<StatusEffect>> onChanged, Consumer<Setting<Object2IntMap<StatusEffect>>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);
-
-        widget = new WButton("Select");
-        ((WButton) widget).action = () -> MinecraftClient.getInstance().openScreen(new StatusEffectSettingScreen(this));
     }
 
     @Override
     public void reset(boolean callbacks) {
         value = new Object2IntArrayMap<>(defaultValue);
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
 
     @Override
@@ -52,11 +43,6 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
         } catch (Exception ignored) {}
 
         return effects;
-    }
-
-    @Override
-    public void resetWidget() {
-
     }
 
     @Override

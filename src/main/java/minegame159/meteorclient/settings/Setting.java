@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.misc.IGetter;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class Setting<T> implements ISerializable<T> {
+public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
 
     public final String name, title, description;
@@ -30,7 +30,6 @@ public abstract class Setting<T> implements ISerializable<T> {
 
     private final Consumer<T> onChanged;
     public final Consumer<Setting<T>> onModuleActivated;
-    public WWidget widget;
 
     public Module module;
 
@@ -44,6 +43,7 @@ public abstract class Setting<T> implements ISerializable<T> {
         this.onModuleActivated = onModuleActivated;
     }
 
+    @Override
     public T get() {
         return value;
     }
@@ -51,20 +51,21 @@ public abstract class Setting<T> implements ISerializable<T> {
     public boolean set(T value) {
         if (!isValueValid(value)) return false;
         this.value = value;
-        resetWidget();
         changed();
         return true;
     }
 
     public void reset(boolean callbacks) {
         value = defaultValue;
-        if (callbacks) {
-            resetWidget();
-            changed();
-        }
+        if (callbacks) changed();
     }
+
     public void reset() {
         reset(true);
+    }
+
+    public T getDefaultValue() {
+        return defaultValue;
     }
 
     public boolean parse(String str) {
@@ -73,7 +74,6 @@ public abstract class Setting<T> implements ISerializable<T> {
         if (newValue != null) {
             if (isValueValid(newValue)) {
                 value = newValue;
-                resetWidget();
                 changed();
             }
         }
@@ -90,8 +90,6 @@ public abstract class Setting<T> implements ISerializable<T> {
     }
 
     protected abstract T parseImpl(String str);
-
-    public abstract void resetWidget();
 
     protected abstract boolean isValueValid(T value);
 

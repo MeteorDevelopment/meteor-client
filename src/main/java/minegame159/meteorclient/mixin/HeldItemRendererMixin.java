@@ -7,8 +7,8 @@ package minegame159.meteorclient.mixin;
 
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.platform.GlStateManager;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.HandView;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.HandView;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -34,14 +34,10 @@ public abstract class HeldItemRendererMixin {
 
         if (module.isActive()) {
             if (hand == Hand.OFF_HAND && !mc.player.getOffHandStack().isEmpty()) {
-                if (!module.noSwing.get()) {
-                    if (module.offSwing.get() != 1 && module.offSwing.get() != 0) return module.offSwing.get().floatValue();
-                } else return module.offSwing.get().floatValue();
+                return swingProgress + module.offSwing.get().floatValue();
             }
             if (hand == Hand.MAIN_HAND && !mc.player.getMainHandStack().isEmpty()) {
-                if (!module.noSwing.get()) {
-                    if (module.mainSwing.get() != 1 && module.mainSwing.get() != 0) return module.mainSwing.get().floatValue();
-                } else return module.mainSwing.get().floatValue();
+                return swingProgress + module.mainSwing.get().floatValue();
             }
         }
         return swingProgress;

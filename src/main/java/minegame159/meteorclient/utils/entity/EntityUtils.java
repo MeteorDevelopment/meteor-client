@@ -5,9 +5,10 @@
 
 package minegame159.meteorclient.utils.entity;
 
-import minegame159.meteorclient.friends.Friends;
+import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -20,6 +21,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
@@ -27,8 +29,8 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class EntityUtils {
-    public static MinecraftClient mc;
     private static final List<Entity> entities = new ArrayList<>();
+    public static MinecraftClient mc;
 
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
@@ -45,6 +47,7 @@ public class EntityUtils {
 
         switch (entity.getType().getSpawnGroup()) {
             case CREATURE:       return animals;
+            case WATER_AMBIENT:
             case WATER_CREATURE: return waterAnmals;
             case MONSTER:        return monsters;
             case AMBIENT:        return ambient;
@@ -82,6 +85,7 @@ public class EntityUtils {
             case HighestDistance: return invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
             case LowestHealth:    return sortHealth(e1, e2);
             case HighestHealth:   return invertSort(sortHealth(e1, e2));
+            case ClosestAngle:    return sortAngle(e1, e2);
             default:              return 0;
         }
     }
@@ -95,6 +99,23 @@ public class EntityUtils {
         else if (!e1l) return -1;
 
         return Float.compare(((LivingEntity) e1).getHealth(), ((LivingEntity) e2).getHealth());
+    }
+
+    private static int sortAngle(Entity e1, Entity e2) {
+        boolean e1l = e1 instanceof LivingEntity;
+        boolean e2l = e2 instanceof LivingEntity;
+
+        if (!e1l && !e2l) return 0;
+        else if (e1l && !e2l) return 1;
+        else if (!e1l) return -1;
+
+        double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.yaw);
+        double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.yaw);
+
+        double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.pitch);
+        double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.pitch);
+
+        return Double.compare(Math.sqrt(e1yaw * e1yaw + e1pitch * e1pitch), Math.sqrt(e2yaw * e2yaw + e2pitch * e2pitch));
     }
 
     private static int invertSort(int sort) {

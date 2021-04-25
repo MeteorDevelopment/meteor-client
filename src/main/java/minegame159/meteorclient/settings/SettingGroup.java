@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.nbt.CompoundTag;
@@ -38,35 +37,6 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
     public <T> Setting<T> add(Setting<T> setting) {
         settings.add(setting);
         return setting;
-    }
-
-    public void fillTable(WTable table) {
-        WSection section = table.add(new WSection(name, sectionExpanded)).fillX().expandX().getWidget();
-        section.action = () -> sectionExpanded = section.isExpanded();
-
-        for (Setting<?> setting : settings) {
-            fillTable(section, setting);
-        }
-
-        table.row();
-    }
-
-    private void fillTable(WSection section, Setting<?> setting) {
-        if (setting.widget instanceof WTextBox) ((WTextBox) setting.widget).setFocused(false);
-
-        WLabel label = section.add(new WLabel(setting.title)).getWidget();
-        label.tooltip = setting.description;
-
-        Cell<?> cell = section.add(setting.widget).fillX();
-        if (setting.widget instanceof WIntEdit || setting.widget instanceof WDoubleEdit) cell.expandX();
-        WWidget widget = cell.getWidget();
-        widget.tooltip = setting.description;
-
-        WButton reset = section.add(new WButton(WButton.ButtonRegion.Reset)).getWidget();
-        reset.tooltip = "Reset";
-        reset.action = setting::reset;
-
-        section.row();
     }
 
     @Override

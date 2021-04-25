@@ -5,9 +5,10 @@
 
 package minegame159.meteorclient.utils.player;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
-import minegame159.meteorclient.modules.Module;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -16,21 +17,10 @@ import net.minecraft.util.math.Vec3d;
 public class ChatUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private enum PrefixType {
-        Module(Formatting.AQUA),
-        Other(Formatting.LIGHT_PURPLE),
-        None(Formatting.RESET);
+    private static final Color rainbow = new Color(255, 255, 255);
+    private static double rainbowHue1;
 
-        public Formatting color;
-
-        PrefixType(Formatting color) {
-            this.color = color;
-        }
-    }
-
-    //No prefix
-
-    private static void message(int id,  Formatting color, String msg, Object... args) {
+    private static void message(int id, Formatting color, String msg, Object... args) {
         sendMsg(id, null, PrefixType.None, formatMsg(msg, color, args), color);
     }
 
@@ -44,6 +34,10 @@ public class ChatUtils {
 
     public static void info(String prefix, Text msg) {
         sendMsg(0, prefix, PrefixType.Other, msg);
+    }
+
+    public static void info(Text msg) {
+        sendMsg(0, null, PrefixType.None, msg);
     }
 
     public static void warning(String msg, Object... args) {
@@ -116,7 +110,6 @@ public class ChatUtils {
         sendMsg(id, prefix, type, message);
     }
 
-
     private static void sendMsg(int id, String prefix, PrefixType type, Text msg) {
         if (mc.world == null) return;
 
@@ -130,14 +123,14 @@ public class ChatUtils {
     }
 
     public static BaseText formatCoords(Vec3d pos) {
-        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)",pos.x,pos.y,pos.z);
-        coordsString = formatMsg(coordsString,Formatting.GRAY);
+        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
+        coordsString = formatMsg(coordsString, Formatting.GRAY);
         BaseText coordsText = new LiteralText(coordsString);
         coordsText.setStyle(coordsText.getStyle()
                 .withFormatting(Formatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        String.format("%sb goto %d %d %d", Config.get().getPrefix(), (int)pos.x, (int)pos.y, (int)pos.z)
+                        String.format("%sb goto %d %d %d", Config.get().getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
@@ -148,10 +141,21 @@ public class ChatUtils {
     }
 
     private static BaseText getPrefix(String title, PrefixType type) {
-        BaseText meteor = new LiteralText("Meteor");
-        meteor.setStyle(meteor.getStyle().withFormatting(Formatting.BLUE));
-
+        BaseText meteor = new LiteralText("");
         BaseText prefix = new LiteralText("");
+
+        if (Config.get().rainbowPrefix) {
+            meteor.append(new LiteralText("M").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+            meteor.append(new LiteralText("t").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+            meteor.append(new LiteralText("o").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+            meteor.append(new LiteralText("r").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+        } else {
+            meteor = new LiteralText("Meteor");
+            meteor.setStyle(meteor.getStyle().withFormatting(Formatting.BLUE));
+        }
+
         prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
         prefix.append("[");
         prefix.append(meteor);
@@ -168,6 +172,23 @@ public class ChatUtils {
         return prefix;
     }
 
+    private static Color cycleRainbow() {
+        rainbowHue1 += Config.get().rainbowPrefixSpeed;
+        if (rainbowHue1 > 1) rainbowHue1 -= 1;
+        else if (rainbowHue1 < -1) rainbowHue1 += 1;
+
+        double rainbowHue2 = rainbowHue1;
+
+        rainbowHue2 += Config.get().rainbowPrefixSpread;
+        int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
+
+        rainbow.r = Color.toRGBAR(c);
+        rainbow.g = Color.toRGBAG(c);
+        rainbow.b = Color.toRGBAB(c);
+
+        return rainbow;
+    }
+
     public static String formatMsg(String format, Formatting defaultColor, Object... args) {
         String msg = String.format(format, args);
         msg = msg.replaceAll("\\(default\\)", defaultColor.toString());
@@ -175,5 +196,17 @@ public class ChatUtils {
         msg = msg.replaceAll("\\(underline\\)", Formatting.UNDERLINE.toString());
 
         return msg;
+    }
+
+    private enum PrefixType {
+        Module(Formatting.AQUA),
+        Other(Formatting.LIGHT_PURPLE),
+        None(Formatting.RESET);
+
+        public Formatting color;
+
+        PrefixType(Formatting color) {
+            this.color = color;
+        }
     }
 }

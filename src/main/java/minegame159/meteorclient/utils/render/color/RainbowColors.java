@@ -8,16 +8,23 @@ package minegame159.meteorclient.utils.render.color;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.gui.GuiThemes;
+import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.waypoints.Waypoint;
-import minegame159.meteorclient.waypoints.Waypoints;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.systems.waypoints.Waypoint;
+import minegame159.meteorclient.systems.waypoints.Waypoints;
+import minegame159.meteorclient.utils.misc.UnorderedArrayList;
 
-import java.util.ArrayList;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class RainbowColors {
-    private static final List<Setting<SettingColor>> colorSettings = new ArrayList<>();
-    private static final List<SettingColor> colors = new ArrayList<>();
+    private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
+    private static final List<SettingColor> colors = new UnorderedArrayList<>();
+    private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
@@ -26,12 +33,17 @@ public class RainbowColors {
     public static void addSetting(Setting<SettingColor> setting) {
         colorSettings.add(setting);
     }
+
     public static void removeSetting(Setting<SettingColor> setting) {
         colorSettings.remove(setting);
     }
 
     public static void add(SettingColor color) {
         colors.add(color);
+    }
+
+    public static void register(Runnable runnable) {
+        listeners.add(runnable);
     }
 
     @EventHandler
@@ -47,5 +59,15 @@ public class RainbowColors {
         for (Waypoint waypoint : Waypoints.get()) {
             waypoint.color.update();
         }
+
+        if (mc.currentScreen instanceof WidgetScreen) {
+            for (SettingGroup group : GuiThemes.get().settings) {
+                for (Setting<?> setting : group) {
+                    if (setting instanceof ColorSetting) ((SettingColor) setting.get()).update();
+                }
+            }
+        }
+
+        for (Runnable listener : listeners) listener.run();
     }
 }

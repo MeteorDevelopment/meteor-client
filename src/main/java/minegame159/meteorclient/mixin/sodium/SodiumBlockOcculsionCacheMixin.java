@@ -6,8 +6,8 @@
 package minegame159.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
-import minegame159.meteorclient.modules.Modules;
-import minegame159.meteorclient.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;

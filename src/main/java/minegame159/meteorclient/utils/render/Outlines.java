@@ -20,9 +20,8 @@ public class Outlines {
     public static boolean renderingOutlines;
 
     public static Framebuffer outlinesFbo;
-    private static ShaderEffect outlinesShader;
-
     public static OutlineVertexConsumerProvider vertexConsumerProvider;
+    private static ShaderEffect outlinesShader;
 
     public static void load() {
         try {

@@ -5,14 +5,16 @@
 
 package minegame159.meteorclient.rendering.text;
 
-import minegame159.meteorclient.Config;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.render.color.Color;
 
 public interface TextRenderer {
     static TextRenderer get() {
         return Config.get().customFont ? MeteorClient.FONT : VanillaTextRenderer.INSTANCE;
     }
+
+    void setAlpha(double a);
 
     void begin(double scale, boolean scaleOnly, boolean big);
     default void begin(double scale) { begin(scale, false, false); }

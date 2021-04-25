@@ -2,3 +2,4 @@ accessWidener	v1	named
 
 Accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
 Accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
+Accessible   method  net/minecraft/text/TextColor <init> (I)V
