@@ -48,10 +48,10 @@ public class CombatHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of combat info.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(1)
             .sliderMin(1)
-            .sliderMax(4)
+            .sliderMax(5)
             .build()
     );
 
@@ -172,7 +172,7 @@ public class CombatHud extends HudElement {
     private PlayerEntity playerEntity;
 
     public CombatHud(HUD hud) {
-        super(hud, "combat-info", "Displays information about your combat target.");
+        super(hud, "combat-info", "Displays information about your combat target.", false);
     }
 
     @Override

@@ -40,7 +40,7 @@ public class TextRadarHud extends HudElement {
     private final List<AbstractClientPlayerEntity> players = new ArrayList<>();
 
     public TextRadarHud(HUD hud) {
-        super(hud, "player-info", "Displays players in your visual range.");
+        super(hud, "player-info", "Displays players in your visual range.", false);
     }
 
     @Override

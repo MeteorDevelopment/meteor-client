@@ -63,7 +63,7 @@ public class SBlockData implements ICopyable<SBlockData>, ISerializable<SBlockDa
     }
 
     @Override
-    public void set(SBlockData value) {
+    public SBlockData set(SBlockData value) {
         shapeMode = value.shapeMode;
         lineColor.set(value.lineColor);
         sideColor.set(value.sideColor);
@@ -72,6 +72,8 @@ public class SBlockData implements ICopyable<SBlockData>, ISerializable<SBlockDa
         tracerColor.set(value.tracerColor);
 
         changed = value.changed;
+
+        return this;
     }
 
     @Override

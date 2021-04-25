@@ -21,7 +21,7 @@ public class TotemHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of totem counter.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(1)
             .sliderMin(1)
             .sliderMax(4)
@@ -29,7 +29,7 @@ public class TotemHud extends HudElement {
     );
 
     public TotemHud(HUD hud) {
-        super(hud, "totems", "Displays the amount of totems in your inventory.");
+        super(hud, "totems", "Displays the amount of totems in your inventory.", false);
     }
 
     @Override
@@ -39,8 +39,8 @@ public class TotemHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        double x = box.getX() / scale.get();
-        double y = box.getY() / scale.get();
+        double x = box.getX();
+        double y = box.getY();
 
         if (isInEditor()) {
             RenderUtils.drawItem(Items.TOTEM_OF_UNDYING.getDefaultStack(), (int) x, (int) y, scale.get(), true);

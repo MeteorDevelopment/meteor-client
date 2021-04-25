@@ -28,7 +28,7 @@ public class CompassHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("The scale of compass.")
-            .defaultValue(2.5)
+            .defaultValue(2)
             .sliderMin(1)
             .sliderMax(5)
             .build()

@@ -40,7 +40,7 @@ public class RenderUtils {
     public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
         RenderSystem.pushMatrix();
         RenderSystem.scaled(scale, scale, 1);
-        drawItem(itemStack, x, y, overlay);
+        drawItem(itemStack, (int) (x / scale), (int) (y / scale), overlay);
         RenderSystem.popMatrix();
     }
 

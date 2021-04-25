@@ -142,23 +142,51 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
     }
 
-    public void set(int r, int g, int b, int a) {
+    public Color set(int r, int g, int b, int a) {
         this.r = r;
         this.g = g;
         this.b = b;
         this.a = a;
 
         validate();
+
+        return this;
+    }
+
+    public Color r(int r) {
+        this.r = r;
+        validate();
+        return this;
+    }
+
+    public Color g(int g) {
+        this.g = g;
+        validate();
+        return this;
+    }
+
+    public Color b(int b) {
+        this.b = b;
+        validate();
+        return this;
+    }
+
+    public Color a(int a) {
+        this.a = a;
+        validate();
+        return this;
     }
 
     @Override
-    public void set(Color value) {
+    public Color set(Color value) {
         r = value.r;
         g = value.g;
         b = value.b;
         a = value.a;
 
         validate();
+
+        return this;
     }
 
     @Override
