@@ -10,6 +10,7 @@ import minegame159.meteorclient.gui.tabs.builtin.ConfigTab;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.nbt.CompoundTag;
@@ -17,16 +18,15 @@ import net.minecraft.nbt.CompoundTag;
 public class Config extends System<Config> {
     public final Version version;
     public final String devBuild;
-    private String prefix;
 
     public boolean customFont;
     public boolean sendDataToApi;
     public int rotationHoldTicks;
 
+    private String prefix;
     public boolean chatCommandsInfo;
     public boolean deleteChatCommandsInfo;
     public boolean rainbowPrefix;
-    public double rainbowPrefixSpeed, rainbowPrefixSpread;
 
     public boolean titleScreenCredits;
     public boolean customWindowTitle;
@@ -63,6 +63,7 @@ public class Config extends System<Config> {
         tag.putString("version", version.getOriginalString());
 
         tag.putBoolean("customFont", customFont);
+        tag.putDouble("rainbowSpeed", RainbowColors.rainbowSpeed);
         tag.putBoolean("sendDataToApi", sendDataToApi);
         tag.putInt("rotationHoldTicks", rotationHoldTicks);
 
@@ -70,8 +71,7 @@ public class Config extends System<Config> {
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
-        tag.putDouble("rainbowPrefixSpeed", rainbowPrefixSpeed);
-        tag.putDouble("rainbowPrefixSpread", rainbowPrefixSpread);
+
 
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
         tag.putBoolean("customWindowTitle", customWindowTitle);
@@ -83,6 +83,7 @@ public class Config extends System<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         customFont = getBoolean(tag, "customFont", ConfigTab.ConfigScreen.customFont);
+        RainbowColors.rainbowSpeed = getDouble(tag, "rainbowSpeed", ConfigTab.ConfigScreen.rainbowSpeed);
         sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.ConfigScreen.sendDataToApi);
         rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.ConfigScreen.rotationHoldTicks);
 
@@ -90,8 +91,6 @@ public class Config extends System<Config> {
         chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.ConfigScreen.chatCommandsInfo);
         deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.ConfigScreen.deleteChatCommandsInfo);
         rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.ConfigScreen.rainbowPrefix);
-        rainbowPrefixSpeed = getDouble(tag, "rainbowPrefixSpeed", ConfigTab.ConfigScreen.rainbowPrefixSpeed);
-        rainbowPrefixSpread = getDouble(tag, "rainbowPrefixSpread", ConfigTab.ConfigScreen.rainbowPrefixSpread);
 
         titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.ConfigScreen.titleScreenCredits);
         customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.ConfigScreen.customWindowTitle);

@@ -9,6 +9,7 @@ import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -173,13 +174,13 @@ public class ChatUtils {
     }
 
     private static Color cycleRainbow() {
-        rainbowHue1 += Config.get().rainbowPrefixSpeed;
+        rainbowHue1 += RainbowColors.rainbowSpeed;
         if (rainbowHue1 > 1) rainbowHue1 -= 1;
         else if (rainbowHue1 < -1) rainbowHue1 += 1;
 
         double rainbowHue2 = rainbowHue1;
 
-        rainbowHue2 += Config.get().rainbowPrefixSpread;
+        rainbowHue2 += RainbowColors.rainbowSpeed;
         int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
 
         rainbow.r = Color.toRGBAR(c);

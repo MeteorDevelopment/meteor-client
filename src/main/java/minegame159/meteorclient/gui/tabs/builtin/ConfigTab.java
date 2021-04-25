@@ -12,6 +12,7 @@ import minegame159.meteorclient.gui.tabs.WindowTabScreen;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
 
 public class ConfigTab extends Tab {
@@ -48,6 +49,19 @@ public class ConfigTab extends Tab {
                     if (ConfigTab.currentScreen != null) ConfigTab.currentScreen.invalidate();
                 })
                 .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().customFont))
+                .build()
+        );
+
+        public static final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+                .name("rainbow-speed")
+                .description("The global rainbow speed.")
+                .min(0)
+                .sliderMax(5)
+                .max(10)
+                .defaultValue(0.5)
+                .decimalPlaces(2)
+                .onChanged(value -> RainbowColors.rainbowSpeed = value / 100)
+                .onModuleActivated(setting -> setting.set(RainbowColors.rainbowSpeed * 100))
                 .build()
         );
 
@@ -105,24 +119,6 @@ public class ConfigTab extends Tab {
                 .defaultValue(true)
                 .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
                 .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
-                .build()
-        );
-
-        public static final Setting<Double> rainbowPrefixSpeed = sgChat.add(new DoubleSetting.Builder()
-                .name("rainbow-prefix-speed")
-                .description("The speed of the rainbow prefix cycle.")
-                .defaultValue(0.005)
-                .onChanged(value -> Config.get().rainbowPrefixSpeed = value)
-                .onModuleActivated(setting -> setting.set(Config.get().rainbowPrefixSpeed))
-                .build()
-        );
-
-        public static final Setting<Double> rainbowPrefixSpread = sgChat.add(new DoubleSetting.Builder()
-                .name("rainbow-prefix-spread")
-                .description("The spread of the rainbow prefix cycle.")
-                .defaultValue(0.02)
-                .onChanged(value -> Config.get().rainbowPrefixSpread = value)
-                .onModuleActivated(setting -> setting.set(Config.get().rainbowPrefixSpread))
                 .build()
         );
 
