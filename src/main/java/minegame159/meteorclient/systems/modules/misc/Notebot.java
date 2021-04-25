@@ -10,6 +10,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.screens.NotebotHelpScreen;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
@@ -150,6 +151,7 @@ public class Notebot extends Module {
     private int lastKey = -1;
     private int offset = 0;
     private int ticks = 0;
+    private boolean noSongsFound = true;
 
     public Notebot() {
         super(Categories.Misc, "notebot","Plays noteblock nicely");
@@ -248,9 +250,11 @@ public class Notebot extends Module {
             status.set(getStatus());
         };
         table.row();
+        noSongsFound = true;
         try {
             Files.list(MeteorClient.FOLDER.toPath().resolve("notebot")).forEach(path -> {
                 if (isValidFile(path)) {
+                    noSongsFound = false;
                     table.add(theme.label(getFileLabel(path))).expandCellX();
                     WButton load = table.add(theme.button("Load")).right().widget();
                     load.action = () -> {
@@ -267,6 +271,15 @@ public class Notebot extends Module {
             });
         }  catch (IOException e) {
             table.add(theme.label("Missing \"notebot\" folder.")).expandCellX();
+            table.row();
+        }
+        if (noSongsFound) {
+            table.add(theme.label("No songs found.")).expandCellX();
+            table.row();
+            WButton help = table.add(theme.button("Help")).expandCellX().widget();
+            help.action = () -> {
+                mc.openScreen(new NotebotHelpScreen(theme));
+            };
         }
         return table;
     }
