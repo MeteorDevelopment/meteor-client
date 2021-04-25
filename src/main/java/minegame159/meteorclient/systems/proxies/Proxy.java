@@ -24,7 +24,7 @@ public class Proxy implements ISerializable<Proxy> {
     public boolean enabled = false;
 
     public boolean isValid() {
-        return IP_PATTERN.matcher(ip).matches() && port >= 0 && port <= 65535 && !name.equals("");
+        return IP_PATTERN.matcher(ip).matches() && port >= 0 && port <= 65535 && !name.isEmpty();
     }
 
     @Override
