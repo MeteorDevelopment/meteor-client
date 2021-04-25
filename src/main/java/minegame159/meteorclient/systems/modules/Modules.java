@@ -543,7 +543,6 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new VisualRange());
         add(new VanillaSpoof());
-        add(new AntiBot());
         add(new BetterTab());
     }
 
