@@ -12,9 +12,9 @@ import minegame159.meteorclient.gui.widgets.WQuad;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
-import minegame159.meteorclient.gui.widgets.input.WDoubleEdit;
 import minegame159.meteorclient.gui.widgets.input.WIntEdit;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
+import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -35,7 +35,7 @@ public class ColorSettingScreen extends WindowScreen {
     private final WHueQuad hueQuad;
 
     private final WIntEdit rItb, gItb, bItb, aItb;
-    private final WDoubleEdit rainbowSpeed;
+    private final WCheckbox rainbow;
 
     public ColorSettingScreen(GuiTheme theme, Setting<SettingColor> setting) {
         super(theme, "Select Color");
@@ -81,14 +81,12 @@ public class ColorSettingScreen extends WindowScreen {
         // Rainbow
         WHorizontalList rainbowList = add(theme.horizontalList()).expandX().widget();
         rainbowList.add(theme.label("Rainbow: "));
-        rainbowSpeed = theme.doubleEdit(setting.get().rainbowSpeed, 0, 0.025);
-        rainbowSpeed.min = 0.0;
-        rainbowSpeed.action = () -> {
-            setting.get().rainbowSpeed = rainbowSpeed.get();
+        rainbow = theme.checkbox(setting.get().rainbow);
+        rainbow.action = () -> {
+            setting.get().rainbow = rainbow.checked;
             setting.changed();
         };
-        rainbowSpeed.small = true;
-        rainbowList.add(rainbowSpeed).expandX();
+        rainbowList.add(rainbow).expandCellX().right();
 
         // Bottom
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
@@ -114,7 +112,7 @@ public class ColorSettingScreen extends WindowScreen {
         if (c.g != gItb.get()) gItb.set(c.g);
         if (c.b != bItb.get()) bItb.set(c.b);
         if (c.a != aItb.get()) aItb.set(c.a);
-        if (c.rainbowSpeed != rainbowSpeed.get()) rainbowSpeed.set(c.rainbowSpeed);
+        rainbow.checked = c.rainbow;
 
         displayQuad.color.set(setting.get());
         hueQuad.calculateFromSetting(true);
@@ -128,8 +126,7 @@ public class ColorSettingScreen extends WindowScreen {
     @Override
     public void tick() {
         super.tick();
-
-        if (setting.get().rainbowSpeed > 0) setFromSetting();
+        if (setting.get().rainbow) setFromSetting();
     }
 
     private void rgbaChanged() {
