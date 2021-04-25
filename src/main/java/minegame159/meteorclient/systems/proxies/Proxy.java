@@ -17,13 +17,14 @@ public class Proxy implements ISerializable<Proxy> {
     public String ip = "";
     public int port = 0;
 
+    public String name = "";
     public String username = "";
     public String password = "";
 
     public boolean enabled = false;
 
     public boolean isValid() {
-        return IP_PATTERN.matcher(ip).matches() && port >= 0 && port <= 65535;
+        return IP_PATTERN.matcher(ip).matches() && port >= 0 && port <= 65535 && !name.isEmpty();
     }
 
     @Override
@@ -34,6 +35,7 @@ public class Proxy implements ISerializable<Proxy> {
         tag.putString("ip", ip);
         tag.putInt("port", port);
 
+        tag.putString("name", name);
         tag.putString("username", username);
         tag.putString("password", password);
 
@@ -48,6 +50,7 @@ public class Proxy implements ISerializable<Proxy> {
         ip = tag.getString("ip");
         port = tag.getInt("port");
 
+        name = tag.getString("name");
         username = tag.getString("username");
         password = tag.getString("password");
 
