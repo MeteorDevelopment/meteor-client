@@ -10,6 +10,7 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
@@ -64,6 +65,14 @@ public class ServerCommand extends Command {
             
             return SINGLE_SUCCESS;
         });
+
+        builder.then(literal("gamerules").executes(ctx -> {
+            CompoundTag tag = mc.world.getGameRules().toNbt();
+            tag.getKeys().forEach((key) -> {
+                    ChatUtils.prefixInfo("Server", "%s: %s", key, tag.getString(key));
+            });
+            return SINGLE_SUCCESS;
+        }));
     }
     
 }
