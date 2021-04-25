@@ -1,7 +1,5 @@
 package minegame159.meteorclient.gui.screens;
 
-import net.minecraft.item.Items;
-
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
