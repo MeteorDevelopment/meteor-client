@@ -23,7 +23,7 @@ public class PlayerModelHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of player model.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(1)
             .sliderMin(1)
             .sliderMax(4)
@@ -81,7 +81,7 @@ public class PlayerModelHud extends HudElement {
     );
 
     public PlayerModelHud(HUD hud) {
-        super(hud, "player-model", "Displays a model of your player.");
+        super(hud, "player-model", "Displays a model of your player.", false);
     }
 
     @Override

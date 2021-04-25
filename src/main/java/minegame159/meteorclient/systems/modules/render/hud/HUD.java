@@ -72,6 +72,14 @@ public class HUD extends Module {
     
     private final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
 
+    public final Runnable reset = () -> {
+        align();
+        elements.forEach(element -> {
+            element.active = element.defaultActive;
+            element.settings.forEach(group -> group.forEach(Setting::reset));
+        });
+    };
+
     public HUD() {
         super(Categories.Render, "HUD", "In game overlay.");
 
@@ -117,6 +125,7 @@ public class HUD extends Module {
         bottomRight.add(new PositionHud(this));
         bottomRight.add(new RotationHud(this));
         bottomRight.add(new PotionTimersHud(this));
+        bottomRight.add(new HoleHud(this));
         bottomRight.add(new CombatHud(this));
 
         align();
@@ -156,7 +165,7 @@ public class HUD extends Module {
         WHorizontalList list = theme.horizontalList();
 
         WButton reset = list.add(theme.button("Reset")).widget();
-        reset.action = this::align;
+        reset.action = this.reset;
         list.add(theme.label("Resets positions (do this after changing scale)."));
 
         return list;
