@@ -12,7 +12,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
 
@@ -67,8 +66,6 @@ public class AutoTotem extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.currentScreen != null && !(mc.currentScreen instanceof AbstractInventoryScreen)) return;
-
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
 
         totems = result.count;

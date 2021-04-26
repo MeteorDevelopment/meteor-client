@@ -65,7 +65,7 @@ public class InvUtils {
         findItemResult.slot = -1;
         findItemResult.count = 0;
 
-        for (int i = 0; i < mc.player.inventory.size(); i++) {
+        for (int i = 0; i <= 35; i++) {
             ItemStack itemStack = mc.player.inventory.getStack(i);
 
             if (itemStack.getItem() == item) {
