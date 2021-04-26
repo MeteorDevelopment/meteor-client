@@ -6,6 +6,7 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -14,6 +15,7 @@ import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 
 public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -25,6 +27,17 @@ public class AutoTotem extends Module {
             .defaultValue(Mode.Smart)
             .build()
     );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The ticks between slot movements.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    // Smart settings
 
     private final Setting<Integer> health = sgSmart.add(new IntSetting.Builder()
             .name("health")
@@ -58,7 +71,7 @@ public class AutoTotem extends Module {
     );
 
     public boolean locked;
-    private int totems;
+    private int totems, ticks;
 
     public AutoTotem() {
         super(Categories.Combat, "auto-totem", "Automatically equips a totem in your offhand.");
@@ -67,22 +80,34 @@ public class AutoTotem extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
-
         totems = result.count;
 
-        if (totems <= 0) {
-            locked = false;
+        if (totems <= 0) locked = false;
+        else if (ticks >= delay.get()) {
+            boolean low = mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions(explosion.get(), fall.get()) <= health.get();
+            boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
+
+            locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
+
+            if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
+                InvUtils.move().from(result.slot).toOffhand();
+            }
+
+            ticks = 0;
             return;
         }
 
-        boolean low = mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions(explosion.get(), fall.get()) <= health.get();
-        boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
+        ticks++;
+    }
 
-        locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
+    @EventHandler
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (!(event.packet instanceof EntityStatusS2CPacket)) return;
 
-        if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
-            InvUtils.move().from(result.slot).toOffhand();
-        }
+        EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
+        if (p.getStatus() != 35) return;
+
+        if (p.getEntity(mc.world).equals(mc.player)) ticks = 0;
     }
 
     public boolean isLocked() {
