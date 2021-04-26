@@ -104,6 +104,7 @@ public class MeteorClient implements ClientModInitializer {
         Blur.init();
         Tabs.init();
         GuiThemes.init();
+        BlockUtils.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -130,8 +131,6 @@ public class MeteorClient implements ClientModInitializer {
 
         GuiRenderer.init();
         GuiThemes.postInit();
-
-        EVENT_BUS.subscribe(BlockUtils.class);
     }
 
     private void openClickGui() {
