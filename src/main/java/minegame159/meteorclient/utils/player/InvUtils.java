@@ -77,49 +77,38 @@ public class InvUtils {
         return findItemResult;
     }
 
-    //Whole
-    public static int findItemInAll(Item item) {
-        return findItemInHotbar(item, itemStack -> true);
-    }
-
-    public static int findItemInAll(Item item, Predicate<ItemStack> isGood) {
-        return findItem(item, isGood, mc.player.inventory.size());
-    }
-
-    public static int findItemInAll(Predicate<ItemStack> isGood) {
-        return findItem(null, isGood, mc.player.inventory.size());
-    }
+    // Find slot
 
     //Hotbar
-    public static int findItemInHotbar(Item item) {
-        return findItemInHotbar(item, itemStack -> true);
-    }
-
-    public static int findItemInHotbar(Item item, Predicate<ItemStack> isGood) {
-        return findItem(item, isGood, 9);
-    }
-
     public static int findItemInHotbar(Predicate<ItemStack> isGood) {
-        return findItem(null, isGood, 9);
+        return findItem(isGood, 0, 8);
+    }
+
+    public static int findItemInHotbar(Item item) {
+        return findItemInHotbar(itemStack -> itemStack.getItem() == item);
     }
 
     //Main
-    public static int findItemInMain(Item item) {
-        return findItemInHotbar(item, itemStack -> true);
-    }
-
-    public static int findItemInMain(Item item, Predicate<ItemStack> isGood) {
-        return findItem(item, isGood, mc.player.inventory.main.size());
-    }
-
     public static int findItemInMain(Predicate<ItemStack> isGood) {
-        return findItem(null, isGood, mc.player.inventory.main.size());
+        return findItem(isGood, 9, 35);
     }
 
-    private static int findItem(Item item, Predicate<ItemStack> isGood, int size) {
-        for (int i = 0; i < size; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-            if ((item == null || itemStack.getItem() == item) && isGood.test(itemStack)) return i;
+    public static int findItemInMain(Item item) {
+        return findItemInMain(itemStack -> itemStack.getItem() == item);
+    }
+
+    // Whole
+    public static int findItemInWhole(Predicate<ItemStack> isGood) {
+        return findItem(isGood, 0, 35);
+    }
+
+    public static int findItemInWhole(Item item) {
+        return findItemInWhole(itemStack -> itemStack.getItem() == item);
+    }
+
+    private static int findItem(Predicate<ItemStack> isGood, int start, int end) {
+        for (int i = start; i <= end; i++) {
+            if (isGood.test(mc.player.inventory.getStack(i))) return i;
         }
         return -1;
     }
