@@ -83,7 +83,7 @@ public class Config extends System<Config> {
     @Override
     public Config fromTag(CompoundTag tag) {
         customFont = getBoolean(tag, "customFont", ConfigTab.ConfigScreen.customFont);
-        RainbowColors.rainbowSpeed = getDouble(tag, "rainbowSpeed", ConfigTab.ConfigScreen.rainbowSpeed);
+        RainbowColors.rainbowSpeed = tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.ConfigScreen.rainbowSpeed.getDefaultValue() / 100;
         sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.ConfigScreen.sendDataToApi);
         rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.ConfigScreen.rotationHoldTicks);
 
