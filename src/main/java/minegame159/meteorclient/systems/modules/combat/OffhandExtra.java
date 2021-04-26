@@ -134,7 +134,7 @@ public class OffhandExtra extends Module {
 
         if (mc.currentScreen != null && ((!(mc.currentScreen instanceof InventoryScreen) && !(mc.currentScreen instanceof WidgetScreen)) || !asimov.get())) return;
         if (!mc.player.isUsingItem()) isClicking = false;
-        if (Modules.get().get(AutoTotem.class).getLocked()) return;
+        if (Modules.get().get(AutoTotem.class).isLocked()) return;
 
         if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && sword.get()) currentMode = Mode.EGap;
         else if (mc.player.getMainHandStack().getItem() instanceof EnchantedGoldenAppleItem && offhandCrystal.get()) currentMode = Mode.Crystal;
@@ -177,7 +177,7 @@ public class OffhandExtra extends Module {
         if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_RIGHT) return;
 
         if (mc.currentScreen != null) return;
-        if (Modules.get().get(AutoTotem.class).getLocked() || !canMove()) return;
+        if (Modules.get().get(AutoTotem.class).isLocked() || !canMove()) return;
         if ((mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING || (mc.player.getHealth() + mc.player.getAbsorptionAmount() > health.get())
                 && (mc.player.getOffHandStack().getItem() != getItem()) && !(mc.currentScreen instanceof HandledScreen<?>))) {
             if (mc.player.getMainHandStack().getItem() instanceof SwordItem && sword.get()) currentMode = Mode.EGap;
