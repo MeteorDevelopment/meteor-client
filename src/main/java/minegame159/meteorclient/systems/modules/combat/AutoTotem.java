@@ -89,7 +89,7 @@ public class AutoTotem extends Module {
     }
 
     public boolean isLocked() {
-        return locked;
+        return isActive() && locked;
     }
 
     @Override
