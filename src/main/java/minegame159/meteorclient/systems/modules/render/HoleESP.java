@@ -269,20 +269,19 @@ public class HoleESP extends Module {
     }
 
     private void drawSides(double x, double y, double z, int excludeDir) {
-        Color color = topColor.copy();
-        color.a *= 0.5;
+        Color top = topColor.copy();
+        top.a *= 0.5;
 
-        Color color1 = bottomColor.copy();
-        color1.a *= 0.5;
+        Color bottom = bottomColor.copy();
+        bottom.a *= 0.5;
 
-        if (Dir.is(excludeDir, Dir.DOWN) && bottom.get()) SIDES.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, color1); // Bottom
-        if (Dir.is(excludeDir, Dir.UP) && top.get()) SIDES.quad(x, y + height.get(), z, x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, x + 1, y + height.get(), z, color); // Top
+        if (Dir.is(excludeDir, Dir.UP) && this.top.get()) SIDES.quad(x, y + height.get(), z, x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, x + 1, y + height.get(), z, top); // Top
+        if (Dir.is(excludeDir, Dir.DOWN) && this.bottom.get()) SIDES.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
 
-        if (Dir.is(excludeDir, Dir.NORTH)) SIDES.quad(x, y, z, x, y + height.get(), z, x + 1, y + height.get(), z, x + 1, y, z, color1, color); // Front
-        if (Dir.is(excludeDir, Dir.SOUTH)) SIDES.quad(x, y, z + 1, x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, x + 1, y, z + 1, color1, color); // Back
-
-        if (Dir.is(excludeDir, Dir.WEST)) SIDES.quad(x, y, z, x, y + height.get(), z, x, y + height.get(), z + 1, x, y, z + 1,  color1, color); // Left
-        if (Dir.is(excludeDir, Dir.EAST)) SIDES.quad(x + 1, y, z, x + 1, y + height.get(), z, x + 1, y + height.get(), z + 1, x + 1, y, z + 1,  color1, color); // Right
+        if (Dir.is(excludeDir, Dir.NORTH)) SIDES.verticalGradientQuad(x, y + height.get(), z, x + 1, y + height.get(), z, x + 1, y, z, x, y, z, top, bottom); // North
+        if (Dir.is(excludeDir, Dir.SOUTH)) SIDES.verticalGradientQuad( x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, x + 1, y, z + 1, x, y, z + 1, top, bottom); // South
+        if (Dir.is(excludeDir, Dir.WEST)) SIDES.verticalGradientQuad(x, y + height.get(), z, x, y + height.get(), z + 1, x, y, z + 1, x, y, z, top, bottom); // East
+        if (Dir.is(excludeDir, Dir.EAST)) SIDES.verticalGradientQuad(x + 1, y + height.get(), z, x + 1, y + height.get(), z + 1, x + 1, y, z + 1, x + 1, y, z, top, bottom); // West
     }
 
     private static class Hole {
@@ -301,16 +300,16 @@ public class HoleESP extends Module {
         public Color getTopColor() {
             switch (this.type) {
                 case Obsidian:  return Modules.get().get(HoleESP.class).obsidianColorTop.get();
-                case Bedrock:  return Modules.get().get(HoleESP.class).bedrockColorTop.get();
-                default:  return Modules.get().get(HoleESP.class).mixedColorTop.get();
+                case Bedrock:   return Modules.get().get(HoleESP.class).bedrockColorTop.get();
+                default:        return Modules.get().get(HoleESP.class).mixedColorTop.get();
             }
         }
 
         public Color getBottomColor() {
             switch (this.type) {
                 case Obsidian:  return Modules.get().get(HoleESP.class).obsidianColorBottom.get();
-                case Bedrock:  return Modules.get().get(HoleESP.class).bedrockColorBottom.get();
-                default:  return Modules.get().get(HoleESP.class).mixedColorBottom.get();
+                case Bedrock:   return Modules.get().get(HoleESP.class).bedrockColorBottom.get();
+                default:        return Modules.get().get(HoleESP.class).mixedColorBottom.get();
             }
         }
 
