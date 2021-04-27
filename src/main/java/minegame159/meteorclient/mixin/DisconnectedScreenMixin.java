@@ -48,7 +48,7 @@ public class DisconnectedScreenMixin extends ScreenMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (reconnectBtn == null) return;
+        if (reconnectBtn == null || Modules.get().get(AutoReconnect.class).lastServerInfo == null) return;
 
         if (Modules.get().isActive(AutoReconnect.class)) {
             if (reconnectTime-- - System.currentTimeMillis() > 0) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText("Reconnect " + getTimeString()));
