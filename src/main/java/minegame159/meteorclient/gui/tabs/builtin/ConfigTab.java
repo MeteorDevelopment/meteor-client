@@ -60,8 +60,8 @@ public class ConfigTab extends Tab {
                 .max(10)
                 .defaultValue(0.5)
                 .decimalPlaces(2)
-                .onChanged(value -> RainbowColors.rainbowSpeed = value / 100)
-                .onModuleActivated(setting -> setting.set(RainbowColors.rainbowSpeed * 100))
+                .onChanged(value -> RainbowColors.GLOBAL.setSpeed(value / 100))
+                .onModuleActivated(setting -> setting.set(RainbowColors.GLOBAL.getSpeed() * 100))
                 .build()
         );
 
