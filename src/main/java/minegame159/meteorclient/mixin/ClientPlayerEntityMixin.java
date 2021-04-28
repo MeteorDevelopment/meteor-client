@@ -50,7 +50,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.get().getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (!msg.startsWith(Config.get().prefix) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(msg));
 
             if (!event.isCancelled()) {
@@ -63,9 +63,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             return;
         }
 
-        if (msg.startsWith(Config.get().getPrefix())) {
+        if (msg.startsWith(Config.get().prefix)) {
             try {
-                Commands.get().dispatch(msg.substring(Config.get().getPrefix().length()));
+                Commands.get().dispatch(msg.substring(Config.get().prefix.length()));
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }
