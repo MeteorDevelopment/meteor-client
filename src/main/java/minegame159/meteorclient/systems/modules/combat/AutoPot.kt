@@ -76,8 +76,6 @@ class AutoPot:Module(Categories.Player, "auto-pot", "Automatically Drinks Potion
   private val wasAura = ArrayList<Class<out Module>>()
   private val wasBaritone:Boolean = false
   //Gilded's first module, lets see how much i'll die making this
-  //TODO:Rework everything to accept all pots
-  //TODO: Does strength work better if you throw it up? will check.
   fun onDeactivate() {
     if (drinking) stopDrinking()
     if (splashing) stopSplashing()
