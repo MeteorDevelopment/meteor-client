@@ -41,7 +41,7 @@ public class NbtCommand extends Command {
                     stack.getTag().copyFrom(tag);
                     setStack(stack);
                 } else {
-                    ChatUtils.prefixError("NBT", "Some of the NBT data could not be found, try using: " + Config.get().getPrefix() + "nbt set {nbt}");
+                    ChatUtils.prefixError("NBT", "Some of the NBT data could not be found, try using: " + Config.get().prefix + "nbt set {nbt}");
                 }
             }
             return SINGLE_SUCCESS;
