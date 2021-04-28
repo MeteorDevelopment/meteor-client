@@ -266,7 +266,7 @@ public class BedAura extends Module {
             return;
         }
 
-        if (place.get() && InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
+        if (place.get() && InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
             switch (stage) {
                 case Placing:
                     bestPos = getPlacePos(target);
@@ -299,7 +299,7 @@ public class BedAura extends Module {
     }
 
     private void placeBed(BlockPos pos) {
-        if (pos == null || InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
+        if (pos == null || InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
 
         if (autoMove.get()) doAutoMove();
 

@@ -379,7 +379,7 @@ public class Modules extends System<Modules> {
         add(new Hitboxes());
         add(new HoleFiller());
         add(new KillAura());
-        add(new OffhandExtra());
+        add(new Offhand());
         add(new Quiver());
         add(new SelfAnvil());
         add(new SelfTrap());
@@ -543,7 +543,6 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new VisualRange());
         add(new VanillaSpoof());
-        add(new AntiBot());
         add(new BetterTab());
     }
 

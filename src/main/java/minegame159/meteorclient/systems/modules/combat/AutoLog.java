@@ -15,22 +15,14 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
-import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -115,7 +107,7 @@ public class AutoLog extends Module {
             }
         }
 
-        if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - getHealthReduction() < health.get()){
+        if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was going to be lower than " + health.get() + ".")));
             if (toggleOff.get()) this.toggle();
         }
@@ -139,48 +131,6 @@ public class AutoLog extends Module {
                 if (toggleOff.get()) this.toggle();
             }
         }
-    }
-
-    private double getHealthReduction() {
-        double damageTaken = 0;
-
-        for (Entity entity : mc.world.getEntities()) {
-            // Check for end crystals
-            if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
-                damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
-            }
-            // Check for players holding swords
-            else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
-                if (Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
-                    if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
-                        damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
-                    }
-                }
-            }
-        }
-
-        // Check for fall distance with water check
-        if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
-            double damage = mc.player.fallDistance * 0.5;
-
-            if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
-                damageTaken = damage;
-            }
-        }
-
-        // Check for beds if in nether
-        if (Utils.getDimension() != Dimension.Overworld) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
-                BlockPos bp = blockEntity.getPos();
-                Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
-
-                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, pos)) {
-                    damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
-                }
-            }
-        }
-
-        return damageTaken;
     }
 
     private class StaticListener {

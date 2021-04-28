@@ -40,7 +40,7 @@ public class ElytraFlightMode {
 
             if (chestStack.getItem() == Items.ELYTRA) {
                 if (chestStack.getMaxDamage() - chestStack.getDamage() <= settings.replaceDurability.get()) {
-                    int slot = InvUtils.findItemInAll(Items.ELYTRA, stack -> stack.getMaxDamage() - stack.getDamage() > settings.replaceDurability.get());
+                    int slot = InvUtils.findItemInWhole(stack -> stack.getMaxDamage() - stack.getDamage() > settings.replaceDurability.get() && stack.getItem() == Items.ELYTRA);
 
                     InvUtils.move().from(slot).toArmor(2);
                 }

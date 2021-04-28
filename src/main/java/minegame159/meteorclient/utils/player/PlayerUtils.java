@@ -8,15 +8,25 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.Rotation;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.systems.friends.Friends;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.BaritoneUtils;
 import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.world.BlockUtils;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.PotionItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -240,5 +250,51 @@ public class PlayerUtils {
         }
 
         return air < 2;
+    }
+
+    public static double possibleHealthReductions() {
+        return possibleHealthReductions(true, true);
+    }
+
+    public static double possibleHealthReductions(boolean explosions, boolean fall) {
+        double damageTaken = 0;
+
+        for (Entity entity : mc.world.getEntities()) {
+            // Check for end crystals
+            if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
+                damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
+            }
+            // Check for players holding swords
+            else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
+                if (Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
+                    if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
+                        damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
+                    }
+                }
+            }
+        }
+
+        // Check for beds if in nether
+        if (Utils.getDimension() != Dimension.Overworld) {
+            for (BlockEntity blockEntity : mc.world.blockEntities) {
+                BlockPos bp = blockEntity.getPos();
+                Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
+
+                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, pos)) {
+                    damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
+                }
+            }
+        }
+
+        // Check for fall distance with water check
+        if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
+            double damage = mc.player.fallDistance * 0.5;
+
+            if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
+                damageTaken = damage;
+            }
+        }
+
+        return damageTaken;
     }
 }

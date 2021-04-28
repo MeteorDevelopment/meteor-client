@@ -387,8 +387,8 @@ public class CombatHud extends HudElement {
             int absorbWidth = (int) (totalAbsorbWidth * absorbPrecent);
 
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get(), healthColor1.get(), healthColor2.get());
-            Renderer.NORMAL.quad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get(), healthColor2.get(), healthColor3.get());
+            Renderer.NORMAL.horizontalGradientQuad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get());
+            Renderer.NORMAL.horizontalGradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
             Renderer.NORMAL.end();
 
             String healthText = String.valueOf(Math.round(totalHealth * 10.0) / 10.0);

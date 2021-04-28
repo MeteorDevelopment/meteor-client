@@ -111,20 +111,39 @@ public class MeshBuilder {
         buffer.next();
     }
 
-    // NORMAL
+    // Quads, 2 dimensional, top left to bottom right
 
-    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color startColor, Color endColor) {
-        pos(x1, y1, z1).color(startColor).endVertex();
-        pos(x2, y2, z2).color(endColor).endVertex();
-        pos(x3, y3, z3).color(endColor).endVertex();
+    public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft) {
+        pos(x1, y1, z1).color(topLeft).endVertex();
+        pos(x2, y2, z2).color(topRight).endVertex();
+        pos(x3, y3, z3).color(bottomRight).endVertex();
+        pos(x1, y1, z1).color(topLeft).endVertex();
+        pos(x3, y3, z3).color(bottomRight).endVertex();
+        pos(x4, y4, z4).color(bottomLeft).endVertex();
+    }
 
-        pos(x1, y1, z1).color(startColor).endVertex();
-        pos(x3, y3, z3).color(endColor).endVertex();
-        pos(x4, y4, z4).color(startColor).endVertex();
+    public void quad(double x, double y, double width, double height, Color topLeft, Color topRight, Color bottomRight, Color bottomLeft) {
+        quad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, topLeft, topRight, bottomRight, bottomLeft);
+    }
+
+    public void verticalGradientQuad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color top, Color bottom) {
+        quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, top, top, bottom, bottom);
+    }
+
+    public void verticalGradientQuad(double x, double y, double width, double height, Color top, Color bottom) {
+        verticalGradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, top, bottom);
+    }
+
+    public void horizontalGradientQuad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color left, Color right) {
+        quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, left, right, right, left);
+    }
+
+    public void horizontalGradientQuad(double x, double y, double width, double height, Color left, Color right) {
+        horizontalGradientQuad(x, y, 0, x + width, y, 0, x + width, y + height, 0, x, y + height, 0, left, right);
     }
 
     public void quad(double x1, double y1, double z1, double x2, double y2, double z2, double x3, double y3, double z3, double x4, double y4, double z4, Color color) {
-        quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, color, color);
+        quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, color, color, color, color);
     }
 
     public void quad(double x, double y, double width, double height, Color color) {
@@ -134,18 +153,9 @@ public class MeshBuilder {
     public void horizontalQuad(double x1, double z1, double x2, double z2, double y, Color color) {
         quad(x1, y, z1, x1, y, z2, x2, y, z2, x2, y, z1, color);
     }
+
     public void verticalQuad(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
         quad(x1, y1, z1, x1, y2, z1, x2, y2, z2, x2, y1, z2, color);
-    }
-
-    public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
-        pos(x, y, 0).color(cTopLeft).endVertex();
-        pos(x + width, y, 0).color(cTopRight).endVertex();
-        pos(x + width, y + height, 0).color(cBottomRight).endVertex();
-
-        pos(x, y, 0).color(cTopLeft).endVertex();
-        pos(x + width, y + height, 0).color(cBottomRight).endVertex();
-        pos(x, y + height, 0).color(cBottomLeft).endVertex();
     }
 
     public void texQuad(double x, double y, double width, double height, TextureRegion tex, Color color) {
@@ -176,8 +186,16 @@ public class MeshBuilder {
         pos(x2, y2, z2).color(endColor).endVertex();
     }
 
+    public void line(double x1, double y1, double x2, double y2, Color startColor, Color endColor) {
+        line(x1, y1, 0, x2, y2, 0, startColor, endColor);
+    }
+
     public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
         line(x1, y1, z1, x2, y2, z2, color, color);
+    }
+
+    public void line(double x1, double y1, double x2, double y2, Color color) {
+        line(x1, y1, 0, x2, y2, 0, color);
     }
 
     public void boxEdges(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
@@ -196,6 +214,7 @@ public class MeshBuilder {
         if (Dir.is(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
         if (Dir.is(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
     }
+
     public void boxEdges(double x, double y, double width, double height, Color color) {
         boxEdges(x, y, 0, x + width, y + height, 0, color, 0);
     }

@@ -80,7 +80,7 @@ public class AutoShearer extends Module {
 
             boolean foundShears = !findNewShears;
             if (findNewShears) {
-                int slot = InvUtils.findItemInHotbar(Items.SHEARS, itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)));
+                int slot = InvUtils.findItemInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
 
                 if (slot != -1) {
                     mc.player.inventory.selectedSlot = slot;
