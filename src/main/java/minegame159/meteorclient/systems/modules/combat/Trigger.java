@@ -23,12 +23,7 @@ import net.minecraft.util.Hand;
 public class Trigger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public enum weapons {
-        Sword,
-        Axe,
-        Both,
-        Any
-    }
+
 
     private final Setting<Boolean> whenHoldingLeftClick = sgGeneral.add(new BoolSetting.Builder()
             .name("when-holding-left-click")
@@ -37,10 +32,10 @@ public class Trigger extends Module {
             .build()
     );
 
-    private final Setting<weapons> weapon = sgGeneral.add(new EnumSetting.Builder<weapons>()
+    private final Setting<Weapons> weapon = sgGeneral.add(new EnumSetting.Builder<Weapons>()
             .name("weapon")
             .description("Only attacks an entity when a specified weapon is in your hand.")
-            .defaultValue(weapons.Any)
+            .defaultValue(Weapons.Any)
             .build()
     );
 
@@ -63,11 +58,11 @@ public class Trigger extends Module {
 
         //Checks if the player is holding the specified weapon
         if(
-                weapon.get() == weapons.Axe && mc.player.getMainHandStack().getItem() instanceof AxeItem ||
-                weapon.get() == weapons.Sword && mc.player.getMainHandStack().getItem() instanceof SwordItem ||
-                weapon.get() == weapons.Both && mc.player.getMainHandStack().getItem() instanceof AxeItem ||
-                weapon.get() == weapons.Both && mc.player.getMainHandStack().getItem() instanceof SwordItem ||
-                weapon.get() == weapons.Any
+                weapon.get() == Weapons.Axe && mc.player.getMainHandStack().getItem() instanceof AxeItem ||
+                weapon.get() == Weapons.Sword && mc.player.getMainHandStack().getItem() instanceof SwordItem ||
+                weapon.get() == Weapons.Both && mc.player.getMainHandStack().getItem() instanceof AxeItem ||
+                weapon.get() == Weapons.Both && mc.player.getMainHandStack().getItem() instanceof SwordItem ||
+                weapon.get() == Weapons.Any
         ) {
             //Attack the entity
             if (whenHoldingLeftClick.get()) {
@@ -89,11 +84,16 @@ public class Trigger extends Module {
 
     @Override
     public String getInfoString() {
-        //Get a target to attack
         if (target != null && target instanceof PlayerEntity) return target.getEntityName();
         if (target != null) return target.getType().getName().getString();
         return null;
     }
-
-
+    
+    public enum Weapons {
+        Sword,
+        Axe,
+        Both,
+        Any
+    }
+    
 }
