@@ -1,0 +1,84 @@
+import java.util.jar.JarFile
+
+task generatePacketUtils() {
+    doLast {
+        // Get minecraft jar file
+        def mc = ""
+        def dir = new File(".gradle/loom-cache/${project.minecraft_version}-projectmapped-net.fabricmc.yarn-${project.yarn_mappings}-v2")
+        for (def file in dir.listFiles()) {
+            if (file.name.contains("minecraft") && file.name.contains("mapped") && file.name.endsWith((String) project.yarn_mappings + "-v2.jar")) {
+                mc = file.absolutePath
+                break
+            }
+        }
+
+        // Get packets
+        def s2cPackets = []
+        def c2sPackets = []
+
+        def file = new JarFile(mc)
+        for (entry in file.entries()) {
+            if (entry.name.endsWith("S2CPacket.class")) s2cPackets << entry.name.substring(0, entry.name.length() - 6)
+            else if (entry.name.endsWith("C2SPacket.class")) c2sPackets << entry.name.substring(0, entry.name.length() - 6)
+        }
+
+        // Generate PacketUtils.java
+        def writer = new File("src/main/java/minegame159/meteorclient/utils/network/PacketUtils.java").newWriter()
+        writer << "package minegame159.meteorclient.utils.network;\n\n"
+
+        //   Write imports
+        writer << "import net.minecraft.network.Packet;\n"
+        writer << "import java.util.Map;\n"
+        writer << "import java.util.HashMap;\n"
+        writer << "import java.util.Set;\n"
+
+        //   Write class
+        writer << "\npublic class PacketUtils {\n"
+
+        //     Write fields
+        writer << "    private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();\n"
+        writer << "    private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new HashMap<>();\n\n"
+        writer << "    private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new HashMap<>();\n"
+        writer << "    private static final Map<String, Class<? extends Packet<?>>> C2S_PACKETS_R = new HashMap<>();\n\n"
+
+        //     Write static block
+        writer << "    static {\n"
+        s2cPackets.each { def packet = (String) it; def name = packet.substring(packet.lastIndexOf("/") + 1); writer << "        S2C_PACKETS.put(${packet.replace("/", ".")}.class, \"$name\");\n" }
+        writer << "\n"
+        c2sPackets.each { def packet = (String) it; def name = packet.substring(packet.lastIndexOf("/") + 1); writer << "        C2S_PACKETS.put(${packet.replace("/", ".")}.class, \"$name\");\n" }
+        writer << "\n\n"
+        s2cPackets.each { def packet = (String) it; def name = packet.substring(packet.lastIndexOf("/") + 1); writer << "        S2C_PACKETS_R.put(\"$name\", ${packet.replace("/", ".")}.class);\n" }
+        writer << "\n"
+        c2sPackets.each { def packet = (String) it; def name = packet.substring(packet.lastIndexOf("/") + 1); writer << "        C2S_PACKETS_R.put(\"$name\", ${packet.replace("/", ".")}.class);\n" }
+        writer << "    }\n\n"
+
+        //     Write getName method
+        writer << "    public static String getName(Class<? extends Packet<?>> packetClass) {\n"
+        writer << "        String name = S2C_PACKETS.get(packetClass);\n"
+        writer << "        if (name != null) return name;\n"
+        writer << "        return C2S_PACKETS.get(packetClass);\n"
+        writer << "    }\n\n"
+
+        //     Write getPacket method
+        writer << "    public static Class<? extends Packet<?>> getPacket(String name) {\n"
+        writer << "        Class<? extends Packet<?>> packet = S2C_PACKETS_R.get(name);\n"
+        writer << "        if (packet != null) return packet;\n"
+        writer << "        return C2S_PACKETS_R.get(name);\n"
+        writer << "    }\n\n"
+
+        //     Write getS2CPackets method
+        writer << "    public static Set<Class<? extends Packet<?>>> getS2CPackets() {\n"
+        writer << "        return S2C_PACKETS.keySet();\n"
+        writer << "    }\n\n"
+
+        //     Write getC2SPackets method
+        writer << "    public static Set<Class<? extends Packet<?>>> getC2SPackets() {\n"
+        writer << "        return C2S_PACKETS.keySet();\n"
+        writer << "    }\n"
+
+        //   Write end class
+        writer << "}\n"
+
+        writer.close()
+    }
+}
