@@ -71,7 +71,7 @@ public class Offhand extends Module {
     private Item currentItem;
 
     public Offhand() {
-        super(Categories.Combat, "offhand", "Allows you to use specified items in your offhand. REQUIRES AutoTotem to be on smart mode.");
+        super(Categories.Combat, "offhand", "Allows you to hold specified items in your offhand.");
     }
 
     @Override
