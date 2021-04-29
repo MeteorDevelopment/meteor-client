@@ -15,6 +15,7 @@ import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.rendering.text.TextRenderer;
@@ -895,6 +896,7 @@ public class CrystalAura extends Module {
         }
         BlockPos blockPos = new BlockPos(block);
         Direction direction = rayTraceCheck(blockPos, true);
+        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
         if (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both) {
             float[] rotation = PlayerUtils.calculateAngle(strictLook.get() ? new Vec3d(blockPos.getX() + 0.5 + direction.getVector().getX() * 1.0 / 2.0,
                     blockPos.getY() + 0.5 + direction.getVector().getY() * 1.0 / 2.0,
