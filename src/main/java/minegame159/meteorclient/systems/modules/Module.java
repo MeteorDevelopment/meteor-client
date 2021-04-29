@@ -144,7 +144,7 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatCommandsInfo) ChatUtils.info(42069, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        if (Config.get().chatCommandsInfo) ChatUtils.info(this.hashCode(), "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
     }
 
     @Override
