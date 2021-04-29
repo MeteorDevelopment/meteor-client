@@ -6,21 +6,41 @@
 package minegame159.meteorclient.mixin;
 
 import net.minecraft.client.resource.SplashTextResourceSupplier;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.util.profiler.Profiler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashTextResourceSupplierMixin {
-    @Inject(method = "apply", at = @At("HEAD"))
-    private void onApply(List<String> list, ResourceManager resourceManager, Profiler profiler, CallbackInfo info) {
-        list.add("Meteor on Crack!");
-        list.add("Star Meteor Client on GitHub!");
-        list.add("Based utility mod.");
+
+    private boolean override = true;
+    private final Random random = new Random();
+
+    private final List<String> meteorSplashes = getMeteorSplashes();
+
+    @Inject(method = "get", at = @At("HEAD"), cancellable = true)
+    private void onApply(CallbackInfoReturnable<String> cir) {
+        if (override) {
+            cir.setReturnValue(meteorSplashes.get(random.nextInt(meteorSplashes.size())));
+        }
+        override = !override;
     }
+
+    private static List<String> getMeteorSplashes() {
+        return Arrays.asList(
+                "Meteor on Crack!",
+                "Star Meteor Client on GitHub!",
+                "Based utility mod.",
+                "§6MineGame159 §fbased god",
+                "§4meteorclient.com",
+                "§4Meteor on Crack!",
+                "§6Meteor on Crack!"
+        );
+    }
+
 }
