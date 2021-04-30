@@ -5,7 +5,7 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MeteorDevelopment/meteor-client)
 ![GitHub lines of code](https://tokei.rs/b1/github/MeteorDevelopment/meteor-client)
-![GitHub contributors](https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client)
+![GitHub contributors](https://img.shields.io/badge/Contributors-42-green)
 ![CircleCI](https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=svg)
 
 Minecraft fabric utility mod for the latest Minecraft version.  
