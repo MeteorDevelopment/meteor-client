@@ -76,7 +76,8 @@ public class CrystalAura extends Module {
 
     public enum CancelCrystalMode {
         Sound,
-        Hit
+        Hit,
+	None
     }
 
     private final SettingGroup sgPlace = settings.createGroup("Place");
