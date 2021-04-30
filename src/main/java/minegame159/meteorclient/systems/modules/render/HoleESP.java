@@ -40,7 +40,7 @@ public class HoleESP extends Module {
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("horizontal-radius")
             .description("Horizontal radius in which to search for holes.")
-            .defaultValue(7)
+            .defaultValue(10)
             .min(0)
             .sliderMax(32)
             .build()
@@ -49,7 +49,7 @@ public class HoleESP extends Module {
     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
             .name("vertical-radius")
             .description("Vertical radius in which to search for holes.")
-            .defaultValue(7)
+            .defaultValue(5)
             .min(0)
             .sliderMax(32)
             .build()
@@ -96,65 +96,64 @@ public class HoleESP extends Module {
     private final Setting<Double> height = sgRender.add(new DoubleSetting.Builder()
             .name("height")
             .description("The height of rendering.")
-            .defaultValue(1)
+            .defaultValue(0.2)
             .min(0)
             .build()
     );
 
-    private final Setting<Boolean> top = sgRender.add(new BoolSetting.Builder()
-            .name("top")
+    private final Setting<Boolean> topQuad = sgRender.add(new BoolSetting.Builder()
+            .name("top-quad")
             .description("Whether to render a quad at the top of the hole.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
-
-    private final Setting<Boolean> bottom = sgRender.add(new BoolSetting.Builder()
-            .name("bottom")
+    private final Setting<Boolean> bottomQuad = sgRender.add(new BoolSetting.Builder()
+            .name("bottom-quad")
             .description("Whether to render a quad at the bottom of the hole.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
     private final Setting<SettingColor> bedrockColorTop = sgRender.add(new ColorSetting.Builder()
             .name("bedrock-top")
             .description("The top color for holes that are completely bedrock.")
-            .defaultValue(new SettingColor(100, 255, 0, 0))
+            .defaultValue(new SettingColor(100, 255, 0, 200))
             .build()
     );
 
     private final Setting<SettingColor> bedrockColorBottom = sgRender.add(new ColorSetting.Builder()
             .name("bedrock-bottom")
             .description("The bottom color for holes that are completely bedrock.")
-            .defaultValue(new SettingColor(100, 255, 0))
+            .defaultValue(new SettingColor(100, 255, 0, 0))
             .build()
     );
 
     private final Setting<SettingColor> obsidianColorTop = sgRender.add(new ColorSetting.Builder()
             .name("obsidian-top")
             .description("The top color for holes that are completely obsidian.")
-            .defaultValue(new SettingColor(255, 0, 0, 0))
+            .defaultValue(new SettingColor(255, 0, 0, 200))
             .build()
     );
 
     private final Setting<SettingColor> obsidianColorBottom = sgRender.add(new ColorSetting.Builder()
             .name("obsidian-bottom")
             .description("The bottom color for holes that are completely obsidian.")
-            .defaultValue(new SettingColor(255, 0, 0))
+            .defaultValue(new SettingColor(255, 0, 0, 0))
             .build()
     );
 
     private final Setting<SettingColor> mixedColorTop = sgRender.add(new ColorSetting.Builder()
             .name("mixed-top")
             .description("The top color for holes that have mixed bedrock and obsidian.")
-            .defaultValue(new SettingColor(255, 127, 0, 0))
+            .defaultValue(new SettingColor(255, 127, 0, 200))
             .build()
     );
 
     private final Setting<SettingColor> mixedColorBottom = sgRender.add(new ColorSetting.Builder()
             .name("mixed-bottom")
             .description("The bottom color for holes that have mixed bedrock and obsidian.")
-            .defaultValue(new SettingColor(255, 127, 0))
+            .defaultValue(new SettingColor(255, 127, 0, 0))
             .build()
     );
 
@@ -163,9 +162,6 @@ public class HoleESP extends Module {
 
     private final Pool<Hole> holePool = new Pool<>(Hole::new);
     private final List<Hole> holes = new ArrayList<>();
-
-    private final Color topColor = new Color();
-    private final Color bottomColor = new Color();
 
     private final byte NULL = 0;
 
@@ -235,53 +231,10 @@ public class HoleESP extends Module {
         LINES.begin(event, DrawMode.Lines, VertexFormats.POSITION_COLOR);
         SIDES.begin(event, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
-        for (HoleESP.Hole hole : holes) {
-            int x = hole.blockPos.getX();
-            int y = hole.blockPos.getY();
-            int z = hole.blockPos.getZ();
-
-            topColor.set(hole.getTopColor());
-            bottomColor.set(hole.getBottomColor());
-
-            if (shapeMode.get() != ShapeMode.Lines) drawSides(x, y, z, hole.exclude);
-            if (shapeMode.get() != ShapeMode.Sides) drawLines(x, y, z, hole.exclude);
-        }
+        for (HoleESP.Hole hole : holes) hole.render(LINES, SIDES, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
 
         LINES.end();
         SIDES.end();
-    }
-
-    private void drawLines(double x, double y, double z, int excludeDir) {
-        if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.NORTH)) LINES.line(x, y, z, x, y + height.get(), z, bottomColor, topColor);
-        if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.SOUTH)) LINES.line(x, y, z + 1, x, y + height.get(), z + 1, bottomColor, topColor);
-        if (Dir.is(excludeDir, Dir.EAST) && Dir.is(excludeDir, Dir.NORTH)) LINES.line(x + 1, y, z, x + 1, y + height.get(), z, bottomColor, topColor);
-        if (Dir.is(excludeDir, Dir.EAST) && Dir.is(excludeDir, Dir.SOUTH)) LINES.line(x + 1, y, z + 1, x + 1, y + height.get(), z + 1, bottomColor, topColor);
-
-        if (Dir.is(excludeDir, Dir.NORTH)) LINES.line(x, y, z, x + 1, y, z, bottomColor);
-        if (Dir.is(excludeDir, Dir.NORTH)) LINES.line(x, y + height.get(), z, x + 1, y + height.get(), z, topColor);
-        if (Dir.is(excludeDir, Dir.SOUTH)) LINES.line(x, y, z + 1, x + 1, y, z + 1, bottomColor);
-        if (Dir.is(excludeDir, Dir.SOUTH)) LINES.line(x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, topColor);
-
-        if (Dir.is(excludeDir, Dir.WEST)) LINES.line(x, y, z, x, y, z + 1, bottomColor);
-        if (Dir.is(excludeDir, Dir.WEST)) LINES.line(x, y + height.get(), z, x, y + height.get(), z + 1, topColor);
-        if (Dir.is(excludeDir, Dir.EAST)) LINES.line(x + 1, y, z, x + 1, y, z + 1, bottomColor);
-        if (Dir.is(excludeDir, Dir.EAST)) LINES.line(x + 1, y + height.get(), z, x + 1, y + height.get(), z + 1, topColor);
-    }
-
-    private void drawSides(double x, double y, double z, int excludeDir) {
-        Color top = topColor.copy();
-        top.a *= 0.5;
-
-        Color bottom = bottomColor.copy();
-        bottom.a *= 0.5;
-
-        if (Dir.is(excludeDir, Dir.UP) && this.top.get()) SIDES.quad(x, y + height.get(), z, x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, x + 1, y + height.get(), z, top); // Top
-        if (Dir.is(excludeDir, Dir.DOWN) && this.bottom.get()) SIDES.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
-
-        if (Dir.is(excludeDir, Dir.NORTH)) SIDES.verticalGradientQuad(x, y + height.get(), z, x + 1, y + height.get(), z, x + 1, y, z, x, y, z, top, bottom); // North
-        if (Dir.is(excludeDir, Dir.SOUTH)) SIDES.verticalGradientQuad( x, y + height.get(), z + 1, x + 1, y + height.get(), z + 1, x + 1, y, z + 1, x, y, z + 1, top, bottom); // South
-        if (Dir.is(excludeDir, Dir.WEST)) SIDES.verticalGradientQuad(x, y + height.get(), z, x, y + height.get(), z + 1, x, y, z + 1, x, y, z, top, bottom); // East
-        if (Dir.is(excludeDir, Dir.EAST)) SIDES.verticalGradientQuad(x + 1, y + height.get(), z, x + 1, y + height.get(), z + 1, x + 1, y, z + 1, x + 1, y, z, top, bottom); // West
     }
 
     private static class Hole {
@@ -310,6 +263,48 @@ public class HoleESP extends Module {
                 case Obsidian:  return Modules.get().get(HoleESP.class).obsidianColorBottom.get();
                 case Bedrock:   return Modules.get().get(HoleESP.class).bedrockColorBottom.get();
                 default:        return Modules.get().get(HoleESP.class).mixedColorBottom.get();
+            }
+        }
+
+        public void render(MeshBuilder lines, MeshBuilder sides, ShapeMode mode, double height, boolean topQuad, boolean bottomQuad) {
+            Color top = getTopColor().copy();
+            Color bottom = getBottomColor().copy();
+
+            int x = blockPos.getX();
+            int y = blockPos.getY();
+            int z = blockPos.getZ();
+
+            if (mode != ShapeMode.Lines) {
+                top.a *= 0.5;
+                bottom.a *= 0.5;
+
+                if (Dir.is(exclude, Dir.UP) && topQuad) sides.quad(x, y + height, z, x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y + height, z, top); // Top
+                if (Dir.is(exclude, Dir.DOWN) && bottomQuad) sides.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
+
+                if (Dir.is(exclude, Dir.NORTH)) sides.verticalGradientQuad(x, y + height, z, x + 1, y + height, z, x + 1, y, z, x, y, z, top, bottom); // North
+                if (Dir.is(exclude, Dir.SOUTH)) sides.verticalGradientQuad( x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y, z + 1, x, y, z + 1, top, bottom); // South
+
+                if (Dir.is(exclude, Dir.WEST)) sides.verticalGradientQuad(x, y + height, z, x, y + height, z + 1, x, y, z + 1, x, y, z, top, bottom); // East
+                if (Dir.is(exclude, Dir.EAST)) sides.verticalGradientQuad(x + 1, y + height, z, x + 1, y + height, z + 1, x + 1, y, z + 1, x + 1, y, z, top, bottom); // West
+            }
+            if (mode != ShapeMode.Sides) {
+                top.a /= 0.5;
+                bottom.a /= 0.5;
+
+                if (Dir.is(exclude, Dir.WEST) && Dir.is(exclude, Dir.NORTH)) lines.line(x, y, z, x, y + height, z, bottom, top);
+                if (Dir.is(exclude, Dir.WEST) && Dir.is(exclude, Dir.SOUTH)) lines.line(x, y, z + 1, x, y + height, z + 1, bottom, top);
+                if (Dir.is(exclude, Dir.EAST) && Dir.is(exclude, Dir.NORTH)) lines.line(x + 1, y, z, x + 1, y + height, z, bottom, top);
+                if (Dir.is(exclude, Dir.EAST) && Dir.is(exclude, Dir.SOUTH)) lines.line(x + 1, y, z + 1, x + 1, y + height, z + 1, bottom, top);
+
+                if (Dir.is(exclude, Dir.NORTH)) lines.line(x, y, z, x + 1, y, z, bottom);
+                if (Dir.is(exclude, Dir.NORTH)) lines.line(x, y + height, z, x + 1, y + height, z, top);
+                if (Dir.is(exclude, Dir.SOUTH)) lines.line(x, y, z + 1, x + 1, y, z + 1, bottom);
+                if (Dir.is(exclude, Dir.SOUTH)) lines.line(x, y + height, z + 1, x + 1, y + height, z + 1, top);
+
+                if (Dir.is(exclude, Dir.WEST)) lines.line(x, y, z, x, y, z + 1, bottom);
+                if (Dir.is(exclude, Dir.WEST)) lines.line(x, y + height, z, x, y + height, z + 1, top);
+                if (Dir.is(exclude, Dir.EAST)) lines.line(x + 1, y, z, x + 1, y, z + 1, bottom);
+                if (Dir.is(exclude, Dir.EAST)) lines.line(x + 1, y + height, z, x + 1, y + height, z + 1, top);
             }
         }
 
