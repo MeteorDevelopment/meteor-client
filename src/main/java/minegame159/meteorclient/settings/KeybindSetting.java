@@ -54,6 +54,14 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
+    public void reset(boolean callbacks) {
+        if (value == null) value = defaultValue.copy();
+        else value.set(defaultValue);
+
+        if (callbacks) changed();
+    }
+
+    @Override
     protected Keybind parseImpl(String str) {
         try {
             return Keybind.fromKey(Integer.parseInt(str.trim()));
@@ -69,18 +77,18 @@ public class KeybindSetting extends Setting<Keybind> {
 
     @Override
     public CompoundTag toTag() {
-        return get().toTag();
+        CompoundTag tag = saveGeneral();
+
+        tag.put("value", get().toTag());
+
+        return tag;
     }
 
     @Override
     public Keybind fromTag(CompoundTag tag) {
-        get().fromTag(tag);
+        get().fromTag(tag.getCompound("value"));
 
         return get();
-    }
-
-    public Keybind getDefault() {
-        return defaultValue;
     }
 
     public static class Builder {

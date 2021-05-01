@@ -71,6 +71,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE:       hasAnimal++; break;
+                    case WATER_AMBIENT:
                     case WATER_CREATURE: hasWaterAnimal++; break;
                     case MONSTER:        hasMonster++; break;
                     case AMBIENT:        hasAmbient++; break;
@@ -78,6 +79,8 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 }
             }
         }
+
+        boolean first = animals == null;
 
         // Animals
         List<EntityType<?>> animalsE = new ArrayList<>();
@@ -136,6 +139,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                         animalsE.add(entityType);
                         addEntityType(animalsT, animalsC, entityType);
                         break;
+                    case WATER_AMBIENT:
                     case WATER_CREATURE:
                         waterAnimalsE.add(entityType);
                         addEntityType(waterAnimalsT, waterAnimalsC, entityType);
@@ -175,21 +179,23 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         if (ambientT.cells.size() == 0) list.cells.remove(ambientCell);
         if (miscT.cells.size() == 0) list.cells.remove(miscCell);
 
-        int totalCount = (hasWaterAnimal + waterAnimals.cells.size() + monsters.cells.size() + ambient.cells.size() + misc.cells.size()) / 2;
+        if (first) {
+            int totalCount = (hasWaterAnimal + waterAnimals.cells.size() + monsters.cells.size() + ambient.cells.size() + misc.cells.size()) / 2;
 
-        if (totalCount <= 20) {
-            if (animalsT.cells.size() > 0) animals.setExpanded(true);
-            if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(true);
-            if (monstersT.cells.size() > 0) monsters.setExpanded(true);
-            if (ambientT.cells.size() > 0) ambient.setExpanded(true);
-            if (miscT.cells.size() > 0) misc.setExpanded(true);
-        }
-        else {
-            if (animalsT.cells.size() > 0) animals.setExpanded(false);
-            if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(false);
-            if (monstersT.cells.size() > 0) monsters.setExpanded(false);
-            if (ambientT.cells.size() > 0) ambient.setExpanded(false);
-            if (miscT.cells.size() > 0) misc.setExpanded(false);
+            if (totalCount <= 20) {
+                if (animalsT.cells.size() > 0) animals.setExpanded(true);
+                if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(true);
+                if (monstersT.cells.size() > 0) monsters.setExpanded(true);
+                if (ambientT.cells.size() > 0) ambient.setExpanded(true);
+                if (miscT.cells.size() > 0) misc.setExpanded(true);
+            }
+            else {
+                if (animalsT.cells.size() > 0) animals.setExpanded(false);
+                if (waterAnimalsT.cells.size() > 0) waterAnimals.setExpanded(false);
+                if (monstersT.cells.size() > 0) monsters.setExpanded(false);
+                if (ambientT.cells.size() > 0) ambient.setExpanded(false);
+                if (miscT.cells.size() > 0) misc.setExpanded(false);
+            }
         }
     }
 
@@ -223,6 +229,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 setting.get().put(entityType, true);
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE:       if (hasAnimal == 0) tableCheckbox.checked = true; hasAnimal++; break;
+                    case WATER_AMBIENT:
                     case WATER_CREATURE: if (hasWaterAnimal == 0) tableCheckbox.checked = true; hasWaterAnimal++; break;
                     case MONSTER:        if (hasMonster == 0) tableCheckbox.checked = true; hasMonster++; break;
                     case AMBIENT:        if (hasAmbient == 0) tableCheckbox.checked = true; hasAmbient++; break;
@@ -232,6 +239,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                 if (setting.get().removeBoolean(entityType)) {
                     switch (entityType.getSpawnGroup()) {
                         case CREATURE:       hasAnimal--; if (hasAnimal == 0) tableCheckbox.checked = false; break;
+                        case WATER_AMBIENT:
                         case WATER_CREATURE: hasWaterAnimal--; if (hasWaterAnimal == 0) tableCheckbox.checked = false; break;
                         case MONSTER:        hasMonster--; if (hasMonster == 0) tableCheckbox.checked = false; break;
                         case AMBIENT:        hasAmbient--; if (hasAmbient == 0) tableCheckbox.checked = false; break;

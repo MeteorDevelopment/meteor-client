@@ -19,6 +19,7 @@ import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Placeholders;
 
 public class DiscordPresence extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -26,7 +27,7 @@ public class DiscordPresence extends Module {
     private final Setting<String> line1 = sgGeneral.add(new StringSetting.Builder()
             .name("line-1")
             .description("The text it displays on line 1 of the RPC.")
-            .defaultValue("{player} || {server}")
+            .defaultValue("{username} || {server}")
             .onChanged(booleanSetting -> updateDetails())
             .build()
     );
@@ -39,19 +40,19 @@ public class DiscordPresence extends Module {
             .build()
     );
 
-    public DiscordPresence() {
-        super(Categories.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
-    }
-
     private static final DiscordRichPresence rpc = new DiscordRichPresence();
     private static final DiscordRPC instance = DiscordRPC.INSTANCE;
     private SmallImage currentSmallImage;
     private int ticks;
 
+    public DiscordPresence() {
+        super(Categories.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
+    }
+
     @Override
     public void onActivate() {
         DiscordEventHandlers handlers = new DiscordEventHandlers();
-        instance.Discord_Initialize("709793491911180378", handlers, true, null);
+        instance.Discord_Initialize("835240968533049424", handlers, true, null);
 
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
         rpc.largeImageKey = "meteor_client";
@@ -88,31 +89,18 @@ public class DiscordPresence extends Module {
         instance.Discord_RunCallbacks();
     }
 
-    private String getLine(Setting<String> line) {
-        if (line.get().length() > 0) return line.get().replace("{player}", getName()).replace("{server}", getServer());
-        else return null;
-    }
-
-    private String getServer(){
-        if (mc.isInSingleplayer()) return "SinglePlayer";
-        else return Utils.getWorldName();
-    }
-
-    private String getName(){
-        return mc.player.getGameProfile().getName();
-    }
-
     private void updateDetails() {
         if (isActive() && Utils.canUpdate()) {
-            rpc.details = getLine(line1);
-            rpc.state = getLine(line2);
+            rpc.details = Placeholders.apply(line1.get());
+            rpc.state = Placeholders.apply(line2.get());
+
             instance.Discord_UpdatePresence(rpc);
         }
     }
 
     private enum SmallImage {
         MineGame("minegame", "MineGame159"),
-        Squid("squidoodly", "squidoodly");
+        Snail("seasnail", "seasnail8169");
 
         private final String key, text;
 
@@ -127,7 +115,7 @@ public class DiscordPresence extends Module {
         }
 
         SmallImage next() {
-            if (this == MineGame) return Squid;
+            if (this == MineGame) return Snail;
             return MineGame;
         }
     }

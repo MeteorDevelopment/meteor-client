@@ -38,8 +38,8 @@ import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.world.BlockIterator;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
@@ -67,8 +67,6 @@ public class MeteorClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         if (INSTANCE == null) {
-            KeyBinds.Register();
-
             INSTANCE = this;
             return;
         }
@@ -106,6 +104,7 @@ public class MeteorClient implements ClientModInitializer {
         Blur.init();
         Tabs.init();
         GuiThemes.init();
+        BlockUtils.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -160,7 +159,7 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler
     private void onKey(KeyEvent event) {
         // Click GUI
-        if (event.action == KeyAction.Press && event.key == KeyBindingHelper.getBoundKeyOf(KeyBinds.OPEN_CLICK_GUI).getCode()) {
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
             if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
         }
     }

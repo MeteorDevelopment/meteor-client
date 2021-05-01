@@ -165,13 +165,18 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         WItem item = list.add(theme.item(setting.get().asItem().getDefaultStack())).widget();
 
         WButton select = list.add(theme.button("Select")).widget();
-        select.action = () -> mc.openScreen(new BlockSettingScreen(theme, setting));
+        select.action = () -> {
+            BlockSettingScreen screen = new BlockSettingScreen(theme, setting);
+            screen.onClosed(() -> item.set(setting.get().asItem().getDefaultStack()));
+
+            mc.openScreen(screen);
+        };
 
         reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
     }
 
     private void keybindW(WTable table, KeybindSetting setting) {
-        WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefault().getValue())).expandX().widget();
+        WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefaultValue().getValue())).expandX().widget();
         keybind.action = setting::changed;
         setting.widget = keybind;
     }

@@ -6,6 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import baritone.api.BaritoneAPI;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
@@ -15,12 +16,15 @@ import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.Scaffold;
+import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.player.Portals;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.world.ClientWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -31,7 +35,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
-public abstract class ClientPlayerEntityMixin {
+public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
+    public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
+        super(world, profile);
+    }
+
     @Shadow @Final public ClientPlayNetworkHandler networkHandler;
 
     @Shadow public abstract void sendChatMessage(String string);
@@ -42,7 +50,7 @@ public abstract class ClientPlayerEntityMixin {
     private void onSendChatMessage(String msg, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        if (!msg.startsWith(Config.get().getPrefix()) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (!msg.startsWith(Config.get().prefix) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(msg));
 
             if (!event.isCancelled()) {
@@ -55,9 +63,9 @@ public abstract class ClientPlayerEntityMixin {
             return;
         }
 
-        if (msg.startsWith(Config.get().getPrefix())) {
+        if (msg.startsWith(Config.get().prefix)) {
             try {
-                Commands.get().dispatch(msg.substring(Config.get().getPrefix().length()));
+                Commands.get().dispatch(msg.substring(Config.get().prefix.length()));
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }
@@ -80,6 +88,21 @@ public abstract class ClientPlayerEntityMixin {
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
         if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
+    }
+
+    @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
+    private void onShouldSlowDown(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().get(NoSlow.class).sneaking()) {
+            info.setReturnValue(shouldLeaveSwimmingPose());
+        }
+    }
+
+    @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
+    private void onPushOutOfBlocks(double x, double d, CallbackInfo info) {
+        Velocity velocity = Modules.get().get(Velocity.class);
+        if (velocity.isActive() && velocity.noPush.get()) {
+            info.cancel();
+        }
     }
 
     // Rotations

@@ -39,12 +39,12 @@ public class CommandsCommand extends Command {
                 commandTooltip.append(new LiteralText(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
 
                 // Aliases
-                BaseText aliases = new LiteralText(Config.get().getPrefix() + command.getName());
+                BaseText aliases = new LiteralText(Config.get().prefix + command.getName());
                 if (command.getAliases().size() > 0) {
                     aliases.append(", ");
                     for (String alias : command.getAliases()) {
                         if (alias.isEmpty()) continue;
-                        aliases.append(Config.get().getPrefix() + alias);
+                        aliases.append(Config.get().prefix + alias);
                         if (!alias.equals(command.getAliases().get(command.getAliases().size() - 1))) aliases.append(", ");
                     }
                 }
@@ -58,7 +58,7 @@ public class CommandsCommand extends Command {
                 finalCommand.setStyle(finalCommand
                         .getStyle()
                         .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, commandTooltip))
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, Config.get().getPrefix() + command.getName()))
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, Config.get().prefix + command.getName()))
                 );
 
                 commands.append(finalCommand);

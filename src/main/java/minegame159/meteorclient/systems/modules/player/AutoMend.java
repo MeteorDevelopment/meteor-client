@@ -5,112 +5,114 @@
 
 package minegame159.meteorclient.systems.modules.player;
 
-//Updated by squidoodly 18/06/2020
-
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.combat.AutoArmor;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.item.ArmorItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.SwordItem;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+            .name("blacklist")
+            .description("Item blacklist.")
+            .defaultValue(new ArrayList<>(0))
+            .filter(Item::isDamageable)
+            .build()
+    );
+
+    private final Setting<Boolean> force = sgGeneral.add(new BoolSetting.Builder()
+            .name("force")
+            .description("Replaces item in offhand even if there is some other non-repairable item.")
+            .defaultValue(false)
+            .build()
+    );
     
-    private final Setting<Boolean> swords = sgGeneral.add(new BoolSetting.Builder()
-            .name("swords")
-            .description("Moves swords.")
+    private final Setting<Boolean> autoDisable = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-disable")
+            .description("Automatically disables when there are no more items to repair.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> armourSlots = sgGeneral.add(new BoolSetting.Builder()
-            .name("use-armor-slots")
-            .description("Whether or not to use armor slots to mend items quicker.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> removeFinished = sgGeneral.add(new BoolSetting.Builder()
-            .name("remove-when-finished")
-            .description("The items will be moved out of active slots if there are no items to replace, but space in your inventory.")
-            .defaultValue(true)
-            .build()
-    );
+    private boolean didMove;
 
     public AutoMend() {
-        super(Categories.Player, "auto-mend", "Automatically replaces equipped items and items in your offhand with Mending when fully repaired.");
+        super(Categories.Player, "auto-mend", "Automatically replaces items in your offhand with mending when fully repaired.");
     }
 
-    private void replaceItem(boolean offhandEmpty) {
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-            if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
-            if (!swords.get() && itemStack.getItem() instanceof SwordItem) continue;
-
-            InvUtils.move().from(i).toOffhand();
-
-            break;
-        }
-        if(!mc.player.getOffHandStack().isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
-            InvUtils.move().fromOffhand().to(mc.player.inventory.getEmptySlot());
-        }
-    }
-
-    private boolean checkSlot(ItemStack itemStack, int slot){
-        boolean correct = false;
-        if(slot == 5 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.HEAD) correct = true;
-        else if(slot == 6 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.CHEST) correct = true;
-        else if(slot == 7 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.LEGS) correct = true;
-        else if(slot == 8 && ((ArmorItem) itemStack.getItem()).getSlotType() == EquipmentSlot.FEET) correct = true;
-        return correct;
-    }
-
-    private void replaceArmour(int slot, boolean empty){
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-            if(!(itemStack.getItem() instanceof ArmorItem)) continue;
-            if(!checkSlot(mc.player.inventory.getStack(i), slot)) continue;
-            if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) == 0 || !itemStack.isDamaged()) continue;
-
-            InvUtils.move().from(i).toId(slot);
-
-            break;
-        }
-        if(!mc.player.inventory.getStack(39 - (slot - 5)).isDamaged() && removeFinished.get() && mc.player.inventory.getEmptySlot() != -1){
-            InvUtils.move().fromId(slot).to(mc.player.inventory.getEmptySlot());
-        }
+    @Override
+    public void onActivate() {
+        didMove = false;
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (mc.player.currentScreenHandler.getStacks().size() != 46) return;
+    private void onTick(TickEvent.Pre event) {
+        if (shouldWait()) return;
 
-        if (mc.player.getOffHandStack().isEmpty()) replaceItem(true);
-        else if (!mc.player.getOffHandStack().isDamaged()) replaceItem(false);
-        else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.getOffHandStack()) == 0) replaceItem(false);
+        int slot = getSlot();
 
-        if(armourSlots.get()) {
-            if(Modules.get().isActive(AutoArmor.class)) {
-                ChatUtils.moduleWarning(this, "Cannot use armor slots while AutoArmor is active. Please disable AutoArmor and try again. Disabling Use Armor Slots.");
-                armourSlots.set(false);
-            }
-            for (int i = 5; i < 9; i++) {
-                if (mc.player.inventory.getStack(39 - (i - 5)).isEmpty()) replaceArmour(i, true);
-                else if (!mc.player.inventory.getStack(39 - (i - 5)).isDamaged()) replaceArmour(i, false);
-                else if (EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getStack(39 - (i - 5))) == 0) replaceArmour(i, false);
+        if (slot == -1) {
+            if (autoDisable.get()) {
+                ChatUtils.moduleInfo(this, "Repaired all items, disabling");
+
+                if (didMove) {
+                    int emptySlot = getEmptySlot();
+                    InvUtils.move().fromOffhand().to(emptySlot);
+                }
+
+                toggle();
             }
         }
+        else {
+            InvUtils.move().from(slot).toOffhand();
+            didMove = true;
+        }
+    }
+
+    private boolean shouldWait() {
+        ItemStack itemStack = mc.player.getOffHandStack();
+
+        if (itemStack.isEmpty()) return false;
+
+        if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0) {
+            return itemStack.getDamage() != 0;
+        }
+
+        return !force.get();
+    }
+
+    private int getSlot() {
+        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+            if (blacklist.get().contains(itemStack.getItem())) continue;
+
+            if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0 && itemStack.getDamage() > 0) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    private int getEmptySlot() {
+        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+            if (mc.player.inventory.getStack(i).isEmpty()) return i;
+        }
+
+        return -1;
     }
 }

@@ -11,7 +11,10 @@ import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.Map;
 
 public class Waypoint implements ISerializable<Waypoint> {
     private static final MeshBuilder MB;
@@ -35,7 +38,21 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public Dimension actualDimension;
 
+    public void validateIcon() {
+        Map<String, AbstractTexture> icons = Waypoints.get().icons;
+
+        AbstractTexture texture = icons.get(icon);
+        if (texture == null && !icons.isEmpty()) {
+            icon = icons.keySet().iterator().next();
+        }
+    }
+
     public void renderIcon(double x, double y, double z, double a, double size) {
+        validateIcon();
+
+        AbstractTexture texture = Waypoints.get().icons.get(icon);
+        if (texture == null) return;
+
         MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
 
         int preA = color.a;
@@ -49,7 +66,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         MB.pos(x + size, y + size, z).texture(1, 1).color(color).endVertex();
         MB.pos(x, y + size, z).texture(0, 1).color(color).endVertex();
 
-        Waypoints.get().icons.get(icon).bindTexture();
+        texture.bindTexture();
         MB.end();
 
         color.a = preA;

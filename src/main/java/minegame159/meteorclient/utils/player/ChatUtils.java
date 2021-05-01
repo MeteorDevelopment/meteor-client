@@ -8,7 +8,8 @@ package minegame159.meteorclient.utils.player;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.render.color.RainbowColor;
+import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -17,8 +18,7 @@ import net.minecraft.util.math.Vec3d;
 public class ChatUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private static final Color rainbow = new Color(255, 255, 255);
-    private static double rainbowHue1;
+    private static final RainbowColor RAINBOW = new RainbowColor();
 
     private static void message(int id, Formatting color, String msg, Object... args) {
         sendMsg(id, null, PrefixType.None, formatMsg(msg, color, args), color);
@@ -130,7 +130,7 @@ public class ChatUtils {
                 .withFormatting(Formatting.UNDERLINE)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        String.format("%sb goto %d %d %d", Config.get().getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
+                        String.format("%sb goto %d %d %d", Config.get().prefix, (int) pos.x, (int) pos.y, (int) pos.z)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
@@ -144,13 +144,15 @@ public class ChatUtils {
         BaseText meteor = new LiteralText("");
         BaseText prefix = new LiteralText("");
 
+        RAINBOW.setSpeed(RainbowColors.GLOBAL.getSpeed());
+
         if (Config.get().rainbowPrefix) {
-            meteor.append(new LiteralText("M").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
-            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
-            meteor.append(new LiteralText("t").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
-            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
-            meteor.append(new LiteralText("o").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
-            meteor.append(new LiteralText("r").setStyle(meteor.getStyle().withColor(new TextColor(cycleRainbow().getPacked()))));
+            meteor.append(new LiteralText("M").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
+            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
+            meteor.append(new LiteralText("t").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
+            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
+            meteor.append(new LiteralText("o").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
+            meteor.append(new LiteralText("r").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
         } else {
             meteor = new LiteralText("Meteor");
             meteor.setStyle(meteor.getStyle().withFormatting(Formatting.BLUE));
@@ -170,23 +172,6 @@ public class ChatUtils {
         }
 
         return prefix;
-    }
-
-    private static Color cycleRainbow() {
-        rainbowHue1 += Config.get().rainbowPrefixSpeed;
-        if (rainbowHue1 > 1) rainbowHue1 -= 1;
-        else if (rainbowHue1 < -1) rainbowHue1 += 1;
-
-        double rainbowHue2 = rainbowHue1;
-
-        rainbowHue2 += Config.get().rainbowPrefixSpread;
-        int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
-
-        rainbow.r = Color.toRGBAR(c);
-        rainbow.g = Color.toRGBAG(c);
-        rainbow.b = Color.toRGBAB(c);
-
-        return rainbow;
     }
 
     public static String formatMsg(String format, Formatting defaultColor, Object... args) {

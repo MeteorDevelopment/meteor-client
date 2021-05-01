@@ -15,6 +15,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.util.math.BlockPos;
@@ -88,7 +89,7 @@ public class BreakIndicators extends Module {
             .build()
     );
 
-    public final Map<Integer, BlockBreakingInfo> blocks = new HashMap<>();
+    private Map<Integer, BlockBreakingInfo> blocks = new HashMap<>();
 
     private final Color cSides = new Color();
     private final Color cLines = new Color();
@@ -97,15 +98,16 @@ public class BreakIndicators extends Module {
         super(Categories.Render, "break-indicators", "Renders the progress of a block being broken.");
     }
 
-    @Override
-    public void onDeactivate() {
-        blocks.clear();
-    }
-
     @EventHandler
     private void onRender(RenderEvent event) {
         ClientPlayerInteractionManagerAccessor iam;
         boolean smooth;
+
+        blocks = BlockUtils.breakingBlocks;
+
+        blocks.keySet().forEach(key -> {
+            if (key != mc.player.getEntityId() && !multiple.get()) blocks.remove(key);
+        });
 
         if (smoothAnim.get()) {
             iam = (ClientPlayerInteractionManagerAccessor) mc.interactionManager;

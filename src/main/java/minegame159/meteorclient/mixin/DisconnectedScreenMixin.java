@@ -22,11 +22,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DisconnectedScreen.class)
 public class DisconnectedScreenMixin extends ScreenMixin {
-    @Shadow
-    private int reasonHeight;
+
+    @Shadow private int reasonHeight;
 
     private ButtonWidget reconnectBtn;
-    private boolean timerActive = true;
     private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
     @Inject(method = "init", at = @At("TAIL"))
@@ -35,21 +34,26 @@ public class DisconnectedScreenMixin extends ScreenMixin {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText("Reconnecting in " + time / 20f), button -> timerActive = !timerActive));
-
-            timerActive = Modules.get().isActive(AutoReconnect.class);
+            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo))));
         }
     }
 
     @Override
     public void tick() {
-        if (timerActive) {
-            if (time <= 0) {
-                Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
-            } else {
-                time--;
-                if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(String.format("Reconnecting in %.1f", time / 20f)));
-            }
+        if (!Modules.get().isActive(AutoReconnect.class)) return;
+
+        if (time <= 0) {
+            Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
+        } else {
+            time--;
+            if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(getText()));
         }
     }
+
+    private String getText() {
+        String reconnectText = "Reconnect";
+        if (Modules.get().isActive(AutoReconnect.class)) reconnectText += " " + String.format("(%.1f)", time / 20);
+        return reconnectText;
+    }
+
 }

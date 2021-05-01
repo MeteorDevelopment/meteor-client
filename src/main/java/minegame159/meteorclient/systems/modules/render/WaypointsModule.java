@@ -123,6 +123,8 @@ public class WaypointsModule extends Module {
             this.waypoint = newWaypoint ? new Waypoint() : waypoint;
             this.action = action;
 
+            this.waypoint.validateIcon();
+
             if (newWaypoint) {
                 MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -161,7 +163,7 @@ public class WaypointsModule extends Module {
 
             // Color:
             table.add(theme.label("Color:"));
-            list = add(theme.horizontalList()).widget();
+            list = table.add(theme.horizontalList()).widget();
             list.add(theme.quad(waypoint.color));
             list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null)));
             table.row();

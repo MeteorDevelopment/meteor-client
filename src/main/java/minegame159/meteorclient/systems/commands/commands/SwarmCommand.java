@@ -74,8 +74,8 @@ public class SwarmCommand extends Command {
                         swarm.server.sendMessage(context.getInput() + " " + mc.player.getDisplayName().getString());
                     }
                     return SINGLE_SUCCESS;
-                }).then(argument("name", PlayerArgumentType.player()).executes(context -> {
-                    PlayerEntity playerEntity = context.getArgument("name", PlayerEntity.class);
+                }).then(argument("player", PlayerArgumentType.player()).executes(context -> {
+                    PlayerEntity playerEntity = PlayerArgumentType.getPlayer(context);
                     Swarm swarm = Modules.get().get(Swarm.class);
                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                         swarm.server.sendMessage(context.getInput());

@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.settings.*;
@@ -19,24 +21,25 @@ import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.inventory.Inventories;
+import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.collection.DefaultedList;
 
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
 
 public class BetterTooltips extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgShulker = settings.createGroup("Shulker");
     private final SettingGroup sgEChest = settings.createGroup("EChest");
@@ -94,6 +97,13 @@ public class BetterTooltips extends Module {
         .description("Color shulker preview according to the shulkers color.")
         .defaultValue(true)
         .build()
+    );
+
+    private final Setting<Boolean> shulkerCompactTooltip = sgShulker.add(new BoolSetting.Builder()
+            .name("shulker-compact-tooltip")
+            .description("Compacts shulker tooltip.")
+            .defaultValue(true)
+            .build()
     );
 
     // EChest
@@ -159,6 +169,10 @@ public class BetterTooltips extends Module {
 
     public boolean previewShulkers() {
         return isActive() && isPressed() && shulkers.get();
+    }
+
+    public boolean shulkerCompactTooltip() {
+        return isActive() && shulkerCompactTooltip.get();
     }
 
     public boolean previewEChest() {
@@ -279,6 +293,39 @@ public class BetterTooltips extends Module {
         if (hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())) {
             for (int s = 0; s < event.list.size(); ++s) event.y -= 10;
             event.y -= 4;
+        }
+    }
+
+    public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
+        CompoundTag tag = stack.getSubTag("BlockEntityTag");
+        if (tag != null) {
+            if (tag.contains("LootTable", 8)) {
+                tooltip.add(new LiteralText("???????"));
+            }
+
+            if (tag.contains("Items", 9)) {
+                DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
+                Inventories.fromTag(tag, items);
+
+                Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
+
+                for (ItemStack item : items) {
+                    if (item.isEmpty()) continue;
+
+                    int count = counts.getInt(item.getItem());
+                    counts.put(item.getItem(), count + item.getCount());
+                }
+
+                counts.keySet().stream().sorted(Comparator.comparingInt(value -> -counts.getInt(value))).limit(5).forEach(item -> {
+                    MutableText mutableText = item.getName().shallowCopy();
+                    mutableText.append(new LiteralText(" x").append(String.valueOf(counts.getInt(item))).formatted(Formatting.GRAY));
+                    tooltip.add(mutableText);
+                });
+
+                if (counts.size() > 5) {
+                    tooltip.add((new TranslatableText("container.shulkerBox.more", counts.size() - 5)).formatted(Formatting.ITALIC));
+                }
+            }
         }
     }
 

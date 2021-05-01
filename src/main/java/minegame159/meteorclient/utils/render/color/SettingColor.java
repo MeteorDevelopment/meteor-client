@@ -8,9 +8,8 @@ package minegame159.meteorclient.utils.render.color;
 import net.minecraft.nbt.CompoundTag;
 
 public class SettingColor extends Color {
-    private static final float[] hsb = new float[3];
 
-    public double rainbowSpeed;
+    public boolean rainbow;
 
     public SettingColor() {
         super();
@@ -20,8 +19,8 @@ public class SettingColor extends Color {
         super(r, g, b);
     }
 
-    public SettingColor(int r, int g, int b, double rainbowSpeed) {
-        this(r, g, b, 255, rainbowSpeed);
+    public SettingColor(int r, int g, int b, boolean rainbow) {
+        this(r, g, b, 255, rainbow);
     }
 
     public SettingColor(int r, int g, int b, int a) {
@@ -32,58 +31,49 @@ public class SettingColor extends Color {
         super(r, g, b, a);
     }
 
-    public SettingColor(int r, int g, int b, int a, double rainbowSpeed) {
+    public SettingColor(int r, int g, int b, int a, boolean rainbow) {
         super(r, g, b, a);
-
-        this.rainbowSpeed = rainbowSpeed;
+        this.rainbow = rainbow;
     }
 
     public SettingColor(SettingColor color) {
         super(color);
+        this.rainbow = color.rainbow;
+    }
 
-        this.rainbowSpeed = color.rainbowSpeed;
+    public SettingColor rainbow(boolean rainbow) {
+        this.rainbow = rainbow;
+        return this;
     }
 
     public void update() {
-        if (rainbowSpeed > 0) {
-            java.awt.Color.RGBtoHSB(r, g, b, hsb);
-            int c = java.awt.Color.HSBtoRGB(hsb[0] + (float) rainbowSpeed, 1, 1);
-
-            r = Color.toRGBAR(c);
-            g = Color.toRGBAG(c);
-            b = Color.toRGBAB(c);
-        }
+        if (rainbow) set(RainbowColors.GLOBAL.r, RainbowColors.GLOBAL.g, RainbowColors.GLOBAL.b, a);
     }
 
     @Override
-    public void set(Color value) {
+    public SettingColor set(Color value) {
         super.set(value);
+        if (value instanceof SettingColor) rainbow = ((SettingColor) value).rainbow;
 
-        if (value instanceof SettingColor) {
-            rainbowSpeed = ((SettingColor) value).rainbowSpeed;
-        }
+        return this;
     }
 
     @Override
     public Color copy() {
-        return new SettingColor(r, g, b, a, rainbowSpeed);
+        return new SettingColor(r, g, b, a, rainbow);
     }
 
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = super.toTag();
-
-        tag.putDouble("rainbowSpeed", rainbowSpeed);
-
+        tag.putBoolean("rainbow", rainbow);
         return tag;
     }
 
     @Override
     public SettingColor fromTag(CompoundTag tag) {
         super.fromTag(tag);
-
-        rainbowSpeed = tag.getDouble("rainbowSpeed");
-
+        rainbow = tag.getBoolean("rainbow");
         return this;
     }
 }

@@ -24,6 +24,7 @@ import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.systems.modules.player.*;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
@@ -51,6 +52,7 @@ public class InfinityMiner extends Module {
             .name("target-block")
             .description("The target block to mine.")
             .defaultValue(Blocks.ANCIENT_DEBRIS)
+            .filter(this::filter)
             .build()
     );
 
@@ -58,6 +60,7 @@ public class InfinityMiner extends Module {
             .name("repair-block")
             .description("The block mined to repair your pickaxe.")
             .defaultValue(Blocks.NETHER_QUARTZ_ORE)
+            .filter(this::filter)
             .build()
     );
 
@@ -69,25 +72,29 @@ public class InfinityMiner extends Module {
             .min(.05)
             .sliderMin(.05)
             .sliderMax(.95)
-            .build());
+            .build()
+    );
 
     public final Setting<Boolean> smartModuleToggle = sgAutoToggles.add(new BoolSetting.Builder()
             .name("smart-module-toggle")
             .description("Will automatically enable helpful modules.")
             .defaultValue(true)
-            .build());
+            .build()
+    );
 
     public final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
             .name("walk-home")
             .description("Will walk 'home' when your inventory is full.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     public final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
             .name("log-out")
             .description("Logs out when your inventory is full. Will walk home FIRST if walk home is enabled.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     private Mode currentMode = Mode.Still;
     private Mode secondaryMode;
@@ -100,6 +107,10 @@ public class InfinityMiner extends Module {
 
     public InfinityMiner() {
         super(Categories.World, "infinity-miner", "Allows you to essentially mine forever.");
+    }
+
+    private boolean filter(Block block) {
+        return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
     }
 
     @Override
@@ -258,9 +269,9 @@ public class InfinityMiner extends Module {
     private void requestLogout(Mode mode) {
         if (mc.player != null) {
             if (mode == Mode.Home)
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full and You Are Home")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is Full and You Are Home")));
             else
-                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("Infinity Miner: Inventory is Full")));
+                mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is Full")));
         }
     }
 

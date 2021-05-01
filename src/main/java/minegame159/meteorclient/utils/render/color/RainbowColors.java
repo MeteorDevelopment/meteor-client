@@ -22,6 +22,9 @@ import java.util.List;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RainbowColors {
+
+    public static final RainbowColor GLOBAL = new RainbowColor();
+
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
     private static final List<Runnable> listeners = new UnorderedArrayList<>();
@@ -48,6 +51,8 @@ public class RainbowColors {
 
     @EventHandler
     private static void onTick(TickEvent.Post event) {
+        GLOBAL.getNext();
+
         for (Setting<SettingColor> setting : colorSettings) {
             if (setting.module == null || setting.module.isActive()) setting.get().update();
         }

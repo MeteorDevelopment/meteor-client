@@ -28,7 +28,8 @@
   },
   "mixins": [
     "meteor-client.mixins.json",
-    "meteor-client-sodium.mixins.json"
+    "meteor-client-sodium.mixins.json",
+    "meteor-client-indigo.mixins.json"
   ],
 
   "accessWidener": "meteor-client.accesswidener",
@@ -39,10 +40,6 @@
 
   "depends": {
     "fabricloader": ">=0.7.4",
-    "fabric": "*",
     "minecraft": "1.16.x"
-  },
-  "suggests": {
-    "flamingo": "*"
   }
 }

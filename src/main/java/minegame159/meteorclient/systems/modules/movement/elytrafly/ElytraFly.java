@@ -163,17 +163,10 @@ public class ElytraFly extends Module {
 
     public final Setting<Double> autoPilotFireworkDelay = sgAutopilot.add(new DoubleSetting.Builder()
             .name("firework-delay")
-            .description("The delay in seconds in between shooting fireworks for Firework mode.")
+            .description("The delay in seconds in between using fireworks if \"Use Fireworks\" is enabled.")
             .min(1)
             .defaultValue(10)
             .sliderMax(20)
-            .build()
-    );
-
-    public final Setting<Boolean> autoPilotFireworkGhosthand = sgAutopilot.add(new BoolSetting.Builder()
-            .name("firework-ghost-hand")
-            .description("Doesn't switch to your firework slot client-side.")
-            .defaultValue(false)
             .build()
     );
 
@@ -271,7 +264,7 @@ public class ElytraFly extends Module {
 
         if (noCrash.get() && mc.player.isFallFlying()) {
             Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
-            RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player);
+            RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 ((IVec3d) event.movement).set(0, currentMode.velY, 0);

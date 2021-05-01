@@ -6,7 +6,7 @@
 package minegame159.meteorclient.utils.misc;
 
 public interface ICopyable<T extends ICopyable<T>> {
-    void set(T value);
+    T set(T value);
 
     T copy();
 }

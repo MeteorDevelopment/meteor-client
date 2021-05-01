@@ -24,10 +24,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Function;
 
-
 @Mixin(value = AbstractQuadRenderer.class, remap = false)
 public abstract class AbstractQuadRendererMixin {
-
     @Final
     @Shadow
     protected BlockRenderInfo blockInfo;
@@ -97,5 +95,4 @@ public abstract class AbstractQuadRendererMixin {
             buff.next();
         }
     }
-
 }

@@ -5,10 +5,14 @@
 
 package minegame159.meteorclient.utils.world;
 
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -18,11 +22,24 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
     private static final ArrayList<Vec3d> cuboidBlocks = new ArrayList<>();
+
+    public static final Map<Integer, BlockBreakingInfo> breakingBlocks = new HashMap<>();
+
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);
+    }
+
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        breakingBlocks.clear();
+    }
 
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean checkEntities, boolean swap, boolean swapBack) {
         if (slot == -1 || !canPlace(blockPos, checkEntities)) return false;

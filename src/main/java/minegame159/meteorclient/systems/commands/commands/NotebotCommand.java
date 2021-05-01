@@ -11,6 +11,8 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.gui.GuiThemes;
+import minegame159.meteorclient.gui.screens.NotebotHelpScreen;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.Notebot;
@@ -39,6 +41,10 @@ public class NotebotCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(literal("help").executes(ctx -> {
+            MeteorClient.INSTANCE.screenToOpen = new NotebotHelpScreen(GuiThemes.get());
+            return SINGLE_SUCCESS;
+        }));
         builder.then(literal("status").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.printStatus();

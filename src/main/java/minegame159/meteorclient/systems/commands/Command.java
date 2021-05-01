@@ -66,7 +66,7 @@ public abstract class Command {
     }
 
     public String toString() {
-        return Config.get().getPrefix() + name;
+        return Config.get().prefix + name;
     }
 
     public String toString(String... args) {

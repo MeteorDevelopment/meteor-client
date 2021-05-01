@@ -8,7 +8,9 @@ package minegame159.meteorclient.gui.screens;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
@@ -38,6 +40,11 @@ public class HudElementScreen extends WindowScreen {
         WCheckbox active = bottomList.add(theme.checkbox(element.active)).widget();
         active.action = () -> {
             if (element.active != active.checked) element.toggle();
+        };
+
+        WButton reset = bottomList.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+        reset.action = () -> {
+            if (element.active != element.defaultActive) element.active = active.checked = element.defaultActive;
         };
     }
 
