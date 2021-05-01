@@ -181,6 +181,35 @@ public class MeshBuilder {
 
     // Rounded quad
 
+    public void quadRoundedOutline(double x, double y, double width, double height, Color color, int r, double s) {
+        if (r == 0) {
+            quad(x, y, width, s, color);
+            quad(x, y + height - s, width, s, color);
+            quad(x, y + s, s, height - s * 2, color);
+            quad(x + width - s, y + s, s, height - s * 2, color);
+        }
+        else {
+            if (r * 2 > height) {
+                r = (int)height / 2;
+            }
+            if (r * 2 > width) {
+                r = (int)width / 2;
+            }
+            int cirDepth = Math.max(r / 2, 1);
+            //top
+            quarterCircleOutline(x + r, y + r, r, 3, cirDepth, color, s);
+            quad(x + r, y, width - r * 2, s, color);
+            quarterCircleOutline(x + width - r, y + r, r, 0, cirDepth, color, s);
+            //middle
+            quad(x, y + r, s, height - r * 2, color);
+            quad(x + width - s, y + r, s, height - r * 2, color);
+            //bottom
+            quarterCircleOutline(x + width - r, y + height - r, r, 1, cirDepth, color, s);
+            quad(x + r, y + height - s, width - r * 2, s, color);
+            quarterCircleOutline(x + r, y + height - r, r, 2, cirDepth, color, s);
+        }
+    }
+
     public void quadRounded(double x, double y, double width, double height, Color color, int r, boolean roundTop) {
         if (r == 0)
             quad(x, y, width, height, color);
@@ -222,6 +251,29 @@ public class MeshBuilder {
             vert2(xV, yV, color);
             if (i != cirDepth)
                 vert2(xV, yV, color);
+        }
+    }
+
+    private void quarterCircleOutline(double x, double y, double r, double a, int cirDepth, Color color, double s) {
+        a *= Math.PI / 2;
+        double cirPart = Math.PI / 2 / cirDepth;
+        for (int i = 0; i < cirDepth; i++) {
+            double xOC = x + Math.sin(a + cirPart * i) * r;
+            double yOC = y - Math.cos(a + cirPart * i) * r;
+            double xIC = x + Math.sin(a + cirPart * i) * (r - s);
+            double yIC = y - Math.cos(a + cirPart * i) * (r - s);
+            double xON = x + Math.sin(a + cirPart * (i + 1)) * r;
+            double yON = y - Math.cos(a + cirPart * (i + 1)) * r;
+            double xIN = x + Math.sin(a + cirPart * (i + 1)) * (r - s);
+            double yIN = y - Math.cos(a + cirPart * (i + 1)) * (r - s);
+            //
+            vert2(xOC, yOC, color);
+            vert2(xON, yON, color);
+            vert2(xIC, yIC, color);
+            //
+            vert2(xIC, yIC, color);
+            vert2(xON, yON, color);
+            vert2(xIN, yIN, color);
         }
     }
 
