@@ -305,6 +305,11 @@ public class MeteorGuiTheme extends GuiTheme {
         return blur.get();
     }
 
+    @Override
+    public int roundAmount() {
+        return round.get();
+    }
+
     public class ThreeStateColorSetting {
         private final Setting<SettingColor> normal, hovered, pressed;
 

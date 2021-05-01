@@ -193,7 +193,7 @@ public class CombatHud extends HudElement {
 
             // Background
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(x, y, box.width, box.height, backgroundColor.get());
+            Renderer.NORMAL.quadRounded(x, y, box.width, box.height, backgroundColor.get(), renderer.roundAmount(), true);
             Renderer.NORMAL.end();
 
             // Player Model

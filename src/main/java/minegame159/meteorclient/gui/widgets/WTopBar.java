@@ -9,7 +9,6 @@ import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.Tabs;
-import minegame159.meteorclient.gui.themes.meteor.MeteorWidget;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WPressable;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -22,7 +21,6 @@ public abstract class WTopBar extends WHorizontalList {
     protected abstract Color getButtonColor(boolean pressed, boolean hovered);
 
     protected abstract Color getNameColor();
-    protected abstract int getRoundingFactor();
 
     public WTopBar() {
         spacing = 0;
@@ -80,13 +78,13 @@ public abstract class WTopBar extends WHorizontalList {
             //renderer.quad(x, y, width, height, color);
             switch (getState(this)) {
                 case 1:
-                    renderer.quadRoundedSide(this, color, getRoundingFactor(), false);
+                    renderer.quadRoundedSide(this, color, theme.roundAmount(), false);
                     break;
                 case 2:
-                    renderer.quadRoundedSide(this, color, getRoundingFactor(), true);
+                    renderer.quadRoundedSide(this, color, theme.roundAmount(), true);
                     break;
                 case 3:
-                    renderer.quadRounded(this, color, getRoundingFactor());
+                    renderer.quadRounded(this, color, theme.roundAmount());
                     break;
                 default:
                     renderer.quad(this, color);

@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.render.hud;
 
+import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
 
@@ -45,5 +46,9 @@ public class HudRenderer {
 
     public void addPostTask(Runnable runnable) {
         postTasks.add(runnable);
+    }
+    
+    public int roundAmount() {
+        return GuiThemes.get().roundAmount();
     }
 }

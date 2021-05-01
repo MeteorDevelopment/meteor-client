@@ -17,7 +17,7 @@ public interface MeteorWidget extends BaseWidget {
 
     default void renderBackground(GuiRenderer renderer, WWidget widget, boolean pressed, boolean mouseOver) {
         MeteorGuiTheme theme = theme();
-        int r = theme().round.get();
+        int r = theme.roundAmount();
         Color outlineColor = theme.outlineColor.get(pressed, mouseOver);
         renderer.quadRounded(widget, theme.backgroundColor.get(pressed, mouseOver), r);
         renderer.quadOutlineRounded(widget, outlineColor, r, theme.scale(2));

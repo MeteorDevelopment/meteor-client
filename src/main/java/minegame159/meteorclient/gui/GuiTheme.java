@@ -213,6 +213,8 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract boolean categoryIcons();
 
     public abstract boolean blur();
+    
+    public abstract int roundAmount();
 
     public double textWidth(String text, int length, boolean title) {
         return scale(textRenderer().getWidth(text, length) * (title ? TITLE_TEXT_SCALE : 1));
