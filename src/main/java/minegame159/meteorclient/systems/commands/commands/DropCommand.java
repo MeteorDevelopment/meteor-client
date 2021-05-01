@@ -5,27 +5,23 @@
 
 package minegame159.meteorclient.systems.commands.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
-import net.minecraft.item.Item;
+import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class DropCommand extends Command {
     private static final SimpleCommandExceptionType NOT_SPECTATOR = new SimpleCommandExceptionType(new LiteralText("Can't drop items while in spectator."));
-    private static final DynamicCommandExceptionType NO_SUCH_ITEM = new DynamicCommandExceptionType(o -> new LiteralText("No such item " + o + "!"));
+    private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(new LiteralText("Could not find an item with that name!"));
 
     public DropCommand() {
         super("drop", "Automatically drops specified items.");
@@ -33,40 +29,53 @@ public class DropCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))))
-                .then(literal("offhand").executes(context -> drop(player -> {
-                    InvUtils.drop().slotOffhand();
-                })))
-                .then(literal("hotbar").executes(context -> drop(player -> {
-                    for (int i = 0; i < 9; i++) {
-                        InvUtils.drop().slotHotbar(i);
-                    }
-                })))
-                .then(literal("inventory").executes(context -> drop(player -> {
-                    for (int i = 9; i < player.inventory.main.size(); i++) {
-                        InvUtils.drop().slotMain(i - 9);
-                    }
-                })))
-                .then(literal("all").executes(context -> drop(player -> {
+
+        // Main Hand
+        builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))));
+
+        // Offhand
+        builder.then(literal("offhand").executes(context -> drop(player -> InvUtils.drop().slotOffhand())));
+
+        // Hotbar
+        builder.then(literal("hotbar").executes(context -> drop(player -> {
+            for (int i = 0; i < 9; i++) {
+                InvUtils.drop().slotHotbar(i);
+            }
+        })));
+
+        // Main Inv
+        builder.then(literal("inventory").executes(context -> drop(player -> {
+            for (int i = 9; i < player.inventory.main.size(); i++) {
+                InvUtils.drop().slotMain(i - 9);
+            }
+        })));
+
+        // Hotbar and main inv
+        builder.then(literal("all").executes(context -> drop(player -> {
                     for (int i = 0; i < player.inventory.size(); i++) {
                         InvUtils.drop().slot(i);
                     }
-                })))
-                .then(literal("armor").executes(context -> drop(player -> {
+                })));
+
+        // Armor
+        builder.then(literal("armor").executes(context -> drop(player -> {
                     for (int i = 0; i < player.inventory.armor.size(); i++) {
                         InvUtils.drop().slotArmor(i);
                     }
-                })))
-                .then(argument("item", StringArgumentType.string()).executes(context -> drop(player -> {
-                    String itemName = context.getArgument("item", String.class);
-                    Item item = Registry.ITEM.get(new Identifier(itemName.toLowerCase()));
-                    if (item == Items.AIR) throw NO_SUCH_ITEM.create(itemName);
-
-                    for (int i = 0; i < player.inventory.main.size(); i++) {
-                        ItemStack itemStack = player.inventory.main.get(i);
-                        if (itemStack.getItem() == item) InvUtils.drop().slot(i);
-                    }
                 })));
+
+        // Specific item
+        builder.then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> drop(player -> {
+            ItemStack stack = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
+
+            if (stack == null || stack.getItem() == Items.AIR) throw NO_SUCH_ITEM.create();
+
+            for (int i = 0; i < player.inventory.size(); i++) {
+                if (stack.getItem() == player.inventory.getStack(i).getItem()) {
+                    InvUtils.drop().slot(i);
+                }
+            }
+        })));
     }
 
     private int drop(PlayerConsumer consumer) throws CommandSyntaxException {
