@@ -79,9 +79,6 @@ public abstract class WTopBar extends WHorizontalList {
 
             //renderer.quad(x, y, width, height, color);
             switch (getState(this)) {
-                case 0:
-                    renderer.quad(this, color);
-                    break;
                 case 1:
                     renderer.quadRoundedSide(this, color, getRoundingFactor(), false);
                     break;
@@ -90,6 +87,9 @@ public abstract class WTopBar extends WHorizontalList {
                     break;
                 case 3:
                     renderer.quadRounded(this, color, getRoundingFactor());
+                    break;
+                default:
+                    renderer.quad(this, color);
                     break;
             }
             renderer.text(tab.name, x + pad, y + pad, getNameColor(), false);
