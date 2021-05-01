@@ -214,6 +214,12 @@ public class GuiRenderer {
     public void quadOutlineRounded(WWidget widget, Color color, int round, double s) {
         quadOutlineRounded(widget.x, widget.y, widget.width, widget.height, color, round, s);
     }
+    public void quadRoundedSide(double x, double y, double width, double height, Color color, int r, boolean right) {
+        mb.quadRoundedSide(x, y, width, height, color, r, right);
+    }
+    public void quadRoundedSide(WWidget widget, Color color, int round, boolean right) {
+        quadRoundedSide(widget.x, widget.y, widget.width, widget.height, color, round, right);
+    }
 
     public void rotatedQuad(double x, double y, double width, double height, double rotation, GuiTexture texture, Color color) {
         TextureRegion region = texture.get(width, height);

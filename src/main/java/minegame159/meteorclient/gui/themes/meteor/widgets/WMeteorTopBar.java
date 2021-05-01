@@ -19,4 +19,9 @@ public class WMeteorTopBar extends WTopBar implements MeteorWidget {
     protected Color getNameColor() {
         return theme().textColor.get();
     }
+
+    @Override
+    protected int getRoundingFactor() {
+        return theme().round.get();
+    }
 }

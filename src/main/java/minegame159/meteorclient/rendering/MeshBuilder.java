@@ -240,6 +240,32 @@ public class MeshBuilder {
         }
     }
 
+    public void quadRoundedSide(double x, double y, double width, double height, Color color, int r, boolean right) {
+        if (r == 0)
+            quad(x, y, width, height, color);
+        else {
+            if (r * 2 > height) {
+                r = (int)height / 2;
+            }
+            if (r * 2 > width) {
+                r = (int)width / 2;
+            }
+            int cirDepth = Math.max(r / 2, 1);
+            if (right) {
+                quarterCircle(x + width - r, y + r, r, 0, cirDepth, color);
+                quarterCircle(x + width - r, y + height - r, r, 1, cirDepth, color);
+                quad(x, y, width - r, height, color);
+                quad(x + width - r, y + r, r, height - r * 2, color);
+            }
+            else {
+                quarterCircle(x + r, y + r, r, 3, cirDepth, color);
+                quarterCircle(x + r, y + height - r, r, 2, cirDepth, color);
+                quad(x + r, y, width - r, height, color);
+                quad(x, y + r, r, height - r * 2, color);
+            }
+        }
+    }
+
     private void quarterCircle(double x, double y, double r, double a, int cirDepth, Color color) {
         a *= Math.PI / 2;
         double cirPart = Math.PI / 2 / cirDepth;
