@@ -26,7 +26,7 @@ public class DamageCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("damage", IntegerArgumentType.integer(1, 7)).executes(context -> {
-            int amount = context.getArgument("damage", Integer.class);
+            int amount = IntegerArgumentType.getInteger(context, "damage");
 
             if (mc.player.abilities.invulnerable) {
                 ChatUtils.error("You are in invulnerable.");
