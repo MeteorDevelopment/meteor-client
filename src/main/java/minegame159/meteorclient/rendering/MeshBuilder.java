@@ -179,6 +179,56 @@ public class MeshBuilder {
         if (Dir.is(excludeDir, Dir.EAST)) quad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, color); // Right
     }
 
+    // Rounded quad
+
+    public void quadRounded(double x, double y, double width, double height, Color color, int r, boolean roundTop) {
+        if (r == 0)
+            quad(x, y, width, height, color);
+        else {
+            if (r * 2 > height) {
+                r = (int)height / 2;
+            }
+            if (r * 2 > width) {
+                r = (int)width / 2;
+            }
+            int cirDepth = Math.max(r / 2, 1);
+            if (roundTop) {
+                //top
+                quarterCircle(x + r, y + r, r, 3, cirDepth, color);
+                quad(x + r, y, width - 2 * r, r, color);
+                quarterCircle(x + width - r, y + r, r, 0, cirDepth, color);
+                //middle
+                quad(x, y + r, width, height - 2 * r, color);
+            }
+            else {
+                //middle
+                quad(x, y, width, height - r, color);
+            }
+            //bottom
+            quarterCircle(x + width - r, y + height - r, r, 1, cirDepth, color);
+            quad(x + r, y + height - r, width - 2 * r, r, color);
+            quarterCircle(x + r, y + height - r, r, 2, cirDepth, color);
+        }
+    }
+
+    private void quarterCircle(double x, double y, double r, double a, int cirDepth, Color color) {
+        a *= Math.PI / 2;
+        double cirPart = Math.PI / 2 / cirDepth;
+        vert2(x + Math.sin(a) * r, y - Math.cos(a) * r, color);
+        for (int i = 1; i < cirDepth + 1; i++) {
+            vert2(x, y, color);
+            double xV = x + Math.sin(a + cirPart * i) * r;
+            double yV = y - Math.cos(a + cirPart * i) * r;
+            vert2(xV, yV, color);
+            if (i != cirDepth)
+                vert2(xV, yV, color);
+        }
+    }
+
+    public void vert2(double x, double y, Color c) {
+        pos(x, y, 0).color(c).endVertex();
+    }
+
     // LINES
 
     public void line(double x1, double y1, double z1, double x2, double y2, double z2, Color startColor, Color endColor) {

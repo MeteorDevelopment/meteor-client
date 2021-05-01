@@ -6,16 +6,17 @@
 package minegame159.meteorclient.gui.themes.meteor.widgets;
 
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.themes.meteor.MeteorWidget;
 import minegame159.meteorclient.gui.widgets.WQuad;
 import minegame159.meteorclient.utils.render.color.Color;
 
-public class WMeteorQuad extends WQuad {
+public class WMeteorQuad extends WQuad implements MeteorWidget {
     public WMeteorQuad(Color color) {
         super(color);
     }
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.quad(x, y, width, height, color);
+        renderer.quadRounded(x, y, width, height, color, theme().round.get());
     }
 }

@@ -199,6 +199,16 @@ public class GuiRenderer {
         mbTex.texQuad(x, y, width, height, texture.get(width, height), color);
     }
 
+    public void quadRounded(double x, double y, double width, double height, Color color, int round, boolean roundTop) {
+        mb.quadRounded(x, y, width, height, color, round, roundTop);
+    }
+    public void quadRounded(double x, double y, double width, double height, Color color, int round) {
+        quadRounded(x, y, width, height, color, round, true);
+    }
+    public void quadRounded(WWidget widget, Color color, int round) {
+        quadRounded(widget.x, widget.y, widget.width, widget.height, color, round);
+    }
+
     public void rotatedQuad(double x, double y, double width, double height, double rotation, GuiTexture texture, Color color) {
         TextureRegion region = texture.get(width, height);
 
