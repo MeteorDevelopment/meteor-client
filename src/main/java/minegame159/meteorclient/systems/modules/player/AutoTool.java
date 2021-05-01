@@ -9,6 +9,7 @@ package minegame159.meteorclient.systems.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AxeItemAccessor;
@@ -24,12 +25,19 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.item.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class AutoTool extends Module {
+
+    public enum Weapon{
+        Sword,
+        Axe
+    }
+
     public enum EnchantPreference {
         None,
         Fortune,
@@ -56,6 +64,20 @@ public class AutoTool extends Module {
             .name("silk-touch-for-ender-chest")
             .description("Mines Ender Chests only with the Silk Touch enchantment.")
             .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
+            .name("Weapon")
+            .description("What type of weapon to use.")
+            .defaultValue(Weapon.Sword)
+            .build()
+    );
+
+    private final Setting<Integer> damageThreshold = sgGeneral.add(new IntSetting.Builder()
+            .name("threshold")
+            .description("If the non-preferred weapon produces this much damage this will favor it over your preferred weapon.")
+            .defaultValue(4)
             .build()
     );
 
@@ -146,6 +168,10 @@ public class AutoTool extends Module {
         }
     }
 
+    private void onAttack(AttackEntityEvent event) {
+        mc.player.inventory.selectedSlot = getBestWeapon();
+    }
+
     public boolean isEffectiveOn(Item item, BlockState blockState) {
         if (item.isEffectiveOn(blockState)) return true;
 
@@ -176,5 +202,46 @@ public class AutoTool extends Module {
 
     private boolean shouldStopUsing(ItemStack itemStack) {
         return antiBreak.get() && itemStack.getMaxDamage() - itemStack.getDamage() < breakDurability.get();
+    }
+
+    private int getBestWeapon(){
+        int slotS = mc.player.inventory.selectedSlot;
+        int slotA = mc.player.inventory.selectedSlot;
+        int slot = mc.player.inventory.selectedSlot;
+        double damageS = 0;
+        double damageA = 0;
+        double currentDamageS;
+        double currentDamageA;
+        for(int i = 0; i < 9; i++){
+            if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem
+                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)){
+                currentDamageS = ((SwordItem) mc.player.inventory.getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getStack(i), EntityGroup.DEFAULT) + 2;
+                if(currentDamageS > damageS){
+                    damageS = currentDamageS;
+                    slotS = i;
+                }
+            }
+        }
+        for(int i = 0; i < 9; i++){
+            if(mc.player.inventory.getStack(i).getItem() instanceof AxeItem
+                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)){
+                currentDamageA = ((AxeItem) mc.player.inventory.getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getStack(i), EntityGroup.DEFAULT) + 2;
+                if(currentDamageA > damageA){
+                    damageA = currentDamageA;
+                    slotA = i;
+                }
+            }
+        }
+
+        if(weapon.get() == Weapon.Sword && damageThreshold.get() > damageA - damageS){
+            slot = slotS;
+        }else if(weapon.get() == Weapon.Axe && damageThreshold.get() > damageS - damageA){
+            slot = slotA;
+        }else if(weapon.get() == Weapon.Sword && damageThreshold.get() < damageA - damageS){
+            slot = slotA;
+        }else if(weapon.get() == Weapon.Axe && damageThreshold.get() < damageS - damageA){
+            slot = slotS;
+        }
+        return slot;
     }
 }

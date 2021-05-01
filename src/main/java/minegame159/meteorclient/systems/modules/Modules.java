@@ -370,7 +370,6 @@ public class Modules extends System<Modules> {
         add(new AutoLog());
         add(new AutoTotem());
         add(new AutoTrap());
-        add(new AutoWeapon());
         add(new AutoWeb());
         add(new BedAura());
         add(new BowSpam());
