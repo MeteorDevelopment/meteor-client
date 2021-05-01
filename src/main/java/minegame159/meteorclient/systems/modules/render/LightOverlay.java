@@ -91,6 +91,7 @@ public class LightOverlay extends Module {
 
             bp.set(blockPos).move(0, -1, 0);
             if (mc.world.getBlockState(bp).getCollisionShape(mc.world, bp) != VoxelShapes.fullCube()) return;
+            if (mc.world.getBlockState(bp).isTranslucent(mc.world, bp)) return;
 
             if (mc.world.getLightLevel(blockPos, 0) <= 7) {
                 crosses.add(crossPool.get().set(blockPos, false));
