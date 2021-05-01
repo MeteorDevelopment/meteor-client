@@ -91,3 +91,8 @@ remapJar {
 	dependsOn shadowJar
 	input.set(shadowJar.archiveFile)
 }
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = "sources"
+	from sourceSets.main.allSource
+}
