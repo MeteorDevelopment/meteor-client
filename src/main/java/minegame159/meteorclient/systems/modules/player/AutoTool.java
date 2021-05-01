@@ -127,47 +127,14 @@ public class AutoTool extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-        BlockState blockState = mc.world.getBlockState(event.blockPos);
-        int bestScore = -1;
-        int score = 0;
-        int bestSlot = -1;
-
-        if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
-
-        for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-
-            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
-
-            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
-
-            score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
-            score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-            score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
-
-            if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
-            if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
-            if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
-
-            if (score > bestScore) {
-                bestScore = score;
-                bestSlot = i;
-            }
-        }
-
-        if (bestSlot != -1) {
+        int slot = getBestTool(event);
+        if (slot != -1) {
             if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = bestSlot;
-        }
-
-        ItemStack currentStack = mc.player.inventory.getStack(mc.player.inventory.selectedSlot);
-
-        if (shouldStopUsing(currentStack) && currentStack.getItem() instanceof ToolItem) {
-            mc.options.keyAttack.setPressed(false);
-            event.setCancelled(true);
+            mc.player.inventory.selectedSlot = slot;
         }
     }
 
+    @EventHandler(priority = EventPriority.HIGH)
     private void onAttack(AttackEntityEvent event) {
         mc.player.inventory.selectedSlot = getBestWeapon();
     }
@@ -202,6 +169,38 @@ public class AutoTool extends Module {
 
     private boolean shouldStopUsing(ItemStack itemStack) {
         return antiBreak.get() && itemStack.getMaxDamage() - itemStack.getDamage() < breakDurability.get();
+    }
+
+    private int getBestTool(StartBreakingBlockEvent event) {
+        BlockState blockState = mc.world.getBlockState(event.blockPos);
+        int bestScore = -1;
+        int score = 0;
+        int bestSlot = -1;
+
+        for (int i = 0; i < 9; i++) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+
+            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
+
+            if (shouldStopUsing(itemStack)) continue;
+
+            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+
+            score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
+            score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
+            score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
+
+            if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
+            if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
+            if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = i;
+            }
+        }
+
+        return bestSlot;
     }
 
     private int getBestWeapon(){
