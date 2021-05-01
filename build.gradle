@@ -16,7 +16,10 @@ minecraft {
 }
 
 repositories {
-	maven { url "https://jitpack.io" }
+	maven {
+		name = "jitpack"
+		url = "https://jitpack.io"
+	}
 	jcenter()
 }
 
@@ -60,8 +63,6 @@ shadowJar {
 
 processResources {
 	inputs.property "version", project.version
-
-	duplicatesStrategy = DuplicatesStrategy.WARN
 
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
