@@ -17,36 +17,59 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class AntiHit extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> antiFriendHit = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-friend-hit")
-        .description("Doesn't allow friends to be attacked.")
-        .defaultValue(true)
-        .build()
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Entities to avoid attacking.")
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
+            .onlyAttackable()
+            .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-        .name("entities")
-        .description("Entities to avoid attacking.")
-        .defaultValue(new Object2BooleanOpenHashMap<>(0))
-        .onlyAttackable()
-        .build()
+    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
+            .name("friends")
+            .description("Doesn't allow friends to be attacked.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
+            .name("babies")
+            .description("Doesn't allow babies to be attacked.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> nametagged = sgGeneral.add(new BoolSetting.Builder()
+            .name("nametagged")
+            .description("Doesn't allow nametagged enities to be attacked.")
+            .defaultValue(false)
+            .build()
     );
 
     public AntiHit() {
-        super(Categories.Combat, "anti-hit", "Cancels out attacks on certain entities.");
+        super(Categories.Combat, "anti-hit", "Prevents you from attacking certain entities.");
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onAttackEntity(AttackEntityEvent event) {
-        if (antiFriendHit.get() && event.entity instanceof PlayerEntity && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
-        if (Modules.get().isActive(AntiHit.class) && entities.get().containsKey(event.entity.getType())) event.cancel();
+        // Friends
+        if (friends.get() && event.entity instanceof PlayerEntity && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
+
+        // Babies
+        if (babies.get() && event.entity instanceof AnimalEntity && ((AnimalEntity) event.entity).isBaby()) event.cancel();
+
+        // NameTagged
+        if (nametagged.get() && event.entity.hasCustomName()) event.cancel();
+
+        // Entities
+        if (entities.get().getBoolean(event.entity.getType())) event.cancel();
     }
 }
