@@ -147,8 +147,8 @@ public class LightOverlay extends Module {
     private Spawn validSpawn(BlockPos blockPos, BlockState blockState) {
         if (!(blockState.getBlock() instanceof AirBlock)) return Spawn.Never;
 
-        if (!topSurface(blockState)) {
-            bp.set(blockPos).move(0, -1, 0);
+        bp.set(blockPos).move(0, -1, 0);
+        if (!topSurface(mc.world.getBlockState(bp))) {
             if (mc.world.getBlockState(bp).getCollisionShape(mc.world, bp) != VoxelShapes.fullCube()) return Spawn.Never;
             if (mc.world.getBlockState(bp).isTranslucent(mc.world, bp)) return Spawn.Never;
         }
