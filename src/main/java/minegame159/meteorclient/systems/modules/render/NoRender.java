@@ -67,6 +67,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noInWallOverlay = sgOverlay.add(new BoolSetting.Builder()
+            .name("no-in-wall-overlay")
+            .description("Disables rendering of the overlay when inside blocks.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> noVignette = sgOverlay.add(new BoolSetting.Builder()
             .name("no-vignette")
             .description("Disables rendering of the vignette overlay.")
@@ -221,6 +228,10 @@ public class NoRender extends Module {
 
     public boolean noWaterOverlay() {
         return isActive() && noWaterOverlay.get();
+    }
+
+    public boolean noInWallOverlay() {
+        return isActive() && noInWallOverlay.get();
     }
 
     public boolean noVignette() {
