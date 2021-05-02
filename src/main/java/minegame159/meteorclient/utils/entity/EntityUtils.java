@@ -10,12 +10,12 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -28,6 +28,7 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
@@ -213,11 +214,17 @@ public class EntityUtils {
 
             BlockPos pos = player.getBlockPos().offset(direction);
 
-            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN || mc.world.getBlockState(pos).getBlock() == Blocks.BEDROCK) {
+            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN) {
                 positions.add(pos);
             }
         }
 
         return positions;
+    }
+
+    public static BlockPos getCityBlock(PlayerEntity player) {
+        List<BlockPos> posList = getSurroundBlocks(player);
+        posList.sort(Comparator.comparingDouble(PlayerUtils::distanceTo));
+        return posList.isEmpty() ? null : posList.get(0);
     }
 }
