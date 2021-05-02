@@ -388,7 +388,7 @@ public class BedAura extends Module {
 
     private void doAutoMove() {
         if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
-            int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
+            int slot = InvUtils.findItemInInventory(itemStack -> itemStack.getItem() instanceof BedItem);
             InvUtils.move().from(slot).toHotbar(autoMoveSlot.get() - 1);
         }
     }
