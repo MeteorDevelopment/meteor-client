@@ -472,7 +472,7 @@ public class Modules extends System<Modules> {
         add(new CustomFOV());
         add(new ESP());
         add(new EntityOwner());
-        add(new FreeRotate());
+        add(new FreeLook());
         add(new Freecam());
         add(new Fullbright());
         add(new HUD());
