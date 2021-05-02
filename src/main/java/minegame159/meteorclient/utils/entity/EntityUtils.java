@@ -24,7 +24,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
@@ -130,7 +130,7 @@ public class EntityUtils {
         return target.getHealth() + target.getAbsorptionAmount();
     }
 
-    public static boolean isInvalid(PlayerEntity target, double range) {
+    public static boolean isBadTarget(PlayerEntity target, double range) {
         if (target == null) return true;
         return mc.player.distanceTo(target) > range || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
     }
@@ -200,5 +200,23 @@ public class EntityUtils {
         double d = (mc.options.viewDistance + 1) * 16;
 
         return x < d && z < d;
+    }
+
+    public static List<BlockPos> getSurroundBlocks(PlayerEntity player) {
+        if (player == null) return null;
+
+        List<BlockPos> positions = new ArrayList<>();
+
+        for (Direction direction : Direction.values()) {
+            if (direction == Direction.UP || direction == Direction.DOWN) continue;
+
+            BlockPos pos = player.getBlockPos().offset(direction);
+
+            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN || mc.world.getBlockState(pos).getBlock() == Blocks.BEDROCK) {
+                positions.add(pos);
+            }
+        }
+
+        return positions;
     }
 }
