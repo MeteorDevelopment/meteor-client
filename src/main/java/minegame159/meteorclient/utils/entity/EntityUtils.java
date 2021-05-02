@@ -72,7 +72,7 @@ public class EntityUtils {
             if (isGood.test(entity)) target.add(entity);
         }
 
-        for (Entity entity : FakePlayerUtils.getPlayers().keySet()) {
+        for (Entity entity : FakePlayerManager.getPlayers()) {
             if (isGood.test(entity)) target.add(entity);
         }
 

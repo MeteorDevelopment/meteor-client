@@ -15,7 +15,7 @@ import minegame159.meteorclient.settings.StringSetting;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.player.PlayerEntity;
 

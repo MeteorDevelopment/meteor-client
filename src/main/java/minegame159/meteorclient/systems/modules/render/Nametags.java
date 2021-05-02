@@ -21,12 +21,9 @@ import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.FakePlayer;
 import minegame159.meteorclient.systems.modules.player.NameProtect;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.render.NametagUtils;
@@ -431,12 +428,9 @@ public class Nametags extends Module {
         String name;
         Color nameColor = Friends.get().getFriendColor(player);
 
-        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getGameProfile().getName());
-        else name = player.getGameProfile().getName();
+        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
+        else name = player.getEntityName();
 
-        if (Modules.get().get(FakePlayer.class).showID(player)) {
-            name += " [" + FakePlayerUtils.getID((FakePlayerEntity) player) + "]";
-        }
         name = name + " ";
 
         // Health
