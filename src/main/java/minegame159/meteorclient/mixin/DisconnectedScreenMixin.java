@@ -7,7 +7,6 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.AutoReconnect;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -34,7 +33,7 @@ public class DisconnectedScreenMixin extends ScreenMixin {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo))));
+            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> client.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), client, Modules.get().get(AutoReconnect.class).lastServerInfo))));
         }
     }
 
@@ -43,7 +42,7 @@ public class DisconnectedScreenMixin extends ScreenMixin {
         if (!Modules.get().isActive(AutoReconnect.class)) return;
 
         if (time <= 0) {
-            Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
+            client.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), client, Modules.get().get(AutoReconnect.class).lastServerInfo));
         } else {
             time--;
             if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(getText()));
