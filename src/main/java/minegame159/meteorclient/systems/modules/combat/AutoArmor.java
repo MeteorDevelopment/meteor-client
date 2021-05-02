@@ -5,6 +5,9 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
+import com.google.common.collect.Lists;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
@@ -12,278 +15,292 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.ChestSwap;
-import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.item.ArmorItem;
+import net.minecraft.item.ElytraItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class AutoArmor extends Module {
-    public enum Prot{
+    public enum Protection {
         Protection(Enchantments.PROTECTION),
-        Blast_Protection(Enchantments.BLAST_PROTECTION),
-        Fire_Protection(Enchantments.FIRE_PROTECTION),
-        Projectile_Protection(Enchantments.PROJECTILE_PROTECTION);
+        BlastProtection(Enchantments.BLAST_PROTECTION),
+        FireProtection(Enchantments.FIRE_PROTECTION),
+        ProjectileProtection(Enchantments.PROJECTILE_PROTECTION);
 
         private final Enchantment enchantment;
 
-        Prot(Enchantment enchantment) {
+        Protection(Enchantment enchantment) {
             this.enchantment = enchantment;
         }
     }
 
-    public AutoArmor() {
-        super(Categories.Combat, "auto-armor", "Automatically manages and equips your armor for you.");
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgDelay = settings.createGroup("Delay");
 
-    // General
-
-    private final Setting<Prot> mode = sgGeneral.add(new EnumSetting.Builder<Prot>()
-            .name("prioritize")
-            .description("Which type of protection to prioritize.")
-            .defaultValue(Prot.Protection)
+    private final Setting<Protection> preferredProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
+            .name("preferred-protection")
+            .description("Which type of protection to prefer.")
+            .defaultValue(Protection.Protection)
             .build()
     );
 
-    private final Setting<Boolean> bProtLegs = sgGeneral.add(new BoolSetting.Builder()
-            .name("blast-protection-leggings")
-            .description("Prioritizes blast protection on your leggings. Useful for fights with End Crystals.")
-            .defaultValue(true)
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("swap-delay")
+            .description("The delay between equipping armor pieces.")
+            .defaultValue(1)
+            .min(0)
+            .sliderMax(5)
             .build()
     );
 
-    private final Setting<Boolean> preferMending = sgGeneral.add(new BoolSetting.Builder()
-            .name("prefer-mending")
-            .description("Prefers to equip mending over non-mending armor pieces.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Integer> weight = sgGeneral.add(new IntSetting.Builder()
-            .name("weight")
-            .description("How much mending is preferred.")
-            .defaultValue(2)
-            .min(1)
-            .max(10)
-            .sliderMax(4)
-            .build()
-    );
-
-    private final Setting<List<Enchantment>> avoidEnch = sgGeneral.add(new EnchListSetting.Builder()
+    private final Setting<List<Enchantment>> avoidedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
             .name("avoided-enchantments")
-            .description("Enchantments that should be avoided unless it's a last resort.")
-            .defaultValue(setDefaultValue())
+            .description("Enchantments that should be avoided.")
+            .defaultValue(Lists.newArrayList(Enchantments.BINDING_CURSE, Enchantments.FROST_WALKER))
+            .build()
+    );
+
+    private final Setting<Boolean> blastLeggings = sgGeneral.add(new BoolSetting.Builder()
+            .name("blast-prot-leggings")
+            .description("Uses blast protection for leggings regardless of preferred protection.")
+            .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
             .name("anti-break")
-            .description("Attempts to stop your armor from being broken.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Integer> breakDurability = sgGeneral.add(new IntSetting.Builder()
-            .name("anti-break-durability")
-            .description("The durability damaged armor is swapped.")
-            .defaultValue(10)
-            .max(50)
-            .min(2)
-            .sliderMax(20)
-            .build()
-    );
-
-    private final Setting<Boolean> boomSwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("switch-for-explosion")
-            .description("Switches to Blast Protection automatically if you're going to get hit by an explosion.")
+            .description("Takes off armor if it is about to break.")
             .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> boomDamage = sgGeneral.add(new IntSetting.Builder()
-            .name("max-explosion-damage")
-            .description("The maximum damage you intake before switching to Blast Protection.")
-            .defaultValue(5)
-            .min(1)
-            .max(18)
-            .sliderMax(10)
             .build()
     );
 
     private final Setting<Boolean> ignoreElytra = sgGeneral.add(new BoolSetting.Builder()
             .name("ignore-elytra")
             .description("Will not replace your elytra if you have it equipped.")
-            .defaultValue(false)
-            .build()
-    );
-
-    // Delay
-
-    private final Setting<Integer> delay = sgDelay.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between pieces being equipped to prevent desync.")
-            .defaultValue(1)
-            .min(0)
-            .max(20)
-            .sliderMax(5)
-            .build()
-    );
-
-    private final Setting<Integer> switchCooldown = sgDelay.add(new IntSetting.Builder().name("switch-cooldown")
-            .description("The cooldown between swapping from your current type of Protection to your preferred type of Protection.")
-            .defaultValue(20)
-            .min(0)
-            .max(60)
-            .sliderMax(40)
-            .build()
-    );
-
-    private final Setting<Boolean> pauseInInventory = sgDelay.add(new BoolSetting.Builder()
-            .name("pause-in-inventory")
-            .description("Stops managing armor when you are in your inventory.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> pause = sgDelay.add(new BoolSetting.Builder()
-            .name("pause-between-pieces")
-            .description("Pauses between equipping each individual piece to prevent desync.")
             .defaultValue(true)
             .build()
     );
 
+    private int timer;
 
-    private int delayLeft = delay.get();
-    private boolean didSkip = false;
-    private int currentBest, currentProt, currentBlast, currentFire, currentProj, currentArmour, currentUnbreaking, currentMending = 0;
-    private float currentToughness = 0;
+    private final Object2IntMap<Enchantment> enchantments = new Object2IntOpenHashMap<>();
+
+    private final ArmorPiece[] armorPieces = new ArmorPiece[4];
+    private final ArmorPiece helmet = new ArmorPiece(3);
+    private final ArmorPiece chestplate = new ArmorPiece(2);
+    private final ArmorPiece leggings = new ArmorPiece(1);
+    private final ArmorPiece boots = new ArmorPiece(0);
+
+    public AutoArmor() {
+        super(Categories.Combat, "auto-armor", "Automatically equips armor.");
+
+        armorPieces[0] = helmet;
+        armorPieces[1] = chestplate;
+        armorPieces[2] = leggings;
+        armorPieces[3] = boots;
+    }
+
+    @Override
+    public void onActivate() {
+        timer = 0;
+    }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (mc.player.abilities.creativeMode) return;
-        if (pauseInInventory.get() && mc.currentScreen instanceof InventoryScreen) return;
-        if (boomSwitch.get() && mode.get() != Prot.Blast_Protection && explosionNear()) {
-            mode.set(Prot.Blast_Protection);
-            delayLeft = 0;
-            didSkip = true;
-        }
-        if (delayLeft > 0) {
-            delayLeft --;
+    private void onPreTick(TickEvent.Pre event) {
+        // Wait for timer (delay)
+        if (timer > 0) {
+            timer--;
             return;
-        } else {
-            delayLeft = delay.get();
         }
-        Prot preMode = mode.get();
-        if (didSkip) {
-            delayLeft = switchCooldown.get();
-            didSkip = false;
+
+        // Reset armor pieces
+        for (ArmorPiece armorPiece : armorPieces) armorPiece.reset();
+
+        // Loop through items in inventory
+        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+            if (itemStack.isEmpty() || !(itemStack.getItem() instanceof ArmorItem)) continue;
+
+            // Check for durability if anti break is enabled
+            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) continue;
+
+            // Get enchantments on the item
+            Utils.getEnchantments(itemStack, enchantments);
+
+            // Check for avoided enchantments
+            if (hasAvoidedEnchantment()) continue;
+
+            // Add the item to the correct armor piece
+            switch (getItemSlotId(itemStack)) {
+                case 0: boots.add(itemStack, i); break;
+                case 1: leggings.add(itemStack, i); break;
+                case 2: chestplate.add(itemStack, i); break;
+                case 3: helmet.add(itemStack, i); break;
+            }
         }
-        ItemStack itemStack;
-        for (int a = 0; a < 4; a++) {
-            itemStack = mc.player.inventory.getArmorStack(a);
-            currentBest = 0;
-            currentProt = 0;
-            currentBlast = 0;
-            currentFire = 0;
-            currentProj = 0;
-            currentArmour = 0;
-            currentToughness = 0;
-            currentUnbreaking = 0;
-            currentMending = 0;
-            if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) continue;
-            if (EnchantmentHelper.hasBindingCurse(itemStack)) continue;
-            if (itemStack.getItem() instanceof ArmorItem) {
-                if (a == 1 && bProtLegs.get()) {
-                    mode.set(Prot.Blast_Protection);
-                }
-                getCurrentScore(itemStack);
-            }
-            int bestSlot = -1;
-            int bestScore = 0;
-            for (int i = 0; i < 36; i++) {
-                ItemStack stack = mc.player.inventory.getStack(i);
-                if (stack.getItem() instanceof ArmorItem
-                        && (((ArmorItem) stack.getItem()).getSlotType().getEntitySlotId() == a)) {
-                    int temp = getItemScore(stack);
-                    if (bestScore < temp) {
-                        bestScore = temp;
-                        bestSlot = i;
-                    }
-                }
-            }
-            if (bestSlot > -1) {
-                InvUtils.move().from(bestSlot).toArmor(a);
-                if (pause.get()) break;
-            }
-            mode.set(preMode);
-        }
+
+        // Apply armor pieces
+        for (ArmorPiece armorPiece : armorPieces) armorPiece.calculate();
+        Arrays.sort(armorPieces, Comparator.comparingInt(ArmorPiece::getSortScore));
+        for (ArmorPiece armorPiece : armorPieces) armorPiece.apply();
     }
 
-    private int getItemScore(ItemStack itemStack){
-        int score = 0;
-        if (antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) <= breakDurability.get()) return 0;
-        for (Enchantment ench : avoidEnch.get()) if (EnchantmentHelper.getLevel(ench, itemStack) > 0) return -10;
-        score += 4 * (EnchantmentHelper.getLevel(mode.get().enchantment, itemStack) - currentBest);
-        score += 2 * (EnchantmentHelper.getLevel(Enchantments.PROTECTION, itemStack) - currentProt);
-        score += 2 * (EnchantmentHelper.getLevel(Enchantments.BLAST_PROTECTION, itemStack) - currentBlast);
-        score += 2 * (EnchantmentHelper.getLevel(Enchantments.FIRE_PROTECTION, itemStack) - currentFire);
-        score += 2 * (EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, itemStack) - currentProj);
-        score += 2 * (((ArmorItem) itemStack.getItem()).getProtection() - currentArmour);
-        score += 2 * (((ArmorItem) itemStack.getItem()).method_26353() - currentToughness);
-        score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack) - currentUnbreaking;
-        if (preferMending.get() && (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) - currentMending) > 0) score += weight.get();
-        return score;
-    }
-
-    private void getCurrentScore(ItemStack itemStack) {
-        currentBest = EnchantmentHelper.getLevel(mode.get().enchantment, itemStack);
-        currentProt = EnchantmentHelper.getLevel(Enchantments.PROTECTION, itemStack);
-        currentBlast = EnchantmentHelper.getLevel(Enchantments.BLAST_PROTECTION, itemStack);
-        currentFire = EnchantmentHelper.getLevel(Enchantments.FIRE_PROTECTION, itemStack);
-        currentProj = EnchantmentHelper.getLevel(Enchantments.PROJECTILE_PROTECTION, itemStack);
-        currentArmour = ((ArmorItem) itemStack.getItem()).getProtection();
-        currentToughness = ((ArmorItem) itemStack.getItem()).method_26353();
-        currentUnbreaking = EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-        currentMending = EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
-    }
-
-    private boolean explosionNear() {
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof EndCrystalEntity && DamageCalcUtils.crystalDamage(mc.player, entity.getPos()) > boomDamage.get()) {
-                return true;
-            }
+    private boolean hasAvoidedEnchantment() {
+        for (Enchantment enchantment : avoidedEnchantments.get()) {
+            if (enchantments.containsKey(enchantment)) return true;
         }
-        if (!mc.world.getDimension().isBedWorking()) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
-                BlockPos pos = blockEntity.getPos();
-                if (blockEntity instanceof BedBlockEntity && DamageCalcUtils.bedDamage(mc.player, new Vec3d(pos.getX(), pos.getY(), pos.getZ())) > boomDamage.get()) {
-                    return true;
-                }
-            }
-        }
+
         return false;
     }
 
-    private List<Enchantment> setDefaultValue() {
-        List<Enchantment> enchs = new ArrayList<>();
-        enchs.add(Enchantments.BINDING_CURSE);
-        enchs.add(Enchantments.FROST_WALKER);
-        return enchs;
+    private int getItemSlotId(ItemStack itemStack) {
+        if (itemStack.getItem() instanceof ElytraItem) return 2;
+        return ((ArmorItem) itemStack.getItem()).getSlotType().getEntitySlotId();
+    }
+
+    private int getScore(ItemStack itemStack) {
+        if (itemStack.isEmpty()) return 0;
+
+        // Score calculated based on enchantments, protection and toughness
+        int score = 0;
+
+        // Prefer blast protection on leggings if enabled
+        Enchantment protection = preferredProtection.get().enchantment;
+        if (blastLeggings.get() && getItemSlotId(itemStack) == 1) protection = Enchantments.BLAST_PROTECTION;
+
+        score += 3 * enchantments.getInt(protection);
+        score += enchantments.getInt(Enchantments.PROTECTION);
+        score += enchantments.getInt(Enchantments.BLAST_PROTECTION);
+        score += enchantments.getInt(Enchantments.FIRE_PROTECTION);
+        score += enchantments.getInt(Enchantments.PROJECTILE_PROTECTION);
+        score += enchantments.getInt(Enchantments.UNBREAKING);
+        score += 2 * enchantments.getInt(Enchantments.MENDING);
+        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getProtection() : 0;
+        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).method_26353() : 0;
+
+        return score;
+    }
+
+    private boolean cannotSwap() {
+        return timer > 0;
+    }
+
+    private void swap(int from, int armorSlotId) {
+        InvUtils.move().from(from).toArmor(armorSlotId);
+
+        // Apply delay
+        timer = delay.get();
+    }
+
+    private void moveToEmpty(int armorSlotId) {
+        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
+            if (mc.player.inventory.getStack(i).isEmpty()) {
+                InvUtils.move().fromArmor(armorSlotId).to(i);
+
+                // Apply delay
+                timer = delay.get();
+
+                break;
+            }
+        }
+    }
+
+    private class ArmorPiece {
+        private final int id;
+
+        private int bestSlot;
+        private int bestScore;
+
+        private int score;
+        private int durability;
+
+        public ArmorPiece(int id) {
+            this.id = id;
+        }
+
+        public void reset() {
+            bestSlot = -1;
+            bestScore = -1;
+            score = -1;
+            durability = Integer.MAX_VALUE;
+        }
+
+        public void add(ItemStack itemStack, int slot) {
+            // Calculate armor piece score and check if its higher than the last one
+            int score = getScore(itemStack);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = slot;
+            }
+        }
+
+        public void calculate() {
+            if (cannotSwap()) return;
+
+            ItemStack itemStack = mc.player.inventory.getArmorStack(id);
+
+            // Check if the item is an elytra
+            if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) {
+                score = Integer.MAX_VALUE; // Setting score to Integer.MAX_VALUE so its now swapped later
+                return;
+            }
+
+            Utils.getEnchantments(itemStack, enchantments);
+
+            // Return if current armor piece has Curse of Binding
+            if (enchantments.containsKey(Enchantments.BINDING_CURSE)) {
+                score = Integer.MAX_VALUE; // Setting score to Integer.MAX_VALUE so its now swapped later
+                return;
+            }
+
+            // Calculate current score
+            score = getScore(itemStack);
+            score = decreaseScoreByAvoidedEnchantments(score);
+            score = applyAntiBreakScore(score, itemStack);
+
+            // Calculate durability
+            if (!itemStack.isEmpty()) {
+                durability = itemStack.getMaxDamage() - itemStack.getDamage();
+            }
+        }
+
+        public int getSortScore() {
+            if (antiBreak.get() && durability <= 10) return -1;
+            return bestScore;
+        }
+
+        public void apply() {
+            // Integer.MAX_VALUE check is there because it indicates that the current piece shouldn't be moved
+            if (cannotSwap() || score == Integer.MAX_VALUE) return;
+
+            // Check if new score is better and swap if it is
+            if (bestScore > score) swap(bestSlot, id);
+            else if (antiBreak.get() && durability <= 10) {
+                // If no better piece has been found but current piece is broken find an empty slot and move it there
+                moveToEmpty(id);
+            }
+        }
+
+        private int decreaseScoreByAvoidedEnchantments(int score) {
+            for (Enchantment enchantment : avoidedEnchantments.get()) {
+                score -= 2 * enchantments.getInt(enchantment);
+            }
+
+            return score;
+        }
+
+        private int applyAntiBreakScore(int score, ItemStack itemStack) {
+            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) return -1;
+
+            return score;
+        }
     }
 }
