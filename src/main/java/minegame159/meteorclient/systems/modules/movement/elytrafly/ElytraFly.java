@@ -35,12 +35,12 @@ public class ElytraFly extends Module {
         WaitForGround
     }
 
-    private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
 
     // General
 
-    public final Setting<ElytraFlightModes> flightMode = sgDefault.add(new EnumSetting.Builder<ElytraFlightModes>()
+    public final Setting<ElytraFlightModes> flightMode = sgGeneral.add(new EnumSetting.Builder<ElytraFlightModes>()
             .name("mode")
             .description("The mode of flying.")
             .defaultValue(ElytraFlightModes.Vanilla)
@@ -49,21 +49,21 @@ public class ElytraFly extends Module {
             .build()
     );
 
-    public final Setting<Boolean> autoTakeOff = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-take-off")
             .description("Automatically takes off when you hold jump without needing to double jump.")
             .defaultValue(false)
             .build()
     );
 
-    public final Setting<Boolean> replace = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
             .name("elytra-replace")
             .description("Replaces broken elytra with a new elytra.")
             .defaultValue(false)
             .build()
     );
 
-    public final Setting<Integer> replaceDurability = sgDefault.add(new IntSetting.Builder()
+    public final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
             .name("replace-durability")
             .description("The durability threshold your elytra will be replaced at.")
             .defaultValue(2)
@@ -73,7 +73,7 @@ public class ElytraFly extends Module {
             .build()
     );
 
-    public final Setting<Double> fallMultiplier = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("fall-multiplier")
             .description("Controls how fast will you go down naturally.")
             .defaultValue(0.01)
@@ -81,7 +81,7 @@ public class ElytraFly extends Module {
             .build()
     );
 
-    public final Setting<Double> horizontalSpeed = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("horizontal-speed")
             .description("How fast you go forward and backward.")
             .defaultValue(1)
@@ -89,7 +89,7 @@ public class ElytraFly extends Module {
             .build()
     );
 
-    public final Setting<Double> verticalSpeed = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("vertical-speed")
             .description("How fast you go up and down.")
             .defaultValue(1)
@@ -97,28 +97,28 @@ public class ElytraFly extends Module {
             .build()
     );
 
-    public final Setting<Boolean> stopInWater = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> stopInWater = sgGeneral.add(new BoolSetting.Builder()
             .name("stop-in-water")
             .description("Stops flying in water.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<Boolean> dontGoIntoUnloadedChunks = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
             .name("no-unloaded-chunks")
             .description("Stops you from going into unloaded chunks.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<Boolean> noCrash = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> noCrash = sgGeneral.add(new BoolSetting.Builder()
             .name("no-crash")
             .description("Stops you from going into walls.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<Integer> crashLookAhead = sgDefault.add(new IntSetting.Builder()
+    public final Setting<Integer> crashLookAhead = sgGeneral.add(new IntSetting.Builder()
             .name("crash-look-ahead")
             .description("Distance to look ahead when flying.")
             .defaultValue(5)
@@ -129,14 +129,14 @@ public class ElytraFly extends Module {
             .build()
     );
 
-    public final Setting<ChestSwapMode> chestSwap = sgDefault.add(new EnumSetting.Builder<ChestSwapMode>()
+    public final Setting<ChestSwapMode> chestSwap = sgGeneral.add(new EnumSetting.Builder<ChestSwapMode>()
             .name("chest-swap")
             .description("Enables ChestSwap when toggling this module.")
             .defaultValue(ChestSwapMode.Never)
             .build()
     );
 
-    private final Setting<Boolean> instaDrop = sgDefault.add(new BoolSetting.Builder()
+    private final Setting<Boolean> instaDrop = sgGeneral.add(new BoolSetting.Builder()
             .name("insta-drop")
             .description("Makes you drop out of flight instantly.")
             .defaultValue(false)
