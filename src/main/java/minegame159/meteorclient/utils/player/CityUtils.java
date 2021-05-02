@@ -8,8 +8,8 @@ package minegame159.meteorclient.utils.player;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
@@ -51,7 +51,7 @@ public class CityUtils {
         }
 
         if (closestTarget == null) {
-            for (FakePlayerEntity target : FakePlayerUtils.getPlayers().keySet()) {
+            for (FakePlayerEntity target : FakePlayerManager.getPlayers()) {
                 if (target.isDead() || !Friends.get().attack(target) || mc.player.distanceTo(target) > range) continue;
 
                 if (closestTarget == null) {
