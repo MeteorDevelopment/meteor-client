@@ -365,7 +365,7 @@ public class Modules extends System<Modules> {
         add(new ArrowDodge());
         add(new Auto32K());
         add(new AutoAnvil());
-//        add(new AutoArmor());
+        add(new AutoArmor());
         add(new AutoCity());
         add(new AutoLog());
         add(new AutoTotem());
