@@ -7,10 +7,13 @@ package minegame159.meteorclient.utils.entity;
 
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
