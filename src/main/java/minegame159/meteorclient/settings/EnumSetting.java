@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.settings;
 
-import minegame159.meteorclient.gui.widgets.input.WDropdown;
 import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.InvocationTargetException;
@@ -17,8 +16,6 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     private T[] values;
 
     private final List<String> suggestions;
-
-    private WDropdown<T> widget;
 
     public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         super(name, description, defaultValue, onChanged, onModuleActivated);

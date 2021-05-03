@@ -8,14 +8,8 @@ package minegame159.meteorclient.gui;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.screens.settings.*;
 import minegame159.meteorclient.gui.utils.SettingsWidgetFactory;
-import minegame159.meteorclient.gui.widgets.WItem;
-import minegame159.meteorclient.gui.widgets.WKeybind;
-import minegame159.meteorclient.gui.widgets.WQuad;
-import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
-import minegame159.meteorclient.gui.widgets.containers.WSection;
-import minegame159.meteorclient.gui.widgets.containers.WTable;
-import minegame159.meteorclient.gui.widgets.containers.WVerticalList;
+import minegame159.meteorclient.gui.widgets.*;
+import minegame159.meteorclient.gui.widgets.containers.*;
 import minegame159.meteorclient.gui.widgets.input.WDoubleEdit;
 import minegame159.meteorclient.gui.widgets.input.WDropdown;
 import minegame159.meteorclient.gui.widgets.input.WIntEdit;
@@ -45,7 +39,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
         factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));
         factories.put(EnumSetting.class, (table, setting) -> enumW(table, (EnumSetting<? extends Enum<?>>) setting));
-        factories.put(PotionSetting.class, (table, setting) -> enumW(table, (EnumSetting<? extends Enum<?>>) setting));
+        factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(ColorSetting.class, (table, setting) -> colorW(table, (ColorSetting) setting));
         factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
         factories.put(BlockSetting.class, (table, setting) -> blockW(table, (BlockSetting) setting));
@@ -139,6 +133,21 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         dropdown.action = () -> setting.set(dropdown.get());
 
         reset(table, setting, () -> dropdown.set(setting.get()));
+    }
+
+    private void potionW(WTable table, PotionSetting setting) {
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+        WItemWithLabel item = list.add(theme.itemWithLabel(setting.get().potion, setting.get().potion.getName().getString())).widget();
+
+        WButton button = list.add(theme.button("Select")).expandCellX().widget();
+        button.action = () -> {
+            WidgetScreen screen = new PotionSettingScreen(theme, setting);
+            screen.onClosed(() -> item.set(setting.get().potion));
+
+            mc.openScreen(screen);
+        };
+
+        reset(list, setting, () -> item.set(setting.get().potion));
     }
 
     private void colorW(WTable table, ColorSetting setting) {
@@ -237,15 +246,15 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     // Other
 
-    private void selectW(WTable table, Setting<?> setting, Runnable action) {
-        WButton button = table.add(theme.button("Select")).expandCellX().widget();
+    private void selectW(WContainer c, Setting<?> setting, Runnable action) {
+        WButton button = c.add(theme.button("Select")).expandCellX().widget();
         button.action = action;
 
-        reset(table, setting, null);
+        reset(c, setting, null);
     }
 
-    private void reset(WTable table, Setting<?> setting, Runnable action) {
-        WButton reset = table.add(theme.button(GuiRenderer.RESET)).widget();
+    private void reset(WContainer c, Setting<?> setting, Runnable action) {
+        WButton reset = c.add(theme.button(GuiRenderer.RESET)).widget();
         reset.action = () -> {
             setting.reset();
             if (action != null) action.run();
