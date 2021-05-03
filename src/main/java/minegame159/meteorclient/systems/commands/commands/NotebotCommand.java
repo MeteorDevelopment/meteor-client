@@ -21,6 +21,7 @@ import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 
 import java.io.FileWriter;
 import java.io.IOException;

@@ -15,6 +15,7 @@ import minegame159.meteorclient.systems.modules.player.AntiHunger;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.text.LiteralText;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
