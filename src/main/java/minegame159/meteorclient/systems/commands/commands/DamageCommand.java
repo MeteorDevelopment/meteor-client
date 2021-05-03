@@ -20,7 +20,7 @@ import net.minecraft.text.LiteralText;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class DamageCommand extends Command {
-    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(new LiteralText("You are in invulnerable."));
+    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(new LiteralText("You are invulnerable."));
     
     public DamageCommand() {
         super("damage", "Damages self", "dmg");
