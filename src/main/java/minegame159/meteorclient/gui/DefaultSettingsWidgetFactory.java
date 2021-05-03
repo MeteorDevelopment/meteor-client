@@ -42,6 +42,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(ColorSetting.class, (table, setting) -> colorW(table, (ColorSetting) setting));
         factories.put(StringSetting.class, (table, setting) -> stringW(table, (StringSetting) setting));
+        factories.put(ProvidedStringSetting.class, (table, setting) -> providedStringW(table, (ProvidedStringSetting) setting));
         factories.put(BlockSetting.class, (table, setting) -> blockW(table, (BlockSetting) setting));
         factories.put(KeybindSetting.class, (table, setting) -> keybindW(table, (KeybindSetting) setting));
         factories.put(GenericSetting.class, (table, setting) -> genericW(table, (GenericSetting<?>) setting));
@@ -166,6 +167,13 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         textBox.action = () -> setting.set(textBox.get());
 
         reset(table, setting, () -> textBox.set(setting.get()));
+    }
+
+    private void providedStringW(WTable table, ProvidedStringSetting setting) {
+        WDropdown<String> dropdown = table.add(theme.dropdown(setting.supplier.get(), setting.get())).expandCellX().widget();
+        dropdown.action = () -> setting.set(dropdown.get());
+
+        reset(table, setting, () -> dropdown.set(setting.get()));
     }
 
     private void blockW(WTable table, BlockSetting setting) {

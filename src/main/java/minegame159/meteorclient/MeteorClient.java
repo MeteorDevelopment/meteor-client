@@ -88,7 +88,6 @@ public class MeteorClient implements ClientModInitializer {
         });
 
         Matrices.begin(new MatrixStack());
-        Fonts.init();
         MeteorExecutor.init();
         Capes.init();
         RainbowColors.init();
@@ -103,6 +102,7 @@ public class MeteorClient implements ClientModInitializer {
         Tabs.init();
         GuiThemes.init();
         BlockUtils.init();
+        Fonts.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -127,6 +127,7 @@ public class MeteorClient implements ClientModInitializer {
         Modules.get().sortModules();
         Systems.load();
 
+        Fonts.load();
         GuiRenderer.init();
         GuiThemes.postInit();
     }

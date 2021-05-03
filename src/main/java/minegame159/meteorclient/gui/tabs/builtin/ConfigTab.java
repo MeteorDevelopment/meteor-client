@@ -9,6 +9,7 @@ import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.WindowTabScreen;
+import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
@@ -20,6 +21,19 @@ public class ConfigTab extends Tab {
     private static final SettingGroup sgGeneral = settings.getDefaultGroup();
     private static final SettingGroup sgChat = settings.createGroup("Chat");
     private static final SettingGroup sgScreens = settings.createGroup("Screens");
+
+    public static final Setting<String> font = sgGeneral.add(new ProvidedStringSetting.Builder()
+            .name("font")
+            .description("Custom font to use (picked from .minecraft/meteor-client/fonts folder).")
+            .supplier(Fonts::getAvailableFonts)
+            .defaultValue(Fonts.DEFAULT_FONT)
+            .onChanged(s -> {
+                Config.get().font = s;
+                Fonts.load();
+            })
+            .onModuleActivated(stringSetting -> stringSetting.set(Config.get().font))
+            .build()
+    );
 
     public static final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
             .name("custom-font")

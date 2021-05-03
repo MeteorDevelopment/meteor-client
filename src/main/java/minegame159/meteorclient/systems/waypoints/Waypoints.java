@@ -18,6 +18,7 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.WaypointsModule;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.files.StreamUtils;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
@@ -29,7 +30,9 @@ import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.math.Vec3d;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
@@ -236,18 +239,6 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     private void copyIcon(File file) {
-        try {
-            InputStream in = Waypoints.class.getResourceAsStream("/assets/meteor-client/textures/icons/waypoints/" + file.getName());
-            OutputStream out = new FileOutputStream(file);
-
-            byte[] bytes = new byte[256];
-            int read;
-            while ((read = in.read(bytes)) > 0) out.write(bytes, 0, read);
-
-            out.close();
-            in.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        StreamUtils.copy(Waypoints.class.getResourceAsStream("/assets/meteor-client/textures/icons/waypoints/" + file.getName()), file);
     }
 }

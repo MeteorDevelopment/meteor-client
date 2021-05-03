@@ -22,6 +22,19 @@ public class StreamUtils {
         }
     }
 
+    public static void copy(InputStream in, File to) {
+        try {
+            OutputStream out = new FileOutputStream(to);
+
+            copy(in, out);
+
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void copy(InputStream in, OutputStream out) {
         byte[] bytes = new byte[512];
         int read;
