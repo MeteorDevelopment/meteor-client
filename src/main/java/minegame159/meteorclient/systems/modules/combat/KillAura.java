@@ -53,6 +53,13 @@ public class KillAura extends Module {
 
     // General
 
+    private final Setting<Boolean> leftclick = sgGeneral.add(new BoolSetting.Builder()
+            .name("left-click")
+            .description("Only attacks if you left click.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("The maximum range the entity can be to attack it.")
@@ -254,30 +261,41 @@ public class KillAura extends Module {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
         }
 
-        if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
-            return;
-        }
-
-        if (hitDelayTimer >= 0) {
-            hitDelayTimer--;
-            return;
-        }
-        else {
-            hitDelayTimer = hitDelay.get();
-        }
-
-        if (randomDelayEnabled.get()) {
-            if (randomDelayTimer > 0) {
-                randomDelayTimer--;
-                return;
-            } else {
-                randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+        if (leftclick.get()) {
+            if (mc.options.keyAttack.isPressed() && !mc.options.keyAttack.wasPressed()) {
+                for (Entity target : entityList) {
+                    if (attack(target) && (canAttack)) {
+                        hitEntity(target);
+                    }
+                }
             }
         }
+        else {
+            if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
+                return;
+            }
 
-        for (Entity target : entityList) {
-            if (attack(target) && (canAttack)) {
-                hitEntity(target);
+            if (hitDelayTimer >= 0) {
+                hitDelayTimer--;
+                return;
+            }
+            else {
+                hitDelayTimer = hitDelay.get();
+            }
+
+            if (randomDelayEnabled.get()) {
+                if (randomDelayTimer > 0) {
+                    randomDelayTimer--;
+                    return;
+                } else {
+                    randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+                }
+            }
+
+            for (Entity target : entityList) {
+                if (attack(target) && (canAttack)) {
+                    hitEntity(target);
+                }
             }
         }
     }
