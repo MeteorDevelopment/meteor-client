@@ -171,6 +171,11 @@ public class Notebot extends Module {
             return Double.compare(d1,d2);
         });
     }
+    
+    @Override
+    public String getInfoString() {
+        return stage.toString();
+    }
 
     @Override
     public void onActivate() {
