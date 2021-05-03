@@ -6,53 +6,80 @@
 package minegame159.meteorclient.rendering;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
+import minegame159.meteorclient.systems.config.Config;
+import minegame159.meteorclient.utils.files.StreamUtils;
 
-import java.io.*;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Fonts {
-    public static void reset() {
-        File[] files = MeteorClient.FOLDER.exists() ? MeteorClient.FOLDER.listFiles() : new File[0];
-        if (files != null) {
-            for (File file : files) {
-                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
-                    file.delete();
-                }
-            }
-        }
-    }
+    private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf" };
+    public static final String DEFAULT_FONT = "JetBrains Mono";
+
+    private static final File FOLDER = new File(MeteorClient.FOLDER, "fonts");
+
+    private static String lastFont = "";
+    private static CustomTextRenderer a;
 
     public static void init() {
-        File[] files = MeteorClient.FOLDER.exists() ? MeteorClient.FOLDER.listFiles() : new File[0];
-        File fontFile = null;
+        FOLDER.mkdirs();
+
+        // Copy built in fonts if they not exist
+        for (String font : BUILTIN_FONTS) {
+            File file = new File(FOLDER, font);
+            if (!file.exists()) {
+                StreamUtils.copy(Fonts.class.getResourceAsStream("/assets/meteor-client/fonts/" + font), file);
+            }
+        }
+
+        // Load default font
+        MeteorClient.FONT = new CustomTextRenderer(new File(FOLDER, DEFAULT_FONT + ".ttf"));
+        lastFont = DEFAULT_FONT;
+    }
+
+    public static void load() {
+        if (lastFont.equals(Config.get().font)) return;
+
+        File file = new File(FOLDER, Config.get().font + ".ttf");
+        if (!file.exists()) {
+            Config.get().font = DEFAULT_FONT;
+            file = new File(FOLDER, Config.get().font + ".ttf");
+        }
+
+        try {
+            MeteorClient.FONT = new CustomTextRenderer(file);
+        } catch (Exception ignored) {
+            Config.get().font = DEFAULT_FONT;
+            file = new File(FOLDER, Config.get().font + ".ttf");
+
+            MeteorClient.FONT = new CustomTextRenderer(file);
+        }
+
+        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont) {
+            ((WidgetScreen) mc.currentScreen).invalidate();
+        }
+
+        lastFont = Config.get().font;
+    }
+
+    public static String[] getAvailableFonts() {
+        List<String> fonts = new ArrayList<>(4);
+
+        File[] files = FOLDER.listFiles(File::isFile);
         if (files != null) {
             for (File file : files) {
-                if (file.getName().endsWith(".ttf") || file.getName().endsWith(".TTF")) {
-                    fontFile = file;
-                    break;
+                int i = file.getName().lastIndexOf('.');
+                if (file.getName().substring(i).equals(".ttf")) {
+                    fonts.add(file.getName().substring(0, i));
                 }
             }
         }
 
-        if (fontFile == null) {
-            try {
-                fontFile = new File(MeteorClient.FOLDER, "JetBrainsMono-Regular.ttf");
-                fontFile.getParentFile().mkdirs();
-
-                InputStream in = MeteorClient.class.getResourceAsStream("/assets/meteor-client/JetBrainsMono-Regular.ttf");
-                OutputStream out = new FileOutputStream(fontFile);
-
-                byte[] bytes = new byte[255];
-                int read;
-                while ((read = in.read(bytes)) > 0) out.write(bytes, 0, read);
-
-                in.close();
-                out.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
-        MeteorClient.FONT = new CustomTextRenderer(fontFile);
+        return fonts.toArray(new String[0]);
     }
 }

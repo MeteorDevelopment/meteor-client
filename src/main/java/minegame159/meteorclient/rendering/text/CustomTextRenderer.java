@@ -26,7 +26,7 @@ public class CustomTextRenderer implements TextRenderer {
 
     private boolean building;
     private boolean scaleOnly;
-    private double scale;
+    private double scale = 1;
 
     public CustomTextRenderer(File file) {
         byte[] bytes = Utils.readBytes(file);

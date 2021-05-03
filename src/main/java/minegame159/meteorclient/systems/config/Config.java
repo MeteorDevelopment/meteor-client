@@ -19,6 +19,7 @@ public class Config extends System<Config> {
     public final Version version;
     public final String devBuild;
 
+    public String font = ConfigTab.font.get();
     public boolean customFont = ConfigTab.customFont.get();
     public boolean sendDataToApi = ConfigTab.sendDataToApi.get();
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
@@ -53,6 +54,7 @@ public class Config extends System<Config> {
         CompoundTag tag = new CompoundTag();
         tag.putString("version", version.getOriginalString());
 
+        tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
         tag.putDouble("rainbowSpeed", RainbowColors.GLOBAL.getSpeed());
         tag.putBoolean("sendDataToApi", sendDataToApi);
@@ -73,6 +75,7 @@ public class Config extends System<Config> {
 
     @Override
     public Config fromTag(CompoundTag tag) {
+        font = getString(tag, "font", ConfigTab.font);
         customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
         RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
         sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.sendDataToApi);
