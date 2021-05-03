@@ -6,19 +6,17 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.IGetter;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
@@ -35,7 +33,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
         this.name = name;
-        this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        this.title = Utils.nameToTitle(name);
         this.description = description;
         this.defaultValue = defaultValue;
         reset(false);
