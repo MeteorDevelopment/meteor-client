@@ -7,18 +7,21 @@ package minegame159.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.systems.modules.player.AntiHunger;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.text.LiteralText;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class DamageCommand extends Command {
+    private final static SimpleCommandExceptionType INVULNERABLE = new SimpleCommandExceptionType(new LiteralText("You are invulnerable."));
+    
     public DamageCommand() {
         super("damage", "Damages self", "dmg");
     }
@@ -29,8 +32,7 @@ public class DamageCommand extends Command {
             int amount = IntegerArgumentType.getInteger(context, "damage");
 
             if (mc.player.abilities.invulnerable) {
-                ChatUtils.error("You are in invulnerable.");
-                return SINGLE_SUCCESS;
+                throw INVULNERABLE.create();
             }
 
             damagePlayer(amount);
