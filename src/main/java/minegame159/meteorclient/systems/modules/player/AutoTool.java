@@ -107,7 +107,6 @@ public class AutoTool extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         BlockState blockState = mc.world.getBlockState(event.blockPos);
         int bestScore = -1;
-        int score = 0;
         int bestSlot = -1;
 
         if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
@@ -118,6 +117,8 @@ public class AutoTool extends Module {
             if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
 
             if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+
+            int score = 0;
 
             score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
             score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
