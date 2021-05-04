@@ -381,6 +381,15 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Integer> switchHealth = sgMisc.add(new IntSetting.Builder()
+            .name("switch-health")
+            .description("Health at which to stop switching to crystal")
+            .min(0)
+            .sliderMax(20)
+            .defaultValue(0)
+            .build()
+    );
+
     private final Setting<Double> verticalRange = sgMisc.add(new DoubleSetting.Builder()
             .name("vertical-range")
             .description("The maximum vertical range for placing/breaking end crystals. May kill performance if this value is higher than 3.")
@@ -862,7 +871,7 @@ public class CrystalAura extends Module {
 
     private void doSwitch(){
         assert mc.player != null;
-        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
+        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL || mc.player.getHealth() <= switchHealth.get()) {
             int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
             if (slot != -1 && slot < 9) {
                 preSlot = mc.player.inventory.selectedSlot;
