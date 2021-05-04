@@ -139,7 +139,6 @@ public class SelfTrap extends Module {
         int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
 
         if (turnOff.get() && ((placed && placePositions.isEmpty()) || slot == -1)) {
-            sendToggledMsg();
             toggle();
             return;
         }

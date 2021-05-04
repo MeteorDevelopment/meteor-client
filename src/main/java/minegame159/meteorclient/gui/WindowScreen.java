@@ -16,6 +16,7 @@ public abstract class WindowScreen extends WidgetScreen {
         super(theme, title);
 
         window = super.add(theme.window(title)).center().widget();
+        window.view.scrollOnlyWhenMouseOver = false;
     }
 
     @Override

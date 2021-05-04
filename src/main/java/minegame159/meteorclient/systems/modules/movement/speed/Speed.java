@@ -22,12 +22,12 @@ import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
 public class Speed extends Module {
-    private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgVanilla = settings.createGroup("Vanilla");
     private final SettingGroup sgNCP = settings.createGroup("NCP");
 
     //Main
-    public final Setting<SpeedModes> speedMode = sgDefault.add(new EnumSetting.Builder<SpeedModes>()
+    public final Setting<SpeedModes> speedMode = sgGeneral.add(new EnumSetting.Builder<SpeedModes>()
             .name("mode")
             .description("The method of applying speed.")
             .defaultValue(SpeedModes.Vanilla)
@@ -36,7 +36,7 @@ public class Speed extends Module {
             .build()
     );
 
-    public final Setting<Double> timer = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
             .name("timer")
             .description("Timer override.")
             .defaultValue(1)
@@ -46,14 +46,14 @@ public class Speed extends Module {
             .build()
     );
 
-    public final Setting<Boolean> inLiquids = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> inLiquids = sgGeneral.add(new BoolSetting.Builder()
             .name("in-liquids")
             .description("Uses speed when in lava or water.")
             .defaultValue(false)
             .build()
     );
 
-    public final Setting<Boolean> whenSneaking = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Uses speed when sneaking.")
             .defaultValue(false)

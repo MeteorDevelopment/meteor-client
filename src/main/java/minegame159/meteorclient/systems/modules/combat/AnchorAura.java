@@ -161,8 +161,8 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<SortPriority> priority = sgMisc.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
+    private final Setting<SortPriority> targetPriority = sgMisc.add(new EnumSetting.Builder<SortPriority>()
+            .name("target-priority")
             .description("How to select the player to target.")
             .defaultValue(SortPriority.LowestHealth)
             .build()
@@ -264,8 +264,8 @@ public class AnchorAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (EntityUtils.isInvalid(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
-        if (target == null) return;
+        if (EntityUtils.isBadTarget(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), targetPriority.get(), false);
+        if (EntityUtils.isBadTarget(target, targetRange.get())) return;
 
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR);
         int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE);

@@ -14,16 +14,23 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
+import minegame159.meteorclient.utils.world.Dir;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.ChunkStatus;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class VoidESP extends Module {
+    private static final Direction[] SIDES = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -48,9 +55,16 @@ public class VoidESP extends Module {
     private final Setting<Integer> holeHeight = sgGeneral.add(new IntSetting.Builder()
             .name("hole-height")
             .description("The minimum hole height to be rendered.")
-            .defaultValue(1)  // If we already have one hole in the bedrock layer, there is already something interesting.
+            .defaultValue(1)
             .min(1)
-            .sliderMax(5)     // There is no sense to check more than 5.
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<Boolean> netherRoof = sgGeneral.add(new BoolSetting.Builder()
+            .name("nether-roof")
+            .description("Check for holes in nether roof.")
+            .defaultValue(true)
             .build()
     );
 
@@ -66,7 +80,7 @@ public class VoidESP extends Module {
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("fill-color")
             .description("The color that fills holes in the void.")
-            .defaultValue(new SettingColor(225, 25, 25))
+            .defaultValue(new SettingColor(225, 25, 25, 50))
             .build()
     );
 
@@ -77,59 +91,83 @@ public class VoidESP extends Module {
             .build()
     );
 
-    private final List<BlockPos> voidHoles = new ArrayList<>();
+    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+
+    private final Pool<Void> voidHolePool = new Pool<>(Void::new);
+    private final List<Void> voidHoles = new ArrayList<>();
 
     public VoidESP() {
         super(Categories.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
     }
 
-    private void getHoles(int searchRange, int holeHeight) {
+    private boolean isBlockWrong(BlockPos blockPos) {
+        Chunk chunk = mc.world.getChunk(blockPos.getX() >> 4, blockPos.getZ() >> 4, ChunkStatus.FULL, false);
+        if (chunk == null) return true;
+
+        Block block = chunk.getBlockState(blockPos).getBlock();
+
+        if (airOnly.get()) return block != Blocks.AIR;
+        return block == Blocks.BEDROCK;
+    }
+
+    private boolean isHole(BlockPos.Mutable blockPos, boolean nether) {
+        for (int i = 0; i < holeHeight.get(); i++) {
+            blockPos.setY(nether ? 127 - i : 0);
+            if (isBlockWrong(blockPos)) return false;
+        }
+
+        return true;
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
         voidHoles.clear();
         if (Utils.getDimension() == Dimension.End) return;
 
-        BlockPos playerPos = mc.player.getBlockPos();
-        int playerY = playerPos.getY();
+        int px = mc.player.getBlockPos().getX();
+        int pz = mc.player.getBlockPos().getZ();
+        int radius = horizontalRadius.get();
 
-        for (int x = -searchRange; x < searchRange; ++x) {
-            for (int z = -searchRange; z < searchRange; ++z) {
-                BlockPos bottomBlockPos = playerPos.add(x, -playerY, z);
+        for (int x = px - radius; x <= px + radius; x++) {
+            for (int z = pz - radius; z <= pz + radius; z++) {
+                blockPos.set(x, 0, z);
+                if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 0, z), false));
 
-                int blocksFromBottom = 0;
-                for (int i = 0; i < holeHeight; ++i)
-                    if (isBlockMatching(mc.world.getBlockState(bottomBlockPos.add(0, i, 0)).getBlock()))
-                        ++blocksFromBottom;
-
-                if (blocksFromBottom >= holeHeight) voidHoles.add(bottomBlockPos);
-
-                // checking nether roof
-                if (Utils.getDimension() == Dimension.Nether) {
-                    BlockPos topBlockPos = playerPos.add(x, 127 - playerY, z);
-
-                    int blocksFromTop = 0;
-                    for (int i = 0; i < holeHeight; ++i)
-                        if (isBlockMatching(mc.world.getBlockState(bottomBlockPos.add(0, 127 - i, 0)).getBlock()))
-                            ++blocksFromTop;
-
-                    if (blocksFromTop >= holeHeight) voidHoles.add(topBlockPos);
+                // Check for nether roof
+                if (netherRoof.get() && Utils.getDimension() == Dimension.Nether) {
+                    blockPos.set(x, 127, z);
+                    if (isHole(blockPos, true)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 127, z), true));
                 }
             }
         }
     }
 
-    private boolean isBlockMatching(Block block) {
-        if (airOnly.get()) return block == Blocks.AIR;
-        return block != Blocks.BEDROCK;
-    }
-
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        getHoles(horizontalRadius.get(), holeHeight.get());
-    }
-
     @EventHandler
     private void onRender(RenderEvent event) {
-        for (BlockPos voidHole : voidHoles) {
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, voidHole, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        for (Void voidHole : voidHoles) voidHole.render();
+    }
+
+    private class Void {
+        private int x, y, z;
+        private int excludeDir;
+
+        public Void set(BlockPos.Mutable blockPos, boolean nether) {
+            x = blockPos.getX();
+            y = blockPos.getY();
+            z = blockPos.getZ();
+
+            excludeDir = 0;
+
+            for (Direction side : SIDES) {
+                blockPos.set(x + side.getOffsetX(), y, z + side.getOffsetZ());
+                if (isHole(blockPos, nether)) excludeDir |= Dir.get(side);
+            }
+
+            return this;
+        }
+
+        public void render() {
+            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, 1, sideColor.get(), lineColor.get(), shapeMode.get(), excludeDir);
         }
     }
 }

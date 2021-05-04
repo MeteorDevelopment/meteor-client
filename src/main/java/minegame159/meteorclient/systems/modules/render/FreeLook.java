@@ -15,7 +15,7 @@ import minegame159.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.options.Perspective;
 import org.lwjgl.glfw.GLFW;
 
-public class FreeRotate extends Module {
+public class FreeLook extends Module {
     public enum Mode {
         Player,
         Camera
@@ -66,14 +66,14 @@ public class FreeRotate extends Module {
             .build()
     );
 
-    public FreeRotate() {
-        super(Categories.Render, "free-rotate", "Allows more rotation options in third person.");
-    }
-
     public float cameraYaw;
     public float cameraPitch;
 
     private Perspective prePers;
+
+    public FreeLook() {
+        super(Categories.Render, "free-look", "Allows more rotation options in third person.");
+    }
 
     @Override
     public void onActivate() {

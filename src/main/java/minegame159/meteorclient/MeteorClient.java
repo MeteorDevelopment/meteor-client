@@ -25,7 +25,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.DiscordPresence;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Names;
@@ -80,7 +79,6 @@ public class MeteorClient implements ClientModInitializer {
 
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
-        EntityUtils.mc = mc;
 
         Systems.addPreLoadTask(() -> {
             if (!Modules.get().getFile().exists()) {
@@ -90,7 +88,6 @@ public class MeteorClient implements ClientModInitializer {
         });
 
         Matrices.begin(new MatrixStack());
-        Fonts.init();
         MeteorExecutor.init();
         Capes.init();
         RainbowColors.init();
@@ -105,6 +102,7 @@ public class MeteorClient implements ClientModInitializer {
         Tabs.init();
         GuiThemes.init();
         BlockUtils.init();
+        Fonts.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -129,6 +127,7 @@ public class MeteorClient implements ClientModInitializer {
         Modules.get().sortModules();
         Systems.load();
 
+        Fonts.load();
         GuiRenderer.init();
         GuiThemes.postInit();
     }

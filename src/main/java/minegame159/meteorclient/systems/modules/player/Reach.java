@@ -12,9 +12,9 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 
 public class Reach extends Module {
-    private final SettingGroup sg = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> reach = sg.add(new DoubleSetting.Builder()
+    private final Setting<Double> reach = sgGeneral.add(new DoubleSetting.Builder()
             .name("reach")
             .description("Your reach modifier.")
             .defaultValue(5)
