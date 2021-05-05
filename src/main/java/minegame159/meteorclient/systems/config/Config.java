@@ -25,6 +25,7 @@ public class Config extends System<Config> {
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
 
     public String prefix = ConfigTab.prefix.get();
+    public boolean openChatOnPrefix = ConfigTab.openChatOnPrefix.get();
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
     public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
@@ -61,6 +62,7 @@ public class Config extends System<Config> {
         tag.putInt("rotationHoldTicks", rotationHoldTicks);
 
         tag.putString("prefix", prefix);
+        tag.putBoolean("openChatOnPrefix", openChatOnPrefix);
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
@@ -82,6 +84,7 @@ public class Config extends System<Config> {
         rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.rotationHoldTicks);
 
         prefix = getString(tag, "prefix", ConfigTab.prefix);
+        openChatOnPrefix = getBoolean(tag, "openChatOnPrefix", ConfigTab.openChatOnPrefix);
         chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.chatCommandsInfo);
         deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
         rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
