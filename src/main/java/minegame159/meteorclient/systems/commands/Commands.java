@@ -33,6 +33,8 @@ public class Commands extends System<Commands> {
 
     @Override
     public void init() {
+        PrefixListener.init();
+
         add(new BaritoneCommand());
         add(new VClipCommand());
         add(new HClipCommand());

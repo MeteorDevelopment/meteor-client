@@ -25,6 +25,7 @@ public class Config extends System<Config> {
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
 
     public String prefix = ConfigTab.prefix.get();
+    public boolean openChatOnPrefix = ConfigTab.openChatOnPrefix.get();
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
     public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
