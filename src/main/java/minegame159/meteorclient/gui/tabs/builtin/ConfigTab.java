@@ -90,9 +90,18 @@ public class ConfigTab extends Tab {
             .build()
     );
 
+    public static final Setting<Boolean> openChatOnPrefix = sgChat.add(new BoolSetting.Builder()
+            .name("open-chat-on-prefix")
+            .description("Open chat when command prefix is pressed. Works like pressing '/' in vanilla.")
+            .defaultValue(true)
+            .onChanged(aBoolean -> Config.get().openChatOnPrefix = aBoolean)
+            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().openChatOnPrefix))
+            .build()
+    );
+
     public static final Setting<Boolean> chatCommandsInfo = sgChat.add(new BoolSetting.Builder()
             .name("chat-commands-info")
-            .description("Sends a chat message when you use chat comamnds (eg toggling module, changing a setting, etc).")
+            .description("Sends a chat message when you use chat commands (eg toggling module, changing a setting, etc).")
             .defaultValue(true)
             .onChanged(aBoolean -> Config.get().chatCommandsInfo = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().chatCommandsInfo))
