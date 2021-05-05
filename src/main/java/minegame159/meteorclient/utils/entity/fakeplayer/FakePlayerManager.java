@@ -17,10 +17,9 @@ public class FakePlayerManager {
     }
 
     public static void clear() {
-        for (FakePlayerEntity fakePlayer : fakePlayers) {
-            fakePlayers.remove(fakePlayer);
-            fakePlayer.despawn();
-        }
+        if (fakePlayers.isEmpty()) return;
+        fakePlayers.forEach(FakePlayerEntity::despawn);
+        fakePlayers.clear();
     }
 
     public static List<FakePlayerEntity> getPlayers() {
