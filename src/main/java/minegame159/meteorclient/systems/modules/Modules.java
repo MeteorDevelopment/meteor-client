@@ -387,7 +387,6 @@ public class Modules extends System<Modules> {
         add(new Surround());
         add(new Swarm());
         add(new TotemPopNotifier());
-        add(new Trigger());
         add(new Burrow());
     }
 

@@ -53,13 +53,6 @@ public class KillAura extends Module {
 
     // General
 
-    private final Setting<Boolean> leftclick = sgGeneral.add(new BoolSetting.Builder()
-            .name("left-click")
-            .description("Only attacks if you left click.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
             .name("range")
             .description("The maximum range the entity can be to attack it.")
@@ -67,6 +60,20 @@ public class KillAura extends Module {
             .min(0)
             .max(6)
             .sliderMax(6)
+            .build()
+    );
+
+    private final Setting<Boolean> leftclick = sgGeneral.add(new BoolSetting.Builder()
+            .name("left-click")
+            .description("Only attacks if you left click.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> onlyWhenLook = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-when-look")
+            .description("Only attacks when you look at the entity.")
+            .defaultValue(false)
             .build()
     );
 
@@ -261,7 +268,13 @@ public class KillAura extends Module {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
         }
 
-        if (leftclick.get()) {
+        if (onlyWhenLook.get()){
+            if (!(mc.targetedEntity instanceof LivingEntity)) return;
+            if (leftclick.get() && !mc.options.keyAttack.isPressed()) return;
+            if (attack(mc.targetedEntity) && canAttack)
+                hitEntity(mc.targetedEntity);
+        }
+        else if (leftclick.get()) {
             if (mc.options.keyAttack.isPressed() && !mc.options.keyAttack.wasPressed()) {
                 for (Entity target : entityList) {
                     if (attack(target) && (canAttack)) {
