@@ -63,9 +63,9 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> leftclick = sgGeneral.add(new BoolSetting.Builder()
-            .name("left-click")
-            .description("Only attacks if you left click.")
+    private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-on-click")
+            .description("Only attacks when you click.")
             .defaultValue(false)
             .build()
     );
@@ -270,11 +270,11 @@ public class KillAura extends Module {
 
         if (onlyWhenLook.get()){
             if (!(mc.targetedEntity instanceof LivingEntity)) return;
-            if (leftclick.get() && !mc.options.keyAttack.isPressed()) return;
+            if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return;
             if (attack(mc.targetedEntity) && canAttack)
                 hitEntity(mc.targetedEntity);
         }
-        else if (leftclick.get()) {
+        else if (onlyOnClick.get()) {
             if (mc.options.keyAttack.isPressed() && !mc.options.keyAttack.wasPressed()) {
                 for (Entity target : entityList) {
                     if (attack(target) && (canAttack)) {
