@@ -19,9 +19,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class EnchListSetting extends Setting<List<Enchantment>>{
-    public EnchListSetting(String name, String description, List<Enchantment> defaultValue, Consumer<List<Enchantment>> onChanged, Consumer<Setting<List<Enchantment>>> onModuleActivated){
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+public class EnchListSetting extends Setting<List<Enchantment>> {
+    public EnchListSetting(String name, String description, List<Enchantment> defaultValue, Consumer<List<Enchantment>> onChanged, Consumer<Setting<List<Enchantment>>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new ArrayList<>(defaultValue);
     }
@@ -90,6 +90,7 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
         private List<Enchantment> defaultValue;
         private Consumer<List<Enchantment>> onChanged;
         private Consumer<Setting<List<Enchantment>>> onModuleActivated;
+        private IVisible visible;
 
         public Builder name(String name) {
             this.name = name;
@@ -116,8 +117,13 @@ public class EnchListSetting extends Setting<List<Enchantment>>{
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public EnchListSetting build() {
-            return new EnchListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new EnchListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

@@ -21,8 +21,8 @@ import java.util.function.Consumer;
 public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<?>>> {
     public final boolean onlyAttackable;
 
-    public EntityTypeListSetting(String name, String description, Object2BooleanMap<EntityType<?>> defaultValue, Consumer<Object2BooleanMap<EntityType<?>>> onChanged, Consumer<Setting<Object2BooleanMap<EntityType<?>>>> onModuleActivated, boolean onlyAttackable) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public EntityTypeListSetting(String name, String description, Object2BooleanMap<EntityType<?>> defaultValue, Consumer<Object2BooleanMap<EntityType<?>>> onChanged, Consumer<Setting<Object2BooleanMap<EntityType<?>>>> onModuleActivated, IVisible visible, boolean onlyAttackable) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.onlyAttackable = onlyAttackable;
         value = new Object2BooleanOpenHashMap<>(defaultValue);
@@ -93,6 +93,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
         private Object2BooleanMap<EntityType<?>> defaultValue;
         private Consumer<Object2BooleanMap<EntityType<?>>> onChanged;
         private Consumer<Setting<Object2BooleanMap<EntityType<?>>>> onModuleActivated;
+        private IVisible visible;
         private boolean onlyAttackable = false;
 
         public Builder name(String name) {
@@ -120,13 +121,18 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public Builder onlyAttackable() {
             onlyAttackable = true;
             return this;
         }
 
         public EntityTypeListSetting build() {
-            return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, onlyAttackable);
+            return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, onlyAttackable);
         }
     }
 }

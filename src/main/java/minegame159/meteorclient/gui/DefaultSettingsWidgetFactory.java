@@ -79,6 +79,10 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         for (Setting<?> setting : group) {
             if (!StringUtils.containsIgnoreCase(setting.title, filter)) continue;
 
+            boolean visible = setting.isVisible();
+            setting.lastWasVisible = visible;
+            if (!visible) continue;
+
             table.add(theme.label(setting.title)).widget().tooltip = setting.description;
 
             Factory factory = factories.get(setting.getClass());

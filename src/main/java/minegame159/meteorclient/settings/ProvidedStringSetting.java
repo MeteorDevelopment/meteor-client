@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 public class ProvidedStringSetting extends StringSetting {
     public final Supplier<String[]> supplier;
 
-    public ProvidedStringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, Supplier<String[]> supplier) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public ProvidedStringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, Supplier<String[]> supplier) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.supplier = supplier;
     }
@@ -22,6 +22,7 @@ public class ProvidedStringSetting extends StringSetting {
         private String defaultValue;
         private Consumer<String> onChanged;
         private Consumer<Setting<String>> onModuleActivated;
+        private IVisible visible;
         private Supplier<String[]> supplier;
 
         public Builder name(String name) {
@@ -49,13 +50,18 @@ public class ProvidedStringSetting extends StringSetting {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public Builder supplier(Supplier<String[]> supplier) {
             this.supplier = supplier;
             return this;
         }
 
         public ProvidedStringSetting build() {
-            return new ProvidedStringSetting(name, description, defaultValue, onChanged, onModuleActivated, supplier);
+            return new ProvidedStringSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, supplier);
         }
     }
 }

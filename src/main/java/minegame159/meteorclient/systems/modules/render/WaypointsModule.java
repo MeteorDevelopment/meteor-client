@@ -165,7 +165,7 @@ public class WaypointsModule extends Module {
             table.add(theme.label("Color:"));
             list = table.add(theme.horizontalList()).widget();
             list.add(theme.quad(waypoint.color));
-            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null)));
+            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();

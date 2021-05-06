@@ -28,10 +28,12 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     private final Consumer<T> onChanged;
     public final Consumer<Setting<T>> onModuleActivated;
+    private final IVisible visible;
 
     public Module module;
+    public boolean lastWasVisible;
 
-    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
+    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         this.name = name;
         this.title = Utils.nameToTitle(name);
         this.description = description;
@@ -39,6 +41,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         reset(false);
         this.onChanged = onChanged;
         this.onModuleActivated = onModuleActivated;
+        this.visible = visible;
     }
 
     @Override
@@ -85,6 +88,10 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
     public void onActivated() {
         if (onModuleActivated != null) onModuleActivated.accept(this);
+    }
+
+    public boolean isVisible() {
+        return visible == null || visible.isVisible();
     }
 
     protected abstract T parseImpl(String str);
