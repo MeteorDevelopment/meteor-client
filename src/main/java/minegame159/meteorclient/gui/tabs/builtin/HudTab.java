@@ -53,7 +53,7 @@ public class HudTab extends Tab {
         return screen instanceof HudScreen;
     }
 
-    private static class HudScreen extends WindowTabScreen {
+    public static class HudScreen extends WindowTabScreen {
         private final Color HOVER_BG_COLOR = new Color(200, 200, 200, 50);
         private final Color HOVER_OL_COLOR = new Color(200, 200, 200, 200);
 

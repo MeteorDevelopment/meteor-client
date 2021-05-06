@@ -9,6 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.renderer.GuiDebugRenderer;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.TabScreen;
+import minegame159.meteorclient.gui.tabs.builtin.HudTab;
 import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WRoot;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -64,7 +65,7 @@ public abstract class WidgetScreen extends Screen {
         if (parent != null) {
             animProgress = 1;
 
-            if (this instanceof TabScreen && parent instanceof TabScreen) {
+            if (this instanceof TabScreen && parent instanceof TabScreen && !(this instanceof HudTab.HudScreen)) {
                 parent = ((TabScreen) parent).parent;
             }
         }
