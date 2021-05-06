@@ -17,8 +17,8 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
 
     private final List<String> suggestions;
 
-    public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         try {
             values = (T[]) defaultValue.getClass().getMethod("values").invoke(null);
@@ -68,6 +68,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
         protected T defaultValue;
         protected Consumer<T> onChanged;
         protected Consumer<Setting<T>> onModuleActivated;
+        protected IVisible visible;
 
         public Builder<T> name(String name) {
             this.name = name;
@@ -94,8 +95,13 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
             return this;
         }
 
+        public Builder<T> visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public EnumSetting<T> build() {
-            return new EnumSetting<>(name, description, defaultValue, onChanged, onModuleActivated);
+            return new EnumSetting<>(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

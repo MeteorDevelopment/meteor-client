@@ -19,8 +19,8 @@ import java.util.function.Consumer;
 public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends Packet<?>>>> {
     private static List<String> suggestions;
 
-    public PacketBoolSetting(String name, String description, Object2BooleanMap<Class<? extends Packet<?>>> defaultValue, Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public PacketBoolSetting(String name, String description, Object2BooleanMap<Class<? extends Packet<?>>> defaultValue, Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new Object2BooleanArrayMap<>(defaultValue);
     }
@@ -100,6 +100,7 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
         private Object2BooleanMap<Class<? extends Packet<?>>> defaultValue;
         private Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged;
         private Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated;
+        private IVisible visible;
 
         public Builder name(String name) {
             this.name = name;
@@ -126,8 +127,13 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public PacketBoolSetting build() {
-            return new PacketBoolSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new PacketBoolSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

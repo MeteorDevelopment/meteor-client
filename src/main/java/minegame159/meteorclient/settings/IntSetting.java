@@ -13,8 +13,8 @@ public class IntSetting extends Setting<Integer> {
     public final Integer min, max;
     private final Integer sliderMin, sliderMax;
 
-    private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, Integer min, Integer max, Integer sliderMin, Integer sliderMax) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, IVisible visible, Integer min, Integer max, Integer sliderMin, Integer sliderMax) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
@@ -62,6 +62,7 @@ public class IntSetting extends Setting<Integer> {
         private Integer defaultValue;
         private Consumer<Integer> onChanged;
         private Consumer<Setting<Integer>> onModuleActivated;
+        private IVisible visible;
         private Integer min, max;
         private Integer sliderMin, sliderMax;
 
@@ -90,6 +91,11 @@ public class IntSetting extends Setting<Integer> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public Builder min(int min) {
             this.min = min;
             return this;
@@ -111,7 +117,7 @@ public class IntSetting extends Setting<Integer> {
         }
 
         public IntSetting build() {
-            return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax);
+            return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax);
         }
     }
 }

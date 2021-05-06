@@ -16,8 +16,8 @@ import java.util.function.Predicate;
 public class BlockSetting extends Setting<Block> {
     public final Predicate<Block> filter;
 
-    public BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated, Predicate<Block> filter) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated, IVisible visible, Predicate<Block> filter) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
     }
@@ -68,6 +68,7 @@ public class BlockSetting extends Setting<Block> {
         private Block defaultValue;
         private Consumer<Block> onChanged;
         private Consumer<Setting<Block>> onModuleActivated;
+        private IVisible visible;
         private Predicate<Block> filter;
 
         public Builder name(String name) {
@@ -100,8 +101,13 @@ public class BlockSetting extends Setting<Block> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public BlockSetting build() {
-            return new BlockSetting(name, description, defaultValue, onChanged, onModuleActivated, filter);
+            return new BlockSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter);
         }
     }
 }

@@ -13,8 +13,8 @@ import net.minecraft.nbt.CompoundTag;
 import java.util.function.Consumer;
 
 public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> extends Setting<T> {
-    public GenericSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public GenericSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
@@ -56,6 +56,7 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
         private T defaultValue;
         private Consumer<T> onChanged;
         private Consumer<Setting<T>> onModuleActivated;
+        private IVisible visible;
 
         public Builder<T> name(String name) {
             this.name = name;
@@ -82,8 +83,13 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public GenericSetting<T> build() {
-            return new GenericSetting<>(name, description, defaultValue, onChanged, onModuleActivated);
+            return new GenericSetting<>(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }
