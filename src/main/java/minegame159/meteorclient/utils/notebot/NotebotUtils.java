@@ -168,7 +168,7 @@ public class NotebotUtils {
             }
 
             case Harp:
-                return (type == 0 || type > 15);
+                return (type == 0);
             case Bass:
                 return (type == 4);
             case Bells:
@@ -211,7 +211,7 @@ public class NotebotUtils {
             }
 
             case Harp:
-                return (type == 0 || type > 15);
+                return (type == 0);
             case Bass:
                 return (type == 1);            
             case Bells:
