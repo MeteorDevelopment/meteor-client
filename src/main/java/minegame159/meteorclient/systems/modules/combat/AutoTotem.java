@@ -107,7 +107,7 @@ public class AutoTotem extends Module {
         if (!(event.packet instanceof EntityStatusS2CPacket) || !Utils.canUpdate()) return;
 
         EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
-        if (p.getStatus() != 35) return;
+        if (p.getStatus() != 35 || p.getEntity(mc.world) == null) return;
 
         if (p.getEntity(mc.world).equals(mc.player)) ticks = 0;
     }
