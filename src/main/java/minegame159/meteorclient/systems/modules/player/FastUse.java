@@ -58,7 +58,7 @@ public class FastUse extends Module {
                 break;
             case Some:
                 if ((exp.get() && (mc.player.getMainHandStack().getItem() == Items.EXPERIENCE_BOTTLE || mc.player.getOffHandStack().getItem() == Items.EXPERIENCE_BOTTLE))
-                        || (blocks.get() && mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem))
+                        || (blocks.get() && (mc.player.getMainHandStack().getItem() instanceof BlockItem || mc.player.getOffHandStack().getItem() instanceof BlockItem)))
                     ((MinecraftClientAccessor) mc).setItemUseCooldown(0);
                 break;
         }
