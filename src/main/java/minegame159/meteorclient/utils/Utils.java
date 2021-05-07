@@ -13,7 +13,6 @@ import minegame159.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.mixin.MinecraftServerAccessor;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.TitleScreen;
@@ -29,8 +28,6 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.text.LiteralText;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -54,7 +51,6 @@ import java.util.stream.Collectors;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
-    public static final Color WHITE = new Color(255, 255, 255);
     private static final Random random = new Random();
     private static final DecimalFormat df;
     public static MinecraftClient mc;
@@ -345,20 +341,6 @@ public class Utils {
         return min + (max - min) * random.nextDouble();
     }
 
-    public static void sendMessage(String msg, Object... args) {
-        if (mc.player == null) return;
-
-        msg = String.format(msg, args);
-        msg = msg.replaceAll("#yellow", Formatting.YELLOW.toString());
-        msg = msg.replaceAll("#white", Formatting.WHITE.toString());
-        msg = msg.replaceAll("#red", Formatting.RED.toString());
-        msg = msg.replaceAll("#blue", Formatting.BLUE.toString());
-        msg = msg.replaceAll("#pink", Formatting.LIGHT_PURPLE.toString());
-        msg = msg.replaceAll("#gray", Formatting.GRAY.toString());
-
-        mc.player.sendMessage(new LiteralText(msg), false);
-    }
-
     public static void leftClick() {
         mc.options.keyAttack.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
@@ -377,32 +359,19 @@ public class Utils {
         return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
     }
 
-    public static String floatToString(float number) {
-        if (number % 1 == 0) return Integer.toString((int) number);
-        return Float.toString(number);
-    }
-
-    public static String doubleToString(double number) {
-        if (number % 1 == 0) return Integer.toString((int) number);
-        return df.format(number);
-    }
-
     public static int clamp(int value, int min, int max) {
         if (value < min) return min;
-        if (value > max) return max;
-        return value;
+        return Math.min(value, max);
     }
 
     public static float clamp(float value, float min, float max) {
         if (value < min) return min;
-        if (value > max) return max;
-        return value;
+        return Math.min(value, max);
     }
 
     public static double clamp(double value, double min, double max) {
         if (value < min) return min;
-        if (value > max) return max;
-        return value;
+        return Math.min(value, max);
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
@@ -443,25 +412,5 @@ public class Utils {
         for (T item : checked)
             map.put(item, true);
         return new Object2BooleanOpenHashMap<T>(map);
-    }
-
-    public static long packLong(int v1, int v2, int v3, int v4) {
-        return ((long) v1 << 48) + ((long) v2 << 32) + ((long) v3 << 16) + (v4);
-    }
-
-    public static int unpackLong1(long l) {
-        return (int) ((l >> 48) & 0x000000000000FFFF);
-    }
-
-    public static int unpackLong2(long l) {
-        return (int) ((l >> 32) & 0x000000000000FFFF);
-    }
-
-    public static int unpackLong3(long l) {
-        return (int) ((l >> 16) & 0x000000000000FFFF);
-    }
-
-    public static int unpackLong4(long l) {
-        return (int) ((l) & 0x000000000000FFFF);
     }
 }

@@ -35,7 +35,8 @@ import java.util.function.Predicate;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class EntityUtils {
-    private static final List<Entity> entities = new ArrayList<>();
+    public static final Color WHITE = new Color(255, 255, 255);
+    private static final List<Entity> ENTITIES = new ArrayList<>();
 
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
@@ -59,14 +60,14 @@ public class EntityUtils {
             case MISC:           return misc;
         }
 
-        return Utils.WHITE;
+        return WHITE;
     }
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
-        entities.clear();
-        getList(isGood, sortPriority, entities);
-        if (!entities.isEmpty()) {
-            return entities.get(0);
+        ENTITIES.clear();
+        getList(isGood, sortPriority, ENTITIES);
+        if (!ENTITIES.isEmpty()) {
+            return ENTITIES.get(0);
         }
 
         return null;
