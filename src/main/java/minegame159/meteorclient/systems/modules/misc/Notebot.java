@@ -21,6 +21,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.notebot.NBSDecoder;
+import minegame159.meteorclient.utils.notebot.NotebotUtils;
 import minegame159.meteorclient.utils.notebot.nbs.Layer;
 import minegame159.meteorclient.utils.notebot.nbs.Note;
 import minegame159.meteorclient.utils.notebot.nbs.Song;
@@ -32,13 +33,9 @@ import minegame159.meteorclient.utils.world.BlockUtils;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
 import net.minecraft.block.NoteBlock;
-import net.minecraft.block.enums.Instrument;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -48,34 +45,18 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.RaycastContext;
 import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
-public class Notebot extends Module {
 
-    public enum InstrumentType {
-        Any,
-        Harp,
-        Bass,
-        Bells,
-        Flute,
-        Chimes,
-        Guitar,
-        Xylophone,
-        Iron_Xylophone,
-        Cow_Bell,
-        Didgeridoo,
-        Bit,
-        Banjo,
-        Pling
-    }
+public class Notebot extends Module {
 
     private enum Stage {
         None,
@@ -97,18 +78,18 @@ public class Notebot extends Module {
             .build()
     );
 
-    private final Setting<InstrumentType> instrument = sgGeneral.add(new EnumSetting.Builder<InstrumentType>()
+    private final Setting<NotebotUtils.InstrumentType> instrument = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.InstrumentType>()
         .name("instrument")
         .description("Select which instrument will be played")
-        .defaultValue(InstrumentType.Any)
+        .defaultValue(NotebotUtils.InstrumentType.NotDrums)
         .build()
     );
 
-    private final Setting<Boolean> moveNotes = sgGeneral.add(new BoolSetting.Builder()
-        .name("move-notes")
-        .description("Move notes by one tick, if multiple notes supposed to play in one tick.")
-        .defaultValue(false)
-        .build()
+    private final Setting<Boolean> polyphonic = sgGeneral.add(new BoolSetting.Builder()
+            .name("polyphonic")
+            .description("Whether or not to allow multiple notes to be played at the same time")
+            .defaultValue(true)
+            .build()
     );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
@@ -139,19 +120,20 @@ public class Notebot extends Module {
             .build()
     );
 
-    private final List<BlockPos> possibleBlockPos = new ArrayList<>(Collections.emptyList());
+    private final List<BlockPos> possibleBlockPos = new ArrayList<>();
 
     private Stage stage = Stage.None;
     private boolean isPlaying = false;
-    private final HashMap<Integer,Integer> song = new HashMap<>();
-    private final List<Integer> uniqueNotes = new ArrayList<>(Collections.emptyList());
+    private final List<ImmutablePair<Integer,Integer>> song = new ArrayList<>();
+    private final List<Integer> uniqueNotes = new ArrayList<>();
     private final HashMap<Integer, BlockPos> blockPositions = new HashMap<>();
     private final List<BlockPos> scannedNoteblocks = new ArrayList<>();
     private int currentNote = 0;
-    private int lastKey = -1;
+    private int currentIndex = 0;
     private int offset = 0;
     private int ticks = 0;
     private boolean noSongsFound = true;
+    private WLabel status;
 
     public Notebot() {
         super(Categories.Misc, "notebot","Plays noteblock nicely");
@@ -185,8 +167,8 @@ public class Notebot extends Module {
 
     private void resetVariables() {
         currentNote=0;
+        currentIndex=0;
         offset=0;
-        lastKey=0;
         isPlaying=false;
         stage=Stage.None;
         song.clear();
@@ -216,25 +198,31 @@ public class Notebot extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         ticks++;
-        switch (stage) {
-            case Preview: {
-                onTickPreview();
-                break;
+        if (stage == Stage.SetUp) {
+            onTickSetup();
+        }
+        else if (stage == Stage.Tune) {
+            onTickTune();
+        }
+        else if (stage == Stage.Preview || stage == Stage.Playing) {
+            if (!isPlaying) return;
+            if (song == null || mc.player == null || currentIndex >= song.size()) {
+                Stop();
+                return;
+            } 
+            while (song.get(currentIndex).left < currentNote) currentIndex++; 
+            if (currentIndex >= song.size()) return;
+            while (song.get(currentIndex).left == currentNote) {
+                if (stage == Stage.Preview) {
+                    onTickPreview();
+                } else {
+                    onTickPlay();
+                }
+                currentIndex++;
+                if (currentIndex >= song.size()) return;
             }
-            case SetUp: {
-                onTickSetup();
-                break;
-            }
-            case Tune: {
-                onTickTune();
-                break;
-            }
-            case Playing: {
-                onTickPlay();
-                break;
-            }
-        default:
-            break;
+            currentNote++;
+            if (status != null) status.set(getStatus());
         }
     }
 
@@ -242,7 +230,7 @@ public class Notebot extends Module {
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
-        WLabel status = table.add(theme.label(getStatus())).expandCellX().widget();
+        status = table.add(theme.label(getStatus())).expandCellX().widget();
         WButton pause = table.add(theme.button(isPlaying?"Pause":"Resume")).right().widget();
         pause.action = () -> {
             Pause();
@@ -252,7 +240,6 @@ public class Notebot extends Module {
         WButton stop = table.add(theme.button("Stop")).right().widget();
         stop.action = () -> {
             Stop();
-            status.set(getStatus());
         };
         table.row();
         noSongsFound = true;
@@ -292,7 +279,7 @@ public class Notebot extends Module {
     private String getStatus() {
         if (!this.isActive()) return "Module disabled.";
         if (song.isEmpty()) return "No song loaded.";
-        if (isPlaying) return String.format("Playing song. %d/%d",currentNote,lastKey);
+        if (isPlaying) return String.format("Playing song. %d/%d",currentIndex,song.size());
         if (stage == Stage.Playing || stage == Stage.Preview) return "Ready to play.";
         if (stage == Stage.SetUp || stage == Stage.Tune) return "Setting up the noteblocks.";
         else return String.format("Stage: %s.", stage.toString());
@@ -347,7 +334,9 @@ public class Notebot extends Module {
         } else {
             isPlaying = false;
             currentNote = 0;
+            currentIndex = 0;
         }
+        if (status != null) status.set(getStatus());
     }
 
     public void Disable() {
@@ -372,15 +361,31 @@ public class Notebot extends Module {
         }
     }
 
+    private void addNote(int tick, int value) {
+        if (polyphonic.get()) {
+            song.add(new ImmutablePair<Integer,Integer>(tick,value));
+        } else if (song.size() == 0) {
+            song.add(new ImmutablePair<Integer,Integer>(tick,value));
+        } else if (song.get(song.size()-1).left != tick) {
+            song.add(new ImmutablePair<Integer,Integer>(tick,value));
+        }
+    }
+
     private boolean loadFileToMap(File file) {
         if (!file.exists() || !file.isFile()) {
             ChatUtils.moduleError(this, "File not found");
             return false;
         }
         String extension = FilenameUtils.getExtension(file.getName());
-        if (extension.equals("txt")) return loadTextFile(file);
-        else if (extension.equals("nbs")) return loadNbsFile(file);
-        return false;
+        boolean success = false;
+        if (extension.equals("txt")) success = loadTextFile(file);
+        else if (extension.equals("nbs")) success = loadNbsFile(file);
+        if (success) {
+            song.sort((o1, o2) -> {
+                return Integer.compare(o1.left, o2.left);
+            });
+        }
+        return success;
     }
 
     private boolean loadTextFile(File file) {
@@ -405,23 +410,13 @@ public class Notebot extends Module {
                 val = Integer.parseInt(parts[1]);
                 if (parts.length>2) {
                     int type = Integer.parseInt(parts[2]);
-                    if (type == 1) continue; //basedrum
-                    if (type == 2) continue; //snare
-                    if (type == 3) continue; //hat
-                    if (type == 11) continue; //cow_bell
+                    if (!NotebotUtils.isValidIntrumentTextFile(type, instrument.get())) continue;
                 }
             } catch (NumberFormatException e) {
                 ChatUtils.moduleWarning(this, "Invalid character at line %d", i);
                 continue;
             }
-            if (moveNotes.get() && song.containsKey(key)) {
-                song.put(key+1, val);
-                lastKey = key+1;
-            } else {
-                song.put(key,val);
-                lastKey = key;
-            }
-            
+            addNote(key,val);
         }
         return true;
     }
@@ -440,29 +435,19 @@ public class Notebot extends Module {
                 Note note = layer.getNote(tick);
                 tick *= nbsSong.getDelay();
                 if (note == null) continue;
-                byte instrument = note.getInstrument();
-                if (instrument == 2) continue;
-                if (instrument == 3) continue;
-                if (instrument == 4) continue;
+                byte instr = note.getInstrument();
+                if (!NotebotUtils.isValidInstrumentNbsFile(instr,instrument.get())) continue;
                 int n = Byte.toUnsignedInt(note.getKey());
                 n -= 33; // amazing conversion
                 if (n<0 || n>24) {
                     ChatUtils.moduleWarning(this, "Note at tick %d out of range.", tick);
                     continue;
                 }
-                if (moveNotes.get() && song.containsKey(tick)) {
-                    song.put(tick+1, n);
-                    lastKey = tick+1;
-                } else {
-                    song.put(tick,n);
-                    lastKey = tick;
-                }
-                
+                addNote(tick, n);
             }
         }
         return true;
     }
-    
 
     private void scanForNoteblocks() {
         if (mc.interactionManager==null || mc.world == null || mc.player == null) return;
@@ -478,7 +463,7 @@ public class Notebot extends Module {
                     float reach = mc.interactionManager.getReachDistance();
                     reach = reach*reach; //^2
                     if (pos.getSquaredDistance(mc.player.getPos(),false) > reach) continue;
-                    if (!isValidScanSpot(pos) || !isValidInstrument(pos)) continue;
+                    if (!isValidScanSpot(pos) || !NotebotUtils.isValidInstrument(pos, instrument.get())) continue;
                     scannedNoteblocks.add(pos);
                 }
             }
@@ -487,9 +472,9 @@ public class Notebot extends Module {
     }
 
     private boolean setupBlocks() {
-        song.values().forEach((v) -> {
-            if (!uniqueNotes.contains(v)) {
-                uniqueNotes.add(v);
+        song.forEach((v) -> {
+            if (!uniqueNotes.contains(v.right)) {
+                uniqueNotes.add(v.right);
             }
         });
         scanForNoteblocks();
@@ -504,45 +489,8 @@ public class Notebot extends Module {
     }
 
     private void onTickPreview() {
-        if (isPlaying && mc.player != null) {
-            if (currentNote >= lastKey) {
-                Stop();
-            }
-            if (song.containsKey(currentNote)) {
-                mc.player.playSound(getInstrumentSound(), 2f, (float) Math.pow(2.0D, (song.get(currentNote) - 12) / 12.0D));
-            }
-            currentNote++;
-        }
-    }
-
-    private SoundEvent getInstrumentSound() {
-        switch (instrument.get()) {
-            case Bass:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BASS;
-            case Bells:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BELL;
-            case Flute:
-                return SoundEvents.BLOCK_NOTE_BLOCK_FLUTE;
-            case Chimes:
-                return SoundEvents.BLOCK_NOTE_BLOCK_CHIME;
-            case Guitar:
-                return SoundEvents.BLOCK_NOTE_BLOCK_GUITAR;
-            case Xylophone:
-                return SoundEvents.BLOCK_NOTE_BLOCK_XYLOPHONE;
-            case Iron_Xylophone:
-                return SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE;
-            case Cow_Bell:
-                return SoundEvents.BLOCK_NOTE_BLOCK_COW_BELL;
-            case Didgeridoo:
-                return SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO;
-            case Bit:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BIT;
-            case Banjo:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BANJO;
-            case Pling:
-                return SoundEvents.BLOCK_NOTE_BLOCK_PLING;
-            default:
-                return SoundEvents.BLOCK_NOTE_BLOCK_HARP;
+        if (song.get(currentIndex).left == currentNote) {
+            mc.player.playSound(NotebotUtils.getInstrumentSound(instrument.get()), 2f, (float) Math.pow(2.0D, (song.get(currentIndex).right - 12) / 12.0D));
         }
     }
 
@@ -581,7 +529,7 @@ public class Notebot extends Module {
             Disable();
             return;
         }
-        if (!isValidEmptySpot(pos) || !isValidInstrument(pos)) {
+        if (!isValidEmptySpot(pos) || !NotebotUtils.isValidInstrument(pos, instrument.get())) {
             offset++;
             return;
         }
@@ -633,32 +581,26 @@ public class Notebot extends Module {
     }
 
     private void onTickPlay() {
-        if (!isPlaying) return;
-        if (song == null) return;
-        if (currentNote >= lastKey) {
-            Stop();
-            return;
-        }
-        if (song.containsKey(currentNote)) {
-            int note = song.get(currentNote);
+        if (song.get(currentIndex).left == currentNote) {
+            int note = song.get(currentIndex).right;
             BlockPos pos = blockPositions.get(note);
-            Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 100, this::playRotate);
-        }  else {
-            currentNote++;
+            if (polyphonic.get()) {
+                Rotations.setCamRotation(Rotations.getYaw(pos), Rotations.getPitch(pos));
+                playRotate();
+            } else {
+                Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 100, this::playRotate);
+            }
         }
     }
 
     private void playRotate() {
         if (mc.interactionManager == null) return;
         try {
-            int note = song.get(currentNote);
+            int note = song.get(currentIndex).right;
             BlockPos pos = blockPositions.get(note);
 
             mc.interactionManager.attackBlock(pos,Direction.DOWN);
-            currentNote++;
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
+        } catch (NullPointerException e) { }
     }
 
     private boolean isValidEmptySpot(BlockPos pos) {
@@ -672,89 +614,6 @@ public class Notebot extends Module {
         if (mc.world.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) return false;
         if (!mc.world.getBlockState(pos.up()).isAir()) return false;
         return true;
-    }
-
-    private boolean isValidInstrument(BlockPos pos) {
-        switch (instrument.get()) {
-            case Any:
-                return true;
-
-            case Harp: {
-                BlockState state = mc.world.getBlockState(pos);
-                if (state.getBlock() == Blocks.NOTE_BLOCK) {
-                    return (state.get(NoteBlock.INSTRUMENT) == Instrument.HARP);
-                } else {
-                    BlockState block = mc.world.getBlockState(pos.down());
-                    if (block.getMaterial() == Material.WOOD) return false;
-                    else if (block.getMaterial() == Material.AGGREGATE) return false;
-                    else if (block.getMaterial() == Material.GLASS) return false;
-                    else if (block.getMaterial() == Material.STONE) return false;
-                    else if (block.getBlock() == Blocks.GOLD_BLOCK) return false;
-                    else if (block.getBlock() == Blocks.CLAY) return false;
-                    else if (block.getBlock() == Blocks.PACKED_ICE) return false;
-                    else if (block.getMaterial() == Material.WOOL) return false;
-                    else if (block.getBlock() == Blocks.BONE_BLOCK) return false;
-                    else if (block.getBlock() == Blocks.IRON_BLOCK) return false;
-                    else if (block.getBlock() == Blocks.SOUL_SAND) return false;
-                    else if (block.getBlock() == Blocks.PUMPKIN) return false;
-                    else if (block.getBlock() == Blocks.EMERALD_BLOCK) return false;
-                    else if (block.getBlock() == Blocks.HAY_BLOCK) return false;
-                    else if (block.getBlock() == Blocks.GLOWSTONE) return false;
-                    else return true;
-                }
-            }
-            case Banjo: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.HAY_BLOCK);
-            }
-            case Bass: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getMaterial() == Material.WOOD);
-            }
-            case Bells: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.GOLD_BLOCK);
-            }
-            case Bit: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.EMERALD_BLOCK);
-            }
-            case Chimes: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.PACKED_ICE);
-            }
-            case Cow_Bell: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.SOUL_SAND);
-            }
-            case Didgeridoo: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.PUMPKIN);
-            }
-            case Flute: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.CLAY);
-            }
-            case Guitar: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getMaterial() == Material.WOOL);
-            }
-            case Iron_Xylophone: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.IRON_BLOCK);
-            }
-            case Pling: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.GLOWSTONE);
-            }
-            case Xylophone: {
-                BlockState block = mc.world.getBlockState(pos.down());
-                return (block.getBlock() == Blocks.BONE_BLOCK);
-            }
-            default:
-                return false;
-        }
-
     }
 
     // Stolen from crystal aura :)
