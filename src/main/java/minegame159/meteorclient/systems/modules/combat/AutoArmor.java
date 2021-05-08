@@ -167,13 +167,13 @@ public class AutoArmor extends Module {
 
     private int getScore(ItemStack itemStack) {
         if (itemStack.isEmpty()) return 0;
-
+        
         // Score calculated based on enchantments, protection and toughness
         int score = 0;
 
         // Prefer blast protection on leggings if enabled
         Enchantment protection = preferredProtection.get().enchantment;
-        if (blastLeggings.get() && getItemSlotId(itemStack) == 1) protection = Enchantments.BLAST_PROTECTION;
+        if (itemStack.getItem() instanceof ArmorItem && blastLeggings.get() && getItemSlotId(itemStack) == 1) protection = Enchantments.BLAST_PROTECTION;
 
         score += 3 * enchantments.getInt(protection);
         score += enchantments.getInt(Enchantments.PROTECTION);
