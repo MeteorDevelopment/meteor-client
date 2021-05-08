@@ -21,16 +21,16 @@ import net.minecraft.util.Hand;
 public class AntiAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Makes you rotate when placing.")
+    private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
+            .name("swing")
+            .description("Swings your hand when placing.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
-            .name("swing")
-            .description("Swings your hand when placing.")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Makes you rotate when placing.")
             .defaultValue(true)
             .build()
     );

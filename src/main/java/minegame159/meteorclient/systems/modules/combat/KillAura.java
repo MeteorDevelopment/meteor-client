@@ -171,6 +171,7 @@ public class KillAura extends Module {
             .name("rotation-direction")
             .description("The direction to use for rotating towards the enemy.")
             .defaultValue(Target.Head)
+            .visible(() -> rotationMode.get() != RotationMode.None)
             .build()
     );
 
@@ -205,6 +206,7 @@ public class KillAura extends Module {
             .defaultValue(4)
             .min(0)
             .sliderMax(20)
+            .visible(randomDelayEnabled::get)
             .build()
     );
 

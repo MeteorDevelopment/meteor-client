@@ -44,6 +44,7 @@ public class BetterTab extends Module {
             .name("self-color")
             .description("The color to highlight your name with.")
             .defaultValue(new SettingColor(250, 130, 30))
+            .visible(self::get)
             .build()
     );
 
@@ -65,6 +66,7 @@ public class BetterTab extends Module {
             .name("meteor-color")
             .description("The color to highlight meteor users with.")
             .defaultValue(new SettingColor(135, 0, 255))
+            .visible(meteor::get)
             .build()
     );
 

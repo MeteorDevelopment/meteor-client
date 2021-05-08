@@ -52,6 +52,7 @@ public class BedAura extends Module {
             .name("place-mode")
             .description("The way beds are allowed to be placed near you.")
             .defaultValue(Safety.Safe)
+            .visible(place::get)
             .build()
     );
 
@@ -61,6 +62,7 @@ public class BedAura extends Module {
             .defaultValue(9)
             .min(0)
             .sliderMax(20)
+            .visible(place::get)
             .build()
     );
 
@@ -145,6 +147,7 @@ public class BedAura extends Module {
             .sliderMin(1)
             .max(9)
             .sliderMax(9)
+            .visible(autoMove::get)
             .build()
     );
 
