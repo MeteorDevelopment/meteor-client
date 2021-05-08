@@ -49,6 +49,7 @@ public class AntiAFK extends Module {
             .name("spin-mode")
             .description("The method of rotating.")
             .defaultValue(SpinMode.Server)
+            .visible(spin::get)
             .build()
     );
 
@@ -56,6 +57,7 @@ public class AntiAFK extends Module {
             .name("spin-speed")
             .description("The speed to spin you.")
             .defaultValue(7)
+            .visible(spin::get)
             .build()
     );
 
@@ -67,6 +69,7 @@ public class AntiAFK extends Module {
             .max(90)
             .sliderMin(-90)
             .sliderMax(90)
+            .visible(() -> spin.get() && spinMode.get() == SpinMode.Server)
             .build()
     );
 
@@ -74,19 +77,22 @@ public class AntiAFK extends Module {
             .name("jump")
             .description("Jumps.")
             .defaultValue(true)
-            .build());
+            .build()
+    );
 
     private final Setting<Boolean> click = sgActions.add(new BoolSetting.Builder()
             .name("click")
             .description("Clicks.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     private final Setting<Boolean> disco = sgActions.add(new BoolSetting.Builder()
             .name("disco")
             .description("Sneaks and unsneaks quickly.")
             .defaultValue(false)
-            .build());
+            .build()
+    );
 
     private final Setting<Boolean> strafe = sgActions.add(new BoolSetting.Builder()
             .name("strafe")
@@ -101,7 +107,8 @@ public class AntiAFK extends Module {
                     mc.options.keyRight.setPressed(false);
                 }
             })
-            .build());
+            .build()
+    );
 
     // Messages
 

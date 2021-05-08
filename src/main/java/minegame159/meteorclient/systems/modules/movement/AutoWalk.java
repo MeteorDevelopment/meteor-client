@@ -60,6 +60,7 @@ public class AutoWalk extends Module {
             .onChanged(direction1 -> {
                 if (isActive()) unpress();
             })
+            .visible(() -> mode.get() == Mode.Simple)
             .build()
     );
 

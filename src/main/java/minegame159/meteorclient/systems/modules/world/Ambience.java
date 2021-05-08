@@ -40,6 +40,7 @@ public class Ambience extends Module {
             .name("ender-custom-color")
             .description("Allows a custom sky color for Ender Mode.")
             .defaultValue(false)
+            .visible(enderMode::get)
             .build()
     );
 

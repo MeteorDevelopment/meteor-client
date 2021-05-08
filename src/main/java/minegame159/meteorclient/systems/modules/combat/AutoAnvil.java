@@ -82,7 +82,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> startHeight = sgPlace.add(new IntSetting.Builder()
             .name("start-Height")
-            .description("The height at beginning")
+            .description("The height at the beginning.")
             .defaultValue(5)
             .min(0)
             .max(10)
@@ -93,7 +93,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> minHeight = sgPlace.add(new IntSetting.Builder()
             .name("min-Height")
-            .description("The minimum height accetable")
+            .description("The minimum height acceptable.")
             .defaultValue(1)
             .min(0)
             .max(5)
@@ -104,7 +104,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Double> decrease = sgPlace.add(new DoubleSetting.Builder()
             .name("decrease")
-            .description("The distance where it will start decrease")
+            .description("The distance where it will start to decrease.")
             .defaultValue(1.4)
             .min(0)
             .max(4)
@@ -115,7 +115,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
             .name("blocks-per-tick")
-            .description("The number of blocks you can place every ticks")
+            .description("The number of blocks you can place every ticks.")
             .defaultValue(4)
             .min(2)
             .max(8)

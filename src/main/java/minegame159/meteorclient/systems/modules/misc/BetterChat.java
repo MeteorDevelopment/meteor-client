@@ -59,6 +59,7 @@ public class BetterChat extends Module {
             .defaultValue(4)
             .min(1)
             .sliderMin(1)
+            .visible(antiSpamEnabled::get)
             .build()
     );
 
@@ -66,6 +67,7 @@ public class BetterChat extends Module {
             .name("move-to-bottom")
             .description("Moves any duplicate messages to the bottom of the chat.")
             .defaultValue(true)
+            .visible(antiSpamEnabled::get)
             .build()
     );
 
@@ -82,6 +84,7 @@ public class BetterChat extends Module {
             .name("disable-all-messages")
             .description("Prevents you from essentially being able to send messages in chat.")
             .defaultValue(false)
+            .visible(coordsProtectionEnabled::get)
             .build()
     );
 
@@ -89,6 +92,7 @@ public class BetterChat extends Module {
             .name("disable-button")
             .description("Adds a button to the warning to send a message to the chat in any way.")
             .defaultValue(true)
+            .visible(coordsProtectionEnabled::get)
             .build()
     );
 
@@ -123,6 +127,7 @@ public class BetterChat extends Module {
             .defaultValue(1000)
             .min(100)
             .sliderMax(1000)
+            .visible(longerChatEnabled::get)
             .build()
     );
 
@@ -139,6 +144,7 @@ public class BetterChat extends Module {
             .name("text")
             .description("The text to add as your prefix.")
             .defaultValue("> ")
+            .visible(prefixEnabled::get)
             .build()
     );
 
@@ -146,13 +152,15 @@ public class BetterChat extends Module {
             .name("small-caps")
             .description("Uses a small font.")
             .defaultValue(false)
+            .visible(prefixEnabled::get)
             .build()
     );
 
     private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
             .name("random-number")
-            .description("Example: <msg> (538)")
+            .description("Example: (538) <msg>")
             .defaultValue(false)
+            .visible(prefixEnabled::get)
             .build()
     );
 
@@ -170,6 +178,7 @@ public class BetterChat extends Module {
             .name("text")
             .description("The text to add as your suffix.")
             .defaultValue(" | Meteor on Crack!")
+            .visible(suffixEnabled::get)
             .build()
     );
 
@@ -177,6 +186,7 @@ public class BetterChat extends Module {
             .name("small-caps")
             .description("Uses a small font.")
             .defaultValue(true)
+            .visible(suffixEnabled::get)
             .build()
     );
 
@@ -184,6 +194,7 @@ public class BetterChat extends Module {
             .name("random")
             .description("Example: <msg> (538)")
             .defaultValue(false)
+            .visible(suffixEnabled::get)
             .build()
     );
 

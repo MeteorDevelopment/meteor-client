@@ -26,8 +26,8 @@ public class Trigger extends Module {
 
 
     private final Setting<Boolean> whenHoldingLeftClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("when-holding-left-click")
-            .description("Attacks only when you are holding left click.")
+            .name("only-left-click")
+            .description("Only attacks when you are holding left click.")
             .defaultValue(false)
             .build()
     );
