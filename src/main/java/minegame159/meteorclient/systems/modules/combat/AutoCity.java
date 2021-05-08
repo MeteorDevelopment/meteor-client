@@ -124,6 +124,8 @@ public class AutoCity extends Module {
 
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPosTarget), Rotations.getPitch(blockPosTarget), () -> mine(blockPosTarget));
         else mine(blockPosTarget);
+
+        if (selfToggle.get()) toggle();
     }
 
     private void mine(BlockPos blockPos) {
