@@ -46,7 +46,7 @@ public class SelfTrap extends Module {
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
             .name("top-mode")
             .description("Which positions to place on your top half.")
-            .defaultValue(TopMode.AntiFacePlace)
+            .defaultValue(TopMode.Top)
             .build()
     );
 
@@ -73,16 +73,16 @@ public class SelfTrap extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Sends rotation packets to the server when placing.")
+    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
+            .name("turn-off")
+            .description("Turns off after placing.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> turnOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("turn-off")
-            .description("Turns off after placing.")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+            .name("rotate")
+            .description("Sends rotation packets to the server when placing.")
             .defaultValue(true)
             .build()
     );

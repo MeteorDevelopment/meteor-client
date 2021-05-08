@@ -81,6 +81,7 @@ public class StashFinder extends Module {
             .name("notification-mode")
             .description("The mode to use for notifications.")
             .defaultValue(Mode.Toast)
+            .visible(sendNotifications::get)
             .build()
     );
 

@@ -126,6 +126,7 @@ public class ElytraFly extends Module {
             .max(15)
             .sliderMin(1)
             .sliderMax(10)
+            .visible(noCrash::get)
             .build()
     );
 
@@ -153,7 +154,6 @@ public class ElytraFly extends Module {
             .build()
     );
 
-
     public final Setting<Boolean> useFireworks = sgAutopilot.add(new BoolSetting.Builder()
             .name("use-fireworks")
             .description("Uses firework rockets every second of your choice.")
@@ -167,6 +167,7 @@ public class ElytraFly extends Module {
             .min(1)
             .defaultValue(10)
             .sliderMax(20)
+            .visible(useFireworks::get)
             .build()
     );
 
@@ -183,6 +184,7 @@ public class ElytraFly extends Module {
             .defaultValue(120)
             .min(0)
             .sliderMax(260)
+            .visible(moveForward::get)
             .build()
     );
 

@@ -60,7 +60,6 @@ public class VeinMiner extends Module {
             .build()
     );
 
-
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Sends rotation packets to the server when mining.")

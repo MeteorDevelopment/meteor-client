@@ -56,6 +56,7 @@ public class Step extends Module {
             .defaultValue(5)
             .min(1)
             .max(36)
+            .visible(safeStep::get)
             .build()
     );
 

@@ -35,6 +35,7 @@ public class OffhandCrash extends Module {
             .defaultValue(2000)
             .min(1)
             .sliderMax(10000)
+            .visible(doCrash::get)
             .build()
     );
 
