@@ -272,7 +272,11 @@ public class KillAura extends Module {
 
         if (onlyWhenLook.get()){
             if (!(mc.targetedEntity instanceof LivingEntity)) return;
-            if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return;
+
+            if (onlyOnClick.get() && (!mc.options.keyAttack.isPressed() || mc.options.keyAttack.wasPressed())) return;
+
+            if (!delayCheck()) return;
+
             if (attack(mc.targetedEntity) && canAttack)
                 hitEntity(mc.targetedEntity);
         }
@@ -286,26 +290,7 @@ public class KillAura extends Module {
             }
         }
         else {
-            if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
-                return;
-            }
-
-            if (hitDelayTimer >= 0) {
-                hitDelayTimer--;
-                return;
-            }
-            else {
-                hitDelayTimer = hitDelay.get();
-            }
-
-            if (randomDelayEnabled.get()) {
-                if (randomDelayTimer > 0) {
-                    randomDelayTimer--;
-                    return;
-                } else {
-                    randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
-                }
-            }
+            if (!delayCheck()) return;
 
             for (Entity target : entityList) {
                 if (attack(target) && (canAttack)) {
@@ -313,6 +298,30 @@ public class KillAura extends Module {
                 }
             }
         }
+    }
+
+    private boolean delayCheck() {
+        if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
+            return false;
+        }
+
+        if (hitDelayTimer >= 0) {
+            hitDelayTimer--;
+            return false;
+        }
+        else {
+            hitDelayTimer = hitDelay.get();
+        }
+
+        if (randomDelayEnabled.get()) {
+            if (randomDelayTimer > 0) {
+                randomDelayTimer--;
+                return false;
+            } else {
+                randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
+            }
+        }
+        return true;
     }
 
     private boolean attack(Entity target) {
