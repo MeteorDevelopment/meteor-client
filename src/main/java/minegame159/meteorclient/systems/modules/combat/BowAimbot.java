@@ -9,7 +9,7 @@ import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -99,7 +99,7 @@ public class BowAimbot extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onRender(RenderEvent event) {
         if (playerIsDead() || !itemInHand()) return;
         if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
 
@@ -130,7 +130,7 @@ public class BowAimbot extends Module {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
             }
-            aim();
+            aim(event.tickDelta);
         }
     }
 
@@ -147,17 +147,16 @@ public class BowAimbot extends Module {
         return mc.player.getMainHandStack().getItem() instanceof BowItem || mc.player.getMainHandStack().getItem() instanceof CrossbowItem;
     }
 
-    private void aim() {
+    private void aim(double tickDelta) {
         // Velocity based on bow charge.
         float velocity = (mc.player.getItemUseTime() - mc.player.getItemUseTimeLeft()) / 20f;
         velocity = (velocity * velocity + velocity * 2) / 3;
         if (velocity > 1) velocity = 1;
 
         // Positions
-        double distance = target.getPos().distanceTo(mc.player.getPos());
-        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * distance;
-        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * distance;
-        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * distance;
+        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * tickDelta;
+        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * tickDelta;
+        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * tickDelta;
 
         // Adjusting for hitbox heights
         posY -= 1.9f - target.getHeight();
