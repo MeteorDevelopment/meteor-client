@@ -6,6 +6,7 @@
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -103,7 +104,7 @@ public class InventoryViewerHud extends HudElement {
                 break;
             case Flat:
                 Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                Renderer.NORMAL.quad(x, y, w, h, color.get());
+                Renderer.NORMAL.quadRounded(x, y, w, h, color.get(), GuiThemes.get().roundAmount(), true);
                 Renderer.NORMAL.end();
                 break;
         }

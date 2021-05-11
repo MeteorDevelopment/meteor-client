@@ -182,6 +182,7 @@ public class MeshBuilder {
     // Rounded quad
 
     public void quadRoundedOutline(double x, double y, double width, double height, Color color, int r, double s) {
+        r = getR(r, width, height);
         if (r == 0) {
             quad(x, y, width, s, color);
             quad(x, y + height - s, width, s, color);
@@ -189,13 +190,7 @@ public class MeshBuilder {
             quad(x + width - s, y + s, s, height - s * 2, color);
         }
         else {
-            if (r * 2 > height) {
-                r = (int)height / 2;
-            }
-            if (r * 2 > width) {
-                r = (int)width / 2;
-            }
-            int cirDepth = Math.max(r / 2, 1);
+            int cirDepth = getCir(r);
             //top
             quarterCircleOutline(x + r, y + r, r, 3, cirDepth, color, s);
             quad(x + r, y, width - r * 2, s, color);
@@ -211,16 +206,11 @@ public class MeshBuilder {
     }
 
     public void quadRounded(double x, double y, double width, double height, Color color, int r, boolean roundTop) {
+        r = getR(r, width, height);
         if (r == 0)
             quad(x, y, width, height, color);
         else {
-            if (r * 2 > height) {
-                r = (int)height / 2;
-            }
-            if (r * 2 > width) {
-                r = (int)width / 2;
-            }
-            int cirDepth = Math.max(r / 2, 1);
+            int cirDepth = getCir(r);
             if (roundTop) {
                 //top
                 quarterCircle(x + r, y + r, r, 3, cirDepth, color);
@@ -241,16 +231,11 @@ public class MeshBuilder {
     }
 
     public void quadRoundedSide(double x, double y, double width, double height, Color color, int r, boolean right) {
+        r = getR(r, width, height);
         if (r == 0)
             quad(x, y, width, height, color);
         else {
-            if (r * 2 > height) {
-                r = (int)height / 2;
-            }
-            if (r * 2 > width) {
-                r = (int)width / 2;
-            }
-            int cirDepth = Math.max(r / 2, 1);
+            int cirDepth = getCir(r);
             if (right) {
                 quarterCircle(x + width - r, y + r, r, 0, cirDepth, color);
                 quarterCircle(x + width - r, y + height - r, r, 1, cirDepth, color);
@@ -264,6 +249,20 @@ public class MeshBuilder {
                 quad(x, y + r, r, height - r * 2, color);
             }
         }
+    }
+
+    private int getR(int r, double w, double h) {
+        if (r * 2 > h) {
+            r = (int)h / 2;
+        }
+        if (r * 2 > w) {
+            r = (int)w / 2;
+        }
+        return r;
+    }
+
+    private int getCir(int r) {
+        return Math.max(r / 2, 1);
     }
 
     private void quarterCircle(double x, double y, double r, double a, int cirDepth, Color color) {
