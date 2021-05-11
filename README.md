@@ -31,7 +31,7 @@ We would appreciate if you donated to us through [PayPal](https://paypal.me/Mine
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [Minn](https://github.com/MinnDevelopment) for [Discord Rpc](https://github.com/MinnDevelopment/java-discord-rpc)  
 [G00fY2](https://github.com/G00fY2) for [Version Compare](https://github.com/G00fY2/version-compare)  
-[Earthcomputer](https://github.com/Earthcomputer) for [multiconnect](https://github.com/Earthcomputer/multiconnect)
+[Earthcomputer](https://github.com/Earthcomputer) for [multiconnect](https://github.com/Earthcomputer/multiconnect)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
 
 ## License
