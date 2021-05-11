@@ -177,14 +177,6 @@ public class KillAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> rotateCamera = sgRotations.add(new BoolSetting.Builder()
-            .name("rotate-camera")
-            .description("Rotate the client-side camera when targeting")
-            .defaultValue(false)
-            .visible(() -> !onlyWhenLook.get())
-            .build()
-    );
-
     // Delay
 
     private final Setting<Boolean> smartDelay = sgDelay.add(new BoolSetting.Builder()
@@ -348,13 +340,7 @@ public class KillAura extends Module {
     }
 
     private void rotate(Entity target, Runnable callback) {
-        double yaw = Rotations.getYaw(target);
-        double pitch = Rotations.getPitch(target, rotationDirection.get());
-        Rotations.rotate(yaw, pitch, callback);
-        if (rotateCamera.get() && !onlyWhenLook.get()) {
-            mc.player.yaw = (float)yaw;
-            mc.player.pitch = (float)pitch;
-        }
+        Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), callback);
     }
 
     private void hitEntity(Entity target) {
