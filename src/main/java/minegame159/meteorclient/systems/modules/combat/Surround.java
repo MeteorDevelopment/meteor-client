@@ -8,6 +8,7 @@ package minegame159.meteorclient.systems.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -22,6 +23,12 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 public class Surround extends Module {
+    public enum Block {
+        EChest,
+        Obsidian,
+        Anchor
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
@@ -80,10 +87,10 @@ public class Surround extends Module {
             .build()
     );
 
-    private final Setting<Boolean> useEnderChests = sgGeneral.add(new BoolSetting.Builder()
-            .name("use-ender-chests")
-            .description("Will surround with ender chests if they are found in your hotbar.")
-            .defaultValue(false)
+    private final Setting<Block> block = sgGeneral.add(new EnumSetting.Builder<Block>()
+            .name("block")
+            .description("What block to use for surround.")
+            .defaultValue(Block.Obsidian)
             .build()
     );
 
@@ -172,8 +179,16 @@ public class Surround extends Module {
 
             if (!(item instanceof BlockItem)) continue;
 
-            if (item == Items.OBSIDIAN || (item == Items.ENDER_CHEST && useEnderChests.get())) {
-                return i;
+            switch (block.get()) {
+                case EChest:
+                    if (item == Items.ENDER_CHEST) return i;
+                    break;
+                case Anchor:
+                    if (item == Items.RESPAWN_ANCHOR) return i;
+                    break;
+                case Obsidian:
+                    if (item == Items.OBSIDIAN) return i;
+                    break;
             }
         }
 
