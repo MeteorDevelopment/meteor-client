@@ -30,7 +30,7 @@ public class AutoWeapon extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
-            .name("Weapon")
+            .name("weapon")
             .description("What type of weapon to use.")
             .defaultValue(Weapon.Sword)
             .build()

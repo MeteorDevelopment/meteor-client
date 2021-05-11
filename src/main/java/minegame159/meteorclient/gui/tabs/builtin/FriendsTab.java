@@ -22,7 +22,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.systems.friends.Friend;
 import minegame159.meteorclient.systems.friends.Friends;
-import minegame159.meteorclient.utils.entity.FriendType;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.Screen;
 
@@ -152,7 +151,7 @@ public class FriendsTab extends Tab {
             for (Friend friend : Friends.get()) {
                 table.add(theme.label(friend.name));
 
-                WDropdown<FriendType> type = table.add(theme.dropdown(friend.type)).widget();
+                WDropdown<Friends.FriendType> type = table.add(theme.dropdown(friend.type)).widget();
                 type.action = () -> friend.type = type.get();
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();

@@ -72,6 +72,7 @@ public class AutoLog extends Module {
             .min(1)
             .max(10)
             .sliderMax(5)
+            .visible(crystalLog::get)
             .build()
     );
 

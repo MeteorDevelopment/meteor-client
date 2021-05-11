@@ -63,6 +63,20 @@ public class KillAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-on-click")
+            .description("Only attacks when you click.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> onlyWhenLook = sgGeneral.add(new BoolSetting.Builder()
+            .name("only-when-look")
+            .description("Only attacks when you look at the entity.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to attack.")
@@ -157,6 +171,7 @@ public class KillAura extends Module {
             .name("rotation-direction")
             .description("The direction to use for rotating towards the enemy.")
             .defaultValue(Target.Head)
+            .visible(() -> rotationMode.get() != RotationMode.None)
             .build()
     );
 
@@ -191,6 +206,7 @@ public class KillAura extends Module {
             .defaultValue(4)
             .min(0)
             .sliderMax(20)
+            .visible(randomDelayEnabled::get)
             .build()
     );
 
@@ -254,13 +270,44 @@ public class KillAura extends Module {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
         }
 
+        if (onlyWhenLook.get()){
+            if (!(mc.targetedEntity instanceof LivingEntity)) return;
+
+            if (onlyOnClick.get() && (!mc.options.keyAttack.isPressed() || mc.options.keyAttack.wasPressed())) return;
+
+            if (!delayCheck()) return;
+
+            if (attack(mc.targetedEntity) && canAttack)
+                hitEntity(mc.targetedEntity);
+        }
+        else if (onlyOnClick.get()) {
+            if (mc.options.keyAttack.isPressed() && !mc.options.keyAttack.wasPressed()) {
+                for (Entity target : entityList) {
+                    if (attack(target) && (canAttack)) {
+                        hitEntity(target);
+                    }
+                }
+            }
+        }
+        else {
+            if (!delayCheck()) return;
+
+            for (Entity target : entityList) {
+                if (attack(target) && (canAttack)) {
+                    hitEntity(target);
+                }
+            }
+        }
+    }
+
+    private boolean delayCheck() {
         if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
-            return;
+            return false;
         }
 
         if (hitDelayTimer >= 0) {
             hitDelayTimer--;
-            return;
+            return false;
         }
         else {
             hitDelayTimer = hitDelay.get();
@@ -269,17 +316,12 @@ public class KillAura extends Module {
         if (randomDelayEnabled.get()) {
             if (randomDelayTimer > 0) {
                 randomDelayTimer--;
-                return;
+                return false;
             } else {
                 randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
             }
         }
-
-        for (Entity target : entityList) {
-            if (attack(target) && (canAttack)) {
-                hitEntity(target);
-            }
-        }
+        return true;
     }
 
     private boolean attack(Entity target) {

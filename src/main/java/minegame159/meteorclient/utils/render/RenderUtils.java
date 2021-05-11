@@ -9,7 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.FreeRotate;
+import minegame159.meteorclient.systems.modules.render.FreeLook;
 import minegame159.meteorclient.systems.modules.render.Freecam;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -46,7 +46,7 @@ public class RenderUtils {
 
     //Tracers
     public static Vec3d getCameraVector() {
-        boolean dist = Modules.get().isActive(Freecam.class) || Modules.get().get(FreeRotate.class).playerMode();
+        boolean dist = Modules.get().isActive(Freecam.class) || Modules.get().get(FreeLook.class).playerMode();
         return new Vec3d(0, 0, dist ? 1 : 75)
                 .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
                 .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))

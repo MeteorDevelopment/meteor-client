@@ -240,7 +240,7 @@ public class Modules extends System<Modules> {
         if (MinecraftClient.getInstance().currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : moduleInstances.values()) {
                 if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
-                    module.doAction();
+                    module.toggle();
                     module.sendToggledMsg();
                 }
             }
@@ -363,7 +363,6 @@ public class Modules extends System<Modules> {
         add(new AntiBed());
         add(new AntiHit());
         add(new ArrowDodge());
-        add(new Auto32K());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
@@ -388,7 +387,6 @@ public class Modules extends System<Modules> {
         add(new Surround());
         add(new Swarm());
         add(new TotemPopNotifier());
-        add(new Trigger());
         add(new Burrow());
     }
 
@@ -472,7 +470,7 @@ public class Modules extends System<Modules> {
         add(new CustomFOV());
         add(new ESP());
         add(new EntityOwner());
-        add(new FreeRotate());
+        add(new FreeLook());
         add(new Freecam());
         add(new Fullbright());
         add(new HUD());

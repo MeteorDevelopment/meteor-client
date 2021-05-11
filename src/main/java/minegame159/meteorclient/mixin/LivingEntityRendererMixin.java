@@ -8,7 +8,6 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.Chams;
 import minegame159.meteorclient.systems.modules.render.Freecam;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -30,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import static minegame159.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL11.*;
 
 @Mixin(LivingEntityRenderer.class)
@@ -46,19 +46,19 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     //3rd Person Rotation
     @ModifyVariable(method = "render", ordinal = 2, at = @At(value = "STORE", ordinal = 0))
     public float changeYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
+        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
         return oldValue;
     }
 
     @ModifyVariable(method = "render", ordinal = 3, at = @At(value = "STORE", ordinal = 0))
     public float changeHeadYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
+        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
         return oldValue;
     }
 
     @ModifyVariable(method = "render", ordinal = 5, at = @At(value = "STORE", ordinal = 3))
     public float changePitch(float oldValue, LivingEntity entity) {
-        if (entity.equals(Utils.mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
+        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
         return oldValue;
     }
 

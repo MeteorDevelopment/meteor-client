@@ -142,7 +142,7 @@ public class Offhand extends Module {
 
     private int getSlot(Predicate<ItemStack> item) {
         if (hotbar.get()) return InvUtils.findItemInWhole(item);
-        else return InvUtils.findItemInMain(item);
+        else return InvUtils.findItemInInventory(item);
     }
 
     @Override

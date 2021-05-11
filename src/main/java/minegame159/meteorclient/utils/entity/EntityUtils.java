@@ -7,12 +7,15 @@ package minegame159.meteorclient.utils.entity;
 
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -21,16 +24,19 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Direction;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class EntityUtils {
-    private static final List<Entity> entities = new ArrayList<>();
-    public static MinecraftClient mc;
+    public static final Color WHITE = new Color(255, 255, 255);
+    private static final List<Entity> ENTITIES = new ArrayList<>();
 
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
@@ -54,14 +60,14 @@ public class EntityUtils {
             case MISC:           return misc;
         }
 
-        return Utils.WHITE;
+        return WHITE;
     }
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
-        entities.clear();
-        getList(isGood, sortPriority, entities);
-        if (!entities.isEmpty()) {
-            return entities.get(0);
+        ENTITIES.clear();
+        getList(isGood, sortPriority, ENTITIES);
+        if (!ENTITIES.isEmpty()) {
+            return ENTITIES.get(0);
         }
 
         return null;
@@ -72,7 +78,7 @@ public class EntityUtils {
             if (isGood.test(entity)) target.add(entity);
         }
 
-        for (Entity entity : FakePlayerUtils.getPlayers().keySet()) {
+        for (Entity entity : FakePlayerManager.getPlayers()) {
             if (isGood.test(entity)) target.add(entity);
         }
 
@@ -127,7 +133,7 @@ public class EntityUtils {
         return target.getHealth() + target.getAbsorptionAmount();
     }
 
-    public static boolean isInvalid(PlayerEntity target, double range) {
+    public static boolean isBadTarget(PlayerEntity target, double range) {
         if (target == null) return true;
         return mc.player.distanceTo(target) > range || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
     }
@@ -197,5 +203,29 @@ public class EntityUtils {
         double d = (mc.options.viewDistance + 1) * 16;
 
         return x < d && z < d;
+    }
+
+    public static List<BlockPos> getSurroundBlocks(PlayerEntity player) {
+        if (player == null) return null;
+
+        List<BlockPos> positions = new ArrayList<>();
+
+        for (Direction direction : Direction.values()) {
+            if (direction == Direction.UP || direction == Direction.DOWN) continue;
+
+            BlockPos pos = player.getBlockPos().offset(direction);
+
+            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN) {
+                positions.add(pos);
+            }
+        }
+
+        return positions;
+    }
+
+    public static BlockPos getCityBlock(PlayerEntity player) {
+        List<BlockPos> posList = getSurroundBlocks(player);
+        posList.sort(Comparator.comparingDouble(PlayerUtils::distanceTo));
+        return posList.isEmpty() ? null : posList.get(0);
     }
 }

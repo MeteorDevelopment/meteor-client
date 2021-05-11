@@ -16,7 +16,10 @@ minecraft {
 }
 
 repositories {
-	maven { url "https://jitpack.io" }
+	maven {
+		name = "jitpack"
+		url = "https://jitpack.io"
+	}
 	jcenter()
 }
 
@@ -61,8 +64,6 @@ shadowJar {
 processResources {
 	inputs.property "version", project.version
 
-	duplicatesStrategy = DuplicatesStrategy.WARN
-
 	from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
 		expand "version": project.version
@@ -91,3 +92,24 @@ remapJar {
 	dependsOn shadowJar
 	input.set(shadowJar.archiveFile)
 }
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+	classifier = "sources"
+	from sourceSets.main.allSource
+}
+
+publishing {
+	publications {
+		maven(MavenPublication) {
+			artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
+				classifier null
+				builtBy remapJar
+			}
+
+			artifact(sourcesJar) {
+				builtBy remapSourcesJar
+			}
+		}
+	}
+}
+
