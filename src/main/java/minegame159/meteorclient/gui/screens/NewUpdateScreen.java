@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.gui.screens;
 
-import com.g00fy2.versioncompare.Version;
+import io.github.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;

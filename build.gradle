@@ -53,8 +53,13 @@ dependencies {
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
-	dependency "com.g00fy2:versioncompare:${project.versioncompare_version}"
+	dependency "io.github.g00fy2:versioncompare:${project.versioncompare_version}"
 	dependency "com.github.minndevelopment:java-discordrpc:${project.discordrpc_version}"
+
+	// Multiconnect
+	modImplementation fabricApi.module("fabric-resource-loader-v0", project.api_version)
+	include modImplementation("net.earthcomputer.multiconnect:multiconnect:${project.multiconnect_version}")
+	modImplementation("net.earthcomputer.multiconnect:multiconnect-api:${project.multiconnect_version}")
 }
 
 shadowJar {

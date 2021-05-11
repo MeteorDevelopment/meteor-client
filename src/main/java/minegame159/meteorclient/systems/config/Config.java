@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.systems.config;
 
-import com.g00fy2.versioncompare.Version;
+import io.github.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.tabs.builtin.ConfigTab;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.systems.System;

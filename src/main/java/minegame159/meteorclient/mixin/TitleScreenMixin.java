@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-import com.g00fy2.versioncompare.Version;
+import io.github.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.screens.NewUpdateScreen;
