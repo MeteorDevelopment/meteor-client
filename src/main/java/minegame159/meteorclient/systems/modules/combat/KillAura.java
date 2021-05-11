@@ -29,6 +29,7 @@ import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
 import net.minecraft.util.Hand;
+import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,6 +152,14 @@ public class KillAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> randomTeleport = sgGeneral.add(new BoolSetting.Builder()
+            .name("random-teleport")
+            .description("Randomly teleport around the target")
+            .defaultValue(false)
+            .visible(() -> !onlyWhenLook.get())
+            .build()
+    );
+
     // Rotations
 
     private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
@@ -165,6 +174,14 @@ public class KillAura extends Module {
             .description("The direction to use for rotating towards the enemy.")
             .defaultValue(Target.Head)
             .visible(() -> rotationMode.get() != RotationMode.None)
+            .build()
+    );
+
+    private final Setting<Boolean> rotateCamera = sgRotations.add(new BoolSetting.Builder()
+            .name("rotate-camera")
+            .description("Rotate the client-side camera when targeting")
+            .defaultValue(false)
+            .visible(() -> !onlyWhenLook.get())
             .build()
     );
 
@@ -227,7 +244,7 @@ public class KillAura extends Module {
     private void onTick(TickEvent.Pre event) {
         entityList.clear();
 
-        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand()) return;
+        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand() || EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) return;
 
         EntityUtils.getList(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
@@ -259,38 +276,35 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
-        if (rotationMode.get() == RotationMode.Always && target != null) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()));
-        }
-
-        if (onlyWhenLook.get()){
-            if (!(mc.targetedEntity instanceof LivingEntity)) return;
-
-            if (onlyOnClick.get() && (!mc.options.keyAttack.isPressed() || mc.options.keyAttack.wasPressed())) return;
-
-            if (!delayCheck()) return;
-
-            if (attack(mc.targetedEntity) && canAttack)
-                hitEntity(mc.targetedEntity);
-        }
-        else if (onlyOnClick.get()) {
-            if (mc.options.keyAttack.isPressed() && !mc.options.keyAttack.wasPressed()) {
-                for (Entity target : entityList) {
-                    if (attack(target) && (canAttack)) {
-                        hitEntity(target);
+        if (!onlyOnClick.get() || (!mc.options.keyAttack.wasPressed() && mc.options.keyAttack.isPressed())) {
+            if (onlyWhenLook.get()) {
+                if (mc.targetedEntity instanceof LivingEntity && delayCheck()) {
+                    if (attack(mc.targetedEntity) && canAttack) {
+                        hitEntity(mc.targetedEntity);
                     }
                 }
-            }
-        }
-        else {
-            if (!delayCheck()) return;
-
-            for (Entity target : entityList) {
-                if (attack(target) && (canAttack)) {
-                    hitEntity(target);
+            } else {
+                if (delayCheck()) {
+                    for (Entity target : entityList) {
+                        if (attack(target) && canAttack) {
+                            hitEntity(target);
+                        }
+                    }
+                }
+                if (randomTeleport.get() && !entityList.isEmpty()) {
+                    Entity target = entityList.get(0);
+                    mc.player.updatePosition(target.getX() + randomOffset(), target.getY(), target.getZ() + randomOffset());
                 }
             }
         }
+
+        if (rotationMode.get() == RotationMode.Always && target != null) {
+            rotate(target, null);
+        }
+    }
+
+    private double randomOffset() {
+        return Math.random() * 4 - 2;
     }
 
     private boolean delayCheck() {
@@ -323,15 +337,24 @@ public class KillAura extends Module {
 
         if (Math.random() > hitChance.get() / 100) return false;
 
-        if (rotationMode.get() == RotationMode.None || rotationMode.get() == RotationMode.Always) {
+        if (rotationMode.get() == RotationMode.OnHit) {
+            rotate(target, () -> hitEntity(target));
+        } else {
             hitEntity(target);
-        }
-        else {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), () -> hitEntity(target));
         }
 
         canAttack = true;
         return true;
+    }
+
+    private void rotate(Entity target, Runnable callback) {
+        double yaw = Rotations.getYaw(target);
+        double pitch = Rotations.getPitch(target, rotationDirection.get());
+        Rotations.rotate(yaw, pitch, callback);
+        if (rotateCamera.get() && !onlyWhenLook.get()) {
+            mc.player.yaw = (float)yaw;
+            mc.player.pitch = (float)pitch;
+        }
     }
 
     private void hitEntity(Entity target) {
