@@ -11,6 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.BlockUpdateEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -20,6 +21,7 @@ import minegame159.meteorclient.utils.misc.UnorderedArrayList;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -71,6 +73,8 @@ public class Search extends Module {
     private final Long2ObjectMap<SChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final List<SGroup> groups = new UnorderedArrayList<>();
 
+    private Dimension lastDimension;
+
     public Search() {
         super(Categories.Render, "search", "Searches for specified blocks.");
 
@@ -91,6 +95,8 @@ public class Search extends Module {
                 if (mc.world.getChunkManager().isChunkLoaded(x, z)) searchChunk(mc.world.getChunk(x, z), null);
             }
         }
+
+        lastDimension = Utils.getDimension();
     }
 
     @Override
@@ -213,6 +219,15 @@ public class Search extends Module {
                 }
             });
         }
+    }
+
+    @EventHandler
+    private void onPostTick(TickEvent.Post event) {
+        Dimension dimension = Utils.getDimension();
+
+        if (lastDimension != dimension) onActivate();
+
+        lastDimension = dimension;
     }
 
     @EventHandler
