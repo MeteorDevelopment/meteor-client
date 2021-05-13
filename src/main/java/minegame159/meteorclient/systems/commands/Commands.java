@@ -50,7 +50,6 @@ public class Commands extends System<Commands> {
         add(new NotebotCommand());
         add(new PanicCommand());
         add(new PeekCommand());
-        add(new PluginsCommand());
         add(new ProfileCommand());
         add(new ReloadCommand());
         add(new ResetCommand());
@@ -63,6 +62,8 @@ public class Commands extends System<Commands> {
         add(new SaveMapCommand());
         add(new ModulesCommand());
         add(new BindsCommand());
+        add(new GiveCommand());
+        add(new NameHistoryCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }

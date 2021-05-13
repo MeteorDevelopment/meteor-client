@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.CameraClip;
-import minegame159.meteorclient.systems.modules.render.FreeRotate;
+import minegame159.meteorclient.systems.modules.render.FreeLook;
 import minegame159.meteorclient.systems.modules.render.Freecam;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -61,16 +61,16 @@ public abstract class CameraMixin {
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
     private void onUpdateSetRotationArgs(Args args) {
         Freecam freecam = Modules.get().get(Freecam.class);
-        FreeRotate freeRotate = Modules.get().get(FreeRotate.class);
+        FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) {
             args.set(0, (float) freecam.getYaw(tickDelta));
             args.set(1, (float) freecam.getPitch(tickDelta));
         }
 
-        if (freeRotate.isActive()) {
-            args.set(0, freeRotate.cameraYaw);
-            args.set(1, freeRotate.cameraPitch);
+        if (freeLook.isActive()) {
+            args.set(0, freeLook.cameraYaw);
+            args.set(1, freeLook.cameraPitch);
         }
     }
 }

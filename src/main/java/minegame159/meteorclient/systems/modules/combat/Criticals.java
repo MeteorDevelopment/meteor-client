@@ -19,6 +19,8 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -63,7 +65,10 @@ public class Criticals extends Module {
         if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
 
             if (skipCrit()) return;
-            if (((PlayerInteractEntityC2SPacket) event.packet).getEntity(mc.world) != Modules.get().get(KillAura.class).getTarget() && ka.get()) return;
+
+            Entity entity =  ((PlayerInteractEntityC2SPacket) event.packet).getEntity(mc.world);
+
+            if (!(entity instanceof LivingEntity) || (entity != Modules.get().get(KillAura.class).getTarget() && ka.get())) return;
 
             switch (mode.get()) {
                 case Packet:

@@ -22,7 +22,6 @@ public class MountBypass extends Module {
 
     @EventHandler
     public void onSendPacket(PacketEvent.Send event) {
-        if (Modules.get().isActive(AutoMountBypassDupe.class)) return;
 
         if (dontCancel) {
             dontCancel = false;

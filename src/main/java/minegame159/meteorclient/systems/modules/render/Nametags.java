@@ -21,12 +21,9 @@ import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.FakePlayer;
 import minegame159.meteorclient.systems.modules.player.NameProtect;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.render.NametagUtils;
@@ -103,6 +100,7 @@ public class Nametags extends Module {
             .defaultValue(20.0D)
             .min(0.0D)
             .sliderMax(200.0D)
+            .visible(culling::get)
             .build()
     );
 
@@ -113,6 +111,7 @@ public class Nametags extends Module {
             .min(1)
             .sliderMin(1)
             .sliderMax(100)
+            .visible(culling::get)
             .build()
     );
 
@@ -153,6 +152,7 @@ public class Nametags extends Module {
             .name("enchantment-position")
             .description("Where the enchantments are rendered.")
             .defaultValue(Position.Above)
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -163,6 +163,7 @@ public class Nametags extends Module {
             .min(1)
             .max(5)
             .sliderMax(5)
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -170,6 +171,7 @@ public class Nametags extends Module {
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
             .defaultValue(setDefaultList())
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -181,6 +183,7 @@ public class Nametags extends Module {
             .max(2)
             .sliderMin(0.1)
             .sliderMax(2)
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -223,6 +226,7 @@ public class Nametags extends Module {
             .name("meteor-color")
             .description("The color of M when the player is using Meteor.")
             .defaultValue(new SettingColor(135, 0, 255))
+            .visible(displayMeteor::get)
             .build()
     );
 
@@ -230,6 +234,7 @@ public class Nametags extends Module {
             .name("gamemode-color")
             .description("The color of the gamemode text.")
             .defaultValue(new SettingColor(232, 185, 35))
+            .visible(displayGameMode::get)
             .build()
     );
 
@@ -237,6 +242,7 @@ public class Nametags extends Module {
             .name("ping-color")
             .description("The color of the ping text.")
             .defaultValue(new SettingColor(150, 150, 150))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -244,6 +250,7 @@ public class Nametags extends Module {
             .name("distance-color")
             .description("The color of the distance text.")
             .defaultValue(new SettingColor(150, 150, 150))
+            .visible(displayDistance::get)
             .build()
     );
 
@@ -431,12 +438,9 @@ public class Nametags extends Module {
         String name;
         Color nameColor = Friends.get().getFriendColor(player);
 
-        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getGameProfile().getName());
-        else name = player.getGameProfile().getName();
+        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
+        else name = player.getEntityName();
 
-        if (Modules.get().get(FakePlayer.class).showID(player)) {
-            name += " [" + FakePlayerUtils.getID((FakePlayerEntity) player) + "]";
-        }
         name = name + " ";
 
         // Health

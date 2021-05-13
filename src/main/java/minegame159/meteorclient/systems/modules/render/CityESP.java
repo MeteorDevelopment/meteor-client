@@ -7,29 +7,23 @@ package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.player.CityUtils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 
 public class CityESP extends Module {
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
-
-    // General
-
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The maximum range a city-able block will be found.")
-            .defaultValue(5)
-            .min(0)
-            .sliderMax(20)
-            .build()
-    );
 
     // Render
 
@@ -41,29 +35,39 @@ public class CityESP extends Module {
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("fill-color")
-            .description("The fill color the city block will render as.")
+            .name("side-color")
+            .description("The side color of the rendering.")
             .defaultValue(new SettingColor(225, 0, 0, 75))
             .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("outline-color")
-            .description("The line color the city block will render as.")
+            .name("line-color")
+            .description("The line color of the rendering.")
             .defaultValue(new SettingColor(225, 0, 0, 255))
             .build()
     );
+
+    private BlockPos target;
 
     public CityESP() {
         super(Categories.Render, "city-esp", "Displays blocks that can be broken in order to city another player.");
     }
 
     @EventHandler
+    private void onTick(TickEvent.Post event) {
+        PlayerEntity targetEntity = EntityUtils.getPlayerTarget(mc.interactionManager.getReachDistance() + 2, SortPriority.LowestDistance, false);
+
+        if (EntityUtils.isBadTarget(targetEntity, mc.interactionManager.getReachDistance() + 2)) {
+            target = null;
+        } else {
+            target = EntityUtils.getCityBlock(targetEntity);
+        }
+    }
+
+    @EventHandler
     private void onRender(RenderEvent event) {
-        BlockPos targetBlock = CityUtils.getTargetBlock(CityUtils.getPlayerTarget(range.get()));
-
-        if (targetBlock == null) return;
-
-        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, targetBlock, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (target == null) return;
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, target, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

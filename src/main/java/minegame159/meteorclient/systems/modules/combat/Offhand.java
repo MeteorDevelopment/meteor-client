@@ -71,7 +71,7 @@ public class Offhand extends Module {
     private Item currentItem;
 
     public Offhand() {
-        super(Categories.Combat, "offhand", "Allows you to use specified items in your offhand. REQUIRES AutoTotem to be on smart mode.");
+        super(Categories.Combat, "offhand", "Allows you to hold specified items in your offhand.");
     }
 
     @Override
@@ -142,7 +142,7 @@ public class Offhand extends Module {
 
     private int getSlot(Predicate<ItemStack> item) {
         if (hotbar.get()) return InvUtils.findItemInWhole(item);
-        else return InvUtils.findItemInMain(item);
+        else return InvUtils.findItemInInventory(item);
     }
 
     @Override

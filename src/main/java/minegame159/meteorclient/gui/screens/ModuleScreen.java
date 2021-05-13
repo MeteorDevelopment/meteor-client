@@ -16,6 +16,8 @@ import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.containers.WSection;
 import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
@@ -23,17 +25,22 @@ import minegame159.meteorclient.utils.Utils;
 import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
 public class ModuleScreen extends WindowScreen {
+    private final Module module;
+
+    private final WContainer settings;
     private final WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
         super(theme, module.title);
+        this.module = module;
 
         // Description
         add(theme.label(module.description, getWindowWidth() / 2.0));
 
         // Settings
+        settings = add(theme.verticalList()).expandX().widget();
         if (module.settings.groups.size() > 0) {
-            add(theme.settings(module.settings)).expandX();
+            settings.add(theme.settings(module.settings)).expandX();
         }
 
         // Custom widget
@@ -75,6 +82,27 @@ public class ModuleScreen extends WindowScreen {
         visible.action = () -> {
             if (module.isVisible() != visible.checked) module.setVisible(visible.checked);
         };
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        for (SettingGroup group : module.settings) {
+            for (Setting<?> setting : group) {
+                boolean visible = setting.isVisible();
+
+                if (visible != setting.lastWasVisible) {
+                    settings.clear();
+                    settings.add(theme.settings(module.settings)).expandX();
+
+                    setting.lastWasVisible = visible;
+                    return;
+                }
+
+                setting.lastWasVisible = visible;
+            }
+        }
     }
 
     @EventHandler

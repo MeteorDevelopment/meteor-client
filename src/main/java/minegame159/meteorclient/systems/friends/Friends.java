@@ -7,7 +7,6 @@ package minegame159.meteorclient.systems.friends;
 
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
-import minegame159.meteorclient.utils.entity.FriendType;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
@@ -22,6 +21,13 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
+
+    public enum FriendType {
+        Enemy,
+        Neutral,
+        Trusted
+    }
+
     public final SettingColor enemyColor = new SettingColor(204, 0, 0);
     public final SettingColor neutralColor = new SettingColor(0, 255, 180);
     public final SettingColor trustedColor = new SettingColor(57, 247, 47);

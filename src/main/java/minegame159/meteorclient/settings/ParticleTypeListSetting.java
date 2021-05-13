@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     private static List<Identifier> suggestions;
 
-    public ParticleTypeListSetting(String name, String description, List<ParticleType<?>> defaultValue, Consumer<List<ParticleType<?>>> onChanged, Consumer<Setting<List<ParticleType<?>>>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public ParticleTypeListSetting(String name, String description, List<ParticleType<?>> defaultValue, Consumer<List<ParticleType<?>>> onChanged, Consumer<Setting<List<ParticleType<?>>>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new ArrayList<>(defaultValue);
     }
@@ -97,6 +97,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
         private List<ParticleType<?>> defaultValue;
         private Consumer<List<ParticleType<?>>> onChanged;
         private Consumer<Setting<List<ParticleType<?>>>> onModuleActivated;
+        private IVisible visible;
 
         public ParticleTypeListSetting.Builder name(String name) {
             this.name = name;
@@ -123,8 +124,13 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public ParticleTypeListSetting build() {
-            return new ParticleTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new ParticleTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

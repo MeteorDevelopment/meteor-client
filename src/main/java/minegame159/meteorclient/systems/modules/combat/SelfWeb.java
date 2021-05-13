@@ -33,6 +33,16 @@ public class SelfWeb extends Module {
             .build()
     );
 
+    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
+            .name("range")
+            .description("How far away the player has to be from you to place webs. Requires Mode to Smart.")
+            .defaultValue(3)
+            .min(1)
+            .sliderMax(7)
+            .visible(() -> mode.get() == Mode.Smart)
+            .build()
+    );
+
     private final Setting<Boolean> doubles = sgGeneral.add(new BoolSetting.Builder()
             .name("double-place")
             .description("Places webs in your upper hitbox as well.")
@@ -44,15 +54,6 @@ public class SelfWeb extends Module {
             .name("auto-toggle")
             .description("Toggles off after placing the webs.")
             .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range")
-            .description("How far away the player has to be from you to place webs. Requires Mode to Smart.")
-            .defaultValue(3)
-            .min(1)
-            .sliderMax(7)
             .build()
     );
 

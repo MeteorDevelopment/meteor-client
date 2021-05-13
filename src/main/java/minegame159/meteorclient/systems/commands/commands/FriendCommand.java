@@ -34,8 +34,8 @@ public class FriendCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("add")
-                .then(argument("friend", FriendArgumentType.friend())
+
+        builder.then(literal("add").then(argument("friend", FriendArgumentType.friend())
                         .executes(context -> {
                             Friend friend = FriendArgumentType.getFriend(context, "friend");
 
@@ -43,8 +43,11 @@ public class FriendCommand extends Command {
                             else ChatUtils.prefixError("Friends","That person is already your friend.");
 
                             return SINGLE_SUCCESS;
-                        })))
-                .then(literal("remove").then(argument("friend", FriendArgumentType.friend())
+                        })
+                )
+        );
+
+        builder.then(literal("remove").then(argument("friend", FriendArgumentType.friend())
                         .executes(context -> {
                             Friend friend = FriendArgumentType.getFriend(context, "friend");
 
@@ -52,13 +55,16 @@ public class FriendCommand extends Command {
                             else ChatUtils.prefixError("Friends", "That person is not your friend.");
 
                             return SINGLE_SUCCESS;
-                        })))
-                .then(literal("list").executes(context -> {
-                    ChatUtils.prefixInfo("Friends","You have (highlight)%d (default)friends:", Friends.get().count());
-                    Friends.get().forEach(friend-> ChatUtils.info(" - (highlight)%s", friend.name));
+                        })
+                )
+        );
 
+        builder.then(literal("list").executes(context -> {
+                    ChatUtils.prefixInfo("Friends","(highlight)%d(default) friends:", Friends.get().count());
+                    Friends.get().forEach(friend-> ChatUtils.info(" - (highlight)%s", friend.name));
                     return SINGLE_SUCCESS;
-                }));
+                })
+        );
     }
 
     private static class FriendArgumentType implements ArgumentType<Friend> {

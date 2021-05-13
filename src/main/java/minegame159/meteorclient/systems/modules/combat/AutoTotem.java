@@ -6,6 +6,7 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
@@ -13,6 +14,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
@@ -77,7 +79,7 @@ public class AutoTotem extends Module {
         super(Categories.Combat, "auto-totem", "Automatically equips a totem in your offhand.");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onTick(TickEvent.Pre event) {
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
         totems = result.count;
@@ -100,14 +102,16 @@ public class AutoTotem extends Module {
         ticks++;
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onReceivePacket(PacketEvent.Receive event) {
         if (!(event.packet instanceof EntityStatusS2CPacket)) return;
-
         EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
         if (p.getStatus() != 35) return;
 
-        if (p.getEntity(mc.world).equals(mc.player)) ticks = 0;
+        Entity entity = p.getEntity(mc.world);
+        if (entity == null || !(entity.equals(mc.player))) return;
+
+        ticks = 0;
     }
 
     public boolean isLocked() {

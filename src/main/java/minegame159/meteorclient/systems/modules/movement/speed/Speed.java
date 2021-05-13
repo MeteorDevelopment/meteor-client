@@ -22,12 +22,13 @@ import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
 public class Speed extends Module {
-    private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgVanilla = settings.createGroup("Vanilla");
     private final SettingGroup sgNCP = settings.createGroup("NCP");
 
-    //Main
-    public final Setting<SpeedModes> speedMode = sgDefault.add(new EnumSetting.Builder<SpeedModes>()
+    // Main
+
+    public final Setting<SpeedModes> speedMode = sgGeneral.add(new EnumSetting.Builder<SpeedModes>()
             .name("mode")
             .description("The method of applying speed.")
             .defaultValue(SpeedModes.Vanilla)
@@ -36,7 +37,7 @@ public class Speed extends Module {
             .build()
     );
 
-    public final Setting<Double> timer = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
             .name("timer")
             .description("Timer override.")
             .defaultValue(1)
@@ -46,25 +47,26 @@ public class Speed extends Module {
             .build()
     );
 
-    public final Setting<Boolean> inLiquids = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> inLiquids = sgGeneral.add(new BoolSetting.Builder()
             .name("in-liquids")
             .description("Uses speed when in lava or water.")
             .defaultValue(false)
             .build()
     );
 
-    public final Setting<Boolean> whenSneaking = sgDefault.add(new BoolSetting.Builder()
+    public final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Uses speed when sneaking.")
             .defaultValue(false)
             .build()
     );
 
-    //Vanilla
+    // Vanilla
 
     public final Setting<Double> speed = sgVanilla.add(new DoubleSetting.Builder()
             .name("speed")
             .description("How fast you want to go in blocks per second.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(5.6)
             .min(0)
             .sliderMax(50)
@@ -74,6 +76,7 @@ public class Speed extends Module {
     public final Setting<Boolean> onlyOnGround = sgVanilla.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Uses speed only when standing on a block.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(false)
             .build()
     );
@@ -81,6 +84,7 @@ public class Speed extends Module {
     public final Setting<Boolean> applySpeedPotions = sgVanilla.add(new BoolSetting.Builder()
             .name("apply-speed-potions")
             .description("Applies the speed effect via potions.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(true)
             .build()
     );
@@ -88,6 +92,7 @@ public class Speed extends Module {
     public final Setting<Boolean> jump = sgVanilla.add(new BoolSetting.Builder()
             .name("jump")
             .description("Automatically jumps.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(false)
             .build()
     );
@@ -95,6 +100,7 @@ public class Speed extends Module {
     public final Setting<AutoJump.Mode> jumpMode = sgVanilla.add(new EnumSetting.Builder<AutoJump.Mode>()
             .name("mode")
             .description("The method of jumping.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(AutoJump.Mode.Jump)
             .build()
     );
@@ -102,6 +108,7 @@ public class Speed extends Module {
     public final Setting<Double> hopHeight = sgVanilla.add(new DoubleSetting.Builder()
             .name("hop-height")
             .description("The distance that lowhop moves you.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(0.25)
             .min(0)
             .sliderMax(2)
@@ -111,16 +118,18 @@ public class Speed extends Module {
     public final Setting<AutoJump.JumpWhen> jumpIf = sgVanilla.add(new EnumSetting.Builder<AutoJump.JumpWhen>()
             .name("jump-when")
             .description("Jumps when you are doing said action.")
+            .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(AutoJump.JumpWhen.Walking)
             .build()
     );
 
 
-    //NCP
+    // NCP
 
     public final Setting<Double> ncpSpeed = sgNCP.add(new DoubleSetting.Builder()
             .name("speed")
             .description("How fast you go.")
+            .visible(() -> speedMode.get() == SpeedModes.NCP)
             .defaultValue(1.6)
             .min(0)
             .sliderMax(3)
@@ -130,6 +139,7 @@ public class Speed extends Module {
     public final Setting<Boolean> ncpSpeedLimit = sgNCP.add(new BoolSetting.Builder()
             .name("speed-limit")
             .description("Limits your speed on servers with very strict anticheats.")
+            .visible(() -> speedMode.get() == SpeedModes.NCP)
             .defaultValue(false)
             .build()
     );
@@ -175,11 +185,12 @@ public class Speed extends Module {
                 || (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava()))) {
             return;
         }
+
         currentMode.onTick();
     }
 
     @EventHandler
-    private void onPacketRecieve(PacketEvent.Receive event) {
+    private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.onRubberband();
     }
 

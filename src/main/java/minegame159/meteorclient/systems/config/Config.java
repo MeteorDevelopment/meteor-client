@@ -19,11 +19,13 @@ public class Config extends System<Config> {
     public final Version version;
     public final String devBuild;
 
+    public String font = ConfigTab.font.get();
     public boolean customFont = ConfigTab.customFont.get();
     public boolean sendDataToApi = ConfigTab.sendDataToApi.get();
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
 
     public String prefix = ConfigTab.prefix.get();
+    public boolean openChatOnPrefix = ConfigTab.openChatOnPrefix.get();
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
     public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
@@ -53,12 +55,14 @@ public class Config extends System<Config> {
         CompoundTag tag = new CompoundTag();
         tag.putString("version", version.getOriginalString());
 
+        tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
         tag.putDouble("rainbowSpeed", RainbowColors.GLOBAL.getSpeed());
         tag.putBoolean("sendDataToApi", sendDataToApi);
         tag.putInt("rotationHoldTicks", rotationHoldTicks);
 
         tag.putString("prefix", prefix);
+        tag.putBoolean("openChatOnPrefix", openChatOnPrefix);
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
@@ -73,12 +77,14 @@ public class Config extends System<Config> {
 
     @Override
     public Config fromTag(CompoundTag tag) {
+        font = getString(tag, "font", ConfigTab.font);
         customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
         RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
         sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.sendDataToApi);
         rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.rotationHoldTicks);
 
         prefix = getString(tag, "prefix", ConfigTab.prefix);
+        openChatOnPrefix = getBoolean(tag, "openChatOnPrefix", ConfigTab.openChatOnPrefix);
         chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.chatCommandsInfo);
         deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
         rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);

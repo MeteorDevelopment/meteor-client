@@ -54,12 +54,20 @@ public class AnchorAura extends Module {
 
     // Place
 
+    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
+            .name("place")
+            .description("Allows Anchor Aura to place anchors.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
             .name("place-delay")
             .description("The tick delay between placing anchors.")
             .defaultValue(2)
             .min(0)
             .max(20)
+            .visible(place::get)
             .build()
     );
 
@@ -67,6 +75,7 @@ public class AnchorAura extends Module {
             .name("place-mode")
             .description("The way anchors are allowed to be placed near you.")
             .defaultValue(Safety.Safe)
+            .visible(place::get)
             .build()
     );
 
@@ -76,6 +85,7 @@ public class AnchorAura extends Module {
             .defaultValue(3)
             .min(0)
             .sliderMax(5)
+            .visible(place::get)
             .build()
     );
 
@@ -83,13 +93,7 @@ public class AnchorAura extends Module {
             .name("placement-positions")
             .description("Where the Anchors will be placed on the entity.")
             .defaultValue(PlaceMode.AboveAndBelow)
-            .build()
-    );
-
-    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Anchor Aura to place anchors.")
-            .defaultValue(true)
+            .visible(place::get)
             .build()
     );
 
@@ -161,8 +165,8 @@ public class AnchorAura extends Module {
             .build()
     );
 
-    private final Setting<SortPriority> priority = sgMisc.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
+    private final Setting<SortPriority> targetPriority = sgMisc.add(new EnumSetting.Builder<SortPriority>()
+            .name("target-priority")
             .description("How to select the player to target.")
             .defaultValue(SortPriority.LowestHealth)
             .build()
@@ -195,6 +199,7 @@ public class AnchorAura extends Module {
             .name("place-side-color")
             .description("The side color for positions to be placed.")
             .defaultValue(new SettingColor(255, 0, 0, 75))
+            .visible(renderPlace::get)
             .build()
     );
 
@@ -202,6 +207,7 @@ public class AnchorAura extends Module {
             .name("place-line-color")
             .description("The line color for positions to be placed.")
             .defaultValue(new SettingColor(255, 0, 0, 255))
+            .visible(renderPlace::get)
             .build()
     );
 
@@ -216,6 +222,7 @@ public class AnchorAura extends Module {
             .name("break-side-color")
             .description("The side color for anchors to be broken.")
             .defaultValue(new SettingColor(255, 0, 0, 75))
+            .visible(renderBreak::get)
             .build()
     );
 
@@ -223,6 +230,7 @@ public class AnchorAura extends Module {
             .name("break-line-color")
             .description("The line color for anchors to be broken.")
             .defaultValue(new SettingColor(255, 0, 0, 255))
+            .visible(renderBreak::get)
             .build()
     );
 
@@ -264,8 +272,8 @@ public class AnchorAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (EntityUtils.isInvalid(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
-        if (target == null) return;
+        if (EntityUtils.isBadTarget(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), targetPriority.get(), false);
+        if (EntityUtils.isBadTarget(target, targetRange.get())) return;
 
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR);
         int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE);

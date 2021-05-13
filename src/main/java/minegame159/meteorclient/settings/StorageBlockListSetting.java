@@ -26,8 +26,8 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();
 
-    public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new ArrayList<>(defaultValue);
     }
@@ -96,6 +96,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         private List<BlockEntityType<?>> defaultValue;
         private Consumer<List<BlockEntityType<?>>> onChanged;
         private Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated;
+        private IVisible visible;
 
         public Builder name(String name) {
             this.name = name;
@@ -122,8 +123,13 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public StorageBlockListSetting build() {
-            return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 

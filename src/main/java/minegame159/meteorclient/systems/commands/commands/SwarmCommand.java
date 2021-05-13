@@ -8,6 +8,7 @@ package minegame159.meteorclient.systems.commands.commands;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.BoolArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.systems.commands.Command;
@@ -22,6 +23,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.client.MinecraftClient;
 
 import java.util.Random;
 
@@ -74,8 +76,8 @@ public class SwarmCommand extends Command {
                         swarm.server.sendMessage(context.getInput() + " " + mc.player.getDisplayName().getString());
                     }
                     return SINGLE_SUCCESS;
-                }).then(argument("name", PlayerArgumentType.player()).executes(context -> {
-                    PlayerEntity playerEntity = context.getArgument("name", PlayerEntity.class);
+                }).then(argument("player", PlayerArgumentType.player()).executes(context -> {
+                    PlayerEntity playerEntity = PlayerArgumentType.getPlayer(context);
                     Swarm swarm = Modules.get().get(Swarm.class);
                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                         swarm.server.sendMessage(context.getInput());
@@ -271,6 +273,17 @@ public class SwarmCommand extends Command {
             }
             return SINGLE_SUCCESS;
         }));
+
+        builder.then(literal("exec").then(argument("command", StringArgumentType.greedyString()).executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
+                swarm.server.sendMessage(context.getInput());
+            } else {
+                String command = context.getArgument("command", String.class);
+                MinecraftClient.getInstance().player.sendChatMessage(command);
+            }
+            return SINGLE_SUCCESS;
+        })));
     }
 
     private void runInfinityMiner() {

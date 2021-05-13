@@ -59,7 +59,8 @@ public class Swarm extends Module {
             .name("iP-address")
             .description("The IP address of the Queen.")
             .defaultValue("localhost")
-            .build());
+            .build()
+    );
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
             .name("port")
@@ -67,7 +68,8 @@ public class Swarm extends Module {
             .defaultValue(7777)
             .sliderMin(1)
             .sliderMax(65535)
-            .build());
+            .build()
+    );
 
     public Swarm() {
         super(Categories.Misc, "Swarm", "I Am... The Swarm.");

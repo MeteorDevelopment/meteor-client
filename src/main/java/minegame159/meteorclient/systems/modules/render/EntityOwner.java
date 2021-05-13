@@ -21,7 +21,6 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.network.UuidNameHistoryResponseItem;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.VertexFormats;
@@ -139,5 +138,9 @@ public class EntityOwner extends Module {
         name = "Retrieving";
         uuidToName.put(uuid, name);
         return name;
+    }
+
+    public static class UuidNameHistoryResponseItem {
+        public String name;
     }
 }

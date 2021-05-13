@@ -68,6 +68,7 @@ public class Flight extends Module {
             .min(1)
             .max(5000)
             .sliderMax(200)
+            .visible(() -> antiKickMode.get() == AntiKickMode.Normal)
             .build()
     );
 
@@ -78,6 +79,7 @@ public class Flight extends Module {
             .min(1)
             .max(20)
             .sliderMax(10)
+            .visible(() -> antiKickMode.get() == AntiKickMode.Normal)
             .build()
     );
 
