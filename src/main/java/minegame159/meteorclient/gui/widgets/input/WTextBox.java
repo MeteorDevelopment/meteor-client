@@ -313,6 +313,14 @@ public abstract class WTextBox extends WWidget {
     public void setFocused(boolean focused) {
         if (this.focused && !focused && actionOnUnfocused != null) actionOnUnfocused.run();
 
+        boolean wasJustFocused = focused && !this.focused;
+
         this.focused = focused;
+
+        if (wasJustFocused) onCursorChanged();
+    }
+
+    public void setCursorMax() {
+        cursor = text.length();
     }
 }
