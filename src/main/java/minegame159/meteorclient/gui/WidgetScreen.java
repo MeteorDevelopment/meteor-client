@@ -38,6 +38,7 @@ public abstract class WidgetScreen extends Screen {
     private static final GuiDebugRenderer DEBUG_RENDERER = new GuiDebugRenderer();
 
     public Runnable taskAfterRender;
+    protected Runnable enterAction;
 
     protected Screen parent;
     private final WContainer root;
@@ -148,6 +149,11 @@ public abstract class WidgetScreen extends Screen {
 
         if ((modifiers == GLFW_MOD_CONTROL || modifiers == GLFW_MOD_SUPER) && keyCode == GLFW_KEY_9) {
             debug = !debug;
+            return true;
+        }
+
+        if ((keyCode == GLFW_KEY_ENTER || keyCode == GLFW_KEY_KP_ENTER) && enterAction != null) {
+            enterAction.run();
             return true;
         }
 

@@ -145,6 +145,8 @@ public class FriendsTab extends Tab {
                     fillTable(table);
                 }
             };
+
+            enterAction = add.action;
         }
 
         private void fillTable(WTable table) {

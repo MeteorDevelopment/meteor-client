@@ -218,7 +218,8 @@ public class ProfilesTab extends Tab {
             table.row();
 
             // Save
-            table.add(theme.button("Save")).expandX().widget().action = () -> {
+            WButton save = table.add(theme.button("Save")).expandX().widget();
+            save.action = () -> {
                 if (profile.name == null || profile.name.isEmpty()) return;
 
                 for (Profile p : Profiles.get()) {
@@ -234,6 +235,8 @@ public class ProfilesTab extends Tab {
 
                 onClose();
             };
+
+            enterAction = save.action;
         }
 
         private void fillTable(WTable table) {
