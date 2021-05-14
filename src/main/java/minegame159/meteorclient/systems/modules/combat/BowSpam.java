@@ -57,7 +57,8 @@ public class BowSpam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
+        if (!mc.player.abilities.creativeMode && InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
+
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
             if (!isBow && wasBow) setPressed(false);
