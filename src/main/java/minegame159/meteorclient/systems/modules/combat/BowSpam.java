@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.InvUtils;
+import net.minecraft.item.ArrowItem;
 import net.minecraft.item.Items;
 
 public class BowSpam extends Module {
@@ -57,7 +58,7 @@ public class BowSpam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.abilities.creativeMode && InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
+        if (!mc.player.abilities.creativeMode && InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
 
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;
