@@ -38,5 +38,7 @@ public class AddPremiumAccountScreen extends WindowScreen {
                 AccountsScreen.addAccount(add, this, account);
             }
         };
+
+        enterAction = add.action;
     }
 }
