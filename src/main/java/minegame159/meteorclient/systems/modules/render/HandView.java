@@ -5,14 +5,18 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.DoubleSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 
 public class HandView extends Module {
+
+    public enum SwingMode {
+        Offhand,
+        Mainhand,
+        None
+    }
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSwing = settings.createGroup("Swing");
 
@@ -115,10 +119,10 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Boolean> offhandSwing = sgSwing.add(new BoolSetting.Builder()
-            .name("offhand-swing")
-            .description("Makes you swing with your off-hand instead of your main-hand.")
-            .defaultValue(false)
+    public final Setting<SwingMode> swingMode = sgSwing.add(new EnumSetting.Builder<SwingMode>()
+            .name("swing-mode")
+            .description("Modifies your client & server hand swinging.")
+            .defaultValue(SwingMode.None)
             .build()
     );
 

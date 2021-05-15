@@ -247,12 +247,15 @@ public class WaypointsModule extends Module {
             table.row();
 
             // Save
-            table.add(theme.button("Save")).expandX().widget().action = () -> {
+            WButton save = table.add(theme.button("Save")).expandX().widget();
+            save.action = () -> {
                 if (newWaypoint) Waypoints.get().add(waypoint);
                 else Waypoints.get().save();
 
                 onClose();
             };
+
+            enterAction = save.action;
         }
 
         @Override

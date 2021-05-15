@@ -251,12 +251,12 @@ public class Modules extends System<Modules> {
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onOpenScreen(OpenScreenEvent event) {
+        if (!Utils.canUpdate()) return;
+
         for (Module module : moduleInstances.values()) {
-            if (module.toggleOnBindRelease) {
-                if (module.isActive()) {
-                    module.toggle();
-                    module.sendToggledMsg();
-                }
+            if (module.toggleOnBindRelease && module.isActive()) {
+                module.toggle();
+                module.sendToggledMsg();
             }
         }
     }

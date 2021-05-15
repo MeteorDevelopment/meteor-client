@@ -26,6 +26,8 @@ import net.minecraft.text.LiteralText;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static minegame159.meteorclient.utils.Utils.*;
@@ -36,6 +38,7 @@ public abstract class WidgetScreen extends Screen {
     private static final GuiDebugRenderer DEBUG_RENDERER = new GuiDebugRenderer();
 
     public Runnable taskAfterRender;
+    protected Runnable enterAction;
 
     protected Screen parent;
     private final WContainer root;
@@ -149,6 +152,11 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
+        if ((keyCode == GLFW_KEY_ENTER || keyCode == GLFW_KEY_KP_ENTER) && enterAction != null) {
+            enterAction.run();
+            return true;
+        }
+
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
@@ -156,7 +164,44 @@ public abstract class WidgetScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (locked) return false;
 
-        return root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        boolean shouldReturn = root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        if (shouldReturn) return true;
+
+        // Select next text box if TAB was pressed
+        if (keyCode == GLFW_KEY_TAB) {
+            AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
+            AtomicBoolean done = new AtomicBoolean(false);
+            AtomicBoolean foundFocused = new AtomicBoolean(false);
+
+            loopWidgets(root, wWidget -> {
+                if (done.get() || !(wWidget instanceof WTextBox)) return;
+                WTextBox textBox = (WTextBox) wWidget;
+
+                if (foundFocused.get()) {
+                    textBox.setFocused(true);
+                    textBox.setCursorMax();
+
+                    done.set(true);
+                }
+                else {
+                    if (textBox.isFocused()) {
+                        textBox.setFocused(false);
+                        foundFocused.set(true);
+                    }
+                }
+
+                if (firstTextBox.get() == null) firstTextBox.set(textBox);
+            });
+
+            if (!done.get() && firstTextBox.get() != null) {
+                firstTextBox.get().setFocused(true);
+                firstTextBox.get().setCursorMax();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public void keyRepeated(int key, int mods) {
