@@ -8,27 +8,26 @@ package minegame159.meteorclient.systems.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.registry.Registry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class Surround extends Module {
-    public enum Block {
-        EChest,
-        Obsidian,
-        Anchor
-    }
-
+    
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
@@ -86,11 +85,12 @@ public class Surround extends Module {
             .defaultValue(true)
             .build()
     );
-
-    private final Setting<Block> block = sgGeneral.add(new EnumSetting.Builder<Block>()
+    
+    private final Setting<List<Item>> blocks = sgGeneral.add(new ItemListSetting.Builder()
             .name("block")
-            .description("What block to use for surround.")
-            .defaultValue(Block.Obsidian)
+            .description("What blocks to use for surround.")
+            .defaultValue(getDefaultItems())
+            .filter(this::itemFilter)
             .build()
     );
 
@@ -154,7 +154,23 @@ public class Surround extends Module {
             if (doubleHeightPlaced || !doubleHeight.get()) toggle();
         }
     }
-
+    
+    private boolean itemFilter(Item item) {
+        return item == Items.OBSIDIAN ||
+                item == Items.ENDER_CHEST ||
+                item == Items.RESPAWN_ANCHOR;
+    }
+    
+    private List<Item> getDefaultItems() {
+        List<Item> items = new ArrayList<>();
+        
+        for (Item item : Registry.ITEM) {
+            if (itemFilter(item)) items.add(item);
+        }
+        
+        return items;
+    }
+    
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
         BlockState blockState = mc.world.getBlockState(blockPos);
@@ -174,24 +190,6 @@ public class Surround extends Module {
     }
 
     private int findSlot() {
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (!(item instanceof BlockItem)) continue;
-
-            switch (block.get()) {
-                case EChest:
-                    if (item == Items.ENDER_CHEST) return i;
-                    break;
-                case Anchor:
-                    if (item == Items.RESPAWN_ANCHOR) return i;
-                    break;
-                case Obsidian:
-                    if (item == Items.OBSIDIAN) return i;
-                    break;
-            }
-        }
-
-        return -1;
+        return InvUtils.findItemInHotbar(itemStack -> blocks.get().contains(itemStack.getItem()));
     }
 }
