@@ -9,6 +9,7 @@ import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.gui.widgets.containers.WHorizontalList;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
@@ -19,15 +20,20 @@ import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
 import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
 public class HudElementScreen extends WindowScreen {
+    private final HudElement element;
+    private WContainer settings;
+
     public HudElementScreen(GuiTheme theme, HudElement element) {
         super(theme, element.title);
+        this.element = element;
 
         // Description
         add(theme.label(element.description, getWindowWidth() / 2.0));
 
         // Settings
         if (element.settings.sizeGroups() > 0) {
-            add(theme.settings(element.settings)).expandX();
+            settings = add(theme.verticalList()).expandX().widget();
+            settings.add(theme.settings(element.settings)).expandX();
 
             add(theme.horizontalSeparator()).expandX();
         }
@@ -46,6 +52,15 @@ public class HudElementScreen extends WindowScreen {
         reset.action = () -> {
             if (element.active != element.defaultActive) element.active = active.checked = element.defaultActive;
         };
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        if (settings == null) return;
+
+        element.settings.tick(settings, theme);
     }
 
     @Override
