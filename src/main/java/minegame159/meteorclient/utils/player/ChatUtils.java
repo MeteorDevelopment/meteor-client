@@ -87,24 +87,6 @@ public class ChatUtils {
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
     }
 
-    public static BaseText formatCoords(Vec3d pos) {
-        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
-        coordsString = formatMsg(coordsString, Formatting.GRAY);
-        BaseText coordsText = new LiteralText(coordsString);
-        coordsText.setStyle(coordsText.getStyle()
-                .withFormatting(Formatting.UNDERLINE)
-                .withClickEvent(new ClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        String.format("%sb goto %d %d %d", Config.get().prefix, (int) pos.x, (int) pos.y, (int) pos.z)
-                ))
-                .withHoverEvent(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
-                        new LiteralText("Set as Baritone goal")
-                ))
-        );
-        return coordsText;
-    }
-
     private static BaseText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
         BaseText prefix = new LiteralText("");
 
@@ -150,5 +132,23 @@ public class ChatUtils {
         msg = msg.replaceAll("\\(underline\\)", Formatting.UNDERLINE.toString());
 
         return msg;
+    }
+
+    public static BaseText formatCoords(Vec3d pos) {
+        String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
+        coordsString = formatMsg(coordsString, Formatting.GRAY);
+        BaseText coordsText = new LiteralText(coordsString);
+        coordsText.setStyle(coordsText.getStyle()
+                .withFormatting(Formatting.UNDERLINE)
+                .withClickEvent(new ClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        String.format("%sb goto %d %d %d", Config.get().prefix, (int) pos.x, (int) pos.y, (int) pos.z)
+                ))
+                .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        new LiteralText("Set as Baritone goal")
+                ))
+        );
+        return coordsText;
     }
 }
