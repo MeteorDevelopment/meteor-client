@@ -90,7 +90,7 @@ public class TotemPopNotifier extends Module {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
             totemPops.put(entity.getUuid(), ++pops);
 
-            ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", ((PlayerEntity) entity).getGameProfile().getName(), pops, pops == 1 ? "totem" : "totems");
+            ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", ((PlayerEntity) entity).getEntityName(), pops, pops == 1 ? "totem" : "totems");
         }
     }
 
@@ -103,7 +103,7 @@ public class TotemPopNotifier extends Module {
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
                     int pops = totemPops.removeInt(player.getUuid());
 
-                    ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getGameProfile().getName(), pops, pops == 1 ? "totem" : "totems");
+                    ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getEntityName(), pops, pops == 1 ? "totem" : "totems");
                     chatIds.removeInt(player.getUuid());
                 }
             }

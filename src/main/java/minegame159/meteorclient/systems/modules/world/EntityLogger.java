@@ -61,7 +61,7 @@ public class EntityLogger extends Module {
             }
 
             String name;
-            if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
+            if (playerNames.get() && event.entity instanceof PlayerEntity) name = event.entity.getEntityName() + " (Player)";
             else name = event.entity.getType().getName().getString();
 
             BaseText msg = new LiteralText(String.format("%s%s %shas spawned at ", Formatting.WHITE, name, Formatting.GRAY));

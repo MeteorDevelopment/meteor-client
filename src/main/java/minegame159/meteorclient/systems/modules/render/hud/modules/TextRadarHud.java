@@ -57,7 +57,7 @@ public class TextRadarHud extends HudElement {
             if (entity.equals(mc.player)) continue;
             if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
 
-            String text = entity.getGameProfile().getName();
+            String text = entity.getEntityName();
             if (distance.get()) text += String.format("(%sm)", Math.round(mc.getCameraEntity().distanceTo(entity)));
 
             width = Math.max(width, renderer.textWidth(text));
@@ -83,7 +83,7 @@ public class TextRadarHud extends HudElement {
             x = box.getX();
             y += renderer.textHeight() + 2;
 
-            String text = entity.getGameProfile().getName();
+            String text = entity.getEntityName();
             Color color = Friends.get().contains(Friends.get().get(entity)) ? Friends.get().getFriendColor(entity) : hud.primaryColor.get();
 
             renderer.text(text, x, y, color);

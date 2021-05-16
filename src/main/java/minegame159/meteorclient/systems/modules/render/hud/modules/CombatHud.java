@@ -213,7 +213,7 @@ public class CombatHud extends HudElement {
             String breakText = " | ";
 
             // Name
-            String nameText = playerEntity.getGameProfile().getName();
+            String nameText = playerEntity.getEntityName();
             Color nameColor = Friends.get().getFriendColor(playerEntity);
 
             // Ping
@@ -390,12 +390,6 @@ public class CombatHud extends HudElement {
             Renderer.NORMAL.horizontalGradientQuad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get());
             Renderer.NORMAL.horizontalGradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
             Renderer.NORMAL.end();
-
-            String healthText = String.valueOf(Math.round(totalHealth * 10.0) / 10.0);
-
-            TextRenderer.get().begin(0.45);
-            TextRenderer.get().render(healthText, x, y, hud.primaryColor.get());
-            TextRenderer.get().end();
 
             RenderSystem.popMatrix();
         });

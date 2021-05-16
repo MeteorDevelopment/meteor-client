@@ -101,7 +101,7 @@ public class AutoCity extends Module {
         }
 
         if (!sentMessage) {
-            ChatUtils.moduleInfo(this, "Attempting to city " + target.getGameProfile().getName());
+            ChatUtils.moduleInfo(this, "Attempting to city " + target.getEntityName());
             sentMessage = true;
         }
 
