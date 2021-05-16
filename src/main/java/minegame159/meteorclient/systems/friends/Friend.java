@@ -20,7 +20,7 @@ public class Friend implements ISerializable<Friend> {
     }
 
     public Friend(PlayerEntity player) {
-        this(player.getGameProfile().getName());
+        this(player.getEntityName());
     }
 
     public Friend(CompoundTag tag) {
