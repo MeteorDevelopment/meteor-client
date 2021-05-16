@@ -15,7 +15,8 @@ import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
@@ -113,7 +114,7 @@ public class LogoutSpots extends Module {
         updateLastPlayers();
 
         timer = 10;
-        lastDimension = Utils.getDimension();
+        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -172,7 +173,7 @@ public class LogoutSpots extends Module {
             timer--;
         }
 
-        Dimension dimension = Utils.getDimension();
+        Dimension dimension = PlayerUtils.getDimension();
         if (dimension != lastDimension) players.clear();
         lastDimension = dimension;
     }
@@ -228,7 +229,7 @@ public class LogoutSpots extends Module {
 
             // Compute scale
             double scale = 0.025;
-            double dist = Utils.distanceToCamera(x, y, z);
+            double dist = EntityUtils.distanceToCamera(x, y, z);
             if (dist > 8) scale *= dist / 8 * LogoutSpots.this.scale.get();
 
             if (dist > mc.options.viewDistance * 16) return;

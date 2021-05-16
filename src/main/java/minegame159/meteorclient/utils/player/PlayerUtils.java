@@ -275,7 +275,7 @@ public class PlayerUtils {
         }
 
         // Check for beds if in nether
-        if (Utils.getDimension() != Dimension.Overworld) {
+        if (PlayerUtils.getDimension() != Dimension.Overworld) {
             for (BlockEntity blockEntity : mc.world.blockEntities) {
                 BlockPos bp = blockEntity.getPos();
                 Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
@@ -311,6 +311,14 @@ public class PlayerUtils {
         float g = (float) (mc.player.getY() - y);
         float h = (float) (mc.player.getZ() - z);
         return MathHelper.sqrt(f * f + g * g + h * h);
+    }
+
+    public static Dimension getDimension() {
+        switch (MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath()) {
+            case "the_nether": return Dimension.Nether;
+            case "the_end":    return Dimension.End;
+            default:           return Dimension.Overworld;
+        }
     }
 
 }

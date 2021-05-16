@@ -12,24 +12,24 @@ import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.ByteCountDataOutput;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.block.Block;
-import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.item.*;
+import net.minecraft.item.FoodComponent;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -41,9 +41,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
 
 public class BetterTooltips extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgShulker = settings.createGroup("Shulker");
-    private final SettingGroup sgEChest = settings.createGroup("EChest");
-    private final SettingGroup sgMap = settings.createGroup("Map");
+    private final SettingGroup sgPreviews = settings.createGroup("Previews");
     private final SettingGroup sgOther = settings.createGroup("Other");
 
     // General
@@ -59,6 +57,7 @@ public class BetterTooltips extends Module {
             .name("keybind")
             .description("The bind for keybind mode.")
             .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
+            .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
             .build()
     );
 
@@ -76,71 +75,48 @@ public class BetterTooltips extends Module {
             .build()
     );
 
-    // Shulker
+    // Previews
 
-    private final Setting<Boolean> shulkers = sgShulker.add(new BoolSetting.Builder()
-            .name("shulker-preview")
+    private final Setting<Boolean> shulkers = sgPreviews.add(new BoolSetting.Builder()
+            .name("storage-blocks")
             .description("Shows a preview of a shulker box when hovering over it in an inventory.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<SettingColor> shulkersColor = sgShulker.add(new ColorSetting.Builder()
-            .name("container-color")
-            .description("The color of the preview in container mode.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
-    );
-
-    private final Setting<Boolean> shulkerColorFromType = sgShulker.add(new BoolSetting.Builder()
-        .name("color-from-type")
-        .description("Color shulker preview according to the shulkers color.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> shulkerCompactTooltip = sgShulker.add(new BoolSetting.Builder()
-            .name("shulker-compact-tooltip")
-            .description("Compacts shulker tooltip.")
+    private final Setting<Boolean> shulkerCompactTooltip = sgPreviews.add(new BoolSetting.Builder()
+            .name("compact-shulker-tooltip")
+            .description("Compacts the lines of the shulker tooltip.")
             .defaultValue(true)
+            .visible(shulkers::get)
             .build()
     );
 
-    // EChest
-
-    public final Setting<Boolean> echest = sgEChest.add(new BoolSetting.Builder()
-            .name("echest-preview")
+    public final Setting<Boolean> echest = sgPreviews.add(new BoolSetting.Builder()
+            .name("echests")
             .description("Shows a preview of your echest when hovering over it in an inventory.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<SettingColor> echestColor = sgEChest.add(new ColorSetting.Builder()
-            .name("container-color")
-            .description("The color of the echest preview in container mode.")
-            .defaultValue(new SettingColor(0, 50, 50))
-            .build()
-    );
-
-    // Map
-
-    private final Setting<Boolean> maps = sgMap.add(new BoolSetting.Builder()
-            .name("map-preview")
+    private final Setting<Boolean> maps = sgPreviews.add(new BoolSetting.Builder()
+            .name("maps")
             .description("Shows a preview of a map when hovering over it in an inventory.")
             .defaultValue(true)
             .build()
     );
 
-    public final Setting<Integer> mapsScale = sgMap.add(new IntSetting.Builder()
+    public final Setting<Double> mapsScale = sgPreviews.add(new DoubleSetting.Builder()
             .name("scale")
             .description("The scale of the map preview.")
-            .defaultValue(100)
+            .defaultValue(1)
             .min(1)
-            .sliderMax(500)
+            .sliderMax(5)
+            .visible(maps::get)
             .build()
     );
 
-    // Byte Size
+    // Extras
 
     public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
             .name("byte-size")
@@ -157,11 +133,13 @@ public class BetterTooltips extends Module {
     );
 
     private final Setting<Boolean> beehive = sgOther.add(new BoolSetting.Builder()
-        .name("beehive")
-        .description("Displays information about a beehive or bee nest.")
-        .defaultValue(true)
-        .build()
+            .name("beehive")
+            .description("Displays information about a beehive or bee nest.")
+            .defaultValue(true)
+            .build()
     );
+
+    public static final Color ECHEST_COLOR = new Color(0, 50, 50);
 
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
@@ -185,26 +163,6 @@ public class BetterTooltips extends Module {
 
     private boolean isPressed() {
         return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
-    }
-
-    public Color getShulkerColor(ItemStack shulkerItem) {
-        if (shulkerColorFromType.get()) {
-            if (!(shulkerItem.getItem() instanceof BlockItem)) return shulkersColor.get();
-            Block block = ((BlockItem) shulkerItem.getItem()).getBlock();
-            if (!(block instanceof ShulkerBoxBlock)) return shulkersColor.get();
-            ShulkerBoxBlock shulkerBlock = (ShulkerBoxBlock) ShulkerBoxBlock.getBlockFromItem(shulkerItem.getItem());
-            DyeColor dye = shulkerBlock.getColor();
-            if (dye == null) return shulkersColor.get();
-            final float[] colors = dye.getColorComponents();
-            return new Color(colors[0], colors[1], colors[2], 1f);
-        } else {
-            return shulkersColor.get();
-        }
-    }
-
-    public static boolean hasItems(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getSubTag("BlockEntityTag");
-        return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
     @EventHandler
@@ -279,7 +237,7 @@ public class BetterTooltips extends Module {
         }
 
         // Hold to preview tooltip
-        if (hasItems(event.itemStack) && shulkers.get() && !previewShulkers()
+        if (Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers()
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
             || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())) {
             event.list.add(new LiteralText(""));
@@ -289,9 +247,8 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void modifyTooltip(GetTooltipEvent.Modify event) {
-        // Moving vanilla tooltip up when container is rendered
-        if (hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())) {
-            for (int s = 0; s < event.list.size(); ++s) event.y -= 10;
+        if (Utils.hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest()) && showVanilla.get()) {
+            event.y -= 10 * event.list.size();
             event.y -= 4;
         }
     }
@@ -332,7 +289,7 @@ public class BetterTooltips extends Module {
     private MutableText getStatusText(StatusEffectInstance effect) {
         MutableText text = new TranslatableText(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier()+1, StatusEffectUtil.durationToString(effect, 1)));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.durationToString(effect, 1)));
         } else {
             text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1)));
         }

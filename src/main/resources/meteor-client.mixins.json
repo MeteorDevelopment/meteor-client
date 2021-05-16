@@ -127,7 +127,8 @@
     "Vec3dMixin",
     "WorldChunkMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "ShaderEffectAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
