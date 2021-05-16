@@ -20,14 +20,12 @@ import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
@@ -43,8 +41,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 
-import static minegame159.meteorclient.systems.commands.commands.PeekCommand.PeekShulkerBoxScreen;
 import static minegame159.meteorclient.systems.modules.render.BetterTooltips.hasItems;
+import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
@@ -67,25 +65,17 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     // Middleclick open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
-            BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
+        BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
-            if (hasItems(focusedSlot.getStack()) && toolips.middleClickOpen.get()) {
-                Utils.getItemsInContainerItem(focusedSlot.getStack(), ITEMS);
-                client.openScreen(new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, client.player.inventory, new SimpleInventory(ITEMS)), client.player.inventory, focusedSlot.getStack().getName()));
-                cir.setReturnValue(true);
-            } else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && toolips.previewEChest()) {
-                for (int i = 0; i < EChestMemory.ITEMS.size(); i++) ITEMS[i] = EChestMemory.ITEMS.get(i);
-                client.openScreen(new PeekShulkerBoxScreen(new ShulkerBoxScreenHandler(0, client.player.inventory, new SimpleInventory(ITEMS)), client.player.inventory, focusedSlot.getStack().getName()));
-                cir.setReturnValue(true);
-            }
+        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty() && toolips.middleClickOpen.get()) {
+            cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
         }
     }
 
     //Rendering previews
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty()) {
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             // Shulker Preview
@@ -93,12 +83,12 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                 Inventories.fromTag(compoundTag, itemStacks);
-                draw(matrices, itemStacks, mouseX, mouseY, toolips.getShulkerColor(focusedSlot.getStack()));
+                draw(matrices, itemStacks, mouseX, mouseY, Utils.getShulkerColor(focusedSlot.getStack()));
             }
 
             // EChest preview
             else if (focusedSlot.getStack().getItem() == Items.ENDER_CHEST && toolips.previewEChest()) {
-                draw(matrices, EChestMemory.ITEMS, mouseX, mouseY, toolips.echestColor.get());
+                draw(matrices, EChestMemory.ITEMS, mouseX, mouseY, BetterTooltips.ECHEST_COLOR);
             }
 
             // Map preview
@@ -111,7 +101,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     // Hiding vanilla tooltips
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty()) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty()) {
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) info.cancel();
