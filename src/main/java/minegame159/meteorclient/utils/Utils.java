@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static minegame159.meteorclient.systems.modules.render.BetterTooltips.hasItems;
 import static minegame159.meteorclient.utils.entity.EntityUtils.WHITE;
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -184,6 +183,11 @@ public class Utils {
         if (dye == null) return WHITE;
         final float[] colors = dye.getColorComponents();
         return new Color(colors[0], colors[1], colors[2], 1f);
+    }
+
+    public static boolean hasItems(ItemStack itemStack) {
+        CompoundTag compoundTag = itemStack.getSubTag("BlockEntityTag");
+        return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {
