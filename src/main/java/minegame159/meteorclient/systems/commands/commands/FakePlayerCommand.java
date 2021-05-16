@@ -28,8 +28,8 @@ public class FakePlayerCommand extends Command {
             if (active()) FakePlayerManager.add("Meteor on Crack", 36, true);
             return SINGLE_SUCCESS;
         })
-                        .then(argument("name", StringArgumentType.word())
-                .executes(context -> {
+                 .then(argument("name", StringArgumentType.word())
+                         .executes(context -> {
                     if (active()) FakePlayerManager.add(StringArgumentType.getString(context, "name"), 36, true);
                     return SINGLE_SUCCESS;
                 })

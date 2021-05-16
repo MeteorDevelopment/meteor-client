@@ -19,20 +19,20 @@ public class GiveCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
 
     public GiveCommand() {
-        super("give", "Gives you any item. REQUIRES Creative mode.", "item");
+        super("give", "Gives you any item.");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
-            if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
+            if (!mc.player.abilities.creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             addItem(item);
             
             return SINGLE_SUCCESS;
         }).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
-            if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
+            if (!mc.player.abilities.creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "number"), false);
             addItem(item);
