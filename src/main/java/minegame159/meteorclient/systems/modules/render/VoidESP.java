@@ -13,8 +13,8 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import minegame159.meteorclient.utils.world.Dir;
@@ -122,7 +122,7 @@ public class VoidESP extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         voidHoles.clear();
-        if (Utils.getDimension() == Dimension.End) return;
+        if (PlayerUtils.getDimension() == Dimension.End) return;
 
         int px = mc.player.getBlockPos().getX();
         int pz = mc.player.getBlockPos().getZ();
@@ -134,7 +134,7 @@ public class VoidESP extends Module {
                 if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 0, z), false));
 
                 // Check for nether roof
-                if (netherRoof.get() && Utils.getDimension() == Dimension.Nether) {
+                if (netherRoof.get() && PlayerUtils.getDimension() == Dimension.Nether) {
                     blockPos.set(x, 127, z);
                     if (isHole(blockPos, true)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 127, z), true));
                 }

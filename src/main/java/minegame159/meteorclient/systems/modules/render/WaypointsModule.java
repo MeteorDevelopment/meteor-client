@@ -29,6 +29,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
@@ -68,7 +69,7 @@ public class WaypointsModule extends Module {
             // Name
             WLabel name = table.add(theme.label(waypoint.name)).expandCellX().widget();
             boolean goodDimension = false;
-            Dimension dimension = Utils.getDimension();
+            Dimension dimension = PlayerUtils.getDimension();
             if (waypoint.overworld && dimension == Dimension.Overworld) goodDimension = true;
             else if (waypoint.nether && dimension == Dimension.Nether) goodDimension = true;
             else if (waypoint.end && dimension == Dimension.End) goodDimension = true;
@@ -132,9 +133,9 @@ public class WaypointsModule extends Module {
                 this.waypoint.y = (int) mc.player.getY() + 2;
                 this.waypoint.z = (int) mc.player.getZ();
 
-                this.waypoint.actualDimension = Utils.getDimension();
+                this.waypoint.actualDimension = PlayerUtils.getDimension();
 
-                switch (Utils.getDimension()) {
+                switch (PlayerUtils.getDimension()) {
                     case Overworld: this.waypoint.overworld = true; break;
                     case Nether:    this.waypoint.nether = true; break;
                     case End:       this.waypoint.end = true; break;

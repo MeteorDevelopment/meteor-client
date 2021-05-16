@@ -19,6 +19,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.UnorderedArrayList;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
@@ -96,7 +97,7 @@ public class Search extends Module {
             }
         }
 
-        lastDimension = Utils.getDimension();
+        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -223,7 +224,7 @@ public class Search extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        Dimension dimension = Utils.getDimension();
+        Dimension dimension = PlayerUtils.getDimension();
 
         if (lastDimension != dimension) onActivate();
 

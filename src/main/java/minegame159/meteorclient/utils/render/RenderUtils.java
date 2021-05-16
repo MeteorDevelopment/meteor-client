@@ -33,7 +33,6 @@ public class RenderUtils {
         mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
         if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
         DiffuseLighting.disable();
-        DiffuseLighting.disable();
         RenderSystem.enableDepthTest();
     }
 

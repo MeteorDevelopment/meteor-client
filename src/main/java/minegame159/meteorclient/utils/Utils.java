@@ -9,25 +9,31 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.mixin.MinecraftServerAccessor;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.utils.world.Dimension;
+import minegame159.meteorclient.systems.modules.render.BetterTooltips;
+import minegame159.meteorclient.utils.player.EChestMemory;
+import minegame159.meteorclient.utils.render.PeekScreen;
+import minegame159.meteorclient.utils.render.color.Color;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.options.ServerList;
-import net.minecraft.client.render.Camera;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -48,6 +54,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import static minegame159.meteorclient.systems.modules.render.BetterTooltips.hasItems;
+import static minegame159.meteorclient.utils.entity.EntityUtils.WHITE;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
@@ -129,19 +137,29 @@ public class Utils {
         RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
     }
 
-    public static Dimension getDimension() {
-        switch (MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath()) {
-            case "the_nether": return Dimension.Nether;
-            case "the_end":    return Dimension.End;
-            default:           return Dimension.Overworld;
-        }
-    }
-
     public static Vec3d vec3d(BlockPos pos) {
         return new Vec3d(pos.getX(), pos.getY(), pos.getZ());
     }
 
+    public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
+        if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
+            Utils.getItemsInContainerItem(itemStack, contents);
+            if (pause) MeteorClient.INSTANCE.screenToOpen = new PeekScreen(itemStack, contents);
+            else mc.openScreen(new PeekScreen(itemStack, contents));
+            return true;
+        }
+
+        return false;
+    }
+
     public static void getItemsInContainerItem(ItemStack itemStack, ItemStack[] items) {
+        if (itemStack.getItem() == Items.ENDER_CHEST) {
+            for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
+                items[i] = EChestMemory.ITEMS.get(i);
+            }
+            return;
+        }
+
         Arrays.fill(items, ItemStack.EMPTY);
         CompoundTag nbt = itemStack.getTag();
 
@@ -154,6 +172,18 @@ public class Utils {
                 }
             }
         }
+    }
+
+    public static Color getShulkerColor(ItemStack shulkerItem) {
+        if (!(shulkerItem.getItem() instanceof BlockItem)) return WHITE;
+        Block block = ((BlockItem) shulkerItem.getItem()).getBlock();
+        if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
+        if (!(block instanceof ShulkerBoxBlock)) return WHITE;
+        ShulkerBoxBlock shulkerBlock = (ShulkerBoxBlock) ShulkerBoxBlock.getBlockFromItem(shulkerItem.getItem());
+        DyeColor dye = shulkerBlock.getColor();
+        if (dye == null) return WHITE;
+        final float[] colors = dye.getColorComponents();
+        return new Color(colors[0], colors[1], colors[2], 1f);
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {
@@ -312,15 +342,6 @@ public class Utils {
         }
 
         return new byte[0];
-    }
-
-    public static double distanceToCamera(double x, double y, double z) {
-        Camera camera = mc.gameRenderer.getCamera();
-        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
-    }
-
-    public static double distanceToCamera(Entity entity) {
-        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
     }
 
     public static boolean canUpdate() {

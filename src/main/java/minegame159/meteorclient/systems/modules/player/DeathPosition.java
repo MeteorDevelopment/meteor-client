@@ -9,7 +9,6 @@ import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
-import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -22,9 +21,8 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
-
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
@@ -113,9 +111,9 @@ public class DeathPosition extends Module {
             waypoint.y = (int) dmgPos.y + 2;
             waypoint.z = (int) dmgPos.z;
             waypoint.maxVisibleDistance = Integer.MAX_VALUE;
-            waypoint.actualDimension = Utils.getDimension();
+            waypoint.actualDimension = PlayerUtils.getDimension();
 
-            switch (Utils.getDimension()) {
+            switch (PlayerUtils.getDimension()) {
                 case Overworld:
                     waypoint.overworld = true;
                     break;
