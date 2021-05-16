@@ -16,10 +16,7 @@ import minegame159.meteorclient.gui.widgets.input.WDropdown;
 import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.WMinus;
 import minegame159.meteorclient.gui.widgets.pressable.WPlus;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ColorSetting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.settings.Settings;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friend;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -52,7 +49,7 @@ public class FriendsTab extends Tab {
 
             // Enemies
 
-            sgEnemy.add(new BoolSetting.Builder()
+            Setting<Boolean> showEnemies = sgEnemy.add(new BoolSetting.Builder()
                     .name("show-in-tracers")
                     .description("Whether to show enemies in tracers.")
                     .defaultValue(true)
@@ -67,12 +64,13 @@ public class FriendsTab extends Tab {
                     .defaultValue(new SettingColor(204, 0, 0))
                     .onChanged(Friends.get().enemyColor::set)
                     .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().enemyColor))
+                    .visible(showEnemies::get)
                     .build()
             );
 
             // Neutral
 
-            sgNeutral.add(new BoolSetting.Builder()
+            Setting<Boolean> showNeutrals = sgNeutral.add(new BoolSetting.Builder()
                     .name("show-in-tracers")
                     .description("Whether to show neutrals in tracers.")
                     .defaultValue(true)
@@ -87,6 +85,7 @@ public class FriendsTab extends Tab {
                     .defaultValue(new SettingColor(60, 240,240))
                     .onChanged(Friends.get().neutralColor::set)
                     .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().neutralColor))
+                    .visible(showNeutrals::get)
                     .build()
             );
 
@@ -101,7 +100,7 @@ public class FriendsTab extends Tab {
 
             // Trusted
 
-            sgTrusted.add(new BoolSetting.Builder()
+            Setting<Boolean> showTrusted = sgTrusted.add(new BoolSetting.Builder()
                     .name("show-in-tracers")
                     .description("Whether to show trusted in tracers.")
                     .defaultValue(true)
@@ -116,6 +115,7 @@ public class FriendsTab extends Tab {
                     .defaultValue(new SettingColor(57, 247, 47))
                     .onChanged(Friends.get().trustedColor::set)
                     .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().trustedColor))
+                    .visible(showTrusted::get)
                     .build()
             );
 
