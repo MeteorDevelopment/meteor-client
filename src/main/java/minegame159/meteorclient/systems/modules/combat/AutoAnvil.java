@@ -13,7 +13,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
@@ -170,7 +169,7 @@ public class AutoAnvil extends Module {
     private void onTick(TickEvent.Pre event) {
         // Head check
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
-            ChatUtils.moduleError(this, "Target head slot is empty... disabling.");
+            error("Target head slot is empty... disabling.");
             toggle();
             return;
         }
@@ -234,7 +233,7 @@ public class AutoAnvil extends Module {
 
             // If we are too far away
             if (startHeightValue <= minHeight.get()) {
-                ChatUtils.moduleError(this, "Target too far away... disabling.");
+                error("Target too far away... disabling.");
                 toggle();
                 return;
             }

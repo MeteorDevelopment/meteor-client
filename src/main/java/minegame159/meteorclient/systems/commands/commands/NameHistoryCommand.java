@@ -60,7 +60,7 @@ public class NameHistoryCommand extends Command {
                     ))
             );
 
-            ChatUtils.info(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
+            ChatUtils.sendMsg(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
 
             for (NameHistoryObject nameHistoryObject : nameHistoryObjects) {
                 BaseText nameText = new LiteralText(nameHistoryObject.name);
@@ -77,7 +77,7 @@ public class NameHistoryCommand extends Command {
                     nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
                 }
 
-                ChatUtils.info(nameText);
+                ChatUtils.sendMsg(nameText);
             }
 
             return SINGLE_SUCCESS;

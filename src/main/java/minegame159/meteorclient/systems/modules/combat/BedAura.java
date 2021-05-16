@@ -254,7 +254,7 @@ public class BedAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.world.getDimension().isBedWorking()) {
-            ChatUtils.moduleError(this, "You are in the Overworld... disabling!");
+            error("You are in the Overworld... disabling!");
             toggle();
             return;
         }

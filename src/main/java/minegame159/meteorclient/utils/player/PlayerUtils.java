@@ -15,6 +15,8 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.BaritoneUtils;
 import minegame159.meteorclient.utils.misc.Vector2;
+import minegame159.meteorclient.utils.misc.text.TextUtils;
+import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.BlockState;
@@ -321,4 +323,11 @@ public class PlayerUtils {
         }
     }
 
+    public static Color getPlayerColor(PlayerEntity entity, Color defaultColor, boolean useNameColor) {
+        Color friendColor = Friends.get().getFriendColor(entity);
+
+        if (friendColor != null) return new Color(friendColor.r, friendColor.g, friendColor.b, defaultColor.a);
+        else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());
+        else return defaultColor;
+    }
 }

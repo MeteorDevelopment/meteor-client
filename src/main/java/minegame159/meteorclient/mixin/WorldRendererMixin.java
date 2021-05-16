@@ -118,7 +118,7 @@ public abstract class WorldRendererMixin {
             info.setStage(stage);
             BlockUtils.breakingBlocks.put(entityId, info);
 
-            if (Modules.get().isActive(BreakIndicators.class) && Modules.get().get(BreakIndicators.class).hideVanillaIndicators.get()) ci.cancel();
+            if (Modules.get().isActive(BreakIndicators.class)) ci.cancel();
         } else {
             BlockUtils.breakingBlocks.remove(entityId);
         }

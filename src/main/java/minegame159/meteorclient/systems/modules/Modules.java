@@ -213,7 +213,7 @@ public class Modules extends System<Modules> {
         if (moduleToBind != null && moduleToBind.keybind.canBindTo(isKey, value)) {
             if (value != GLFW.GLFW_KEY_ESCAPE) {
                 moduleToBind.keybind.set(isKey, value);
-                ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
+                ChatUtils.info("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
             }
 
             MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));

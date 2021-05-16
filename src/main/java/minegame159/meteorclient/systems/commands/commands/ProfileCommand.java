@@ -41,7 +41,7 @@ public class ProfileCommand extends Command {
 
                     if (profile != null) {
                         profile.load();
-                        ChatUtils.prefixInfo("Profiles","Loaded profile (highlight)%s(default).", profile.name);
+                        ChatUtils.info("Profiles","Loaded profile (highlight)%s(default).", profile.name);
                     }
 
                     return SINGLE_SUCCESS;
@@ -51,7 +51,7 @@ public class ProfileCommand extends Command {
 
                     if (profile != null) {
                         profile.save();
-                        ChatUtils.prefixInfo("Profiles","Saved profile (highlight)%s(default).", profile.name);
+                        ChatUtils.info("Profiles","Saved profile (highlight)%s(default).", profile.name);
                     }
 
                     return SINGLE_SUCCESS;
@@ -61,7 +61,7 @@ public class ProfileCommand extends Command {
 
                     if (profile != null) {
                         Profiles.get().remove(profile);
-                        ChatUtils.prefixInfo("Profiles","Deleted profile (highlight)%s(default).", profile.name);
+                        ChatUtils.info("Profiles","Deleted profile (highlight)%s(default).", profile.name);
                     }
 
                     return SINGLE_SUCCESS;

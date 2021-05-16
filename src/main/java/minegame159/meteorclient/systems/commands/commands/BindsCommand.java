@@ -35,7 +35,7 @@ public class BindsCommand extends Command {
                     .filter(module -> module.keybind.isSet())
                     .collect(Collectors.toList());
 
-            ChatUtils.info("--- (highlight)%d(default) bound modules ---", modules.size());
+            info("--- (highlight)%d(default) bound modules ---", modules.size());
 
             for (Module module : modules) {
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, getTooltip(module));
@@ -51,7 +51,7 @@ public class BindsCommand extends Command {
                 key.setStyle(key.getStyle().withHoverEvent(hoverEvent));
                 text.append(key.formatted(Formatting.GRAY));
 
-                ChatUtils.info(text);
+                ChatUtils.sendMsg(text);
             }
 
             return SINGLE_SUCCESS;

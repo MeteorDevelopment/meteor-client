@@ -21,6 +21,7 @@ import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.util.Formatting;
 
 import java.util.Random;
 import java.util.UUID;
@@ -90,7 +91,7 @@ public class TotemPopNotifier extends Module {
             int pops = totemPops.getOrDefault(entity.getUuid(), 0);
             totemPops.put(entity.getUuid(), ++pops);
 
-            ChatUtils.info(getChatId(entity), "(highlight)%s (default)popped (highlight)%d (default)%s.", ((PlayerEntity) entity).getEntityName(), pops, pops == 1 ? "totem" : "totems");
+            ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", ((PlayerEntity) entity).getEntityName(), pops, pops == 1 ? "totem" : "totems");
         }
     }
 
@@ -103,7 +104,7 @@ public class TotemPopNotifier extends Module {
                 if (player.deathTime > 0 || player.getHealth() <= 0) {
                     int pops = totemPops.removeInt(player.getUuid());
 
-                    ChatUtils.info(getChatId(player), "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getEntityName(), pops, pops == 1 ? "totem" : "totems");
+                    ChatUtils.sendMsg(getChatId(player), Formatting.GRAY, "(highlight)%s (default)died after popping (highlight)%d (default)%s.", player.getEntityName(), pops, pops == 1 ? "totem" : "totems");
                     chatIds.removeInt(player.getUuid());
                 }
             }

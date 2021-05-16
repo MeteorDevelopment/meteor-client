@@ -15,7 +15,6 @@ import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.world.Timer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -123,25 +122,25 @@ public class Burrow extends Module {
     @Override
     public void onActivate() {
         if (!mc.world.getBlockState(mc.player.getBlockPos()).getMaterial().isReplaceable()) {
-            ChatUtils.moduleError(this, "Already burrowed, disabling.");
+            error("Already burrowed, disabling.");
             toggle();
             return;
         }
 
         if (!PlayerUtils.isInHole(false) && onlyInHole.get()) {
-            ChatUtils.moduleError(this, "Not in a hole, disabling.");
+            error("Not in a hole, disabling.");
             toggle();
             return;
         }
 
         if (!checkHead()) {
-            ChatUtils.moduleError(this, "Not enough headroom to burrow, disabling.");
+            error("Not enough headroom to burrow, disabling.");
             toggle();
             return;
         }
 
         if (!checkInventory()) {
-            ChatUtils.moduleError(this, "No burrow block found, disabling.");
+            error("No burrow block found, disabling.");
             toggle();
             return;
         }
@@ -156,7 +155,7 @@ public class Burrow extends Module {
             if (instant.get()) shouldBurrow = true;
             else mc.player.jump();
         } else {
-            ChatUtils.moduleInfo(this, "Waiting for manual jump.");
+            info("Waiting for manual jump.");
         }
     }
 

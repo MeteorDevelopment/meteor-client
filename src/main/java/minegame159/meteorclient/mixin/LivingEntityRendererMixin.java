@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.Chams;
 import minegame159.meteorclient.systems.modules.render.Freecam;
-import minegame159.meteorclient.utils.misc.text.TextUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
@@ -113,7 +113,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
         if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return;
 
-        Color color = module.useNameColor.get() ? TextUtils.getMostPopularColor(livingEntity.getDisplayName()) : module.playersColor.get();
+        Color color = PlayerUtils.getPlayerColor(((PlayerEntity) livingEntity), module.playersColor.get(), true);
         args.set(4, color.r / 255f);
         args.set(5, color.g / 255f);
         args.set(6, color.b / 255f);

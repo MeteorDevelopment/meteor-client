@@ -7,114 +7,79 @@ package minegame159.meteorclient.utils.player;
 
 import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.render.color.RainbowColor;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 public class ChatUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final RainbowColor RAINBOW = new RainbowColor();
 
-    private static void message(int id, Formatting color, String msg, Object... args) {
-        sendMsg(id, null, PrefixType.None, formatMsg(msg, color, args), color);
+    // Default
+    public static void info(String message, Object... args) {
+        sendMsg(Formatting.GRAY, message, args);
     }
 
-    public static void info(int id, String msg, Object... args) {
-        message(id, Formatting.GRAY, msg, args);
+    public static void info(String prefix, String message, Object... args) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.GRAY, message, args);
     }
 
-    public static void info(String msg, Object... args) {
-        message(0, Formatting.GRAY, msg, args);
+    // Warning
+    public static void warning(String message, Object... args) {
+        sendMsg(Formatting.YELLOW, message, args);
     }
 
-    public static void info(String prefix, Text msg) {
-        sendMsg(0, prefix, PrefixType.Other, msg);
+    public static void warning(String prefix, String message, Object... args) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.YELLOW, message, args);
     }
 
-    public static void info(Text msg) {
-        sendMsg(0, null, PrefixType.None, msg);
+    // Error
+    public static void error(String message, Object... args) {
+        sendMsg(Formatting.RED, message, args);
     }
 
-    public static void warning(String msg, Object... args) {
-        message(0, Formatting.YELLOW, msg, args);
+    public static void error(String prefix, String message, Object... args) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.RED, message, args);
     }
 
-    public static void error(String msg, Object... args) {
-        message(0, Formatting.RED, msg, args);
+    // Misc
+    public static void sendMsg(Text message) {
+        sendMsg(null, message);
     }
 
-    //Custom Prefix
-
-    private static void prefixMessage(Formatting color, String prefix, String msg, Object... args) {
-        sendMsg(0, prefix, PrefixType.Other, formatMsg(msg, color, args), color);
+    public static void sendMsg(String prefix, Text message) {
+        sendMsg(0, prefix, Formatting.LIGHT_PURPLE, message);
     }
 
-    public static void prefixInfo(String prefix, String msg, Object... args) {
-        prefixMessage(Formatting.GRAY, prefix, msg, args);
+    public static void sendMsg(Formatting color, String message, Object... args) {
+        sendMsg(0, null, null, color, message, args);
     }
 
-    public static void prefixWarning(String prefix, String msg, Object... args) {
-        prefixMessage(Formatting.YELLOW, prefix, msg, args);
+    public static void sendMsg(int id, Formatting color, String message, Object... args) {
+        sendMsg(id, null, null, color, message, args);
     }
 
-    public static void prefixError(String prefix, String msg, Object... args) {
-        prefixMessage(Formatting.RED, prefix, msg, args);
+    public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
+        sendMsg(id, prefixTitle, prefixColor, formatMsg(messageContent, messageColor, args), messageColor);
     }
 
-    //Module
-
-    private static void moduleMessage(Formatting color, Module module, String msg, Object... args) {
-        sendMsg(0, module.title, PrefixType.Module, formatMsg(msg, color, args), color);
+    public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
+        BaseText message = new LiteralText(messageContent);
+        message.setStyle(message.getStyle().withFormatting(messageColor));
+        sendMsg(id, prefixTitle, prefixColor, message);
     }
 
-    private static void moduleMessage(Formatting color, Module module, Text msg) {
-        sendMsg(0, module.title, PrefixType.Module, msg);
-    }
-
-    public static void moduleInfo(Module module, String msg, Object... args) {
-        moduleMessage(Formatting.GRAY, module, msg, args);
-    }
-
-    public static void moduleInfo(Module module, Text msg) {
-        moduleMessage(Formatting.GRAY, module, msg);
-    }
-
-    public static void moduleWarning(Module module, String msg, Object... args) {
-        moduleMessage(Formatting.YELLOW, module, msg, args);
-    }
-
-    public static void moduleWarning(Module module, Text msg) {
-        moduleMessage(Formatting.YELLOW, module, msg);
-    }
-
-    public static void moduleError(Module module, String msg, Object... args) {
-        moduleMessage(Formatting.RED, module, msg, args);
-    }
-
-    public static void moduleError(Module module, Text msg) {
-        moduleMessage(Formatting.RED, module, msg);
-    }
-
-    private static void sendMsg(int id, String prefix, PrefixType type, String msg, Formatting color) {
-
-        String formatted = msg.replaceAll("\\(default\\)", color.toString()).replaceAll("\\(highlight\\)", Formatting.WHITE.toString());
-
-        BaseText message = new LiteralText(formatted);
-        message.setStyle(message.getStyle().withFormatting(color));
-
-        sendMsg(id, prefix, type, message);
-    }
-
-    private static void sendMsg(int id, String prefix, PrefixType type, Text msg) {
+    public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Text msg) {
         if (mc.world == null) return;
 
         BaseText message = new LiteralText("");
-        message.append(getPrefix(prefix, type));
+        message.append(getMeteorPrefix());
+        if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
 
         if (!Config.get().deleteChatCommandsInfo) id = 0;
@@ -140,7 +105,19 @@ public class ChatUtils {
         return coordsText;
     }
 
-    private static BaseText getPrefix(String title, PrefixType type) {
+    private static BaseText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
+        BaseText prefix = new LiteralText("");
+
+        BaseText moduleTitle = new LiteralText(prefixTitle);
+        moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(prefixColor));
+        prefix.append("[");
+        prefix.append(moduleTitle);
+        prefix.append("] ");
+
+        return prefix;
+    }
+
+    private static BaseText getMeteorPrefix() {
         BaseText meteor = new LiteralText("");
         BaseText prefix = new LiteralText("");
 
@@ -163,35 +140,15 @@ public class ChatUtils {
         prefix.append(meteor);
         prefix.append("] ");
 
-        if (type != PrefixType.None) {
-            BaseText moduleTitle = new LiteralText(title);
-            moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(type.color));
-            prefix.append("[");
-            prefix.append(moduleTitle);
-            prefix.append("] ");
-        }
-
         return prefix;
     }
 
-    public static String formatMsg(String format, Formatting defaultColor, Object... args) {
+    private static String formatMsg(String format, Formatting defaultColor, Object... args) {
         String msg = String.format(format, args);
         msg = msg.replaceAll("\\(default\\)", defaultColor.toString());
         msg = msg.replaceAll("\\(highlight\\)", Formatting.WHITE.toString());
         msg = msg.replaceAll("\\(underline\\)", Formatting.UNDERLINE.toString());
 
         return msg;
-    }
-
-    private enum PrefixType {
-        Module(Formatting.AQUA),
-        Other(Formatting.LIGHT_PURPLE),
-        None(Formatting.RESET);
-
-        public Formatting color;
-
-        PrefixType(Formatting color) {
-            this.color = color;
-        }
     }
 }

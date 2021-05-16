@@ -98,12 +98,12 @@ public class NotebotCommand extends Command {
             ticks = -1;
             song.clear();
             MeteorClient.EVENT_BUS.subscribe(this);
-            ChatUtils.prefixInfo("Notebot","Recording started");
+            ChatUtils.info("Notebot","Recording started");
             return  SINGLE_SUCCESS;
         })));
         builder.then(literal("record").then(literal("cancel").executes(ctx -> {
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            ChatUtils.prefixInfo("Notebot","Recording cancelled");
+            ChatUtils.info("Notebot","Recording cancelled");
             return  SINGLE_SUCCESS;
         })));
         builder.then(literal("record").then(literal("save").then(argument("name",StringArgumentType.greedyString()).executes(ctx -> {
@@ -152,10 +152,10 @@ public class NotebotCommand extends Command {
                     note.get(0), note.get(1)
             ));
             file.close();
-            ChatUtils.prefixInfo("Notebot",String.format("Song saved. Length: (highlight)%d(default).",note.get(0)));
+            ChatUtils.info("Notebot",String.format("Song saved. Length: (highlight)%d(default).",note.get(0)));
             MeteorClient.EVENT_BUS.unsubscribe(this);
         } catch (IOException e) {
-            ChatUtils.prefixError("Notebot","Couldn't create the file.");
+            ChatUtils.info("Notebot","Couldn't create the file.");
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }
 
