@@ -23,6 +23,8 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -81,7 +83,10 @@ public class LocateCommand extends Command {
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            info("Buried Treasure located at %s.", formatCoords(coords));
+            BaseText text = new LiteralText("Buried Treasure located at ");
+            text.append(formatCoords(coords));
+            text.append(".");
+            info(text);
             return SINGLE_SUCCESS;
         }));
 
@@ -103,7 +108,10 @@ public class LocateCommand extends Command {
             }
 
             Vec3d coords = new Vec3d(nbt1.getDouble("X"),nbt1.getDouble("Y"),nbt1.getDouble("Z"));
-            info("Lodestone located at %s.", formatCoords(coords));
+            BaseText text = new LiteralText("Lodestone located at ");
+            text.append(formatCoords(coords));
+            text.append(".");
+            info(text);
             return SINGLE_SUCCESS;
         }));
 
@@ -127,7 +135,10 @@ public class LocateCommand extends Command {
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            info("Mansion located at %s.", formatCoords(coords));
+            BaseText text = new LiteralText("Mansion located at ");
+            text.append(formatCoords(coords));
+            text.append(".");
+            info(text);
             return SINGLE_SUCCESS;
         }));
 
@@ -147,7 +158,10 @@ public class LocateCommand extends Command {
                     error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
                     return SINGLE_SUCCESS;
                 }
-                info("Stronghold located at %s.", formatCoords(coords));
+                BaseText text = new LiteralText("Stronghold located at ");
+                text.append(formatCoords(coords));
+                text.append(".");
+                info(text);
                 return SINGLE_SUCCESS;
             }
         }));
@@ -158,7 +172,10 @@ public class LocateCommand extends Command {
                 error("No nether fortress found.");
                 return SINGLE_SUCCESS;
             }
-            info("Fortress located at %s.", formatCoords(coords));
+            BaseText text = new LiteralText("Fortress located at ");
+            text.append(formatCoords(coords));
+            text.append(".");
+            info(text);
             return SINGLE_SUCCESS;
         }));
 
@@ -171,7 +188,10 @@ public class LocateCommand extends Command {
                     CompoundTag iconNBT = nbt1.getCompound(0);
                     if (iconNBT != null) {
                         Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-                        info("Monument located at %s.", formatCoords(coords));
+                        BaseText text = new LiteralText("Monument located at ");
+                        text.append(formatCoords(coords));
+                        text.append(".");
+                        info(text);
                         return SINGLE_SUCCESS;
                     }
                 }
@@ -181,7 +201,10 @@ public class LocateCommand extends Command {
                 error("No monument found. You can try using a (highlight)Ocean explorer map(default) for more success.");
                 return SINGLE_SUCCESS;
             }
-            info("Monument located at %s.", formatCoords(coords));
+            BaseText text = new LiteralText("Monument located at ");
+            text.append(formatCoords(coords));
+            text.append(".");
+            info(text);
             return SINGLE_SUCCESS;
         }));
 
@@ -263,8 +286,11 @@ public class LocateCommand extends Command {
         }
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
         MeteorClient.EVENT_BUS.unsubscribe(this);
-        Vec3d pos = new Vec3d(intersection[0],0,intersection[1]);
-        info("Stronghold roughly located at %s.", formatCoords(pos));
+        Vec3d coords = new Vec3d(intersection[0],0,intersection[1]);
+        BaseText text = new LiteralText("Stronghold roughly located at ");
+        text.append(formatCoords(coords));
+        text.append(".");
+        info(text);
     }
 
     private double[] calcIntersection(double[] line, double[] line2) {
