@@ -57,7 +57,6 @@ public class Commands extends System<Commands> {
         add(new ServerCommand());
         add(new SwarmCommand());
         add(new ToggleCommand());
-        add(new TpsCommand());
         add(new SettingCommand());
         add(new GamemodeCommand());
         add(new SaveMapCommand());

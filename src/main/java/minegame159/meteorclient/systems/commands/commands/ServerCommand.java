@@ -10,6 +10,7 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import joptsimple.internal.Strings;
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.utils.world.TickRate;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -63,6 +64,16 @@ public class ServerCommand extends Command {
             ticks = 0;
             MeteorClient.EVENT_BUS.subscribe(this);
             mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(0, "/"));
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("tps").executes(ctx -> {
+            float tps = TickRate.INSTANCE.getTickRate();
+            Formatting color = Formatting.WHITE;
+            if (tps > 17.0f) color = Formatting.GREEN;
+            else if (tps > 12.0f) color = Formatting.YELLOW;
+            else color = Formatting.RED;
+            ChatUtils.prefixInfo("Server", "Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
     }
