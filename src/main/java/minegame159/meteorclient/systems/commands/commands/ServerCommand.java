@@ -14,7 +14,6 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.systems.commands.Command;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.world.TickRate;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
@@ -56,7 +55,7 @@ public class ServerCommand extends Command {
 
         builder.then(literal("gamerules").executes(ctx -> {
             CompoundTag tag = mc.world.getGameRules().toNbt();
-            tag.getKeys().forEach((key) -> ChatUtils.info("Server", "%s: %s", key, tag.getString(key)));
+            tag.getKeys().forEach((key) -> info("%s: %s", key, tag.getString(key)));
             return SINGLE_SUCCESS;
         }));
 
@@ -73,7 +72,7 @@ public class ServerCommand extends Command {
             if (tps > 17.0f) color = Formatting.GREEN;
             else if (tps > 12.0f) color = Formatting.YELLOW;
             else color = Formatting.RED;
-            ChatUtils.info("Server", "Current TPS: %s%.2f(default).", color, tps);
+            info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
     }
@@ -82,8 +81,8 @@ public class ServerCommand extends Command {
         if (mc.isIntegratedServerRunning()) {
             IntegratedServer server = mc.getServer();
 
-            ChatUtils.info("Server","Singleplayer");
-            if (server != null) ChatUtils.info("Server", "Version: %s", server.getVersion());
+            info("Singleplayer");
+            if (server != null) info("Version: %s", server.getVersion());
 
             return;
         }
@@ -91,7 +90,7 @@ public class ServerCommand extends Command {
         ServerInfo server = mc.getCurrentServerEntry();
 
         if (server == null) {
-            ChatUtils.info("Server","Couldn't obtain any server information.");
+            info("Couldn't obtain any server information.");
             return;
         }
 
@@ -101,23 +100,23 @@ public class ServerCommand extends Command {
         } catch (UnknownHostException ignored) {}
 
         if (ipv4.isEmpty()) {
-            ChatUtils.info("Server", "IP: %s", server.address);
+            info("IP: %s", server.address);
         }
         else {
-            ChatUtils.info("Server", "IP: %s (%s)", server.address, ipv4);
+            info("IP: %s (%s)", server.address, ipv4);
         }
 
-        ChatUtils.info("Server", "Port: %d", ServerAddress.parse(server.address).getPort());
+        info("Port: %d", ServerAddress.parse(server.address).getPort());
 
-        ChatUtils.info("Server","Type: %s", mc.player.getServerBrand() != null ? mc.player.getServerBrand() : "unknown");
+        info("Type: %s", mc.player.getServerBrand() != null ? mc.player.getServerBrand() : "unknown");
 
-        ChatUtils.info("Server", "Motd: %s", server.label != null ? server.label.getString() : "unknown");
+        info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
 
-        ChatUtils.info("Server", "Version: %s", server.version.getString());
+        info("Version: %s", server.version.getString());
 
-        ChatUtils.info("Server","Protocol version: %d", server.protocolVersion);
+        info("Protocol version: %d", server.protocolVersion);
 
-        ChatUtils.info("Server", "Difficulty: %s", mc.world.getDifficulty().getTranslatableName().getString());
+        info("Difficulty: %s", mc.world.getDifficulty().getTranslatableName().getString());
     }
     
     @EventHandler
@@ -125,7 +124,7 @@ public class ServerCommand extends Command {
         ticks++;
 
         if (ticks >= 5000) {
-            ChatUtils.error("Server", "Plugins check timed out");
+            error("Plugins check timed out");
             MeteorClient.EVENT_BUS.unsubscribe(this);
             ticks = 0;
         }
@@ -140,7 +139,7 @@ public class ServerCommand extends Command {
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches == null) {
-                    ChatUtils.error("Server", "Invalid Packet.");
+                    error("Invalid Packet.");
                     return;
                 }
 
@@ -161,9 +160,9 @@ public class ServerCommand extends Command {
                 }
 
                 if (!plugins.isEmpty()) {
-                    ChatUtils.info("Server", "Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+                    info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
                 } else {
-                    ChatUtils.error("Server", "No plugins found.");
+                    error("No plugins found.");
                 }
 
                 ticks = 0;
@@ -171,7 +170,7 @@ public class ServerCommand extends Command {
             }
 
         } catch (Exception e) {
-            ChatUtils.error("Server", "An error occurred while trying to find plugins");
+            error("An error occurred while trying to find plugins");
             ticks = 0;
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }

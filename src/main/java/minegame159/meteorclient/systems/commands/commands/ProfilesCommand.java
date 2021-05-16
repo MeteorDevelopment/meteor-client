@@ -16,7 +16,6 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.profiles.Profile;
 import minegame159.meteorclient.systems.profiles.Profiles;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.LiteralText;
 
@@ -27,10 +26,10 @@ import java.util.concurrent.CompletableFuture;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class ProfileCommand extends Command {
+public class ProfilesCommand extends Command {
 
-    public ProfileCommand() {
-        super("profile", "Loads and saves profiles.");
+    public ProfilesCommand() {
+        super("profiles", "Loads and saves profiles.");
     }
 
     @Override
@@ -41,7 +40,7 @@ public class ProfileCommand extends Command {
 
                     if (profile != null) {
                         profile.load();
-                        ChatUtils.info("Profiles","Loaded profile (highlight)%s(default).", profile.name);
+                        info("Loaded profile (highlight)%s(default).", profile.name);
                     }
 
                     return SINGLE_SUCCESS;
@@ -51,7 +50,7 @@ public class ProfileCommand extends Command {
 
                     if (profile != null) {
                         profile.save();
-                        ChatUtils.info("Profiles","Saved profile (highlight)%s(default).", profile.name);
+                        info("Saved profile (highlight)%s(default).", profile.name);
                     }
 
                     return SINGLE_SUCCESS;
@@ -61,7 +60,7 @@ public class ProfileCommand extends Command {
 
                     if (profile != null) {
                         Profiles.get().remove(profile);
-                        ChatUtils.info("Profiles","Deleted profile (highlight)%s(default).", profile.name);
+                        info("Deleted profile (highlight)%s(default).", profile.name);
                     }
 
                     return SINGLE_SUCCESS;

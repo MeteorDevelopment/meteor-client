@@ -10,7 +10,6 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.CompoundNbtTagArgumentType;
 import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
@@ -41,7 +40,7 @@ public class NbtCommand extends Command {
                     stack.getTag().copyFrom(tag);
                     setStack(stack);
                 } else {
-                    ChatUtils.error("NBT", "Some of the NBT data could not be found, try using: " + Config.get().prefix + "nbt set {nbt}");
+                    error("Some of the NBT data could not be found, try using: " + Config.get().prefix + "nbt set {nbt}");
                 }
             }
             return SINGLE_SUCCESS;
@@ -66,7 +65,7 @@ public class NbtCommand extends Command {
         builder.then(literal("get").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                ChatUtils.error("NBT", "You must hold an item in your main hand.");
+                error("You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 String nbt = tag == null ? "none" : tag.asString();
@@ -87,18 +86,18 @@ public class NbtCommand extends Command {
                 text.append(copyButton);
                 text.append(new LiteralText(": " + nbt));
 
-                ChatUtils.info("NBT", text);
+                info(text);
             }
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("copy").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack == null) {
-                ChatUtils.error("NBT","You must hold an item in your main hand.");
+                error("You must hold an item in your main hand.");
             } else {
                 CompoundTag tag = stack.getTag();
                 if (tag == null)
-                    ChatUtils.error("NBT","No NBT data on this item.");
+                    error("No NBT data on this item.");
                 else {
                     mc.keyboard.setClipboard(tag.toString());
                     BaseText nbt = new LiteralText("NBT");
@@ -113,7 +112,7 @@ public class NbtCommand extends Command {
                     text.append(nbt);
                     text.append(new LiteralText(" data copied!"));
 
-                    ChatUtils.info("NBT", text);
+                    info(text);
                 }
             }
             return SINGLE_SUCCESS;
@@ -125,7 +124,7 @@ public class NbtCommand extends Command {
                 int count = IntegerArgumentType.getInteger(context, "count");
                 stack.setCount(count);
                 setStack(stack);
-                ChatUtils.info("NBT", "Set mainhand stack count to " + count + ".");
+                info("Set mainhand stack count to %s.",count);
             }
 
             return SINGLE_SUCCESS;
@@ -138,12 +137,12 @@ public class NbtCommand extends Command {
 
     private boolean validBasic(ItemStack stack) {
         if (!mc.player.abilities.creativeMode) {
-            ChatUtils.error("NBT","Creative mode only.");
+            error("Creative mode only.");
             return false;
         }
 
         if (stack == null) {
-            ChatUtils.error("NBT","You must hold an item in your main hand.");
+            error("You must hold an item in your main hand.");
             return false;
         }
         return true;
