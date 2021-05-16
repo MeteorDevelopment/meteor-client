@@ -22,6 +22,18 @@ public class ConfigTab extends Tab {
     private static final SettingGroup sgChat = settings.createGroup("Chat");
     private static final SettingGroup sgScreens = settings.createGroup("Screens");
 
+    public static final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
+            .name("custom-font")
+            .description("Use a custom font.")
+            .defaultValue(true)
+            .onChanged(aBoolean -> {
+                Config.get().customFont = aBoolean;
+                if (ConfigTab.currentScreen != null) ConfigTab.currentScreen.invalidate();
+            })
+            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().customFont))
+            .build()
+    );
+
     public static final Setting<String> font = sgGeneral.add(new ProvidedStringSetting.Builder()
             .name("font")
             .description("Custom font to use (picked from .minecraft/meteor-client/fonts folder).")
@@ -32,18 +44,7 @@ public class ConfigTab extends Tab {
                 Fonts.load();
             })
             .onModuleActivated(stringSetting -> stringSetting.set(Config.get().font))
-            .build()
-    );
-
-    public static final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
-            .name("custom-font")
-            .description("Use a custom font.")
-            .defaultValue(true)
-            .onChanged(aBoolean -> {
-                Config.get().customFont = aBoolean;
-                if (ConfigTab.currentScreen != null) ConfigTab.currentScreen.invalidate();
-            })
-            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().customFont))
+            .visible(customFont::get)
             .build()
     );
 
@@ -114,6 +115,7 @@ public class ConfigTab extends Tab {
             .defaultValue(true)
             .onChanged(aBoolean -> Config.get().deleteChatCommandsInfo = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().deleteChatCommandsInfo))
+            .visible(chatCommandsInfo::get)
             .build()
     );
 
@@ -150,6 +152,7 @@ public class ConfigTab extends Tab {
             .defaultValue("Minecraft {mc_version} - Meteor Client {version}")
             .onChanged(titleText -> Config.get().customWindowTitleText = titleText)
             .onModuleActivated(stringSetting -> stringSetting.set(Config.get().customWindowTitleText))
+            .visible(customWindowTitle::get)
             .build()
     );
 
