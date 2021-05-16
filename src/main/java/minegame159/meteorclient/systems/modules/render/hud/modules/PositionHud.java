@@ -7,7 +7,6 @@ package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
-import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 
 public class PositionHud extends HudElement {

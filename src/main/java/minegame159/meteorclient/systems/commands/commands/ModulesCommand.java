@@ -26,7 +26,7 @@ public class ModulesCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- (highlight)%d(default) modules ---", Modules.get().getCount());
+            ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
 
             BaseText modules = new LiteralText("");
 
@@ -44,7 +44,7 @@ public class ModulesCommand extends Command {
                 modules.append(finalModule);
             }
 
-            ChatUtils.info(modules);
+            ChatUtils.sendMsg(modules);
 
             return SINGLE_SUCCESS;
         });

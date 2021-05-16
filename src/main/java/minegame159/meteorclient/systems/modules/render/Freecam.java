@@ -12,15 +12,16 @@ import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.client.options.Perspective;
-import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -30,30 +31,31 @@ import net.minecraft.util.math.Vec3d;
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public enum AutoDisableEvent {
-        None,
-        OnDamage,
-        OnDeath
-    }
-
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("speed")
-            .description("Your speed while in Freecam.")
+            .description("Your speed while in freecam.")
             .defaultValue(1.0)
             .min(0.0)
             .build()
     );
 
-    private final Setting<AutoDisableEvent> autoDisableOnDamage = sgGeneral.add(new EnumSetting.Builder<AutoDisableEvent>()
-            .name("auto-disable-on-damage")
-            .description("Disables Freecam when you either take damage or die.")
-            .defaultValue(AutoDisableEvent.OnDamage)
+    private final Setting<Boolean> autoDisableOnDamage = sgGeneral.add(new BoolSetting.Builder()
+            .name("toggle-on-damage")
+            .description("Disables freecam when you take damage.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> autoDisableOnDeath = sgGeneral.add(new BoolSetting.Builder()
+            .name("toggle-on-death")
+            .description("Disables freecam when you die.")
+            .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> autoDisableOnLog = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-disable-on-log")
-            .description("Disables Freecam when you disconnect from a server.")
+            .name("toggle-on-log")
+            .description("Disables freecam when you disconnect from a server.")
             .defaultValue(true)
             .build()
     );
@@ -66,15 +68,15 @@ public class Freecam extends Module {
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
-            .name("render-hand")
-            .description("Whether or not to render your hand in Freecam.")
+            .name("show-hands")
+            .description("Whether or not to render your hands in greecam.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
-            .description("Rotates your character to whatever block or entity you are looking at.")
+            .description("Rotates to the block or entity you are looking at.")
             .defaultValue(false)
             .build()
     );
@@ -90,7 +92,7 @@ public class Freecam extends Module {
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
-        super(Categories.Render, "freecam", "Makes you fly out of your body.");
+        super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
     }
 
     @Override
@@ -249,9 +251,9 @@ public class Freecam extends Module {
         if (event.entity.getUuid() == null) return;
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        if ((autoDisableOnDamage.get() == AutoDisableEvent.OnDamage) || (autoDisableOnDamage.get() == AutoDisableEvent.OnDeath && event.entity.getHealth() <= 0)) {
+        if (autoDisableOnDamage.get() || (autoDisableOnDeath.get() && event.entity.getHealth() <= 0)) {
             toggle();
-            ChatUtils.moduleInfo(this, "Auto toggled %s(default).", isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+            info("Auto toggled because you took damage or died.");
         }
     }
 

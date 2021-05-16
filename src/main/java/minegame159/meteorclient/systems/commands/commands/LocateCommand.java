@@ -11,7 +11,6 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.systems.commands.Command;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -24,8 +23,6 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -33,6 +30,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class LocateCommand extends Command {
 
@@ -66,79 +64,70 @@ public class LocateCommand extends Command {
         builder.then(literal("buried_treasure").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {
-                ChatUtils.prefixError("Locate","You need to hold a treasure map first");
+                error("You need to hold a treasure map first");
                 return SINGLE_SUCCESS;
             }
             CompoundTag tag = stack.getTag();
             ListTag nbt1 = (ListTag) tag.get("Decorations");
             if (nbt1 == null) {
-                ChatUtils.prefixError("Locate","Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
+                error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
                 return SINGLE_SUCCESS;
             }
 
             CompoundTag iconNBT = nbt1.getCompound(0);
             if (iconNBT == null) {
-                ChatUtils.prefixError("Locate","Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
+                error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
                 return SINGLE_SUCCESS;
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            BaseText msg = new LiteralText("Buried Treasure located at ");
-            msg.append(ChatUtils.formatCoords(coords));
-            msg.append(".");
-            ChatUtils.info("Locate", msg);
+            info("Buried Treasure located at %s.", formatCoords(coords));
             return SINGLE_SUCCESS;
         }));
 
         builder.then(literal("lodestone").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack.getItem() != Items.COMPASS) {
-                ChatUtils.prefixError("Locate","You need to hold a lodestone compass");
+                error("You need to hold a lodestone compass");
                 return SINGLE_SUCCESS;
             }
             CompoundTag tag = stack.getTag();
             if (tag == null) {
-                ChatUtils.prefixError("Locate","Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+                error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
             }
             CompoundTag nbt1 = tag.getCompound("LodestonePos");
             if (nbt1 == null) {
-                ChatUtils.prefixError("Locate","Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+                error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
             }
 
             Vec3d coords = new Vec3d(nbt1.getDouble("X"),nbt1.getDouble("Y"),nbt1.getDouble("Z"));
-            BaseText msg = new LiteralText("Lodestone at ");
-            msg.append(ChatUtils.formatCoords(coords));
-            msg.append(".");
-            ChatUtils.info("Locate", msg);
+            info("Lodestone located at %s.", formatCoords(coords));
             return SINGLE_SUCCESS;
         }));
 
         builder.then(literal("mansion").executes(s -> {
             ItemStack stack = mc.player.inventory.getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {
-                ChatUtils.prefixError("Locate","You need to hold a woodland explorer map first");
+                error("You need to hold a woodland explorer map first");
                 return SINGLE_SUCCESS;
             }
             CompoundTag tag = stack.getTag();
             ListTag nbt1 = (ListTag) tag.get("Decorations");
             if (nbt1 == null) {
-                ChatUtils.prefixError("Locate","Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
+                error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
             CompoundTag iconNBT = nbt1.getCompound(0);
             if (iconNBT == null) {
-                ChatUtils.prefixError("Locate","Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
+                error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            BaseText msg = new LiteralText("Mansion located at ");
-            msg.append(ChatUtils.formatCoords(coords));
-            msg.append(".");
-            ChatUtils.info("Locate", msg);
+            info("Mansion located at %s.", formatCoords(coords));
             return SINGLE_SUCCESS;
         }));
 
@@ -150,18 +139,15 @@ public class LocateCommand extends Command {
                 secondStart = null;
                 secondEnd = null;
                 MeteorClient.EVENT_BUS.subscribe(this);
-                ChatUtils.prefixInfo("Locate", "Please throw the first Eye of Ender");
+                info("Please throw the first Eye of Ender");
                 return SINGLE_SUCCESS;
             } else {
                 Vec3d coords = findByBlockList(strongholdBlocks);
                 if (coords == null ) {
-                    ChatUtils.prefixError("Locate","No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
+                    error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
                     return SINGLE_SUCCESS;
                 }
-                BaseText msg = new LiteralText("Stronghold located at ");
-                msg.append(ChatUtils.formatCoords(coords));
-                msg.append(".");
-                ChatUtils.info("Locate", msg);
+                info("Stronghold located at %s.", formatCoords(coords));
                 return SINGLE_SUCCESS;
             }
         }));
@@ -169,13 +155,10 @@ public class LocateCommand extends Command {
         builder.then(literal("nether_fortress").executes(s -> {
             Vec3d coords = findByBlockList(netherFortressBlocks);
             if (coords == null ) {
-                ChatUtils.prefixError("Locate","No nether fortress found.");
+                error("No nether fortress found.");
                 return SINGLE_SUCCESS;
             }
-            BaseText msg = new LiteralText("Nether fortress located at ");
-            msg.append(ChatUtils.formatCoords(coords));
-            msg.append(".");
-            ChatUtils.info("Locate", msg);
+            info("Fortress located at %s.", formatCoords(coords));
             return SINGLE_SUCCESS;
         }));
 
@@ -188,23 +171,17 @@ public class LocateCommand extends Command {
                     CompoundTag iconNBT = nbt1.getCompound(0);
                     if (iconNBT != null) {
                         Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-                        BaseText msg = new LiteralText("Monument located at ");
-                        msg.append(ChatUtils.formatCoords(coords));
-                        msg.append(".");
-                        ChatUtils.info("Locate", msg);
+                        info("Monument located at %s.", formatCoords(coords));
                         return SINGLE_SUCCESS;
                     }
                 }
             }
             Vec3d coords = findByBlockList(monumentBlocks);
             if (coords == null ) {
-                ChatUtils.prefixError("Locate","No monument found. You can try using a (highlight)Ocean explorer map(default) for more success.");
+                error("No monument found. You can try using a (highlight)Ocean explorer map(default) for more success.");
                 return SINGLE_SUCCESS;
             }
-            BaseText msg = new LiteralText("Monument located at ");
-            msg.append(ChatUtils.formatCoords(coords));
-            msg.append(".");
-            ChatUtils.info("Locate", msg);
+            info("Monument located at %s.", formatCoords(coords));
             return SINGLE_SUCCESS;
         }));
 
@@ -215,7 +192,7 @@ public class LocateCommand extends Command {
     }
 
     private void cancel() {
-        ChatUtils.prefixWarning("Locate","Locate canceled");
+        warning("Locate canceled");
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 
@@ -226,7 +203,7 @@ public class LocateCommand extends Command {
             return null;
         }
         if (posList.size() < 3) {
-            ChatUtils.prefixWarning("Locate","Only %d block(s) found. This search might be a false positive.", posList.size());
+            warning("Only %d block(s) found. This search might be a false positive.", posList.size());
         }
         return new Vec3d(posList.get(0).getX(),posList.get(0).getY(),posList.get(0).getZ());
     }
@@ -258,11 +235,11 @@ public class LocateCommand extends Command {
     }
 
     private void lastPosition(double x, double y, double z) {
-        ChatUtils.prefixInfo("Locate","%s Eye of Ender's trajectory saved.", (this.firstEnd==null)?"First":"Second");
+        info("%s Eye of Ender's trajectory saved.", (this.firstEnd == null) ? "First" : "Second");
         Vec3d pos = new Vec3d(x, y, z);
         if (this.firstEnd == null) {
             this.firstEnd = pos;
-            ChatUtils.prefixInfo("Locate","Please throw the second Eye Of Ender from a different location.");
+            info("Please throw the second Eye Of Ender from a different location.");
         }
         else {
             this.secondEnd = pos;
@@ -272,7 +249,7 @@ public class LocateCommand extends Command {
 
     private void findStronghold() {
         if (this.firstStart == null || this.firstEnd == null || this.secondStart == null || this.secondEnd == null) {
-            ChatUtils.prefixError("Locate","Missing position data");
+            error("Missing position data");
             cancel();
             return;
         }
@@ -280,17 +257,14 @@ public class LocateCommand extends Command {
         final double[] end = new double[]{this.firstStart.x, this.firstStart.z, this.firstEnd.x, this.firstEnd.z};
         final double[] intersection = calcIntersection(start, end);
         if (Double.isNaN(intersection[0]) || Double.isNaN(intersection[1]) || Double.isInfinite(intersection[0]) || Double.isInfinite(intersection[1])) {
-            ChatUtils.prefixError("Locate","Lines are parallel");
+            error("Lines are parallel");
             cancel();
             return;
         }
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
         MeteorClient.EVENT_BUS.unsubscribe(this);
         Vec3d pos = new Vec3d(intersection[0],0,intersection[1]);
-        BaseText msg = new LiteralText("Stronghold roughly located at ");
-        msg.append(ChatUtils.formatCoords(pos));
-        msg.append(".");
-        ChatUtils.info("Locate", msg);
+        info("Stronghold roughly located at %s.", formatCoords(pos));
     }
 
     private double[] calcIntersection(double[] line, double[] line2) {

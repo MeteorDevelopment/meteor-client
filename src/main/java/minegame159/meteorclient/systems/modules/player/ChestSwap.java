@@ -12,7 +12,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ArmorItem;
@@ -133,6 +132,6 @@ public class ChestSwap extends Module {
     @Override
     public void sendToggledMsg() {
         if (stayOn.get()) super.sendToggledMsg();
-        else if (Config.get().chatCommandsInfo) ChatUtils.moduleInfo(this, "Triggered (highlight)%s(default).", title);
+        else if (Config.get().chatCommandsInfo) info("Triggered (highlight)%s(default).", title);
     }
 }

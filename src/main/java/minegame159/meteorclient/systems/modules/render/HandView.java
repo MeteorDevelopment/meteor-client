@@ -5,7 +5,10 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 

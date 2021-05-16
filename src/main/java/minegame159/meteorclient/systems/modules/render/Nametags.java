@@ -17,7 +17,6 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
@@ -26,7 +25,7 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
-import minegame159.meteorclient.utils.misc.text.TextUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -343,11 +342,7 @@ public class Nametags extends Module {
 
         // Name
         String name;
-        Color nameColor;
-
-        if (Friends.get().getFriendColor(player) != null) nameColor = Friends.get().getFriendColor(player).a(255);
-        if (useTeamColor.get()) nameColor = TextUtils.getMostPopularColor(player.getDisplayName());
-        else nameColor = WHITE;
+        Color nameColor = PlayerUtils.getPlayerColor(player, WHITE, true);
 
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
         else name = player.getEntityName();

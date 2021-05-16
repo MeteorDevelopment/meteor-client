@@ -16,7 +16,6 @@ import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.player.PlayerEntity;
 
 public class VisualRange extends Module {
@@ -59,15 +58,13 @@ public class VisualRange extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !Friends.get().attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
 
-        String enter = enterMessage.get().replace("{player}", event.entity.getEntityName());
-        ChatUtils.moduleInfo(this, enter);
+        info(enterMessage.get().replace("{player}", event.entity.getEntityName()));
     }
 
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
         if (event.entity.equals(mc.player) || !(event.entity instanceof PlayerEntity) || !Friends.get().attack((PlayerEntity) event.entity) && ignoreFriends.get() || (event.entity instanceof FakePlayerEntity && ignoreFakes.get())) return;
 
-        String leave = leaveMessage.get().replace("{player}", event.entity.getEntityName());
-        ChatUtils.moduleInfo(this, leave);
+        info(leaveMessage.get().replace("{player}", event.entity.getEntityName()));
     }
 }

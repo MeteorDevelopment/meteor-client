@@ -68,7 +68,6 @@ public class ESP extends Module {
             .defaultValue(6)
             .min(0)
             .sliderMax(12)
-            .visible(() -> mode.get() == Mode.Shader)
             .build()
     );
 
@@ -89,8 +88,8 @@ public class ESP extends Module {
     // Colors
 
     public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
-            .name("use-name-color")
-            .description("Uses players displayname color for the ESP color.")
+            .name("use-team-color")
+            .description("Uses players team color for the ESP color.")
             .defaultValue(true)
             .build()
     );
