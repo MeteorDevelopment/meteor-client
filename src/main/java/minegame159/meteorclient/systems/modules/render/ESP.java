@@ -29,7 +29,7 @@ public class ESP extends Module {
 
     public enum Mode {
         Box,
-        Outline
+        Shader
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,14 +40,35 @@ public class ESP extends Module {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
-            .defaultValue(Mode.Outline)
+            .defaultValue(Mode.Shader)
             .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("box-mode")
+            .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
+            .visible(() -> mode.get() == Mode.Box)
+            .build()
+    );
+
+    public final Setting<Double> fillAlpha = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fill-opacity")
+            .description("The opacity of the shader fill.")
+            .defaultValue(50)
+            .min(0).max(255)
+            .sliderMax(255)
+            .visible(() -> mode.get() == Mode.Shader)
+            .build()
+    );
+
+    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fade-distance")
+            .description("The distance from an entity where the color begins to fade.")
+            .defaultValue(6)
+            .min(0)
+            .sliderMax(12)
+            .visible(() -> mode.get() == Mode.Shader)
             .build()
     );
 
@@ -70,7 +91,7 @@ public class ESP extends Module {
     public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
             .name("use-name-color")
             .description("Uses players displayname color for the ESP color.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
@@ -113,15 +134,6 @@ public class ESP extends Module {
             .name("misc-color")
             .description("The misc color.")
             .defaultValue(new SettingColor(175, 175, 175, 255))
-            .build()
-    );
-
-    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fade-distance")
-            .description("The distance where the color fades.")
-            .defaultValue(6)
-            .min(0)
-            .sliderMax(12)
             .build()
     );
 
@@ -201,11 +213,22 @@ public class ESP extends Module {
         return null;
     }
 
+    public float getFillOpacity(Entity entity) {
+        double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
+        float a = fillAlpha.get().floatValue() / 255;
+        if (dist <= fadeDistance.get() * fadeDistance.get()) a *= dist / (fadeDistance.get() * fadeDistance.get());
+
+        if (a >= 0.075) {
+            return a;
+        }
+        return 0;
+    }
+
     public Color getColor(Entity entity) {
         return EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
     }
 
     public boolean isOutline() {
-        return mode.get() == Mode.Outline;
+        return mode.get() == Mode.Shader;
     }
 }

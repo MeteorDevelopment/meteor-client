@@ -1,13 +1,18 @@
 #version 120
 
 uniform sampler2D DiffuseSampler;
+uniform float fillAlpha;
 
 varying vec2 texCoord;
 varying vec2 oneTexel;
 
-void main(){
+void main() {
     vec4 center = texture2D(DiffuseSampler, texCoord);
-    if (center.a != 0) discard;
+
+    if (center.a != 0) {
+        gl_FragColor = vec4(center.rgb, fillAlpha);
+        return;
+    }
 
     vec4 left = texture2D(DiffuseSampler, texCoord - vec2(oneTexel.x, 0.0));
     vec4 right = texture2D(DiffuseSampler, texCoord + vec2(oneTexel.x, 0.0));

@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils.render;
 
+import minegame159.meteorclient.mixin.ShaderEffectAccessor;
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -22,6 +23,8 @@ public class Outlines {
     public static Framebuffer outlinesFbo;
     public static OutlineVertexConsumerProvider vertexConsumerProvider;
     private static ShaderEffect outlinesShader;
+
+    public static float fillAlpha = 0.35f;
 
     public static void load() {
         try {
@@ -43,6 +46,8 @@ public class Outlines {
     }
 
     public static void beginRender() {
+        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName("fillAlpha").set(fillAlpha);
+
         outlinesFbo.clear(MinecraftClient.IS_SYSTEM_MAC);
         MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
     }

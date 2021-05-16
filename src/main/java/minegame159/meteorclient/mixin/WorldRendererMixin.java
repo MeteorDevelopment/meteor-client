@@ -13,7 +13,6 @@ import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -21,7 +20,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,8 +35,6 @@ public abstract class WorldRendererMixin {
     @Shadow protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
     @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
-
-    @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
     private void onLoadEntityOutlineShader(CallbackInfo info) {
@@ -90,6 +86,7 @@ public abstract class WorldRendererMixin {
             Framebuffer fbo = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
 
+            Outlines.fillAlpha = Modules.get().get(ESP.class).getFillOpacity(entity);
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
 
