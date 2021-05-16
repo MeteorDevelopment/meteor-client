@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import javax.annotation.Nullable;
 
-import static minegame159.meteorclient.systems.modules.render.BetterTooltips.hasItems;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(HandledScreen.class)
@@ -79,7 +78,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             // Shulker Preview
-            if (hasItems(focusedSlot.getStack()) && toolips.previewShulkers()) {
+            if (Utils.hasItems(focusedSlot.getStack()) && toolips.previewShulkers()) {
                 CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
                 Inventories.fromTag(compoundTag, itemStacks);
@@ -93,7 +92,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
             // Map preview
             else if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) {
-                drawMapPreview(matrices, focusedSlot.getStack(), mouseX, mouseY, toolips.mapsScale.get());
+                drawMapPreview(matrices, focusedSlot.getStack(), mouseX, mouseY, (int) (toolips.mapsScale.get() * 100));
             }
         }
     }
@@ -105,7 +104,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) info.cancel();
-            else if ((hasItems(focusedSlot.getStack())
+            else if ((Utils.hasItems(focusedSlot.getStack())
                     && toolips.previewShulkers()
                     || (focusedSlot.getStack().getItem() == Items.ENDER_CHEST
                     && toolips.previewEChest()))
