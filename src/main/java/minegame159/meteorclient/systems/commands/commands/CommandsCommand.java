@@ -10,7 +10,6 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
@@ -22,13 +21,13 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class CommandsCommand extends Command {
     public CommandsCommand() {
-        super("help", "List of all commands.", "commands");
+        super("commands", "List of all commands.", "help");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.get().getCount());
+            info("--- Commands ((highlight)%d(default)) ---", Commands.get().getCount());
 
             BaseText commands = new LiteralText("");
 
@@ -64,7 +63,7 @@ public class CommandsCommand extends Command {
                 commands.append(finalCommand);
             }
 
-            ChatUtils.sendMsg(commands);
+            info(commands);
 
             return SINGLE_SUCCESS;
         });

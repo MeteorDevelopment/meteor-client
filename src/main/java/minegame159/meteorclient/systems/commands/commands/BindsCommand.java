@@ -10,7 +10,6 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.LiteralText;
@@ -35,7 +34,7 @@ public class BindsCommand extends Command {
                     .filter(module -> module.keybind.isSet())
                     .collect(Collectors.toList());
 
-            info("--- (highlight)%d(default) bound modules ---", modules.size());
+            info("--- Bound Modules ((highlight)%d(default)) ---", modules.size());
 
             for (Module module : modules) {
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, getTooltip(module));
@@ -51,7 +50,7 @@ public class BindsCommand extends Command {
                 key.setStyle(key.getStyle().withHoverEvent(hoverEvent));
                 text.append(key.formatted(Formatting.GRAY));
 
-                ChatUtils.sendMsg(text);
+                info(text);
             }
 
             return SINGLE_SUCCESS;
