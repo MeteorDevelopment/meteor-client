@@ -226,7 +226,7 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR || (!itemInHand() || !autoSwitch.get())) return;
+        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR) return;
 
         EntityUtils.getList(entity -> {
             if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
@@ -311,7 +311,7 @@ public class KillAura extends Module {
     }
 
     private void hitEntity(Entity target) {
-        if (!itemInHand()) {
+        if (autoSwitch.get()) {
             int slot = InvUtils.findItemInHotbar(itemStack -> {
                 Item item = itemStack.getItem();
 
@@ -323,10 +323,11 @@ public class KillAura extends Module {
                 }
             });
 
-            if (autoSwitch.get() && slot == -1) return;
-
-            if (autoSwitch.get()) mc.player.inventory.selectedSlot = slot;
+            if (slot == -1) return;
+            mc.player.inventory.selectedSlot = slot;
         }
+
+        if (!itemInHand()) return;
 
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
