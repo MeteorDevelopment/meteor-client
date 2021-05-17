@@ -44,7 +44,7 @@ public class EntityUtils {
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
         ENTITIES.clear();
-        getList(isGood, sortPriority, ENTITIES);
+        getList(isGood, sortPriority, ENTITIES, 1);
         if (!ENTITIES.isEmpty()) {
             return ENTITIES.get(0);
         }
@@ -52,16 +52,19 @@ public class EntityUtils {
         return null;
     }
 
-    public static void getList(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> target) {
+    public static void getList(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> targetList, int maxCount) {
+        targetList.clear();
+
         for (Entity entity : mc.world.getEntities()) {
-            if (isGood.test(entity)) target.add(entity);
+            if (isGood.test(entity)) targetList.add(entity);
         }
 
         for (Entity entity : FakePlayerManager.getPlayers()) {
-            if (isGood.test(entity)) target.add(entity);
+            if (isGood.test(entity)) targetList.add(entity);
         }
 
-        target.sort((e1, e2) -> sort(e1, e2, sortPriority));
+        targetList.sort((e1, e2) -> sort(e1, e2, sortPriority));
+        targetList.removeIf(entity -> targetList.indexOf(entity) > maxCount -1);
     }
 
     private static int sort(Entity e1, Entity e2, SortPriority priority) {

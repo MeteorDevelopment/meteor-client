@@ -24,6 +24,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -37,6 +38,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
 public class PlayerUtils {
@@ -327,5 +329,11 @@ public class PlayerUtils {
         if (Friends.get().isFriend(entity)) return new Color(Friends.get().color.r, Friends.get().color.g, Friends.get().color.b, defaultColor.a);
         else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());
         else return defaultColor;
+    }
+
+    public static GameMode getGameMode() {
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        if (playerListEntry == null) return GameMode.NOT_SET;
+        return playerListEntry.getGameMode();
     }
 }

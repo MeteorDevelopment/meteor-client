@@ -35,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KillAura extends Module {
-    public enum OnlyWith {
+    public enum Weapon {
         Sword,
         Axe,
         Both,
@@ -49,82 +49,51 @@ public class KillAura extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRotations = settings.createGroup("Rotations");
+    private final SettingGroup sgTargeting = settings.createGroup("Targeting");
     private final SettingGroup sgDelay = settings.createGroup("Delay");
 
     // General
 
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The maximum range the entity can be to attack it.")
-            .defaultValue(4)
-            .min(0)
-            .max(6)
-            .sliderMax(6)
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to your selected weapon when attacking the target.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
+            .name("weapon")
+            .description("Only attacks an entity when a specified item is in your hand.")
+            .defaultValue(Weapon.Both)
             .build()
     );
 
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-click")
-            .description("Only attacks when you click.")
+            .description("Only attacks when hold left click.")
             .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> onlyWhenLook = sgGeneral.add(new BoolSetting.Builder()
             .name("only-when-look")
-            .description("Only attacks when you look at the entity.")
+            .description("Only attacks when you are looking at the entity.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to attack.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
-            .onlyAttackable()
-            .build()
-    );
-
-    private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
-            .description("What type of entities to target.")
-            .defaultValue(SortPriority.LowestHealth)
-            .build()
-    );
-
-    private final Setting<OnlyWith> onlyWith = sgGeneral.add(new EnumSetting.Builder<OnlyWith>()
-            .name("only-with")
-            .description("Only attacks an entity when a specified item is in your hand.")
-            .defaultValue(OnlyWith.Any)
-            .build()
-    );
-
-    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-switch")
-            .description("Switches to an axe or a sword when attacking the target.")
+    private final Setting<Boolean> randomTeleport = sgGeneral.add(new BoolSetting.Builder()
+            .name("random-teleport")
+            .description("Randomly teleport around the target")
             .defaultValue(false)
+            .visible(() -> !onlyWhenLook.get())
             .build()
     );
 
-    private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Whether or not to attack the entity through a wall.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
-            .name("babies")
-            .description("Whether or not to attack baby variants of the entity.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> nametagged = sgGeneral.add(new BoolSetting.Builder()
-            .name("nametagged")
-            .description("Whether or not to attack mobs with a name tag.")
-            .defaultValue(false)
+    private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotate")
+            .description("Determines when you should rotate towards the target.")
+            .defaultValue(RotationMode.Always)
             .build()
     );
 
@@ -141,39 +110,63 @@ public class KillAura extends Module {
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
             .name("pause-on-combat")
             .description("Freezes Baritone temporarily until you are finished attacking the entity.")
+            .defaultValue(true)
+            .build()
+    );
+
+    // Targeting
+
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Entities to attack.")
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
+            .onlyAttackable()
+            .build()
+    );
+
+    private final Setting<Double> range = sgTargeting.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("The maximum range the entity can be to attack it.")
+            .defaultValue(4)
+            .min(0).max(6)
+            .sliderMax(6)
+            .build()
+    );
+
+    private final Setting<SortPriority> priority = sgTargeting.add(new EnumSetting.Builder<SortPriority>()
+            .name("priority")
+            .description("How to filter targets within range.")
+            .defaultValue(SortPriority.LowestHealth)
+            .build()
+    );
+
+    private final Setting<Integer> maxTargets = sgTargeting.add(new IntSetting.Builder()
+            .name("max-targets")
+            .description("How many entities to target at once.")
+            .defaultValue(1)
+            .min(1).max(10)
+            .sliderMin(1).sliderMax(5)
+            .build()
+    );
+
+    private final Setting<Boolean> ignoreWalls = sgTargeting.add(new BoolSetting.Builder()
+            .name("ignore-walls")
+            .description("Whether or not to attack the entity through a wall.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> babies = sgTargeting.add(new BoolSetting.Builder()
+            .name("babies")
+            .description("Whether or not to attack baby variants of the entity.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> nametagged = sgTargeting.add(new BoolSetting.Builder()
+            .name("nametagged")
+            .description("Whether or not to attack mobs with a name tag.")
             .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> targetMultiple = sgGeneral.add(new BoolSetting.Builder()
-            .name("target-multiple")
-            .description("Targets multiple entities at once.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> randomTeleport = sgGeneral.add(new BoolSetting.Builder()
-            .name("random-teleport")
-            .description("Randomly teleport around the target")
-            .defaultValue(false)
-            .visible(() -> !onlyWhenLook.get())
-            .build()
-    );
-
-    // Rotations
-
-    private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
-            .name("rotation-mode")
-            .description("Determines when you should rotate towards the target.")
-            .defaultValue(RotationMode.Always)
-            .build()
-    );
-
-    private final Setting<Target> rotationDirection = sgRotations.add(new EnumSetting.Builder<Target>()
-            .name("rotation-direction")
-            .description("The direction to use for rotating towards the enemy.")
-            .defaultValue(Target.Head)
-            .visible(() -> rotationMode.get() != RotationMode.None)
             .build()
     );
 
@@ -192,6 +185,7 @@ public class KillAura extends Module {
             .defaultValue(0)
             .min(0)
             .sliderMax(60)
+            .visible(() -> !smartDelay.get())
             .build()
     );
 
@@ -199,6 +193,7 @@ public class KillAura extends Module {
             .name("random-delay-enabled")
             .description("Adds a random delay between hits to attempt to bypass anti-cheats.")
             .defaultValue(false)
+            .visible(() -> !smartDelay.get())
             .build()
     );
 
@@ -208,15 +203,13 @@ public class KillAura extends Module {
             .defaultValue(4)
             .min(0)
             .sliderMax(20)
-            .visible(randomDelayEnabled::get)
+            .visible(() -> randomDelayEnabled.get() && !smartDelay.get())
             .build()
     );
 
     private int hitDelayTimer;
     private int randomDelayTimer;
     private boolean wasPathing;
-    private boolean canAttack;
-    private Entity target;
 
     private final List<Entity> entityList = new ArrayList<>();
 
@@ -229,17 +222,14 @@ public class KillAura extends Module {
         hitDelayTimer = 0;
         randomDelayTimer = 0;
         entityList.clear();
-        target = null;
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        entityList.clear();
-
-        if (mc.player.isDead() || !mc.player.isAlive() || !itemInHand() || EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) return;
+        if (!mc.player.isAlive() || PlayerUtils.getGameMode() == GameMode.SPECTATOR || (!itemInHand() || !autoSwitch.get())) return;
 
         EntityUtils.getList(entity -> {
-            if (entity == mc.player || entity == mc.cameraEntity) return false;
+            if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
             if (entity.distanceTo(mc.player) > range.get()) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
@@ -250,10 +240,7 @@ public class KillAura extends Module {
                 if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
             }
             return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
-        }, priority.get(), entityList);
-
-        if (!targetMultiple.get() && !entityList.isEmpty())
-            entityList.subList(1, entityList.size()).clear();
+        }, priority.get(), entityList, maxTargets.get());
 
         if (entityList.isEmpty()) {
             if (wasPathing) {
@@ -268,30 +255,17 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
-        if (!onlyOnClick.get() || (!mc.options.keyAttack.wasPressed() && mc.options.keyAttack.isPressed())) {
-            if (onlyWhenLook.get()) {
-                if (mc.targetedEntity instanceof LivingEntity && delayCheck()) {
-                    if (attack(mc.targetedEntity) && canAttack) {
-                        hitEntity(mc.targetedEntity);
-                    }
-                }
-            } else {
-                if (delayCheck()) {
-                    for (Entity target : entityList) {
-                        if (attack(target) && canAttack) {
-                            hitEntity(target);
-                        }
-                    }
-                }
-                if (randomTeleport.get() && !entityList.isEmpty()) {
-                    Entity target = entityList.get(0);
-                    mc.player.updatePosition(target.getX() + randomOffset(), target.getY(), target.getZ() + randomOffset());
-                }
-            }
+        if (delayCheck()) {
+            entityList.forEach(this::attack);
         }
 
-        if (rotationMode.get() == RotationMode.Always && target != null) {
-            rotate(target, null);
+        if (randomTeleport.get() && !onlyWhenLook.get()) {
+            Entity target = entityList.get(0);
+            mc.player.updatePosition(target.getX() + randomOffset(), target.getY(), target.getZ() + randomOffset());
+        }
+
+        if (rotation.get() == RotationMode.Always && !entityList.isEmpty()) {
+            rotate(entityList.get(0), null);
         }
     }
 
@@ -300,9 +274,7 @@ public class KillAura extends Module {
     }
 
     private boolean delayCheck() {
-        if (smartDelay.get() && mc.player.getAttackCooldownProgress(0.5f) < 1) {
-            return false;
-        }
+        if (smartDelay.get()) return mc.player.getAttackCooldownProgress(0.5f) >= 1;
 
         if (hitDelayTimer >= 0) {
             hitDelayTimer--;
@@ -320,42 +292,52 @@ public class KillAura extends Module {
                 randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
             }
         }
+
         return true;
     }
 
     private boolean attack(Entity target) {
-        canAttack = false;
-        this.target = target;
-
         if (Math.random() > hitChance.get() / 100) return false;
+        if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return false;
+        if (onlyWhenLook.get() && (!target.equals(mc.targetedEntity))) return false;
 
-        if (rotationMode.get() == RotationMode.OnHit) {
+        if (rotation.get() == RotationMode.OnHit) {
             rotate(target, () -> hitEntity(target));
         } else {
             hitEntity(target);
         }
 
-        canAttack = true;
         return true;
     }
 
-    private void rotate(Entity target, Runnable callback) {
-        Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, rotationDirection.get()), callback);
-    }
-
     private void hitEntity(Entity target) {
-        int slot = InvUtils.findItemInHotbar(itemStack -> {
+        if (!itemInHand()) {
+            int slot = InvUtils.findItemInHotbar(itemStack -> {
                 Item item = itemStack.getItem();
-                return ((item instanceof SwordItem || item instanceof AxeItem) && autoSwitch.get());
-            }
-        );
-        if (autoSwitch.get() && slot != -1) mc.player.inventory.selectedSlot = slot;
+
+                switch(weapon.get()) {
+                    case Axe:        return item instanceof AxeItem;
+                    case Sword:      return item instanceof SwordItem;
+                    case Both:       return item instanceof AxeItem || item instanceof SwordItem;
+                    default:         return true;
+                }
+            });
+
+            if (autoSwitch.get() && slot == -1) return;
+
+            if (autoSwitch.get()) mc.player.inventory.selectedSlot = slot;
+        }
+
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
 
+    private void rotate(Entity target, Runnable callback) {
+        Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body), callback);
+    }
+
     private boolean itemInHand() {
-        switch(onlyWith.get()) {
+        switch(weapon.get()) {
             case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
             case Both:       return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
@@ -374,6 +356,7 @@ public class KillAura extends Module {
     }
 
     public Entity getTarget() {
-        return target;
+        if (!entityList.isEmpty()) return entityList.get(0);
+        return null;
     }
 }

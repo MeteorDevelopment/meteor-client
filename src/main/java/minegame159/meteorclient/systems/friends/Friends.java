@@ -79,8 +79,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public boolean shouldAttack(PlayerEntity player) {
-        Friend friend = get(player);
-        return friend != null && !attack;
+        return !isFriend(player) || attack;
     }
 
     public int count() {
