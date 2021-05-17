@@ -119,6 +119,9 @@ public class HUD extends Module {
         bottomCenter.add(new ArmorHud(this));
         bottomCenter.add(new CompassHud(this));
         bottomCenter.add(new TotemHud(this));
+        bottomCenter.add(new CrystalHud(this));
+        bottomCenter.add(new ExpHud(this));
+        bottomCenter.add(new AppleHud(this));
 
         // Bottom Right
         bottomRight = new HudElementLayer(RENDERER, elements, AlignmentX.Right, AlignmentY.Bottom, 2, 2);
