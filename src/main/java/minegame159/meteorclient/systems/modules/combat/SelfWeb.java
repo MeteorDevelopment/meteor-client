@@ -10,8 +10,8 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.item.Items;
@@ -75,7 +75,7 @@ public class SelfWeb extends Module {
                 placeWeb();
                 break;
             case Smart:
-                if (EntityUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance) != null) placeWeb();
+                if (TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance) != null) placeWeb();
                 break;
         }
     }

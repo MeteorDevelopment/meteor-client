@@ -14,9 +14,9 @@ import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
@@ -99,7 +99,7 @@ public class AimAssist extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        target = EntityUtils.get(entity -> {
+        target = TargetUtils.get(entity -> {
             if (!entity.isAlive()) return false;
             if (mc.player.distanceTo(entity) >= range.get()) return false;
             if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;

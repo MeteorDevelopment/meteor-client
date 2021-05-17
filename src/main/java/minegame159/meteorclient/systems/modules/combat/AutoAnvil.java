@@ -11,8 +11,8 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
@@ -175,8 +175,8 @@ public class AutoAnvil extends Module {
         }
 
         // Check distance + alive
-        if (EntityUtils.isBadTarget(target, range.get())) target = EntityUtils.getPlayerTarget(range.get(), priority.get());
-        if (EntityUtils.isBadTarget(target, range.get())) return;
+        if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+        if (TargetUtils.isBadTarget(target, range.get())) return;
 
         // Number of blocks we have placed
         int blocksPlaced = 0;

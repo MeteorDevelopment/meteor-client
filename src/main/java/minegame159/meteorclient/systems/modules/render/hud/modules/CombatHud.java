@@ -16,6 +16,7 @@ import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.RenderUtils;
@@ -38,9 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static minegame159.meteorclient.utils.entity.EntityUtils.WHITE;
-
 public class CombatHud extends HudElement {
+    private static final Color WHITE = new Color(255, 255, 255);
     private static final Color GREEN = new Color(15, 255, 15);
     private static final Color RED = new Color(255, 15, 15);
     private static final Color BLACK = new Color(0, 0, 0, 255);
@@ -182,7 +182,7 @@ public class CombatHud extends HudElement {
             double y = box.getY();
 
             if (isInEditor()) playerEntity = FakeClientPlayer.getPlayer();
-            else playerEntity = EntityUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
+            else playerEntity = TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
 
             if (playerEntity == null) return;
 

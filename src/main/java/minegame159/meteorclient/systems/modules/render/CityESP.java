@@ -18,6 +18,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -56,9 +57,9 @@ public class CityESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        PlayerEntity targetEntity = EntityUtils.getPlayerTarget(mc.interactionManager.getReachDistance() + 2, SortPriority.LowestDistance);
+        PlayerEntity targetEntity = TargetUtils.getPlayerTarget(mc.interactionManager.getReachDistance() + 2, SortPriority.LowestDistance);
 
-        if (EntityUtils.isBadTarget(targetEntity, mc.interactionManager.getReachDistance() + 2)) {
+        if (TargetUtils.isBadTarget(targetEntity, mc.interactionManager.getReachDistance() + 2)) {
             target = null;
         } else {
             target = EntityUtils.getCityBlock(targetEntity);

@@ -10,8 +10,8 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
@@ -58,10 +58,10 @@ public class AutoWeb extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (EntityUtils.isBadTarget(target, range.get())) {
-            target = EntityUtils.getPlayerTarget(range.get(), priority.get());
+        if (TargetUtils.isBadTarget(target, range.get())) {
+            target = TargetUtils.getPlayerTarget(range.get(), priority.get());
         }
-        if (EntityUtils.isBadTarget(target, range.get())) return;
+        if (TargetUtils.isBadTarget(target, range.get())) return;
 
         BlockUtils.place(target.getBlockPos(), Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0, false);
         if (doubles.get()) BlockUtils.place(target.getBlockPos().add(0, 1, 0), Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0, false);
