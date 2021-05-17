@@ -70,7 +70,7 @@ public class AutoCity extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (EntityUtils.isBadTarget(target, targetRange.get())) {
-            PlayerEntity search = EntityUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance, false);
+            PlayerEntity search = EntityUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance);
             if (search != target) sentMessage = false;
             target = search;
         }

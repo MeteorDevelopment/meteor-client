@@ -59,7 +59,7 @@ public class AutoWeb extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (EntityUtils.isBadTarget(target, range.get())) {
-            target = EntityUtils.getPlayerTarget(range.get(), priority.get(), false);
+            target = EntityUtils.getPlayerTarget(range.get(), priority.get());
         }
         if (EntityUtils.isBadTarget(target, range.get())) return;
 
