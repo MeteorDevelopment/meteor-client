@@ -214,6 +214,15 @@ public class AutoTrap extends Module {
                 break;
             case Top:
                 add(targetPos.add(0, 2, 0));
+                break;
+            case Vclip:
+                add(targetPos.add(1, 1, 0));
+                add(targetPos.add(-1, 1, 0));
+                add(targetPos.add(0, 1, 1));
+                add(targetPos.add(0, 1, -1));
+                add(targetPos.add(0, 2, 0));
+                add(targetPos.add(0, 3, 0));
+                add(targetPos.add(0, 4, 0));
         }
 
         switch (bottomPlacement.get()) {
@@ -250,6 +259,7 @@ public class AutoTrap extends Module {
         Full,
         Top,
         Face,
+        Vclip,
         None
     }
 
