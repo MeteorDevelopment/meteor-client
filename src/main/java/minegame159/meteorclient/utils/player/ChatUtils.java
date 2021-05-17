@@ -89,11 +89,14 @@ public class ChatUtils {
 
     private static BaseText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
         BaseText prefix = new LiteralText("");
+        prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
+
+        prefix.append("[");
 
         BaseText moduleTitle = new LiteralText(prefixTitle);
         moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(prefixColor));
-        prefix.append("[");
         prefix.append(moduleTitle);
+
         prefix.append("] ");
 
         return prefix;

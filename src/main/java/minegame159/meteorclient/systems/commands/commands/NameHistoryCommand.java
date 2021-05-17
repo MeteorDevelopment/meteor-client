@@ -6,6 +6,7 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.PlayerArgumentType;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.network.HttpUtils;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
@@ -76,7 +77,7 @@ public class NameHistoryCommand extends Command {
                     nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
                 }
 
-                info(nameText);
+                ChatUtils.sendMsg(nameText);
             }
 
             return SINGLE_SUCCESS;

@@ -15,6 +15,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.friends.Friend;
 import minegame159.meteorclient.systems.friends.Friends;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import java.util.Arrays;
@@ -59,8 +60,8 @@ public class FriendsCommand extends Command {
         );
 
         builder.then(literal("list").executes(context -> {
-                    info("(highlight)%d(default) friends:", Friends.get().count());
-                    Friends.get().forEach(friend-> info(" - (highlight)%s", friend.name));
+                    info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
+                    Friends.get().forEach(friend-> ChatUtils.info("(highlight)" + friend.name));
                     return SINGLE_SUCCESS;
                 })
         );

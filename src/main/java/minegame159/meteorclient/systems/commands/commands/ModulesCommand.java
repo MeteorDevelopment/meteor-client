@@ -28,26 +28,29 @@ public class ModulesCommand extends Command {
         builder.executes(context -> {
             ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
 
-            BaseText modules = new LiteralText("");
-
-            for (Module module : Modules.get().getList()) {
-                BaseText tooltip = new LiteralText("");
-
-                tooltip.append(new LiteralText(module.title).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
-                tooltip.append(new LiteralText(module.name).formatted(Formatting.GRAY)).append("\n\n");
-                tooltip.append(new LiteralText(module.description).formatted(Formatting.WHITE));
-
-                BaseText finalModule = new LiteralText(module.title);
-                if (module != Modules.get().getList().get(Modules.get().getAll().size() - 1)) modules.append(new LiteralText(", ").formatted(Formatting.GRAY));
-                finalModule.setStyle(finalModule.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip)));
-
-                modules.append(finalModule);
-            }
-
-            ChatUtils.sendMsg(modules);
+            Modules.loopCategories().forEach(category -> {
+                BaseText categoryMessage = new LiteralText("");
+                Modules.get().getGroup(category).forEach(module -> categoryMessage.append(getModuleText(module)));
+                ChatUtils.sendMsg(category.name, categoryMessage);
+            });
 
             return SINGLE_SUCCESS;
         });
+    }
+
+    private BaseText getModuleText(Module module) {
+        // Hover tooltip
+        BaseText tooltip = new LiteralText("");
+
+        tooltip.append(new LiteralText(module.title).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+        tooltip.append(new LiteralText(module.name).formatted(Formatting.GRAY)).append("\n\n");
+        tooltip.append(new LiteralText(module.description).formatted(Formatting.WHITE));
+
+        BaseText finalModule = new LiteralText(module.title);
+        if (module != Modules.get().getList().get(Modules.get().getList().size() - 1)) finalModule.append(new LiteralText(", ").formatted(Formatting.GRAY));
+        finalModule.setStyle(finalModule.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip)));
+
+        return finalModule;
     }
 
 }
