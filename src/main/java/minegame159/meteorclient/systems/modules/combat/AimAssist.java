@@ -105,8 +105,8 @@ public class AimAssist extends Module {
             if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
             if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
-            if (entity instanceof PlayerEntity && !friends.get()) {
-                return Friends.get().attack((PlayerEntity) entity);
+            if (entity instanceof PlayerEntity) {
+                return Friends.get().shouldAttack((PlayerEntity) entity);
             }
 
             return true;

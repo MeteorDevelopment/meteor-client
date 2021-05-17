@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class Friend implements ISerializable<Friend> {
     public String name;
-    public Friends.FriendType type = Friends.FriendType.Neutral;
+
 
     public Friend(String name) {
         this.name = name;
@@ -31,14 +31,12 @@ public class Friend implements ISerializable<Friend> {
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
         tag.putString("name", name);
-        tag.putString("type", type.name());
         return tag;
     }
 
     @Override
     public Friend fromTag(CompoundTag tag) {
         name = tag.getString("name");
-        if (tag.contains("type")) type = Friends.FriendType.valueOf(tag.getString("type"));
         return this;
     }
 

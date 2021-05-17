@@ -36,7 +36,7 @@ public class CityUtils {
         for (PlayerEntity target : mc.world.getPlayers()) {
             if (target == mc.player
                     || target.isDead()
-                    || !Friends.get().attack(target)
+                    || !Friends.get().shouldAttack(target)
                     || mc.player.distanceTo(target) > range
             ) continue;
 
@@ -52,7 +52,7 @@ public class CityUtils {
 
         if (closestTarget == null) {
             for (FakePlayerEntity target : FakePlayerManager.getPlayers()) {
-                if (target.isDead() || !Friends.get().attack(target) || mc.player.distanceTo(target) > range) continue;
+                if (target.isDead() || !Friends.get().shouldAttack(target) || mc.player.distanceTo(target) > range) continue;
 
                 if (closestTarget == null) {
                     closestTarget = target;
