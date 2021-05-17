@@ -15,6 +15,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -69,13 +70,13 @@ public class AutoCity extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (EntityUtils.isBadTarget(target, targetRange.get())) {
-            PlayerEntity search = EntityUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance);
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
+            PlayerEntity search = TargetUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance);
             if (search != target) sentMessage = false;
             target = search;
         }
 
-        if (EntityUtils.isBadTarget(target, targetRange.get())) {
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
             target = null;
             blockPosTarget = null;
             if (selfToggle.get()) toggle();

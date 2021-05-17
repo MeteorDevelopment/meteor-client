@@ -14,10 +14,8 @@ import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.BaritoneUtils;
-import minegame159.meteorclient.utils.misc.Vector2;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -31,8 +29,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.PotionItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -43,59 +39,14 @@ import net.minecraft.world.RaycastContext;
 
 public class PlayerUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
-    private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
-    public static boolean placeBlock(BlockPos blockPos, Hand hand) {
-        return placeBlock(blockPos, hand, true);
-    }
-
-    public static boolean placeBlock(BlockPos blockPos, int slot, Hand hand) {
-        if (slot == -1) return false;
-
-        int preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
-
-        boolean a = placeBlock(blockPos, hand, true);
-
-        mc.player.inventory.selectedSlot = preSlot;
-        return a;
-    }
-
-    public static boolean placeBlock(BlockPos blockPos, Hand hand, boolean swing) {
-        if (!BlockUtils.canPlace(blockPos)) return false;
-
-        // Try to find a neighbour to click on to avoid air place
-        for (Direction side : Direction.values()) {
-            BlockPos neighbor = blockPos.offset(side);
-            Direction side2 = side.getOpposite();
-
-            // Check if neighbour isn't empty
-            if (mc.world.getBlockState(neighbor).isAir() || BlockUtils.isClickable(mc.world.getBlockState(neighbor).getBlock())) continue;
-
-            // Calculate hit pos
-            ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + side2.getVector().getX() * 0.5, neighbor.getY() + 0.5 + side2.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + side2.getVector().getZ() * 0.5);
-
-            // Place block
-            boolean wasSneaking = mc.player.input.sneaking;
-            mc.player.input.sneaking = false;
-
-            mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, side2, neighbor, false));
-            if (swing) mc.player.swingHand(hand);
-
-            mc.player.input.sneaking = wasSneaking;
-            return true;
-        }
-
-        // Air place if no neighbour was found
-        ((IVec3d) hitPos).set(blockPos);
-
-        mc.interactionManager.interactBlock(mc.player, mc.world, hand, new BlockHitResult(hitPos, Direction.UP, blockPos, false));
-        if (swing) mc.player.swingHand(hand);
-
-        return true;
+    public static Color getPlayerColor(PlayerEntity entity, Color defaultColor, boolean useNameColor) {
+        if (Friends.get().isFriend(entity)) return new Color(Friends.get().color.r, Friends.get().color.g, Friends.get().color.b, defaultColor.a);
+        else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());
+        else return defaultColor;
     }
 
     public static Vec3d getHorizontalVelocity(double bps) {
@@ -191,40 +142,6 @@ public class PlayerUtils {
         return mc.player.isSprinting() && (mc.player.forwardSpeed != 0 || mc.player.sidewaysSpeed != 0);
     }
 
-    public static Vector2 transformStrafe(double speed) {
-        float forward = mc.player.input.movementForward;
-        float side = mc.player.input.movementSideways;
-        float yaw = mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta();
-
-        double velX, velZ;
-
-        if (forward == 0.0f && side == 0.0f) return new Vector2(0, 0);
-
-        else if (forward != 0.0f) {
-            if (side >= 1.0f) {
-                yaw += (float) (forward > 0.0f ? -45 : 45);
-                side = 0.0f;
-            } else if (side <= -1.0f) {
-                yaw += (float) (forward > 0.0f ? 45 : -45);
-                side = 0.0f;
-            }
-
-            if (forward > 0.0f)
-                forward = 1.0f;
-
-            else if (forward < 0.0f)
-                forward = -1.0f;
-        }
-
-        double mx = Math.cos(Math.toRadians(yaw + 90.0f));
-        double mz = Math.sin(Math.toRadians(yaw + 90.0f));
-
-        velX = (double) forward * speed * mx + (double) side * speed * mz;
-        velZ = (double) forward * speed * mz - (double) side * speed * mx;
-
-        return new Vector2(velX, velZ);
-    }
-
     public static boolean isInHole(boolean doubles) {
         if (!Utils.canUpdate()) return false;
 
@@ -260,42 +177,46 @@ public class PlayerUtils {
         return possibleHealthReductions(true, true);
     }
 
-    public static double possibleHealthReductions(boolean explosions, boolean fall) {
+    public static double possibleHealthReductions(boolean entities, boolean fall) {
         double damageTaken = 0;
 
-        for (Entity entity : mc.world.getEntities()) {
-            // Check for end crystals
-            if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
-                damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
+        if (entities) {
+            for (Entity entity : mc.world.getEntities()) {
+                // Check for end crystals
+                if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
+                    damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
+                }
+                // Check for players holding swords
+                else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
+                    if (!Friends.get().isFriend((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
+                        if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
+                            damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
+                        }
+                    }
+                }
             }
-            // Check for players holding swords
-            else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
-                if (!Friends.get().isFriend((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
-                    if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
-                        damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
+
+            // Check for beds if in nether
+            if (PlayerUtils.getDimension() != Dimension.Overworld) {
+                for (BlockEntity blockEntity : mc.world.blockEntities) {
+                    BlockPos bp = blockEntity.getPos();
+                    Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
+
+                    if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, pos)) {
+                        damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
                     }
                 }
             }
         }
 
-        // Check for beds if in nether
-        if (PlayerUtils.getDimension() != Dimension.Overworld) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
-                BlockPos bp = blockEntity.getPos();
-                Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
-
-                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, pos)) {
-                    damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
-                }
-            }
-        }
-
         // Check for fall distance with water check
-        if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
-            double damage = mc.player.fallDistance * 0.5;
+        if (fall) {
+            if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
+                double damage = mc.player.fallDistance * 0.5;
 
-            if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
-                damageTaken = damage;
+                if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
+                    damageTaken = damage;
+                }
             }
         }
 
@@ -308,6 +229,10 @@ public class PlayerUtils {
 
     public static double distanceTo(BlockPos blockPos) {
         return distanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
+    public static double distanceTo(Vec3d vec3d) {
+        return distanceTo(vec3d.getX(), vec3d.getY(), vec3d.getZ());
     }
 
     public static double distanceTo(double x, double y, double z) {
@@ -325,15 +250,21 @@ public class PlayerUtils {
         }
     }
 
-    public static Color getPlayerColor(PlayerEntity entity, Color defaultColor, boolean useNameColor) {
-        if (Friends.get().isFriend(entity)) return new Color(Friends.get().color.r, Friends.get().color.g, Friends.get().color.b, defaultColor.a);
-        else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());
-        else return defaultColor;
-    }
-
     public static GameMode getGameMode() {
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         if (playerListEntry == null) return GameMode.NOT_SET;
         return playerListEntry.getGameMode();
+    }
+
+    public static double getTotalHealth() {
+        return mc.player.getHealth() + mc.player.getAbsorptionAmount();
+    }
+
+    public static int getPing() {
+        if (mc.getNetworkHandler() == null) return 0;
+
+        PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        if (playerListEntry == null) return 0;
+        return playerListEntry.getLatency();
     }
 }
