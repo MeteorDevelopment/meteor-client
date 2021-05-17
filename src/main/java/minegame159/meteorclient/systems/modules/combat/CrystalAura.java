@@ -8,33 +8,40 @@ package minegame159.meteorclient.systems.modules.combat;
 import com.google.common.collect.Streams;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import minegame159.meteorclient.events.entity.EntityRemovedEvent;
-import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
+import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.misc.Vec3;
-import minegame159.meteorclient.utils.player.*;
+import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.sound.SoundCategory;
@@ -45,29 +52,12 @@ import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public class CrystalAura extends Module {
-    public enum Mode {
-        Safe,
-        Suicide
-    }
-
-    public enum TargetMode {
-        MostDamage,
-        HighestXDamages
-    }
-
     public enum RotationMode {
-        Place,
-        Break,
+        Placing,
+        Breaking,
         Both,
-        None
-    }
-
-    public enum SwitchMode {
-        Auto,
-        Spoof,
         None
     }
 
@@ -77,13 +67,37 @@ public class CrystalAura extends Module {
 	    None
     }
 
+    private final SettingGroup sgTarget = settings.createGroup("Target");
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
-    private final SettingGroup sgTarget = settings.createGroup("Target");
     private final SettingGroup sgPause = settings.createGroup("Pause");
-    private final SettingGroup sgRotations = settings.createGroup("Rotations");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
     private final SettingGroup sgRender = settings.createGroup("Render");
+
+    // Targeting
+
+    private final Setting<Double> targetRange = sgTarget.add(new DoubleSetting.Builder()
+            .name("target-range")
+            .description("The maximum range the entity can be to be targeted.")
+            .defaultValue(7)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    private final Setting<SortPriority> targetPriority = sgTarget.add(new EnumSetting.Builder<SortPriority>()
+            .name("target-priority")
+            .description("How to select the player to target.")
+            .defaultValue(SortPriority.LowestHealth)
+            .build()
+    );
+
+    private final Setting<Double> minDamage = sgTarget.add(new DoubleSetting.Builder()
+            .name("min-damage")
+            .description("The minimum damage to deal.")
+            .defaultValue(8)
+            .build()
+    );
 
     // Place
 
@@ -96,84 +110,35 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Mode> placeMode = sgPlace.add(new EnumSetting.Builder<Mode>()
-            .name("place-mode")
-            .description("The placement mode for crystals.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
+    private final Setting<Integer> placeRange = sgPlace.add(new IntSetting.Builder()
             .name("place-range")
             .description("The radius in which crystals can be placed in.")
-            .defaultValue(4.5)
+            .defaultValue(5)
             .min(0)
             .sliderMax(7)
             .build()
     );
 
-    private final Setting<Double> placeWallsRange = sgPlace.add(new DoubleSetting.Builder()
+    private final Setting<Integer> placeWallsRange = sgPlace.add(new IntSetting.Builder()
             .name("place-walls-range")
             .description("The radius in which crystals can be placed through walls.")
-            .defaultValue(3.0)
+            .defaultValue(3)
             .min(0)
             .sliderMax(7)
-            .build()
-    );
-
-    private final Setting<Boolean> place = sgPlace.add(new BoolSetting.Builder()
-            .name("place")
-            .description("Allows Crystal Aura to place crystals.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> multiPlace = sgPlace.add(new BoolSetting.Builder()
-            .name("multi-place")
-            .description("Allows Crystal Aura to place multiple crystals.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> rayTrace = sgPlace.add(new BoolSetting.Builder()
-            .name("ray-trace")
-            .description("Whether or not to place through walls.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Double> minDamage = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-damage")
-            .description("The minimum damage the crystal will place.")
-            .defaultValue(5.5)
-            .build()
-    );
-
-    private final Setting<Double> minHealth = sgPlace.add(new DoubleSetting.Builder()
-            .name("min-health")
-            .description("The minimum health you have to be for it to place.")
-            .defaultValue(15)
-            .build()
-    );
-
-    private final Setting<Boolean> surroundBreak = sgPlace.add(new BoolSetting.Builder()
-            .name("surround-break")
-            .description("Places a crystal next to a surrounded player and keeps it there so they cannot use Surround again.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> surroundHold = sgPlace.add(new BoolSetting.Builder()
-            .name("surround-hold")
-            .description("Places a crystal next to a player so they cannot use Surround.")
-            .defaultValue(false)
             .build()
     );
 
     private final Setting<Boolean> oldPlace = sgPlace.add(new BoolSetting.Builder()
-            .name("1.12-place")
-            .description("Won't place in one block holes to help compatibility with some servers.")
+            .name("1.12")
+            .description("Won't place in one block holes for 1.12 crystal placements.")
             .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Keybind> surroundBreak = sgPlace.add(new KeybindSetting.Builder()
+            .name("surround-break")
+            .description("Forces you to place crystals next to the targets surround when the bind is held.")
+            .defaultValue(Keybind.fromKey(-1))
             .build()
     );
 
@@ -184,52 +149,31 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> spamFacePlace = sgPlace.add(new BoolSetting.Builder()
-            .name("spam-face-place")
-            .description("Places faster when someone is below the face place health (Requires Smart Delay).")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Double> facePlaceHealth = sgPlace.add(new DoubleSetting.Builder()
             .name("face-place-health")
-            .description("The health required to face-place.")
+            .description("The health required to face place.")
             .defaultValue(8)
-            .min(1)
-            .max(36)
+            .min(1).max(36)
+            .sliderMin(1).sliderMax(36)
+            .visible(facePlace::get)
             .build()
     );
 
-    private final Setting<Double> facePlaceDurability = sgPlace.add(new DoubleSetting.Builder()
+    private final Setting<Integer> facePlaceDurability = sgPlace.add(new IntSetting.Builder()
             .name("face-place-durability")
-            .description("The durability threshold to be able to face-place.")
+            .description("The durability threshold to face place.")
             .defaultValue(2)
-            .min(1)
-            .max(100)
-            .sliderMax(100)
+            .min(1).max(100)
+            .sliderMin(0).sliderMax(100)
+            .visible(facePlace::get)
             .build()
     );
 
-    private final Setting<Boolean> support = sgPlace.add(new BoolSetting.Builder()
-            .name("support")
-            .description("Places a block in the air and crystals on it. Helps with killing players that are flying.")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Integer> supportDelay = sgPlace.add(new IntSetting.Builder()
-            .name("support-delay")
-            .description("The delay between support blocks being placed.")
-            .defaultValue(5)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Boolean> supportBackup = sgPlace.add(new BoolSetting.Builder()
-            .name("support-backup")
-            .description("Makes it so support only works if there are no other options.")
-            .defaultValue(true)
+    private final Setting<Keybind> forceFacePlace = sgPlace.add(new KeybindSetting.Builder()
+            .name("force-face-place")
+            .description("Forces you to face place when the key is held.")
+            .defaultValue(Keybind.fromKey(-1))
+            .visible(facePlace::get)
             .build()
     );
 
@@ -244,14 +188,7 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Mode> breakMode = sgBreak.add(new EnumSetting.Builder<Mode>()
-            .name("break-mode")
-            .description("The type of break mode for crystals.")
-            .defaultValue(Mode.Safe)
-            .build()
-    );
-
-    private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
+    private final Setting<Integer> breakRange = sgBreak.add(new IntSetting.Builder()
             .name("break-range")
             .description("The maximum range that crystals can be to be broken.")
             .defaultValue(5)
@@ -260,54 +197,31 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    private final Setting<Boolean> ignoreWalls = sgBreak.add(new BoolSetting.Builder()
-            .name("ray-trace")
-            .description("Whether or not to break through walls.")
-            .defaultValue(false)
+    private final Setting<Integer> breakWallsRange = sgBreak.add(new IntSetting.Builder()
+            .name("break-walls-range")
+            .description("The radius in which crystals can be broken through walls.")
+            .defaultValue(3)
+            .min(0)
+            .sliderMax(7)
             .build()
     );
 
     private final Setting<CancelCrystalMode> cancelCrystalMode = sgBreak.add(new EnumSetting.Builder<CancelCrystalMode>()
-            .name("cancel-crystal")
+            .name("cancel-mode")
             .description("Mode to use for the crystals to be removed from the world.")
-            .defaultValue(CancelCrystalMode.Hit)
-            .build()
-    );
-
-    // Target
-    private final Setting<Double> targetRange = sgTarget.add(new DoubleSetting.Builder()
-            .name("target-range")
-            .description("The maximum range the entity can be to be targeted.")
-            .defaultValue(7)
-            .min(0)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<TargetMode> targetMode = sgTarget.add(new EnumSetting.Builder<TargetMode>()
-            .name("target-mode")
-            .description("The way you target multiple targets.")
-            .defaultValue(TargetMode.HighestXDamages)
-            .build()
-    );
-
-    private final Setting<Integer> numberOfDamages = sgTarget.add(new IntSetting.Builder()
-            .name("number-of-damages")
-            .description("The number to replace 'x' with in HighestXDamages.")
-            .defaultValue(3)
-            .min(2)
-            .sliderMax(10)
-            .build()
-    );
-
-    private final Setting<Boolean> multiTarget = sgTarget.add(new BoolSetting.Builder()
-            .name("multi-targeting")
-            .description("Will calculate damage for all entities and pick a block based on target mode.")
-            .defaultValue(false)
+            .defaultValue(CancelCrystalMode.Sound)
             .build()
     );
 
     // Pause
+
+    private final Setting<Double> pauseAtHealth = sgPause.add(new DoubleSetting.Builder()
+            .name("pause-health")
+            .description("Pauses when you go below a certain health.")
+            .defaultValue(5)
+            .min(0)
+            .build()
+    );
 
     private final Setting<Boolean> pauseOnEat = sgPause.add(new BoolSetting.Builder()
             .name("pause-on-eat")
@@ -330,74 +244,12 @@ public class CrystalAura extends Module {
             .build()
     );
 
-    // Rotations
-
-    private final Setting<RotationMode> rotationMode = sgRotations.add(new EnumSetting.Builder<RotationMode>()
-            .name("rotation-mode")
-            .description("The method of rotating when using Crystal Aura.")
-            .defaultValue(RotationMode.Place)
-            .build()
-    );
-
-    private final Setting<Boolean> strictLook = sgRotations.add(new BoolSetting.Builder()
-            .name("strict-look")
-            .description("Looks at exactly where you're placing.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> resetRotations = sgRotations.add(new BoolSetting.Builder()
-            .name("reset-rotations")
-            .description("Resets rotations once Crystal Aura is disabled.")
-            .defaultValue(false)
-            .build()
-    );
-
     // Misc
 
-    private final Setting<SwitchMode> switchMode = sgMisc.add(new EnumSetting.Builder<SwitchMode>()
-            .name("switch-mode")
-            .description("How to switch items.")
-            .defaultValue(SwitchMode.Auto)
-            .build()
-    );
-
-    private final Setting<Boolean> switchBack = sgMisc.add(new BoolSetting.Builder()
-            .name("switch-back")
-            .description("Switches back to your previous slot when disabling Crystal Aura.")
+    private final Setting<Boolean> autoSwitch = sgMisc.add(new BoolSetting.Builder()
+            .name("auto-switch")
+            .description("Switches to crystals automatically.")
             .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Double> verticalRange = sgMisc.add(new DoubleSetting.Builder()
-            .name("vertical-range")
-            .description("The maximum vertical range for placing/breaking end crystals. May kill performance if this value is higher than 3.")
-            .min(0)
-            .defaultValue(3)
-            .max(7)
-            .build()
-    );
-
-    private final Setting<Double> maxDamage = sgMisc.add(new DoubleSetting.Builder()
-            .name("max-damage")
-            .description("The maximum self-damage allowed.")
-            .defaultValue(3)
-            .build()
-    );
-
-    private final Setting<Boolean> smartDelay = sgMisc.add(new BoolSetting.Builder()
-            .name("smart-delay")
-            .description("Reduces crystal consumption when doing large amounts of damage. (Can tank performance on lower-end PCs).")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Double> healthDifference = sgMisc.add(new DoubleSetting.Builder()
-            .name("damage-increase")
-            .description("The damage increase for smart delay to work.")
-            .defaultValue(5)
-            .min(0)
-            .max(20)
             .build()
     );
 
@@ -408,11 +260,41 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<RotationMode> rotationMode = sgMisc.add(new EnumSetting.Builder<RotationMode>()
+            .name("rotation-mode")
+            .description("The method of rotating when using Crystal Aura.")
+            .defaultValue(RotationMode.Placing)
+            .build()
+    );
+
+    private final Setting<Integer> verticalRange = sgMisc.add(new IntSetting.Builder()
+            .name("vertical-range")
+            .description("The maximum vertical range for placing/breaking end crystals.")
+            .min(0)
+            .defaultValue(3)
+            .max(7)
+            .build()
+    );
+
+    private final Setting<Boolean> antiSuicide = sgMisc.add(new BoolSetting.Builder()
+            .name("anti-suicide")
+            .description("Attempts to prevent you from killing yourself.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Double> maxSelfDamage = sgMisc.add(new DoubleSetting.Builder()
+            .name("max-self-damage")
+            .description("The maximum self-damage allowed.")
+            .defaultValue(8)
+            .build()
+    );
+
     // Render
 
     private final Setting<Boolean> swing = sgRender.add(new BoolSetting.Builder()
             .name("swing")
-            .description("Renders your swing client-side.")
+            .description("Renders your hand swinging client-side.")
             .defaultValue(true)
             .build()
     );
@@ -427,7 +309,7 @@ public class CrystalAura extends Module {
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
             .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Lines)
+            .defaultValue(ShapeMode.Sides)
             .build()
     );
 
@@ -441,33 +323,24 @@ public class CrystalAura extends Module {
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The line color.")
-            .defaultValue(new SettingColor(255, 255, 255, 255))
+            .defaultValue(new SettingColor(255, 255, 255, 175))
             .build()
     );
 
     private final Setting<Boolean> renderDamage = sgRender.add(new BoolSetting.Builder()
-            .name("render-damage")
-            .description("Renders the damage of the crystal where it is placing.")
+            .name("damage-text")
+            .description("Renders text displaying the amount of damage the crystal will do.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> roundDamage = sgRender.add(new IntSetting.Builder()
-            .name("round-damage")
-            .description("Round damage to x decimal places.")
-            .defaultValue(2)
-            .min(0)
-            .max(3)
-            .sliderMax(3)
-            .build()
-    );
-
     private final Setting<Double> damageScale = sgRender.add(new DoubleSetting.Builder()
-            .name("damage-scale")
+            .name("damage-text-scale")
             .description("The scale of the damage text.")
             .defaultValue(1.4)
             .min(0)
             .sliderMax(5)
+            .visible(renderDamage::get)
             .build()
     );
 
@@ -475,6 +348,7 @@ public class CrystalAura extends Module {
             .name("damage-color")
             .description("The color of the damage text.")
             .defaultValue(new SettingColor(255, 255, 255, 255))
+            .visible(renderDamage::get)
             .build()
     );
 
@@ -491,63 +365,40 @@ public class CrystalAura extends Module {
         super(Categories.Combat, "crystal-aura", "Automatically places and breaks crystals to damage other players.");
     }
 
-    private int preSlot;
     private int placeDelayLeft = placeDelay.get();
     private int breakDelayLeft = breakDelay.get();
-    private Vec3d bestBlock;
-    private double bestDamage = 0;
-    private double lastDamage = 0;
-    private EndCrystalEntity heldCrystal = null;
-    private LivingEntity target;
-    private boolean locked = false;
-    private boolean canSupport;
-    private int supportSlot = 0;
-    private int supportDelayLeft = supportDelay.get();
-    private final Map<EndCrystalEntity, List<Double>> crystalMap = new HashMap<>();
-    private final List<Double> crystalList = new ArrayList<>();
+
+    private PlayerEntity playerTarget;
+    private BlockPos blockTarget;
+
+    private final Map<BlockPos, Double> crystalMap = new HashMap<>();
     private final List<Integer> removalQueue = new ArrayList<>();
-    private EndCrystalEntity bestBreak = null;
+
+    private static final Vec3d crystalPos = new Vec3d(0, 0, 0);
+    private static final Vec3d hitPos = new Vec3d(0, 0, 0);
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
+    private static final Vec3 renderPos = new Vec3();
 
     private boolean broken = false;
 
     @Override
     public void onActivate() {
-        preSlot = -1;
         placeDelayLeft = 0;
         breakDelayLeft = 0;
-        heldCrystal = null;
-        locked = false;
-        broken = false;
     }
 
     @Override
     public void onDeactivate() {
-        if (switchBack.get() && preSlot != -1) mc.player.inventory.selectedSlot = preSlot;
         for (RenderBlock renderBlock : renderBlocks) {
             renderBlockPool.free(renderBlock);
         }
         renderBlocks.clear();
-        if (target != null && resetRotations.get()) {
-            if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Break) {
-                RotationUtils.packetRotate(mc.player.yaw, mc.player.pitch);
-            }
-        }
-    }
-
-    @EventHandler
-    private void onEntityRemoved(EntityRemovedEvent event) {
-        if (heldCrystal == null) return;
-        if (event.entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
-            heldCrystal = null;
-            locked = false;
-        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         if (cancelCrystalMode.get() == CancelCrystalMode.Hit) {
             removalQueue.forEach(id -> mc.world.removeEntity(id));
             removalQueue.clear();
@@ -555,7 +406,16 @@ public class CrystalAura extends Module {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    private void onTick(SendMovementPacketsEvent.Pre event) {
+    private void onPlaySound(PlaySoundEvent event) {
+        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && cancelCrystalMode.get() == CancelCrystalMode.Sound) {
+            removalQueue.forEach(id -> mc.world.removeEntity(id));
+            removalQueue.clear();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onTick(TickEvent.Post event) {
+        // Clear render
         for (Iterator<RenderBlock> it = renderBlocks.iterator(); it.hasNext();) {
             RenderBlock renderBlock = it.next();
 
@@ -565,135 +425,245 @@ public class CrystalAura extends Module {
             }
         }
 
-        placeDelayLeft --;
-        breakDelayLeft --;
-        supportDelayLeft --;
-        if (target == null) {
-            heldCrystal = null;
-            locked = false;
+        // Find target
+        if (TargetUtils.isBadTarget(playerTarget, targetRange.get())) playerTarget = TargetUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
+        if (TargetUtils.isBadTarget(playerTarget, targetRange.get())) return;
+
+        // Pause
+        if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
+        if (PlayerUtils.getTotalHealth() <= pauseAtHealth.get()) return;
+
+        breakDelayLeft--;
+        placeDelayLeft--;
+
+        // Break
+        broken = false;
+        if (breakDelayLeft <= 0) breakBest();
+        if (broken) return;
+
+        // Check for crystals
+        if (!autoSwitch.get() && InvUtils.getHand(itemStack -> itemStack.getItem() == Items.END_CRYSTAL) == null) return;
+
+        // Get place positions
+        getAllValid();
+        if (crystalMap.isEmpty()) return;
+
+        // Select best pos
+        blockTarget = findBestPos();
+        if (blockTarget == null) return;
+
+        // Run place
+        if (placeDelayLeft <= 0) placeBest();
+    }
+
+    // Breaking
+    private void breakBest() {
+        Streams.stream(mc.world.getEntities())
+                .filter(this::validBreak)
+                .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(o.getBlockPos()))))
+                .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
+    }
+
+    private void hitCrystal(EndCrystalEntity entity) {
+        if (rotationMode.get() == RotationMode.Breaking || rotationMode.get() == RotationMode.Both) {
+            float[] rotation = PlayerUtils.calculateAngle(entity.getPos());
+            Rotations.rotate(rotation[0], rotation[1], 30, () -> attackCrystal(entity));
+        } else {
+            attackCrystal(entity);
         }
 
-        if ((mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem().isFood() || mc.player.getOffHandStack().getItem().isFood()) && pauseOnEat.get())
-                || (mc.interactionManager.isBreakingBlock() && pauseOnMine.get())
-                || (mc.player.isUsingItem() && (mc.player.getMainHandStack().getItem() instanceof PotionItem || mc.player.getOffHandStack().getItem() instanceof PotionItem) && pauseOnDrink.get())) {
-            return;
+        broken = true;
+        breakDelayLeft = breakDelay.get();
+    }
+
+    private void attackCrystal(EndCrystalEntity entity) {
+        int preSlot = mc.player.inventory.selectedSlot, slot;
+
+        if (antiWeakness.get() && mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS)) {
+            slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof SwordItem || itemStack.getItem() instanceof AxeItem);
+            if (slot == -1) return;
+        } else {
+            slot = mc.player.inventory.selectedSlot;
         }
 
-        if (locked && heldCrystal != null && ((!surroundBreak.get()
-                && target.getBlockPos().getSquaredDistance(new Vec3i(heldCrystal.getX(), heldCrystal.getY(), heldCrystal.getZ())) == 4d) || (!surroundHold.get()
-                && target.getBlockPos().getSquaredDistance(new Vec3i(heldCrystal.getX(), heldCrystal.getY(), heldCrystal.getZ())) == 2d))) {
-            heldCrystal = null;
-            locked = false;
+        mc.player.inventory.selectedSlot = slot;
+
+        mc.interactionManager.attackEntity(mc.player, entity);
+        if (swing.get()) mc.player.swingHand(Hand.MAIN_HAND);
+        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+
+        removalQueue.add(entity.getEntityId());
+
+        mc.player.inventory.selectedSlot = preSlot;
+    }
+
+    private boolean validBreak(Entity entity) {
+        if (!(entity instanceof EndCrystalEntity)) return false;
+        if (!entity.isAlive()) return false;
+
+        if (PlayerUtils.canSeeEntity(entity) ) {
+            if (PlayerUtils.distanceTo(entity) >= breakRange.get()) return false;
+        } else {
+            if (PlayerUtils.distanceTo(entity) >= breakWallsRange.get()) return false;
         }
-        if (heldCrystal != null && mc.player.distanceTo(heldCrystal) > breakRange.get()) {
-            heldCrystal = null;
-            locked = false;
+
+        if (DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(entity.getBlockPos())) >= maxSelfDamage.get()) return false;
+        if (antiSuicide.get() && DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(entity.getBlockPos())) - PlayerUtils.getTotalHealth() <= 0) return false;
+        return shouldFacePlace() || surroundBreak.get().isPressed() || !(DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(entity.getBlockPos())) < minDamage.get());
+    }
+
+    // Placing
+    private void placeBest() {
+        Hand hand = InvUtils.getHand(Items.END_CRYSTAL);
+        int slot;
+
+        if (hand == null) {
+            slot = InvUtils.findItemInHotbar(Items.END_CRYSTAL);
+            if (!autoSwitch.get() || slot == -1) return;
+
+            mc.player.inventory.selectedSlot = slot;
+
+            hand = InvUtils.getHand(Items.END_CRYSTAL);
+            if (hand == null) return;
         }
-        boolean isThere = false;
-        if (heldCrystal != null) {
-            for (Entity entity : mc.world.getEntities()) {
-                if (!(entity instanceof EndCrystalEntity)) continue;
-                if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
-                    isThere = true;
-                    break;
+
+        Direction direction = rayTrace(blockTarget, true);
+        Direction opposite = direction.getOpposite();
+        BlockPos neighbor = blockTarget.offset(direction);
+
+        ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + opposite.getVector().getX() * 0.5, neighbor.getY() + 0.5 + opposite.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + opposite.getVector().getZ() * 0.5);
+
+        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(hitPos, direction, blockTarget, false)));
+        if (swing.get()) mc.player.swingHand(hand);
+        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
+
+        if (render.get()) {
+            RenderBlock renderBlock = renderBlockPool.get();
+            renderBlock.reset(blockTarget);
+            renderBlock.damage = DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(blockTarget));
+            renderBlocks.add(renderBlock);
+        }
+    }
+
+    private boolean shouldFacePlace() {
+        if (!facePlace.get()) return false;
+
+        if (EntityUtils.getTotalHealth(playerTarget) <= facePlaceHealth.get()) return true;
+
+        for (ItemStack itemStack : playerTarget.getArmorItems()) {
+            if (itemStack.isEmpty() || !itemStack.isDamageable()) continue;
+            if ((((itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage()) * 100) <= facePlaceDurability.get()) return true;
+        }
+
+        return forceFacePlace.get().isPressed();
+    }
+
+    private BlockPos findBestPos() {
+        double bestDamage = 0;
+
+        for (Map.Entry<BlockPos, Double> blockPosDoubleEntry : crystalMap.entrySet()) {
+            if (blockPosDoubleEntry.getValue() > bestDamage) bestDamage = blockPosDoubleEntry.getValue();
+        }
+
+        if (bestDamage < minDamage.get()) return null;
+
+        for (Map.Entry<BlockPos, Double> blockPosDoubleEntry : crystalMap.entrySet()) {
+            if (blockPosDoubleEntry.getValue() == bestDamage) return blockPosDoubleEntry.getKey();
+        }
+
+        return null;
+    }
+
+    private void getAllValid() {
+        crystalMap.clear();
+
+        for (BlockPos blockPos : BlockUtils.getSphere(mc.player.getBlockPos(), placeRange.get(), verticalRange.get())) {
+            if (!validPlace(blockPos)) continue;
+            crystalMap.put(blockPos, DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(blockPos.up())));
+        }
+    }
+
+    private boolean validPlace(BlockPos pos) {
+        if (crystalMap.keySet().contains(pos)) return false;
+
+        // Base check
+        Block block = mc.world.getBlockState(pos).getBlock();
+        if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK) return false;
+
+        // Raytracing
+        boolean canSee = rayTrace(pos, false) != null;
+        if (canSee) {
+            if (PlayerUtils.distanceTo(pos) >= placeRange.get()) return false;
+        } else {
+            if (PlayerUtils.distanceTo(pos) >= placeWallsRange.get()) return false;
+        }
+
+        // Space check
+        BlockPos crystalPos = pos.up();
+        if (notEmpty(crystalPos)) return false;
+        if (oldPlace.get() && notEmpty(crystalPos.up())) return false;
+
+        // Damage check
+        if (DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(crystalPos)) >= maxSelfDamage.get()) return false;
+        if (antiSuicide.get() && DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(crystalPos)) - PlayerUtils.getTotalHealth() <= 0) return false;
+
+        if (shouldFacePlace()) {
+            BlockPos targetHead = playerTarget.getBlockPos();
+
+            // Checking faceplace blocks
+            for (Direction direction : Direction.values()) {
+                if (direction == Direction.DOWN || direction == Direction.UP) continue;
+
+                // If one of the positions matches the current pos, ignore minDamage
+                if (pos.equals(targetHead.offset(direction))) return true;
+            }
+        }
+        else if (surroundBreak.get().isPressed()) {
+            BlockPos targetSurround = EntityUtils.getCityBlock(playerTarget);
+
+            if (targetSurround != null) {
+                // Checking arround targets city block
+                for (Direction direction : Direction.values()) {
+                    if (direction == Direction.DOWN || direction == Direction.UP) continue;
+
+                    // If one of the positions matches the current pos, ignore minDamage
+                    if (pos.equals(targetSurround.down().offset(direction))) return true;
                 }
             }
-            if (!isThere) {
-                heldCrystal = null;
-                locked = false;
-            }
-        }
-        boolean shouldFacePlace = false;
-        if (getTotalHealth(mc.player) <= minHealth.get() && placeMode.get() != Mode.Suicide) return;
-        if (target != null && heldCrystal != null && placeDelayLeft <= 0 && mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                == HitResult.Type.MISS) locked = false;
-        if (heldCrystal == null) locked = false;
-        if (locked && !facePlace.get()) return;
-
-        if (!multiTarget.get()) {
-            findTarget();
-            if (target == null) return;
-            if (breakDelayLeft <= 0) {
-                singleBreak();
-            }
-        } else if (breakDelayLeft <= 0) {
-            multiBreak();
         }
 
-        // Return after breaking
-        if (broken) {
-            broken = false;
-            return;
-        }
+        return !(DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(crystalPos)) < minDamage.get());
+    }
 
-        if (!smartDelay.get() && placeDelayLeft > 0 && ((!surroundHold.get() && (target != null && (!surroundBreak.get() || !isSurrounded(target)))) || heldCrystal != null) && (!spamFacePlace.get())) return;
-        if (switchMode.get() == SwitchMode.None && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-        if (place.get()) {
-            if (target == null) return;
-            if (!multiPlace.get() && getCrystalStream().count() > 0) return;
-            if (surroundHold.get() && heldCrystal == null) {
-                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
-                    bestBlock = findOpen(target);
-                    if (bestBlock != null) {
-                        doHeldCrystal();
-                        return;
-                    }
-                }
-            }
-            if (surroundBreak.get() && heldCrystal == null && isSurrounded(target)) {
-                int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-                if ((slot != -1 && slot < 9) || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
-                    bestBlock = findOpenSurround(target);
-                    if (bestBlock != null) {
-                        doHeldCrystal();
-                        return;
-                    }
-                }
-            }
-            int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-            if ((slot == -1 || slot > 9) && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
-                return;
-            }
-            findValidBlocks(target);
-            if (bestBlock == null) {
-                findFacePlace(target);
-            }
-            if (bestBlock == null) return;
-            if (facePlace.get() && Math.sqrt(target.squaredDistanceTo(bestBlock)) <= 2) {
-                if (target.getHealth() + target.getAbsorptionAmount() < facePlaceHealth.get()) {
-                    shouldFacePlace = true;
-                } else {
-                    Iterable<ItemStack> armourItems = target.getArmorItems();
-                    for (ItemStack itemStack : armourItems) {
-                        if (itemStack == null) continue;
-                        if (!itemStack.isEmpty() && (((double)(itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage()) * 100) <= facePlaceDurability.get()) {
-                            shouldFacePlace = true;
-                        }
-                    }
-                }
-            }
+    // Getting damage from the center of the blast
+    private Vec3d getCrystalPos(BlockPos blockPos) {
+        ((IVec3d) crystalPos).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+        return crystalPos;
+    }
 
-            if (bestBlock != null && ((bestDamage >= minDamage.get() && !locked) || shouldFacePlace)) {
-                if (switchMode.get() != SwitchMode.None) doSwitch();
-                if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
+    private boolean notEmpty(BlockPos pos) {
+        return !mc.world.getBlockState(pos).isAir() || !mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
+    }
 
-                if (!smartDelay.get()) {
-                    placeDelayLeft = placeDelay.get();
-                    placeBlock(bestBlock, getHand());
-                }
-                else if (smartDelay.get() && (placeDelayLeft <= 0 || bestDamage - lastDamage > healthDifference.get() || (spamFacePlace.get() && shouldFacePlace))) {
-                    lastDamage = bestDamage;
-                    placeBlock(bestBlock, getHand());
+    private Direction rayTrace(BlockPos pos, boolean forceReturn) {
+        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
 
-                    if (placeDelayLeft <= 0) placeDelayLeft = 10;
-                }
-            }
-
-            if (switchMode.get() == SwitchMode.Spoof && preSlot != mc.player.inventory.selectedSlot && preSlot != -1) {
-                mc.player.inventory.selectedSlot = preSlot;
+        for (Direction direction : Direction.values()) {
+            RaycastContext raycastContext = new RaycastContext(eyesPos, new Vec3d(pos.getX() + 0.5 + direction.getVector().getX() * 0.5,
+                    pos.getY() + 0.5 + direction.getVector().getY() * 0.5,
+                    pos.getZ() + 0.5 + direction.getVector().getZ() * 0.5), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+            BlockHitResult result = mc.world.raycast(raycastContext);
+            if (result != null && result.getType() == HitResult.Type.BLOCK && result.getBlockPos().equals(pos)) {
+                return direction;
             }
         }
+        if (forceReturn) { // When we're placing, we have to return a direction so we have a side to place against
+            if ((double) pos.getY() > eyesPos.y) {
+                return Direction.DOWN; // The player can never see the top of a block if they are under it
+            }
+            return Direction.UP;
+        }
+        return null;
     }
 
     @EventHandler
@@ -714,362 +684,12 @@ public class CrystalAura extends Module {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    private void onPlaySound(PlaySoundEvent event) {
-        if (event.sound.getCategory().getName().equals(SoundCategory.BLOCKS.getName()) && event.sound.getId().getPath().equals("entity.generic.explode") && cancelCrystalMode.get() == CancelCrystalMode.Sound) {
-            removalQueue.forEach(id -> mc.world.removeEntity(id));
-            removalQueue.clear();
-        }
-    }
-
-    private Stream<Entity> getCrystalStream() {
-        return Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EndCrystalEntity)
-                .filter(entity -> entity.distanceTo(mc.player) <= breakRange.get())
-                .filter(Entity::isAlive)
-                .filter(entity -> shouldBreak((EndCrystalEntity) entity))
-                .filter(entity -> !ignoreWalls.get() || mc.player.canSee(entity))
-                .filter(entity -> isSafe(entity.getPos()));
-    }
-
-    private void singleBreak() {
-        getCrystalStream().max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(target, o.getPos())))
-                .ifPresent(entity -> hitCrystal((EndCrystalEntity) entity));
-    }
-
-    private void multiBreak() {
-        crystalMap.clear();
-        crystalList.clear();
-        getCrystalStream().forEach(entity -> {
-            for (PlayerEntity target : mc.world.getPlayers()) {
-                if (target != mc.player && mc.player.distanceTo(target) <= targetRange.get() && target.isAlive() && Friends.get().shouldAttack(target)) {
-                    crystalList.add(DamageCalcUtils.crystalDamage(target, entity.getPos()));
-                }
-            }
-            if (!crystalList.isEmpty()) {
-                crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
-                crystalMap.put((EndCrystalEntity) entity, new ArrayList<>(crystalList));
-                crystalList.clear();
-            }
-        });
-        EndCrystalEntity crystal = findBestCrystal(crystalMap);
-        if (crystal != null) {
-            hitCrystal(crystal);
-        }
-    }
-
-    private EndCrystalEntity findBestCrystal(Map<EndCrystalEntity, List<Double>> map) {
-        bestDamage = 0;
-        double currentDamage = 0;
-        if (targetMode.get() == TargetMode.HighestXDamages) {
-            for (Map.Entry<EndCrystalEntity, List<Double>> entry : map.entrySet()) {
-                for (int i = 0; i < entry.getValue().size() && i < numberOfDamages.get(); i++) {
-                    currentDamage += entry.getValue().get(i);
-                }
-                if (bestDamage < currentDamage) {
-                    bestDamage = currentDamage;
-                    bestBreak = entry.getKey();
-                }
-                currentDamage = 0;
-            }
-        } else if (targetMode.get() == TargetMode.MostDamage) {
-            for (Map.Entry<EndCrystalEntity, List<Double>> entry : map.entrySet()) {
-                for (int i = 0; i < entry.getValue().size(); i++) {
-                    currentDamage += entry.getValue().get(i);
-                }
-                if (bestDamage < currentDamage) {
-                    bestDamage = currentDamage;
-                    bestBreak = entry.getKey();
-                }
-                currentDamage = 0;
-            }
-        }
-        return bestBreak;
-    }
-
-    private void hitCrystal(EndCrystalEntity entity) {
-        int preSlot = mc.player.inventory.selectedSlot;
-        if (mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS) && antiWeakness.get()) {
-            for (int i = 0; i < 9; i++) {
-                if (mc.player.inventory.getStack(i).getItem() instanceof SwordItem || mc.player.inventory.getStack(i).getItem() instanceof AxeItem) {
-                    mc.player.inventory.selectedSlot = i;
-                    break;
-                }
-            }
-        }
-        if (rotationMode.get() == RotationMode.Break || rotationMode.get() == RotationMode.Both) {
-            float[] rotation = PlayerUtils.calculateAngle(entity.getPos());
-            Rotations.rotate(rotation[0], rotation[1], 30, () -> attackCrystal(entity, preSlot));
-        } else {
-            attackCrystal(entity, preSlot);
-        }
-
-        broken = true;
-        breakDelayLeft = breakDelay.get();
-    }
-
-    private void attackCrystal(EndCrystalEntity entity, int preSlot) {
-        mc.interactionManager.attackEntity(mc.player, entity);
-        removalQueue.add(entity.getEntityId());
-        if (swing.get()) mc.player.swingHand(getHand());
-        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(getHand()));
-        mc.player.inventory.selectedSlot = preSlot;
-        if (heldCrystal != null && entity.getBlockPos().equals(heldCrystal.getBlockPos())) {
-            heldCrystal = null;
-            locked = false;
-        }
-    }
-
-    private void findTarget() {
-        Optional<PlayerEntity> player = Streams.stream(mc.world.getPlayers())
-                .filter(Entity::isAlive)
-                .filter(entity -> entity != mc.player)
-                .filter(entity -> Friends.get().shouldAttack(entity))
-                .filter(entity -> entity.distanceTo(mc.player) <= targetRange.get() * 2)
-                .min(Comparator.comparingDouble(o -> o.distanceTo(mc.player)))
-                .map(entity -> entity);
-        if (!player.isPresent()) {
-            target = null;
-            return;
-        }
-        target = player.get();
-    }
-
-    private void doSwitch() {
-        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) {
-            int slot = InvUtils.findItemWithCount(Items.END_CRYSTAL).slot;
-            if (slot != -1 && slot < 9) {
-                preSlot = mc.player.inventory.selectedSlot;
-                mc.player.inventory.selectedSlot = slot;
-            }
-        }
-    }
-
-    private void doHeldCrystal() {
-        if (switchMode.get() != SwitchMode.None) doSwitch();
-        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL) return;
-        bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0, 1, 0));
-        heldCrystal = new EndCrystalEntity(mc.world, bestBlock.x, bestBlock.y + 1, bestBlock.z);
-        locked = true;
-        if (!smartDelay.get()) {
-            placeDelayLeft = placeDelay.get();
-        } else {
-            lastDamage = bestDamage;
-            if (placeDelayLeft <= 0) placeDelayLeft = 10;
-        }
-        placeBlock(bestBlock, getHand());
-    }
-
-    private void placeBlock(Vec3d block, Hand hand) {
-        if (mc.world.isAir(new BlockPos(block))) {
-            PlayerUtils.placeBlock(new BlockPos(block), supportSlot, Hand.MAIN_HAND);
-            supportDelayLeft = supportDelay.get();
-        }
-        BlockPos blockPos = new BlockPos(block);
-        Direction direction = rayTraceCheck(blockPos, true);
-        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
-        if (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both) {
-            float[] rotation = PlayerUtils.calculateAngle(strictLook.get() ? new Vec3d(blockPos.getX() + 0.5 + direction.getVector().getX() * 1.0 / 2.0,
-                    blockPos.getY() + 0.5 + direction.getVector().getY() * 1.0 / 2.0,
-                    blockPos.getZ() + 0.5 + direction.getVector().getZ() * 1.0 / 2.0) : block.add(0.5, 1.0, 0.5));
-            Rotations.rotate(rotation[0], rotation[1], 25, () -> {
-                mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));
-                if (swing.get()) mc.player.swingHand(hand);
-                else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
-            });
-        } else {
-            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(mc.player.getPos(), direction, new BlockPos(block), false)));
-            if (swing.get()) mc.player.swingHand(hand);
-            else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
-        }
-
-        if (render.get()) {
-            RenderBlock renderBlock = renderBlockPool.get();
-            renderBlock.reset(block);
-            renderBlock.damage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
-            renderBlocks.add(renderBlock);
-        }
-    }
-
-    private void findValidBlocks(LivingEntity target) {
-	bestBlock = new Vec3d(0, 0, 0);
-        bestDamage = 0;
-        Vec3d bestSupportBlock = new Vec3d(0, 0, 0);
-        double bestSupportDamage = 0;
-        BlockPos playerPos = mc.player.getBlockPos();
-        canSupport = false;
-        crystalMap.clear();
-        crystalList.clear();
-        if (support.get()) {
-            for (int i = 0; i < 9; i++) {
-                if (mc.player.inventory.getStack(i).getItem() == Items.OBSIDIAN) {
-                    canSupport = true;
-                    supportSlot = i;
-                    break;
-                }
-            }
-        }
-        for (Vec3d pos : BlockUtils.getAreaAsVec3ds(playerPos, placeRange.get(), placeRange.get(), verticalRange.get(), true)) {
-            if (isValid(new BlockPos(pos)) && getDamagePlace(new BlockPos(pos).up())) {
-                if (!oldPlace.get() || isEmpty(new BlockPos(pos.add(0, 2, 0)))) {
-                    if (!rayTrace.get() || pos.distanceTo(new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ())) <= placeWallsRange.get() || rayTraceCheck(new BlockPos(pos), false) != null) {
-                        if (!multiTarget.get()) {
-                            if (isEmpty(new BlockPos(pos)) && bestSupportDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
-                                bestSupportBlock = pos;
-                                bestSupportDamage = DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5));
-                            } else if (!isEmpty(new BlockPos(pos)) && bestDamage < DamageCalcUtils.crystalDamage(target, pos.add(0.5, 1, 0.5))) {
-                                bestBlock = pos;
-                                bestDamage = DamageCalcUtils.crystalDamage(target, bestBlock.add(0.5, 1, 0.5));
-                            }
-                        } else {
-                            for (PlayerEntity entity : mc.world.getPlayers()) {
-                                if (entity != mc.player && mc.player.distanceTo(entity) <= targetRange.get() && entity.isAlive() && Friends.get().shouldAttack(entity)) {
-                                    crystalList.add(DamageCalcUtils.crystalDamage(entity, pos.add(0.5, 1, 0.5)));
-                                }
-                            }
-                            if (!crystalList.isEmpty()) {
-                                crystalList.sort(Comparator.comparingDouble(Double::doubleValue));
-                                crystalMap.put(new EndCrystalEntity(mc.world, pos.x, pos.y, pos.z), new ArrayList<>(crystalList));
-                                crystalList.clear();
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (multiTarget.get()) {
-            EndCrystalEntity entity = findBestCrystal(crystalMap);
-            if (entity != null && bestDamage > minDamage.get()) {
-                bestBlock = entity.getPos();
-            } else {
-                bestBlock = null;
-            }
-        } else {
-            if (bestDamage < minDamage.get()) bestBlock = null;
-        }
-        if (support.get() && (bestBlock == null || (bestDamage < bestSupportDamage && !supportBackup.get()))) {
-            bestBlock = bestSupportBlock;
-        }
-    }
-
-    private void findFacePlace(LivingEntity target) {
-        BlockPos targetBlockPos = target.getBlockPos();
-        if (mc.world.getBlockState(targetBlockPos.add(1, 1, 0)).isAir() && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(targetBlockPos.add(1, 1, 0))) <= placeRange.get()
-                && getDamagePlace(targetBlockPos.add(1, 1, 0))) {
-            bestBlock = target.getPos().add(1, 0, 0);
-        } else if (mc.world.getBlockState(targetBlockPos.add(-1, 1, 0)).isAir() && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(targetBlockPos.add(-1, 1, 0))) <= placeRange.get()
-                && getDamagePlace(targetBlockPos.add(-1, 1, 0))) {
-            bestBlock = target.getPos().add(-1, 0, 0);
-        } else if (mc.world.getBlockState(targetBlockPos.add(0, 1, 1)).isAir() && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(targetBlockPos.add(0, 1, 1))) <= placeRange.get()
-                && getDamagePlace(targetBlockPos.add(0, 1, 1))) {
-            bestBlock = target.getPos().add(0, 0, 1);
-        } else if (mc.world.getBlockState(targetBlockPos.add(0, 1, -1)).isAir() && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(targetBlockPos.add(0, 1, -1))) <= placeRange.get()
-                && getDamagePlace(targetBlockPos.add(0, 1, -1))) {
-            bestBlock = target.getPos().add(0, 0, -1);
-        }
-    }
-
-    private boolean getDamagePlace(BlockPos pos) {
-        return placeMode.get() == Mode.Suicide || (DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) <= maxDamage.get()
-                && getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, new Vec3d(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5)) >= minHealth.get());
-    }
-
-    private Vec3d findOpen(LivingEntity target) {
-        int x = 0;
-        int z = 0;
-        if (isValid(target.getBlockPos().add(1, -1, 0))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + 1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()) {
-            x = 1;
-        } else if (isValid(target.getBlockPos().add(-1, -1, 0))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() -1, target.getBlockPos().getY() - 1, target.getBlockPos().getZ()))) < placeRange.get()) {
-            x = -1;
-        } else if (isValid(target.getBlockPos().add(0, -1, 1))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 1))) < placeRange.get()) {
-            z = 1;
-        } else if (isValid(target.getBlockPos().add(0, -1, -1))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX(), target.getBlockPos().getY() - 1, target.getBlockPos().getZ() - 1))) < placeRange.get()) {
-            z = -1;
-        }
-        if (x != 0 || z != 0) {
-            return new Vec3d(target.getBlockPos().getX() + 0.5 + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 0.5 + z);
-        }
-        return null;
-    }
-
-    private Vec3d findOpenSurround(LivingEntity target) {
-        int x = 0;
-        int z = 0;
-        if (validSurroundBreak(target, 2, 0)) {
-            x = 2;
-        } else if (validSurroundBreak(target, -2, 0)) {
-            x = -2;
-        } else if (validSurroundBreak(target, 0, 2)) {
-            z = 2;
-        } else if (validSurroundBreak(target, 0, -2)) {
-            z = -2;
-        }
-        if (x != 0 || z != 0) {
-            return new Vec3d(target.getBlockPos().getX() + 0.5 + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + 0.5 + z);
-        }
-        return null;
-    }
-
-    private boolean isValid(BlockPos blockPos) {
-        return (((canSupport && isEmpty(blockPos) && blockPos.getY() - target.getBlockPos().getY() == -1 && supportDelayLeft <= 0) || (mc.world.getBlockState(blockPos).getBlock() == Blocks.BEDROCK
-                || mc.world.getBlockState(blockPos).getBlock() == Blocks.OBSIDIAN))
-                && isEmpty(blockPos.add(0, 1, 0)));
-    }
-
-    private Direction rayTraceCheck(BlockPos pos, boolean forceReturn) {
-        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
-        for (Direction direction : Direction.values()) {
-            RaycastContext raycastContext = new RaycastContext(eyesPos, new Vec3d(pos.getX() + 0.5 + direction.getVector().getX() * 0.5,
-                    pos.getY() + 0.5 + direction.getVector().getY() * 0.5,
-                    pos.getZ() + 0.5 + direction.getVector().getZ() * 0.5), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
-            BlockHitResult result = mc.world.raycast(raycastContext);
-            if (result != null && result.getType() == HitResult.Type.BLOCK && result.getBlockPos().equals(pos)) {
-                return direction;
-            }
-        }
-        if (forceReturn) { // When we're placing, we have to return a direction so we have a side to place against
-            if ((double) pos.getY() > eyesPos.y) {
-                return Direction.DOWN; // The player can never see the top of a block if they are under it
-            }
-            return Direction.UP;
-        }
-        return null;
-    }
-
-    private boolean validSurroundBreak(LivingEntity target, int x, int z) {
-        Vec3d crystalPos = new Vec3d(target.getBlockPos().getX() + 0.5, target.getBlockPos().getY(), target.getBlockPos().getZ() + 0.5);
-        return isValid(target.getBlockPos().add(x, -1, z)) && mc.world.getBlockState(target.getBlockPos().add(x/2, 0, z/2)).getBlock() != Blocks.BEDROCK
-                && isSafe(crystalPos.add(x, 0, z))
-                && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(new Vec3i(target.getBlockPos().getX() + x, target.getBlockPos().getY() - 1, target.getBlockPos().getZ() + z))) < placeRange.get()
-                && mc.world.raycast(new RaycastContext(target.getPos(), target.getPos().add(x, 0, z), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                != HitResult.Type.MISS;
-    }
-
-    private boolean isSafe(Vec3d crystalPos) {
-        return (!(breakMode.get() == Mode.Safe) || (getTotalHealth(mc.player) - DamageCalcUtils.crystalDamage(mc.player, crystalPos) > minHealth.get()
-                && DamageCalcUtils.crystalDamage(mc.player, crystalPos) < maxDamage.get()));
-    }
-
-    private float getTotalHealth(PlayerEntity target) {
-        return target.getHealth() + target.getAbsorptionAmount();
-    }
-
-    private boolean isEmpty(BlockPos pos) {
-        return mc.world.getBlockState(pos).isAir() && mc.world.getOtherEntities(null, new Box(pos.getX(), pos.getY(), pos.getZ(), pos.getX() + 1.0D, pos.getY() + 2.0D, pos.getZ() + 1.0D)).isEmpty();
-    }
-
-    private static final Vec3 pos = new Vec3();
-
     private class RenderBlock {
         private int x, y, z;
         private int timer;
         private double damage;
 
-        public void reset(Vec3d pos) {
+        public void reset(BlockPos pos) {
             x = MathHelper.floor(pos.getX());
             y = MathHelper.floor(pos.getY());
             z = MathHelper.floor(pos.getZ());
@@ -1088,28 +708,13 @@ public class CrystalAura extends Module {
 
         public void render2D() {
             if (renderDamage.get()) {
-                pos.set(x + 0.5, y + 0.5, z + 0.5);
+                renderPos.set(x + 0.5, y + 0.5, z + 0.5);
 
-                if (NametagUtils.to2D(pos, damageScale.get())) {
-                    NametagUtils.begin(pos);
+                if (NametagUtils.to2D(renderPos, damageScale.get())) {
+                    NametagUtils.begin(renderPos);
                     TextRenderer.get().begin(1, false, true);
 
-                    String damageText = String.valueOf(Math.round(damage));
-
-                    switch (roundDamage.get()) {
-                        case 0:
-                            damageText = String.valueOf(Math.round(damage));
-                            break;
-                        case 1:
-                            damageText = String.valueOf(Math.round(damage * 10.0) / 10.0);
-                            break;
-                        case 2:
-                            damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
-                            break;
-                        case 3:
-                            damageText = String.valueOf(Math.round(damage * 1000.0) / 1000.0);
-                            break;
-                    }
+                    String damageText = String.valueOf(Math.round(damage * 100.0) / 100.0);
 
                     double w = TextRenderer.get().getWidth(damageText) / 2;
 
@@ -1122,30 +727,9 @@ public class CrystalAura extends Module {
         }
     }
 
-    private boolean shouldBreak(EndCrystalEntity entity) {
-        return (heldCrystal == null || (!surroundHold.get() && !surroundBreak.get())) || (placeDelayLeft <= 0 && (!heldCrystal.getBlockPos().equals(entity.getBlockPos()) || mc.world.raycast(new RaycastContext(target.getPos(), heldCrystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, target)).getType()
-                == HitResult.Type.MISS || (target.distanceTo(heldCrystal) > 1.5 && !isSurrounded(target))));
-    }
-
-    private boolean isSurrounded(LivingEntity target) {
-        return !mc.world.getBlockState(target.getBlockPos().add(1, 0, 0)).isAir()
-                && !mc.world.getBlockState(target.getBlockPos().add(-1, 0, 0)).isAir()
-                && !mc.world.getBlockState(target.getBlockPos().add(0, 0, 1)).isAir() &&
-                !mc.world.getBlockState(target.getBlockPos().add(0, 0, -1)).isAir();
-    }
-
-    public Hand getHand() {
-        Hand hand = Hand.MAIN_HAND;
-        if (mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL && mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL) {
-            hand = Hand.OFF_HAND;
-        }
-        return hand;
-    }
-
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (playerTarget != null) return playerTarget.getEntityName();
         return null;
     }
 }
