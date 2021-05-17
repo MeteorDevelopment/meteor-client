@@ -891,7 +891,8 @@ public class CrystalAura extends Module {
         }
     }
 
-    private void findValidBlocks(LivingEntity target) { bestBlock = new Vec3d(0, 0, 0);
+    private void findValidBlocks(LivingEntity target) {
+	bestBlock = new Vec3d(0, 0, 0);
         bestDamage = 0;
         Vec3d bestSupportBlock = new Vec3d(0, 0, 0);
         double bestSupportDamage = 0;
