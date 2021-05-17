@@ -7,8 +7,8 @@ package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.ItemListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -16,14 +16,13 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.block.Blocks;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class Surround extends Module {
@@ -86,11 +85,11 @@ public class Surround extends Module {
             .build()
     );
     
-    private final Setting<List<Item>> blocks = sgGeneral.add(new ItemListSetting.Builder()
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("block")
             .description("What blocks to use for surround.")
-            .defaultValue(getDefaultItems())
-            .filter(this::itemFilter)
+            .defaultValue(Collections.singletonList(Blocks.OBSIDIAN))
+            .filter(this::blockFilter)
             .build()
     );
 
@@ -155,20 +154,10 @@ public class Surround extends Module {
         }
     }
     
-    private boolean itemFilter(Item item) {
-        return item == Items.OBSIDIAN ||
-                item == Items.ENDER_CHEST ||
-                item == Items.RESPAWN_ANCHOR;
-    }
-    
-    private List<Item> getDefaultItems() {
-        List<Item> items = new ArrayList<>();
-        
-        for (Item item : Registry.ITEM) {
-            if (itemFilter(item)) items.add(item);
-        }
-        
-        return items;
+    private boolean blockFilter(Block block) {
+        return block == Blocks.OBSIDIAN ||
+                block == Blocks.ENDER_CHEST ||
+                block == Blocks.RESPAWN_ANCHOR;
     }
     
     private boolean place(int x, int y, int z) {
@@ -190,6 +179,6 @@ public class Surround extends Module {
     }
 
     private int findSlot() {
-        return InvUtils.findItemInHotbar(itemStack -> blocks.get().contains(itemStack.getItem()));
+        return InvUtils.findItemInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
     }
 }
