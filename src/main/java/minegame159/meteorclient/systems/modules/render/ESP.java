@@ -17,10 +17,12 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 
 public class ESP extends Module {
@@ -224,7 +226,15 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
-        return EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
+        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get(), true);
+        switch (entity.getType().getSpawnGroup()) {
+            case CREATURE:          return animalsColor.get();
+            case WATER_AMBIENT:
+            case WATER_CREATURE:    return waterAnimalsColor.get();
+            case MONSTER:           return monstersColor.get();
+            case AMBIENT:           return ambientColor.get();
+            default:                return miscColor.get();
+        }
     }
 
     public boolean isOutline() {

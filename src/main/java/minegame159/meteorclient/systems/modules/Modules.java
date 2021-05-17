@@ -386,7 +386,6 @@ public class Modules extends System<Modules> {
         add(new SmartSurround());
         add(new Surround());
         add(new Swarm());
-        add(new TotemPopNotifier());
         add(new Burrow());
     }
 
@@ -539,9 +538,9 @@ public class Modules extends System<Modules> {
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
-        add(new VisualRange());
         add(new VanillaSpoof());
         add(new BetterTab());
+        add(new Notifier());
     }
 
     public static class ModuleRegistry extends Registry<Module> {

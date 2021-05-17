@@ -57,13 +57,6 @@ public class BowAimbot extends Module {
             .build()
     );
 
-    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
-            .name("friends")
-            .description("Whether or not to attack friends. Useful if you select players selected.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
             .name("babies")
             .description("Whether or not to attack baby variants of the entity.")
@@ -112,7 +105,7 @@ public class BowAimbot extends Module {
             if (!PlayerUtils.canSeeEntity(entity)) return false;
             if (entity instanceof PlayerEntity) {
                 if (((PlayerEntity) entity).isCreative()) return false;
-                if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
+                if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
             }
             return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
         }, priority.get());

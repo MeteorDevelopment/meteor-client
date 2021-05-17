@@ -268,7 +268,7 @@ public class PlayerUtils {
             }
             // Check for players holding swords
             else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
-                if (Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
+                if (!Friends.get().isFriend((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
                     if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
                         damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
                     }
@@ -324,9 +324,7 @@ public class PlayerUtils {
     }
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor, boolean useNameColor) {
-        Color friendColor = Friends.get().getFriendColor(entity);
-
-        if (friendColor != null) return new Color(friendColor.r, friendColor.g, friendColor.b, defaultColor.a);
+        if (Friends.get().isFriend(entity)) return new Color(Friends.get().color.r, Friends.get().color.g, Friends.get().color.b, defaultColor.a);
         else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());
         else return defaultColor;
     }
