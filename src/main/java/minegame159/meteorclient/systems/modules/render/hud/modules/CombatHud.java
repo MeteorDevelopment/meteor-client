@@ -66,13 +66,6 @@ public class CombatHud extends HudElement {
             .build()
     );
 
-    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-friends")
-            .description("Ignores friends when targeting.")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<Boolean> displayPing = sgGeneral.add(new BoolSetting.Builder()
             .name("ping")
             .description("Shows the player's ping.")
@@ -189,7 +182,7 @@ public class CombatHud extends HudElement {
             double y = box.getY();
 
             if (isInEditor()) playerEntity = FakeClientPlayer.getPlayer();
-            else playerEntity = EntityUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance, ignoreFriends.get());
+            else playerEntity = EntityUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
 
             if (playerEntity == null) return;
 

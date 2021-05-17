@@ -272,7 +272,7 @@ public class AnchorAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (EntityUtils.isBadTarget(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), targetPriority.get(), false);
+        if (EntityUtils.isBadTarget(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
         if (EntityUtils.isBadTarget(target, targetRange.get())) return;
 
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR);

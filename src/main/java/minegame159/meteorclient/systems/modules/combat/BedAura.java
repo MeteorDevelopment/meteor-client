@@ -262,7 +262,7 @@ public class BedAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
+        target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get());
 
         if (target == null) {
             bestPos = null;
