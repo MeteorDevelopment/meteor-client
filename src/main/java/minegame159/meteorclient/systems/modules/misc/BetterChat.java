@@ -425,6 +425,6 @@ public class BetterChat extends Module {
             warningMessage.append(sendButton);
         }
 
-        ChatUtils.info("Warning", warningMessage);
+        ChatUtils.sendMsg(warningMessage);
     }
 }
