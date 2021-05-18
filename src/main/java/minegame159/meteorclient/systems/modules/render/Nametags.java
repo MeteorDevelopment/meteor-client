@@ -86,6 +86,13 @@ public class Nametags extends Module {
             .build()
     );
 
+    private final Setting<SettingColor> names = sgGeneral.add(new ColorSetting.Builder()
+            .name("names")
+            .description("The color of the nametag names.")
+            .defaultValue(new SettingColor())
+            .build()
+    );
+
     private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
             .name("culling")
             .description("Only render a certain number of nametags at a certain distance.")
@@ -342,7 +349,7 @@ public class Nametags extends Module {
 
         // Name
         String name;
-        Color nameColor = PlayerUtils.getPlayerColor(player, WHITE, true);
+        Color nameColor = PlayerUtils.getPlayerColor(player, names.get(), true);
 
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
         else name = player.getEntityName();
@@ -396,7 +403,7 @@ public class Nametags extends Module {
         if (displayMeteor.get()) hX = text.render(usingMeteor, hX, hY, METEOR);
 
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, GOLD);
-        hX = text.render(name, hX, hY, nameColor != null ? nameColor : WHITE);
+        hX = text.render(name, hX, hY, nameColor);
 
         hX = text.render(healthText, hX, hY, healthColor);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, BLUE);
@@ -565,7 +572,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        hX = text.render(nameText, hX, hY, WHITE);
+        hX = text.render(nameText, hX, hY, names.get());
         text.render(healthText, hX, hY, healthColor);
         text.end();
 
@@ -589,7 +596,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        text.render(fuseText, hX, hY, WHITE);
+        text.render(fuseText, hX, hY, names.get());
         text.end();
 
         NametagUtils.end();
