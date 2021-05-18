@@ -12,6 +12,7 @@ import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.PlaySoundEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
@@ -522,6 +523,7 @@ public class CrystalAura extends Module {
             if (!autoSwitch.get() || slot == -1) return;
 
             mc.player.inventory.selectedSlot = slot;
+            ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
 
             hand = InvUtils.getHand(Items.END_CRYSTAL);
             if (hand == null) return;
