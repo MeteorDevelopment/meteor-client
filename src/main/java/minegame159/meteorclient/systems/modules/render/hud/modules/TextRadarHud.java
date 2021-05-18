@@ -85,7 +85,7 @@ public class TextRadarHud extends HudElement {
             y += renderer.textHeight() + 2;
 
             String text = entity.getEntityName();
-            Color color = PlayerUtils.getPlayerColor(entity, hud.primaryColor.get(), true);
+            Color color = PlayerUtils.getPlayerColor(entity, hud.primaryColor.get());
 
             renderer.text(text, x, y, color);
 

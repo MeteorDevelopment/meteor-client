@@ -123,13 +123,6 @@ public class Nametags extends Module {
 
     //Players
 
-    public final Setting<Boolean> useTeamColor = sgPlayers.add(new BoolSetting.Builder()
-            .name("use-team-color")
-            .description("Uses players team color for the color of the players name.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
             .name("display-items")
             .description("Displays armor and hand items above the name tags.")
@@ -349,7 +342,7 @@ public class Nametags extends Module {
 
         // Name
         String name;
-        Color nameColor = PlayerUtils.getPlayerColor(player, names.get(), true);
+        Color nameColor = PlayerUtils.getPlayerColor(player, names.get());
 
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
         else name = player.getEntityName();

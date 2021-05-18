@@ -99,13 +99,6 @@ public class ESP extends Module {
 
     // Colors
 
-    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
-            .name("use-team-color")
-            .description("Uses players team color for the ESP color.")
-            .defaultValue(true)
-            .build()
-    );
-
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
             .description("The other player's color.")
@@ -229,7 +222,7 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get(), true);
+        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
         switch (entity.getType().getSpawnGroup()) {
             case CREATURE:          return animalsColor.get();
             case WATER_AMBIENT:
