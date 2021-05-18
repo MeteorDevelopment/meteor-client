@@ -264,7 +264,7 @@ public class KillAura extends Module {
             mc.player.updatePosition(target.getX() + randomOffset(), target.getY(), target.getZ() + randomOffset());
         }
 
-        if (rotation.get() == RotationMode.Always && !entityList.isEmpty()) {
+        if (rotation.get() == RotationMode.Always && !entityList.isEmpty() && itemInHand()) {
             rotate(entityList.get(0), null);
         }
     }
