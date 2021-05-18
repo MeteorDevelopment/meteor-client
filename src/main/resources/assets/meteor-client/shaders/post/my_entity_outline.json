@@ -9,7 +9,9 @@
       "intarget": "final",
       "outtarget": "swap",
       "uniforms": [
-        { "name": "fillAlpha", "type": "float", "count": 1, "values": [ 0.35 ] }
+        { "name": "width", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "opacity", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "fillOpacity", "type": "float", "count": 1, "values": [ 0.35 ] }
       ]
     },
     {

@@ -54,10 +54,20 @@ public class ESP extends Module {
             .build()
     );
 
-    public final Setting<Double> fillAlpha = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
+            .name("width")
+            .description("The width of the shader outline.")
+            .defaultValue(2)
+            .min(1).max(10)
+            .sliderMin(1).sliderMax(5)
+            .visible(() -> mode.get() == Mode.Shader)
+            .build()
+    );
+
+    public final Setting<Integer> fillOpacity = sgGeneral.add(new IntSetting.Builder()
             .name("fill-opacity")
             .description("The opacity of the shader fill.")
-            .defaultValue(50)
+            .defaultValue(80)
             .min(0).max(255)
             .sliderMax(255)
             .visible(() -> mode.get() == Mode.Shader)
@@ -67,7 +77,7 @@ public class ESP extends Module {
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
             .name("fade-distance")
             .description("The distance from an entity where the color begins to fade.")
-            .defaultValue(6)
+            .defaultValue(3)
             .min(0)
             .sliderMax(12)
             .build()
@@ -205,23 +215,16 @@ public class ESP extends Module {
         double a = 1;
         if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
-        if (a >= 0.075) {
-            outlineColor.set(color);
-            outlineColor.a *= a;
-            return outlineColor;
-        }
-
+        if (a >= 0.075) return outlineColor.set(color);
         return null;
     }
 
-    public float getFillOpacity(Entity entity) {
+    public float getOpacity(Entity entity) {
         double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
-        float a = fillAlpha.get().floatValue() / 255;
-        if (dist <= fadeDistance.get() * fadeDistance.get()) a *= dist / (fadeDistance.get() * fadeDistance.get());
+        double a = 1;
+        if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
-        if (a >= 0.075) {
-            return a;
-        }
+        if (a >= 0.075) return (float) a;
         return 0;
     }
 
