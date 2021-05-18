@@ -113,7 +113,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
         if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return;
 
-        Color color = PlayerUtils.getPlayerColor(((PlayerEntity) livingEntity), module.playersColor.get(), true);
+        Color color = PlayerUtils.getPlayerColor(((PlayerEntity) livingEntity), module.playersColor.get());
         args.set(4, color.r / 255f);
         args.set(5, color.g / 255f);
         args.set(6, color.b / 255f);

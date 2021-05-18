@@ -76,17 +76,11 @@ public class Tracers extends Module {
             .build()
     );
 
-    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
-            .name("use-name-color")
-            .description("Uses players displayname color for the tracer color (good for minigames).")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
             .description("The player's color.")
             .defaultValue(new SettingColor(205, 205, 205, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -94,6 +88,7 @@ public class Tracers extends Module {
             .name("animals-color")
             .description("The animal's color.")
             .defaultValue(new SettingColor(145, 255, 145, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -101,6 +96,7 @@ public class Tracers extends Module {
             .name("water-animals-color")
             .description("The water animal's color.")
             .defaultValue(new SettingColor(145, 145, 255, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -108,6 +104,7 @@ public class Tracers extends Module {
             .name("monsters-color")
             .description("The monster's color.")
             .defaultValue(new SettingColor(255, 145, 145, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -115,6 +112,7 @@ public class Tracers extends Module {
             .name("ambient-color")
             .description("The ambient color.")
             .defaultValue(new SettingColor(75, 75, 75, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -122,6 +120,7 @@ public class Tracers extends Module {
             .name("misc-color")
             .description("The misc color.")
             .defaultValue(new SettingColor(145, 145, 145, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -148,7 +147,7 @@ public class Tracers extends Module {
             if (distance.get() && entity instanceof PlayerEntity) {
                 color = getColorFromDistance((PlayerEntity) entity);
             } else if (entity instanceof PlayerEntity) {
-                color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get(), useNameColor.get());
+                color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
             } else {
                 switch (entity.getType().getSpawnGroup()) {
                     case CREATURE:          color = animalsColor.get(); break;

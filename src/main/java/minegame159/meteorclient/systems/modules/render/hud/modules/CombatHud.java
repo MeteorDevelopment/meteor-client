@@ -209,7 +209,7 @@ public class CombatHud extends HudElement {
 
             // Name
             String nameText = playerEntity.getEntityName();
-            Color nameColor = PlayerUtils.getPlayerColor(playerEntity, WHITE, true);
+            Color nameColor = PlayerUtils.getPlayerColor(playerEntity, hud.primaryColor.get());
 
             // Ping
             int ping = EntityUtils.getPing(playerEntity);

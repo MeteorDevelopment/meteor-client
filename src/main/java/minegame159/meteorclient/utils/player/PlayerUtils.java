@@ -43,10 +43,9 @@ public class PlayerUtils {
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
-    public static Color getPlayerColor(PlayerEntity entity, Color defaultColor, boolean useNameColor) {
+    public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
         if (Friends.get().isFriend(entity)) return new Color(Friends.get().color.r, Friends.get().color.g, Friends.get().color.b, defaultColor.a);
-        else if (useNameColor) return TextUtils.getMostPopularColor(entity.getDisplayName());
-        else return defaultColor;
+        return TextUtils.getMostPopularColor(entity.getDisplayName());
     }
 
     public static Vec3d getHorizontalVelocity(double bps) {
