@@ -539,7 +539,7 @@ public class CrystalAura extends Module {
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
             renderBlock.reset(blockTarget);
-            renderBlock.damage = DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(blockTarget));
+            renderBlock.damage = DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(blockTarget.up()));
             renderBlocks.add(renderBlock);
         }
     }
