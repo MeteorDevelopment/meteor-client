@@ -37,15 +37,20 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
+import static minegame159.meteorclient.utils.Utils.WHITE;
+
 public class PlayerUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
+    private static final Color color = new Color();
+
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
-        if (Friends.get().isFriend(entity)) return new Color(Friends.get().color.r, Friends.get().color.g, Friends.get().color.b, defaultColor.a);
-        return TextUtils.getMostPopularColor(entity.getDisplayName());
+        if (Friends.get().isFriend(entity)) return color.set(Friends.get().color).a(defaultColor.a);
+        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE)) return color.set(color).a(defaultColor.a);
+        return defaultColor;
     }
 
     public static Vec3d getHorizontalVelocity(double bps) {
