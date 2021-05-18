@@ -65,6 +65,7 @@
     "FireworksSparkParticleMixin",
     "FluidBlockMixin",
     "FluidRendererMixin",
+    "FoliageColorsMixin",
     "GameOptionsMixin",
     "GameRendererMixin",
     "GenericContainerScreenMixin",
@@ -110,6 +111,7 @@
     "RenderLayersMixin",
     "RenderTickCounterMixin",
     "ScreenMixin",
+    "ShaderEffectAccessor",
     "ShovelItemAccessor",
     "ShulkerBoxBlockMixin",
     "ShulkerBoxScreenMixin",
@@ -127,8 +129,7 @@
     "Vec3dMixin",
     "WorldChunkMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin",
-    "ShaderEffectAccessor"
+    "WorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1
