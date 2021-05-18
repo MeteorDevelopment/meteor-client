@@ -86,7 +86,7 @@ public abstract class WorldRendererMixin {
             Framebuffer fbo = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
 
-            Outlines.fillAlpha = Modules.get().get(ESP.class).getFillOpacity(entity);
+            Outlines.opacity = esp.getOpacity(entity);
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
 
