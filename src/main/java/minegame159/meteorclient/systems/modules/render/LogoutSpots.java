@@ -217,7 +217,7 @@ public class LogoutSpots extends Module {
             height = entity.getBoundingBox().getYLength();
 
             uuid = entity.getUuid();
-            name = entity.getGameProfile().getName();
+            name = entity.getEntityName();
             health = Math.round(entity.getHealth() + entity.getAbsorptionAmount());
             maxHealth = Math.round(entity.getMaxHealth() + entity.getAbsorptionAmount());
 

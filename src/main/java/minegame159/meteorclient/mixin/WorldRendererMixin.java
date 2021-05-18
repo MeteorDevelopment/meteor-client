@@ -86,7 +86,7 @@ public abstract class WorldRendererMixin {
             Framebuffer fbo = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
 
-            Outlines.fillAlpha = Modules.get().get(ESP.class).getFillOpacity(entity);
+            Outlines.opacity = esp.getOpacity(entity);
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
 
@@ -118,7 +118,7 @@ public abstract class WorldRendererMixin {
             info.setStage(stage);
             BlockUtils.breakingBlocks.put(entityId, info);
 
-            if (Modules.get().isActive(BreakIndicators.class) && Modules.get().get(BreakIndicators.class).hideVanillaIndicators.get()) ci.cancel();
+            if (Modules.get().isActive(BreakIndicators.class)) ci.cancel();
         } else {
             BlockUtils.breakingBlocks.remove(entityId);
         }

@@ -36,7 +36,7 @@ public class NameHistoryCommand extends Command {
             List<NameHistoryObject> nameHistoryObjects = HttpUtils.get("https://api.mojang.com/user/profiles/" + lookUpTarget.getUuid().toString().replace("-", "") + "/names", type);
 
             if (nameHistoryObjects == null || nameHistoryObjects.isEmpty()) {
-                ChatUtils.error("There was an error fetching that users name history.");
+                error("There was an error fetching that users name history.");
                 return SINGLE_SUCCESS;
             }
 
@@ -60,7 +60,7 @@ public class NameHistoryCommand extends Command {
                     ))
             );
 
-            ChatUtils.info(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
+            info(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
 
             for (NameHistoryObject nameHistoryObject : nameHistoryObjects) {
                 BaseText nameText = new LiteralText(nameHistoryObject.name);
@@ -77,7 +77,7 @@ public class NameHistoryCommand extends Command {
                     nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
                 }
 
-                ChatUtils.info(nameText);
+                ChatUtils.sendMsg(nameText);
             }
 
             return SINGLE_SUCCESS;

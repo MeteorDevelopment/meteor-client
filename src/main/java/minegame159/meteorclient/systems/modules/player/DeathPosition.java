@@ -21,7 +21,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
@@ -32,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class DeathPosition extends Module {
 
@@ -96,11 +97,10 @@ public class DeathPosition extends Module {
         labelText = String.format("Latest death: %.1f, %.1f, %.1f", dmgPos.x, dmgPos.y, dmgPos.z);
 
         String time = dateFormat.format(new Date());
-        //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
-        BaseText msg = new LiteralText("Died at ");
-        msg.append(ChatUtils.formatCoords(dmgPos));
-        msg.append(showTimestamp.get() ? String.format(" on %s.", time) : ".");
-        ChatUtils.moduleInfo(this,msg);
+        BaseText text = new LiteralText("Died at ");
+        text.append(formatCoords(dmgPos));
+        text.append(showTimestamp.get() ? String.format(" on %s.", time) : ".");
+        info(text);
 
         // Create waypoint
         if (createWaypoint.get()) {
@@ -131,7 +131,7 @@ public class DeathPosition extends Module {
 
     private void path() {
         if (deathPos.isEmpty() && mc.player != null) {
-            ChatUtils.moduleWarning(this,"No latest death found.");
+            warning("No latest death found.");
         }
         else {
             if (mc.world != null) {

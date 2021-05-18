@@ -16,7 +16,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.SlotUtils;
 import net.minecraft.item.AxeItem;
@@ -98,7 +97,7 @@ public class Offhand extends Module {
             // No offhand item
             if (slot == -1) {
                 if (!sentMessage) {
-                    ChatUtils.moduleWarning(this, "Chosen item not found.");
+                    warning("Chosen item not found.");
                     sentMessage = true;
                 }
             }

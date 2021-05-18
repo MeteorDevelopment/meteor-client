@@ -8,8 +8,8 @@ package minegame159.meteorclient.systems.commands.commands;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.BoolArgumentType;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.ModuleArgumentType;
@@ -18,12 +18,11 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.Swarm;
 import minegame159.meteorclient.systems.modules.world.InfinityMiner;
-import minegame159.meteorclient.utils.player.ChatUtils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.client.MinecraftClient;
 
 import java.util.Random;
 
@@ -63,7 +62,7 @@ public class SwarmCommand extends Command {
                             swarm.currentMode = Swarm.Mode.Idle;
                             Modules.get().get(Swarm.class).toggle();
                         } else {
-                            ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "You are the queen.");
+                            info("You are the queen.");
                         }
                     }
                     return SINGLE_SUCCESS;
@@ -182,10 +181,10 @@ public class SwarmCommand extends Command {
                                         swarm.server.sendMessage(context.getInput());
                                     if (swarm.currentMode != Swarm.Mode.Queen) {
                                         swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
-                                    } else ChatUtils.moduleError(Modules.get().get(Swarm.class),"Null block");
+                                    } else error("Null block.");
                                 }
                             } catch (Exception e) {
-                                ChatUtils.moduleError(Modules.get().get(Swarm.class),"Error in baritone command. " + e.getClass().getSimpleName());
+                                error("Error in baritone command. " + e.getClass().getSimpleName());
                             }
                             return SINGLE_SUCCESS;
                         })

@@ -25,12 +25,10 @@ import minegame159.meteorclient.utils.notebot.NotebotUtils;
 import minegame159.meteorclient.utils.notebot.nbs.Layer;
 import minegame159.meteorclient.utils.notebot.nbs.Note;
 import minegame159.meteorclient.utils.notebot.nbs.Song;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
-
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.NoteBlock;
@@ -286,7 +284,7 @@ public class Notebot extends Module {
     }
 
     public void printStatus() {
-        ChatUtils.moduleInfo(this,  getStatus());
+        info( getStatus());
     }
 
     private String getFileLabel(Path file) {
@@ -306,29 +304,29 @@ public class Notebot extends Module {
     public void Play() {
         if (mc.player == null) return;
         if (mc.player.abilities.creativeMode && stage != Stage.Preview) {
-            ChatUtils.moduleError(this, "You need to be in survival mode.");
+            error("You need to be in survival mode.");
         }
         else if (stage == Stage.Preview || stage == Stage.Playing) {
             isPlaying = true;
-            ChatUtils.moduleInfo(this, "Playing.");
+            info("Playing.");
         } else {
-            ChatUtils.moduleError(this, "No song loaded.");
+            error("No song loaded.");
         }
     }
 
     public void Pause() {
         if (!isActive()) toggle();
         if (isPlaying) {
-            ChatUtils.moduleInfo(this, "Pausing.");
+            info("Pausing.");
             isPlaying = false;
         } else {
-            ChatUtils.moduleInfo(this, "Resuming.");
+            info("Resuming.");
             isPlaying = true;
         }
     }
 
     public void Stop() {
-        ChatUtils.moduleInfo(this, "Stopping.");
+        info("Stopping.");
         if (stage == Stage.SetUp || stage == Stage.Tune) {
             resetVariables();
         } else {
@@ -341,7 +339,7 @@ public class Notebot extends Module {
 
     public void Disable() {
         resetVariables();
-        ChatUtils.moduleInfo(this, "Stopping.");
+        info("Stopping.");
         if (!isActive()) toggle();
     }
 
@@ -349,13 +347,13 @@ public class Notebot extends Module {
         if (!isActive()) toggle();
         if (!loadFileToMap(file)) return;
         if (!setupBlocks()) return;
-        ChatUtils.moduleInfo(this, "Loading song \"%s\".", getFileLabel(file.toPath()));
+        info("Loading song \"%s\".", getFileLabel(file.toPath()));
     }
 
     public void previewSong(File file) {
         if (!isActive()) toggle();
         if (loadFileToMap(file)) {
-            ChatUtils.moduleInfo(this, "Song \"%s\" loaded.",getFileLabel(file.toPath()));
+            info("Song \"%s\" loaded.",getFileLabel(file.toPath()));
             stage = Stage.Preview;
             Play();
         }
@@ -373,7 +371,7 @@ public class Notebot extends Module {
 
     private boolean loadFileToMap(File file) {
         if (!file.exists() || !file.isFile()) {
-            ChatUtils.moduleError(this, "File not found");
+            error("File not found");
             return false;
         }
         String extension = FilenameUtils.getExtension(file.getName());
@@ -393,14 +391,14 @@ public class Notebot extends Module {
         try {
             data = Files.readAllLines(file.toPath());
         } catch (IOException e) {
-            ChatUtils.moduleError(this, "Error while reading \"%s\"",file.getName());
+            error("Error while reading \"%s\"",file.getName());
             return false;
         }
         resetVariables();
         for (int i = 0; i < data.size(); i++) {
             String[] parts = data.get(i).split(":");
             if (parts.length<2) {
-                ChatUtils.moduleWarning(this, "Malformed line %d", i);
+                warning("Malformed line %d", i);
                 continue;
             }
             int key;
@@ -413,7 +411,7 @@ public class Notebot extends Module {
                     if (!NotebotUtils.isValidIntrumentTextFile(type, instrument.get())) continue;
                 }
             } catch (NumberFormatException e) {
-                ChatUtils.moduleWarning(this, "Invalid character at line %d", i);
+                warning("Invalid character at line %d", i);
                 continue;
             }
             addNote(key,val);
@@ -425,7 +423,7 @@ public class Notebot extends Module {
     private boolean loadNbsFile(File file) {
         Song nbsSong = NBSDecoder.parse(file);
         if (nbsSong == null) {
-            ChatUtils.moduleError(this, "Couldn't parse the file. Only classic and opennbs v5 are supported");
+            error("Couldn't parse the file. Only classic and opennbs v5 are supported");
             return false;
         }
         List<Layer> layers = new ArrayList<>(nbsSong.getLayerHashMap().values());
@@ -440,7 +438,7 @@ public class Notebot extends Module {
                 int n = Byte.toUnsignedInt(note.getKey());
                 n -= 33; // amazing conversion
                 if (n<0 || n>24) {
-                    ChatUtils.moduleWarning(this, "Note at tick %d out of range.", tick);
+                    warning("Note at tick %d out of range.", tick);
                     continue;
                 }
                 addNote(tick, n);
@@ -479,7 +477,7 @@ public class Notebot extends Module {
         });
         scanForNoteblocks();
         if (uniqueNotes.size() > possibleBlockPos.size()+scannedNoteblocks.size()) {
-            ChatUtils.moduleError(this, "Too many notes. %d is the maximum.", possibleBlockPos.size());
+            error("Too many notes. %d is the maximum.", possibleBlockPos.size());
             return false;
         }
         currentNote = 0;
@@ -499,7 +497,7 @@ public class Notebot extends Module {
         ticks = 0;
         if (currentNote>=uniqueNotes.size()) {
             stage = Stage.Playing;
-            ChatUtils.moduleInfo(this, "Loading done.");
+            info("Loading done.");
             Play();
             return;
         }
@@ -517,7 +515,7 @@ public class Notebot extends Module {
         }
         int slot = InvUtils.findItemInHotbar(Items.NOTE_BLOCK);
         if (slot == -1) {
-            ChatUtils.moduleError(this, "Not enough noteblocks");
+            error("Not enough noteblocks");
             Disable();
             return;
         }
@@ -525,7 +523,7 @@ public class Notebot extends Module {
         try {
             pos = mc.player.getBlockPos().add(possibleBlockPos.get(index));
         } catch (IndexOutOfBoundsException e) {
-            ChatUtils.moduleError(this, "Not enough valid positions.");
+            error("Not enough valid positions.");
             Disable();
             return;
         }

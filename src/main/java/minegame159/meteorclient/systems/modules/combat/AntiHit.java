@@ -61,7 +61,7 @@ public class AntiHit extends Module {
     @EventHandler(priority = EventPriority.HIGH)
     private void onAttackEntity(AttackEntityEvent event) {
         // Friends
-        if (friends.get() && event.entity instanceof PlayerEntity && !Friends.get().attack((PlayerEntity) event.entity)) event.cancel();
+        if (friends.get() && event.entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) event.entity)) event.cancel();
 
         // Babies
         if (babies.get() && event.entity instanceof AnimalEntity && ((AnimalEntity) event.entity).isBaby()) event.cancel();

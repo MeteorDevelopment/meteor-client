@@ -54,7 +54,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import static minegame159.meteorclient.utils.entity.EntityUtils.WHITE;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
@@ -63,6 +62,7 @@ public class Utils {
     public static MinecraftClient mc;
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
+    public static final Color WHITE = new Color(255, 255, 255);
 
     static {
         df = new DecimalFormat("0");

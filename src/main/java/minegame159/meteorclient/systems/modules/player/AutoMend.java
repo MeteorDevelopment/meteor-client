@@ -13,7 +13,6 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -67,7 +66,7 @@ public class AutoMend extends Module {
 
         if (slot == -1) {
             if (autoDisable.get()) {
-                ChatUtils.moduleInfo(this, "Repaired all items, disabling");
+                info("Repaired all items, disabling");
 
                 if (didMove) {
                     int emptySlot = getEmptySlot();

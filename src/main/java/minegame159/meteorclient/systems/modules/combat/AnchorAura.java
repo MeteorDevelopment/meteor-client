@@ -20,6 +20,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
@@ -264,16 +265,16 @@ public class AnchorAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.world.getDimension().isRespawnAnchorWorking()) {
-            ChatUtils.moduleError(this, "You are in the Nether... disabling.");
-            this.toggle();
+            error("You are in the Nether... disabling.");
+            toggle();
             return;
         }
 
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (EntityUtils.isBadTarget(target, targetRange.get())) target = EntityUtils.getPlayerTarget(targetRange.get(), targetPriority.get(), false);
-        if (EntityUtils.isBadTarget(target, targetRange.get())) return;
+        if (TargetUtils.isBadTarget(target, targetRange.get())) target = TargetUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
+        if (TargetUtils.isBadTarget(target, targetRange.get())) return;
 
         int anchorSlot = InvUtils.findItemInHotbar(Items.RESPAWN_ANCHOR);
         int glowSlot = InvUtils.findItemInHotbar(Items.GLOWSTONE);

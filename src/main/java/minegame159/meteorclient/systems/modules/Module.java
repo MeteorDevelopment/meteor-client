@@ -18,6 +18,7 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Objects;
@@ -85,7 +86,23 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatCommandsInfo) ChatUtils.info(this.hashCode(), "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        if (Config.get().chatCommandsInfo) ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+    }
+
+    public void info(Text message) {
+        ChatUtils.sendMsg(title, message);
+    }
+
+    public void info(String message, Object... args) {
+        ChatUtils.info(title, message, args);
+    }
+
+    public void warning(String message, Object... args) {
+        ChatUtils.warning(title, message, args);
+    }
+
+    public void error(String message, Object... args) {
+        ChatUtils.error(title, message, args);
     }
 
     public void setVisible(boolean visible) {

@@ -26,10 +26,10 @@ import java.util.stream.Collectors;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
-public class FriendCommand extends Command {
+public class FriendsCommand extends Command {
 
-    public FriendCommand() {
-        super("friend", "Manages friends.");
+    public FriendsCommand() {
+        super("friends", "Manages friends.");
     }
 
     @Override
@@ -39,8 +39,8 @@ public class FriendCommand extends Command {
                         .executes(context -> {
                             Friend friend = FriendArgumentType.getFriend(context, "friend");
 
-                            if (Friends.get().add(friend)) ChatUtils.prefixInfo("Friends","Added (highlight)%s (default)to friends.", friend.name);
-                            else ChatUtils.prefixError("Friends","That person is already your friend.");
+                            if (Friends.get().add(friend)) info("Added (highlight)%s (default)to friends.", friend.name);
+                            else error("That person is already your friend.");
 
                             return SINGLE_SUCCESS;
                         })
@@ -51,8 +51,8 @@ public class FriendCommand extends Command {
                         .executes(context -> {
                             Friend friend = FriendArgumentType.getFriend(context, "friend");
 
-                            if (Friends.get().remove(friend)) ChatUtils.prefixInfo("Friends","Removed (highlight)%s (default)from friends.", friend.name);
-                            else ChatUtils.prefixError("Friends", "That person is not your friend.");
+                            if (Friends.get().remove(friend)) info("Removed (highlight)%s (default)from friends.", friend.name);
+                            else error("That person is not your friend.");
 
                             return SINGLE_SUCCESS;
                         })
@@ -60,8 +60,8 @@ public class FriendCommand extends Command {
         );
 
         builder.then(literal("list").executes(context -> {
-                    ChatUtils.prefixInfo("Friends","(highlight)%d(default) friends:", Friends.get().count());
-                    Friends.get().forEach(friend-> ChatUtils.info(" - (highlight)%s", friend.name));
+                    info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
+                    Friends.get().forEach(friend-> ChatUtils.info("(highlight)" + friend.name));
                     return SINGLE_SUCCESS;
                 })
         );

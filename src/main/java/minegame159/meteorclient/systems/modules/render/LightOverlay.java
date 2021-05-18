@@ -17,12 +17,14 @@ import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockIterator;
-import net.minecraft.block.*;
+import net.minecraft.block.AirBlock;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 

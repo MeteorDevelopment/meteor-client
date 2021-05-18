@@ -16,12 +16,13 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
+
+import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class EntityLogger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -61,13 +62,14 @@ public class EntityLogger extends Module {
             }
 
             String name;
-            if (playerNames.get() && event.entity instanceof PlayerEntity) name = ((PlayerEntity) event.entity).getGameProfile().getName() + " (Player)";
+            if (playerNames.get() && event.entity instanceof PlayerEntity) name = event.entity.getEntityName() + " (Player)";
             else name = event.entity.getType().getName().getString();
 
-            BaseText msg = new LiteralText(String.format("%s%s %shas spawned at ", Formatting.WHITE, name, Formatting.GRAY));
-            msg.append(ChatUtils.formatCoords(event.entity.getPos()));
-            msg.append(".");
-            ChatUtils.moduleInfo(this, msg);
+            MutableText text = new LiteralText(name + " ").formatted(Formatting.WHITE);
+            text.append(new LiteralText(" has spawned at ").formatted(Formatting.GRAY));
+            text.append(formatCoords(event.entity.getPos()));
+            text.append(new LiteralText(".").formatted(Formatting.GRAY));
+            info(text);
         }
     }
 }
