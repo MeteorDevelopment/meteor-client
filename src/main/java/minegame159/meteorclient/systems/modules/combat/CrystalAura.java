@@ -433,13 +433,12 @@ public class CrystalAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (PlayerUtils.getTotalHealth() <= pauseAtHealth.get()) return;
 
-        breakDelayLeft--;
-        placeDelayLeft--;
-
         // Break
-        broken = false;
-        if (breakDelayLeft <= 0) breakBest();
-        if (broken) return;
+        breakDelayLeft--;
+        if (breakDelayLeft <= 0) {
+            breakBest();
+            if (broken) return;
+	  }
 
         // Check for crystals
         if (!autoSwitch.get() && InvUtils.getHand(itemStack -> itemStack.getItem() == Items.END_CRYSTAL) == null) return;
@@ -449,15 +448,17 @@ public class CrystalAura extends Module {
         if (crystalMap.isEmpty()) return;
 
         // Select best pos
-        blockTarget = findBestPos();
+        findBestPos();
         if (blockTarget == null) return;
 
         // Run place
+        placeDelayLeft--;
         if (placeDelayLeft <= 0) placeBest();
     }
 
     // Breaking
     private void breakBest() {
+        broken = false;
         Streams.stream(mc.world.getEntities())
                 .filter(this::validBreak)
                 .max(Comparator.comparingDouble(o -> DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(o.getBlockPos()))))
@@ -557,20 +558,21 @@ public class CrystalAura extends Module {
         return forceFacePlace.get().isPressed();
     }
 
-    private BlockPos findBestPos() {
+    private void findBestPos() {
         double bestDamage = 0;
 
         for (Map.Entry<BlockPos, Double> blockPosDoubleEntry : crystalMap.entrySet()) {
             if (blockPosDoubleEntry.getValue() > bestDamage) bestDamage = blockPosDoubleEntry.getValue();
         }
 
-        if (bestDamage < minDamage.get()) return null;
+        bestBlock = null;
 
         for (Map.Entry<BlockPos, Double> blockPosDoubleEntry : crystalMap.entrySet()) {
-            if (blockPosDoubleEntry.getValue() == bestDamage) return blockPosDoubleEntry.getKey();
+            if (blockPosDoubleEntry.getValue() == bestDamage) {
+                bestBlock = blockPosDoubleEntry.getKey();
+                return;
+            }
         }
-
-        return null;
     }
 
     private void getAllValid() {
