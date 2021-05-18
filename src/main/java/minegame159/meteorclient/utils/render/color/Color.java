@@ -243,4 +243,9 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     public String toString() {
         return r + " " + g + " " + b + " " + a;
     }
+
+    public boolean equals(Color color) {
+        if (color == null) return false;
+        return r == color.r && g == color.g && b == color.b && a == color.a;
+    }
 }
