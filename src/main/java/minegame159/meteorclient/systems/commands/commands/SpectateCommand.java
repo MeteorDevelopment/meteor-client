@@ -1,11 +1,14 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
-
 import minegame159.meteorclient.systems.commands.arguments.PlayerArgumentType;
 import minegame159.meteorclient.systems.commands.Command;
+import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -22,9 +25,8 @@ public class SpectateCommand extends Command {
             return SINGLE_SUCCESS;
         });
 
-        builder.then(argument("player", PlayerArgumentType.player()).executes(ctx -> {
-            PlayerEntity playerEntity = ctx.getArgument("player", PlayerEntity.class);
-            mc.setCameraEntity(playerEntity);
+        builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
+            mc.setCameraEntity(PlayerArgumentType.getPlayer(context));
             return SINGLE_SUCCESS;
         }));
     }
