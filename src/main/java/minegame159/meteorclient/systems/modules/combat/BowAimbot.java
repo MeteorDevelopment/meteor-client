@@ -24,6 +24,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArrowItem;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.Items;
@@ -94,9 +95,7 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         if (playerIsDead() || !itemInHand()) return;
-        if (InvUtils.findItemInWhole(Items.ARROW) == -1 &&
-                InvUtils.findItemInWhole(Items.SPECTRAL_ARROW) == -1 &&
-                InvUtils.findItemInWhole(Items.TIPPED_ARROW) == -1) return;
+        if (InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
