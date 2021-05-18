@@ -560,12 +560,12 @@ public class CrystalAura extends Module {
 
     private void findBestPos() {
         double bestDamage = 0;
-        bestBlock = null;
+        blockTarget = null;
 
         for (Map.Entry<BlockPos, Double> blockPosDoubleEntry : crystalMap.entrySet()) {
             if (blockPosDoubleEntry.getValue() > bestDamage) {
                 bestDamage = blockPosDoubleEntry.getValue();
-                if (blockPosDoubleEntry.getValue() >= minDamage.get()) bestBlock = blockPosDoubleEntry.getKey();
+                if (blockPosDoubleEntry.getValue() >= minDamage.get()) blockTarget = blockPosDoubleEntry.getKey();
             }
         }
     }
