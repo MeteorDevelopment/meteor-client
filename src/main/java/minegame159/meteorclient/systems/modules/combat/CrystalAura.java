@@ -465,18 +465,6 @@ public class CrystalAura extends Module {
     }
 
     private void hitCrystal(EndCrystalEntity entity) {
-        if (rotationMode.get() == RotationMode.Breaking || rotationMode.get() == RotationMode.Both) {
-            float[] rotation = PlayerUtils.calculateAngle(entity.getPos());
-            Rotations.rotate(rotation[0], rotation[1], 30, () -> attackCrystal(entity));
-        } else {
-            attackCrystal(entity);
-        }
-
-        broken = true;
-        breakDelayLeft = breakDelay.get();
-    }
-
-    private void attackCrystal(EndCrystalEntity entity) {
         int preSlot = mc.player.inventory.selectedSlot, slot;
 
         if (antiWeakness.get() && mc.player.getActiveStatusEffects().containsKey(StatusEffects.WEAKNESS)) {
@@ -488,13 +476,24 @@ public class CrystalAura extends Module {
 
         mc.player.inventory.selectedSlot = slot;
 
+        if (rotationMode.get() == RotationMode.Breaking || rotationMode.get() == RotationMode.Both) {
+            float[] rotation = PlayerUtils.calculateAngle(entity.getPos());
+            Rotations.rotate(rotation[0], rotation[1], 30, () -> attackCrystal(entity));
+        } else {
+            attackCrystal(entity);
+        }
+
+        mc.player.inventory.selectedSlot = preSlot;
+
+        removalQueue.add(entity.getEntityId());
+        broken = true;
+        breakDelayLeft = breakDelay.get();
+    }
+
+    private void attackCrystal(EndCrystalEntity entity) {
         mc.interactionManager.attackEntity(mc.player, entity);
         if (swing.get()) mc.player.swingHand(Hand.MAIN_HAND);
         else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-
-        removalQueue.add(entity.getEntityId());
-
-        mc.player.inventory.selectedSlot = preSlot;
     }
 
     private boolean validBreak(Entity entity) {
@@ -508,7 +507,7 @@ public class CrystalAura extends Module {
         }
 
         if (DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(entity.getBlockPos())) >= maxSelfDamage.get()) return false;
-        if (antiSuicide.get() && DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(entity.getBlockPos())) - PlayerUtils.getTotalHealth() <= 0) return false;
+        if (antiSuicide.get() && PlayerUtils.getTotalHealth() - DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(entity.getBlockPos())) <= 0) return false;
         return shouldFacePlace() || surroundBreak.get().isPressed() || !(DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(entity.getBlockPos())) < minDamage.get());
     }
 
@@ -605,7 +604,7 @@ public class CrystalAura extends Module {
 
         // Damage check
         if (DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(crystalPos)) >= maxSelfDamage.get()) return false;
-        if (antiSuicide.get() && DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(crystalPos)) - PlayerUtils.getTotalHealth() <= 0) return false;
+        if (antiSuicide.get() && PlayerUtils.getTotalHealth() - DamageCalcUtils.crystalDamage(mc.player, getCrystalPos(crystalPos)) <= 0) return false;
 
         if (shouldFacePlace()) {
             BlockPos targetHead = playerTarget.getBlockPos();
