@@ -535,9 +535,13 @@ public class CrystalAura extends Module {
 
         ((IVec3d) hitPos).set(neighbor.getX() + 0.5 + opposite.getVector().getX() * 0.5, neighbor.getY() + 0.5 + opposite.getVector().getY() * 0.5, neighbor.getZ() + 0.5 + opposite.getVector().getZ() * 0.5);
 
-        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(hitPos, direction, blockTarget, false)));
-        if (swing.get()) mc.player.swingHand(hand);
-        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
+        Hand finalHand = hand;
+        if (rotationMode.get() == RotationMode.Placing || rotationMode.get() == RotationMode.Both) {
+            float[] rotation = PlayerUtils.calculateAngle(hitPos);
+            Rotations.rotate(rotation[0], rotation[1], 30, () -> place(direction, finalHand));
+        } else {
+            place(direction, finalHand);
+        }
 
         if (render.get()) {
             RenderBlock renderBlock = renderBlockPool.get();
@@ -545,6 +549,12 @@ public class CrystalAura extends Module {
             renderBlock.damage = DamageCalcUtils.crystalDamage(playerTarget, getCrystalPos(blockTarget.up()));
             renderBlocks.add(renderBlock);
         }
+    }
+
+    private void place(Direction direction, Hand hand) {
+        mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, new BlockHitResult(hitPos, direction, blockTarget, false)));
+        if (swing.get()) mc.player.swingHand(hand);
+        else mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(hand));
     }
 
     private boolean shouldFacePlace() {
