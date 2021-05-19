@@ -7,8 +7,6 @@ package minegame159.meteorclient.utils.render;
 
 import minegame159.meteorclient.mixin.ShaderEffectAccessor;
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.ESP;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.ShaderEffect;
@@ -25,8 +23,6 @@ public class Outlines {
     public static Framebuffer outlinesFbo;
     public static OutlineVertexConsumerProvider vertexConsumerProvider;
     private static ShaderEffect outlinesShader;
-
-    public static float opacity = 1;
 
     public static void load() {
         try {
@@ -48,11 +44,6 @@ public class Outlines {
     }
 
     public static void beginRender() {
-        // Uniforms
-        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName("width").set(Modules.get().get(ESP.class).outlineWidth.get().floatValue());
-        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName("opacity").set(opacity);
-        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName("fillOpacity").set(Modules.get().get(ESP.class).fillOpacity.get().floatValue() / 255f);
-
         outlinesFbo.clear(MinecraftClient.IS_SYSTEM_MAC);
         MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
     }
@@ -78,5 +69,9 @@ public class Outlines {
 
     public static void onResized(int width, int height) {
         if (outlinesShader != null) outlinesShader.setupDimensions(width, height);
+    }
+
+    public static void setUniform(String name, float value) {
+        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName(name).set(value);
     }
 }

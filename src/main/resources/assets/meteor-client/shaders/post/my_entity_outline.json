@@ -7,12 +7,7 @@
     {
       "name": "my_entity_outline",
       "intarget": "final",
-      "outtarget": "swap",
-      "uniforms": [
-        { "name": "width", "type": "float", "count": 1, "values": [ 1.0 ] },
-        { "name": "opacity", "type": "float", "count": 1, "values": [ 1.0 ] },
-        { "name": "fillOpacity", "type": "float", "count": 1, "values": [ 0.35 ] }
-      ]
+      "outtarget": "swap"
     },
     {
       "name": "blit",
