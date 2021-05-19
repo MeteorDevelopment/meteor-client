@@ -78,19 +78,21 @@ public abstract class WorldRendererMixin {
         if (vertexConsumers == Outlines.vertexConsumerProvider) return;
 
         ESP esp = Modules.get().get(ESP.class);
-        if (!esp.isActive() || !esp.isOutline()) return;
 
         Color color = esp.getOutlineColor(entity);
 
-        if (color != null) {
-            Framebuffer fbo = this.entityOutlinesFramebuffer;
+        if (esp.shouldDrawOutline(entity)) {
+            Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
 
-            Outlines.opacity = esp.getOpacity(entity);
+            Outlines.setUniform("width", esp.outlineWidth.get());
+            Outlines.setUniform("fillOpacity", esp.fillOpacity.get().floatValue() / 255f);
+            Outlines.setUniform("shapeMode", (float) esp.shapeMode.get().ordinal());
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
 
-            this.entityOutlinesFramebuffer = fbo;
+            this.entityOutlinesFramebuffer = prevBuffer;
         }
     }
     

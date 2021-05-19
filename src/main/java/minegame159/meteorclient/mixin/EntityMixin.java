@@ -123,12 +123,12 @@ public abstract class EntityMixin {
         return blockState.getBlock();
     }
 
-
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (player == null) info.setReturnValue(false);
 
-        if (Modules.get().isActive(ESP.class) && Modules.get().get(ESP.class).showInvis.get()) info.setReturnValue(false);
+        ESP esp = Modules.get().get(ESP.class);
+        if (esp.isActive() && esp.showInvis.get()) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
