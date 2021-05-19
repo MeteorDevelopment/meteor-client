@@ -21,7 +21,7 @@ public class PanicCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            Modules.get().getActive().forEach(Module::toggle);
+            new ArrayList<>(Modules.get().getActive()).forEach(Module::toggle);
 
             return SINGLE_SUCCESS;
         });
