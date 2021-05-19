@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.TargetUtils;
@@ -132,6 +133,15 @@ public class KillAura extends Module {
             .sliderMax(6)
             .build()
     );
+    
+    private final Setting<Double> wallsRange = sgTargeting.add(new DoubleSetting.Builder()
+            .name("walls-range")
+            .description("The maximum range the entity can be attacked through walls.")
+            .defaultValue(3)
+            .min(0).max(6)
+            .sliderMax(6)
+            .build()
+    );
 
     private final Setting<SortPriority> priority = sgTargeting.add(new EnumSetting.Builder<SortPriority>()
             .name("priority")
@@ -234,7 +244,11 @@ public class KillAura extends Module {
             if (entity.distanceTo(mc.player) > range.get()) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
-            if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
+            if (ignoreWalls.get()) {
+                if (EntityUtils.distanceToCamera(entity) > wallsRange.get()) return false;
+            } else {
+                if (!PlayerUtils.canSeeEntity(entity)) return false;
+            }
             if (entity instanceof PlayerEntity) {
                 if (((PlayerEntity) entity).isCreative()) return false;
                 if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
