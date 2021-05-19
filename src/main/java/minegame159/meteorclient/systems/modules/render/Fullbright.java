@@ -53,16 +53,16 @@ public class Fullbright extends Module {
         disable();
     }
 
-    public static boolean isEnabled = false;
+    public static boolean isEnabled() {
+        return StaticListener.timesEnabled > 0;
+    }
 
     public static void enable() {
         StaticListener.timesEnabled++;
-        isEnabled = true;
     }
 
     public static void disable() {
         StaticListener.timesEnabled--;
-        isEnabled = false;
     }
 
     private static class StaticListener {

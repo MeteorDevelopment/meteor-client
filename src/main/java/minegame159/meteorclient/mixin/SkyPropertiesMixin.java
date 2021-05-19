@@ -15,7 +15,7 @@ public class SkyPropertiesMixin {
     private void onShouldBrightenLighting(CallbackInfoReturnable<Boolean> cir) {
         Fullbright fullbright = Modules.get().get(Fullbright.class);
 
-        if((fullbright.mode.get() == Fullbright.Mode.Luminance) && Fullbright.isEnabled) {
+        if((fullbright.mode.get() == Fullbright.Mode.Luminance) && Fullbright.isEnabled()) {
             cir.setReturnValue(true);
         }
     }
