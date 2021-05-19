@@ -22,13 +22,13 @@ public class LightmapTextureManagerMixin {
     private boolean updateHasStatusEffectProxy(ClientPlayerEntity player, StatusEffect effect) {
         Fullbright fullbright = Modules.get().get(Fullbright.class);
 
-        return (fullbright.isActive() && (fullbright.mode.get() == Fullbright.Mode.Gamma)) || player.hasStatusEffect(effect);
+        return (Fullbright.isEnabled() && (fullbright.mode.get() == Fullbright.Mode.Gamma)) || player.hasStatusEffect(effect);
     }
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;getNightVisionStrength(Lnet/minecraft/entity/LivingEntity;F)F"))
     private float updateGetNightVisionStrengthProxy(LivingEntity entity, float delta) {
         Fullbright fullbright = Modules.get().get(Fullbright.class);
 
-        return (fullbright.isActive() && (fullbright.mode.get() == Fullbright.Mode.Gamma)) ? 1 : GameRenderer.getNightVisionStrength(entity, delta);
+        return (Fullbright.isEnabled() && (fullbright.mode.get() == Fullbright.Mode.Gamma)) ? 1 : GameRenderer.getNightVisionStrength(entity, delta);
     }
 }
