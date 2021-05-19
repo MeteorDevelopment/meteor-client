@@ -62,7 +62,7 @@ public class ActiveModulesHud extends HudElement {
     private final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
             .name("rainbow-speed")
             .description("Rainbow speed of rainbow color mode.")
-            .defaultValue(0.025)
+            .defaultValue(0.0035)
             .sliderMax(0.1)
             .decimalPlaces(4)
             .visible(() -> colorMode.get() == ColorMode.Rainbow)
