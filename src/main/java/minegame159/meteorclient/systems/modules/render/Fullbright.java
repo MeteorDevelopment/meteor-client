@@ -8,11 +8,35 @@ package minegame159.meteorclient.systems.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.settings.EnumSetting;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
 import net.minecraft.client.MinecraftClient;
 
 public class Fullbright extends Module {
+
+    public enum Mode {
+        Gamma,
+        Luminance
+    }
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("The mode to use for Fullbright.")
+            .defaultValue(Mode.Luminance)
+            .onChanged(mode -> {
+                if(mode == Mode.Luminance) {
+                    mc.options.gamma = StaticListener.prevGamma;
+                }
+            })
+            .build()
+    );
+
     public Fullbright() {
         super(Categories.Render, "fullbright", "Lights up your world!");
 
@@ -29,33 +53,41 @@ public class Fullbright extends Module {
         disable();
     }
 
+    public static boolean isEnabled = false;
+
     public static void enable() {
         StaticListener.timesEnabled++;
+        isEnabled = true;
     }
 
     public static void disable() {
         StaticListener.timesEnabled--;
+        isEnabled = false;
     }
 
     private static class StaticListener {
         private static final MinecraftClient mc = MinecraftClient.getInstance();
+        private static final Fullbright fullbright = Modules.get().get(Fullbright.class);
 
         private static int timesEnabled;
         private static int lastTimesEnabled;
 
-        private static double prevGamma;
+        private static double prevGamma = mc.options.gamma;
 
         @EventHandler
         private static void onTick(TickEvent.Post event) {
             if (timesEnabled > 0 && lastTimesEnabled == 0) {
                 prevGamma = mc.options.gamma;
-            }
-            else if (timesEnabled == 0 && lastTimesEnabled > 0) {
-                mc.options.gamma = prevGamma == 16 ? 1 : prevGamma;
+            } else if (timesEnabled == 0 && lastTimesEnabled > 0) {
+                if (fullbright.mode.get() == Mode.Gamma) {
+                    mc.options.gamma = prevGamma == 16 ? 1 : prevGamma;
+                }
             }
 
             if (timesEnabled > 0) {
-                mc.options.gamma = 16;
+                if (fullbright.mode.get() == Mode.Gamma) {
+                    mc.options.gamma = 16;
+                }
             }
 
             lastTimesEnabled = timesEnabled;
