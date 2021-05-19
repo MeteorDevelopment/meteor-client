@@ -105,6 +105,7 @@ public class CombatHud extends HudElement {
             .name("ping-stage-1")
             .description("Color of ping text when under 75.")
             .defaultValue(new SettingColor(15, 255, 15))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -112,6 +113,7 @@ public class CombatHud extends HudElement {
             .name("ping-stage-2")
             .description("Color of ping text when between 75 and 200.")
             .defaultValue(new SettingColor(255, 150, 15))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -119,6 +121,7 @@ public class CombatHud extends HudElement {
             .name("ping-stage-3")
             .description("Color of ping text when over 200.")
             .defaultValue(new SettingColor(255, 15, 15))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -126,6 +129,7 @@ public class CombatHud extends HudElement {
             .name("distance-stage-1")
             .description("The color when a player is within 10 blocks of you.")
             .defaultValue(new SettingColor(255, 15, 15))
+            .visible(displayDistance::get)
             .build()
     );
 
@@ -133,6 +137,7 @@ public class CombatHud extends HudElement {
             .name("distance-stage-2")
             .description("The color when a player is within 50 blocks of you.")
             .defaultValue(new SettingColor(255, 150, 15))
+            .visible(displayDistance::get)
             .build()
     );
 
@@ -140,6 +145,7 @@ public class CombatHud extends HudElement {
             .name("distance-stage-3")
             .description("The color when a player is greater then 50 blocks away from you.")
             .defaultValue(new SettingColor(15, 255, 15))
+            .visible(displayDistance::get)
             .build()
     );
 
