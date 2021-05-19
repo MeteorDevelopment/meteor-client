@@ -117,6 +117,7 @@
     "ShulkerBoxScreenMixin",
     "SignBlockEntityRendererMixin",
     "SignEditScreenAccessor",
+    "SkyPropertiesMixin",
     "SlimeBlockMixin",
     "SoundSystemMixin",
     "SplashTextResourceSupplierMixin",
