@@ -20,11 +20,15 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class LightmapTextureManagerMixin {
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z", ordinal = 0))
     private boolean updateHasStatusEffectProxy(ClientPlayerEntity player, StatusEffect effect) {
-        return Modules.get().isActive(Fullbright.class) || player.hasStatusEffect(effect);
+        Fullbright fullbright = Modules.get().get(Fullbright.class);
+
+        return (fullbright.isActive() && (fullbright.mode.get() == Fullbright.Mode.Gamma)) || player.hasStatusEffect(effect);
     }
 
     @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/GameRenderer;getNightVisionStrength(Lnet/minecraft/entity/LivingEntity;F)F"))
     private float updateGetNightVisionStrengthProxy(LivingEntity entity, float delta) {
-        return Modules.get().isActive(Fullbright.class) ? 1 : GameRenderer.getNightVisionStrength(entity, delta);
+        Fullbright fullbright = Modules.get().get(Fullbright.class);
+
+        return (fullbright.isActive() && (fullbright.mode.get() == Fullbright.Mode.Gamma)) ? 1 : GameRenderer.getNightVisionStrength(entity, delta);
     }
 }
