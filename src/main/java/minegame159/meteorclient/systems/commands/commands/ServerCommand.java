@@ -15,13 +15,17 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.utils.world.TickRate;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.ServerAddress;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.server.integrated.IntegratedServer;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 
 import java.net.InetAddress;
@@ -50,12 +54,6 @@ public class ServerCommand extends Command {
 
         builder.then(literal("info").executes(ctx -> {
             basicInfo();
-            return SINGLE_SUCCESS;
-        }));
-
-        builder.then(literal("gamerules").executes(ctx -> {
-            CompoundTag tag = mc.world.getGameRules().toNbt();
-            tag.getKeys().forEach((key) -> info("%s: %s", key, tag.getString(key)));
             return SINGLE_SUCCESS;
         }));
 
@@ -99,12 +97,50 @@ public class ServerCommand extends Command {
             ipv4 = InetAddress.getByName(server.address).getHostAddress();
         } catch (UnknownHostException ignored) {}
 
+        BaseText ipText;
+
         if (ipv4.isEmpty()) {
-            info("IP: %s", server.address);
+            ipText = new LiteralText(Formatting.GRAY + server.address);
+            ipText.setStyle(ipText.getStyle()
+                .withClickEvent(new ClickEvent(
+                    ClickEvent.Action.COPY_TO_CLIPBOARD, 
+                    server.address
+                ))
+                .withHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT, 
+                    new LiteralText("Copy to clipboard")
+                ))
+            );
         }
         else {
-            info("IP: %s (%s)", server.address, ipv4);
+            ipText = new LiteralText(Formatting.GRAY + server.address);
+            ipText.setStyle(ipText.getStyle()
+                .withClickEvent(new ClickEvent(
+                    ClickEvent.Action.COPY_TO_CLIPBOARD, 
+                    server.address
+                ))
+                .withHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT, 
+                    new LiteralText("Copy to clipboard")
+                ))
+            );
+            BaseText ipv4Text = new LiteralText(String.format("%s (%s)", Formatting.GRAY, ipv4));
+            ipv4Text.setStyle(ipText.getStyle()
+                .withClickEvent(new ClickEvent(
+                    ClickEvent.Action.COPY_TO_CLIPBOARD, 
+                    ipv4
+                ))
+                .withHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT, 
+                    new LiteralText("Copy to clipboard")
+                ))
+            );
+            ipText.append(ipv4Text);
         }
+        info(
+            new LiteralText(String.format("%sIP: ", Formatting.GRAY))
+            .append(ipText)
+        );
 
         info("Port: %d", ServerAddress.parse(server.address).getPort());
 
@@ -117,6 +153,14 @@ public class ServerCommand extends Command {
         info("Protocol version: %d", server.protocolVersion);
 
         info("Difficulty: %s", mc.world.getDifficulty().getTranslatableName().getString());
+
+        ClientCommandSource cmdSource = mc.getNetworkHandler().getCommandSource();
+        int permission_level = 5;
+        while (permission_level > 0) {
+            if (cmdSource.hasPermissionLevel(permission_level)) break;
+            permission_level--;
+        }
+        info("Permission level: %d", permission_level);
     }
     
     @EventHandler
