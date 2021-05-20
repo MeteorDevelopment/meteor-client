@@ -180,6 +180,11 @@ public class MeshBuilder {
     }
 
     // Rounded quad
+    
+    private final double circleNone = 0;
+    private final double circleQuarter = Math.PI / 2;
+    private final double circleHalf = circleQuarter * 2;
+    private final double circleThreeQuarter = circleQuarter * 3;
 
     public void quadRoundedOutline(double x, double y, double width, double height, Color color, int r, double s) {
         r = getR(r, width, height);
@@ -190,18 +195,17 @@ public class MeshBuilder {
             quad(x + width - s, y + s, s, height - s * 2, color);
         }
         else {
-            int cirDepth = getCir(r);
             //top
-            quarterCircleOutline(x + r, y + r, r, 3, cirDepth, color, s);
+            circlePartOutline(x + r, y + r, r, circleThreeQuarter, circleQuarter, color, s);
             quad(x + r, y, width - r * 2, s, color);
-            quarterCircleOutline(x + width - r, y + r, r, 0, cirDepth, color, s);
+            circlePartOutline(x + width - r, y + r, r, circleNone, circleQuarter, color, s);
             //middle
             quad(x, y + r, s, height - r * 2, color);
             quad(x + width - s, y + r, s, height - r * 2, color);
             //bottom
-            quarterCircleOutline(x + width - r, y + height - r, r, 1, cirDepth, color, s);
+            circlePartOutline(x + width - r, y + height - r, r, circleQuarter, circleQuarter, color, s);
             quad(x + r, y + height - s, width - r * 2, s, color);
-            quarterCircleOutline(x + r, y + height - r, r, 2, cirDepth, color, s);
+            circlePartOutline(x + r, y + height - r, r, circleHalf, circleQuarter, color, s);
         }
     }
 
@@ -210,12 +214,11 @@ public class MeshBuilder {
         if (r == 0)
             quad(x, y, width, height, color);
         else {
-            int cirDepth = getCir(r);
             if (roundTop) {
                 //top
-                quarterCircle(x + r, y + r, r, 3, cirDepth, color);
+                circlePart(x + r, y + r, r, circleThreeQuarter, circleQuarter, color);
                 quad(x + r, y, width - 2 * r, r, color);
-                quarterCircle(x + width - r, y + r, r, 0, cirDepth, color);
+                circlePart(x + width - r, y + r, r, circleNone, circleQuarter, color);
                 //middle
                 quad(x, y + r, width, height - 2 * r, color);
             }
@@ -224,9 +227,9 @@ public class MeshBuilder {
                 quad(x, y, width, height - r, color);
             }
             //bottom
-            quarterCircle(x + width - r, y + height - r, r, 1, cirDepth, color);
+            circlePart(x + width - r, y + height - r, r, circleQuarter, circleQuarter, color);
             quad(x + r, y + height - r, width - 2 * r, r, color);
-            quarterCircle(x + r, y + height - r, r, 2, cirDepth, color);
+            circlePart(x + r, y + height - r, r, circleHalf, circleQuarter, color);
         }
     }
 
@@ -235,16 +238,15 @@ public class MeshBuilder {
         if (r == 0)
             quad(x, y, width, height, color);
         else {
-            int cirDepth = getCir(r);
             if (right) {
-                quarterCircle(x + width - r, y + r, r, 0, cirDepth, color);
-                quarterCircle(x + width - r, y + height - r, r, 1, cirDepth, color);
+                circlePart(x + width - r, y + r, r, circleNone, circleQuarter, color);
+                circlePart(x + width - r, y + height - r, r, circleQuarter, circleQuarter, color);
                 quad(x, y, width - r, height, color);
                 quad(x + width - r, y + r, r, height - r * 2, color);
             }
             else {
-                quarterCircle(x + r, y + r, r, 3, cirDepth, color);
-                quarterCircle(x + r, y + height - r, r, 2, cirDepth, color);
+                circlePart(x + r, y + r, r, circleThreeQuarter, circleQuarter, color);
+                circlePart(x + r, y + height - r, r, circleHalf, circleQuarter, color);
                 quad(x + r, y, width - r, height, color);
                 quad(x, y + r, r, height - r * 2, color);
             }
@@ -261,36 +263,36 @@ public class MeshBuilder {
         return r;
     }
 
-    private int getCir(int r) {
-        return Math.max(r / 2, 1);
+    private int getCirDepth(double r, double angle) {
+        return Math.max(1, (int)(angle * r / circleQuarter));
     }
 
-    private void quarterCircle(double x, double y, double r, double a, int cirDepth, Color color) {
-        a *= Math.PI / 2;
-        double cirPart = Math.PI / 2 / cirDepth;
-        vert2(x + Math.sin(a) * r, y - Math.cos(a) * r, color);
+    public void circlePart(double x, double y, double r, double startAngle, double angle, Color color) {
+        int cirDepth = getCirDepth(r, angle);
+        double cirPart = angle / cirDepth;
+        vert2(x + Math.sin(startAngle) * r, y - Math.cos(startAngle) * r, color);
         for (int i = 1; i < cirDepth + 1; i++) {
             vert2(x, y, color);
-            double xV = x + Math.sin(a + cirPart * i) * r;
-            double yV = y - Math.cos(a + cirPart * i) * r;
+            double xV = x + Math.sin(startAngle + cirPart * i) * r;
+            double yV = y - Math.cos(startAngle + cirPart * i) * r;
             vert2(xV, yV, color);
             if (i != cirDepth)
                 vert2(xV, yV, color);
         }
     }
 
-    private void quarterCircleOutline(double x, double y, double r, double a, int cirDepth, Color color, double s) {
-        a *= Math.PI / 2;
-        double cirPart = Math.PI / 2 / cirDepth;
+    public void circlePartOutline(double x, double y, double r, double startAngle, double angle, Color color, double outlineWidth) {
+        int cirDepth = getCirDepth(r, angle);
+        double cirPart = angle / cirDepth;
         for (int i = 0; i < cirDepth; i++) {
-            double xOC = x + Math.sin(a + cirPart * i) * r;
-            double yOC = y - Math.cos(a + cirPart * i) * r;
-            double xIC = x + Math.sin(a + cirPart * i) * (r - s);
-            double yIC = y - Math.cos(a + cirPart * i) * (r - s);
-            double xON = x + Math.sin(a + cirPart * (i + 1)) * r;
-            double yON = y - Math.cos(a + cirPart * (i + 1)) * r;
-            double xIN = x + Math.sin(a + cirPart * (i + 1)) * (r - s);
-            double yIN = y - Math.cos(a + cirPart * (i + 1)) * (r - s);
+            double xOC = x + Math.sin(startAngle + cirPart * i) * r;
+            double yOC = y - Math.cos(startAngle + cirPart * i) * r;
+            double xIC = x + Math.sin(startAngle + cirPart * i) * (r - outlineWidth);
+            double yIC = y - Math.cos(startAngle + cirPart * i) * (r - outlineWidth);
+            double xON = x + Math.sin(startAngle + cirPart * (i + 1)) * r;
+            double yON = y - Math.cos(startAngle + cirPart * (i + 1)) * r;
+            double xIN = x + Math.sin(startAngle + cirPart * (i + 1)) * (r - outlineWidth);
+            double yIN = y - Math.cos(startAngle + cirPart * (i + 1)) * (r - outlineWidth);
             //
             vert2(xOC, yOC, color);
             vert2(xON, yON, color);
