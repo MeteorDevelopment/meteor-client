@@ -72,7 +72,6 @@ public class Step extends Module {
         assert mc.player != null;
         prevStepHeight = mc.player.stepHeight;
 
-        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
         BaritoneAPI.getSettings().assumeStep.value = true;
     }
 
@@ -92,7 +91,7 @@ public class Step extends Module {
     public void onDeactivate() {
         if (mc.player != null) mc.player.stepHeight = prevStepHeight;
 
-        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+        BaritoneAPI.getSettings().assumeStep.value = false;
     }
 
     private float getHealth(){
