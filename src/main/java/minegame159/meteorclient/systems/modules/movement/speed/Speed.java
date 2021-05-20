@@ -33,7 +33,7 @@ public class Speed extends Module {
     );
 
     public final Setting<Double> vanillaSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
+            .name("vanilla-speed")
             .description("The speed in blocks per second.")
             .defaultValue(5.6)
             .min(0)
@@ -43,7 +43,7 @@ public class Speed extends Module {
     );
 
     public final Setting<Double> ncpSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
+            .name("ncp-speed")
             .description("The speed.")
             .visible(() -> speedMode.get() == SpeedModes.Strafe)
             .defaultValue(1.6)
