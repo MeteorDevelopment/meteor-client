@@ -40,7 +40,7 @@ public class NbtCommand extends Command {
                     stack.getTag().copyFrom(tag);
                     setStack(stack);
                 } else {
-                    error("Some of the NBT data could not be found, try using: " + Config.get().prefix + "nbt set {nbt}");
+                    error("Some of the NBT data could not be found, try using: /nbt set {nbt}");
                 }
             }
             return SINGLE_SUCCESS;

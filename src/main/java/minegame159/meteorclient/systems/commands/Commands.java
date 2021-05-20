@@ -14,12 +14,12 @@ import minegame159.meteorclient.systems.commands.commands.*;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
+import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
+import net.fabricmc.fabric.impl.command.client.ClientCommandInternals;
 
 import java.util.*;
 
 public class Commands extends System<Commands> {
-    private final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
-    private final CommandSource COMMAND_SOURCE = new ChatCommandSource(MinecraftClient.getInstance());
     private final List<Command> commands = new ArrayList<>();
     private final Map<Class<? extends Command>, Command> commandInstances = new HashMap<>();
 
@@ -73,16 +73,12 @@ public class Commands extends System<Commands> {
     }
 
     public void dispatch(String message, CommandSource source) throws CommandSyntaxException {
-        ParseResults<CommandSource> results = DISPATCHER.parse(message, source);
-        DISPATCHER.execute(results);
+        ParseResults<CommandSource> results = getDispatcher().parse(message, source);
+        getDispatcher().execute(results);
     }
 
     public CommandDispatcher<CommandSource> getDispatcher() {
-        return DISPATCHER;
-    }
-
-    public CommandSource getCommandSource() {
-        return COMMAND_SOURCE;
+        return (CommandDispatcher<CommandSource>)(Object)ClientCommandManager.DISPATCHER;
     }
 
     private final static class ChatCommandSource extends ClientCommandSource {
@@ -95,7 +91,7 @@ public class Commands extends System<Commands> {
         commands.removeIf(command1 -> command1.getName().equals(command.getName()));
         commandInstances.values().removeIf(command1 -> command1.getName().equals(command.getName()));
 
-        command.registerTo(DISPATCHER);
+        command.registerTo(getDispatcher());
         commands.add(command);
         commandInstances.put(command.getClass(), command);
     }

@@ -24,11 +24,7 @@ public class CrashReportMixin {
         if (Modules.get() != null) {
             sb.append("\n\n");
             sb.append("-- Meteor Client --\n");
-            sb.append("Version: ").append(Config.get().version.getOriginalString()).append("\n");
-
-            if (!Config.get().devBuild.isEmpty()) {
-                sb.append("Dev Build: ").append(Config.get().devBuild).append("\n");
-            }
+            sb.append("Version: ").append(Config.get().versionString).append("\n");
 
             for (Category category : Modules.loopCategories()) {
                 List<Module> modules = Modules.get().getGroup(category);

@@ -12,7 +12,6 @@ import minegame159.meteorclient.gui.tabs.WindowTabScreen;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
 
@@ -20,7 +19,6 @@ public class ConfigTab extends Tab {
     private static final Settings settings = new Settings();
     private static final SettingGroup sgGeneral = settings.getDefaultGroup();
     private static final SettingGroup sgChat = settings.createGroup("Chat");
-    private static final SettingGroup sgScreens = settings.createGroup("Screens");
 
     public static final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
             .name("custom-font")
@@ -61,42 +59,12 @@ public class ConfigTab extends Tab {
             .build()
     );
 
-    public static final Setting<Boolean> sendDataToApi = sgGeneral.add(new BoolSetting.Builder()
-            .name("send-data-to-api")
-            .description("If checked, your UUID will be send to Meteor's servers.")
-            .defaultValue(true)
-            .onChanged(aBoolean -> {
-                Config.get().sendDataToApi = aBoolean;
-                OnlinePlayers.forcePing();
-            })
-            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().sendDataToApi))
-            .build()
-    );
-
     public static final Setting<Integer> rotationHoldTicks = sgGeneral.add(new IntSetting.Builder()
             .name("rotation-hold-ticks")
             .description("Hold long to hold server side rotation when not sending any packets.")
             .defaultValue(9)
             .onChanged(integer -> Config.get().rotationHoldTicks = integer)
             .onModuleActivated(integerSetting -> integerSetting.set(Config.get().rotationHoldTicks))
-            .build()
-    );
-
-    public static final Setting<String> prefix = sgChat.add(new StringSetting.Builder()
-            .name("prefix")
-            .description("Prefix.")
-            .defaultValue(".")
-            .onChanged(s -> Config.get().prefix = s)
-            .onModuleActivated(stringSetting -> stringSetting.set(Config.get().prefix))
-            .build()
-    );
-
-    public static final Setting<Boolean> openChatOnPrefix = sgChat.add(new BoolSetting.Builder()
-            .name("open-chat-on-prefix")
-            .description("Open chat when command prefix is pressed. Works like pressing '/' in vanilla.")
-            .defaultValue(true)
-            .onChanged(aBoolean -> Config.get().openChatOnPrefix = aBoolean)
-            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().openChatOnPrefix))
             .build()
     );
 
@@ -125,34 +93,6 @@ public class ConfigTab extends Tab {
             .defaultValue(true)
             .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
-            .build()
-    );
-
-    public static final Setting<Boolean> titleScreenCredits = sgScreens.add(new BoolSetting.Builder()
-            .name("title-screen-credits")
-            .description("Show Meteor credits on title screen")
-            .defaultValue(true)
-            .onChanged(aBool -> Config.get().titleScreenCredits = aBool)
-            .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenCredits))
-            .build()
-    );
-
-    public static final Setting<Boolean> customWindowTitle = sgScreens.add(new BoolSetting.Builder()
-            .name("custom-window-title")
-            .description("Show custom text in the window title.")
-            .defaultValue(false)
-            .onChanged(aBool -> Config.get().customWindowTitle = aBool)
-            .onModuleActivated(boolSetting -> boolSetting.set(Config.get().customWindowTitle))
-            .build()
-    );
-
-    public static final Setting<String> customWindowTitleText = sgScreens.add(new StringSetting.Builder()
-            .name("window-title-text")
-            .description("The text it displays in the window title.")
-            .defaultValue("Minecraft {mc_version} - Meteor Client {version}")
-            .onChanged(titleText -> Config.get().customWindowTitleText = titleText)
-            .onModuleActivated(stringSetting -> stringSetting.set(Config.get().customWindowTitleText))
-            .visible(customWindowTitle::get)
             .build()
     );
 

@@ -19,7 +19,7 @@ public class GiveCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
 
     public GiveCommand() {
-        super("give", "Gives you any item.");
+        super("give-c", "Gives you any item.");
     }
 
     @Override

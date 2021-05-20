@@ -27,7 +27,7 @@ public class HttpUtils {
             conn.setRequestMethod(method);
             conn.setConnectTimeout(2500);
             conn.setReadTimeout(2500);
-            conn.setRequestProperty("User-Agent", "Meteor Client");
+            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36");
 
             if (body != null) {
                 byte[] bytes = body.getBytes(StandardCharsets.UTF_8);

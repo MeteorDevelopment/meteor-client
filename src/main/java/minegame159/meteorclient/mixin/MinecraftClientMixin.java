@@ -13,9 +13,6 @@ import minegame159.meteorclient.events.game.ResourcePacksReloadedEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
-import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.utils.misc.Placeholders;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
@@ -57,8 +54,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void onPreTick(CallbackInfo info) {
-        OnlinePlayers.update();
-
         doItemUseCalled = false;
 
         getProfiler().push("meteor-client_pre_update");
@@ -107,13 +102,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
         completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
         return completableFuture;
-    }
-
-    @ModifyArg(method = "updateWindowTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;setTitle(Ljava/lang/String;)V"))
-    private String setTitle(String original) {
-        if (Config.get() == null || !Config.get().customWindowTitle) return original;
-
-        return Placeholders.apply(Config.get().customWindowTitleText);
     }
 
     // Interface

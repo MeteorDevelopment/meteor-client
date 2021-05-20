@@ -530,7 +530,6 @@ public class Modules extends System<Modules> {
         add(new AutoReconnect());
         add(new BetterChat());
         add(new BookBot());
-        add(new DiscordPresence());
         add(new MessageAura());
         add(new MiddleClickFriend());
         add(new Notebot());

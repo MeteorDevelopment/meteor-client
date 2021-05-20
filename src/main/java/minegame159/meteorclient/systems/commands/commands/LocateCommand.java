@@ -58,7 +58,7 @@ public class LocateCommand extends Command {
     );
 
     public LocateCommand() {
-        super("locate", "Locates structures", "loc");
+        super("locate-c", "Locates structures", "loc");
     }
 
     @Override

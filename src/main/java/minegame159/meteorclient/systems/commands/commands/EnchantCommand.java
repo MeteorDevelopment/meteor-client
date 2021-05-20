@@ -25,7 +25,7 @@ public class EnchantCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
 
     public EnchantCommand() {
-        super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");
+        super("enchant-c", "Enchants the item in your hand. REQUIRES Creative mode.");
     }
 
     @Override

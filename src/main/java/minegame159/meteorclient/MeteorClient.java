@@ -25,16 +25,13 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.misc.DiscordPresence;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
-import minegame159.meteorclient.utils.network.Capes;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
@@ -83,16 +80,8 @@ public class MeteorClient implements ClientModInitializer {
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
 
-        Systems.addPreLoadTask(() -> {
-            if (!Modules.get().getFile().exists()) {
-                Modules.get().get(DiscordPresence.class).toggle(false);
-                Utils.addMeteorPvpToServerList();
-            }
-        });
-
         Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
-        Capes.init();
         RainbowColors.init();
         BlockIterator.init();
         EChestMemory.init();
@@ -117,7 +106,6 @@ public class MeteorClient implements ClientModInitializer {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Systems.save();
-            OnlinePlayers.leave();
             GuiThemes.save();
         }));
 
@@ -146,8 +134,6 @@ public class MeteorClient implements ClientModInitializer {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        Capes.tick();
-
         if (screenToOpen != null && mc.currentScreen == null) {
             mc.openScreen(screenToOpen);
             screenToOpen = null;
@@ -163,17 +149,6 @@ public class MeteorClient implements ClientModInitializer {
         // Click GUI
         if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
             if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
-        }
-    }
-
-    @EventHandler
-    private void onCharTyped(CharTypedEvent event) {
-        if (mc.currentScreen != null) return;
-        if (!Config.get().openChatOnPrefix) return;
-
-        if (event.c == Config.get().prefix.charAt(0)) {
-            mc.openScreen(new ChatScreen(Config.get().prefix));
-            event.cancel();
         }
     }
 }
