@@ -52,6 +52,7 @@ public class PlayerModelHud extends HudElement {
             .max(180)
             .sliderMin(-180)
             .sliderMax(180)
+            .visible(() -> !copyYaw.get())
             .build()
     );
 
@@ -63,6 +64,7 @@ public class PlayerModelHud extends HudElement {
             .max(180)
             .sliderMin(-180)
             .sliderMax(180)
+            .visible(() -> !copyPitch.get())
             .build()
     );
 
@@ -77,6 +79,7 @@ public class PlayerModelHud extends HudElement {
             .name("background-color")
             .description("Color of background.")
             .defaultValue(new SettingColor(0, 0, 0, 64))
+            .visible(background::get)
             .build()
     );
 

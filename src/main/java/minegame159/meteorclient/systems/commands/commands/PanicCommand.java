@@ -17,7 +17,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class PanicCommand extends Command {
     public PanicCommand() {
-        super("panic", "Disables all modules. DOES NOT remove keybinds.");
+        super("panic", "Disables all modules.");
     }
 
     @Override

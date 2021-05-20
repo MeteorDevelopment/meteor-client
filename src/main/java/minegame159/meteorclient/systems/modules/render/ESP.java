@@ -8,7 +8,6 @@ package minegame159.meteorclient.systems.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
@@ -17,19 +16,18 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 
 public class ESP extends Module {
-    //private static final Identifier BOX2D = new Identifier("meteor-client", "box2d.png");
-    private static final MeshBuilder MB = new MeshBuilder(128);
-
     public enum Mode {
         Box,
-        Outline
+        Shader
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -40,14 +38,42 @@ public class ESP extends Module {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("Rendering mode.")
-            .defaultValue(Mode.Outline)
+            .defaultValue(Mode.Shader)
             .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("box-mode")
+    public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+            .name("shape-mode")
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
+            .build()
+    );
+
+    public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
+            .name("width")
+            .description("The width of the shader outline.")
+            .defaultValue(2)
+            .min(1).max(10)
+            .sliderMin(1).sliderMax(5)
+            .visible(() -> mode.get() == Mode.Shader)
+            .build()
+    );
+
+    public final Setting<Integer> fillOpacity = sgGeneral.add(new IntSetting.Builder()
+            .name("fill-opacity")
+            .description("The opacity of the shape fill.")
+            .defaultValue(80)
+            .min(0).max(255)
+            .sliderMax(255)
+            .build()
+    );
+
+    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
+            .name("fade-distance")
+            .description("The distance from an entity where the color begins to fade.")
+            .defaultValue(2)
+            .min(0)
+            .sliderMax(12)
             .build()
     );
 
@@ -66,13 +92,6 @@ public class ESP extends Module {
     );
 
     // Colors
-
-    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
-            .name("use-name-color")
-            .description("Uses players displayname color for the ESP color.")
-            .defaultValue(false)
-            .build()
-    );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
@@ -116,36 +135,20 @@ public class ESP extends Module {
             .build()
     );
 
-    private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fade-distance")
-            .description("The distance where the color fades.")
-            .defaultValue(6)
-            .min(0)
-            .sliderMax(12)
-            .build()
-    );
-
+    private final Color lineColor = new Color();
     private final Color sideColor = new Color();
-    private final Color outlineColor = new Color();
+
     private int count;
 
     public ESP() {
         super(Categories.Render, "esp", "Renders entities through walls.");
-
-        MB.texture = true;
     }
 
-    private void setSideColor(Color lineColor) {
-        sideColor.set(lineColor);
-        sideColor.a = 25;
-    }
+    private void render(RenderEvent event, Entity entity) {
+        lineColor.set(getColor(entity));
+        sideColor.set(lineColor).a(fillOpacity.get());
 
-    private void render(RenderEvent event, Entity entity, Color lineColor) {
-        setSideColor(lineColor);
-
-        double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
-        double a = 1;
-        if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+        double a = getFadeAlpha(entity);
 
         int prevLineA = lineColor.a;
         int prevSideA = sideColor.a;
@@ -153,14 +156,12 @@ public class ESP extends Module {
         lineColor.a *= a;
         sideColor.a *= a;
 
-        if (a >= 0.075) {
-            double x = (entity.getX() - entity.prevX) * event.tickDelta;
-            double y = (entity.getY() - entity.prevY) * event.tickDelta;
-            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
+        double x = (entity.getX() - entity.prevX) * event.tickDelta;
+        double y = (entity.getY() - entity.prevY) * event.tickDelta;
+        double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
-            Box box = entity.getBoundingBox();
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
-        }
+        Box box = entity.getBoundingBox();
+        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
 
         lineColor.a = prevLineA;
         sideColor.a = prevSideA;
@@ -174,9 +175,43 @@ public class ESP extends Module {
             if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
             if (!EntityUtils.isInRenderDistance(entity)) continue;
 
-            if (mode.get() == Mode.Box) render(event, entity, getColor(entity));
+            if (mode.get() == Mode.Box) render(event, entity);
             count++;
         }
+    }
+
+    private double getFadeAlpha(Entity entity) {
+        double dist = PlayerUtils.distanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
+        double fadeDist = fadeDistance.get().floatValue() * fadeDistance.get().floatValue();
+        double alpha = 1;
+        if (dist <= fadeDist) alpha = (float) (dist / fadeDist);
+        if (alpha <= 0.075) alpha = 0;
+        return alpha;
+    }
+
+    public Color getColor(Entity entity) {
+        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+        switch (entity.getType().getSpawnGroup()) {
+            case CREATURE:          return animalsColor.get();
+            case WATER_AMBIENT:
+            case WATER_CREATURE:    return waterAnimalsColor.get();
+            case MONSTER:           return monstersColor.get();
+            case AMBIENT:           return ambientColor.get();
+            default:                return miscColor.get();
+        }
+    }
+
+    // Outlines
+
+    public boolean shouldDrawOutline(Entity entity) {
+        return mode.get() == Mode.Shader && isActive() && getOutlineColor(entity) != null;
+    }
+
+    public Color getOutlineColor(Entity entity) {
+        if (!entities.get().getBoolean(entity.getType())) return null;
+        Color color = getColor(entity);
+        double alpha = getFadeAlpha(entity);
+        return lineColor.set(color).a((int) (alpha * 255));
     }
 
     @Override
@@ -184,28 +219,4 @@ public class ESP extends Module {
         return Integer.toString(count);
     }
 
-    public Color getOutlineColor(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return null;
-        Color color = getColor(entity);
-
-        double dist = mc.cameraEntity.squaredDistanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
-        double a = 1;
-        if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
-
-        if (a >= 0.075) {
-            outlineColor.set(color);
-            outlineColor.a *= a;
-            return outlineColor;
-        }
-
-        return null;
-    }
-
-    public Color getColor(Entity entity) {
-        return EntityUtils.getEntityColor(entity, playersColor.get(), animalsColor.get(), waterAnimalsColor.get(), monstersColor.get(), ambientColor.get(), miscColor.get(), useNameColor.get());
-    }
-
-    public boolean isOutline() {
-        return mode.get() == Mode.Outline;
-    }
 }

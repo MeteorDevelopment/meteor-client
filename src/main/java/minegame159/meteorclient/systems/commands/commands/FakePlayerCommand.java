@@ -13,7 +13,6 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.FakePlayer;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -29,8 +28,8 @@ public class FakePlayerCommand extends Command {
             if (active()) FakePlayerManager.add("Meteor on Crack", 36, true);
             return SINGLE_SUCCESS;
         })
-                        .then(argument("name", StringArgumentType.word())
-                .executes(context -> {
+                 .then(argument("name", StringArgumentType.word())
+                         .executes(context -> {
                     if (active()) FakePlayerManager.add(StringArgumentType.getString(context, "name"), 36, true);
                     return SINGLE_SUCCESS;
                 })
@@ -55,7 +54,7 @@ public class FakePlayerCommand extends Command {
 
     private boolean active() {
         if (!Modules.get().isActive(FakePlayer.class)) {
-            ChatUtils.moduleError(Modules.get().get(FakePlayer.class),"The FakePlayer module must be enabled to use this command.");
+            error("The FakePlayer module must be enabled.");
             return false;
         }
         else return true;

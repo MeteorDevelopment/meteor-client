@@ -15,7 +15,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
-import minegame159.meteorclient.utils.player.ChatUtils;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -70,13 +70,13 @@ public class AutoCity extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (EntityUtils.isBadTarget(target, targetRange.get())) {
-            PlayerEntity search = EntityUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance, false);
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
+            PlayerEntity search = TargetUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance);
             if (search != target) sentMessage = false;
             target = search;
         }
 
-        if (EntityUtils.isBadTarget(target, targetRange.get())) {
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
             target = null;
             blockPosTarget = null;
             if (selfToggle.get()) toggle();
@@ -87,7 +87,7 @@ public class AutoCity extends Module {
 
         if (blockPosTarget == null) {
             if (selfToggle.get()) {
-                ChatUtils.moduleError(this, "No target block found... disabling.");
+                error("No target block found... disabling.");
                 toggle();
             }
             target = null;
@@ -95,13 +95,13 @@ public class AutoCity extends Module {
         }
 
         if (PlayerUtils.distanceTo(blockPosTarget) > mc.interactionManager.getReachDistance() && selfToggle.get()) {
-            ChatUtils.moduleError(this, "Target block out of reach... disabling.");
+            error("Target block out of reach... disabling.");
             toggle();
             return;
         }
 
         if (!sentMessage) {
-            ChatUtils.moduleInfo(this, "Attempting to city " + target.getGameProfile().getName());
+            info("Attempting to city %s.", target.getEntityName());
             sentMessage = true;
         }
 
@@ -110,7 +110,7 @@ public class AutoCity extends Module {
 
         if (slot == -1) {
             if (selfToggle.get()) {
-                ChatUtils.moduleError(this, "No pickaxe found... disabling.");
+                error("No pickaxe found... disabling.");
                 toggle();
             }
             return;

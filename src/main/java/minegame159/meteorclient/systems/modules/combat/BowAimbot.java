@@ -9,13 +9,13 @@ import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -24,6 +24,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ArrowItem;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.Items;
@@ -54,13 +55,6 @@ public class BowAimbot extends Module {
             .name("priority")
             .description("What type of entities to target.")
             .defaultValue(SortPriority.LowestHealth)
-            .build()
-    );
-
-    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
-            .name("friends")
-            .description("Whether or not to attack friends. Useful if you select players selected.")
-            .defaultValue(false)
             .build()
     );
 
@@ -99,11 +93,11 @@ public class BowAimbot extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private void onRender(RenderEvent event) {
         if (playerIsDead() || !itemInHand()) return;
-        if (InvUtils.findItemWithCount(Items.ARROW).slot == -1) return;
+        if (InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
 
-        target = EntityUtils.get(entity -> {
+        target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
             if (entity.distanceTo(mc.player) > range.get()) return false;
@@ -112,7 +106,7 @@ public class BowAimbot extends Module {
             if (!PlayerUtils.canSeeEntity(entity)) return false;
             if (entity instanceof PlayerEntity) {
                 if (((PlayerEntity) entity).isCreative()) return false;
-                if (!friends.get() && !Friends.get().attack((PlayerEntity) entity)) return false;
+                if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
             }
             return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
         }, priority.get());
@@ -130,7 +124,7 @@ public class BowAimbot extends Module {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
             }
-            aim();
+            aim(event.tickDelta);
         }
     }
 
@@ -147,17 +141,16 @@ public class BowAimbot extends Module {
         return mc.player.getMainHandStack().getItem() instanceof BowItem || mc.player.getMainHandStack().getItem() instanceof CrossbowItem;
     }
 
-    private void aim() {
+    private void aim(double tickDelta) {
         // Velocity based on bow charge.
         float velocity = (mc.player.getItemUseTime() - mc.player.getItemUseTimeLeft()) / 20f;
         velocity = (velocity * velocity + velocity * 2) / 3;
         if (velocity > 1) velocity = 1;
 
         // Positions
-        double distance = target.getPos().distanceTo(mc.player.getPos());
-        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * distance;
-        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * distance;
-        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * distance;
+        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * tickDelta;
+        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * tickDelta;
+        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * tickDelta;
 
         // Adjusting for hitbox heights
         posY -= 1.9f - target.getHeight();

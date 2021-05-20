@@ -131,6 +131,8 @@ public class MacrosTab extends Tab {
                     onClose();
                 }
             };
+
+            enterAction = apply.action;
         }
 
         private void fillMessagesTable(WTable lines) {

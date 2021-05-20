@@ -32,7 +32,7 @@ public class Chams extends Module {
     //Players
 
     public final Setting<Boolean> players = sgPlayers.add(new BoolSetting.Builder()
-            .name("enabled")
+            .name("players")
             .description("Enables model tweaks for players.")
             .defaultValue(true)
             .build()
@@ -42,6 +42,7 @@ public class Chams extends Module {
             .name("ignore-self")
             .description("Ignores yourself when tweaking player models.")
             .defaultValue(true)
+            .visible(players::get)
             .build()
     );
 
@@ -50,6 +51,7 @@ public class Chams extends Module {
             .description("Players scale.")
             .defaultValue(1.0)
             .min(0.0)
+            .visible(players::get)
             .build()
     );
 
@@ -57,6 +59,7 @@ public class Chams extends Module {
             .name("texture")
             .description("Enables player model textures.")
             .defaultValue(false)
+            .visible(players::get)
             .build()
     );
 
@@ -64,20 +67,14 @@ public class Chams extends Module {
             .name("color")
             .description("The color of player models.")
             .defaultValue(new SettingColor(0, 255, 255, 100))
-            .build()
-    );
-
-    public final Setting<Boolean> useNameColor = sgPlayers.add(new BoolSetting.Builder()
-            .name("use-name-color")
-            .description("Uses players name color for the color.")
-            .defaultValue(false)
+            .visible(players::get)
             .build()
     );
 
     //Crystals
 
     public final Setting<Boolean> crystals = sgCrystals.add(new BoolSetting.Builder()
-            .name("enabled")
+            .name("crystals")
             .description("Enables model tweaks for end crystals.")
             .defaultValue(true)
             .build()
@@ -88,6 +85,7 @@ public class Chams extends Module {
             .description("Crystal scale.")
             .defaultValue(0.6)
             .min(0)
+            .visible(crystals::get)
             .build()
     );
 
@@ -96,6 +94,7 @@ public class Chams extends Module {
             .description("How high crystals bounce.")
             .defaultValue(0.3)
             .min(0.0)
+            .visible(crystals::get)
             .build()
     );
 
@@ -104,6 +103,7 @@ public class Chams extends Module {
             .description("Multiplies the roation speed of the crystal.")
             .defaultValue(3)
             .min(0)
+            .visible(crystals::get)
             .build()
     );
 
@@ -111,6 +111,7 @@ public class Chams extends Module {
             .name("texture")
             .description("Whether to render crystal model textures.")
             .defaultValue(false)
+            .visible(crystals::get)
             .build()
     );
 
@@ -118,6 +119,7 @@ public class Chams extends Module {
             .name("render-core")
             .description("Enables rendering of the core of the crystal.")
             .defaultValue(false)
+            .visible(crystals::get)
             .build()
     );
 
@@ -125,34 +127,39 @@ public class Chams extends Module {
             .name("core-color")
             .description("The color of end crystal models.")
             .defaultValue(new SettingColor(0, 255, 255, 100))
+            .visible(renderCore::get)
             .build()
     );
 
     public final Setting<Boolean> renderFrame1 = sgCrystals.add(new BoolSetting.Builder()
-            .name("render-frame-1")
+            .name("render-inner-frame")
             .description("Enables rendering of the frame of the crystal.")
             .defaultValue(true)
+            .visible(crystals::get)
             .build()
     );
 
     public final Setting<SettingColor> crystalsFrame1Color = sgCrystals.add(new ColorSetting.Builder()
-            .name("frame-1-color")
+            .name("inner-frame-color")
             .description("The color of end crystal models.")
             .defaultValue(new SettingColor(0, 255, 255, 100))
+            .visible(renderFrame1::get)
             .build()
     );
 
     public final Setting<Boolean> renderFrame2 = sgCrystals.add(new BoolSetting.Builder()
-            .name("render-frame-2")
+            .name("render-outer-frame")
             .description("Enables rendering of the frame of the crystal.")
             .defaultValue(true)
+            .visible(crystals::get)
             .build()
     );
 
     public final Setting<SettingColor> crystalsFrame2Color = sgCrystals.add(new ColorSetting.Builder()
-            .name("frame-2-color")
+            .name("outer-frame-color")
             .description("The color of end crystal models.")
             .defaultValue(new SettingColor(0, 255, 255, 100))
+            .visible(renderFrame2::get)
             .build()
     );
 
@@ -181,7 +188,7 @@ public class Chams extends Module {
     public static final Identifier BLANK = new Identifier("meteor-client", "textures/blank.png");
 
     public Chams() {
-        super(Categories.Render, "chams", "Renders entities through walls.");
+        super(Categories.Render, "chams", "Tweaks rendering of entities.");
     }
 
     public boolean shouldRender(Entity entity) {

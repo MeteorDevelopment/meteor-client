@@ -18,17 +18,20 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
-    private static final ArrayList<Vec3d> cuboidBlocks = new ArrayList<>();
+
+    private static final ArrayList<BlockPos> blocks = new ArrayList<>();
 
     public static final Map<Integer, BlockBreakingInfo> breakingBlocks = new HashMap<>();
 
@@ -136,26 +139,26 @@ public class BlockUtils {
         return null;
     }
 
-    public static ArrayList<Vec3d> getAreaAsVec3ds(BlockPos centerPos, double l, double d, double h, boolean sphere) {
-        cuboidBlocks.clear();
-        for(double i = centerPos.getX() - l; i < centerPos.getX() + l; i++) {
-            for(double j = centerPos.getY() - d; j < centerPos.getY() + d; j++) {
-                for(double k = centerPos.getZ() - h; k < centerPos.getZ() + h; k++) {
-                    Vec3d pos = new Vec3d(Math.floor(i), Math.floor(j), Math.floor(k));
-                    cuboidBlocks.add(pos);
+    public static List<BlockPos> getSphere(BlockPos centerPos, int radius, int height) {
+        blocks.clear();
+
+        for (int i = centerPos.getX() - radius; i < centerPos.getX() + radius; i++) {
+            for (int j = centerPos.getY() - height; j < centerPos.getY() + height; j++) {
+                for (int k = centerPos.getZ() - radius; k < centerPos.getZ() + radius; k++) {
+                    BlockPos pos = new BlockPos(i, j, k);
+                    if (distanceBetween(centerPos, pos) <= radius && !blocks.contains(pos)) blocks.add(pos);
                 }
             }
         }
 
-        if(sphere) {
-            cuboidBlocks.removeIf(pos -> (pos.distanceTo(blockPosToVec3d(centerPos)) > l));
-        }
-
-        return cuboidBlocks;
+        return blocks;
     }
 
-    public static Vec3d blockPosToVec3d(BlockPos blockPos) {
-        return new Vec3d(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    public static double distanceBetween(BlockPos blockPos1, BlockPos blockPos2) {
+        double d = blockPos1.getX() - blockPos2.getX();
+        double e = blockPos1.getY() - blockPos2.getY();
+        double f = blockPos1.getZ() - blockPos2.getZ();
+        return MathHelper.sqrt(d * d + e * e + f * f);
     }
 
 }

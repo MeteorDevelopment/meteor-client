@@ -28,6 +28,13 @@ public class Capes {
     private static final List<Cape> TO_REMOVE = new ArrayList<>();
 
     public static void init() {
+        OWNERS.clear();
+        URLS.clear();
+        TEXTURES.clear();
+        TO_REGISTER.clear();
+        TO_RETRY.clear();
+        TO_REMOVE.clear();
+
         // Cape owners
         MeteorExecutor.execute(() -> HttpUtils.getLines(CAPE_OWNERS_URL, s -> {
             String[] split = s.split(" ");

@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils.render;
 
+import minegame159.meteorclient.mixin.ShaderEffectAccessor;
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
@@ -68,5 +69,9 @@ public class Outlines {
 
     public static void onResized(int width, int height) {
         if (outlinesShader != null) outlinesShader.setupDimensions(width, height);
+    }
+
+    public static void setUniform(String name, float value) {
+        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName(name).set(value);
     }
 }

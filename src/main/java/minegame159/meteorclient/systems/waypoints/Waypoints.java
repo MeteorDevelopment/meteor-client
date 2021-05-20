@@ -18,8 +18,10 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.WaypointsModule;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.files.StreamUtils;
 import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
@@ -99,7 +101,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     private boolean checkDimension(Waypoint waypoint) {
-        Dimension dimension = Utils.getDimension();
+        Dimension dimension = PlayerUtils.getDimension();
 
         if (waypoint.overworld && dimension == Dimension.Overworld) return true;
         if (waypoint.nether && dimension == Dimension.Nether) return true;
@@ -111,10 +113,10 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         double y = waypoint.y;
         double z = waypoint.z;
 
-        if (waypoint.actualDimension == Dimension.Overworld && Utils.getDimension() == Dimension.Nether) {
+        if (waypoint.actualDimension == Dimension.Overworld && PlayerUtils.getDimension() == Dimension.Nether) {
             x = waypoint.x / 8f;
             z = waypoint.z / 8f;
-        } else if (waypoint.actualDimension == Dimension.Nether && Utils.getDimension() == Dimension.Overworld) {
+        } else if (waypoint.actualDimension == Dimension.Nether && PlayerUtils.getDimension() == Dimension.Overworld) {
             x = waypoint.x * 8;
             z = waypoint.z * 8;
         }
@@ -136,7 +138,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             double z = getCoords(waypoint).z;
 
             // Compute scale
-            double dist = Utils.distanceToCamera(x, y, z);
+            double dist = EntityUtils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.01 * waypoint.scale;
             if(dist > 8) scale *= dist / 8;

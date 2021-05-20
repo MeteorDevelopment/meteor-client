@@ -11,6 +11,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -55,9 +56,9 @@ public class TextRadarHud extends HudElement {
 
         for (PlayerEntity entity : getPlayers()) {
             if (entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
+            if (!friends.get() && Friends.get().isFriend(entity)) continue;
 
-            String text = entity.getGameProfile().getName();
+            String text = entity.getEntityName();
             if (distance.get()) text += String.format("(%sm)", Math.round(mc.getCameraEntity().distanceTo(entity)));
 
             width = Math.max(width, renderer.textWidth(text));
@@ -78,13 +79,13 @@ public class TextRadarHud extends HudElement {
 
         for (PlayerEntity entity : getPlayers()) {
             if (entity.equals(mc.player)) continue;
-            if (!friends.get() && Friends.get().contains(Friends.get().get(entity))) continue;
+            if (!friends.get() && Friends.get().isFriend(entity)) continue;
 
             x = box.getX();
             y += renderer.textHeight() + 2;
 
-            String text = entity.getGameProfile().getName();
-            Color color = Friends.get().contains(Friends.get().get(entity)) ? Friends.get().getFriendColor(entity) : hud.primaryColor.get();
+            String text = entity.getEntityName();
+            Color color = PlayerUtils.getPlayerColor(entity, hud.primaryColor.get());
 
             renderer.text(text, x, y, color);
 

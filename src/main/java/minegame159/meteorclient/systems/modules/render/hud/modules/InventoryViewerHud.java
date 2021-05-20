@@ -38,7 +38,7 @@ public class InventoryViewerHud extends HudElement {
             .build()
     );
 
-    private final Setting<Background> background = sgGeneral.add(new EnumSetting.Builder<InventoryViewerHud.Background>()
+    private final Setting<Background> background = sgGeneral.add(new EnumSetting.Builder<Background>()
             .name("background")
             .description("Background of inventory viewer.")
             .defaultValue(Background.Texture)
@@ -49,6 +49,7 @@ public class InventoryViewerHud extends HudElement {
             .name("background-color")
             .description("Color of the background.")
             .defaultValue(new SettingColor(255, 255, 255))
+            .visible(() -> background.get() != Background.None)
             .build()
     );
 

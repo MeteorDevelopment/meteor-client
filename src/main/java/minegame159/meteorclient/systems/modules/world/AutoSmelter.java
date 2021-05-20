@@ -8,7 +8,6 @@ package minegame159.meteorclient.systems.modules.world;
 import minegame159.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
@@ -87,7 +86,7 @@ public class AutoSmelter extends Module {
         }
 
         if (slot == -1) {
-            ChatUtils.moduleError(this, "You do not have any items in your inventory that can be smelted... disabling.");
+            error("You do not have any items in your inventory that can be smelted... disabling.");
             toggle();
             return true;
         }
@@ -103,7 +102,7 @@ public class AutoSmelter extends Module {
                 InvUtils.quickMove().slotId(1);
 
                 if (!c.slots.get(1).getStack().isEmpty()) {
-                    ChatUtils.moduleError(this, "Your inventory is currently full... disabling.");
+                    error("Your inventory is currently full... disabling.");
                     toggle();
                     return true;
                 }
@@ -118,7 +117,7 @@ public class AutoSmelter extends Module {
             }
 
             if (slot == -1) {
-                ChatUtils.moduleError(this, "You do not have any fuel in your inventory... disabling.");
+                error("You do not have any fuel in your inventory... disabling.");
                 toggle();
                 return true;
             }
@@ -133,7 +132,7 @@ public class AutoSmelter extends Module {
         InvUtils.quickMove().slotId(2);
 
         if (!c.slots.get(2).getStack().isEmpty()) {
-            ChatUtils.moduleError(this, "Your inventory is full... disabling.");
+            error("Your inventory is full... disabling.");
             toggle();
             return true;
         }
