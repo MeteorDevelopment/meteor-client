@@ -138,7 +138,7 @@ public class HoleFiller extends Module {
     private final byte NULL = 0;
 
     public HoleFiller() {
-        super(Categories.Combat, "hole-filler", "Fills holes with specified blocks.");
+        super(Categories.Combat, "HoleFiller", "Fills holes with specified blocks.");
     }
 
     @Override

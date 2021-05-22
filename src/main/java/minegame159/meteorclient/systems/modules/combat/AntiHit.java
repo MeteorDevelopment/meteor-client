@@ -55,7 +55,7 @@ public class AntiHit extends Module {
     );
 
     public AntiHit() {
-        super(Categories.Combat, "anti-hit", "Prevents you from attacking certain entities.");
+        super(Categories.Combat, "AntiHit", "Prevents you from attacking certain entities.");
     }
 
     @EventHandler(priority = EventPriority.HIGH)

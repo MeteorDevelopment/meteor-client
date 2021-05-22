@@ -363,7 +363,7 @@ public class CrystalAura extends Module {
     );
 
     public CrystalAura() {
-        super(Categories.Combat, "crystal-aura", "Automatically places and breaks crystals to damage other players.");
+        super(Categories.Combat, "CrystalAura", "Automatically places and breaks crystals to damage other players.");
     }
 
     private int placeDelayLeft = placeDelay.get();

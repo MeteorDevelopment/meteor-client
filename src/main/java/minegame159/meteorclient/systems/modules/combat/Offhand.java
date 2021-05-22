@@ -70,7 +70,7 @@ public class Offhand extends Module {
     private Item currentItem;
 
     public Offhand() {
-        super(Categories.Combat, "offhand", "Allows you to hold specified items in your offhand.");
+        super(Categories.Combat, "Offhand", "Allows you to hold specified items in your offhand.");
     }
 
     @Override

@@ -243,7 +243,7 @@ public class AnchorAura extends Module {
     );
 
     public AnchorAura() {
-        super(Categories.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");
+        super(Categories.Combat, "AnchorAura", "Automatically places and breaks Respawn Anchors to harm entities.");
     }
 
     private int placeDelayLeft;

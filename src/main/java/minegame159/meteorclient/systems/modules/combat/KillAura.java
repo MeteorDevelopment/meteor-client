@@ -224,7 +224,7 @@ public class KillAura extends Module {
     private final List<Entity> entityList = new ArrayList<>();
 
     public KillAura() {
-        super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
+        super(Categories.Combat, "KillAura", "Attacks specified entities around you.");
     }
 
     @Override

@@ -24,7 +24,7 @@ public class AutoWeapon extends Module {
     }
 
     public AutoWeapon(){
-        super(Categories.Combat, "auto-weapon", "Finds the best weapon to use in your hotbar.");
+        super(Categories.Combat, "AutoWeapon", "Finds the best weapon to use in your hotbar.");
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
