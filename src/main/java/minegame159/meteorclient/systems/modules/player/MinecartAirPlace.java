@@ -19,7 +19,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-// Basically AirPlace but works with any item
+// Basically AirPlace but works with any item just because I can.
 
 public class MinecartAirPlace extends Module {
     public enum Place {
