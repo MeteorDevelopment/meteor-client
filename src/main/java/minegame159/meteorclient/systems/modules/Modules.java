@@ -408,6 +408,7 @@ public class Modules extends System<Modules> {
         add(new GhostHand());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
+        add(new MinecartAirPlace());
         add(new NameProtect());
         add(new NoBreakDelay());
         add(new NoInteract());
