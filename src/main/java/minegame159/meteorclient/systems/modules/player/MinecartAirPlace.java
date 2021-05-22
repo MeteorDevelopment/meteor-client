@@ -41,21 +41,21 @@ public class MinecartAirPlace extends Module {
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
             .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
+            .defaultValue(ShapeMode.Lines)
             .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
             .name("side-color")
             .description("The color of the sides of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 10))
+            .defaultValue(new SettingColor(188, 26, 141, 10))
             .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
             .name("line-color")
             .description("The color of the lines of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 255))
+            .defaultValue(new SettingColor(237, 19, 144, 255))
             .build()
     );
 
