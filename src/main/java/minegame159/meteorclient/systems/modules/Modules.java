@@ -421,7 +421,7 @@ public class Modules extends System<Modules> {
         add(new SpeedMine());
         add(new Trail());
         add(new XCarry());
-        add(new AutoGap());
+        add(new AutoGapple());
         add(new AutoEat());
         add(new PotionSaver());
         add(new BowAimbot());

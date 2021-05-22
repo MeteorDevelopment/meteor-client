@@ -75,7 +75,7 @@ public class AutoEat extends Module {
     private boolean wasBaritone;
 
     public AutoEat() {
-        super(Categories.Player, "auto-eat", "Automatically eats food.");
+        super(Categories.Player, "AutoEat", "Automatically eats food.");
     }
 
     @Override
@@ -86,7 +86,7 @@ public class AutoEat extends Module {
     @EventHandler(priority = EventPriority.LOW)
     private void onTick(TickEvent.Pre event) {
         // Skip if Auto Gap is already eating
-        if (Modules.get().get(AutoGap.class).isEating()) return;
+        if (Modules.get().get(AutoGapple.class).isEating()) return;
 
         if (eating) {
             // If we are eating check if we should still be still eating

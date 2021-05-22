@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class AutoGap extends Module {
+public class AutoGapple extends Module {
     private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -118,7 +118,7 @@ public class AutoGap extends Module {
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();
     private boolean wasBaritone;
 
-    public AutoGap() {
+    public AutoGapple() {
         super(Categories.Player, "auto-gap", "Automatically eats Gaps or E-Gaps.");
     }
 

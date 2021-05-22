@@ -38,7 +38,7 @@ public class AutoDrop extends Module {
     );
 
     public AutoDrop() {
-        super(Categories.Player, "auto-drop", "Automatically drops specified items.");
+        super(Categories.Player, "AutoDrop", "Automatically drops specified items.");
     }
 
     @EventHandler
