@@ -28,8 +28,6 @@ public class MinecartAirPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    // General
-
     // Render
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
