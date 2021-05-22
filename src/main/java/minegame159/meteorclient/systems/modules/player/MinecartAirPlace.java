@@ -15,7 +15,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
-import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -30,13 +29,6 @@ public class MinecartAirPlace extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
-
-    private final Setting<Place> placeWhen = sgGeneral.add(new EnumSetting.Builder<Place>()
-            .name("place-when")
-            .description("Decides when it should place.")
-            .defaultValue(Place.OnClick)
-            .build()
-    );
 
     // Render
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
@@ -86,7 +78,7 @@ public class MinecartAirPlace extends Module {
 
         if (!mc.world.getBlockState(target).isAir()) return;
 
-        if (placeWhen.get() == Place.Always || placeWhen.get() == Place.OnClick && (mc.options.keyUse.wasPressed() || mc.options.keyUse.isPressed())) {
+        if (mc.options.keyUse.wasPressed() || mc.options.keyUse.isPressed()) {
             BlockUtils.place(target, Hand.MAIN_HAND, 0, false, 0, true, true, false, false);
         }
     }
