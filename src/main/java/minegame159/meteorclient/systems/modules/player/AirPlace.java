@@ -75,7 +75,7 @@ public class AirPlace extends Module {
 
     @Override
     public void onActivate() {
-        target = mc.player.getBlockPos().add(4, 2, 0); //lol funni
+        target = mc.player.getBlockPos().add(4, 2, 0);
     }
 
     @EventHandler
