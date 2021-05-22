@@ -3,8 +3,8 @@
   "id": "meteor-client",
   "version": "${version}",
 
-  "name": "Meteor Client",
-  "description": "Based utility mod.",
+  "name": "CSB Client",
+  "description": "Custom build of Meteor Client dedicated to CursedSkyblock.net.",
   "authors": [
     "MineGame159",
     "squidoodly",
