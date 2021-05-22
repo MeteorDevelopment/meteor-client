@@ -70,7 +70,7 @@ public class AirPlace extends Module {
     private BlockPos target;
 
     public AirPlace() {
-        super(Categories.Player, "air-place", "Places a block where your crosshair is pointing at.");
+        super(Categories.Player, "AirPlace", "Places a block where your crosshair is pointing at.");
     }
 
     @Override
