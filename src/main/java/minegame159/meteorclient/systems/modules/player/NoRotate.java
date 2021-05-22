@@ -14,7 +14,7 @@ import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
 public class NoRotate extends Module {
     public NoRotate() {
-        super(Categories.Player, "no-rotate", "Attempts to block rotations sent from server to client.");
+        super(Categories.Player, "NoRotate", "Attempts to block rotations sent from server to client.");
     }
 
     @EventHandler

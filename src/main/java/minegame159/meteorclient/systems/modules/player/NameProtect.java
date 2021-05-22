@@ -17,14 +17,14 @@ public class NameProtect extends Module {
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
             .description("Name to be replaced with.")
-            .defaultValue("squidoodly")
+            .defaultValue("You")
             .build()
     );
 
     private String username = "If you see this, something is wrong.";
 
     public NameProtect() {
-        super(Categories.Player, "name-protect", "Hides your name client-side.");
+        super(Categories.Player, "NameProtect", "Hides your name client-side.");
     }
 
     @Override

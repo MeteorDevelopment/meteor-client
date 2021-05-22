@@ -24,7 +24,7 @@ public class Reach extends Module {
     );
 
     public Reach() {
-        super(Categories.Player, "reach", "Gives you super long arms.");
+        super(Categories.Player, "Reach", "Gives you super long arms.");
     }
 
     public float getReach() {

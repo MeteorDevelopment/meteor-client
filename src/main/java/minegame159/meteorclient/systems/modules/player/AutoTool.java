@@ -84,7 +84,7 @@ public class AutoTool extends Module {
     );
 
     public AutoTool() {
-        super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
+        super(Categories.Player, "AutoTool", "Automatically switches to the most effective tool when performing an action.");
     }
 
     private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);

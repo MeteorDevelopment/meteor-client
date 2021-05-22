@@ -74,7 +74,7 @@ public class MiddleClickExtra extends Module {
     private int preSlot;
 
     public MiddleClickExtra(){
-        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
+        super(Categories.Player, "MiddleClickExtra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
     }
 
     @Override

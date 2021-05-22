@@ -23,7 +23,7 @@ public class NoMiningTrace extends Module {
     );
 
     public NoMiningTrace() {
-        super(Categories.Player, "no-mining-trace", "Allows you to mine blocks through entities.");
+        super(Categories.Player, "NoMiningTrace", "Allows you to mine blocks through entities.");
     }
 
     public boolean canWork() {

@@ -25,7 +25,7 @@ public class PotionSaver extends Module {
     );
 
     public PotionSaver() {
-        super(Categories.Player, "potion-saver", "Stops potion effects ticking when you stand still.");
+        super(Categories.Player, "PotionSaver", "Stops potion effects ticking when you stand still.");
     }
 
     public boolean shouldFreeze() {

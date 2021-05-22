@@ -37,7 +37,7 @@ public class EXPThrower extends Module {
     );
 
     public EXPThrower() {
-        super(Categories.Player, "exp-thrower", "Automatically throws XP bottles in your hotbar.");
+        super(Categories.Player, "EXPThrower", "Automatically throws XP bottles in your hotbar.");
     }
 
     @EventHandler

@@ -50,7 +50,7 @@ public class AutoMend extends Module {
     private boolean didMove;
 
     public AutoMend() {
-        super(Categories.Player, "auto-mend", "Automatically replaces items in your offhand with mending when fully repaired.");
+        super(Categories.Player, "AutoMend", "Automatically replaces items in your offhand with mending when fully repaired.");
     }
 
     @Override

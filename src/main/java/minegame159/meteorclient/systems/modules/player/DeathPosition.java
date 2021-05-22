@@ -61,7 +61,7 @@ public class DeathPosition extends Module {
     private String labelText = "No latest death";
 
     public DeathPosition() {
-        super(Categories.Player, "death-position", "Sends you the coordinates to your latest death.");
+        super(Categories.Player, "DeathPosition", "Sends you the coordinates to your latest death.");
     }
 
     @EventHandler

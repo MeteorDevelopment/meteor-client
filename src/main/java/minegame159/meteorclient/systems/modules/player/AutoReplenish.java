@@ -76,7 +76,7 @@ public class AutoReplenish extends Module {
     private int tickDelayLeft;
 
     public AutoReplenish(){
-        super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
+        super(Categories.Player, "AutoReplenish", "Automatically refills items in your hotbar, main hand, or offhand.");
 
         for (int i = 0; i < items.length; i++) items[i] = new ItemStack(Items.AIR);
     }

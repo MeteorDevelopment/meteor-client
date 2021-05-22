@@ -119,7 +119,7 @@ public class AutoGapple extends Module {
     private boolean wasBaritone;
 
     public AutoGapple() {
-        super(Categories.Player, "auto-gap", "Automatically eats Gaps or E-Gaps.");
+        super(Categories.Player, "AutoGapple", "Automatically eats Gaps or E-Gaps.");
     }
 
     @Override
