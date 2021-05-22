@@ -19,6 +19,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
+// Basically AirPlace but works with any item
+
 public class MinecartAirPlace extends Module {
     public enum Place {
         OnClick,
