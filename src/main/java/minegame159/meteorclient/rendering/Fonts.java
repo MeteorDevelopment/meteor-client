@@ -18,8 +18,8 @@ import java.util.List;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Fonts {
-    private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf" };
-    public static final String DEFAULT_FONT = "JetBrains Mono";
+    private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf", "twcen.ttf" };
+    public static final String DEFAULT_FONT = "twcen";
 
     private static final File FOLDER = new File(MeteorClient.FOLDER, "fonts");
 
