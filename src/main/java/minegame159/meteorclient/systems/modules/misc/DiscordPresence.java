@@ -59,7 +59,7 @@ public class DiscordPresence extends Module {
         String largeText = "CSB Client " + Config.get().version.getOriginalString();
         if (!Config.get().devBuild.isEmpty()) largeText += " Dev Build: " + Config.get().devBuild;
         rpc.largeImageText = largeText;
-        currentSmallImage = SmallImage.MineGame;
+        currentSmallImage = SmallImage.Cypphi;
         updateDetails();
 
         instance.Discord_UpdatePresence(rpc);
@@ -99,8 +99,8 @@ public class DiscordPresence extends Module {
     }
 
     private enum SmallImage {
-        MineGame("cypphi", "Developed by Cypphi"),
-        Snail("cursedskyblock", "CursedSkyblock.net");
+        Cypphi("cypphi", "Developed by Cypphi"),
+        CursedSkyblock("cursedskyblock", "CursedSkyblock.net");
 
         private final String key, text;
 
@@ -115,8 +115,8 @@ public class DiscordPresence extends Module {
         }
 
         SmallImage next() {
-            if (this == MineGame) return Snail;
-            return MineGame;
+            if (this == Cypphi) return CursedSkyblock;
+            return Cypphi;
         }
     }
 }
