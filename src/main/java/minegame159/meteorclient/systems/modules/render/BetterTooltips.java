@@ -142,7 +142,7 @@ public class BetterTooltips extends Module {
     public static final Color ECHEST_COLOR = new Color(0, 50, 50);
 
     public BetterTooltips() {
-        super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
+        super(Categories.Render, "BetterTooltips", "Displays more useful tooltips for certain items.");
     }
 
     public boolean previewShulkers() {

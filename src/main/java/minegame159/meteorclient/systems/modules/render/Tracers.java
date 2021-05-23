@@ -136,7 +136,7 @@ public class Tracers extends Module {
         count = 0;
         for (Entity entity : mc.world.getEntities()) {
             if (mc.player.distanceTo(entity) > maxDist.get()
-                    || (!Modules.get().isActive(Freecam.class) && entity == mc.player)
+                    || (!Modules.get().isActive(FreeCam.class) && entity == mc.player)
                     || !entities.get().getBoolean(entity.getType())
                     || (!showInvis.get() && entity.isInvisible())
                     || !EntityUtils.isInRenderDistance(entity)

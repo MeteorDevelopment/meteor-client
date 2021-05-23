@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 
 public class AirJump extends Module {
@@ -49,7 +49,7 @@ public class AirJump extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (Modules.get().isActive(Freecam.class) || mc.currentScreen != null || (!onGround.get() && mc.player.isOnGround())) return;
+        if (Modules.get().isActive(FreeCam.class) || mc.currentScreen != null || (!onGround.get() && mc.player.isOnGround())) return;
         if ((event.action == KeyAction.Press || (event.action == KeyAction.Repeat && onHold.get())) && mc.options.keyJump.matchesKey(event.key, 0)) {
             mc.player.jump();
             level = mc.player.getBlockPos().getY();
@@ -61,7 +61,7 @@ public class AirJump extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (Modules.get().isActive(Freecam.class) || (!onGround.get() && mc.player.isOnGround())) return;
+        if (Modules.get().isActive(FreeCam.class) || (!onGround.get() && mc.player.isOnGround())) return;
         if (maintainY.get() && mc.player.getBlockPos().getY() == level){
             mc.player.jump();
         }

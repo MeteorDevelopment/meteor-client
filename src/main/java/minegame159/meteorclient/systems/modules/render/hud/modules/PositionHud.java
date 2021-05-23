@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -35,7 +35,7 @@ public class PositionHud extends HudElement {
             return;
         }
 
-        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeCam freecam = Modules.get().get(FreeCam.class);
 
         double x1 = freecam.isActive() ? mc.gameRenderer.getCamera().getPos().x : mc.player.getX();
         double y1 = freecam.isActive() ? mc.gameRenderer.getCamera().getPos().y - mc.player.getEyeHeight(mc.player.getPose()) : mc.player.getY();

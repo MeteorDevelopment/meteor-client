@@ -58,7 +58,7 @@ public abstract class WorldRendererMixin {
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZIZ)V"), index = 4)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
-        return Modules.get().isActive(Freecam.class) || spectator;
+        return Modules.get().isActive(FreeCam.class) || spectator;
     }
 
     @Inject(method = "render", at = @At("TAIL"))

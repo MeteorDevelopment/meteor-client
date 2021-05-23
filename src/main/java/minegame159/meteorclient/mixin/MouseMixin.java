@@ -10,7 +10,7 @@ import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.events.meteor.MouseScrollEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.FreeLook;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.client.Mouse;
@@ -40,7 +40,7 @@ public class MouseMixin {
 
     @Redirect(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;changeLookDirection(DD)V"))
     private void updateMouseChangeLookDirection(ClientPlayerEntity player, double cursorDeltaX, double cursorDeltaY) {
-        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeCam freecam = Modules.get().get(FreeCam.class);
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);

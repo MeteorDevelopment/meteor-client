@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.Chams;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -39,7 +39,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     //Freecam
     @Redirect(method = "hasLabel", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
     private Entity hasLabelGetCameraEntityProxy(MinecraftClient mc) {
-        if (Modules.get().isActive(Freecam.class)) return null;
+        if (Modules.get().isActive(FreeCam.class)) return null;
         return mc.getCameraEntity();
     }
 

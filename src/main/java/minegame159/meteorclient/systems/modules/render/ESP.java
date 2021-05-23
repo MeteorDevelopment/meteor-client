@@ -141,7 +141,7 @@ public class ESP extends Module {
     private int count;
 
     public ESP() {
-        super(Categories.Render, "esp", "Renders entities through walls.");
+        super(Categories.Render, "ESP", "Renders entities through walls.");
     }
 
     private void render(RenderEvent event, Entity entity) {
@@ -172,7 +172,7 @@ public class ESP extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
+            if ((!Modules.get().isActive(FreeCam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
             if (!EntityUtils.isInRenderDistance(entity)) continue;
 
             if (mode.get() == Mode.Box) render(event, entity);

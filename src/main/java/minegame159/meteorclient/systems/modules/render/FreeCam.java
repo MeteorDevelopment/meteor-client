@@ -28,7 +28,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
-public class Freecam extends Module {
+public class FreeCam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
@@ -91,8 +91,8 @@ public class Freecam extends Module {
 
     private boolean forward, backward, right, left, up, down;
 
-    public Freecam() {
-        super(Categories.Render, "freecam", "Allows the camera to move away from the player.");
+    public FreeCam() {
+        super(Categories.Render, "FreeCam", "Allows the camera to move away from the player.");
     }
 
     @Override

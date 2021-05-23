@@ -13,7 +13,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -127,6 +127,6 @@ public class InventoryWalk extends Module {
     }
 
     private boolean skip() {
-        return mc.currentScreen == null || Modules.get().isActive(Freecam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((CreativeInventoryScreenAccessor) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
+        return mc.currentScreen == null || Modules.get().isActive(FreeCam.class) || (mc.currentScreen instanceof CreativeInventoryScreen && ((CreativeInventoryScreenAccessor) mc.currentScreen).getSelectedTab() == ItemGroup.SEARCH.getIndex()) || mc.currentScreen instanceof ChatScreen || mc.currentScreen instanceof SignEditScreen || mc.currentScreen instanceof AnvilScreen || mc.currentScreen instanceof AbstractCommandBlockScreen || mc.currentScreen instanceof StructureBlockScreen;
     }
 }

@@ -256,7 +256,7 @@ public class Nametags extends Module {
     private void onTick(TickEvent.Post event) {
         entityList.clear();
 
-        boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
+        boolean freecamNotActive = !Modules.get().isActive(FreeCam.class);
         Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
         mc.world.getEntities().forEach(entity -> {

@@ -471,7 +471,7 @@ public class Modules extends System<Modules> {
         add(new ESP());
         add(new EntityOwner());
         add(new FreeLook());
-        add(new Freecam());
+        add(new FreeCam());
         add(new Fullbright());
         add(new HUD());
         add(new HandView());

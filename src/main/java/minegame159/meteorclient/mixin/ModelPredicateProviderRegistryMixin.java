@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -22,13 +22,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ModelPredicateProviderRegistryMixin {
     @Redirect(method = "call(Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/world/ClientWorld;Lnet/minecraft/entity/LivingEntity;)F", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/LivingEntity;yaw:F"))
     private float callLivingEntityGetYaw(LivingEntity entity) {
-        if (Modules.get().isActive(Freecam.class)) return MinecraftClient.getInstance().gameRenderer.getCamera().getYaw();
+        if (Modules.get().isActive(FreeCam.class)) return MinecraftClient.getInstance().gameRenderer.getCamera().getYaw();
         return entity.yaw;
     }
 
     @Inject(method = "getAngleToPos(Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/entity/Entity;)D", at = @At("HEAD"), cancellable = true)
     private void onGetAngleToPos(Vec3d pos, Entity entity, CallbackInfoReturnable<Double> info) {
-        if (Modules.get().isActive(Freecam.class)) {
+        if (Modules.get().isActive(FreeCam.class)) {
             Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
             info.setReturnValue(Math.atan2(pos.getZ() - camera.getPos().z, pos.getX() - camera.getPos().x));
         }

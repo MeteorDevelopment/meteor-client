@@ -188,7 +188,7 @@ public class Chams extends Module {
     public static final Identifier BLANK = new Identifier("meteor-client", "textures/blank.png");
 
     public Chams() {
-        super(Categories.Render, "chams", "Tweaks rendering of entities.");
+        super(Categories.Render, "Chams", "Tweaks rendering of entities.");
     }
 
     public boolean shouldRender(Entity entity) {

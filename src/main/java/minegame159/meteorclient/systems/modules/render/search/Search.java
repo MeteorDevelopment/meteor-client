@@ -77,7 +77,7 @@ public class Search extends Module {
     private Dimension lastDimension;
 
     public Search() {
-        super(Categories.Render, "search", "Searches for specified blocks.");
+        super(Categories.Render, "Search", "Searches for specified blocks.");
 
         RainbowColors.register(this::onTickRainbow);
     }

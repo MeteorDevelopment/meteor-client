@@ -8,7 +8,7 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.CameraClip;
 import minegame159.meteorclient.systems.modules.render.FreeLook;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.BlockView;
@@ -42,14 +42,14 @@ public abstract class CameraMixin {
 
     @Inject(method = "update", at = @At("TAIL"))
     private void onUpdateTail(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        if (Modules.get().isActive(Freecam.class)) {
+        if (Modules.get().isActive(FreeCam.class)) {
             this.thirdPerson = true;
         }
     }
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))
     private void onUpdateSetPosArgs(Args args) {
-        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeCam freecam = Modules.get().get(FreeCam.class);
 
         if (freecam.isActive()) {
             args.set(0, freecam.getX(tickDelta));
@@ -60,7 +60,7 @@ public abstract class CameraMixin {
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
     private void onUpdateSetRotationArgs(Args args) {
-        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeCam freecam = Modules.get().get(FreeCam.class);
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) {

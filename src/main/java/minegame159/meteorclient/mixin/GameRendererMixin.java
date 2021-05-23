@@ -15,7 +15,7 @@ import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.LiquidInteract;
 import minegame159.meteorclient.systems.modules.player.NoMiningTrace;
-import minegame159.meteorclient.systems.modules.render.Freecam;
+import minegame159.meteorclient.systems.modules.render.FreeCam;
 import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.systems.modules.render.UnfocusedCPU;
 import minegame159.meteorclient.utils.Utils;
@@ -138,7 +138,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "updateTargetedEntity", at = @At("INVOKE"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
-        Freecam freecam = Modules.get().get(Freecam.class);
+        FreeCam freecam = Modules.get().get(FreeCam.class);
 
         if (freecam.isActive() && client.getCameraEntity() != null && !freecamSet) {
             info.cancel();
@@ -181,6 +181,6 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderHand", at = @At("INVOKE"), cancellable = true)
     private void renderHand(MatrixStack matrices, Camera camera, float tickDelta, CallbackInfo info) {
-        if (!Modules.get().get(Freecam.class).renderHands()) info.cancel();
+        if (!Modules.get().get(FreeCam.class).renderHands()) info.cancel();
     }
 }
