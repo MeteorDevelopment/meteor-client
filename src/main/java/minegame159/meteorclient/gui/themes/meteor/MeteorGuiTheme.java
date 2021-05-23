@@ -82,54 +82,54 @@ public class MeteorGuiTheme extends GuiTheme {
 
     // Colors
 
-    public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(135, 0, 255));
-    public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(135, 0, 255));
-    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 255, 255));
+    public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(237, 19, 144));
+    public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(237, 19, 144));
+    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(0, 255, 0));
+    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 0, 0));
 
     // Text
 
-    public final Setting<SettingColor> textColor = color(sgTextColors, "text", "Color of text.", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> textSecondaryColor = color(sgTextColors, "text-secondary-text", "Color of secondary text.", new SettingColor(150, 150, 150));
-    public final Setting<SettingColor> titleTextColor = color(sgTextColors, "title-text", "Color of title text.", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> loggedInColor = color(sgTextColors, "logged-in-text", "Color of logged in account name.", new SettingColor(45, 225, 45));
+    public final Setting<SettingColor> textColor = color(sgTextColors, "text", "Color of text.", new SettingColor(237, 19, 144));
+    public final Setting<SettingColor> textSecondaryColor = color(sgTextColors, "text-secondary-text", "Color of secondary text.", new SettingColor(237, 19, 144));
+    public final Setting<SettingColor> titleTextColor = color(sgTextColors, "title-text", "Color of title text.", new SettingColor(255, 200, 10));
+    public final Setting<SettingColor> loggedInColor = color(sgTextColors, "logged-in-text", "Color of logged in account name.", new SettingColor(0, 255, 0));
 
     // Background
 
     public final ThreeStateColorSetting backgroundColor = new ThreeStateColorSetting(
             sgBackgroundColors,
             "background",
-            new SettingColor(20, 20, 20, 200),
-            new SettingColor(30, 30, 30, 200),
-            new SettingColor(40, 40, 40, 200)
+            new SettingColor(3, 13, 34, 200),
+            new SettingColor(3, 13, 34, 200),
+            new SettingColor(237, 19, 144, 50)
     );
 
-    public final Setting<SettingColor> moduleBackground = color(sgBackgroundColors, "module-background", "Color of module background when active.", new SettingColor(50, 50, 50));
+    public final Setting<SettingColor> moduleBackground = color(sgBackgroundColors, "module-background", "Color of module background when active.", new SettingColor(237, 19, 144, 50));
 
     // Outline
 
     public final ThreeStateColorSetting outlineColor = new ThreeStateColorSetting(
             sgOutline,
             "outline",
-            new SettingColor(0, 0, 0),
-            new SettingColor(10, 10, 10),
-            new SettingColor(20, 20, 20)
+            new SettingColor(237, 19, 144),
+            new SettingColor(237, 19, 144, 100),
+            new SettingColor(237, 19, 144)
     );
 
     // Separator
 
-    public final Setting<SettingColor> separatorText = color(sgSeparator, "separator-text", "Color of separator text", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> separatorCenter = color(sgSeparator, "separator-center", "Center color of separators.", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> separatorEdges = color(sgSeparator, "separator-edges", "Color of separator edges.", new SettingColor(225, 225, 225, 150));
+    public final Setting<SettingColor> separatorText = color(sgSeparator, "separator-text", "Color of separator text", new SettingColor(255, 200, 10));
+    public final Setting<SettingColor> separatorCenter = color(sgSeparator, "separator-center", "Center color of separators.", new SettingColor(255, 200, 10));
+    public final Setting<SettingColor> separatorEdges = color(sgSeparator, "separator-edges", "Color of separator edges.", new SettingColor(237, 19, 144));
 
     // Scrollbar
 
     public final ThreeStateColorSetting scrollbarColor = new ThreeStateColorSetting(
             sgScrollbar,
             "Scrollbar",
-            new SettingColor(30, 30, 30, 200),
-            new SettingColor(40, 40, 40, 200),
-            new SettingColor(50, 50, 50, 200)
+            new SettingColor(255, 200, 10, 100),
+            new SettingColor(255, 200, 10, 200),
+            new SettingColor(255, 200, 10, 255)
     );
 
     // Slider
@@ -137,13 +137,13 @@ public class MeteorGuiTheme extends GuiTheme {
     public final ThreeStateColorSetting sliderHandle = new ThreeStateColorSetting(
             sgSlider,
             "slider-handle",
-            new SettingColor(0, 255, 180),
-            new SettingColor(0, 240, 165),
-            new SettingColor(0, 225, 150)
+            new SettingColor(237, 19, 144),
+            new SettingColor(237, 19, 144, 200),
+            new SettingColor(237, 19, 144)
     );
 
-    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(0, 150, 80));
-    public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 50));
+    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(255, 200, 10, 200));
+    public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 100));
 
     public MeteorGuiTheme() {
         super("CSB Client");
