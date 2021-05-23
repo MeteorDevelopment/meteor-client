@@ -76,7 +76,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public final Setting<Boolean> blur = sgGeneral.add(new BoolSetting.Builder()
             .name("blur")
             .description("Apply blur behind the GUI.")
-            .defaultValue(false)
+            .defaultValue(true)
             .build()
     );
 
