@@ -18,6 +18,8 @@ axios
     let success = true
     let description = ""
 
+    if (branch !== "master") return
+
     description += "**Branch:** " + branch
     description += "\n**Status:** " + (success ? "success" : "failure")
 
