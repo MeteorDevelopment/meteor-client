@@ -12,6 +12,7 @@ import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.combat.Hitboxes;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
+import minegame159.meteorclient.systems.modules.movement.PacketFly;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.render.ESP;
 import minegame159.meteorclient.utils.Utils;
@@ -78,6 +79,11 @@ public abstract class EntityMixin {
         }
 
         return vec;
+    }
+
+    @Inject(method = "pushAwayFrom", at = @At("HEAD"), cancellable = true)
+    private void onPushAwayFrom(Entity entity, CallbackInfo info) {
+        if (Modules.get().get(PacketFly.class).isActive()) {info.cancel();}
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)

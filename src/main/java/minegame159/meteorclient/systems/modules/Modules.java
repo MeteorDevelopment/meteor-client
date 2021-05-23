@@ -447,6 +447,7 @@ public class Modules extends System<Modules> {
         add(new Jesus());
         add(new NoFall());
         add(new NoSlow());
+        add(new PacketFly());
         add(new Parkour());
         add(new ReverseStep());
         add(new SafeWalk());
