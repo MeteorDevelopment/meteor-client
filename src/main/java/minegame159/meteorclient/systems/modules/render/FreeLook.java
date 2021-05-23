@@ -72,7 +72,7 @@ public class FreeLook extends Module {
     private Perspective prePers;
 
     public FreeLook() {
-        super(Categories.Render, "free-look", "Allows more rotation options in third person.");
+        super(Categories.Render, "FreeLook", "Allows more rotation options in third person.");
     }
 
     @Override

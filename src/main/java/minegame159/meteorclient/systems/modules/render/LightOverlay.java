@@ -90,7 +90,7 @@ public class LightOverlay extends Module {
     private final MeshBuilder mb = new MeshBuilder();
 
     public LightOverlay() {
-        super(Categories.Render, "light-overlay", "Shows blocks where mobs can spawn.");
+        super(Categories.Render, "LightOverlay", "Shows blocks where mobs can spawn.");
     }
 
     @EventHandler

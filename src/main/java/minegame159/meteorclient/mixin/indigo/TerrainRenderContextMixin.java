@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin.indigo;
 
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.render.XRay;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.TerrainRenderContext;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.model.BakedModel;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class TerrainRenderContextMixin {
     @Inject(method = "tesselateBlock", at = @At("HEAD"), cancellable = true)
     private void onTesselateBlock(BlockState blockState, BlockPos blockPos, BakedModel model, MatrixStack matrixStack, CallbackInfoReturnable<Boolean> info) {
-        Xray xray = Modules.get().get(Xray.class);
+        XRay xray = Modules.get().get(XRay.class);
 
         if (xray.isActive() && xray.isBlocked(blockState.getBlock())) {
             info.cancel();

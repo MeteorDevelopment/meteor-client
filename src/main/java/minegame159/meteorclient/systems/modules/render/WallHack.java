@@ -53,7 +53,7 @@ public class WallHack extends Module {
     );
 
     public WallHack() {
-        super(Categories.Render, "wall-hack", "Makes blocks translucent.");
+        super(Categories.Render, "WallHack", "Makes blocks translucent.");
     }
 
     @Override

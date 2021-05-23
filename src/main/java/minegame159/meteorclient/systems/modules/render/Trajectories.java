@@ -80,7 +80,7 @@ public class Trajectories extends Module {
     private final List<Path> paths = new ArrayList<>();
 
     public Trajectories() {
-        super(Categories.Render, "trajectories", "Predicts the trajectory of throwable items.");
+        super(Categories.Render, "Trajectories", "Predicts the trajectory of throwable items.");
     }
 
     private boolean itemFilter(Item item) {

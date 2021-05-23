@@ -104,7 +104,7 @@ public class LogoutSpots extends Module {
     private Dimension lastDimension;
 
     public LogoutSpots() {
-        super(Categories.Render, "logout-spots", "Displays a box where another player has logged out at.");
+        super(Categories.Render, "LogoutSpots", "Displays a box where another player has logged out at.");
         lineColor.changed();
     }
 

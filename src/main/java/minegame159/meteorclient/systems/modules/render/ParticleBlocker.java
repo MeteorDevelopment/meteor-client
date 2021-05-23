@@ -28,7 +28,7 @@ public class ParticleBlocker extends Module {
     );
 
     public ParticleBlocker() {
-        super(Categories.Render, "particle-blocker", "Stops specified particles from rendering.");
+        super(Categories.Render, "ParticleBlocker", "Stops specified particles from rendering.");
     }
 
     @EventHandler

@@ -29,7 +29,7 @@ import net.minecraft.util.shape.VoxelShape;
 
 public class ItemPhysics extends Module {
     public ItemPhysics() {
-        super(Categories.Render, "item-physics", "Applies physics to items on the ground.");
+        super(Categories.Render, "ItemPhysics", "I don't know why you would use it but I kept it.");
     }
 
     @EventHandler

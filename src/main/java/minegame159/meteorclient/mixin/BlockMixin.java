@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.Slippy;
-import minegame159.meteorclient.systems.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.render.XRay;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -29,7 +29,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
 
     @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        Xray xray = Modules.get().get(Xray.class);
+        XRay xray = Modules.get().get(XRay.class);
 
         if (xray.isActive()) {
             info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));

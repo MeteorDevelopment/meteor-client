@@ -97,7 +97,7 @@ public class VoidESP extends Module {
     private final List<Void> voidHoles = new ArrayList<>();
 
     public VoidESP() {
-        super(Categories.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
+        super(Categories.Render, "VoidESP", "Renders holes in bedrock layers that lead to the void.");
     }
 
     private boolean isBlockWrong(BlockPos blockPos) {

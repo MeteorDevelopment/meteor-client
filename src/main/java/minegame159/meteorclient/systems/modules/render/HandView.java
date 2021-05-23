@@ -130,6 +130,6 @@ public class HandView extends Module {
     );
 
     public HandView() {
-        super(Categories.Render, "hand-view", "Alters the way items are rendered in your hands.");
+        super(Categories.Render, "HandView", "Alters the way items are rendered in your hands.");
     }
 }

@@ -249,7 +249,7 @@ public class Nametags extends Module {
     private final List<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
-        super(Categories.Render, "nametags", "Displays customizable nametags above players.");
+        super(Categories.Render, "Nametags", "Displays customizable nametags above players.");
     }
 
     @EventHandler

@@ -18,7 +18,7 @@ import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.WallHack;
-import minegame159.meteorclient.systems.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.render.XRay;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.color.block.BlockColorProvider;
 import net.minecraft.client.render.model.BakedModel;
@@ -60,7 +60,7 @@ public class SodiumBlockRendererMixin {
 
     @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
     private void onRenderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ModelQuadSinkDelegate builder, boolean cull, long seed, CallbackInfoReturnable<Boolean> cir) {
-        Xray xray = Modules.get().get(Xray.class);
+        XRay xray = Modules.get().get(XRay.class);
 
         if (xray.isActive() && xray.isBlocked(state.getBlock())) {
             cir.setReturnValue(false);

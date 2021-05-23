@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Xray;
+import minegame159.meteorclient.systems.modules.render.XRay;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class SodiumBlockOcculsionCacheMixin {
     @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
     private void shouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        Xray xray = Modules.get().get(Xray.class);
+        XRay xray = Modules.get().get(XRay.class);
 
         if (xray.isActive()) {
             info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));

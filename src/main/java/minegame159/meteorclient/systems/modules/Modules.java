@@ -488,7 +488,7 @@ public class Modules extends System<Modules> {
         add(new Trajectories());
         add(new UnfocusedCPU());
         add(new VoidESP());
-        add(new Xray());
+        add(new XRay());
         add(new BossStack());
         add(new ItemHighlight());
         add(new LightOverlay());

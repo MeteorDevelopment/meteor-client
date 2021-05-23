@@ -40,7 +40,7 @@ public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
 
     public WaypointsModule() {
-        super(Categories.Render, "waypoints", "Allows you to create waypoints.");
+        super(Categories.Render, "Waypoints", "Allows you to create waypoints.");
     }
 
     @Override

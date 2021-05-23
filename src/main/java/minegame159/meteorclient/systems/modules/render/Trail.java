@@ -38,7 +38,7 @@ public class Trail extends Module {
 
 
     public Trail() {
-        super(Categories.Render, "trail", "Renders a customizable trail behind your player.");
+        super(Categories.Render, "Trail", "Renders a customizable trail behind your player.");
     }
 
     @EventHandler

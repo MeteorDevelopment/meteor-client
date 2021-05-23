@@ -25,7 +25,7 @@ import net.minecraft.world.BlockView;
 import java.util.Arrays;
 import java.util.List;
 
-public class Xray extends Module {
+public class XRay extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -40,8 +40,8 @@ public class Xray extends Module {
             .build()
     );
 
-    public Xray() {
-        super(Categories.Render, "xray", "Only renders specified blocks. Good for mining.");
+    public XRay() {
+        super(Categories.Render, "XRay", "Only renders specified blocks. Good for mining.");
     }
 
     @Override

@@ -38,7 +38,7 @@ public class Fullbright extends Module {
     );
 
     public Fullbright() {
-        super(Categories.Render, "fullbright", "Lights up your world!");
+        super(Categories.Render, "Fullbright", "Lights up your world!");
 
         MeteorClient.EVENT_BUS.subscribe(StaticListener.class);
     }
