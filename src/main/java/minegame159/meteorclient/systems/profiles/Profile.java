@@ -9,6 +9,7 @@ import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.accounts.Accounts;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.friends.Friends;
+import minegame159.meteorclient.systems.hud.HUD;
 import minegame159.meteorclient.systems.macros.Macros;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
@@ -29,7 +30,7 @@ public class Profile implements ISerializable<Profile> {
     public String name = "";
     public boolean onLaunch = false;
     public List<String> loadOnJoinIps = new ArrayList<>();
-    public boolean accounts = false, config = true, friends = false, macros = true, modules = true, waypoints = false;
+    public boolean modules = false, config = true, hud = true, friends = false, macros = true, accounts = false, waypoints = false;
 
     public void load(System<?> system) {
         File folder = new File(Profiles.FOLDER, name);
@@ -39,11 +40,12 @@ public class Profile implements ISerializable<Profile> {
     public void load() {
         File folder = new File(Profiles.FOLDER, name);
 
-        if (accounts) Accounts.get().load(folder);
+        if (modules) Modules.get().load(folder);
         if (config) Config.get().load(folder);
+        if (hud) HUD.get().load(folder);
         if (friends) Friends.get().load(folder);
         if (macros) Macros.get().load(folder);
-        if (modules) Modules.get().load(folder);
+        if (accounts) Accounts.get().load(folder);
         if (waypoints) Waypoints.get().load(folder);
     }
 
@@ -55,11 +57,12 @@ public class Profile implements ISerializable<Profile> {
     public void save() {
         File folder = new File(Profiles.FOLDER, name);
 
-        if (accounts) Accounts.get().save(folder);
+        if (modules) Modules.get().save(folder);
         if (config) Config.get().save(folder);
+        if (hud) HUD.get().save(folder);
         if (friends) Friends.get().save(folder);
         if (macros) Macros.get().save(folder);
-        if (modules) Modules.get().save(folder);
+        if (accounts) Accounts.get().save(folder);
         if (waypoints) Waypoints.get().save(folder);
     }
 
@@ -81,14 +84,8 @@ public class Profile implements ISerializable<Profile> {
         CompoundTag tag = new CompoundTag();
 
         tag.putString("name", name);
-        tag.putBoolean("onLaunch", onLaunch);
 
-        tag.putBoolean("accounts", accounts);
-        tag.putBoolean("config", config);
-        tag.putBoolean("friends", friends);
-        tag.putBoolean("macros", macros);
-        tag.putBoolean("modules", modules);
-        tag.putBoolean("waypoints", waypoints);
+        tag.putBoolean("onLaunch", onLaunch);
 
         loadOnJoinIps.removeIf(String::isEmpty);
 
@@ -96,20 +93,22 @@ public class Profile implements ISerializable<Profile> {
         for (String ip : loadOnJoinIps) ipsTag.add(StringTag.of(ip));
         tag.put("loadOnJoinIps", ipsTag);
 
+        tag.putBoolean("modules", modules);
+        tag.putBoolean("config", config);
+        tag.putBoolean("hud", hud);
+        tag.putBoolean("friends", friends);
+        tag.putBoolean("macros", macros);
+        tag.putBoolean("accounts", accounts);
+        tag.putBoolean("waypoints", waypoints);
+
         return tag;
     }
 
     @Override
     public Profile fromTag(CompoundTag tag) {
         name = tag.getString("name");
-        onLaunch = tag.contains("onLaunch") && tag.getBoolean("onLaunch");
 
-        accounts = tag.contains("accounts") && tag.getBoolean("accounts");
-        config = tag.contains("config") && tag.getBoolean("config");
-        friends = tag.contains("friends") && tag.getBoolean("friends");
-        macros = tag.contains("macros") && tag.getBoolean("macros");
-        modules = tag.contains("modules") && tag.getBoolean("modules");
-        waypoints = tag.contains("waypoints") && tag.getBoolean("waypoints");
+        onLaunch = tag.contains("onLaunch") && tag.getBoolean("onLaunch");
 
         loadOnJoinIps.clear();
 
@@ -117,6 +116,14 @@ public class Profile implements ISerializable<Profile> {
             ListTag ipsTag = tag.getList("loadOnJoinIps", 8);
             for (Tag ip : ipsTag) loadOnJoinIps.add(ip.asString());
         }
+
+        modules = tag.getBoolean("modules") && tag.contains("modules");
+        config = tag.getBoolean("config") || !tag.contains("config");
+        hud = tag.getBoolean("hud") || !tag.contains("hud");
+        friends = tag.getBoolean("friends") && tag.contains("friends");
+        macros = tag.getBoolean("macros") || !tag.contains("macros");
+        accounts = tag.getBoolean("accounts") && tag.contains("accounts");
+        waypoints = tag.getBoolean("waypoints") && tag.contains("waypoints");
 
         return this;
     }
@@ -127,11 +134,12 @@ public class Profile implements ISerializable<Profile> {
         this.onLaunch = profile.onLaunch;
         this.loadOnJoinIps = profile.loadOnJoinIps;
 
-        this.accounts = profile.accounts;
+        this.modules = profile.modules;
         this.config = profile.config;
+        this.hud = profile.hud;
         this.friends = profile.friends;
         this.macros = profile.macros;
-        this.modules = profile.modules;
+        this.accounts = profile.accounts;
         this.waypoints = profile.waypoints;
         return this;
     }

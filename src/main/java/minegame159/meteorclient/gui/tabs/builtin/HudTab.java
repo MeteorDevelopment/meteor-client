@@ -7,40 +7,53 @@ package minegame159.meteorclient.gui.tabs.builtin;
 
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.GuiTheme;
-import minegame159.meteorclient.gui.screens.HudElementScreen;
+import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.WindowScreen;
+import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.WindowTabScreen;
+import minegame159.meteorclient.gui.utils.Cell;
+import minegame159.meteorclient.gui.widgets.WItemWithLabel;
+import minegame159.meteorclient.gui.widgets.WWidget;
+import minegame159.meteorclient.gui.widgets.containers.*;
+import minegame159.meteorclient.gui.widgets.input.WTextBox;
+import minegame159.meteorclient.gui.widgets.pressable.WButton;
+import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
+import minegame159.meteorclient.gui.widgets.pressable.WMinus;
+import minegame159.meteorclient.gui.widgets.pressable.WPlus;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.hud.HUD;
-import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
+import minegame159.meteorclient.settings.Setting;
+import minegame159.meteorclient.systems.hud.ElementRegister;
+import minegame159.meteorclient.systems.hud.HUD;
+import minegame159.meteorclient.systems.hud.HudElement;
+import minegame159.meteorclient.systems.hud.elements.CustomItemHud;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.CursorStyle;
+import minegame159.meteorclient.utils.misc.Names;
+import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
-import org.lwjgl.glfw.GLFW;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
+import net.minecraft.util.registry.Registry;
+import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 import static minegame159.meteorclient.utils.Utils.mc;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class HudTab extends Tab {
-    public static HudTab INSTANCE;
 
     public HudTab() {
         super("HUD");
-
-        INSTANCE = this;
-    }
-
-    @Override
-    public void openScreen(GuiTheme theme) {
-        mc.openScreen(createScreen(theme));
     }
 
     @Override
@@ -54,81 +67,137 @@ public class HudTab extends Tab {
     }
 
     public static class HudScreen extends WindowTabScreen {
-        private final Color HOVER_BG_COLOR = new Color(200, 200, 200, 50);
-        private final Color HOVER_OL_COLOR = new Color(200, 200, 200, 200);
-
-        private final Color INACTIVE_BG_COLOR = new Color(200, 25, 25, 50);
-        private final Color INACTIVE_OL_COLOR = new Color(200, 25, 25, 200);
-
-        private final HUD hud;
-
-        private boolean selecting;
-        private double mouseStartX, mouseStartY;
-
-        private boolean dragging, dragged;
-        private double lastMouseX, lastMouseY;
-        private HudElement hoveredModule;
-        private final List<HudElement> selectedElements = new ArrayList<>();
 
         public HudScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
 
-            this.hud = Modules.get().get(HUD.class);
+            HUD hud = HUD.get();
+
+            hud.settings.onActivated();
+            add(theme.settings(hud.settings)).expandX();
+
+            WButton button = add(theme.button("Editor")).expandX().widget();
+            button.action = () -> mc.openScreen(new HudEditorScreen(theme));
+
+            add(theme.horizontalSeparator()).expandX();
+
+            // Bottom
+            WHorizontalList bottom = add(theme.horizontalList()).expandX().widget();
+
+            //   Active
+            bottom.add(theme.label("Active: "));
+            WCheckbox active = bottom.add(theme.checkbox(hud.isActive())).expandCellX().widget();
+            active.action = () -> hud.setActive(active.checked);
+
+            WButton reset = bottom.add(theme.button(GuiRenderer.RESET)).right().widget();
+            reset.action = hud::reset;
+        }
+
+    }
+
+    public static class HudEditorScreen extends WidgetScreen {
+        private final HUD hud;
+
+        private boolean selecting;
+        private double selectStartX, selectStartY;
+
+        private boolean dragging;
+        private double lastMouseX, lastMouseY;
+
+//        private boolean scaling;
+
+        private HudElement hoveredElement;
+        private final List<HudElement> selectedElements = new ArrayList<>();
+
+        private final Color BG_COLOR = new Color(200, 200, 200, 50);
+        private final Color OL_COLOR = new Color(200, 200, 200, 200);
+
+        public HudEditorScreen(GuiTheme theme) {
+            super(theme, "hud-editor");
+
+            this.hud = HUD.get();
         }
 
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
-            if (hoveredModule != null) {
-                if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
-                    if (!selectedElements.isEmpty()) selectedElements.clear();
-                    MinecraftClient.getInstance().openScreen(new HudElementScreen(theme, hoveredModule));
-                }
-                else {
-                    dragging = true;
-                    dragged = false;
+            double s = mc.getWindow().getScaleFactor();
 
-                    if (!selectedElements.contains(hoveredModule)) {
-                        selectedElements.clear();
-                        selectedElements.add(hoveredModule);
+            mouseX *= s;
+            mouseY *= s;
+
+            switch (button) {
+                case GLFW_MOUSE_BUTTON_LEFT:
+                    if (hoveredElement != null) {
+//                        if (isAtElementCorner(hoveredElement, mouseX, mouseY)) {
+//                            scaling = true;
+//                            selectedElements.clear();
+//                            selectedElements.add(hoveredElement);
+//                        }
+//                        else  {
+                            dragging = true;
+
+                            if (!selectedElements.contains(hoveredElement)) {
+                                selectedElements.clear();
+                                selectedElements.add(hoveredElement);
+                            }
+//                        }
+                        Input.setCursorStyle(CursorStyle.Click);
+
+                        return true;
                     }
+                    else {
+                        selectedElements.clear();
+                        selecting = true;
+                        selectStartX = mouseX;
+                        selectStartY = mouseY;
 
-                }
+                        return false;
+                    }
+                case GLFW_MOUSE_BUTTON_RIGHT:
+                    selectedElements.clear();
 
-                return true;
+                    if (hoveredElement != null) mc.openScreen(new HudElementScreen(theme, hoveredElement));
+                    else mc.openScreen(new HudElementSelectorScreen(theme, mouseX, mouseY));
+
+                    return true;
+                case GLFW_MOUSE_BUTTON_MIDDLE:
+                    if (hoveredElement != null) {
+                        selectedElements.remove(hoveredElement);
+                        hud.activeElements.remove(hoveredElement);
+                        return true;
+                    }
+                    return false;
             }
-
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
-
-            selecting = true;
-            mouseStartX = mouseX * s;
-            mouseStartY = mouseY * s;
-
-            if (!selectedElements.isEmpty()) {
-                selectedElements.clear();
-                return true;
-            }
-
             return false;
         }
+
+//        private boolean isAtElementCorner(HudElement element, double mouseX, double mouseY) {
+//            if (!(element instanceof ScaleableHudElement)) return false;
+//            double bounds = 3 * ((ScaleableHudElement) element).getScale();
+//            if ((mouseX > element.box.getX() - bounds && mouseX < element.box.getX() + bounds) && (mouseY > element.box.getY() - bounds && mouseY < element.box.getY() + bounds)) return true;
+//            if ((mouseX > element.box.getX() + element.box.width - bounds && mouseX < element.box.getX() + element.box.width + bounds) && (mouseY > element.box.getY() - bounds && mouseY < element.box.getY() + bounds)) return true;
+//            if ((mouseX > element.box.getX() - bounds && mouseX < element.box.getX() + bounds) && (mouseY > element.box.getY() + element.box.height - bounds && mouseY < element.box.getY() + element.box.height + bounds)) return true;
+//            return (mouseX > element.box.getX() + element.box.width - bounds && mouseX < element.box.getX() + element.box.width + bounds) && (mouseY > element.box.getY() + element.box.height - bounds && mouseY < element.box.getY() + element.box.height + bounds);
+//        }
 
         private boolean isInSelection(double mouseX, double mouseY, double x, double y) {
             double sx, sy;
             double sw, sh;
 
-            if (mouseX >= mouseStartX) {
-                sx = mouseStartX;
-                sw = mouseX - mouseStartX;
+            if (mouseX >= selectStartX) {
+                sx = selectStartX;
+                sw = mouseX - selectStartX;
             } else {
                 sx = mouseX;
-                sw = mouseStartX - mouseX;
+                sw = selectStartX - mouseX;
             }
 
-            if (mouseY >= mouseStartY) {
-                sy = mouseStartY;
-                sh = mouseY - mouseStartY;
+            if (mouseY >= selectStartY) {
+                sy = selectStartY;
+                sh = mouseY - selectStartY;
             } else {
                 sy = mouseY;
-                sh = mouseStartY - mouseY;
+                sh = selectStartY - mouseY;
             }
 
             return x >= sx && x <= sx + sw && y >= sy && y <= sy + sh;
@@ -136,7 +205,7 @@ public class HudTab extends Tab {
 
         @Override
         public void mouseMoved(double mouseX, double mouseY) {
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             mouseX *= s;
             mouseY *= s;
@@ -144,17 +213,22 @@ public class HudTab extends Tab {
             if (selecting) {
                 selectedElements.clear();
 
-                for (HudElement module : hud.elements) {
-                    double mX = module.box.getX();
-                    double mY = module.box.getY();
-                    double mW = module.box.width;
-                    double mH = module.box.height;
+                for (HudElement element : hud.activeElements) {
+                    double mX = element.box.getX();
+                    double mY = element.box.getY();
+                    double mW = element.box.width;
+                    double mH = element.box.height;
 
                     if (isInSelection(mouseX, mouseY, mX, mY) || isInSelection(mouseX, mouseY, mX + mW, mY) || (isInSelection(mouseX, mouseY, mX, mY + mH) || isInSelection(mouseX, mouseY, mX + mW, mY + mH))) {
-                        selectedElements.add(module);
+                        selectedElements.add(element);
                     }
                 }
             }
+//            else if (scaling) {
+//                if (selectedElements.size() == 1 && selectedElements.get(0) == hoveredElement && hoveredElement instanceof ScaleableHudElement) {
+//                    ((ScaleableHudElement) hoveredElement).setScale(mmmjnfenfowehuhfowej);
+//                }
+//            }
             else if (dragging) {
                 for (HudElement element : selectedElements) {
                     element.box.addPos(mouseX - lastMouseX, mouseY - lastMouseY);
@@ -181,7 +255,7 @@ public class HudTab extends Tab {
                     boolean movedX = false;
                     boolean movedY = false;
 
-                    for (HudElement element : hud.elements) {
+                    for (HudElement element : hud.activeElements) {
                         if (selectedElements.contains(element)) continue;
 
                         double eX = element.box.getX();
@@ -224,8 +298,6 @@ public class HudTab extends Tab {
 
                         if (movedX && movedY) break;
                     }
-
-                    dragged = true;
                 }
             }
 
@@ -241,13 +313,8 @@ public class HudTab extends Tab {
         public boolean mouseReleased(double mouseX, double mouseY, int button) {
             if (dragging) {
                 dragging = false;
-
-                if (!dragged && !selectedElements.isEmpty()) {
-                    selectedElements.forEach(HudElement::toggle);
-                    selectedElements.clear();
-                }
-
                 if (selectedElements.size() <= 1) selectedElements.clear();
+                Input.setCursorStyle(CursorStyle.Default);
                 return true;
             }
 
@@ -256,12 +323,19 @@ public class HudTab extends Tab {
                 return true;
             }
 
+//            if (scaling) {
+//                scaling = false;
+//                selectedElements.clear();
+//                Input.setCursorStyle(CursorStyle.Default);
+//                return true;
+//            }
+
             return false;
         }
 
         @Override
         public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             mouseX *= s;
             mouseY *= s;
@@ -278,47 +352,241 @@ public class HudTab extends Tab {
 
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
 
-            for (HudElement element : hud.elements) {
-                if (element.active) continue;
-
-                renderElement(element, INACTIVE_BG_COLOR, INACTIVE_OL_COLOR);
-            }
-
             for (HudElement element : selectedElements) {
-                renderElement(element, HOVER_BG_COLOR, HOVER_OL_COLOR);
+                renderElement(element);
             }
 
             if (!dragging) {
-                hoveredModule = null;
+                hoveredElement = null;
 
-                for (HudElement module : hud.elements) {
-                    if (module.box.isOver(mouseX, mouseY)) {
-                        if (!selectedElements.contains(module)) renderElement(module, HOVER_BG_COLOR, HOVER_OL_COLOR);
-                        hoveredModule = module;
+                for (HudElement element : hud.activeElements) {
+                    if (element.box.intersects(mouseX, mouseY)) {
+                        if (!selectedElements.contains(element)) renderElement(element);
+                        hoveredElement = element;
 
                         break;
                     }
                 }
 
                 if (selecting) {
-                    renderQuad(mouseStartX, mouseStartY, mouseX - mouseStartX, mouseY - mouseStartY, HOVER_BG_COLOR, HOVER_OL_COLOR);
+                    renderBox(selectStartX, selectStartY, mouseX - selectStartX, mouseY - selectStartY);
                 }
+            }
+
+            if (!selecting && !dragging && hud.guides.get() == HUD.Guides.Always) {
+                renderGuides(mouseX, mouseY);
+            }
+            else if (!selecting && dragging && hoveredElement != null && selectedElements.size() == 1 && hud.guides.get() != HUD.Guides.None) {
+                double x, y;
+
+                switch (hoveredElement.box.boxAnchorX) {
+                    case Center: x = hoveredElement.box.getX() + (hoveredElement.box.width / 2); break;
+                    case Right:  x = hoveredElement.box.getX() + hoveredElement.box.width; break;
+                    default:     x = hoveredElement.box.getX(); break;
+                }
+
+                switch (hoveredElement.box.boxAnchorY) {
+                    case Center:    y = hoveredElement.box.getY() + (hoveredElement.box.height / 2); break;
+                    case Bottom:    y = hoveredElement.box.getY() + hoveredElement.box.height; break;
+                    default:        y = hoveredElement.box.getY(); break;
+                }
+
+                renderGuides(x, y);
             }
 
             Renderer.NORMAL.end();
             Utils.scaledProjection();
         }
 
-        private void renderElement(HudElement module, Color bgColor, Color olColor) {
-            renderQuad(module.box.getX(), module.box.getY(), module.box.width, module.box.height, bgColor, olColor);
+        private void renderElement(HudElement module) {
+            renderBox(module.box.getX(), module.box.getY(), module.box.width, module.box.height);
         }
 
-        private void renderQuad(double x, double y, double w, double h, Color bgColor, Color olColor) {
-            Renderer.NORMAL.quad(x, y, w, h, bgColor);
-            Renderer.NORMAL.quad(x - 1, y - 1, w + 2, 1, olColor);
-            Renderer.NORMAL.quad(x - 1, y + h - 1, w + 2, 1, olColor);
-            Renderer.NORMAL.quad(x - 1, y, 1, h, olColor);
-            Renderer.NORMAL.quad(x + w, y, 1, h, olColor);
+        private void renderBox(double x, double y, double w, double h) {
+            Renderer.NORMAL.quad(x, y, w, h, BG_COLOR);
+            Renderer.NORMAL.quad(x - 1, y - 1, w + 2, 1, OL_COLOR);
+            Renderer.NORMAL.quad(x - 1, y + h - 1, w + 2, 1, OL_COLOR);
+            Renderer.NORMAL.quad(x - 1, y, 1, h, OL_COLOR);
+            Renderer.NORMAL.quad(x + w, y, 1, h, OL_COLOR);
+        }
+
+        private void renderGuides(double mouseX, double mouseY) {
+            Renderer.NORMAL.quad(mouseX - 1, 0, 2, Utils.getWindowHeight(), OL_COLOR);
+            Renderer.NORMAL.quad(0, mouseY - 1, Utils.getWindowWidth(), 2, OL_COLOR);
+        }
+    }
+
+    public static class HudElementScreen extends WindowScreen {
+        private final HUD hud;
+        private final HudElement element;
+        private WContainer settings;
+
+        public HudElementScreen(GuiTheme theme, HudElement element) {
+            super(theme, element.title);
+            this.element = element;
+            this.hud = HUD.get();
+
+            // Description
+            add(theme.label(element.description, getWindowWidth() / 2.0));
+
+            // Settings
+            if (element.settings.sizeGroups() > 0) {
+                settings = add(theme.verticalList()).expandX().widget();
+                settings.add(theme.settings(element.settings)).expandX();
+
+                add(theme.horizontalSeparator()).expandX();
+            }
+
+            // Bottom
+            WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
+
+            // Remove
+            WMinus remove = bottomList.add(theme.minus()).widget();
+            remove.action = () -> {
+                hud.activeElements.remove(element);
+                this.onClose();
+            };
+
+            // Reset
+            WButton reset = bottomList.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+            reset.action = () -> element.settings.forEach(group -> group.forEach(Setting::reset));
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+
+            if (settings == null) return;
+
+            element.settings.tick(settings, theme);
+        }
+
+        @Override
+        protected void onRenderBefore(float delta) {
+            HUD.get().onRender(Render2DEvent.get(0, 0, delta));
+        }
+    }
+
+
+    public static class HudElementSelectorScreen extends WindowScreen {
+        private final HUD hud;
+
+        private final WVerticalList list;
+
+        private WSection defaultElements, custom;
+
+        private final double clickX, clickY;
+
+        public HudElementSelectorScreen(GuiTheme theme, double clickX, double clickY) {
+            super(theme, "Add Element");
+
+            hud = HUD.get();
+            this.clickX = clickX;
+            this.clickY = clickY;
+
+            list = super.add(theme.verticalList()).expandX().minWidth(400).widget();
+
+            defaultElements = add(theme.section("Default", defaultElements == null || defaultElements.isExpanded())).expandX().widget();
+            custom = add(theme.section("Custom", custom == null || custom.isExpanded())).expandX().widget();
+
+            initWidgets();
+        }
+
+        @Override
+        public <W extends WWidget> Cell<W> add(W widget) {
+            return list.add(widget);
+        }
+
+        private void initWidgets() {
+            hud.elementClasses.forEach((name, klass) -> {
+                switch (klass.getAnnotation(ElementRegister.class).category()) {
+                    case Custom:    addElement(custom, Utils.nameToTitle(name), createItemElement()); break;
+                    case Default:   addElement(defaultElements, Utils.nameToTitle(name), addElementToHud(klass)); break;
+                }
+            });
+        }
+
+        // Default elements
+        private void addElement(WSection category, String title, Runnable action) {
+            WHorizontalList elementList = category.add(theme.horizontalList()).expandX().widget();
+
+            // Title
+            elementList.add(theme.label(title)).expandX();
+
+            // Add
+            WPlus add = elementList.add(theme.plus()).expandCellX().right().widget();
+            add.action = action;
+        }
+
+        // Default + button action
+        private Runnable addElementToHud(Class<? extends HudElement> elementClass) {
+            return () -> {
+                try {
+                    HudElement element = elementClass.getDeclaredConstructor().newInstance();
+                    element.box.setPos(clickX, clickY);
+                    hud.add(element);
+                    this.onClose();
+                } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | InvocationTargetException ignored) {}
+            };
+        }
+
+        private Runnable createItemElement() {
+            return () -> {
+                this.onClose();
+                mc.openScreen(new ItemSelectorScreen(theme, clickX, clickY));
+            };
+        }
+
+        public static class ItemSelectorScreen extends WindowScreen {
+            private WTable table;
+
+            private final WTextBox filter;
+            private String filterText = "";
+
+            private final double clickX, clickY;
+
+            public ItemSelectorScreen(GuiTheme theme, double clickX, double clickY) {
+                super(theme, "Select Item");
+
+                this.clickX = clickX;
+                this.clickY = clickY;
+
+                filter = add(theme.textBox("")).minWidth(400).expandX().widget();
+                filter.setFocused(true);
+                filter.action = () -> {
+                    filterText = filter.get().trim();
+
+                    table.clear();
+                    initWidgets();
+                };
+
+                table = add(theme.table()).expandX().widget();
+
+                initWidgets();
+            }
+
+            private void initWidgets() {
+                for (Item item : Registry.ITEM) {
+                    if (item == Items.AIR) continue;
+
+                    WItemWithLabel itemWithLabel = theme.itemWithLabel(item.getDefaultStack(), Names.get(item));
+                    if (!filterText.isEmpty()) {
+                        if (!StringUtils.containsIgnoreCase(itemWithLabel.getLabelText(), filterText)) continue;
+                    }
+                    table.add(itemWithLabel);
+
+                    WButton select = table.add(theme.button("Select")).expandCellX().right().widget();
+                    select.action = () -> {
+                        CustomItemHud element = new CustomItemHud(item);
+                        element.box.setPos(clickX, clickY);
+                        HUD.get().add(element);
+                        this.onClose();
+                        onClose();
+                    };
+
+                    table.row();
+                }
+            }
         }
     }
 }

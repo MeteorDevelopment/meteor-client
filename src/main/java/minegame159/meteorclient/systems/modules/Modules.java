@@ -27,7 +27,6 @@ import minegame159.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import minegame159.meteorclient.systems.modules.movement.speed.Speed;
 import minegame159.meteorclient.systems.modules.player.*;
 import minegame159.meteorclient.systems.modules.render.*;
-import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.search.Search;
 import minegame159.meteorclient.systems.modules.world.Timer;
 import minegame159.meteorclient.systems.modules.world.*;
@@ -472,7 +471,6 @@ public class Modules extends System<Modules> {
         add(new FreeLook());
         add(new Freecam());
         add(new Fullbright());
-        add(new HUD());
         add(new HandView());
         add(new HoleESP());
         add(new ItemPhysics());

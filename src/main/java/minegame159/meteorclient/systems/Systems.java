@@ -10,6 +10,7 @@ import minegame159.meteorclient.systems.accounts.Accounts;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.friends.Friends;
+import minegame159.meteorclient.systems.hud.HUD;
 import minegame159.meteorclient.systems.macros.Macros;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.profiles.Profiles;
@@ -42,6 +43,7 @@ public class Systems {
         add(new Waypoints());
         add(new Profiles());
         add(new Proxies());
+        add(new HUD());
 
         for (System<?> system : systems.values()) {
             if (system != config) system.init();

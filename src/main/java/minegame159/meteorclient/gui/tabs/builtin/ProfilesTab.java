@@ -146,16 +146,22 @@ public class ProfilesTab extends Tab {
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
 
-            // Accounts
-            table.add(theme.label("Accounts:"));
-            WCheckbox accountsBool = table.add(theme.checkbox(ogProfile.accounts)).widget();
-            accountsBool.action = () -> newProfile.accounts = accountsBool.checked;
+            // Modules
+            table.add(theme.label("Modules:"));
+            WCheckbox modulesBool = table.add(theme.checkbox(ogProfile.modules)).widget();
+            modulesBool.action = () -> newProfile.modules = modulesBool.checked;
             table.row();
 
             // Config
             table.add(theme.label("Config:"));
             WCheckbox configBool = table.add(theme.checkbox(ogProfile.config)).widget();
             configBool.action = () -> newProfile.config = configBool.checked;
+            table.row();
+
+            // HUD
+            table.add(theme.label("HUD:"));
+            WCheckbox hudBool = table.add(theme.checkbox(ogProfile.hud)).widget();
+            hudBool.action = () -> newProfile.hud = configBool.checked;
             table.row();
 
             // Friends
@@ -170,10 +176,10 @@ public class ProfilesTab extends Tab {
             macrosBool.action = () -> newProfile.macros = macrosBool.checked;
             table.row();
 
-            // Modules
-            table.add(theme.label("Modules:"));
-            WCheckbox modulesBool = table.add(theme.checkbox(ogProfile.modules)).widget();
-            modulesBool.action = () -> newProfile.modules = modulesBool.checked;
+            // Accounts
+            table.add(theme.label("Accounts:"));
+            WCheckbox accountsBool = table.add(theme.checkbox(ogProfile.accounts)).widget();
+            accountsBool.action = () -> newProfile.accounts = accountsBool.checked;
             table.row();
 
             // Waypoints
