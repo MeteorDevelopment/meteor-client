@@ -10,6 +10,6 @@ import minegame159.meteorclient.systems.modules.Module;
 
 public class AntiPacketKick extends Module {
     public AntiPacketKick() {
-        super(Categories.Misc, "anti-packet-kick", "Attempts to prevent you from being disconnected by large packets.");
+        super(Categories.Misc, "AntiPacketKick", "Attempts to prevent you from being disconnected by large packets.");
     }
 }

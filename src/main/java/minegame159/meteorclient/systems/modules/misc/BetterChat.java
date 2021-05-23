@@ -212,7 +212,7 @@ public class BetterChat extends Module {
 
 
     public BetterChat() {
-        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
+        super(Categories.Misc, "BetterChat", "Improves your chat experience in various ways.");
     }
 
     public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {

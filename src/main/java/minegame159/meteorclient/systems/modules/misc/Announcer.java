@@ -33,7 +33,7 @@ public class Announcer extends Module {
     };
 
     public Announcer() {
-        super(Categories.Misc, "announcer", "Announces specified actions into chat.");
+        super(Categories.Misc, "Announcer", "Announces specified actions into chat.");
     }
 
     @Override

@@ -9,7 +9,7 @@ package minegame159.meteorclient.mixin;
 // Did squidoodly put his name on everything???
 
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.misc.BypassDeathScreen;
+import minegame159.meteorclient.systems.modules.misc.DeathSpectate;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -28,9 +28,9 @@ public class DeathScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("HEAD"))
     protected void init(CallbackInfo ci) {
-        if (Modules.get().isActive(BypassDeathScreen.class)) {
+        if (Modules.get().isActive(DeathSpectate.class)) {
             this.addButton(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> {
-                Modules.get().get(BypassDeathScreen.class).shouldBypass = true;
+                Modules.get().get(DeathSpectate.class).shouldBypass = true;
                 this.client.openScreen(null);
             }));
         }

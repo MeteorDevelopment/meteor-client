@@ -31,21 +31,18 @@ import java.util.PrimitiveIterator;
 import java.util.Random;
 import java.util.stream.IntStream;
 
-// FUCK YOU GHOST TYPES
-// agreed fuck that guy.
-
 public class BookBot extends Module {
     private static final int LINE_WIDTH = 113;
 
-    public enum Mode{ // Edna Mode
+    public enum Mode{
         File,
         Random,
         Ascii
     }
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();//Obligatory comment.
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>() //WEEEEEEEEEEEEEEEEEEEE (Wanted to add a comment on everything but nothing to say so fuck you.)
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The mode of the book bot.")
             .defaultValue(Mode.Ascii)
@@ -55,7 +52,7 @@ public class BookBot extends Module {
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
             .description("The name you want to give your books.")
-            .defaultValue("Meteor on Crack!") //METEOR ON CRACK!!! / based.
+            .defaultValue("CSB Client on top!")
             .build()
     );
 
@@ -93,7 +90,6 @@ public class BookBot extends Module {
             .build()
     );
 
-    //Please don't ask my why they are global. I have no answer for you.
     private static final Random RANDOM = new Random();
     private ListTag pages = new ListTag();
     private int booksLeft;
@@ -108,12 +104,11 @@ public class BookBot extends Module {
     private String fileString;
 
     public BookBot(){
-        super(Categories.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
+        super(Categories.Misc, "BookBot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
     }
 
     @Override
-    public void onActivate() { //WHY THE FUCK DOES OnActivate NOT CORRECT TO onActivate? Fucking retard.
-        //We need to enter the loop somehow. ;)
+    public void onActivate() {
         booksLeft = noOfBooks.get();
         firstTime = true;
     }
@@ -272,5 +267,4 @@ public class BookBot extends Module {
         nextChar = stream.nextInt();
         return true;
     }
-} //IT TOOK ME 30 FUCKING MINUTES TO COMMENT THIS. I WANT TO DIE. SEND HELP. CODING METEOR IS BECOMING AN ADDICTION. PLEASE. CAN SOMEONE HEAR ME? ANYONE?
-// this is a r/squidoodly moment.
+}

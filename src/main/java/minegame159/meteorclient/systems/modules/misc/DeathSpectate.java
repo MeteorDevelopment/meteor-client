@@ -10,11 +10,11 @@ package minegame159.meteorclient.systems.modules.misc;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 
-public class BypassDeathScreen extends Module {
+public class DeathSpectate extends Module {
     public boolean shouldBypass = false;
 
-    public BypassDeathScreen(){
-        super(Categories.Misc, "bypass-death-screen", "Lets you spy on people after death.");
+    public DeathSpectate(){
+        super(Categories.Misc, "DeathSpectate", "Lets you spy on people after death.");
     }
 
     @Override
