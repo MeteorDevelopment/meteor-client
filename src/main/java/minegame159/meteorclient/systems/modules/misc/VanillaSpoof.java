@@ -21,7 +21,7 @@ import java.nio.charset.StandardCharsets;
 
 public class VanillaSpoof extends Module {
     public VanillaSpoof() {
-        super(Categories.Misc, "vanilla-spoof", "When connecting to a server it spoofs the client name to be 'vanilla'.");
+        super(Categories.Misc, "VanillaSpoof", "When connecting to a server it spoofs the client name to be 'vanilla'.");
 
         MeteorClient.EVENT_BUS.subscribe(new Listener());
     }

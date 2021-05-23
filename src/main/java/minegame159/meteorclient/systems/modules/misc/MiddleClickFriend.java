@@ -31,7 +31,7 @@ public class MiddleClickFriend extends Module {
     );
 
     public MiddleClickFriend() {
-        super(Categories.Misc, "middle-click-friend", "Adds or removes a player as a friend via middle click.");
+        super(Categories.Misc, "MiddleClickFriend", "Adds or removes a player as a friend via middle click.");
     }
 
     @EventHandler

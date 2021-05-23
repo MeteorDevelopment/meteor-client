@@ -52,7 +52,7 @@ public class Spam extends Module {
     private int messageI;
 
     public Spam() {
-        super(Categories.Misc, "spam", "Spams specified messages in chat.");
+        super(Categories.Misc, "Spam", "Spams specified messages in chat.");
     }
 
     @Override
@@ -146,7 +146,7 @@ public class Spam extends Module {
             ListTag messagesTag = tag.getList("messages", 8);
             for (Tag messageTag : messagesTag) messages.add(messageTag.asString());
         } else {
-            messages.add("Meteor on Crack!");
+            messages.add("CSB Client on top!");
         }
 
         return super.fromTag(tag);

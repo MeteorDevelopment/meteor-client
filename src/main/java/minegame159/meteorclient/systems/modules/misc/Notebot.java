@@ -134,7 +134,7 @@ public class Notebot extends Module {
     private WLabel status;
 
     public Notebot() {
-        super(Categories.Misc, "notebot","Plays noteblock nicely");
+        super(Categories.Misc, "Notebot","Plays noteblock nicely");
         for (int y = -5; y < 5; y++) {
             for (int x = -5; x < 5; x++) {
                 if (y!=0||x!=0) {
