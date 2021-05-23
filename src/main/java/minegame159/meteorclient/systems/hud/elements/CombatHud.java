@@ -170,7 +170,7 @@ public class CombatHud extends ScaleableHudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(175 * scale.get(), 95 * scale.get());
+        box.setSize(175 * getScale(), 95 * getScale());
     }
 
     @Override
@@ -191,16 +191,16 @@ public class CombatHud extends ScaleableHudElement {
 
             // Player Model
             InventoryScreen.drawEntity(
-                    (int) (x + (25 * scale.get())),
-                    (int) (y + (66 * scale.get())),
-                    (int) (30 * scale.get()),
+                    (int) (x + (25 * getScale())),
+                    (int) (y + (66 * getScale())),
+                    (int) (30 * getScale()),
                     -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.yaw - playerEntity.prevYaw) * mc.getTickDelta()),
                     -playerEntity.pitch, playerEntity
             );
 
             // Moving pos to past player model
-            x += 50 * scale.get();
-            y += 5 * scale.get();
+            x += 50 * getScale();
+            y += 5 * getScale();
 
             // Setting up texts
             String breakText = " | ";
@@ -268,7 +268,7 @@ public class CombatHud extends ScaleableHudElement {
                 }
             }
 
-            TextRenderer.get().begin(0.45 * scale.get(), false, true);
+            TextRenderer.get().begin(0.45 * getScale(), false, true);
 
             double breakWidth = TextRenderer.get().getWidth(breakText);
             double pingWidth = TextRenderer.get().getWidth(pingText);
@@ -296,7 +296,7 @@ public class CombatHud extends ScaleableHudElement {
             TextRenderer.get().end();
 
             // Moving pos down for armor
-            y += 10 * scale.get();
+            y += 10 * getScale();
 
             double armorX;
             double armorY;
@@ -304,10 +304,10 @@ public class CombatHud extends ScaleableHudElement {
 
             // Drawing armor
             RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
+            RenderSystem.scaled(getScale(), getScale(), 1);
 
-            x /= scale.get();
-            y /= scale.get();
+            x /= getScale();
+            y /= getScale();
 
             TextRenderer.get().begin(0.35, false, true);
 
@@ -342,15 +342,15 @@ public class CombatHud extends ScaleableHudElement {
             TextRenderer.get().end();
             RenderSystem.popMatrix();
 
-            y = (int) (box.getY() + 75 * scale.get());
+            y = (int) (box.getY() + 75 * getScale());
             x = box.getX();
 
             // Health bar
             RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
+            RenderSystem.scaled(getScale(), getScale(), 1);
 
-            x /= scale.get();
-            y /= scale.get();
+            x /= getScale();
+            y /= getScale();
 
             x += 5;
             y += 5;

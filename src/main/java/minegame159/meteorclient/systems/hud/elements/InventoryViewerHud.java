@@ -61,7 +61,7 @@ public class InventoryViewerHud extends ScaleableHudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(176 * scale.get(), 67 * scale.get());
+        box.setSize(176 * getScale(), 67 * getScale());
     }
 
     @Override
@@ -76,7 +76,7 @@ public class InventoryViewerHud extends ScaleableHudElement {
                 ItemStack stack = getStack(9 + row * 9 + i);
                 if (stack == null) continue;
 
-                RenderUtils.drawItem(stack, (int) (x + (8 + i * 18) * scale.get()), (int) (y + (7 + row * 18) * scale.get()), scale.get(), true);
+                RenderUtils.drawItem(stack, (int) (x + (8 + i * 18) * getScale()), (int) (y + (7 + row * 18) * getScale()), getScale(), true);
             }
         }
     }

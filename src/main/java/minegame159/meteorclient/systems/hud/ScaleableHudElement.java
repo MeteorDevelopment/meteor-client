@@ -5,7 +5,7 @@ import minegame159.meteorclient.settings.Setting;
 
 public abstract class ScaleableHudElement extends HudElement {
 
-    protected final Setting<Double> scale = sgBox.add(new DoubleSetting.Builder()
+    private final Setting<Double> scale = sgBox.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of the element.")
             .defaultValue(2)
@@ -19,10 +19,14 @@ public abstract class ScaleableHudElement extends HudElement {
     }
 
     public double getScale() {
-        return scale.get();
+        return scale.get() * hud.scale.get();
     }
 
     public void setScale(double scale) {
         this.scale.set(scale);
+    }
+
+    public void addScale(double scale) {
+        this.scale.set(this.scale.get() + scale);
     }
 }

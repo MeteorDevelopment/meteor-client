@@ -82,7 +82,7 @@ public class PlayerModelHud extends ScaleableHudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(50 * scale.get(), 75 * scale.get());
+        box.setSize(50 * getScale(), 75 * getScale());
     }
 
     @Override
@@ -102,6 +102,6 @@ public class PlayerModelHud extends ScaleableHudElement {
         float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.yaw - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
         float pitch = copyPitch.get() ? player.pitch : (float) customPitch.get();
 
-        InventoryScreen.drawEntity((int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
+        InventoryScreen.drawEntity((int) (x + (25 * getScale())), (int) (y + (66 * getScale())), (int) (30 * getScale()), -yaw, -pitch, player);
     }
 }

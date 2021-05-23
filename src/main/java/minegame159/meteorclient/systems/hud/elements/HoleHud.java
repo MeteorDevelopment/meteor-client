@@ -42,7 +42,7 @@ public class HoleHud extends ScaleableHudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(16 * 3 * scale.get(), 16 * 3 * scale.get());
+        box.setSize(16 * 3 * getScale(), 16 * 3 * getScale());
     }
 
     @Override
@@ -50,10 +50,10 @@ public class HoleHud extends ScaleableHudElement {
         double x = box.getX();
         double y = box.getY();
 
-        drawBlock(get(Facing.Left), x, y + 16 * scale.get()); // Left
-        drawBlock(get(Facing.Front), x + 16 * scale.get(), y); // Front
-        drawBlock(get(Facing.Right), x + 32 * scale.get(), y + 16 * scale.get()); // Right
-        drawBlock(get(Facing.Back), x + 16 * scale.get(), y + 32 * scale.get()); // Back
+        drawBlock(get(Facing.Left), x, y + 16 * getScale()); // Left
+        drawBlock(get(Facing.Front), x + 16 * getScale(), y); // Front
+        drawBlock(get(Facing.Right), x + 32 * getScale(), y + 16 * getScale()); // Right
+        drawBlock(get(Facing.Back), x + 16 * getScale(), y + 32 * getScale()); // Back
     }
 
     private Direction get(Facing dir) {
@@ -65,7 +65,7 @@ public class HoleHud extends ScaleableHudElement {
         Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
         if (!safe.get().contains(block)) block = Blocks.AIR;
 
-        RenderUtils.drawItem(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get(),false);
+        RenderUtils.drawItem(block.asItem().getDefaultStack(), (int) x, (int) y, getScale(),false);
 
         if (dir == Direction.DOWN) return;
 
@@ -78,11 +78,11 @@ public class HoleHud extends ScaleableHudElement {
 
     private void renderBreaking(double x, double y, double percent) {
         Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        Renderer.NORMAL.quad(x, y, (16 * percent) * scale.get(), 16 * scale.get(), BG_COLOR);
-        Renderer.NORMAL.quad(x, y, 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        Renderer.NORMAL.quad(x, y + 15 * scale.get(), 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        Renderer.NORMAL.quad(x, y, 1 * scale.get(), 16 * scale.get(),OL_COLOR);
-        Renderer.NORMAL.quad(x + 15 * scale.get(), y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
+        Renderer.NORMAL.quad(x, y, (16 * percent) * getScale(), 16 * getScale(), BG_COLOR);
+        Renderer.NORMAL.quad(x, y, 16 * getScale(), 1 * getScale(), OL_COLOR);
+        Renderer.NORMAL.quad(x, y + 15 * getScale(), 16 * getScale(), 1 * getScale(), OL_COLOR);
+        Renderer.NORMAL.quad(x, y, 1 * getScale(), 16 * getScale(),OL_COLOR);
+        Renderer.NORMAL.quad(x + 15 * getScale(), y, 1 * getScale(), 16 * getScale(), OL_COLOR);
         Renderer.NORMAL.end();
     }
 

@@ -47,7 +47,7 @@ public class CompassHud extends ScaleableHudElement {
         yaw = MathHelper.wrapDegrees(yaw);
         yaw = Math.toRadians(yaw);
 
-        box.setSize(100 *  scale.get(), 100 *  scale.get());
+        box.setSize(100 *  getScale(), 100 *  getScale());
     }
 
     @Override
@@ -63,11 +63,11 @@ public class CompassHud extends ScaleableHudElement {
     }
 
     private double getX(Direction dir) {
-        return Math.sin(getPosOnCompass(dir)) * scale.get() * 40;
+        return Math.sin(getPosOnCompass(dir)) * getScale() * 40;
     }
 
     private double getY(Direction dir) {
-        return Math.cos(getPosOnCompass(dir)) * Math.sin(pitch) * scale.get() * 40;
+        return Math.cos(getPosOnCompass(dir)) * Math.sin(pitch) * getScale() * 40;
     }
 
     private double getPosOnCompass(Direction dir) {

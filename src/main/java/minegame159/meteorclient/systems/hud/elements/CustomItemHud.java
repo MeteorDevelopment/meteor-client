@@ -25,7 +25,7 @@ public class CustomItemHud extends ScaleableHudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(16 * scale.get(), 16 * scale.get());
+        box.setSize(16 * getScale(), 16 * getScale());
     }
 
     @Override
@@ -34,9 +34,9 @@ public class CustomItemHud extends ScaleableHudElement {
         double y = box.getY();
 
         if (isInEditor()) {
-            RenderUtils.drawItem(item.getDefaultStack(), (int) x, (int) y, scale.get(), true);
+            RenderUtils.drawItem(item.getDefaultStack(), (int) x, (int) y, getScale(), true);
         } else if (InvUtils.findItemWithCount(item).count > 0) {
-            RenderUtils.drawItem(new ItemStack(item, InvUtils.findItemWithCount(item).count), (int) x, (int) y, scale.get(), true);
+            RenderUtils.drawItem(new ItemStack(item, InvUtils.findItemWithCount(item).count), (int) x, (int) y, getScale(), true);
         }
     }
 
