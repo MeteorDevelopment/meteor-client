@@ -146,7 +146,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 50));
 
     public MeteorGuiTheme() {
-        super("Meteor");
+        super("CSB Client");
 
         settingsFactory = new DefaultSettingsWidgetFactory(this);
     }
