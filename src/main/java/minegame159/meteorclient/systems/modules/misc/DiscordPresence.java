@@ -27,7 +27,7 @@ public class DiscordPresence extends Module {
     private final Setting<String> line1 = sgGeneral.add(new StringSetting.Builder()
             .name("line-1")
             .description("The text it displays on line 1 of the RPC.")
-            .defaultValue("{username} || {server}")
+            .defaultValue("{username}")
             .onChanged(booleanSetting -> updateDetails())
             .build()
     );
@@ -35,7 +35,7 @@ public class DiscordPresence extends Module {
     private final Setting<String> line2 = sgGeneral.add(new StringSetting.Builder()
             .name("line-2")
             .description("The text it displays on line 2 of the RPC.")
-            .defaultValue("Meteor on Crack!")
+            .defaultValue("CSB Client on top!")
             .onChanged(booleanSetting -> updateDetails())
             .build()
     );
