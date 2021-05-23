@@ -443,7 +443,7 @@ public class Modules extends System<Modules> {
         add(new EntitySpeed());
         add(new FastClimb());
         add(new Fly());
-        add(new InventoryWalk());
+        add(new InventoryMove());
         add(new HighJump());
         add(new Jesus());
         add(new NoFall());
