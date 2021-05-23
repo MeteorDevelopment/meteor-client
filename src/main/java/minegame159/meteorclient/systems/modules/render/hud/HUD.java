@@ -55,7 +55,7 @@ public class HUD extends Module {
     public final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("secondary-color")
             .description("Secondary color of text.")
-            .defaultValue(new SettingColor(188, 26, 141))
+            .defaultValue(new SettingColor(255, 255, 255))
             .build()
     );
 
