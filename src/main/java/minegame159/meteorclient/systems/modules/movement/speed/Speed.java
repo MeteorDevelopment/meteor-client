@@ -95,7 +95,7 @@ public class Speed extends Module {
     private SpeedMode currentMode;
 
     public Speed() {
-        super(Categories.Movement, "speed", "Modifies your movement speed when moving on the ground.");
+        super(Categories.Movement, "Speed", "Modifies your movement speed when moving on the ground.");
 
         onSpeedModeChanged(speedMode.get());
     }

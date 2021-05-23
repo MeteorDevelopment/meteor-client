@@ -15,7 +15,7 @@ import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
-import minegame159.meteorclient.systems.modules.movement.Scaffold;
+import minegame159.meteorclient.systems.modules.movement.BlockFly;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.player.Portals;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -87,7 +87,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().isActive(Scaffold.class)) info.setReturnValue(false);
+        if (Modules.get().isActive(BlockFly.class)) info.setReturnValue(false);
     }
 
     @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)

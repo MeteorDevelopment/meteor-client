@@ -93,7 +93,7 @@ public class NoFall extends Module {
     private double x, z;
 
     public NoFall() {
-        super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
+        super(Categories.Movement, "NoFall", "Prevents you from taking fall damage.");
     }
 
     @Override

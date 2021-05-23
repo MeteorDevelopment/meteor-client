@@ -26,7 +26,7 @@ public class FastClimb extends Module {
     );
 
     public FastClimb() {
-        super(Categories.Movement, "fast-climb", "Allows you to climb faster.");
+        super(Categories.Movement, "FastClimb", "Allows you to climb faster.");
     }
 
     @EventHandler

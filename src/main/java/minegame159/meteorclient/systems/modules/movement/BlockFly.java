@@ -23,7 +23,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Scaffold extends Module {
+public class BlockFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> safeWalk = sgGeneral.add(new BoolSetting.Builder()
@@ -85,8 +85,8 @@ public class Scaffold extends Module {
     private boolean lastWasSneaking;
     private double lastSneakingY;
 
-    public Scaffold() {
-        super(Categories.Movement, "scaffold", "Automatically places blocks under you.");
+    public BlockFly() {
+        super(Categories.Movement, "BlockFly", "Automatically places blocks under you.");
     }
 
     @Override

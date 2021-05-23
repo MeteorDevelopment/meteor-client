@@ -68,7 +68,7 @@ public class AutoWalk extends Module {
     private GoalDirection goal;
 
     public AutoWalk() {
-        super(Categories.Movement, "auto-walk", "Automatically walks forward.");
+        super(Categories.Movement, "AutoWalk", "Automatically walks forward.");
     }
 
     @Override

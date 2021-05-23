@@ -42,7 +42,7 @@ public class AirJump extends Module {
     );
 
     public AirJump() {
-        super(Categories.Movement, "air-jump", "Lets you jump in the air.");
+        super(Categories.Movement, "AirJump", "Lets you jump in the air.");
     }
 
     private int level = 0;
