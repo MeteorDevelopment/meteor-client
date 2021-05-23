@@ -7,6 +7,8 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.render.chunk.ChunkOcclusionDataBuilder;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
@@ -20,5 +22,6 @@ public class ChunkOcclusionDataBuilderMixin {
     private void onMarkClosed(BlockPos pos, CallbackInfo info) {
         ChunkOcclusionEvent event = MeteorClient.EVENT_BUS.post(ChunkOcclusionEvent.get());
         if (event.isCancelled()) info.cancel();
+        if (Modules.get().get(NoRender.class).noCaveCulling()) {info.cancel();}
     }
 }

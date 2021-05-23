@@ -183,6 +183,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noCaveCulling = sgWorld.add(new BoolSetting.Builder()
+            .name("no-cave-culling")
+            .description("Disables Minecraft's cave culling algorithm.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Entity
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
@@ -296,6 +303,10 @@ public class NoRender extends Module {
 
     public boolean noFallingBlocks() {
         return isActive() && noFallingBlocks.get();
+    }
+
+    public boolean noCaveCulling() {
+        return isActive() && noCaveCulling.get();
     }
 
     // Entity
