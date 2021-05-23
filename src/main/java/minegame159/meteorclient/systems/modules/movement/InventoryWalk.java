@@ -84,7 +84,7 @@ public class InventoryWalk extends Module {
     );
 
     public InventoryWalk() {
-        super(Categories.Movement, "InventoryWalk", "Allows you to perform various actions while in GUIs.");
+        super(Categories.Movement, "InventoryWalk", "Allows you to walk while your inventory is opened.");
     }
 
     @Override
