@@ -84,8 +84,8 @@ public class MeteorGuiTheme extends GuiTheme {
 
     public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(237, 19, 144));
     public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(237, 19, 144));
-    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(0, 255, 0));
-    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 0, 0));
+    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(255, 200, 10));
+    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 200, 10));
 
     // Text
 
