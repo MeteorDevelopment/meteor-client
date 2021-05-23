@@ -85,7 +85,7 @@ public class PacketMine extends Module {
     private final List<MyBlock> blocks = new ArrayList<>();
 
     public PacketMine() {
-        super(Categories.World, "packet-mine", "Sends packets to mine blocks without the mining animation.");
+        super(Categories.World, "PacketMine", "Sends packets to mine blocks without the mining animation.");
     }
 
     @Override

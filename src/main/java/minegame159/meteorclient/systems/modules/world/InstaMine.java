@@ -102,7 +102,7 @@ public class InstaMine extends Module {
     private Direction direction;
 
     public InstaMine() {
-        super(Categories.World, "insta-mine", "Attempts to instantly mine blocks.");
+        super(Categories.World, "InstaMine", "Attempts to instantly mine blocks.");
     }
 
     @Override

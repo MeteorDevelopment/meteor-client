@@ -15,7 +15,7 @@ import net.minecraft.util.math.Direction;
 
 public class BuildHeight extends Module {
     public BuildHeight() {
-        super(Categories.World, "build-height", "Allows you to interact with objects at the build limit.");
+        super(Categories.World, "BuildHeight", "Allows you to interact with objects at the build limit.");
     }
 
     @EventHandler

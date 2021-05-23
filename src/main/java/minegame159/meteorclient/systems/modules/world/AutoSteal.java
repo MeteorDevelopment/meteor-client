@@ -75,7 +75,7 @@ public class AutoSteal extends Module {
     );
 
     public AutoSteal() {
-        super(Categories.World, "auto-steal", "Automatically dumps or steals from storage blocks.");
+        super(Categories.World, "AutoSteal", "Automatically dumps or steals from storage blocks.");
     }
 
     private void checkAutoSettings() {

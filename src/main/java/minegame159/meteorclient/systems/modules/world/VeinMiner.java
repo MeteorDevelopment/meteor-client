@@ -102,7 +102,7 @@ public class VeinMiner extends Module {
     private final List<BlockPos> foundBlockPositions = new ArrayList<>();
 
     public VeinMiner() {
-        super(Categories.World, "vein-miner", "Mines all nearby blocks with this type");
+        super(Categories.World, "VeinMiner", "Mines all nearby blocks with this type");
     }
 
     @Override

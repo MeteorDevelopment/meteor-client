@@ -66,7 +66,7 @@ public class EChestFarmer extends Module {
     private int numLeft = Math.floorDiv(amount.get() , 8);
 
     public EChestFarmer(){
-        super(Categories.World, "EChest-farmer", "Places and mines Ender Chests where you're looking.");
+        super(Categories.World, "EChestFarmer", "Places and mines Ender Chests where you're looking.");
     }
 
     @EventHandler

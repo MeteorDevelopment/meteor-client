@@ -34,7 +34,7 @@ public class EndermanLook extends Module {
     );
 
     public EndermanLook() {
-        super(Categories.World, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
+        super(Categories.World, "EndermanLook", "Either looks at all Endermen or prevents you from looking at Endermen.");
     }
 
     @EventHandler

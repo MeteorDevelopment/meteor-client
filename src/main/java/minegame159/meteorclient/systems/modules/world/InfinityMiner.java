@@ -106,7 +106,7 @@ public class InfinityMiner extends Module {
     private volatile Boolean BLOCKER = false;
 
     public InfinityMiner() {
-        super(Categories.World, "infinity-miner", "Allows you to essentially mine forever.");
+        super(Categories.World, "InfinityMiner", "Allows you to essentially mine forever.");
     }
 
     private boolean filter(Block block) {

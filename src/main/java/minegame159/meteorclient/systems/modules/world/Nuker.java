@@ -106,7 +106,7 @@ public class Nuker extends Module {
     private int timer;
 
     public Nuker() {
-        super(Categories.World, "nuker", "Breaks a large amount of specified blocks around you.");
+        super(Categories.World, "Nuker", "Breaks a large amount of specified blocks around you.");
     }
 
     @Override
