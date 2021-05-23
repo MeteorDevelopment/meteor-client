@@ -22,7 +22,7 @@ import net.minecraft.item.ItemGroup;
 
 import static org.lwjgl.glfw.GLFW.*;
 
-public class GUIMove extends Module {
+public class InventoryWalk extends Module {
     public enum Screens {
         GUI,
         Inventory,
@@ -83,8 +83,8 @@ public class GUIMove extends Module {
             .build()
     );
 
-    public GUIMove() {
-        super(Categories.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
+    public InventoryWalk() {
+        super(Categories.Movement, "InventoryWalk", "Allows you to perform various actions while in GUIs.");
     }
 
     @Override
