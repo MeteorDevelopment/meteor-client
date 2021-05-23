@@ -14,6 +14,7 @@ import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.movement.NoPush;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.Scaffold;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
@@ -100,7 +101,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double d, CallbackInfo info) {
         Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.noPush.get()) {
+        NoPush noPush = Modules.get().get(NoPush.class);
+
+        if (noPush.isActive() && noPush.blocks.get()) {
             info.cancel();
         }
     }

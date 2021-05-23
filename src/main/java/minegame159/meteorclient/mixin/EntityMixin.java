@@ -11,6 +11,7 @@ import minegame159.meteorclient.events.entity.player.JumpVelocityMultiplierEvent
 import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.combat.Hitboxes;
+import minegame159.meteorclient.systems.modules.movement.NoPush;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.render.ESP;
@@ -33,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -73,11 +75,22 @@ public abstract class EntityMixin {
         Vec3d vec = state.getVelocity(world, pos);
 
         Velocity velocity = Modules.get().get(Velocity.class);
+        NoPush noPush = Modules.get().get(NoPush.class);
         if (velocity.isActive() && velocity.liquids.get()) {
             vec = vec.multiply(velocity.getHorizontal(), velocity.getVertical(), velocity.getHorizontal());
         }
 
+        if (noPush.isActive() && noPush.liquids.get()) {
+            vec = Vec3d.ZERO;
+        }
+
         return vec;
+    }
+
+    @Inject(method = "pushAwayFrom", at = @At("HEAD"), cancellable = true)
+    private void onPushAwayFrom(Entity entity, CallbackInfo info) {
+        NoPush noPush = Modules.get().get(NoPush.class);
+        if (noPush.isActive() && noPush.entities.get()) {info.cancel();}
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
