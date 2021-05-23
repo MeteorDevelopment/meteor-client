@@ -33,7 +33,7 @@ public class MinecartAirPlace extends Module {
     // Render
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Renders a block overlay where the obsidian will be placed.")
+            .description("Renders a block overlay where the minecart will be placed.")
             .defaultValue(true)
             .build()
     );
