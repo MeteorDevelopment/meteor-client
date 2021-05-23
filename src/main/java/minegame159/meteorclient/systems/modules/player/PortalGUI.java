@@ -8,8 +8,8 @@ package minegame159.meteorclient.systems.modules.player;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 
-public class Portals extends Module {
-    public Portals() {
-        super(Categories.Player, "Portals", "Allows you to use GUIs normally while in a Nether Portal.");
+public class PortalGUI extends Module {
+    public PortalGUI() {
+        super(Categories.Player, "PortalGUI", "Allows you to use GUIs normally while in a Nether Portal.");
     }
 }

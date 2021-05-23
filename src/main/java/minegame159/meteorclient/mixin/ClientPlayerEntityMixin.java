@@ -17,7 +17,7 @@ import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.BlockFly;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
-import minegame159.meteorclient.systems.modules.player.Portals;
+import minegame159.meteorclient.systems.modules.player.PortalGUI;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
@@ -75,7 +75,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
     private Screen updateNauseaGetCurrentScreenProxy(MinecraftClient client) {
-        if (Modules.get().isActive(Portals.class)) return null;
+        if (Modules.get().isActive(PortalGUI.class)) return null;
         return client.currentScreen;
     }
 

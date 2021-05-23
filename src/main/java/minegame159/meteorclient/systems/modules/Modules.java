@@ -414,7 +414,7 @@ public class Modules extends System<Modules> {
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
-        add(new Portals());
+        add(new PortalGUI());
         add(new PotionSpoof());
         add(new Reach());
         add(new Rotation());
