@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 plugins {
 	id 'fabric-loom' version '0.6-SNAPSHOT'
 	id 'maven-publish'
@@ -38,10 +43,10 @@ dependencies {
 	modImplementation fabricApi.module("fabric-renderer-indigo", project.api_version)
 
 	// For XRay compatibility
-	modImplementation "com.github.CaffeineMC:sodium-fabric:1.16.x~stable-SNAPSHOT"
+	modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}-SNAPSHOT"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-	modImplementation("com.github.MeteorDevelopment:baritone:${project.minecraft_version}-SNAPSHOT") {
+	modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}-SNAPSHOT") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
 		exclude(group: "net.java.jinput", module: "jinput-platform")
@@ -49,7 +54,7 @@ dependencies {
 		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
 		exclude(group: "org.ow2.asm", module: "asm-debug-all")
 	}
-	include "com.github.MeteorDevelopment:baritone:${project.minecraft_version}-SNAPSHOT"
+	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}-SNAPSHOT"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
