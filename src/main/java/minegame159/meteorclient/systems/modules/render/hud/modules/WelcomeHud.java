@@ -24,7 +24,7 @@ public class WelcomeHud extends DoubleTextHudElement {
     );
 
     public WelcomeHud(HUD hud) {
-        super(hud, "welcome", "Displays a welcome message.", "Welcome to Meteor Client, ");
+        super(hud, "welcome", "Displays a welcome message.", "Welcome to CSB Client, ");
         rightColor = color.get();
     }
 

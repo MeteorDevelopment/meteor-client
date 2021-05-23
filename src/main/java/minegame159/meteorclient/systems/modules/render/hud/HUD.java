@@ -48,14 +48,14 @@ public class HUD extends Module {
     public final Setting<SettingColor> primaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("primary-color")
             .description("Primary color of text.")
-            .defaultValue(new SettingColor(255, 255, 255))
+            .defaultValue(new SettingColor(217, 19, 144))
             .build()
     );
 
     public final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
             .name("secondary-color")
             .description("Secondary color of text.")
-            .defaultValue(new SettingColor(175, 175, 175))
+            .defaultValue(new SettingColor(188, 26, 141))
             .build()
     );
 
