@@ -39,7 +39,7 @@ public class GuiThemes {
             }
         }
 
-        if (theme == null) select("Meteor");
+        if (theme == null) select("CSB Client");
     }
 
     public static void add(GuiTheme theme) {
