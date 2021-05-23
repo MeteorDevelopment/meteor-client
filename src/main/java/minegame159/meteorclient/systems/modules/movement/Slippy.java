@@ -37,6 +37,6 @@ public class Slippy extends Module {
     );
 
     public Slippy() {
-        super(Categories.Movement, "slippy", "Makes blocks slippery like ice.");
+        super(Categories.Movement, "Slippy", "Makes blocks slippery like ice.");
     }
 }

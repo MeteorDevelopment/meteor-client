@@ -64,7 +64,7 @@ public class Step extends Module {
     private boolean prevBaritoneAssumeStep;
 
     public Step() {
-        super(Categories.Movement, "step", "Allows you to walk up full blocks instantly.");
+        super(Categories.Movement, "Step", "Allows you to walk up full blocks instantly.");
     }
 
     @Override

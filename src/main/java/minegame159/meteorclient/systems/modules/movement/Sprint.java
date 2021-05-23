@@ -24,7 +24,7 @@ public class Sprint extends Module {
     );
 
     public Sprint() {
-        super(Categories.Movement, "sprint", "Automatically sprints.");
+        super(Categories.Movement, "Sprint", "Automatically sprints.");
     }
     
     @Override
