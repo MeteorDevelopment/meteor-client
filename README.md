@@ -1,4 +1,4 @@
-# Meteor Client
+# CSB Client
 ![Discord](https://img.shields.io/discord/689197705683140636?logo=discord)
 [![CodeFactor](https://www.codefactor.io/repository/github/meteordevelopment/meteor-client/badge)](https://www.codefactor.io/repository/github/meteordevelopment/meteor-client)
 ![GitHub last commit](https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client)
