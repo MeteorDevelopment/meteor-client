@@ -18,7 +18,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.combat.AutoLog;
-import minegame159.meteorclient.systems.modules.movement.InventoryMove;
+import minegame159.meteorclient.systems.modules.movement.InventoryWalk;
 import minegame159.meteorclient.systems.modules.movement.Jesus;
 import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.systems.modules.player.*;
@@ -262,7 +262,7 @@ public class InfinityMiner extends Module {
                 Modules.get().get(AutoLog.class),
                 Modules.get().get(AutoTool.class),
                 Modules.get().get(AutoDrop.class),
-                Modules.get().get(InventoryMove.class)
+                Modules.get().get(InventoryWalk.class)
         );
     }
 
