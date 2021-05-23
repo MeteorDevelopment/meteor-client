@@ -36,7 +36,7 @@ public class MessageAura extends Module {
     );
 
     public MessageAura() {
-        super(Categories.Misc, "message-aura", "Sends a specified message to any player that enters render distance.");
+        super(Categories.Misc, "MessageAura", "Sends a specified message to any player that enters render distance.");
     }
 
     @EventHandler

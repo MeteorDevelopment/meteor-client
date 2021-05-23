@@ -46,17 +46,17 @@ public class DiscordPresence extends Module {
     private int ticks;
 
     public DiscordPresence() {
-        super(Categories.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
+        super(Categories.Misc, "DiscordPresence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
     }
 
     @Override
     public void onActivate() {
         DiscordEventHandlers handlers = new DiscordEventHandlers();
-        instance.Discord_Initialize("835240968533049424", handlers, true, null);
+        instance.Discord_Initialize("845289000142766100", handlers, true, null);
 
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
-        rpc.largeImageKey = "meteor_client";
-        String largeText = "Meteor Client " + Config.get().version.getOriginalString();
+        rpc.largeImageKey = "cursedskyblock";
+        String largeText = "CSB Client " + Config.get().version.getOriginalString();
         if (!Config.get().devBuild.isEmpty()) largeText += " Dev Build: " + Config.get().devBuild;
         rpc.largeImageText = largeText;
         currentSmallImage = SmallImage.MineGame;
@@ -99,8 +99,8 @@ public class DiscordPresence extends Module {
     }
 
     private enum SmallImage {
-        MineGame("minegame", "MineGame159"),
-        Snail("seasnail", "seasnail8169");
+        MineGame("cypphi", "Developed by Cypphi"),
+        Snail("cursedskyblock", "CursedSkyblock.net");
 
         private final String key, text;
 
