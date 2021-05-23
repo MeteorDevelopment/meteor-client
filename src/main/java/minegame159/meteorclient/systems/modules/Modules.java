@@ -467,7 +467,7 @@ public class Modules extends System<Modules> {
         add(new CameraClip());
         add(new Chams());
         add(new CityESP());
-        add(new CustomFOV());
+        add(new FOVSpoofer());
         add(new ESP());
         add(new EntityOwner());
         add(new FreeLook());
