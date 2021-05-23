@@ -442,7 +442,7 @@ public class Modules extends System<Modules> {
         add(new EntityControl());
         add(new EntitySpeed());
         add(new FastClimb());
-        add(new Flight());
+        add(new Fly());
         add(new GUIMove());
         add(new HighJump());
         add(new Jesus());

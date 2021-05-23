@@ -16,7 +16,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Vec3d;
 
-public class Flight extends Module {
+public class Fly extends Module {
     public enum Mode {
         Abilities,
         Velocity
@@ -83,8 +83,8 @@ public class Flight extends Module {
             .build()
     );
 
-    public Flight() {
-        super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
+    public Fly() {
+        super(Categories.Movement, "Fly", "FLYYYY! No Fall is recommended with this module.");
     }
 
     private int delayLeft = delay.get();

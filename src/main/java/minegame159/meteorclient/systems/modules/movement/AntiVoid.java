@@ -35,21 +35,21 @@ public class AntiVoid extends Module {
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Flight) wasFlightEnabled = Modules.get().isActive(Flight.class);
+        if (mode.get() == Mode.Flight) wasFlightEnabled = Modules.get().isActive(Fly.class);
     }
 
     @Override
     public void onDeactivate() {
-        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate() && Modules.get().isActive(Flight.class)) {
-            Modules.get().get(Flight.class).toggle();
+        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate() && Modules.get().isActive(Fly.class)) {
+            Modules.get().get(Fly.class).toggle();
         }
     }
 
     @EventHandler
     public void onPreTick(TickEvent.Pre event) {
         if (mc.player.getY() > 0 || mc.player.getY() < -15) {
-            if (hasRun && mode.get() == Mode.Flight && Modules.get().isActive(Flight.class)) {
-                Modules.get().get(Flight.class).toggle();
+            if (hasRun && mode.get() == Mode.Flight && Modules.get().isActive(Fly.class)) {
+                Modules.get().get(Fly.class).toggle();
                 hasRun = false;
             }
             return;
@@ -57,7 +57,7 @@ public class AntiVoid extends Module {
 
         switch (mode.get()) {
             case Flight:
-                if (!Modules.get().isActive(Flight.class)) Modules.get().get(Flight.class).toggle();
+                if (!Modules.get().isActive(Fly.class)) Modules.get().get(Fly.class).toggle();
                 hasRun = true;
                 break;
             case Jump:
