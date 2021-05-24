@@ -22,6 +22,5 @@ public class ChunkOcclusionDataBuilderMixin {
     private void onMarkClosed(BlockPos pos, CallbackInfo info) {
         ChunkOcclusionEvent event = MeteorClient.EVENT_BUS.post(ChunkOcclusionEvent.get());
         if (event.isCancelled()) info.cancel();
-        if (Modules.get().get(NoRender.class).noCaveCulling()) {info.cancel();}
     }
 }

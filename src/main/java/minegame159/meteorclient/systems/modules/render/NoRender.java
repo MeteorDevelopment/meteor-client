@@ -7,6 +7,8 @@ package minegame159.meteorclient.systems.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -305,9 +307,8 @@ public class NoRender extends Module {
         return isActive() && noFallingBlocks.get();
     }
 
-    public boolean noCaveCulling() {
-        return isActive() && noCaveCulling.get();
-    }
+    @EventHandler
+    private void onChunkOcclusion(ChunkOcclusionEvent event) { if (noCaveCulling.get()) event.cancel(); }
 
     // Entity
 
@@ -318,4 +319,5 @@ public class NoRender extends Module {
     public boolean noArmor() {
         return isActive() && noArmor.get();
     }
+
 }
