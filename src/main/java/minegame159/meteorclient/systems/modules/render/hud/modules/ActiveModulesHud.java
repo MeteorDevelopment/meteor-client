@@ -47,14 +47,14 @@ public class ActiveModulesHud extends HudElement {
     private final Setting<ColorMode> colorMode = sgGeneral.add(new EnumSetting.Builder<ColorMode>()
             .name("color-mode")
             .description("What color to use for active modules.")
-            .defaultValue(ColorMode.Rainbow)
+            .defaultValue(ColorMode.Flat)
             .build()
     );
 
     private final Setting<SettingColor> flatColor = sgGeneral.add(new ColorSetting.Builder()
             .name("flat-color")
             .description("Color for flat color mode.")
-            .defaultValue(new SettingColor(225, 25, 25))
+            .defaultValue(new SettingColor(237, 19, 144))
             .visible(() -> colorMode.get() == ColorMode.Flat)
             .build()
     );

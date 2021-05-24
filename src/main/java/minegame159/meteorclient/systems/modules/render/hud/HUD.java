@@ -64,7 +64,7 @@ public class HUD extends Module {
     public final Setting<Integer> snappingRange = sgEditor.add(new IntSetting.Builder()
             .name("snapping-range")
             .description("Snapping range in editor.")
-            .defaultValue(6)
+            .defaultValue(0)
             .build()
     );
 
@@ -86,13 +86,13 @@ public class HUD extends Module {
         // Top Left
         topLeft = new HudElementLayer(RENDERER, elements, AlignmentX.Left, AlignmentY.Top, 2, 2);
         topLeft.add(new WatermarkHud(this));
+        topLeft.add(new ServerHud(this));
         topLeft.add(new FpsHud(this));
         topLeft.add(new PingHud(this));
         topLeft.add(new TpsHud(this));
         topLeft.add(new SpeedHud(this));
         topLeft.add(new BiomeHud(this));
         topLeft.add(new TimeHud(this));
-        topLeft.add(new ServerHud(this));
         topLeft.add(new DurabilityHud(this));
         topLeft.add(new BreakingBlockHud(this));
         topLeft.add(new LookingAtHud(this));

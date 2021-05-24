@@ -30,7 +30,7 @@ public class InventoryViewerHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of inventory viewer.")
-            .defaultValue(3)
+            .defaultValue(2)
             .min(0.1)
             .sliderMin(0.1)
             .max(10)
