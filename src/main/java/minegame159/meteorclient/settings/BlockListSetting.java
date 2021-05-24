@@ -21,8 +21,8 @@ import java.util.function.Predicate;
 public class BlockListSetting extends Setting<List<Block>> {
     public final Predicate<Block> filter;
 
-    public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated, Predicate<Block> filter) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
         this.value = new ArrayList<>(defaultValue);
@@ -93,6 +93,7 @@ public class BlockListSetting extends Setting<List<Block>> {
         private Consumer<List<Block>> onChanged;
         private Consumer<Setting<List<Block>>> onModuleActivated;
         private Predicate<Block> filter;
+        private IVisible visible;
 
         public Builder name(String name) {
             this.name = name;
@@ -124,8 +125,13 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public BlockListSetting build() {
-            return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter);
+            return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter, visible);
         }
     }
 }

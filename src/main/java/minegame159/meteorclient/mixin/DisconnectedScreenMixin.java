@@ -7,13 +7,11 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.AutoReconnect;
-import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -27,40 +25,34 @@ public class DisconnectedScreenMixin extends ScreenMixin {
     @Shadow private int reasonHeight;
 
     private ButtonWidget reconnectBtn;
-    private long reconnectTime;
+    private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onRenderBackground(CallbackInfo info) {
-        AutoReconnect module = Modules.get().get(AutoReconnect.class);
-
-        if (module.lastServerInfo != null) {
+        if (Modules.get().get(AutoReconnect.class).lastServerInfo != null) {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-            reconnectTime = (long) (System.currentTimeMillis() + (Modules.get().get(AutoReconnect.class).time.get() * 1000));
-
-            String reconnectText = "Reconnect";
-            if (module.isActive()) reconnectText += " " + getTimeString();
-
-            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText(reconnectText), button -> reconnect()));
+            reconnectBtn = addButton(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> client.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), client, Modules.get().get(AutoReconnect.class).lastServerInfo))));
         }
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void render(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        if (reconnectBtn == null) return;
+    @Override
+    public void tick() {
+        if (!Modules.get().isActive(AutoReconnect.class)) return;
 
-        if (Modules.get().isActive(AutoReconnect.class)) {
-            if (reconnectTime-- - System.currentTimeMillis() > 0) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText("Reconnect " + getTimeString()));
-            else reconnect();
+        if (time <= 0) {
+            client.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), client, Modules.get().get(AutoReconnect.class).lastServerInfo));
+        } else {
+            time--;
+            if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(getText()));
         }
     }
 
-    private void reconnect() {
-        Utils.mc.openScreen(new ConnectScreen(new MultiplayerScreen(new TitleScreen()), Utils.mc, Modules.get().get(AutoReconnect.class).lastServerInfo));
+    private String getText() {
+        String reconnectText = "Reconnect";
+        if (Modules.get().isActive(AutoReconnect.class)) reconnectText += " " + String.format("(%.1f)", time / 20);
+        return reconnectText;
     }
 
-    private String getTimeString() {
-        return String.format("(%.1f)", (reconnectTime - System.currentTimeMillis()) / 1000D);
-    }
 }

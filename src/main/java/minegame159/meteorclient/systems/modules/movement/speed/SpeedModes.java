@@ -6,6 +6,6 @@
 package minegame159.meteorclient.systems.modules.movement.speed;
 
 public enum SpeedModes {
-    NCP,
+    Strafe,
     Vanilla
 }

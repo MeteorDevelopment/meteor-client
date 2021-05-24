@@ -13,6 +13,7 @@ import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 public class WTable extends WContainer {
@@ -43,6 +44,23 @@ public class WTable extends WContainer {
 
     public void row() {
         rowI++;
+    }
+
+    public int rowI() {
+        return rowI;
+    }
+
+    public void removeRow(int i) {
+        for (Cell<?> cell : rows.remove(i)) {
+            for (Iterator<Cell<?>> it = cells.iterator(); it.hasNext();) {
+                if (it.next() == cell) {
+                    it.remove();
+                    break;
+                }
+            }
+        }
+
+        rowI--;
     }
 
     @Override

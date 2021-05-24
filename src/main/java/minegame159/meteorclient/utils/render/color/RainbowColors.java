@@ -10,6 +10,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.tabs.builtin.ConfigTab;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -22,9 +23,8 @@ import java.util.List;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RainbowColors {
-    public static final Color GLOBAL = new Color();
-    public static double rainbowSpeed;
-    private static final float[] hsb = new float[3];
+
+    public static final RainbowColor GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
 
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
@@ -52,14 +52,7 @@ public class RainbowColors {
 
     @EventHandler
     private static void onTick(TickEvent.Post event) {
-        if (rainbowSpeed > 0) {
-            java.awt.Color.RGBtoHSB(GLOBAL.r, GLOBAL.g, GLOBAL.b, hsb);
-            int c = java.awt.Color.HSBtoRGB(hsb[0] + (float) rainbowSpeed, 1, 1);
-
-            GLOBAL.r = Color.toRGBAR(c);
-            GLOBAL.g = Color.toRGBAG(c);
-            GLOBAL.b = Color.toRGBAB(c);
-        }
+        GLOBAL.getNext();
 
         for (Setting<SettingColor> setting : colorSettings) {
             if (setting.module == null || setting.module.isActive()) setting.get().update();

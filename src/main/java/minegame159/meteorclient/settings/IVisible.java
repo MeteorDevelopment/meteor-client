@@ -3,8 +3,8 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.utils.network;
+package minegame159.meteorclient.settings;
 
-public class UuidNameHistoryResponseItem {
-    public String name;
+public interface IVisible {
+    boolean isVisible();
 }

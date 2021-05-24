@@ -12,9 +12,7 @@ import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
-import net.minecraft.entity.player.PlayerEntity;
+import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 
 public class FakePlayer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -33,13 +31,6 @@ public class FakePlayer extends Module {
             .build()
     );
 
-    public final Setting<Boolean> glowing = sgGeneral.add(new BoolSetting.Builder()
-            .name("glowing")
-            .description("Grants the fake player a glowing effect.")
-            .defaultValue(true)
-            .build()
-    );
-
     public final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("The fake player's default health.")
@@ -49,26 +40,18 @@ public class FakePlayer extends Module {
             .build()
     );
 
-    public final Setting<Boolean> idInNametag = sgGeneral.add(new BoolSetting.Builder()
-            .name("iD-in-nametag")
-            .description("Displays the fake player's ID inside its nametag.")
-            .defaultValue(true)
-            .build()
-    );
-
     public FakePlayer() {
         super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
     }
 
     @Override
     public void onActivate() {
-        FakePlayerUtils.ID = 0;
+        FakePlayerManager.clear();
     }
 
     @Override
     public void onDeactivate() {
-        FakePlayerUtils.ID = 0;
-        FakePlayerUtils.clearFakePlayers();
+        FakePlayerManager.clear();
     }
 
     @Override
@@ -76,21 +59,21 @@ public class FakePlayer extends Module {
         WHorizontalList w = theme.horizontalList();
 
         WButton spawn = w.add(theme.button("Spawn")).widget();
-        spawn.action = FakePlayerUtils::spawnFakePlayer;
+        spawn.action = () -> {
+            if (isActive()) FakePlayerManager.add(name.get(), health.get(), copyInv.get());
+        };
 
         WButton clear = w.add(theme.button("Clear")).widget();
-        clear.action = FakePlayerUtils::clearFakePlayers;
+        clear.action = () -> {
+            if (isActive()) FakePlayerManager.clear();
+        };
 
         return w;
     }
 
-    public boolean showID(PlayerEntity entity) {
-        return isActive() && idInNametag.get() && entity instanceof FakePlayerEntity;
-    }
-
     @Override
     public String getInfoString() {
-        if (FakePlayerUtils.getPlayers() != null) return String.valueOf(FakePlayerUtils.getPlayers().size());
+        if (FakePlayerManager.getPlayers() != null) return String.valueOf(FakePlayerManager.getPlayers().size());
         return null;
     }
 }

@@ -23,17 +23,22 @@ import minegame159.meteorclient.utils.Utils;
 import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
 public class ModuleScreen extends WindowScreen {
+    private final Module module;
+
+    private final WContainer settings;
     private final WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
         super(theme, module.title);
+        this.module = module;
 
         // Description
         add(theme.label(module.description, getWindowWidth() / 2.0));
 
         // Settings
+        settings = add(theme.verticalList()).expandX().widget();
         if (module.settings.groups.size() > 0) {
-            add(theme.settings(module.settings)).expandX();
+            settings.add(theme.settings(module.settings)).expandX();
         }
 
         // Custom widget
@@ -75,6 +80,13 @@ public class ModuleScreen extends WindowScreen {
         visible.action = () -> {
             if (module.isVisible() != visible.checked) module.setVisible(visible.checked);
         };
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+
+        module.settings.tick(settings, theme);
     }
 
     @EventHandler

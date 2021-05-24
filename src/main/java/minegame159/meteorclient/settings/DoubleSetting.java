@@ -16,8 +16,8 @@ public class DoubleSetting extends Setting<Double> {
     public final int decimalPlaces;
     public final boolean onSliderRelease;
 
-    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, Double min, Double max, Double sliderMin, Double sliderMax, boolean onSliderRelease, int decimalPlaces) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, Double min, Double max, Double sliderMin, Double sliderMax, boolean onSliderRelease, int decimalPlaces) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
@@ -67,6 +67,7 @@ public class DoubleSetting extends Setting<Double> {
         private Double defaultValue;
         private Consumer<Double> onChanged;
         private Consumer<Setting<Double>> onModuleActivated;
+        private IVisible visible;
         private Double min, max;
         private Double sliderMin, sliderMax;
         private boolean onSliderRelease;
@@ -94,6 +95,11 @@ public class DoubleSetting extends Setting<Double> {
 
         public Builder onModuleActivated(Consumer<Setting<Double>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
+            return this;
+        }
+
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
             return this;
         }
 
@@ -128,7 +134,7 @@ public class DoubleSetting extends Setting<Double> {
         }
 
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, min, max, sliderMin, sliderMax, onSliderRelease, decimalPlaces);
+            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax, onSliderRelease, decimalPlaces);
         }
     }
 }

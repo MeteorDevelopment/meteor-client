@@ -213,7 +213,7 @@ public class Modules extends System<Modules> {
         if (moduleToBind != null && moduleToBind.keybind.canBindTo(isKey, value)) {
             if (value != GLFW.GLFW_KEY_ESCAPE) {
                 moduleToBind.keybind.set(isKey, value);
-                ChatUtils.prefixInfo("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
+                ChatUtils.info("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
             }
 
             MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
@@ -240,7 +240,7 @@ public class Modules extends System<Modules> {
         if (MinecraftClient.getInstance().currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : moduleInstances.values()) {
                 if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
-                    module.doAction();
+                    module.toggle();
                     module.sendToggledMsg();
                 }
             }
@@ -251,12 +251,12 @@ public class Modules extends System<Modules> {
 
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onOpenScreen(OpenScreenEvent event) {
+        if (!Utils.canUpdate()) return;
+
         for (Module module : moduleInstances.values()) {
-            if (module.toggleOnBindRelease) {
-                if (module.isActive()) {
-                    module.toggle();
-                    module.sendToggledMsg();
-                }
+            if (module.toggleOnBindRelease && module.isActive()) {
+                module.toggle();
+                module.sendToggledMsg();
             }
         }
     }
@@ -363,7 +363,6 @@ public class Modules extends System<Modules> {
         add(new AntiBed());
         add(new AntiHit());
         add(new ArrowDodge());
-        add(new Auto32K());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
@@ -379,7 +378,7 @@ public class Modules extends System<Modules> {
         add(new Hitboxes());
         add(new HoleFiller());
         add(new KillAura());
-        add(new OffhandExtra());
+        add(new Offhand());
         add(new Quiver());
         add(new SelfAnvil());
         add(new SelfTrap());
@@ -387,8 +386,6 @@ public class Modules extends System<Modules> {
         add(new SmartSurround());
         add(new Surround());
         add(new Swarm());
-        add(new TotemPopNotifier());
-        add(new Trigger());
         add(new Burrow());
     }
 
@@ -472,7 +469,7 @@ public class Modules extends System<Modules> {
         add(new CustomFOV());
         add(new ESP());
         add(new EntityOwner());
-        add(new FreeRotate());
+        add(new FreeLook());
         add(new Freecam());
         add(new Fullbright());
         add(new HUD());
@@ -541,9 +538,9 @@ public class Modules extends System<Modules> {
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
-        add(new VisualRange());
         add(new VanillaSpoof());
         add(new BetterTab());
+        add(new Notifier());
     }
 
     public static class ModuleRegistry extends Registry<Module> {

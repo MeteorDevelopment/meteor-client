@@ -14,8 +14,8 @@ import java.util.function.Consumer;
 public class BoolSetting extends Setting<Boolean> {
     private static final List<String> SUGGESTIONS = ImmutableList.of("true", "false", "toggle");
 
-    private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
@@ -55,6 +55,7 @@ public class BoolSetting extends Setting<Boolean> {
         private Boolean defaultValue;
         private Consumer<Boolean> onChanged;
         private Consumer<Setting<Boolean>> onModuleActivated;
+        private IVisible visible;
 
         public Builder name(String name) {
             this.name = name;
@@ -81,8 +82,13 @@ public class BoolSetting extends Setting<Boolean> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public BoolSetting build() {
-            return new BoolSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new BoolSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

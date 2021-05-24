@@ -9,6 +9,7 @@ import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
 import minegame159.meteorclient.events.game.GameLeftEvent;
+import minegame159.meteorclient.events.meteor.CharTypedEvent;
 import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -21,11 +22,11 @@ import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.DiscordPresence;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Names;
@@ -43,6 +44,7 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
@@ -80,7 +82,6 @@ public class MeteorClient implements ClientModInitializer {
 
         mc = MinecraftClient.getInstance();
         Utils.mc = mc;
-        EntityUtils.mc = mc;
 
         Systems.addPreLoadTask(() -> {
             if (!Modules.get().getFile().exists()) {
@@ -90,7 +91,6 @@ public class MeteorClient implements ClientModInitializer {
         });
 
         Matrices.begin(new MatrixStack());
-        Fonts.init();
         MeteorExecutor.init();
         Capes.init();
         RainbowColors.init();
@@ -105,6 +105,7 @@ public class MeteorClient implements ClientModInitializer {
         Tabs.init();
         GuiThemes.init();
         BlockUtils.init();
+        Fonts.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -129,6 +130,7 @@ public class MeteorClient implements ClientModInitializer {
         Modules.get().sortModules();
         Systems.load();
 
+        Fonts.load();
         GuiRenderer.init();
         GuiThemes.postInit();
     }
@@ -161,6 +163,17 @@ public class MeteorClient implements ClientModInitializer {
         // Click GUI
         if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
             if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
+        }
+    }
+
+    @EventHandler
+    private void onCharTyped(CharTypedEvent event) {
+        if (mc.currentScreen != null) return;
+        if (!Config.get().openChatOnPrefix) return;
+
+        if (event.c == Config.get().prefix.charAt(0)) {
+            mc.openScreen(new ChatScreen(Config.get().prefix));
+            event.cancel();
         }
     }
 }

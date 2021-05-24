@@ -26,6 +26,12 @@ public class ShulkerBoxBlockMixin {
         if (Modules.get() == null) return;
 
         BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
-        if (tooltips.isActive() && tooltips.previewShulkers()) info.cancel();
+        if (tooltips.isActive()) {
+            if (tooltips.previewShulkers()) info.cancel();
+            else if (tooltips.shulkerCompactTooltip()) {
+                info.cancel();
+                tooltips.applyCompactShulkerTooltip(stack, tooltip);
+            }
+        }
     }
 }

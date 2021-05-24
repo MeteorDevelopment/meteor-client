@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.friends;
 
-import minegame159.meteorclient.utils.entity.FriendType;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
@@ -14,14 +13,14 @@ import java.util.Objects;
 
 public class Friend implements ISerializable<Friend> {
     public String name;
-    public FriendType type = FriendType.Neutral;
+
 
     public Friend(String name) {
         this.name = name;
     }
 
     public Friend(PlayerEntity player) {
-        this(player.getGameProfile().getName());
+        this(player.getEntityName());
     }
 
     public Friend(CompoundTag tag) {
@@ -32,14 +31,12 @@ public class Friend implements ISerializable<Friend> {
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
         tag.putString("name", name);
-        tag.putString("type", type.name());
         return tag;
     }
 
     @Override
     public Friend fromTag(CompoundTag tag) {
         name = tag.getString("name");
-        if (tag.contains("type")) type = FriendType.valueOf(tag.getString("type"));
         return this;
     }
 

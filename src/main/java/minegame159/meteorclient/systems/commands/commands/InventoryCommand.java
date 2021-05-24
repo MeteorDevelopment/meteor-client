@@ -11,7 +11,6 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.PlayerArgumentType;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -22,9 +21,8 @@ public class InventoryCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("name", PlayerArgumentType.player()).executes(context -> {
-            PlayerEntity playerEntity = context.getArgument("name", PlayerEntity.class);
-            MeteorClient.INSTANCE.screenToOpen = new InventoryScreen(playerEntity);
+        builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
+            MeteorClient.INSTANCE.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
             return SINGLE_SUCCESS;
         }));
 

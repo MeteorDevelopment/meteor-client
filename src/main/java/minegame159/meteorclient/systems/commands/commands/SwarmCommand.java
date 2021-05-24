@@ -9,6 +9,7 @@ import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.ModuleArgumentType;
@@ -17,7 +18,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.Swarm;
 import minegame159.meteorclient.systems.modules.world.InfinityMiner;
-import minegame159.meteorclient.utils.player.ChatUtils;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
@@ -61,7 +62,7 @@ public class SwarmCommand extends Command {
                             swarm.currentMode = Swarm.Mode.Idle;
                             Modules.get().get(Swarm.class).toggle();
                         } else {
-                            ChatUtils.moduleInfo(Modules.get().get(Swarm.class), "You are the queen.");
+                            info("You are the queen.");
                         }
                     }
                     return SINGLE_SUCCESS;
@@ -74,8 +75,8 @@ public class SwarmCommand extends Command {
                         swarm.server.sendMessage(context.getInput() + " " + mc.player.getDisplayName().getString());
                     }
                     return SINGLE_SUCCESS;
-                }).then(argument("name", PlayerArgumentType.player()).executes(context -> {
-                    PlayerEntity playerEntity = context.getArgument("name", PlayerEntity.class);
+                }).then(argument("player", PlayerArgumentType.player()).executes(context -> {
+                    PlayerEntity playerEntity = PlayerArgumentType.getPlayer(context);
                     Swarm swarm = Modules.get().get(Swarm.class);
                     if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
                         swarm.server.sendMessage(context.getInput());
@@ -180,10 +181,10 @@ public class SwarmCommand extends Command {
                                         swarm.server.sendMessage(context.getInput());
                                     if (swarm.currentMode != Swarm.Mode.Queen) {
                                         swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
-                                    } else ChatUtils.moduleError(Modules.get().get(Swarm.class),"Null block");
+                                    } else error("Null block.");
                                 }
                             } catch (Exception e) {
-                                ChatUtils.moduleError(Modules.get().get(Swarm.class),"Error in baritone command. " + e.getClass().getSimpleName());
+                                error("Error in baritone command. " + e.getClass().getSimpleName());
                             }
                             return SINGLE_SUCCESS;
                         })
@@ -271,6 +272,17 @@ public class SwarmCommand extends Command {
             }
             return SINGLE_SUCCESS;
         }));
+
+        builder.then(literal("exec").then(argument("command", StringArgumentType.greedyString()).executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
+                swarm.server.sendMessage(context.getInput());
+            } else {
+                String command = context.getArgument("command", String.class);
+                MinecraftClient.getInstance().player.sendChatMessage(command);
+            }
+            return SINGLE_SUCCESS;
+        })));
     }
 
     private void runInfinityMiner() {

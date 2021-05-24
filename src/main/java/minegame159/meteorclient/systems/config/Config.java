@@ -7,7 +7,7 @@ package minegame159.meteorclient.systems.config;
 
 import com.g00fy2.versioncompare.Version;
 import minegame159.meteorclient.gui.tabs.builtin.ConfigTab;
-import minegame159.meteorclient.settings.*;
+import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
@@ -19,18 +19,20 @@ public class Config extends System<Config> {
     public final Version version;
     public final String devBuild;
 
-    public boolean customFont;
-    public boolean sendDataToApi;
-    public int rotationHoldTicks;
+    public String font = ConfigTab.font.get();
+    public boolean customFont = ConfigTab.customFont.get();
+    public boolean sendDataToApi = ConfigTab.sendDataToApi.get();
+    public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
 
-    private String prefix;
-    public boolean chatCommandsInfo;
-    public boolean deleteChatCommandsInfo;
-    public boolean rainbowPrefix;
+    public String prefix = ConfigTab.prefix.get();
+    public boolean openChatOnPrefix = ConfigTab.openChatOnPrefix.get();
+    public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
+    public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
+    public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
 
-    public boolean titleScreenCredits;
-    public boolean customWindowTitle;
-    public String customWindowTitleText;
+    public boolean titleScreenCredits = ConfigTab.titleScreenCredits.get();
+    public boolean customWindowTitle = ConfigTab.customWindowTitle.get();
+    public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
 
     public Config() {
         super("config");
@@ -48,26 +50,19 @@ public class Config extends System<Config> {
         return Systems.get(Config.class);
     }
 
-    public void setPrefix(String prefix) {
-        this.prefix = prefix;
-        save();
-    }
-
-    public String getPrefix() {
-        return prefix;
-    }
-
     @Override
     public CompoundTag toTag() {
         CompoundTag tag = new CompoundTag();
         tag.putString("version", version.getOriginalString());
 
+        tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
-        tag.putDouble("rainbowSpeed", RainbowColors.rainbowSpeed);
+        tag.putDouble("rainbowSpeed", RainbowColors.GLOBAL.getSpeed());
         tag.putBoolean("sendDataToApi", sendDataToApi);
         tag.putInt("rotationHoldTicks", rotationHoldTicks);
 
         tag.putString("prefix", prefix);
+        tag.putBoolean("openChatOnPrefix", openChatOnPrefix);
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
@@ -82,36 +77,38 @@ public class Config extends System<Config> {
 
     @Override
     public Config fromTag(CompoundTag tag) {
-        customFont = getBoolean(tag, "customFont", ConfigTab.ConfigScreen.customFont);
-        RainbowColors.rainbowSpeed = tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.ConfigScreen.rainbowSpeed.getDefaultValue() / 100;
-        sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.ConfigScreen.sendDataToApi);
-        rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.ConfigScreen.rotationHoldTicks);
+        font = getString(tag, "font", ConfigTab.font);
+        customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
+        RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
+        sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.sendDataToApi);
+        rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.rotationHoldTicks);
 
-        prefix = getString(tag, "prefix", ConfigTab.ConfigScreen.prefix);
-        chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.ConfigScreen.chatCommandsInfo);
-        deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.ConfigScreen.deleteChatCommandsInfo);
-        rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.ConfigScreen.rainbowPrefix);
+        prefix = getString(tag, "prefix", ConfigTab.prefix);
+        openChatOnPrefix = getBoolean(tag, "openChatOnPrefix", ConfigTab.openChatOnPrefix);
+        chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.chatCommandsInfo);
+        deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
+        rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
 
-        titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.ConfigScreen.titleScreenCredits);
-        customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.ConfigScreen.customWindowTitle);
-        customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.ConfigScreen.customWindowTitleText);
+        titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
+        customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.customWindowTitle);
+        customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
 
         return this;
     }
 
     private boolean getBoolean(CompoundTag tag, String key, Setting<Boolean> setting) {
-        return tag.contains(key) ? tag.getBoolean(key) : setting.getDefaultValue();
+        return tag.contains(key) ? tag.getBoolean(key) : setting.get();
     }
 
     private String getString(CompoundTag tag, String key, Setting<String> setting) {
-        return tag.contains(key) ? tag.getString(key) : setting.getDefaultValue();
+        return tag.contains(key) ? tag.getString(key) : setting.get();
     }
 
     private double getDouble(CompoundTag tag, String key, Setting<Double> setting) {
-        return tag.contains(key) ? tag.getDouble(key) : setting.getDefaultValue();
+        return tag.contains(key) ? tag.getDouble(key) : setting.get();
     }
 
     private int getInt(CompoundTag tag, String key, Setting<Integer> setting) {
-        return tag.contains(key) ? tag.getInt(key) : setting.getDefaultValue();
+        return tag.contains(key) ? tag.getInt(key) : setting.get();
     }
 }

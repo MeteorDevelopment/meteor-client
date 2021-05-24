@@ -31,8 +31,8 @@ public class BlockSelection extends Module {
     );
 
     private final Setting<Boolean> oneSide = sgGeneral.add(new BoolSetting.Builder()
-            .name("one-side")
-            .description("Renders only the side you are looking at.")
+            .name("single-side")
+            .description("Only renders the side you are looking at.")
             .defaultValue(false)
             .build()
     );
@@ -40,7 +40,7 @@ public class BlockSelection extends Module {
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
             .name("shape-mode")
             .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Lines)
+            .defaultValue(ShapeMode.Both)
             .build()
     );
 

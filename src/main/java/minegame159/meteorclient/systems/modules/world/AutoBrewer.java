@@ -5,14 +5,12 @@
 
 package minegame159.meteorclient.systems.modules.world;
 
-import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.PotionSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.MyPotion;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -22,12 +20,6 @@ import net.minecraft.potion.Potions;
 import net.minecraft.screen.BrewingStandScreenHandler;
 
 public class AutoBrewer extends Module {
-    public enum Modifier {
-        None,
-        Splash,
-        Lingering
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
@@ -35,12 +27,6 @@ public class AutoBrewer extends Module {
             .description("The type of potion to brew.")
             .defaultValue(MyPotion.Strength)
             .build()
-    );
-
-    private final Setting<Modifier> modifier = sgGeneral.add(new EnumSetting.Builder<Modifier>()
-            .name("modifier")
-            .description("The modifier for the specified potion.")
-            .defaultValue(Modifier.None).build()
     );
 
     private int ingredientI;
@@ -90,43 +76,11 @@ public class AutoBrewer extends Module {
             if (insertIngredient(c, potion.get().ingredients[ingredientI])) return;
             ingredientI++;
             timer = 0;
-        } else if (ingredientI == potion.get().ingredients.length) {
-            // Apply the potion modifier.
-            if (applyModifier(c)) return;
-            ingredientI++;
-            timer = 0;
         } else {
             // Reset the loop.
             ingredientI = -2;
             timer = 0;
         }
-    }
-
-    private boolean applyModifier(BrewingStandScreenHandler c) {
-        if (modifier.get() != Modifier.None) {
-            Item item;
-            if (modifier.get() == Modifier.Splash) item = Items.GUNPOWDER;
-            else item = Items.DRAGON_BREATH;
-
-            int slot = -1;
-
-            for (int slotI = 5; slotI < c.slots.size(); slotI++) {
-                if (c.slots.get(slotI).getStack().getItem() == item) {
-                    slot = slotI;
-                    break;
-                }
-            }
-
-            if (slot == -1) {
-                ChatUtils.moduleError(this, "You do not have any %s left in your inventory... disabling.", item.getName().getString());
-                toggle();
-                return true;
-            }
-
-            moveOneItem(c, slot, 3);
-        }
-
-        return false;
     }
 
     private boolean insertIngredient(BrewingStandScreenHandler c, Item ingredient) {
@@ -140,7 +94,7 @@ public class AutoBrewer extends Module {
         }
 
         if (slot == -1) {
-            ChatUtils.moduleError(this, "You do not have any %s left in your inventory... disabling.", ingredient.getName().getString());
+            error("You do not have any %s left in your inventory... disabling.", ingredient.getName().getString());
             toggle();
             return true;
         }
@@ -162,7 +116,7 @@ public class AutoBrewer extends Module {
             }
 
             if (slot == -1) {
-                ChatUtils.moduleError(this, "You do not have a sufficient amount of blaze powder to use as fuel for the brew... disabling.");
+                error("You do not have a sufficient amount of blaze powder to use as fuel for the brew... disabling.");
                 toggle();
                 return true;
             }
@@ -192,7 +146,7 @@ public class AutoBrewer extends Module {
             }
 
             if (slot == -1) {
-                ChatUtils.moduleError(this, "You do not have a sufficient amount of water bottles to complete this brew... disabling.");
+                error("You do not have a sufficient amount of water bottles to complete this brew... disabling.");
                 toggle();
                 return true;
             }
@@ -208,7 +162,7 @@ public class AutoBrewer extends Module {
             InvUtils.quickMove().slotId(i);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
-                ChatUtils.moduleError(this, "You do not have a sufficient amount of inventory space... disabling.");
+                error("You do not have a sufficient amount of inventory space... disabling.");
                 toggle();
                 return true;
             }

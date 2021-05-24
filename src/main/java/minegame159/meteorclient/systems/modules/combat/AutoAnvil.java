@@ -9,12 +9,10 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
-import minegame159.meteorclient.utils.player.ChatUtils;
+import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.*;
@@ -23,23 +21,13 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-
-// Created by Eureka
+import java.util.Arrays;
+import java.util.List;
 
 public class AutoAnvil extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
-
-    // This is the structure of antiStep
-    private final ArrayList<Vec3d> antiStepStructure = new ArrayList<Vec3d>() {{
-        add(new Vec3d(1, 2, 0));
-        add(new Vec3d(-1, 2, 0));
-        add(new Vec3d(0, 2, 1));
-        add(new Vec3d(0, 2, -1));
-    }};
 
     // General
 
@@ -58,7 +46,7 @@ public class AutoAnvil extends Module {
     );
 
     private final Setting<Boolean> antiStep = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti step")
+            .name("anti-step")
             .description("Place extra blocks for preventing the enemy from escaping")
             .defaultValue(false)
             .build()
@@ -67,10 +55,18 @@ public class AutoAnvil extends Module {
     // Place
 
     private final Setting<Double> range = sgPlace.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("How far away the target can be to be affected.")
+            .name("target-range")
+            .description("The radius in which players get targeted.")
             .defaultValue(4)
             .min(0)
+            .sliderMax(5)
+            .build()
+    );
+
+    private final Setting<SortPriority> priority = sgPlace.add(new EnumSetting.Builder<SortPriority>()
+            .name("target-priority")
+            .description("How to select the player to target.")
+            .defaultValue(SortPriority.LowestHealth)
             .build()
     );
 
@@ -85,7 +81,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> startHeight = sgPlace.add(new IntSetting.Builder()
             .name("start-Height")
-            .description("The height at beginning")
+            .description("The height at the beginning.")
             .defaultValue(5)
             .min(0)
             .max(10)
@@ -96,7 +92,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> minHeight = sgPlace.add(new IntSetting.Builder()
             .name("min-Height")
-            .description("The minimum height accetable")
+            .description("The minimum height acceptable.")
             .defaultValue(1)
             .min(0)
             .max(5)
@@ -107,7 +103,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Double> decrease = sgPlace.add(new DoubleSetting.Builder()
             .name("decrease")
-            .description("The distance where it will start decrease")
+            .description("The distance where it will start to decrease.")
             .defaultValue(1.4)
             .min(0)
             .max(4)
@@ -118,7 +114,7 @@ public class AutoAnvil extends Module {
 
     private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
             .name("blocks-per-tick")
-            .description("The number of blocks you can place every ticks")
+            .description("The number of blocks you can place every ticks.")
             .defaultValue(4)
             .min(2)
             .max(8)
@@ -132,6 +128,13 @@ public class AutoAnvil extends Module {
             .description("Automatically places a button or pressure plate at the targets feet to break the anvils.")
             .defaultValue(true)
             .build()
+    );
+
+    private final List<BlockPos> antiStepStructure = Arrays.asList(
+            new BlockPos(1, 2, 0),
+            new BlockPos(-1, 2, 0),
+            new BlockPos(0, 2, 1),
+            new BlockPos(0, 2, -1)
     );
 
     public AutoAnvil() {
@@ -166,33 +169,14 @@ public class AutoAnvil extends Module {
     private void onTick(TickEvent.Pre event) {
         // Head check
         if (isActive() && toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
-            ChatUtils.moduleError(this, "Target head slot is empty... disabling.");
+            error("Target head slot is empty... disabling.");
             toggle();
             return;
         }
 
         // Check distance + alive
-        if (target != null && (mc.player.distanceTo(target) > range.get() || !target.isAlive())) target = null;
-
-        // find enemy
-        for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player == mc.player || !Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get() || isHole(player.getBlockPos())) continue;
-
-            if (target == null) target = player;
-            else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;
-        }
-
-        if (target == null) {
-            for (FakePlayerEntity player : FakePlayerUtils.getPlayers().keySet()) {
-                if (!Friends.get().attack(player) || !player.isAlive() || mc.player.distanceTo(player) > range.get() || isHole(player.getBlockPos())) continue;
-
-                if (target == null) target = player;
-                else if (mc.player.distanceTo(target) > mc.player.distanceTo(player)) target = player;
-            }
-        }
-
-        if (target == null)
-            return;
+        if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+        if (TargetUtils.isBadTarget(target, range.get())) return;
 
         // Number of blocks we have placed
         int blocksPlaced = 0;
@@ -226,9 +210,9 @@ public class AutoAnvil extends Module {
                 int slotObby = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
                 if (slotObby == -1) return;
                 // Iterate for every blocks in antiStepStructure
-                for(Vec3d blockSpecific : antiStepStructure) {
+                for(BlockPos pos : antiStepStructure) {
                     // Position where we are going to place
-                    BlockPos posBlock = target.getBlockPos().add(blockSpecific.x, blockSpecific.y, blockSpecific.z);
+                    BlockPos posBlock = target.getBlockPos().add(pos);
                     // Try to place
                     if (BlockUtils.place(posBlock, Hand.MAIN_HAND, slotObby, rotate.get(), 0, true)) {
                         if (++blocksPlaced == blocksPerTick.get())
@@ -249,7 +233,7 @@ public class AutoAnvil extends Module {
 
             // If we are too far away
             if (startHeightValue <= minHeight.get()) {
-                ChatUtils.moduleError(this, "Target too far away... disabling.");
+                error("Target too far away... disabling.");
                 toggle();
                 return;
             }
@@ -290,8 +274,7 @@ public class AutoAnvil extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
+        if (target != null) return target.getEntityName();
         return null;
     }
 }

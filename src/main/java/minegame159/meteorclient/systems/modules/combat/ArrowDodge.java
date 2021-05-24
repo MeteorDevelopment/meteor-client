@@ -26,9 +26,6 @@ import java.util.Collections;
 import java.util.List;
 
 public class ArrowDodge extends Module {
-    public enum MoveType {
-        Client, Packet
-    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMovement = settings.createGroup("Movement");
@@ -66,9 +63,14 @@ public class ArrowDodge extends Module {
     );
 
     private final List<Vec3d> possibleMoveDirections = Arrays.asList(
-        new Vec3d(1, 0, 1), new Vec3d(0, 0, 1), new Vec3d(-1, 0, 1),
-        new Vec3d(1, 0, 0), new Vec3d(-1, 0, 0),
-        new Vec3d(1, 0, -1), new Vec3d(0, 0, -1), new Vec3d(-1, 0, -1)
+            new Vec3d(1, 0, 1),
+            new Vec3d(0, 0, 1),
+            new Vec3d(-1, 0, 1),
+            new Vec3d(1, 0, 0),
+            new Vec3d(-1, 0, 0),
+            new Vec3d(1, 0, -1),
+            new Vec3d(0, 0, -1),
+            new Vec3d(-1, 0, -1)
     );
 
     public ArrowDodge() {
@@ -76,17 +78,14 @@ public class ArrowDodge extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (mc.player == null) return;
+    private void onTick(TickEvent.Pre event) {
         Box playerHitbox = mc.player.getBoundingBox();
-        if (playerHitbox == null) return;
         playerHitbox = playerHitbox.expand(0.6);
 
-        Double speed = moveSpeed.get();
+        double speed = moveSpeed.get();
 
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
-            if (((ProjectileEntity)e).getOwner() == mc.player) continue;
             if (e instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor)e).getInGround()) continue;
 
             List<Box> futureArrowHitboxes = new ArrayList<>();
@@ -99,25 +98,29 @@ public class ArrowDodge extends Module {
             }
 
             for (Box arrowHitbox: futureArrowHitboxes) {
-                if (playerHitbox.intersects(arrowHitbox)) {
-                    Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
-                    boolean didMove = false;
-                    for (Vec3d direction: possibleMoveDirections) {
-                        Vec3d velocity = direction.multiply(speed);
-                        if (isValid(velocity, futureArrowHitboxes, playerHitbox)) {
-                            move(velocity);
-                            didMove=true;
-                            break;
-                        }
+                if (!playerHitbox.intersects(arrowHitbox)) continue;
+
+                Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
+
+                boolean didMove = false;
+
+                for (Vec3d direction: possibleMoveDirections) {
+                    Vec3d velocity = direction.multiply(speed);
+                    if (isValid(velocity, futureArrowHitboxes, playerHitbox)) {
+                        move(velocity);
+                        didMove = true;
+                        break;
                     }
-                    if (!didMove) { //If didn't find a suitable position, run back
-                        double yaw = Math.toRadians(e.yaw);
-                        double pitch = Math.toRadians(e.pitch);
-                        double velocityX = Math.sin(yaw) * Math.cos(pitch) * speed;
-                        double velocityY = Math.sin(pitch) * speed;
-                        double velocityZ = -Math.cos(yaw) * Math.cos(pitch) * speed;
-                        move(new Vec3d(velocityX,velocityY,velocityZ));
-                    }
+                }
+
+                if (!didMove) { //If didn't find a suitable position, run back
+                    double yaw = Math.toRadians(e.yaw);
+                    double pitch = Math.toRadians(e.pitch);
+                    move(
+                            Math.sin(yaw) * Math.cos(pitch) * speed,
+                            Math.sin(pitch) * speed,
+                            -Math.cos(yaw) * Math.cos(pitch) * speed
+                    );
                 }
             }
 
@@ -125,14 +128,17 @@ public class ArrowDodge extends Module {
     }
 
     private void move(Vec3d vel) {
-        MoveType mode = moveType.get();
-        if (mode == MoveType.Client) {
-            mc.player.setVelocity(vel);
-        }
-        else if (mode == MoveType.Packet) {
-            Vec3d newPos = mc.player.getPos().add(vel);
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x,newPos.y, newPos.z, false));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x,newPos.y - 0.01, newPos.z, true));
+        move(vel.x, vel.y, vel.z);
+    }
+
+    private void move(double velX, double velY, double velZ) {
+        switch (moveType.get()) {
+            case Client:    mc.player.setVelocity(velX, velY, velZ); break;
+            case Packet:
+                Vec3d newPos = mc.player.getPos().add(velX, velY, velZ);
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x, newPos.y, newPos.z, false));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x, newPos.y - 0.01, newPos.z, true));
+                break;
         }
     }
 
@@ -148,9 +154,15 @@ public class ArrowDodge extends Module {
                 return false;
             }
         }
-        if ( groundCheck.get() && blockPos != null) {
+        if (groundCheck.get() && blockPos != null) {
             return mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.empty();
         }
         return true;
     }
+
+    public enum MoveType {
+        Client,
+        Packet
+    }
+
 }

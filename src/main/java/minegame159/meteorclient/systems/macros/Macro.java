@@ -5,14 +5,9 @@
 
 package minegame159.meteorclient.systems.macros;
 
-import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
-import minegame159.meteorclient.events.meteor.KeyEvent;
-import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -36,17 +31,7 @@ public class Macro implements ISerializable<Macro> {
         messages.remove(i);
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    private void onKey(KeyEvent event) {
-        if (event.action != KeyAction.Release && onAction(true, event.key)) event.cancel();
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    private void onButton(MouseButtonEvent event) {
-        if (event.action != KeyAction.Release && onAction(false, event.button)) event.cancel();
-    }
-
-    private boolean onAction(boolean isKey, int value) {
+    public boolean onAction(boolean isKey, int value) {
         if (keybind.matches(isKey, value) && MinecraftClient.getInstance().currentScreen == null) {
             for (String command : messages) {
                 MinecraftClient.getInstance().player.sendChatMessage(command);

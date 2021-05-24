@@ -9,7 +9,6 @@ import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
-import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -22,9 +21,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
-import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.ChatUtils;
-
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
@@ -34,6 +31,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+
+import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class DeathPosition extends Module {
 
@@ -98,11 +97,10 @@ public class DeathPosition extends Module {
         labelText = String.format("Latest death: %.1f, %.1f, %.1f", dmgPos.x, dmgPos.y, dmgPos.z);
 
         String time = dateFormat.format(new Date());
-        //ChatUtils.moduleInfo(this, "Died at (highlight)%.0f(default), (highlight)%.0f(default), (highlight)%.0f (default)on (highlight)%s(default).", damagedplayerX, damagedplayerY, damagedplayerZ, time);
-        BaseText msg = new LiteralText("Died at ");
-        msg.append(ChatUtils.formatCoords(dmgPos));
-        msg.append(showTimestamp.get() ? String.format(" on %s.", time) : ".");
-        ChatUtils.moduleInfo(this,msg);
+        BaseText text = new LiteralText("Died at ");
+        text.append(formatCoords(dmgPos));
+        text.append(showTimestamp.get() ? String.format(" on %s.", time) : ".");
+        info(text);
 
         // Create waypoint
         if (createWaypoint.get()) {
@@ -113,9 +111,9 @@ public class DeathPosition extends Module {
             waypoint.y = (int) dmgPos.y + 2;
             waypoint.z = (int) dmgPos.z;
             waypoint.maxVisibleDistance = Integer.MAX_VALUE;
-            waypoint.actualDimension = Utils.getDimension();
+            waypoint.actualDimension = PlayerUtils.getDimension();
 
-            switch (Utils.getDimension()) {
+            switch (PlayerUtils.getDimension()) {
                 case Overworld:
                     waypoint.overworld = true;
                     break;
@@ -133,7 +131,7 @@ public class DeathPosition extends Module {
 
     private void path() {
         if (deathPos.isEmpty() && mc.player != null) {
-            ChatUtils.moduleWarning(this,"No latest death found.");
+            warning("No latest death found.");
         }
         else {
             if (mc.world != null) {

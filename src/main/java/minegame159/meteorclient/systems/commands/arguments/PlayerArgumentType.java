@@ -30,7 +30,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
            EXAMPLES = MinecraftClient.getInstance().world.getPlayers()
                     .stream()
                     .limit(3)
-                    .map(playerEntity -> playerEntity.getGameProfile().getName())
+                    .map(PlayerEntity::getEntityName)
                     .collect(Collectors.toList());
         }
     }
@@ -42,13 +42,16 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
         return new PlayerArgumentType();
     }
 
+    public static PlayerEntity getPlayer(CommandContext<?> context) {
+        return context.getArgument("player", PlayerEntity.class);
+    }
 
     @Override
     public PlayerEntity parse(StringReader reader) throws CommandSyntaxException {
         String argument = reader.readString();
         PlayerEntity playerEntity = null;
         for (PlayerEntity p : MinecraftClient.getInstance().world.getPlayers()) {
-            if (p.getGameProfile().getName().equalsIgnoreCase(argument)) {
+            if (p.getEntityName().equalsIgnoreCase(argument)) {
                 playerEntity = p;
                 break;
             }
@@ -59,7 +62,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(MinecraftClient.getInstance().world.getPlayers().stream().map(playerEntity -> playerEntity.getGameProfile().getName()), builder);
+        return CommandSource.suggestMatching(MinecraftClient.getInstance().world.getPlayers().stream().map(PlayerEntity::getEntityName), builder);
     }
 
     @Override

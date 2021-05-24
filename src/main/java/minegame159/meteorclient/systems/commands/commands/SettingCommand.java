@@ -11,7 +11,6 @@ import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.systems.commands.arguments.SettingArgumentType;
 import minegame159.meteorclient.systems.commands.arguments.SettingValueArgumentType;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -32,7 +31,7 @@ public class SettingCommand extends Command {
                             // Get setting value
                             Setting<?> setting = getSetting(context);
 
-                            ChatUtils.info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+                            ModuleArgumentType.getModule(context, "module").info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
 
                             return SINGLE_SUCCESS;
                         })
@@ -44,7 +43,7 @@ public class SettingCommand extends Command {
                                     String value = context.getArgument("value", String.class);
 
                                     if (setting.parse(value)) {
-                                        ChatUtils.info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                        ModuleArgumentType.getModule(context, "module").info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
                                     }
 
                                     return SINGLE_SUCCESS;
