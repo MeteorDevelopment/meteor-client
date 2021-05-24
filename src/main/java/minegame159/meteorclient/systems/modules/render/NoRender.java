@@ -308,7 +308,9 @@ public class NoRender extends Module {
     }
 
     @EventHandler
-    private void onChunkOcclusion(ChunkOcclusionEvent event) { if (noCaveCulling.get()) event.cancel(); }
+    private void onChunkOcclusion(ChunkOcclusionEvent event) {
+        if (noCaveCulling.get()) event.cancel();
+    }
 
     // Entity
 
