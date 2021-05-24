@@ -25,6 +25,7 @@ import minegame159.meteorclient.systems.modules.misc.*;
 import minegame159.meteorclient.systems.modules.movement.*;
 import minegame159.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import minegame159.meteorclient.systems.modules.movement.speed.Speed;
+import minegame159.meteorclient.systems.modules.movement.strafe.Strafe;
 import minegame159.meteorclient.systems.modules.player.*;
 import minegame159.meteorclient.systems.modules.render.*;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
@@ -458,6 +459,7 @@ public class Modules extends System<Modules> {
         add(new Step());
         add(new Velocity());
         add(new AntiVoid());
+        add(new Strafe());
     }
 
     private void initRender() {
