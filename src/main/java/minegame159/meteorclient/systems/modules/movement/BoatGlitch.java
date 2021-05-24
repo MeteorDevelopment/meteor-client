@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.systems.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
@@ -17,12 +22,6 @@ import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.util.Hand;
 
 public class BoatGlitch extends Module {
-
-    private Entity boat = null;
-    private int dismountTicks = 0;
-    private int remountTicks = 0;
-    private boolean dontPhase = true;
-    private boolean boatPhaseEnabled;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> toggleAfter = sgGeneral.add(new BoolSetting.Builder()
@@ -38,6 +37,12 @@ public class BoatGlitch extends Module {
             .defaultValue(true)
             .build()
     );
+
+    private Entity boat = null;
+    private int dismountTicks = 0;
+    private int remountTicks = 0;
+    private boolean dontPhase = true;
+    private boolean boatPhaseEnabled;
 
     public BoatGlitch() {
         super(Categories.Movement, "Boat Glitch", "Glitches your boat into the block beneath you.  Dismount to trigger.");

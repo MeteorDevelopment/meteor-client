@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.systems.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
@@ -16,8 +21,6 @@ import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.util.math.Vec3d;
 
 public class BoatPhase extends Module {
-
-    private BoatEntity boat = null;
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpeeds = settings.createGroup("Speeds");
 
@@ -75,6 +78,8 @@ public class BoatPhase extends Module {
             .sliderMax(10)
             .build()
     );
+
+    private BoatEntity boat = null;
 
     public BoatPhase() {
         super(Categories.Movement, "Boat Phase", "Phase through blocks using a boat.");
