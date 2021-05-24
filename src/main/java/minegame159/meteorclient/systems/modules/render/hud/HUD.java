@@ -87,9 +87,9 @@ public class HUD extends Module {
         topLeft = new HudElementLayer(RENDERER, elements, AlignmentX.Left, AlignmentY.Top, 2, 2);
         topLeft.add(new WatermarkHud(this));
         topLeft.add(new ServerHud(this));
+        topLeft.add(new TpsHud(this));
         topLeft.add(new FpsHud(this));
         topLeft.add(new PingHud(this));
-        topLeft.add(new TpsHud(this));
         topLeft.add(new SpeedHud(this));
         topLeft.add(new BiomeHud(this));
         topLeft.add(new TimeHud(this));
