@@ -100,7 +100,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double d, CallbackInfo info) {
         Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.noPush.get()) {
+        if (velocity.isActive() && velocity.blocks.get()) {
             info.cancel();
         }
     }

@@ -22,6 +22,24 @@ public class Velocity extends Module {
             .build()
     );
 
+    public final Setting<Double> entitiesHorizontal = sgGeneral.add(new DoubleSetting.Builder()
+            .name("entities-horizontal")
+            .description("How much velocity you will take from entities horizontally.")
+            .defaultValue(0)
+            .sliderMin(0).sliderMax(1)
+            .visible(entities::get)
+            .build()
+    );
+
+    public final Setting<Double> entitiesVertical = sgGeneral.add(new DoubleSetting.Builder()
+            .name("entities-vertical")
+            .description("How much velocity you will take from entities vertically.")
+            .defaultValue(0)
+            .sliderMin(0).sliderMax(1)
+            .visible(entities::get)
+            .build()
+    );
+
     public final Setting<Boolean> explosions = sgGeneral.add(new BoolSetting.Builder()
             .name("explosions")
             .description("Modifies your knockback from explosions.")
@@ -29,35 +47,53 @@ public class Velocity extends Module {
             .build()
     );
 
-    public final Setting<Boolean> liquids = sgGeneral.add(new BoolSetting.Builder()
-            .name("liquids")
-            .description("Modifies the amount you are pushed by flowing liquids.")
-            .defaultValue(false)
+    public final Setting<Double> explosionsHorizontal = sgGeneral.add(new DoubleSetting.Builder()
+            .name("explosions-horizontal")
+            .description("How much velocity you will take from explosions horizontally.")
+            .defaultValue(0)
+            .sliderMin(0).sliderMax(1)
+            .visible(explosions::get)
             .build()
     );
 
-    public final Setting<Boolean> noPush = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-push")
-            .description("Attempts to stop getting pushed out of blocks.")
+    public final Setting<Double> explosionsVertical = sgGeneral.add(new DoubleSetting.Builder()
+            .name("explosions-vertical")
+            .description("How much velocity you will take from explosions vertically.")
+            .defaultValue(0)
+            .sliderMin(0).sliderMax(1)
+            .visible(explosions::get)
+            .build()
+    );
+
+    public final Setting<Boolean> liquids = sgGeneral.add(new BoolSetting.Builder()
+            .name("liquids")
+            .description("Modifies the amount you are pushed by flowing liquids.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Double> horizontal = sgGeneral.add(new DoubleSetting.Builder()
-            .name("horizontal-multiplier")
-            .description("How much velocity you will take horizontally.")
+    public final Setting<Double> liquidsHorizontal = sgGeneral.add(new DoubleSetting.Builder()
+            .name("liquids-horizontal")
+            .description("How much velocity you will take from liquids horizontally.")
             .defaultValue(0)
-            .sliderMin(0)
-            .sliderMax(1)
+            .sliderMin(0).sliderMax(1)
+            .visible(liquids::get)
             .build()
     );
 
-    private final Setting<Double> vertical = sgGeneral.add(new DoubleSetting.Builder()
-            .name("vertical-multiplier")
-            .description("How much velocity you will take vertically.")
+    public final Setting<Double> liquidsVertical = sgGeneral.add(new DoubleSetting.Builder()
+            .name("liquids-vertical")
+            .description("How much velocity you will take from liquids vertically.")
             .defaultValue(0)
-            .sliderMin(0)
-            .sliderMax(1)
+            .sliderMin(0).sliderMax(1)
+            .visible(liquids::get)
+            .build()
+    );
+
+    public final Setting<Boolean> blocks = sgGeneral.add(new BoolSetting.Builder()
+            .name("blocks")
+            .description("Prevents you from being pushed out of blocks.")
+            .defaultValue(true)
             .build()
     );
 
@@ -65,11 +101,11 @@ public class Velocity extends Module {
         super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
 
-    public double getHorizontal() {
-        return isActive() ? horizontal.get() : 1;
+    public double getHorizontal(Setting<Double> setting) {
+        return isActive() ? setting.get() : 1;
+    }
+    public double getVertical(Setting<Double> setting) {
+        return isActive() ? setting.get() : 1;
     }
 
-    public double getVertical() {
-        return isActive() ? vertical.get() : 1;
-    }
 }
