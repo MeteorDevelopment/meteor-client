@@ -95,6 +95,7 @@
     "ModelPredicateProviderRegistryMixin",
     "MouseMixin",
     "MultiplayerScreenMixin",
+    "MapRendererMixin",
     "NamespaceResourceManagerMixin",
     "PacketInflaterMixin",
     "ParticleManagerMixin",

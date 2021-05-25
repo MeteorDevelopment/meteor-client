@@ -192,6 +192,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noMapMarkers = sgWorld.add(new BoolSetting.Builder()
+            .name("no-map-markers")
+            .description("Disables markers on maps.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Entity
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
@@ -310,6 +317,10 @@ public class NoRender extends Module {
     @EventHandler
     private void onChunkOcclusion(ChunkOcclusionEvent event) {
         if (noCaveCulling.get()) event.cancel();
+    }
+
+    public boolean noMapMarkers() {
+        return isActive() && noMapMarkers.get();
     }
 
     // Entity
