@@ -37,7 +37,7 @@ public class LookingAtHud extends DoubleTextHudElement {
             .name("show-waterlogged-status")
             .description("Displays if a block is waterlogged or not")
             .defaultValue(true)
-            .build()
+            .build()                                                       
     );
 
     public LookingAtHud(HUD hud) {
@@ -54,6 +54,7 @@ public class LookingAtHud extends DoubleTextHudElement {
             String result = blockPosition.get() ? String.format("%s [%d, %d, %d]", name, pos.getX(), pos.getY(), pos.getZ()) : name;
 
             if(waterLogged.get()) result = blockPosition.get() ? String.format("%s %s[%d, %d, %d]", name, mc.world.getFluidState(pos).isIn(FluidTags.WATER) ? "(Waterlogged) " : "", pos.getX(), pos.getY(), pos.getZ()) : name;
+
             return result;
         }
         else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) {

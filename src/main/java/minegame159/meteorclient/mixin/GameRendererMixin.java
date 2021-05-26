@@ -7,7 +7,6 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.render.GetFovEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.rendering.Matrices;
@@ -37,7 +36,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
@@ -125,11 +123,6 @@ public abstract class GameRendererMixin {
     private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
         if (Modules.get().get(NoRender.class).noNausea()) return 0;
         return MathHelper.lerp(delta, first, second);
-    }
-
-    @Inject(method = "getFov", at = @At("RETURN"), cancellable = true)
-    private void onGetFov(Camera camera, float tickDelta, boolean changingFov, CallbackInfoReturnable<Double> info) {
-        info.setReturnValue(MeteorClient.EVENT_BUS.post(GetFovEvent.get(info.getReturnValue())).fov);
     }
 
     // Freecam
