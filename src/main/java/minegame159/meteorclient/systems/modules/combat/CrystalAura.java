@@ -522,8 +522,6 @@ public class CrystalAura extends Module {
     public void onDeactivate() {
         targets.clear();
 
-        raycastContext = null;
-
         placedCrystals.clear();
 
         attemptedBreaks.clear();
