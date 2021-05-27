@@ -1,0 +1,84 @@
+package minegame159.meteorclient.mixin;
+
+import com.mojang.datafixers.util.Pair;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.NoRender;
+import net.minecraft.block.*;
+import net.minecraft.block.entity.BannerBlockEntity;
+import net.minecraft.block.entity.BannerPattern;
+import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
+import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.util.SpriteIdentifier;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.util.math.Vector3f;
+import net.minecraft.util.DyeColor;
+import net.minecraft.util.math.Direction;
+import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.List;
+
+@Mixin(BannerBlockEntityRenderer.class)
+public class BannerBlockEntityRendererMixin {
+
+    @Final
+    @Shadow private ModelPart pillar;
+    @Final
+    @Shadow private ModelPart crossbar;
+
+    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    private void render(BannerBlockEntity bannerBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j, CallbackInfo ci) {
+        if (bannerBlockEntity.getWorld() != null) { //Don't modify banners in item form
+            NoRender.BannerRenderMode renderMode = Modules.get().get(NoRender.class).getBannerRenderMode();
+            if (renderMode == NoRender.BannerRenderMode.None) ci.cancel();
+            else if (renderMode == NoRender.BannerRenderMode.Pillar) {
+                BlockState blockState = bannerBlockEntity.getCachedState();
+                if (blockState.getBlock() instanceof BannerBlock) { //Floor banner
+                    this.pillar.visible = true;
+                    this.crossbar.visible = false;
+                    renderPillar(bannerBlockEntity, matrixStack, vertexConsumerProvider, i, j);
+                }
+                else { //Wall banner
+                    this.pillar.visible = false;
+                    this.crossbar.visible = true;
+                    renderCrossbar(bannerBlockEntity, matrixStack, vertexConsumerProvider, i, j);
+                }
+                ci.cancel();
+            }
+        }
+    }
+
+    private void renderPillar(BannerBlockEntity bannerBlockEntity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
+        matrixStack.push();
+        BlockState blockState = bannerBlockEntity.getCachedState();
+        matrixStack.translate(0.5D, 0.5D, 0.5D);
+        float h = (float)(-(Integer)blockState.get(BannerBlock.ROTATION) * 360) / 16.0F;
+        matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(h));
+        matrixStack.push();
+        matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
+        VertexConsumer vertexConsumer = ModelLoader.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
+        this.pillar.render(matrixStack, vertexConsumer, i, j);
+        matrixStack.pop();
+        matrixStack.pop();
+    }
+
+    private void renderCrossbar(BannerBlockEntity bannerBlockEntity, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j) {
+        matrixStack.push();
+        BlockState blockState = bannerBlockEntity.getCachedState();
+        matrixStack.translate(0.5D, -0.1666666716337204D, 0.5D);
+        float h = -((Direction)blockState.get(WallBannerBlock.FACING)).asRotation();
+        matrixStack.multiply(Vector3f.POSITIVE_Y.getDegreesQuaternion(h));
+        matrixStack.translate(0.0D, -0.3125D, -0.4375D);
+        matrixStack.push();
+        matrixStack.scale(0.6666667F, -0.6666667F, -0.6666667F);
+        VertexConsumer vertexConsumer = ModelLoader.BANNER_BASE.getVertexConsumer(vertexConsumerProvider, RenderLayer::getEntitySolid);
+        this.crossbar.render(matrixStack, vertexConsumer, i, j);
+        matrixStack.pop();
+        matrixStack.pop();
+    }
+
+}
