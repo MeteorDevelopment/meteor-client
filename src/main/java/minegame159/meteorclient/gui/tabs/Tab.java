@@ -20,7 +20,7 @@ public abstract class Tab {
     public void openScreen(GuiTheme theme) {
         TabScreen screen = this.createScreen(theme);
         screen.addDirect(theme.topBar()).top().centerX();
-
+        if (theme.hideHUD()) mc.options.hudHidden = true;
         mc.openScreen(screen);
     }
 
