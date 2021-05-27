@@ -78,6 +78,12 @@ public class HudTab extends Tab {
         }
 
         @Override
+        public void onClose() {
+            super.onClose();
+            if (theme.hideHUD()) mc.options.hudHidden = true;
+        }
+
+        @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (hoveredModule != null) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {

@@ -13,6 +13,7 @@ import minegame159.meteorclient.events.meteor.CharTypedEvent;
 import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
 import minegame159.meteorclient.events.meteor.KeyEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.Tabs;
@@ -136,7 +137,9 @@ public class MeteorClient implements ClientModInitializer {
     }
 
     private void openClickGui() {
-        Tabs.get().get(0).openScreen(GuiThemes.get());
+        GuiTheme theme = GuiThemes.get();
+        Tabs.get().get(0).openScreen(theme);
+        if (theme.hideHUD()) mc.options.hudHidden = true;
     }
 
     @EventHandler
