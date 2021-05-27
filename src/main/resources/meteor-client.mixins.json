@@ -89,6 +89,7 @@
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "MapRendererMixin",
+    "BannerBlockEntityRendererMixin",
     "Matrix4fMixin",
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
