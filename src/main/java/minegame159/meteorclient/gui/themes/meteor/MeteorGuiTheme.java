@@ -80,6 +80,14 @@ public class MeteorGuiTheme extends GuiTheme {
             .build()
     );
 
+    public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
+            .name("hide-HUD")
+            .description("Hide HUD when in GUI.")
+            .defaultValue(false)
+            //.onChanged((v) -> { mc.options.hudHidden = v; })
+            .build()
+    );
+
     // Colors
 
     public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(135, 0, 255));
@@ -292,6 +300,11 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean blur() {
         return blur.get();
+    }
+
+    @Override
+    public boolean hideHUD() {
+        return hideHUD.get();
     }
 
     public class ThreeStateColorSetting {
