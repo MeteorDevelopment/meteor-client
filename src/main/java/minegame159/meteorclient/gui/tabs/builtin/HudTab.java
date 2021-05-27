@@ -74,6 +74,7 @@ public class HudTab extends Tab {
             super(theme, tab);
 
             this.hud = Modules.get().get(HUD.class);
+            mc.options.hudHidden = false;
         }
 
         @Override
