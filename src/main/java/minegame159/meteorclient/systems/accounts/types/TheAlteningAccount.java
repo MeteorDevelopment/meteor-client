@@ -51,7 +51,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     @Override
     public boolean fetchHead() {
         try {
-            return cache.makeHead("https://crafatar.com/avatars/" + cache.uuid + "?size=8&overlay&default=MHF_Steve");
+            return cache.makeHead("https://www.mc-heads.net/avatar/" + cache.uuid + "/8");
         } catch (Exception e) {
             return false;
         }
