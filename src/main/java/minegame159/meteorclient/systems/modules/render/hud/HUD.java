@@ -146,8 +146,7 @@ public class HUD extends Module {
 
     @EventHandler
     public void onRender(Render2DEvent event) {
-        if (mc.options.debugEnabled) return;
-        if (mc.options.hudHidden) return;
+        if (mc.options.debugEnabled || mc.options.hudHidden) return;
 
         RENDERER.begin(scale.get(), event.tickDelta, false);
 
