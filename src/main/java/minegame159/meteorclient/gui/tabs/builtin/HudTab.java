@@ -86,7 +86,7 @@ public class HudTab extends Tab {
         @Override
         public void onClose() {
             super.onClose();
-            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = true;
+            if (theme.hideHUD() && parent instanceof WidgetScreen) mc.options.hudHidden = true;
         }
 
         @Override
