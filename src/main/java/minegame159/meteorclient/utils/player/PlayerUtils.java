@@ -23,6 +23,7 @@ import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -244,6 +245,15 @@ public class PlayerUtils {
         float g = (float) (mc.player.getY() - y);
         float h = (float) (mc.player.getZ() - z);
         return MathHelper.sqrt(f * f + g * g + h * h);
+    }
+
+    public static double distanceToCamera(double x, double y, double z) {
+        Camera camera = mc.gameRenderer.getCamera();
+        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
+    }
+
+    public static double distanceToCamera(Entity entity) {
+        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
     }
 
     public static Dimension getDimension() {

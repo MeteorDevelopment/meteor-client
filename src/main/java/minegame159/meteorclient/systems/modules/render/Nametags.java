@@ -366,7 +366,7 @@ public class Nametags extends Module {
         String pingText = " [" + ping + "ms]";
 
         // Distance
-        double dist = Math.round(EntityUtils.distanceToCamera(player) * 10.0) / 10.0;
+        double dist = Math.round(PlayerUtils.distanceToCamera(player) * 10.0) / 10.0;
         String distText = " " + dist + "m";
 
         // Calc widths
