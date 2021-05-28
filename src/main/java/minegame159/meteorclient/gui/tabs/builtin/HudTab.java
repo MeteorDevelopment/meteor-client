@@ -7,6 +7,7 @@ package minegame159.meteorclient.gui.tabs.builtin;
 
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.HudElementScreen;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
@@ -74,13 +75,18 @@ public class HudTab extends Tab {
             super(theme, tab);
 
             this.hud = Modules.get().get(HUD.class);
+        }
+
+        @Override
+        protected void init() {
+            super.init();
             mc.options.hudHidden = false;
         }
 
         @Override
         public void onClose() {
             super.onClose();
-            if (theme.hideHUD()) mc.options.hudHidden = true;
+            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = true;
         }
 
         @Override
