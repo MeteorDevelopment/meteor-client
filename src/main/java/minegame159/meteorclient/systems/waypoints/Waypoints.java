@@ -18,7 +18,6 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.WaypointsModule;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.files.StreamUtils;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -138,7 +137,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             double z = getCoords(waypoint).z;
 
             // Compute scale
-            double dist = EntityUtils.distanceToCamera(x, y, z);
+            double dist = PlayerUtils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.01 * waypoint.scale;
             if(dist > 8) scale *= dist / 8;
