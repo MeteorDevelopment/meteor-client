@@ -20,12 +20,6 @@ public class TabScreen extends WidgetScreen {
         this.tab = tab;
     }
 
-    @Override
-    public void onClose() {
-        super.onClose();
-        if (theme.hideHUD()) mc.options.hudHidden = false;
-    }
-
     public <T extends WWidget> Cell<T> addDirect(T widget) {
         return super.add(widget);
     }
