@@ -122,7 +122,7 @@ public class ConfigTab extends Tab {
     public static final Setting<Boolean> rainbowPrefix = sgChat.add(new BoolSetting.Builder()
             .name("rainbow-prefix")
             .description("Makes the [Meteor] prefix on chat info rainbow.")
-            .defaultValue(true)
+            .defaultValue(false)
             .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
             .build()
