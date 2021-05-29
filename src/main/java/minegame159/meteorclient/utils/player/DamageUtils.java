@@ -37,6 +37,7 @@ public class DamageUtils {
     private static final Explosion explosion = new Explosion(null, null, 0, 0, 0, 6, false, Explosion.DestructionType.DESTROY);
 
     public static double crystalDamage(PlayerEntity player, Vec3d crystal, boolean predictMovement, RaycastContext raycastContext, BlockPos obsidianPos) {
+        if (player == null) return 0;
         if (EntityUtils.getGameMode(player) == GameMode.CREATIVE && !(player instanceof FakePlayerEntity)) return 0;
 
         ((IVec3d) vec3d).set(player.getPos().x, player.getPos().y, player.getPos().z);
