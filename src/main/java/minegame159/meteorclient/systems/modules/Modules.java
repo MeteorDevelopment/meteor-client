@@ -22,6 +22,7 @@ import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.modules.combat.*;
 import minegame159.meteorclient.systems.modules.misc.*;
+import minegame159.meteorclient.systems.modules.misc.swarm.Swarm;
 import minegame159.meteorclient.systems.modules.movement.*;
 import minegame159.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import minegame159.meteorclient.systems.modules.movement.speed.Speed;
