@@ -78,6 +78,20 @@ public class Scaffold extends Module {
             .build()
     );
 
+    private final Setting<Boolean> filtFall = sgGeneral.add(new BoolSetting.Builder()
+            .name("Filter Falling Blocks")
+            .description("Filters out falling blocks like sand.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> nonSolid = sgGeneral.add(new BoolSetting.Builder()
+            .name("Filter Non-Solid")
+            .description("Filters out Non-Solid blocks.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private BlockState blockState;
     private int slot;
@@ -216,13 +230,18 @@ public class Scaffold extends Module {
 
         if (blackList.get().contains(Block.getBlockFromItem(handStack.getItem()))) return slot;
 
-        // Filter out non solid blocks
+        //Filters
         Block block = ((BlockItem) handStack.getItem()).getBlock();
         slotBlockState = block.getDefaultState();
-        if (!Block.isShapeFullCube(slotBlockState.getCollisionShape(mc.world, setPos(0, -1, 0)))) return slot;
+
+        // Filter out non solid blocks
+        if (nonSolid.get())
+            if (!Block.isShapeFullCube(slotBlockState.getCollisionShape(mc.world, setPos(0, -1, 0)))) return slot;
 
         // Filter out blocks that would fall
-        if (block instanceof FallingBlock && FallingBlock.canFallThrough(blockState)) return slot;
+        if(filtFall.get())
+            if (block instanceof FallingBlock && FallingBlock.canFallThrough(blockState)) return slot;
+
         slot = mc.player.inventory.selectedSlot;
 
         return slot;
