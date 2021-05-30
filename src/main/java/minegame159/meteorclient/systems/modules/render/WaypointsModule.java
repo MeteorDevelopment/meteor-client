@@ -43,7 +43,6 @@ import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.ListIterator;
 
 import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
@@ -53,8 +52,8 @@ public class WaypointsModule extends Module {
     
     private final SettingGroup sgDeathPosition = settings.createGroup("death-position");
 
-    private final Setting<Integer> dpWpAmouunt = sgDeathPosition.add(new IntSetting.Builder()
-            .name("wp-amount")
+    private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
+            .name("max-death-positions")
             .description("The amount of death positions to save, 0 to disable")
             .min(0)
             .sliderMin(0)
@@ -92,7 +91,7 @@ public class WaypointsModule extends Module {
         }
 
         // Create waypoint
-        if (dpWpAmouunt.get() > 0) {
+        if (maxDeathPositions.get() > 0) {
             Waypoint waypoint = new Waypoint();
             waypoint.name = "Death " + time;
             waypoint.icon = "skull";
@@ -116,7 +115,7 @@ public class WaypointsModule extends Module {
 
             Waypoints.get().add(waypoint);
         }
-        cleanDeathWPs(dpWpAmouunt.get());
+        cleanDeathWPs(maxDeathPositions.get());
     }
 
     private void cleanDeathWPs(int max) {
