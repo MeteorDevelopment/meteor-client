@@ -129,7 +129,7 @@ public class KillAura extends Module {
             .description("The maximum range the entity can be to attack it.")
             .defaultValue(4.5)
             .min(0)
-            .sliderMax(6)
+            .sliderMax(8)
             .build()
     );
     
@@ -153,8 +153,8 @@ public class KillAura extends Module {
             .name("max-targets")
             .description("How many entities to target at once.")
             .defaultValue(1)
-            .min(1).max(10)
-            .sliderMin(1).sliderMax(5)
+            .min(1).max(105)
+            .sliderMin(1).sliderMax(100)
             .build()
     );
 
