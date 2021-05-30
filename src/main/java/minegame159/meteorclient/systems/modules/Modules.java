@@ -501,7 +501,6 @@ public class Modules extends System<Modules> {
         add(new AutoSmelter());
         add(new AutoSteal());
         add(new BuildHeight());
-        add(new DeathPosition());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new EntityLogger());
