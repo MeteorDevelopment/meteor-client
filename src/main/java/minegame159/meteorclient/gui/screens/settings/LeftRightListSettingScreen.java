@@ -18,22 +18,25 @@ import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Consumer;
 
 public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
-    protected final Setting<List<T>> setting;
+    protected final Setting<?> setting;
+    protected final Collection<T> collection;
     private final WTextBox filter;
 
     private String filterText = "";
 
     private WTable table;
 
-    public LeftRightListSettingScreen(GuiTheme theme, String title, Setting<List<T>> setting, Registry<T> registry) {
+    public LeftRightListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Registry<T> registry) {
         super(theme, title);
 
         this.setting = setting;
+        this.collection = collection;
 
         // Filter
         filter = add(theme.textBox("")).minWidth(400).expandX().widget();
@@ -53,7 +56,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     private void initWidgets(Registry<T> registry) {
         // Left (all)
         WTable left = abc(pairs -> registry.forEach(t -> {
-            if (skipValue(t) || setting.get().contains(t)) return;
+            if (skipValue(t) || collection.contains(t)) return;
 
             int words = Utils.search(getValueName(t), filterText);
             if (words > 0) pairs.add(new Pair<>(t, words));
@@ -68,7 +71,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
 
         // Right (selected)
         abc(pairs -> {
-            for (T value : setting.get()) {
+            for (T value : collection) {
                 if (skipValue(value)) continue;
 
                 int words = Utils.search(getValueName(value), filterText);
@@ -83,8 +86,8 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     }
 
     private void addValue(Registry<T> registry, T value) {
-        if (!setting.get().contains(value)) {
-            setting.get().add(value);
+        if (!collection.contains(value)) {
+            collection.add(value);
 
             setting.changed();
             table.clear();
@@ -93,7 +96,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     }
 
     private void removeValue(Registry<T> registry, T value) {
-        if (setting.get().remove(value)) {
+        if (collection.remove(value)) {
             setting.changed();
             table.clear();
             initWidgets(registry);
