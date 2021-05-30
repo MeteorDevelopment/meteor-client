@@ -37,7 +37,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
-    private static final String[] BUILTIN_ICONS = { "square", "circle", "triangle", "star", "diamond" };
+    private static final String[] BUILTIN_ICONS = { "square", "circle", "triangle", "star", "diamond", "skull" };
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -237,6 +237,10 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     @Override
     public Iterator<Waypoint> iterator() {
         return waypoints.iterator();
+    }
+
+    public ListIterator<Waypoint> iteratorReverse() {
+        return waypoints.listIterator(waypoints.size());
     }
 
     private void copyIcon(File file) {
