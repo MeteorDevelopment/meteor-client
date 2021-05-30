@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.systems.modules.player;
+package minegame159.meteorclient.systems.modules.world;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.GoalXZ;
@@ -80,9 +80,11 @@ public class DeathPosition extends Module {
 
         WButton clear = list.add(theme.button("Clear")).widget();
         clear.action = () -> {
-            Waypoints.get().remove(waypoint);
-            labelText = "No latest death";
+            for (Waypoint waypoint : Waypoints.get()) {
+                if (waypoint.name.startsWith("Death")) Waypoints.get().remove(waypoint);
+            }
 
+            labelText = "No latest death";
             label.set(labelText);
         };
 
@@ -113,7 +115,7 @@ public class DeathPosition extends Module {
             waypoint.maxVisibleDistance = Integer.MAX_VALUE;
             waypoint.actualDimension = PlayerUtils.getDimension();
 
-            switch (PlayerUtils.getDimension()) {
+            switch (waypoint.actualDimension) {
                 case Overworld:
                     waypoint.overworld = true;
                     break;

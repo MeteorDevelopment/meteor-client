@@ -79,6 +79,9 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
+
+        // This is here because some hud elements depend on modules to be initialised before them
+        add(new HUD());
     }
 
     public void sortModules() {
@@ -350,17 +353,11 @@ public class Modules extends System<Modules> {
         module.settings.registerColorSettings(module);
     }
 
-    /** Only for backwards compatibility **/
-    @Deprecated
-    public void addModule(Module module) {
-        add(module);
-    }
-
     private void initCombat() {
         add(new AimAssist());
         add(new AnchorAura());
-        add(new AntiAnvil());
         add(new AntiAnchor());
+        add(new AntiAnvil());
         add(new AntiBed());
         add(new AntiHit());
         add(new ArrowDodge());
@@ -373,7 +370,9 @@ public class Modules extends System<Modules> {
         add(new AutoWeapon());
         add(new AutoWeb());
         add(new BedAura());
+        add(new BowAimbot());
         add(new BowSpam());
+        add(new Burrow());
         add(new Criticals());
         add(new CrystalAura());
         add(new Hitboxes());
@@ -386,53 +385,45 @@ public class Modules extends System<Modules> {
         add(new SelfWeb());
         add(new SmartSurround());
         add(new Surround());
-        add(new Swarm());
-        add(new Burrow());
     }
 
     private void initPlayer() {
-        add(new AirPlace());
-        add(new AntiAFK());
         add(new AntiHunger());
-        add(new AutoClicker());
         add(new AutoDrop());
+        add(new AutoEat());
         add(new AutoFish());
+        add(new AutoGap());
         add(new AutoMend());
         add(new AutoReplenish());
-        add(new AutoRespawn());
         add(new AutoTool());
         add(new ChestSwap());
-        add(new DeathPosition());
         add(new EXPThrower());
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new NameProtect());
         add(new NoBreakDelay());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
+        add(new OffhandCrash());
         add(new Portals());
+        add(new PotionSaver());
         add(new PotionSpoof());
         add(new Reach());
         add(new Rotation());
         add(new SpeedMine());
-        add(new Trail());
         add(new XCarry());
-        add(new AutoGap());
-        add(new AutoEat());
-        add(new PotionSaver());
-        add(new BowAimbot());
     }
 
     private void initMovement() {
         add(new AirJump());
         add(new Anchor());
+        add(new AntiAFK());
         add(new AntiLevitation());
+        add(new AntiVoid());
         add(new AutoJump());
-        add(new Sprint());
         add(new AutoWalk());
         add(new Blink());
         add(new BoatFly());
@@ -452,53 +443,53 @@ public class Modules extends System<Modules> {
         add(new ReverseStep());
         add(new SafeWalk());
         add(new Scaffold());
+        add(new Slippy());
         add(new Speed());
         add(new Spider());
-        add(new Slippy());
+        add(new Sprint());
         add(new Step());
         add(new Velocity());
-        add(new AntiVoid());
     }
 
     private void initRender() {
+        add(new BetterTooltips());
         add(new BlockSelection());
+        add(new BossStack());
         add(new Breadcrumbs());
         add(new BreakIndicators());
         add(new CameraClip());
         add(new Chams());
         add(new CityESP());
         add(new CustomFOV());
-        add(new ESP());
         add(new EntityOwner());
-        add(new FreeLook());
+        add(new ESP());
         add(new Freecam());
+        add(new FreeLook());
         add(new Fullbright());
-        add(new HUD());
         add(new HandView());
         add(new HoleESP());
         add(new ItemPhysics());
+        add(new ItemHighlight());
+        add(new LightOverlay());
         add(new LogoutSpots());
         add(new Nametags());
         add(new NoRender());
-        add(new ParticleBlocker());
         add(new Search());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
+        add(new Trail());
         add(new Trajectories());
         add(new UnfocusedCPU());
         add(new VoidESP());
-        add(new Xray());
-        add(new BossStack());
-        add(new ItemHighlight());
-        add(new LightOverlay());
-        add(new Zoom());
         add(new WallHack());
         add(new WaypointsModule());
-        add(new BetterTooltips());
+        add(new Xray());
+        add(new Zoom());
     }
 
     private void initWorld() {
+        add(new AirPlace());
         add(new Ambience());
         add(new AntiCactus());
         add(new AutoBreed());
@@ -510,38 +501,42 @@ public class Modules extends System<Modules> {
         add(new AutoSmelter());
         add(new AutoSteal());
         add(new BuildHeight());
+        add(new DeathPosition());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new EntityLogger());
         add(new Flamethrower());
         add(new InfinityMiner());
-        add(new Nuker());
+        add(new InstaMine());
         add(new LiquidFiller());
         add(new MountBypass());
+        add(new Nuker());
         add(new PacketMine());
         add(new StashFinder());
         add(new Timer());
         add(new VeinMiner());
-        add(new InstaMine());
     }
 
     private void initMisc() {
+        add(new Swarm());
         add(new Announcer());
         add(new AntiPacketKick());
+        add(new AutoClicker());
         add(new AutoReconnect());
+        add(new AutoRespawn());
         add(new BetterChat());
+        add(new BetterTab());
         add(new BookBot());
         add(new DiscordPresence());
         add(new MessageAura());
         add(new MiddleClickFriend());
+        add(new NameProtect());
         add(new Notebot());
-        add(new OffhandCrash());
+        add(new Notifier());
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
         add(new VanillaSpoof());
-        add(new BetterTab());
-        add(new Notifier());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
@@ -610,10 +605,10 @@ public class Modules extends System<Modules> {
 
         @Override
         public Iterator<Module> iterator() {
-            return new ToggleModuleIterator();
+            return new ModuleIterator();
         }
 
-        private static class ToggleModuleIterator implements Iterator<Module> {
+        private static class ModuleIterator implements Iterator<Module> {
             private final Iterator<Module> iterator = Modules.get().getAll().iterator();
 
             @Override
