@@ -50,7 +50,7 @@ import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
     
-    private final SettingGroup sgDeathPosition = settings.createGroup("death-position");
+    private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
 
     private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
             .name("max-death-positions")
