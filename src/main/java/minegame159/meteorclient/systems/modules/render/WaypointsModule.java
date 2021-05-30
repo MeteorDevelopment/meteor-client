@@ -135,12 +135,10 @@ public class WaypointsModule extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
+        if (!Utils.canUpdate()) return theme.label("You need to be in a world.");
 
         WTable table = theme.table();
-        if (!Utils.canUpdate())
-            table.add(theme.label("You need to be in a world."));
-        else
-            fillTable(theme, table);
+        fillTable(theme, table);
         return table;
     }
 
