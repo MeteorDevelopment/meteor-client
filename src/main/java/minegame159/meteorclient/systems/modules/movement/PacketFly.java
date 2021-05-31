@@ -25,7 +25,6 @@ import java.util.Set;
 
 public class PacketFly extends Module {
     private final Set<PlayerMoveC2SPacket> packets = new ConcurrentSet();
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMovement = settings.createGroup("Movement");
     private final SettingGroup sgClient = settings.createGroup("Client");
     private final SettingGroup sgBypass = settings.createGroup("Bypass");
