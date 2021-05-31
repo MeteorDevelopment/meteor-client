@@ -14,6 +14,7 @@ import minegame159.meteorclient.mixin.PlayerPositionLookS2CPacketAccessor;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.TeleportConfirmC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
@@ -25,118 +26,112 @@ import java.util.Set;
 public class PacketFly extends Module {
     private final Set<PlayerMoveC2SPacket> packets = new ConcurrentSet();
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgMovement = settings.createGroup("Movement");
+    private final SettingGroup sgClient = settings.createGroup("Client");
+    private final SettingGroup sgBypass = settings.createGroup("Bypass");
 
-    private final Setting<Boolean> flight = sgGeneral.add(new BoolSetting.Builder()
-            .name("Flight")
-            .defaultValue(true)
+    private final Setting<Double> horizontalSpeed = sgMovement.add(new DoubleSetting.Builder()
+            .name("Horizontal Speed")
+            .description("Horizontal speed in blocks per second.")
+            .defaultValue(5.2)
+            .min(0.0)
+            .max(20.0)
+            .sliderMin(0.0)
+            .sliderMax(20.0)
             .build()
     );
 
-    private final Setting<Integer> flightMode = sgGeneral.add(new IntSetting.Builder()
-            .name("Flight Mode")
-            .defaultValue(0)
-            .sliderMin(0)
-            .sliderMax(1)
-            .min(0)
-            .max(1)
+    private final Setting<Double> verticalSpeed = sgMovement.add(new DoubleSetting.Builder()
+            .name("Vertical Speed")
+            .description("Vertical speed in blocks per second.")
+            .defaultValue(1.24)
+            .min(0.0)
+            .max(5.0)
+            .sliderMin(0.0)
+            .sliderMax(20.0)
             .build()
     );
 
-    private final Setting<Boolean> doAntiFactor = sgGeneral.add(new BoolSetting.Builder()
-            .name("Do AntiFactor")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Double> antiFactor = sgGeneral.add(new DoubleSetting.Builder()
-            .name("AntiFactor")
-            .defaultValue(2.5)
-            .sliderMin(0.1)
-            .sliderMax(3.0)
-            .min(0.1)
-            .max(3.0)
-            .build()
-    );
-
-    private final Setting<Double> extraFactor = sgGeneral.add(new DoubleSetting.Builder()
-            .name("ExtraFactor")
-            .defaultValue(1.0)
-            .sliderMin(0.1)
-            .sliderMax(3.0)
-            .min(0.1)
-            .max(3.0)
-            .build()
-    );
-
-    private final Setting<Boolean> strafeFactor = sgGeneral.add(new BoolSetting.Builder()
-            .name("StrafeFactor")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Integer> loops = sgGeneral.add(new IntSetting.Builder()
-            .name("Loops")
-            .defaultValue(1)
-            .sliderMin(1)
-            .sliderMax(10)
-            .min(1)
-            .max(10)
-            .build()
-    );
-
-    private final Setting<Boolean> setYaw = sgGeneral.add(new BoolSetting.Builder()
-            .name("Set Yaw")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> setID = sgGeneral.add(new BoolSetting.Builder()
-            .name("Set ID")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<Boolean> setMove = sgGeneral.add(new BoolSetting.Builder()
-            .name("Set Move")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> noClip = sgGeneral.add(new BoolSetting.Builder()
-            .name("NoClip")
-            .defaultValue(false)
-            .build()
-    );
-
-    private final Setting<Boolean> sendTeleport = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> sendTeleport = sgMovement.add(new BoolSetting.Builder()
             .name("Teleport")
+            .description("Sends teleport packets.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> resetID = sgGeneral.add(new BoolSetting.Builder()
-            .name("Reset ID")
+    private final Setting<Boolean> setYaw = sgClient.add(new BoolSetting.Builder()
+            .name("Set Yaw")
+            .description("Sets yaw client side.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> setPos = sgGeneral.add(new BoolSetting.Builder()
-            .name("Set Pos")
+    private final Setting<Boolean> setMove = sgClient.add(new BoolSetting.Builder()
+            .name("Set Move")
+            .description("Sets movement client side.")
             .defaultValue(false)
             .build()
     );
 
-    private final Setting<Boolean> invalidPacket = sgGeneral.add(new BoolSetting.Builder()
-            .name("Invalid Packet")
+    private final Setting<Boolean> setPos = sgClient.add(new BoolSetting.Builder()
+            .name("Set Pos")
+            .description("Sets position client side.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> setID = sgClient.add(new BoolSetting.Builder()
+            .name("Set ID")
+            .description("Updates teleport id when a position packet is received.")
             .defaultValue(true)
             .build()
     );
 
+    private final Setting<Boolean> noClip = sgClient.add(new BoolSetting.Builder()
+            .name("NoClip")
+            .description("Makes the client ignore walls.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> antiKick = sgBypass.add(new BoolSetting.Builder()
+            .name("Anti Kick")
+            .description("Moves down occasionally to prevent kicks.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Integer> downDelay = sgBypass.add(new IntSetting.Builder()
+            .name("Down Delay")
+            .description("How often you move down when not flying upwards. (ticks)")
+            .defaultValue(4)
+            .sliderMin(1)
+            .sliderMax(30)
+            .min(1)
+            .max(30)
+            .build()
+    );
+
+    private final Setting<Integer> downDelayFlying = sgBypass.add(new IntSetting.Builder()
+            .name("Down Delay (Flying)")
+            .description("How often you move down when flying upwards. (ticks)")
+            .defaultValue(10)
+            .sliderMin(1)
+            .sliderMax(30)
+            .min(1)
+            .max(30)
+            .build()
+    );
+
+    private final Setting<Boolean> invalidPacket = sgBypass.add(new BoolSetting.Builder()
+            .name("Invalid Packet")
+            .description("Sends invalid movement packets.")
+            .defaultValue(true)
+            .build()
+    );
 
     private int flightCounter = 0;
     private int teleportID = 0;
-    private float yaw;
-    private float pitch;
 
     public PacketFly() {
         super(Categories.Movement, "Packet Fly", "Fly using packets.");
@@ -147,15 +142,13 @@ public class PacketFly extends Module {
         mc.player.setVelocity(0.0,0.0,0.0);
         double speed = 0.0;
         boolean checkCollisionBoxes = checkHitBoxes();
-        speed = mc.player.input.jumping && (checkCollisionBoxes || !(mc.player.input.movementForward != 0.0 || mc.player.input.movementSideways != 0.0)) ? (flight.get() && !checkCollisionBoxes ? (flightMode.get() == 0 ? (resetCounter(10) ? -0.032 : 0.062) : (resetCounter(20) ? -0.032 : 0.062)) : 0.062) : (mc.player.input.sneaking ? -0.062 : (!checkCollisionBoxes ? (resetCounter(4) ? (flight.get() ? -0.04 : 0.0) : 0.0) : 0.0));
-        if(doAntiFactor.get() && checkCollisionBoxes && (mc.player.input.movementForward != 0.0 || mc.player.input.movementSideways != 0.0) && speed != 0.0) {
-            speed /= antiFactor.get();
-        }
-        double[] strafing = this.getMotion(strafeFactor.get() != false && checkCollisionBoxes ? 0.031 : 0.26);
-        for (int i = 1; i < loops.get() + 1; ++i) {
-            mc.player.setVelocity(strafing[0] * (double) i * extraFactor.get(), speed * (double) i, strafing[1] * (double) i * extraFactor.get());
-            sendPackets(mc.player.getVelocity().x, mc.player.getVelocity().y, mc.player.getVelocity().z, sendTeleport.get());
-        }
+
+        speed = mc.player.input.jumping && (checkCollisionBoxes || !(mc.player.input.movementForward != 0.0 || mc.player.input.movementSideways != 0.0)) ? (antiKick.get() && !checkCollisionBoxes ? (resetCounter(downDelayFlying.get()) ? -0.032 : verticalSpeed.get()/20) : verticalSpeed.get()/20) : (mc.player.input.sneaking ? verticalSpeed.get()/-20 : (!checkCollisionBoxes ? (resetCounter(downDelay.get()) ? (antiKick.get() ? -0.04 : 0.0) : 0.0) : 0.0));
+
+        Vec3d horizontal = PlayerUtils.getHorizontalVelocity(horizontalSpeed.get());
+
+        mc.player.setVelocity(horizontal.x, speed, horizontal.z);
+        sendPackets(mc.player.getVelocity().x, mc.player.getVelocity().y, mc.player.getVelocity().z, sendTeleport.get());
     }
 
     @EventHandler
@@ -202,28 +195,6 @@ public class PacketFly extends Module {
         return false;
     }
 
-    private double[] getMotion(double speed) {
-        float moveForward = mc.player.input.movementForward;
-        float moveStrafe = mc.player.input.movementSideways;
-        float rotationYaw = mc.player.prevYaw + (mc.player.yaw - mc.player.prevYaw) * mc.getTickDelta();
-        if (moveForward != 0.0f) {
-            if (moveStrafe > 0.0f) {
-                rotationYaw += (float) (moveForward > 0.0f ? -45 : 45);
-            } else if (moveStrafe < 0.0f) {
-                rotationYaw += (float) (moveForward > 0.0f ? 45 : -45);
-            }
-            moveStrafe = 0.0f;
-            if (moveForward > 0.0f) {
-                moveForward = 1.0f;
-            } else if (moveForward < 0.0f) {
-                moveForward = -1.0f;
-            }
-        }
-        double posX = (double) moveForward * speed * -Math.sin(Math.toRadians(rotationYaw)) + (double) moveStrafe * speed * Math.cos(Math.toRadians(rotationYaw));
-        double posZ = (double) moveForward * speed * Math.cos(Math.toRadians(rotationYaw)) - (double) moveStrafe * speed * -Math.sin(Math.toRadians(rotationYaw));
-        return new double[]{posX,posZ};
-    }
-
     private void sendPackets(double x, double y, double z, boolean teleport) {
         Vec3d vec = new Vec3d(x, y, z);
         Vec3d position = mc.player.getPos().add(vec);
@@ -251,13 +222,5 @@ public class PacketFly extends Module {
     private void packetSender(PlayerMoveC2SPacket packet) {
         packets.add(packet);
         mc.player.networkHandler.sendPacket(packet);
-    }
-
-    private void clean() {
-        flightCounter = 0;
-        if (resetID.get()) {
-            teleportID = 0;
-        }
-        packets.clear();
     }
 }
