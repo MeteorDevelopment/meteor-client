@@ -228,6 +228,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noBarrierInvis = sgWorld.add(new BoolSetting.Builder()
+            .name("barrier-invisibility")
+            .description("Disables barriers being invisible when not holding one.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Entity
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
@@ -241,6 +248,13 @@ public class NoRender extends Module {
     private final Setting<Boolean> noArmor = sgEntity.add(new BoolSetting.Builder()
             .name("armor")
             .description("Disables rendering of armor on entities.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> noInvisibility = sgEntity.add(new BoolSetting.Builder()
+            .name("invisibility")
+            .description("Shows invisible entities.")
             .defaultValue(false)
             .build()
     );
@@ -368,6 +382,10 @@ public class NoRender extends Module {
         else if (particles.get().contains(event.particle.getType())) event.cancel();
     }
 
+    public boolean noBarrierInvis() {
+        return isActive() && noBarrierInvis.get();
+    }
+
     // Entity
 
     public boolean noEntity(Entity entity) {
@@ -376,6 +394,10 @@ public class NoRender extends Module {
 
     public boolean noArmor() {
         return isActive() && noArmor.get();
+    }
+
+    public boolean noInvisibility() {
+        return isActive() && noInvisibility.get();
     }
 
 }

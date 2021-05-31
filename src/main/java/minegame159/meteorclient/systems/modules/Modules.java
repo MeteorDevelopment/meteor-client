@@ -535,6 +535,7 @@ public class Modules extends System<Modules> {
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
+        add(new TPSSync());
         add(new VanillaSpoof());
     }
 

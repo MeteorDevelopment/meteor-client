@@ -34,6 +34,8 @@ public class Config extends System<Config> {
     public boolean customWindowTitle = ConfigTab.customWindowTitle.get();
     public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
 
+    public boolean useTeamColor = ConfigTab.useTeamColor.get();
+
     public Config() {
         super("config");
 
@@ -67,10 +69,11 @@ public class Config extends System<Config> {
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
 
-
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
         tag.putBoolean("customWindowTitle", customWindowTitle);
         tag.putString("customWindowTitleText", customWindowTitleText);
+
+        tag.putBoolean("useTeamColor", useTeamColor);
 
         return tag;
     }
@@ -92,6 +95,8 @@ public class Config extends System<Config> {
         titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
         customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.customWindowTitle);
         customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
+
+        useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
 
         return this;
     }

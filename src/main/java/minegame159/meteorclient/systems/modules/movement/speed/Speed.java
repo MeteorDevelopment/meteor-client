@@ -43,7 +43,7 @@ public class Speed extends Module {
     );
 
     public final Setting<Double> ncpSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("ncp-speed")
+            .name("strafe-speed")
             .description("The speed.")
             .visible(() -> speedMode.get() == SpeedModes.Strafe)
             .defaultValue(1.6)
