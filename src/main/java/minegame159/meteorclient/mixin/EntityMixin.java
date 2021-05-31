@@ -14,6 +14,7 @@ import minegame159.meteorclient.systems.modules.combat.Hitboxes;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.render.ESP;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.block.Block;
@@ -128,10 +129,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (player == null) info.setReturnValue(false);
-
-        ESP esp = Modules.get().get(ESP.class);
-        if (esp.isActive() && esp.showInvis.get()) info.setReturnValue(false);
+        if (player == null || Modules.get().get(NoRender.class).noInvisibility()) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
