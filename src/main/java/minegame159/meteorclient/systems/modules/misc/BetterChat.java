@@ -199,6 +199,8 @@ public class BetterChat extends Module {
         String oldMessage = parsed.getString();
         String newMessage = text.getString();
 
+        if (newMessage.startsWith("[Meteor] ") || newMessage.startsWith("[Baritone] ")) return false;
+
         if (oldMessage.equals(newMessage)) {
             parsed.append(new LiteralText(" (2)").formatted(Formatting.GRAY));
 
