@@ -8,8 +8,9 @@ package minegame159.meteorclient.systems.modules.misc;
 import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.entity.player.ReceiveMessageEvent;
 import minegame159.meteorclient.events.entity.player.SendMessageEvent;
-import minegame159.meteorclient.mixin.ChatHudLineAccessor;
+import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.commands.commands.SayCommand;
@@ -19,7 +20,6 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.*;
-import net.minecraft.util.ChatUtil;
 import net.minecraft.util.Formatting;
 
 import java.util.List;
@@ -27,115 +27,84 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
-    private final SettingGroup sgAnnoy = settings.createGroup("Annoy");
-    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
-    private final SettingGroup sgChatProtect = settings.createGroup("Chat Protect");
-    private final SettingGroup sgFancyChat = settings.createGroup("Fancy Chat");
-    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
-    // Annoy
-
-    private final Setting<Boolean> annoyEnabled = sgAnnoy.add(new BoolSetting.Builder()
-            .name("annoy-enabled")
+    private final Setting<Boolean> annoy = sgGeneral.add(new BoolSetting.Builder()
+            .name("annoy")
             .description("Makes your messages aNnOyInG.")
             .defaultValue(false)
             .build()
     );
 
-    // Anti Spam
+    private final Setting<Boolean> fancy = sgGeneral.add(new BoolSetting.Builder()
+            .name("fancy-chat")
+            .description("Makes your messages ғᴀɴᴄʏ!")
+            .defaultValue(false)
+            .build()
+    );
 
-    private final Setting<Boolean> antiSpamEnabled = sgAntiSpam.add(new BoolSetting.Builder()
-            .name("anti-spam-enabled")
-            .description("Enables the anti-spam.")
+    private final Setting<Boolean> antiSpam = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-spam")
+            .description("Blocks duplicate messages from filling your chat.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
+    private final Setting<Integer> antiSpamDepth = sgGeneral.add(new IntSetting.Builder()
             .name("depth")
-            .description("How many chat messages to check for duplicate messages.")
-            .defaultValue(4)
+            .description("How many messages to check for duplicate messages.")
+            .defaultValue(20)
             .min(1)
             .sliderMin(1)
-            .visible(antiSpamEnabled::get)
+            .visible(antiSpam::get)
             .build()
     );
 
-    private final Setting<Boolean> antiSpamMoveToBottom = sgAntiSpam.add(new BoolSetting.Builder()
-            .name("move-to-bottom")
-            .description("Moves any duplicate messages to the bottom of the chat.")
-            .defaultValue(true)
-            .visible(antiSpamEnabled::get)
-            .build()
-    );
-
-    // Chat Protect
-
-    private final Setting<Boolean> coordsProtectionEnabled = sgChatProtect.add(new BoolSetting.Builder()
-            .name("coords-protection-enabled")
+    private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
+            .name("coords-protection")
             .description("Prevents you from sending messages in chat that may contain coordinates.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> disableAllMessages = sgChatProtect.add(new BoolSetting.Builder()
-            .name("disable-all-messages")
-            .description("Prevents you from essentially being able to send messages in chat.")
-            .defaultValue(false)
-            .visible(coordsProtectionEnabled::get)
-            .build()
-    );
-
-    private final Setting<Boolean> disableButton = sgChatProtect.add(new BoolSetting.Builder()
-            .name("disable-button")
-            .description("Adds a button to the warning to send a message to the chat in any way.")
-            .defaultValue(true)
-            .visible(coordsProtectionEnabled::get)
-            .build()
-    );
-
-    // Fancy Chat
-
-    private final Setting<Boolean> fancyEnabled = sgFancyChat.add(new BoolSetting.Builder()
-            .name("fancy-chat-enabled")
-            .description("Makes your messages fancy!")
-            .defaultValue(false)
-            .build()
-    );
-
-    // Longer Chat
-
-    private final Setting<Boolean> infiniteChatBox = sgLongerChat.add(new BoolSetting.Builder()
+    private final Setting<Boolean> infiniteChatBox = sgGeneral.add(new BoolSetting.Builder()
             .name("infinite-chat-box")
             .description("Lets you type infinitely long messages.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> longerChatEnabled = sgLongerChat.add(new BoolSetting.Builder()
-            .name("longer-chat-enabled")
+    private final Setting<Boolean> longerChatHistory = sgGeneral.add(new BoolSetting.Builder()
+            .name("longer-chat-history")
             .description("Extends chat length.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
+    private final Setting<Integer> longerChatLines = sgGeneral.add(new IntSetting.Builder()
             .name("extra-lines")
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
             .sliderMax(1000)
-            .visible(longerChatEnabled::get)
+            .visible(longerChatHistory::get)
             .build()
     );
 
     // Prefix
 
-    private final Setting<Boolean> prefixEnabled = sgPrefix.add(new BoolSetting.Builder()
-            .name("prefix-enabled")
-            .description("Enables a prefix.")
+    private final Setting<Boolean> prefix = sgPrefix.add(new BoolSetting.Builder()
+            .name("prefix")
+            .description("Adds a prefix to your chat messages.")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
+            .name("random")
+            .description("Uses a random number as your prefix.")
             .defaultValue(false)
             .build()
     );
@@ -144,61 +113,49 @@ public class BetterChat extends Module {
             .name("text")
             .description("The text to add as your prefix.")
             .defaultValue("> ")
-            .visible(prefixEnabled::get)
+            .visible(() -> !prefixRandom.get())
             .build()
     );
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
             .name("small-caps")
-            .description("Uses a small font.")
+            .description("Uses small caps in the prefix.")
             .defaultValue(false)
-            .visible(prefixEnabled::get)
-            .build()
-    );
-
-    private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
-            .name("random-number")
-            .description("Example: (538) <msg>")
-            .defaultValue(false)
-            .visible(prefixEnabled::get)
+            .visible(() -> !prefixRandom.get())
             .build()
     );
 
     // Suffix
 
-    private final Setting<Boolean> suffixEnabled = sgSuffix.add(new BoolSetting.Builder()
-            .name("suffix-enabled")
-            .description("Enables a suffix.")
+    private final Setting<Boolean> suffix = sgSuffix.add(new BoolSetting.Builder()
+            .name("suffix")
+            .description("Adds a suffix to your chat messages.")
             .defaultValue(false)
-            .build()
-    );
-
-
-    private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
-            .name("text")
-            .description("The text to add as your suffix.")
-            .defaultValue(" | Meteor on Crack!")
-            .visible(suffixEnabled::get)
-            .build()
-    );
-
-    private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
-            .name("small-caps")
-            .description("Uses a small font.")
-            .defaultValue(true)
-            .visible(suffixEnabled::get)
             .build()
     );
 
     private final Setting<Boolean> suffixRandom = sgSuffix.add(new BoolSetting.Builder()
             .name("random")
-            .description("Example: <msg> (538)")
+            .description("Uses a random number as your suffix.")
             .defaultValue(false)
-            .visible(suffixEnabled::get)
             .build()
     );
 
-    private boolean skipMessage;
+    private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
+            .name("text")
+            .description("The text to add as your suffix.")
+            .defaultValue(" | meteor on crack!")
+            .visible(() -> !suffixRandom.get())
+            .build()
+    );
+
+    private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
+            .name("small-caps")
+            .description("Uses small caps in the suffix.")
+            .defaultValue(true)
+            .visible(() -> !suffixRandom.get())
+            .build()
+    );
 
     private static final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
 
@@ -208,105 +165,95 @@ public class BetterChat extends Module {
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
     }
 
-    private final StringBuilder sb = new StringBuilder();
-
-
     public BetterChat() {
         super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
     }
 
-    public boolean onMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
-        if (!isActive() || skipMessage) return false;
-        return antiSpamEnabled.get() && antiSpamOnMsg(message, messageId, timestamp, messages, visibleMessages);
-    }
-
     @EventHandler
-    private void onSendMessage(SendMessageEvent event) {
-        String message = event.msg;
+    private void onMessageRecieve(ReceiveMessageEvent event) {
+        if (!antiSpam.get()) return;
 
-        if (annoyEnabled.get())
-            message = applyAnnoy(message);
-
-        if (fancyEnabled.get())
-            message = applyFancy(message);
-
-        message = getPrefix() + message + getSuffix();
-
-        if (disableAllMessages.get()) {
-            sendWarningMessage(message,
-                    "You are trying to send a message to the global chat! ",
-                    "Send your message to the global chat:");
-            event.cancel();
-            return;
-        }
-
-        if (coordsProtectionEnabled.get() && containsCoordinates(message)) {
-            sendWarningMessage(message,
-                    "It looks like there are coordinates in your message! ",
-                    "Send your message to the global chat even if there are coordinates:");
-            event.cancel();
-            return;
-        }
-
-        event.msg = message;
-    }
-
-    // ANTI SPAM
-
-    private boolean antiSpamOnMsg(String message, int messageId, int timestamp, List<ChatHudLine<Text>> messages, List<ChatHudLine<OrderedText>> visibleMessages) {
-        message = ChatUtil.stripTextFormat(message);
+        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
+        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
 
         for (int i = 0; i < antiSpamDepth.get(); i++) {
-            if (antiSpamCheckMsg(visibleMessages, message, timestamp, messageId, i)) {
-                if (antiSpamMoveToBottom.get() && i != 0) {
-                    ChatHudLine msg = visibleMessages.remove(i);
-                    visibleMessages.add(0, msg);
-                    messages.add(0, msg);
-                }
+            if (antiSpamCheckMsg(event.message, event.id, i)) {
+                event.cancel();
+            }
+        }
+    }
 
-                return true;
+    private boolean antiSpamCheckMsg(Text text, int id, int index) {
+        List<ChatHudLine<OrderedText>> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
+        if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return false;
+
+        ChatHudLine<OrderedText> visibleMessage = visibleMessages.get(index);
+
+        LiteralText parsed = new LiteralText("");
+
+        visibleMessage.getText().accept((i, style, codePoint) -> {
+            parsed.append(new LiteralText(new String(Character.toChars(codePoint))).setStyle(style));
+            return true;
+        });
+
+        String oldMessage = parsed.getString();
+        String newMessage = text.getString();
+
+        if (oldMessage.equals(newMessage)) {
+            parsed.append(new LiteralText(" (2)").formatted(Formatting.GRAY));
+
+            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(index);
+            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(index);
+            ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(parsed, id);
+            return true;
+        }
+        else {
+            Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(oldMessage);
+
+            if (matcher.matches()) {
+                String group = matcher.group(matcher.groupCount());
+                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+
+                String counter = " (" + number + ")";
+
+                if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
+                    for (int i = 0; i < counter.length(); i++) parsed.getSiblings().remove(parsed.getSiblings().size() - 1);
+                    parsed.append(new LiteralText( " (" + (number + 1) + ")").formatted(Formatting.GRAY));
+
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(index);
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(index);
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(parsed, id);
+                    return true;
+                }
             }
         }
 
         return false;
     }
 
-    private boolean antiSpamCheckMsg(List<ChatHudLine<OrderedText>> visibleMessages, String newMsg, int newTimestamp, int newId, int msgI) {
-        ChatHudLine<OrderedText> msg = visibleMessages.size() > msgI ? visibleMessages.get(msgI) : null;
-        if (msg == null) return false;
-        String msgString = msg.getText().toString();
+    @EventHandler
+    private void onMessageSend(SendMessageEvent event) {
+        String message = event.message;
 
-        if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
-            msgString += Formatting.GRAY + " (2)";
+        if (annoy.get()) message = applyAnnoy(message);
 
-            ((ChatHudLineAccessor<Text>) msg).setText(new LiteralText(msgString));
-            ((ChatHudLineAccessor<Text>) msg).setTimestamp(newTimestamp);
-            ((ChatHudLineAccessor<Text>) msg).setId(newId);
+        if (fancy.get()) message = applyFancy(message);
 
-            return true;
-        } else {
-            Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(msgString);
+        message = getPrefix() + message + getSuffix();
 
-            if (matcher.matches()) {
-                String group = matcher.group(1);
-                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+        if (coordsProtection.get() && containsCoordinates(message)) {
+            BaseText warningMessage = new LiteralText("It looks like there are coordinates in your message! ");
 
-                int i = msgString.lastIndexOf(group);
-                msgString = msgString.substring(0, i - Formatting.GRAY.toString().length() - 1);
+            BaseText sendButton = getSendButton(message, "Send your message to the global chat even if there are coordinates:");
+            warningMessage.append(sendButton);
 
-                if (ChatUtil.stripTextFormat(msgString).equals(newMsg)) {
-                    msgString += Formatting.GRAY + " (" + (number + 1) + ")";
+            ChatUtils.sendMsg(warningMessage);
 
-                    ((ChatHudLineAccessor) msg).setText(new LiteralText(msgString));
-                    ((ChatHudLineAccessor) msg).setTimestamp(newTimestamp);
-                    ((ChatHudLineAccessor) msg).setId(newId);
-
-                    return true;
-                }
-            }
-
-            return false;
+            event.cancel();
+            return;
         }
+
+        event.message = message;
     }
 
     // LONGER CHAT
@@ -316,14 +263,14 @@ public class BetterChat extends Module {
     }
 
     public boolean isLongerChat() {
-        return longerChatEnabled.get();
+        return isActive() && longerChatHistory.get();
     }
 
     public int getChatLength() {
         return longerChatLines.get();
     }
 
-    // ANNOY
+    // Annoy
 
     private String applyAnnoy(String message) {
         StringBuilder sb = new StringBuilder(message.length());
@@ -337,58 +284,36 @@ public class BetterChat extends Module {
         return message;
     }
 
-    // FANCY CHAT
+    // Fancy
 
-    private String applyFancy(String changeFrom) {
-        String output = changeFrom;
-        sb.setLength(0);
+    private String applyFancy(String message) {
+        StringBuilder sb = new StringBuilder();
 
-        for (char ch : output.toCharArray()) {
+        for (char ch : message.toCharArray()) {
             if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
             else sb.append(ch);
         }
 
-        output = sb.toString();
-
-        return output;
+        return sb.toString();
     }
 
-    // PREFIX/SUFFIX
-
-    private String getAffix(Setting<Boolean> affixEnabled, Setting<Boolean> affixRandom, String affixRandomFormat, Setting<String> affixText, Setting<Boolean> affixSmallCaps) {
-        String text;
-
-        if (affixEnabled.get()) {
-            if (affixRandom.get()) {
-                text = String.format(affixRandomFormat, Utils.random(0, 1000));
-            } else {
-                text = affixText.get();
-
-                if (affixSmallCaps.get()) {
-                    sb.setLength(0);
-
-                    for (char ch : text.toCharArray()) {
-                        if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
-                        else sb.append(ch);
-                    }
-
-                    text = sb.toString();
-                }
-            }
-        } else text = "";
-
-        return text;
-    }
+    // Prefix and Suffix
 
     private String getPrefix() {
-        return getAffix(prefixEnabled, prefixRandom, "(%03d) ", prefixText, prefixSmallCaps);
+        return prefix.get() ? getAffix(prefixText.get(), prefixSmallCaps.get(), prefixRandom.get()) : "";
     }
 
     private String getSuffix() {
-        return getAffix(suffixEnabled, suffixRandom, " (%03d)", suffixText, suffixSmallCaps);
+        return suffix.get() ? getAffix(suffixText.get(), suffixSmallCaps.get(), suffixRandom.get()) : "";
     }
 
-    // PROTECTION
+    private String getAffix(String text, boolean smallcaps, boolean random) {
+        if (random) return String.format("(%03d) ", Utils.random(0, 1000));
+        else if (smallcaps) return applyFancy(text);
+        else return text;
+    }
+
+    // Coords Protection
 
     private boolean containsCoordinates(String message) {
         return message.matches(".*(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?).*");
@@ -415,16 +340,5 @@ public class BetterChat extends Module {
                         hintBaseText
                 )));
         return sendButton;
-    }
-
-    private void sendWarningMessage(String message, String title, String hint) {
-        BaseText warningMessage = new LiteralText(title);
-
-        if (disableButton.get()) {
-            BaseText sendButton = getSendButton(message, hint);
-            warningMessage.append(sendButton);
-        }
-
-        ChatUtils.sendMsg(warningMessage);
     }
 }

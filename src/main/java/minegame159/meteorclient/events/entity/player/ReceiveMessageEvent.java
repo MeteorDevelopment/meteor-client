@@ -6,17 +6,18 @@
 package minegame159.meteorclient.events.entity.player;
 
 import minegame159.meteorclient.events.Cancellable;
+import net.minecraft.text.Text;
 
-public class SendMessageEvent extends Cancellable {
-    private static final SendMessageEvent INSTANCE = new SendMessageEvent();
+public class ReceiveMessageEvent extends Cancellable {
+    private static final ReceiveMessageEvent INSTANCE = new ReceiveMessageEvent();
 
-    public String message;
+    public Text message;
+    public int id;
 
-    public static SendMessageEvent get(String message) {
+    public static ReceiveMessageEvent get(Text message, int id) {
         INSTANCE.setCancelled(false);
         INSTANCE.message = message;
+        INSTANCE.id = id;
         return INSTANCE;
     }
 }
-
-
