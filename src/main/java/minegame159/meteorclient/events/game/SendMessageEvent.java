@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.events.entity.player;
+package minegame159.meteorclient.events.game;
 
 import minegame159.meteorclient.events.Cancellable;
 
