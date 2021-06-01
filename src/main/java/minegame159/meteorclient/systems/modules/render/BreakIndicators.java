@@ -8,6 +8,7 @@ package minegame159.meteorclient.systems.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
+import minegame159.meteorclient.mixin.WorldRendererAccessor;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.ColorSetting;
@@ -18,7 +19,6 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.util.math.BlockPos;
@@ -60,15 +60,10 @@ public class BreakIndicators extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        Map<Integer, BlockBreakingInfo> blocks = BlockUtils.breakingBlocks;
+        Map<Integer, BlockBreakingInfo> blocks = ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos();
 
-        ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) mc.interactionManager;
-        BlockPos currentPos = interactionManager.getCurrentBreakingBlockPos();
-        boolean smooth = currentPos != null && interactionManager.getBreakingProgress() > 0;
-
-        if (smooth && blocks.values().stream().noneMatch(info -> info.getPos().equals(currentPos))) {
-            blocks.put(mc.player.getEntityId(), new BlockBreakingInfo(mc.player.getEntityId(), currentPos));
-        }
+        float ownBreakingStage = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress();
+        BlockPos ownBreakingPos = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getCurrentBreakingBlockPos();
 
         blocks.values().forEach(info -> {
             BlockPos pos = info.getPos();
@@ -77,15 +72,15 @@ public class BreakIndicators extends Module {
             BlockState state = mc.world.getBlockState(pos);
             VoxelShape shape = state.getOutlineShape(mc.world, pos);
             if (shape.isEmpty()) return;
+
             Box orig = shape.getBoundingBox();
             Box box = orig;
 
-            double shrinkFactor;
-            if (smooth && interactionManager.getCurrentBreakingBlockPos().equals(pos)) {
-                shrinkFactor = 1d - interactionManager.getBreakingProgress();
-            } else {
-                shrinkFactor = (9 - (stage + 1)) / 9d;
+            double shrinkFactor = (9 - (stage + 1)) / 9d;
+            if (ownBreakingPos != null && ownBreakingStage > 0 && ownBreakingPos.equals(pos)) {
+                shrinkFactor = 1d - ownBreakingStage;
             }
+
             double progress = 1d - shrinkFactor;
 
             box = box.shrink(

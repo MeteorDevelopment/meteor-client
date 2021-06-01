@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
+import minegame159.meteorclient.mixin.WorldRendererAccessor;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.BlockListSetting;
@@ -16,7 +17,6 @@ import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.render.VertexFormats;
@@ -75,13 +75,13 @@ public class HoleHud extends HudElement {
 
     private void drawBlock(Direction dir, double x, double y) {
         Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
-        if (!safe.get().contains(block)) block = Blocks.AIR;
+        if (!safe.get().contains(block)) return;
 
         RenderUtils.drawItem(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get(),false);
 
         if (dir == Direction.DOWN) return;
 
-        BlockUtils.breakingBlocks.values().forEach(info -> {
+        ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos().values().forEach(info -> {
             if (info.getPos().equals(mc.player.getBlockPos().offset(dir))) {
                 renderBreaking(x, y, info.getStage() / 9f);
             }

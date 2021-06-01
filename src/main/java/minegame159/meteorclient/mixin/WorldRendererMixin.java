@@ -11,7 +11,6 @@ import minegame159.meteorclient.systems.modules.render.*;
 import minegame159.meteorclient.systems.modules.world.Ambience;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
@@ -110,27 +109,6 @@ public abstract class WorldRendererMixin {
     private void onResized(int i, int j, CallbackInfo info) {
         Outlines.onResized(i, j);
     }
-
-    // Break Indicators start
-
-    @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
-    private void onBlockBreakingInfo(int entityId, BlockPos pos, int stage, CallbackInfo ci) {
-        if (0 <= stage && stage <= 8) {
-            BlockBreakingInfo info = new BlockBreakingInfo(entityId, pos);
-            info.setStage(stage);
-            BlockUtils.breakingBlocks.put(entityId, info);
-
-            if (Modules.get().isActive(BreakIndicators.class)) ci.cancel();
-        } else {
-            BlockUtils.breakingBlocks.remove(entityId);
-        }
-    }
-    @Inject(method = "removeBlockBreakingInfo", at = @At("TAIL"))
-    private void onBlockBreakingInfoRemoval(BlockBreakingInfo info, CallbackInfo ci) {
-        BlockUtils.breakingBlocks.values().removeIf(info::equals);
-    }
-
-    // Break Indicators end
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
     private <E extends Entity> boolean shouldRenderRedirect(EntityRenderDispatcher entityRenderDispatcher, E entity, Frustum frustum, double x, double y, double z) {

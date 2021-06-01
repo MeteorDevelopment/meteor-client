@@ -20,6 +20,7 @@
     "BlockHitResultAccessor",
     "BlockItemMixin",
     "BlockMixin",
+    "BlockRenderManagerMixin",
     "BlockStateMixin",
     "BoatEntityMixin",
     "BookEditScreenMixin",
