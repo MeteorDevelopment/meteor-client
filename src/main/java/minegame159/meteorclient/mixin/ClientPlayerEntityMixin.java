@@ -25,6 +25,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,41 +37,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
+    @Shadow @Final public ClientPlayNetworkHandler networkHandler;
+
     public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
     }
 
-    @Shadow @Final public ClientPlayNetworkHandler networkHandler;
-
-    @Shadow public abstract void sendChatMessage(String string);
-
-    private boolean ignoreChatMessage;
-
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
-    private void onSendChatMessage(String msg, CallbackInfo info) {
-        if (ignoreChatMessage) return;
+    private void onSendChatMessage(String message, CallbackInfo info) {
+        if (!message.startsWith(Config.get().prefix) && !message.startsWith("/") && !message.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+            SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
-        if (!msg.startsWith(Config.get().prefix) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
-            SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(msg));
-
-            if (!event.isCancelled()) {
-                ignoreChatMessage = true;
-                sendChatMessage(event.msg);
-                ignoreChatMessage = false;
-            }
-
-            info.cancel();
-            return;
+            if (!event.isCancelled()) networkHandler.sendPacket(new ChatMessageC2SPacket(event.message));
         }
 
-        if (msg.startsWith(Config.get().prefix)) {
+        if (message.startsWith(Config.get().prefix)) {
             try {
-                Commands.get().dispatch(msg.substring(Config.get().prefix.length()));
+                Commands.get().dispatch(message.substring(Config.get().prefix.length()));
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }
-            info.cancel();
         }
+
+        info.cancel();
     }
 
     @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
