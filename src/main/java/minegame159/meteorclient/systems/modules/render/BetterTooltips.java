@@ -106,6 +106,16 @@ public class BetterTooltips extends Module {
             .build()
     );
 
+    public final Setting<Double> mapsScale = sgPreviews.add(new DoubleSetting.Builder()
+            .name("map-scale")
+            .description("The scale of the map preview.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMax(5)
+            .visible(maps::get)
+            .build()
+    );
+
     private final Setting<Boolean> books = sgPreviews.add(new BoolSetting.Builder()
             .name("books")
             .description("Shows contents of a book when hovering over it in an inventory.")
@@ -113,13 +123,13 @@ public class BetterTooltips extends Module {
             .build()
     );
 
-    public final Setting<Double> mapsScale = sgPreviews.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("The scale of the map preview.")
+    public final Setting<Double> booksScale = sgPreviews.add(new DoubleSetting.Builder()
+            .name("book-scale")
+            .description("The scale of the book preview.")
             .defaultValue(1)
             .min(1)
             .sliderMax(5)
-            .visible(maps::get)
+            .visible(books::get)
             .build()
     );
 

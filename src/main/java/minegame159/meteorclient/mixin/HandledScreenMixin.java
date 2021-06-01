@@ -205,8 +205,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
 
     private void drawBookPreview(MatrixStack matrices, ItemStack stack, int x, int y) {
-        float scale = 0.7f;
-        Text page = null;
+        float scale = 0.7f * Modules.get().get(BetterTooltips.class).booksScale.get().floatValue();
+        Text page;
         CompoundTag tag = stack.getTag();
         if (tag == null) return;
         ListTag ltag = tag.getList("pages", 8);
