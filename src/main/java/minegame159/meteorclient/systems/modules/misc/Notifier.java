@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.systems.modules.misc;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
@@ -14,6 +16,7 @@ import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.friends.Friends;
@@ -22,17 +25,23 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.Formatting;
 
 import java.util.Random;
 import java.util.UUID;
 
+import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
+
 public class Notifier extends Module {
 
     private final SettingGroup sgTotemPops = settings.createGroup("Totem Pops");
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
+    private final SettingGroup sgEntityLogger = settings.createGroup("Entity Logger");
 
     // Totem Pops
 
@@ -87,6 +96,15 @@ public class Notifier extends Module {
             .build()
     );
 
+    // Entity Logger
+
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntityLogger.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Select specific entities.")
+            .defaultValue(new Object2BooleanOpenHashMap<>(0))
+            .build()
+    );
+
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
 
@@ -102,12 +120,20 @@ public class Notifier extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         Entity entity = event.entity;
 
+        if (entity.equals(mc.player)) return;
+
         if (visualRange.get() && entity instanceof PlayerEntity) {
             if (!entity.equals(mc.player) && (!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
                 ChatUtils.sendMsg(event.entity.getEntityId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
             }
         }
-
+        else if (entities.get().getBoolean(event.entity.getType())) {
+            MutableText text = new LiteralText(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
+            text.append(new LiteralText(" has spawned at ").formatted(Formatting.GRAY));
+            text.append(formatCoords(event.entity.getPos()));
+            text.append(new LiteralText(".").formatted(Formatting.GRAY));
+            info(text);
+        }
     }
 
     @EventHandler
