@@ -15,6 +15,7 @@ import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.BookScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
 import net.minecraft.client.render.*;
@@ -25,8 +26,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
@@ -52,6 +56,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "textures/container.png");
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
+    private static final Identifier TEXTURE_BOOK_BACKGROUND = BookScreen.BOOK_TEXTURE;
 
     private static final ItemStack[] ITEMS = new ItemStack[27];
 
@@ -94,6 +99,13 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             else if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) {
                 drawMapPreview(matrices, focusedSlot.getStack(), mouseX, mouseY, (int) (toolips.mapsScale.get() * 100));
             }
+
+            //Book preview
+            else if ((focusedSlot.getStack().getItem() == Items.WRITABLE_BOOK 
+                ||focusedSlot.getStack().getItem() == Items.WRITTEN_BOOK) 
+                && toolips.previewBooks()) {
+                    drawBookPreview(matrices, focusedSlot.getStack(), mouseX, mouseY);
+            }
         }
     }
 
@@ -104,6 +116,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) info.cancel();
+            else if (toolips.previewBooks() && BetterTooltips.willRenderBookPreview(focusedSlot.getStack()) && !toolips.showVanilla.get()) info.cancel();
             else if ((Utils.hasItems(focusedSlot.getStack())
                     && toolips.previewShulkers()
                     || (focusedSlot.getStack().getItem() == Items.ENDER_CHEST
@@ -188,6 +201,48 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
         RenderSystem.enableLighting();
         RenderSystem.popMatrix();
+    }
+
+
+    private void drawBookPreview(MatrixStack matrices, ItemStack stack, int x, int y) {
+        float scale = 0.7f;
+        Text page = null;
+        CompoundTag tag = stack.getTag();
+        if (tag == null) return;
+        ListTag ltag = tag.getList("pages", 8);
+        if (ltag.size() < 1) return;
+        if (stack.getItem() == Items.WRITABLE_BOOK) page = new LiteralText(ltag.getString(0));
+        else page = Text.Serializer.fromLenientJson(ltag.getString(0));
+        if (page == null) return;
+
+        int y1 = y - 12;
+        int y2 = y - 12 + 8;
+        int x1 = x - 8;
+        int x2 = x + 16;
+        int z = 300;
+
+        mc.getTextureManager().bindTexture(TEXTURE_BOOK_BACKGROUND);
+        DrawableHelper.drawTexture(
+            matrices,
+            x1, y1, z,
+            0, 0,
+            (int)(192*scale), (int)(192*scale),
+            179, 179);
+
+        matrices.push();
+        matrices.scale(scale, scale, 1f);
+        matrices.translate(0, 0, z+5);
+        int offset = 0;
+        for (OrderedText line : mc.textRenderer.wrapLines(page, 192-48-25)) {
+            mc.textRenderer.draw(
+            matrices,
+            line,
+            x2*(1/scale),
+            (y2+offset)*(1/scale),
+            0x000000);
+            offset+=8;
+        }
+        matrices.pop();
     }
 
     // Item Highlight
