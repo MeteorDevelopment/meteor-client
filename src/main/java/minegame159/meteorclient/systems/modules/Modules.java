@@ -457,7 +457,7 @@ public class Modules extends System<Modules> {
         add(new BossStack());
         add(new Breadcrumbs());
         add(new BreakIndicators());
-        add(new CameraClip());
+        add(new CameraTweaks());
         add(new Chams());
         add(new CityESP());
         add(new CustomFOV());
