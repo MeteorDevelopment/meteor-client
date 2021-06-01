@@ -106,6 +106,13 @@ public class BetterTooltips extends Module {
             .build()
     );
 
+    private final Setting<Boolean> books = sgPreviews.add(new BoolSetting.Builder()
+            .name("books")
+            .description("Shows contents of a book when hovering over it in an inventory.")
+            .defaultValue(true)
+            .build()
+    );
+
     public final Setting<Double> mapsScale = sgPreviews.add(new DoubleSetting.Builder()
             .name("scale")
             .description("The scale of the map preview.")
@@ -159,6 +166,10 @@ public class BetterTooltips extends Module {
 
     public boolean previewMaps() {
         return isActive() && isPressed() && maps.get();
+    }
+
+    public boolean previewBooks() {
+        return isActive() && isPressed() && books.get();
     }
 
     private boolean isPressed() {
@@ -237,9 +248,11 @@ public class BetterTooltips extends Module {
         }
 
         // Hold to preview tooltip
-        if (Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers()
+        if ((Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers())
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
-            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())) {
+            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
+            || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
+            || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())) {
             event.list.add(new LiteralText(""));
             event.list.add(new LiteralText("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
@@ -247,7 +260,9 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void modifyTooltip(GetTooltipEvent.Modify event) {
-        if (Utils.hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest()) && showVanilla.get()) {
+        if ((Utils.hasItems(event.itemStack) && shulkers.get() && previewShulkers())
+            || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())
+            || (willRenderBookPreview(event.itemStack) && books.get() && previewBooks())) {
             event.y -= 10 * event.list.size();
             event.y -= 4;
         }
@@ -298,6 +313,15 @@ public class BetterTooltips extends Module {
         } else {
             return text.formatted(Formatting.RED);
         }
+    }
+
+    public static boolean willRenderBookPreview(ItemStack stack) {
+        if (stack.getItem() != Items.WRITABLE_BOOK && stack.getItem() != Items.WRITTEN_BOOK) return false;
+        CompoundTag tag = stack.getTag();
+        if (tag == null) return false;
+        ListTag ltag = tag.getList("pages", 8);
+        if (ltag.size() < 1) return false;
+        return true;
     }
 
     public enum DisplayWhen {
