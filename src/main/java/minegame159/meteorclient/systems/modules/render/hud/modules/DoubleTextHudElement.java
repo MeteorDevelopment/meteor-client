@@ -18,8 +18,14 @@ public abstract class DoubleTextHudElement extends HudElement {
 
     private double leftWidth;
 
+    public DoubleTextHudElement(HUD hud, String name, String description, String left, boolean defaultActive) {
+        super(hud, name, description, defaultActive);
+        this.rightColor = hud.secondaryColor.get();
+        this.left = left;
+    }
+
     public DoubleTextHudElement(HUD hud, String name, String description, String left) {
-        super(hud, name, description);
+        super(hud, name, description, true);
         this.rightColor = hud.secondaryColor.get();
         this.left = left;
     }

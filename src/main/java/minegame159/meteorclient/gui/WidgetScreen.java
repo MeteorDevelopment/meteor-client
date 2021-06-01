@@ -9,6 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.renderer.GuiDebugRenderer;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.TabScreen;
+import minegame159.meteorclient.gui.tabs.builtin.HudTab;
 import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WRoot;
 import minegame159.meteorclient.gui.widgets.WWidget;
@@ -23,6 +24,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.LiteralText;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import static minegame159.meteorclient.utils.Utils.*;
@@ -33,6 +38,7 @@ public abstract class WidgetScreen extends Screen {
     private static final GuiDebugRenderer DEBUG_RENDERER = new GuiDebugRenderer();
 
     public Runnable taskAfterRender;
+    protected Runnable enterAction;
 
     protected Screen parent;
     private final WContainer root;
@@ -48,6 +54,8 @@ public abstract class WidgetScreen extends Screen {
 
     public double animProgress;
 
+    private List<Runnable> onClosed;
+
     public WidgetScreen(GuiTheme theme, String title) {
         super(new LiteralText(title));
 
@@ -60,7 +68,7 @@ public abstract class WidgetScreen extends Screen {
         if (parent != null) {
             animProgress = 1;
 
-            if (this instanceof TabScreen && parent instanceof TabScreen) {
+            if (this instanceof TabScreen && parent instanceof TabScreen && !(this instanceof HudTab.HudScreen)) {
                 parent = ((TabScreen) parent).parent;
             }
         }
@@ -81,8 +89,13 @@ public abstract class WidgetScreen extends Screen {
     @Override
     protected void init() {
         MeteorClient.EVENT_BUS.subscribe(this);
-
+        if (theme.hideHUD()) mc.options.hudHidden = true;
         closed = false;
+    }
+
+    public void onClosed(Runnable action) {
+        if (onClosed == null) onClosed = new ArrayList<>(2);
+        onClosed.add(action);
     }
 
     @Override
@@ -139,6 +152,11 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
+        if ((keyCode == GLFW_KEY_ENTER || keyCode == GLFW_KEY_KP_ENTER) && enterAction != null) {
+            enterAction.run();
+            return true;
+        }
+
         return super.keyReleased(keyCode, scanCode, modifiers);
     }
 
@@ -146,7 +164,44 @@ public abstract class WidgetScreen extends Screen {
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (locked) return false;
 
-        return root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        boolean shouldReturn = root.keyPressed(keyCode, modifiers) || super.keyPressed(keyCode, scanCode, modifiers);
+        if (shouldReturn) return true;
+
+        // Select next text box if TAB was pressed
+        if (keyCode == GLFW_KEY_TAB) {
+            AtomicReference<WTextBox> firstTextBox = new AtomicReference<>(null);
+            AtomicBoolean done = new AtomicBoolean(false);
+            AtomicBoolean foundFocused = new AtomicBoolean(false);
+
+            loopWidgets(root, wWidget -> {
+                if (done.get() || !(wWidget instanceof WTextBox)) return;
+                WTextBox textBox = (WTextBox) wWidget;
+
+                if (foundFocused.get()) {
+                    textBox.setFocused(true);
+                    textBox.setCursorMax();
+
+                    done.set(true);
+                }
+                else {
+                    if (textBox.isFocused()) {
+                        textBox.setFocused(false);
+                        foundFocused.set(true);
+                    }
+                }
+
+                if (firstTextBox.get() == null) firstTextBox.set(textBox);
+            });
+
+            if (!done.get() && firstTextBox.get() != null) {
+                firstTextBox.get().setFocused(true);
+                firstTextBox.get().setCursorMax();
+            }
+
+            return true;
+        }
+
+        return false;
     }
 
     public void keyRepeated(int key, int mods) {
@@ -219,6 +274,8 @@ public abstract class WidgetScreen extends Screen {
             boolean preOnClose = onClose;
             onClose = true;
 
+            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = false;
+
             removed();
 
             onClose = preOnClose;
@@ -243,6 +300,11 @@ public abstract class WidgetScreen extends Screen {
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
             GuiKeyEvents.canUseKeys = true;
+
+            if (onClosed != null) {
+                for (Runnable action : onClosed) action.run();
+            }
+
             if (onClose) mc.openScreen(parent);
         }
     }

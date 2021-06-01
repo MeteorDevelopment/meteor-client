@@ -21,8 +21,8 @@ public class KeybindSetting extends Setting<Keybind> {
     private final Runnable action;
     public WKeybind widget;
 
-    public KeybindSetting(String name, String description, Keybind defaultValue, Consumer<Keybind> onChanged, Consumer<Setting<Keybind>> onModuleActivated, Runnable action) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public KeybindSetting(String name, String description, Keybind defaultValue, Consumer<Keybind> onChanged, Consumer<Setting<Keybind>> onModuleActivated, IVisible visible, Runnable action) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.action = action;
 
@@ -54,6 +54,14 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
+    public void reset(boolean callbacks) {
+        if (value == null) value = defaultValue.copy();
+        else value.set(defaultValue);
+
+        if (callbacks) changed();
+    }
+
+    @Override
     protected Keybind parseImpl(String str) {
         try {
             return Keybind.fromKey(Integer.parseInt(str.trim()));
@@ -69,18 +77,18 @@ public class KeybindSetting extends Setting<Keybind> {
 
     @Override
     public CompoundTag toTag() {
-        return get().toTag();
+        CompoundTag tag = saveGeneral();
+
+        tag.put("value", get().toTag());
+
+        return tag;
     }
 
     @Override
     public Keybind fromTag(CompoundTag tag) {
-        get().fromTag(tag);
+        get().fromTag(tag.getCompound("value"));
 
         return get();
-    }
-
-    public Keybind getDefault() {
-        return defaultValue;
     }
 
     public static class Builder {
@@ -88,6 +96,7 @@ public class KeybindSetting extends Setting<Keybind> {
         private Keybind defaultValue = Keybind.fromKey(-1);
         private Consumer<Keybind> onChanged;
         private Consumer<Setting<Keybind>> onModuleActivated;
+        private IVisible visible;
         private Runnable action;
 
         public Builder name(String name) {
@@ -115,13 +124,18 @@ public class KeybindSetting extends Setting<Keybind> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public Builder action(Runnable action) {
             this.action = action;
             return this;
         }
 
         public KeybindSetting build() {
-            return new KeybindSetting(name, description, defaultValue, onChanged, onModuleActivated, action);
+            return new KeybindSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, action);
         }
     }
 }

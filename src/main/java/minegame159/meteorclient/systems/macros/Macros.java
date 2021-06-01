@@ -5,10 +5,15 @@
 
 package minegame159.meteorclient.systems.macros;
 
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.meteor.KeyEvent;
+import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.misc.NbtUtils;
+import minegame159.meteorclient.utils.misc.input.KeyAction;
 import net.minecraft.nbt.CompoundTag;
 
 import java.util.ArrayList;
@@ -40,6 +45,24 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         if (macros.remove(macro)) {
             MeteorClient.EVENT_BUS.unsubscribe(macro);
             save();
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onKey(KeyEvent event) {
+        if (event.action == KeyAction.Release) return;
+
+        for (Macro macro : macros) {
+            if (macro.onAction(true, event.key)) return;
+        }
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onButton(MouseButtonEvent event) {
+        if (event.action == KeyAction.Release) return;
+
+        for (Macro macro : macros) {
+            if (macro.onAction(false, event.button)) return;
         }
     }
 

@@ -10,8 +10,8 @@ import minegame159.meteorclient.events.entity.DamageEvent;
 import minegame159.meteorclient.events.entity.TookDamageEvent;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.misc.OffhandCrash;
 import minegame159.meteorclient.systems.modules.movement.AntiLevitation;
+import minegame159.meteorclient.systems.modules.player.OffhandCrash;
 import minegame159.meteorclient.systems.modules.render.HandView;
 import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
@@ -86,6 +86,10 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
     private Hand setHand(Hand hand) {
         HandView handView = Modules.get().get(HandView.class);
-        return (Object) this == MinecraftClient.getInstance().player && handView.isActive() && handView.offhandSwing.get() ? Hand.OFF_HAND : hand;
+        if ((Object) this == MinecraftClient.getInstance().player && handView.isActive()) {
+            if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
+            return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        }
+        return hand;
     }
 }

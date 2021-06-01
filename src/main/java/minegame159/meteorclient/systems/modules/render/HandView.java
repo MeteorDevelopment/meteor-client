@@ -5,18 +5,25 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 
 public class HandView extends Module {
-    private final SettingGroup sgDefault = settings.getDefaultGroup();
+
+    public enum SwingMode {
+        Offhand,
+        Mainhand,
+        None
+    }
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSwing = settings.createGroup("Swing");
 
-    public final Setting<Double> rotationX = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> rotationX = sgGeneral.add(new DoubleSetting.Builder()
             .name("rotation-x")
             .description("The X rotation of your hands.")
             .defaultValue(0.00)
@@ -25,7 +32,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> rotationY = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> rotationY = sgGeneral.add(new DoubleSetting.Builder()
             .name("rotation-y")
             .description("The Y rotation of your hands.")
             .defaultValue(0.00)
@@ -34,7 +41,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> rotationZ = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> rotationZ = sgGeneral.add(new DoubleSetting.Builder()
             .name("rotation-z")
             .description("The Z rotation of your hands.")
             .defaultValue(0.00)
@@ -43,7 +50,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> scaleX = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> scaleX = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale-x")
             .description("The X scale of the items rendered in your hands.")
             .defaultValue(0.75)
@@ -52,7 +59,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> scaleY = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> scaleY = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale-y")
             .description("The Y scale of the items rendered in your hands.")
             .defaultValue(0.60)
@@ -61,7 +68,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> scaleZ = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> scaleZ = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale-z")
             .description("The Z scale of the items rendered in your hands.")
             .defaultValue(1.00)
@@ -70,7 +77,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> posX = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> posX = sgGeneral.add(new DoubleSetting.Builder()
             .name("pos-x")
             .description("The X offset of your hands.")
             .defaultValue(0.00)
@@ -79,7 +86,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> posY = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> posY = sgGeneral.add(new DoubleSetting.Builder()
             .name("pos-y")
             .description("The Y offset of your hands.")
             .defaultValue(0.00)
@@ -88,7 +95,7 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Double> posZ = sgDefault.add(new DoubleSetting.Builder()
+    public final Setting<Double> posZ = sgGeneral.add(new DoubleSetting.Builder()
             .name("pos-z")
             .description("The Z offset of your hands.")
             .defaultValue(-0.10)
@@ -115,10 +122,10 @@ public class HandView extends Module {
             .build()
     );
 
-    public final Setting<Boolean> offhandSwing = sgSwing.add(new BoolSetting.Builder()
-            .name("offhand-swing")
-            .description("Makes you swing with your off-hand instead of your main-hand.")
-            .defaultValue(false)
+    public final Setting<SwingMode> swingMode = sgSwing.add(new EnumSetting.Builder<SwingMode>()
+            .name("swing-mode")
+            .description("Modifies your client & server hand swinging.")
+            .defaultValue(SwingMode.None)
             .build()
     );
 

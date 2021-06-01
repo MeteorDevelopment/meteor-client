@@ -16,7 +16,7 @@ import java.util.List;
 
 public class WItemWithLabel extends WHorizontalList {
     private ItemStack itemStack;
-    private final String name;
+    private String name;
 
     private WItem item;
     private WLabel label;
@@ -49,7 +49,9 @@ public class WItemWithLabel extends WHorizontalList {
     public void set(ItemStack itemStack) {
         this.itemStack = itemStack;
         item.itemStack = itemStack;
-        label.set(itemStack.getName().getString() + getStringToAppend());
+
+        name = itemStack.getName().getString();
+        label.set(name + getStringToAppend());
     }
 
     public String getLabelText() {

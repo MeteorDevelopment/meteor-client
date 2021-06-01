@@ -10,14 +10,15 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.friends.Friend;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 
 public class CombatHud extends HudElement {
+    private static final Color WHITE = new Color(255, 255, 255);
     private static final Color GREEN = new Color(15, 255, 15);
     private static final Color RED = new Color(255, 15, 15);
     private static final Color BLACK = new Color(0, 0, 0, 255);
@@ -48,10 +50,10 @@ public class CombatHud extends HudElement {
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
             .name("scale")
             .description("Scale of combat info.")
-            .defaultValue(2)
+            .defaultValue(3)
             .min(1)
             .sliderMin(1)
-            .sliderMax(4)
+            .sliderMax(5)
             .build()
     );
 
@@ -61,13 +63,6 @@ public class CombatHud extends HudElement {
             .defaultValue(100)
             .min(1)
             .sliderMax(200)
-            .build()
-    );
-
-    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-friends")
-            .description("Ignores friends when targeting.")
-            .defaultValue(false)
             .build()
     );
 
@@ -110,6 +105,7 @@ public class CombatHud extends HudElement {
             .name("ping-stage-1")
             .description("Color of ping text when under 75.")
             .defaultValue(new SettingColor(15, 255, 15))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -117,6 +113,7 @@ public class CombatHud extends HudElement {
             .name("ping-stage-2")
             .description("Color of ping text when between 75 and 200.")
             .defaultValue(new SettingColor(255, 150, 15))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -124,6 +121,7 @@ public class CombatHud extends HudElement {
             .name("ping-stage-3")
             .description("Color of ping text when over 200.")
             .defaultValue(new SettingColor(255, 15, 15))
+            .visible(displayPing::get)
             .build()
     );
 
@@ -131,6 +129,7 @@ public class CombatHud extends HudElement {
             .name("distance-stage-1")
             .description("The color when a player is within 10 blocks of you.")
             .defaultValue(new SettingColor(255, 15, 15))
+            .visible(displayDistance::get)
             .build()
     );
 
@@ -138,6 +137,7 @@ public class CombatHud extends HudElement {
             .name("distance-stage-2")
             .description("The color when a player is within 50 blocks of you.")
             .defaultValue(new SettingColor(255, 150, 15))
+            .visible(displayDistance::get)
             .build()
     );
 
@@ -145,6 +145,7 @@ public class CombatHud extends HudElement {
             .name("distance-stage-3")
             .description("The color when a player is greater then 50 blocks away from you.")
             .defaultValue(new SettingColor(15, 255, 15))
+            .visible(displayDistance::get)
             .build()
     );
 
@@ -172,7 +173,7 @@ public class CombatHud extends HudElement {
     private PlayerEntity playerEntity;
 
     public CombatHud(HUD hud) {
-        super(hud, "combat-info", "Displays information about your combat target.");
+        super(hud, "combat-info", "Displays information about your combat target.", false);
     }
 
     @Override
@@ -187,7 +188,7 @@ public class CombatHud extends HudElement {
             double y = box.getY();
 
             if (isInEditor()) playerEntity = FakeClientPlayer.getPlayer();
-            else playerEntity = EntityUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance, ignoreFriends.get());
+            else playerEntity = TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
 
             if (playerEntity == null) return;
 
@@ -213,8 +214,8 @@ public class CombatHud extends HudElement {
             String breakText = " | ";
 
             // Name
-            String nameText = playerEntity.getGameProfile().getName();
-            Color nameColor = Friends.get().getFriendColor(playerEntity);
+            String nameText = playerEntity.getEntityName();
+            Color nameColor = PlayerUtils.getPlayerColor(playerEntity, hud.primaryColor.get());
 
             // Ping
             int ping = EntityUtils.getPing(playerEntity);
@@ -239,10 +240,10 @@ public class CombatHud extends HudElement {
             String friendText = "Unknown";
 
             Color friendColor = hud.primaryColor.get();
-            if (Friends.get().get(playerEntity) != null) {
-                Friend player = Friends.get().get(playerEntity);
-                friendText = player.type.name();
-                friendColor = Friends.get().getFriendColor(playerEntity);
+
+            if (Friends.get().isFriend(playerEntity)) {
+                friendText = "Friend";
+                friendColor = Friends.get().color;
             } else {
                 boolean naked = true;
 
@@ -262,8 +263,8 @@ public class CombatHud extends HudElement {
                     for (int position = 5; position >= 0; position--) {
                         ItemStack itemStack = getItem(position);
 
-                        if (itemStack.getItem() == Items.END_CRYSTAL
-                                || itemStack.getItem() instanceof SwordItem
+                        if (itemStack.getItem() instanceof SwordItem
+                                || itemStack.getItem() == Items.END_CRYSTAL
                                 || itemStack.getItem() == Items.RESPAWN_ANCHOR
                                 || itemStack.getItem() instanceof BedItem) threat = true;
                     }
@@ -378,7 +379,6 @@ public class CombatHud extends HudElement {
 
             float health = playerEntity.getHealth();
             float absorb = playerEntity.getAbsorptionAmount();
-            float totalHealth = health + absorb;
 
             double healthPrecent = health / maxHealth;
             double absorbPrecent = absorb / maxAbsorb;
@@ -387,15 +387,9 @@ public class CombatHud extends HudElement {
             int absorbWidth = (int) (totalAbsorbWidth * absorbPrecent);
 
             Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.gradientQuad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get());
-            Renderer.NORMAL.gradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
+            Renderer.NORMAL.horizontalGradientQuad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get());
+            Renderer.NORMAL.horizontalGradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
             Renderer.NORMAL.end();
-
-            String healthText = String.valueOf(Math.round(totalHealth * 10.0) / 10.0);
-
-            TextRenderer.get().begin(0.45);
-            TextRenderer.get().render(healthText, x, y, hud.primaryColor.get());
-            TextRenderer.get().end();
 
             RenderSystem.popMatrix();
         });

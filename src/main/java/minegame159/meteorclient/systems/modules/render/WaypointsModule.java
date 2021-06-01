@@ -8,6 +8,8 @@ package minegame159.meteorclient.systems.modules.render;
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.pathing.goals.GoalGetToBlock;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
@@ -23,23 +25,111 @@ import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
 import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
 import minegame159.meteorclient.gui.widgets.pressable.WMinus;
-import minegame159.meteorclient.settings.ColorSetting;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.text.BaseText;
+import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.ListIterator;
+
+import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
+
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
+    
+    private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
+
+    private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
+            .name("max-death-positions")
+            .description("The amount of death positions to save, 0 to disable")
+            .min(0)
+            .sliderMin(0)
+            .sliderMax(20)
+            .defaultValue(0)
+            .onChanged(this::cleanDeathWPs)
+            .build()
+    );
+
+    private final Setting<Boolean> dpChat = sgDeathPosition.add(new BoolSetting.Builder()
+            .name("chat")
+            .description("Send a chat message with your position once you die")
+            .defaultValue(false)
+            .build()
+    );
 
     public WaypointsModule() {
         super(Categories.Render, "waypoints", "Allows you to create waypoints.");
+    }
+
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+    @EventHandler
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (!(event.screen instanceof DeathScreen)) return;
+        if (mc.player == null) return;
+        Vec3d dmgPos = mc.player.getPos();
+
+        String time = dateFormat.format(new Date());
+        if (dpChat.get()) {
+            BaseText text = new LiteralText("Died at ");
+            text.append(formatCoords(dmgPos));
+            text.append(String.format(" on %s.", time));
+            info(text);
+        }
+
+        // Create waypoint
+        if (maxDeathPositions.get() > 0) {
+            Waypoint waypoint = new Waypoint();
+            waypoint.name = "Death " + time;
+            waypoint.icon = "skull";
+            waypoint.x = (int) dmgPos.x;
+            waypoint.y = (int) dmgPos.y + 2;
+            waypoint.z = (int) dmgPos.z;
+            waypoint.maxVisibleDistance = Integer.MAX_VALUE;
+            waypoint.actualDimension = PlayerUtils.getDimension();
+
+            switch (waypoint.actualDimension) {
+                case Overworld:
+                    waypoint.overworld = true;
+                    break;
+                case Nether:
+                    waypoint.nether = true;
+                    break;
+                case End:
+                    waypoint.end = true;
+                    break;
+            }
+
+            Waypoints.get().add(waypoint);
+        }
+        cleanDeathWPs(maxDeathPositions.get());
+    }
+
+    private void cleanDeathWPs(int max) {
+        int oldWpC = 0;
+
+        ListIterator<Waypoint> wps = Waypoints.get().iteratorReverse();
+        while (wps.hasPrevious()) {
+            Waypoint wp = wps.previous();
+            if (wp.name.startsWith("Death ") && "skull".equals(wp.icon)) {
+                oldWpC++;
+                if (oldWpC > max)
+                    Waypoints.get().remove(wp);
+            }
+        }
     }
 
     @Override
@@ -68,7 +158,7 @@ public class WaypointsModule extends Module {
             // Name
             WLabel name = table.add(theme.label(waypoint.name)).expandCellX().widget();
             boolean goodDimension = false;
-            Dimension dimension = Utils.getDimension();
+            Dimension dimension = PlayerUtils.getDimension();
             if (waypoint.overworld && dimension == Dimension.Overworld) goodDimension = true;
             else if (waypoint.nether && dimension == Dimension.Nether) goodDimension = true;
             else if (waypoint.end && dimension == Dimension.End) goodDimension = true;
@@ -123,6 +213,8 @@ public class WaypointsModule extends Module {
             this.waypoint = newWaypoint ? new Waypoint() : waypoint;
             this.action = action;
 
+            this.waypoint.validateIcon();
+
             if (newWaypoint) {
                 MinecraftClient mc = MinecraftClient.getInstance();
 
@@ -130,9 +222,9 @@ public class WaypointsModule extends Module {
                 this.waypoint.y = (int) mc.player.getY() + 2;
                 this.waypoint.z = (int) mc.player.getZ();
 
-                this.waypoint.actualDimension = Utils.getDimension();
+                this.waypoint.actualDimension = PlayerUtils.getDimension();
 
-                switch (Utils.getDimension()) {
+                switch (PlayerUtils.getDimension()) {
                     case Overworld: this.waypoint.overworld = true; break;
                     case Nether:    this.waypoint.nether = true; break;
                     case End:       this.waypoint.end = true; break;
@@ -161,9 +253,9 @@ public class WaypointsModule extends Module {
 
             // Color:
             table.add(theme.label("Color:"));
-            list = add(theme.horizontalList()).widget();
+            list = table.add(theme.horizontalList()).widget();
             list.add(theme.quad(waypoint.color));
-            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null)));
+            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();
@@ -245,12 +337,15 @@ public class WaypointsModule extends Module {
             table.row();
 
             // Save
-            table.add(theme.button("Save")).expandX().widget().action = () -> {
+            WButton save = table.add(theme.button("Save")).expandX().widget();
+            save.action = () -> {
                 if (newWaypoint) Waypoints.get().add(waypoint);
                 else Waypoints.get().save();
 
                 onClose();
             };
+
+            enterAction = save.action;
         }
 
         @Override

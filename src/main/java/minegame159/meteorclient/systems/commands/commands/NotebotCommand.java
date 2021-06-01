@@ -7,17 +7,20 @@ package minegame159.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.gui.GuiThemes;
+import minegame159.meteorclient.gui.screens.NotebotHelpScreen;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.Notebot;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.LiteralText;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -29,6 +32,7 @@ import java.util.List;
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class NotebotCommand extends Command {
+    private final static SimpleCommandExceptionType INVALID_NAME = new SimpleCommandExceptionType(new LiteralText("Invalid name."));
 
     int ticks = -1;
     List<List<Integer>> song = new ArrayList<>();
@@ -39,6 +43,10 @@ public class NotebotCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
+        builder.then(literal("help").executes(ctx -> {
+            MeteorClient.INSTANCE.screenToOpen = new NotebotHelpScreen(GuiThemes.get());
+            return SINGLE_SUCCESS;
+        }));
         builder.then(literal("status").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.printStatus();
@@ -63,7 +71,7 @@ public class NotebotCommand extends Command {
             Notebot notebot = Modules.get().get(Notebot.class);
             String name = ctx.getArgument("name", String.class);
             if (name == null || name.equals("")) {
-                ChatUtils.prefixError("Notebot","Invalid name");
+                throw INVALID_NAME.create();
             }
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt",name));
             if (!path.toFile().exists()) {
@@ -76,7 +84,7 @@ public class NotebotCommand extends Command {
             Notebot notebot = Modules.get().get(Notebot.class);
             String name = ctx.getArgument("name", String.class);
             if (name == null || name == "") {
-                ChatUtils.prefixError("Notebot","Invalid name");
+                throw INVALID_NAME.create();
             }
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt",name));
             if (!path.toFile().exists()) {
@@ -89,18 +97,18 @@ public class NotebotCommand extends Command {
             ticks = -1;
             song.clear();
             MeteorClient.EVENT_BUS.subscribe(this);
-            ChatUtils.prefixInfo("Notebot","Recording started");
+            info("Recording started");
             return  SINGLE_SUCCESS;
         })));
         builder.then(literal("record").then(literal("cancel").executes(ctx -> {
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            ChatUtils.prefixInfo("Notebot","Recording cancelled");
+            info("Recording cancelled");
             return  SINGLE_SUCCESS;
         })));
         builder.then(literal("record").then(literal("save").then(argument("name",StringArgumentType.greedyString()).executes(ctx -> {
             String name = ctx.getArgument("name", String.class);
             if (name == null || name == "") {
-                ChatUtils.prefixError("Notebot","Invalid name");
+                throw INVALID_NAME.create();
             }
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt",name));
             saveRecording(path);
@@ -143,10 +151,10 @@ public class NotebotCommand extends Command {
                     note.get(0), note.get(1)
             ));
             file.close();
-            ChatUtils.prefixInfo("Notebot",String.format("Song saved. Length: (highlight)%d(default).",note.get(0)));
+            info(String.format("Song saved. Length: (highlight)%d(default).",note.get(0)));
             MeteorClient.EVENT_BUS.unsubscribe(this);
         } catch (IOException e) {
-            ChatUtils.prefixError("Notebot","Couldn't create the file.");
+            info("Couldn't create the file.");
             MeteorClient.EVENT_BUS.unsubscribe(this);
         }
 

@@ -21,8 +21,8 @@ import java.util.function.Predicate;
 public class ItemListSetting extends Setting<List<Item>> {
     public final Predicate<Item> filter;
 
-    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, Predicate<Item> filter) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.value = new ArrayList<>(defaultValue);
         this.filter = filter;
@@ -92,6 +92,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         private List<Item> defaultValue;
         private Consumer<List<Item>> onChanged;
         private Consumer<Setting<List<Item>>> onModuleActivated;
+        private IVisible visible;
         private Predicate<Item> filter;
 
         public Builder name(String name) {
@@ -119,13 +120,18 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public Builder filter(Predicate<Item> filter) {
             this.filter = filter;
             return this;
         }
 
         public ItemListSetting build() {
-            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter);
+            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter);
         }
     }
 }

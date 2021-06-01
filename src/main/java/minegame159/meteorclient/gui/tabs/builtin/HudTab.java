@@ -7,6 +7,7 @@ package minegame159.meteorclient.gui.tabs.builtin;
 
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.HudElementScreen;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
@@ -53,7 +54,7 @@ public class HudTab extends Tab {
         return screen instanceof HudScreen;
     }
 
-    private static class HudScreen extends WindowTabScreen {
+    public static class HudScreen extends WindowTabScreen {
         private final Color HOVER_BG_COLOR = new Color(200, 200, 200, 50);
         private final Color HOVER_OL_COLOR = new Color(200, 200, 200, 200);
 
@@ -74,6 +75,18 @@ public class HudTab extends Tab {
             super(theme, tab);
 
             this.hud = Modules.get().get(HUD.class);
+        }
+
+        @Override
+        protected void init() {
+            super.init();
+            mc.options.hudHidden = false;
+        }
+
+        @Override
+        public void onClose() {
+            super.onClose();
+            if (theme.hideHUD() && parent instanceof WidgetScreen) mc.options.hudHidden = true;
         }
 
         @Override
@@ -242,9 +255,9 @@ public class HudTab extends Tab {
             if (dragging) {
                 dragging = false;
 
-                if (!dragged && hoveredModule != null) {
-                    if (!selectedElements.isEmpty()) selectedElements.clear();
-                    hoveredModule.toggle();
+                if (!dragged && !selectedElements.isEmpty()) {
+                    selectedElements.forEach(HudElement::toggle);
+                    selectedElements.clear();
                 }
 
                 if (selectedElements.size() <= 1) selectedElements.clear();

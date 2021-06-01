@@ -9,7 +9,7 @@ import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.NameProtect;
+import minegame159.meteorclient.systems.modules.misc.NameProtect;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 

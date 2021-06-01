@@ -17,8 +17,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.net.InetSocketAddress;
 
-@Mixin(targets = "net/minecraft/network/ClientConnection$1")
+@Mixin(targets = "net.minecraft.network.ClientConnection$1")
 public class ClientConnectionInitChannelMixin {
+    @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "initChannel", at = @At("HEAD"))
     private void onInitChannel(Channel channel, CallbackInfo info) {
         Proxy proxy = Proxies.get().getEnabled();

@@ -10,20 +10,25 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.WidgetScreen;
+import minegame159.meteorclient.gui.tabs.builtin.ConfigTab;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.waypoints.Waypoint;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
+import minegame159.meteorclient.utils.misc.UnorderedArrayList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RainbowColors {
-    private static final List<Setting<SettingColor>> colorSettings = new ArrayList<>();
-    private static final List<SettingColor> colors = new ArrayList<>();
+
+    public static final RainbowColor GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
+
+    private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
+    private static final List<SettingColor> colors = new UnorderedArrayList<>();
+    private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
@@ -41,8 +46,14 @@ public class RainbowColors {
         colors.add(color);
     }
 
+    public static void register(Runnable runnable) {
+        listeners.add(runnable);
+    }
+
     @EventHandler
     private static void onTick(TickEvent.Post event) {
+        GLOBAL.getNext();
+
         for (Setting<SettingColor> setting : colorSettings) {
             if (setting.module == null || setting.module.isActive()) setting.get().update();
         }
@@ -62,5 +73,7 @@ public class RainbowColors {
                 }
             }
         }
+
+        for (Runnable listener : listeners) listener.run();
     }
 }

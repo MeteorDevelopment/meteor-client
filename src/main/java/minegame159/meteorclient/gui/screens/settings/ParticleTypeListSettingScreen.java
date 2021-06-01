@@ -17,7 +17,7 @@ import java.util.List;
 
 public class ParticleTypeListSettingScreen extends LeftRightListSettingScreen<ParticleType<?>> {
     public ParticleTypeListSettingScreen(GuiTheme theme, Setting<List<ParticleType<?>>> setting) {
-        super(theme, "Select particles", setting, Registry.PARTICLE_TYPE);
+        super(theme, "Select particles", setting, setting.get(), Registry.PARTICLE_TYPE);
     }
 
     @Override

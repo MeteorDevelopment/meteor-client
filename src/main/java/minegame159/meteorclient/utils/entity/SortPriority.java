@@ -9,5 +9,6 @@ public enum SortPriority {
     LowestDistance,
     HighestDistance,
     LowestHealth,
-    HighestHealth
+    HighestHealth,
+    ClosestAngle
 }

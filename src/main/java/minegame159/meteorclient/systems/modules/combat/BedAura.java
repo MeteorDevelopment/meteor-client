@@ -16,6 +16,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
+import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
@@ -52,6 +53,7 @@ public class BedAura extends Module {
             .name("place-mode")
             .description("The way beds are allowed to be placed near you.")
             .defaultValue(Safety.Safe)
+            .visible(place::get)
             .build()
     );
 
@@ -61,6 +63,7 @@ public class BedAura extends Module {
             .defaultValue(9)
             .min(0)
             .sliderMax(20)
+            .visible(place::get)
             .build()
     );
 
@@ -145,6 +148,7 @@ public class BedAura extends Module {
             .sliderMin(1)
             .max(9)
             .sliderMax(9)
+            .visible(autoMove::get)
             .build()
     );
 
@@ -251,7 +255,7 @@ public class BedAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.world.getDimension().isBedWorking()) {
-            ChatUtils.moduleError(this, "You are in the Overworld... disabling!");
+            error("You are in the Overworld... disabling!");
             toggle();
             return;
         }
@@ -259,14 +263,14 @@ public class BedAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        target = EntityUtils.getPlayerTarget(targetRange.get(), priority.get(), false);
+        target = TargetUtils.getPlayerTarget(targetRange.get(), priority.get());
 
         if (target == null) {
             bestPos = null;
             return;
         }
 
-        if (place.get() && InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
+        if (place.get() && InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
             switch (stage) {
                 case Placing:
                     bestPos = getPlacePos(target);
@@ -299,7 +303,7 @@ public class BedAura extends Module {
     }
 
     private void placeBed(BlockPos pos) {
-        if (pos == null || InvUtils.findItemInAll(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
+        if (pos == null || InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
 
         if (autoMove.get()) doAutoMove();
 
@@ -388,7 +392,7 @@ public class BedAura extends Module {
 
     private void doAutoMove() {
         if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
-            int slot = InvUtils.findItemInMain(itemStack -> itemStack.getItem() instanceof BedItem);
+            int slot = InvUtils.findItemInInventory(itemStack -> itemStack.getItem() instanceof BedItem);
             InvUtils.move().from(slot).toHotbar(autoMoveSlot.get() - 1);
         }
     }

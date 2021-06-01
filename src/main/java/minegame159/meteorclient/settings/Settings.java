@@ -5,6 +5,8 @@
 
 package minegame159.meteorclient.settings;
 
+import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.widgets.containers.WContainer;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
@@ -84,6 +86,24 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
                 if (setting instanceof ColorSetting) {
                     RainbowColors.removeSetting((Setting<SettingColor>) setting);
                 }
+            }
+        }
+    }
+
+    public void tick(WContainer settings, GuiTheme theme) {
+        for (SettingGroup group : groups) {
+            for (Setting<?> setting : group) {
+                boolean visible = setting.isVisible();
+
+                if (visible != setting.lastWasVisible) {
+                    settings.clear();
+                    settings.add(theme.settings(this)).expandX();
+
+                    setting.lastWasVisible = visible;
+                    return;
+                }
+
+                setting.lastWasVisible = visible;
             }
         }
     }

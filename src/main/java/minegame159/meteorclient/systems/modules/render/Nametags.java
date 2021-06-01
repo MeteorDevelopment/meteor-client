@@ -17,18 +17,15 @@ import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.FakePlayer;
-import minegame159.meteorclient.systems.modules.player.NameProtect;
+import minegame159.meteorclient.systems.modules.misc.NameProtect;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import minegame159.meteorclient.utils.entity.FakePlayerEntity;
-import minegame159.meteorclient.utils.entity.FakePlayerUtils;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -57,7 +54,6 @@ public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("Players");
     private final SettingGroup sgItems = settings.createGroup("Items");
-    private final SettingGroup sgOther = settings.createGroup("Other");
 
     // General
 
@@ -90,6 +86,13 @@ public class Nametags extends Module {
             .build()
     );
 
+    private final Setting<SettingColor> names = sgGeneral.add(new ColorSetting.Builder()
+            .name("names")
+            .description("The color of the nametag names.")
+            .defaultValue(new SettingColor())
+            .build()
+    );
+
     private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
             .name("culling")
             .description("Only render a certain number of nametags at a certain distance.")
@@ -103,6 +106,7 @@ public class Nametags extends Module {
             .defaultValue(20.0D)
             .min(0.0D)
             .sliderMax(200.0D)
+            .visible(culling::get)
             .build()
     );
 
@@ -113,6 +117,7 @@ public class Nametags extends Module {
             .min(1)
             .sliderMin(1)
             .sliderMax(100)
+            .visible(culling::get)
             .build()
     );
 
@@ -129,9 +134,9 @@ public class Nametags extends Module {
             .name("item-spacing")
             .description("The spacing between items.")
             .defaultValue(2)
-            .min(0)
+            .min(0).max(10)
             .sliderMax(5)
-            .max(10)
+            .visible(displayItems::get)
             .build()
     );
 
@@ -139,6 +144,7 @@ public class Nametags extends Module {
             .name("ignore-empty")
             .description("Doesn't add spacing where an empty item stack would be.")
             .defaultValue(true)
+            .visible(displayItems::get)
             .build()
     );
 
@@ -146,6 +152,7 @@ public class Nametags extends Module {
             .name("display-enchants")
             .description("Displays item enchantments on the items.")
             .defaultValue(true)
+            .visible(displayItems::get)
             .build()
     );
 
@@ -153,6 +160,7 @@ public class Nametags extends Module {
             .name("enchantment-position")
             .description("Where the enchantments are rendered.")
             .defaultValue(Position.Above)
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -163,6 +171,7 @@ public class Nametags extends Module {
             .min(1)
             .max(5)
             .sliderMax(5)
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -170,6 +179,7 @@ public class Nametags extends Module {
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
             .defaultValue(setDefaultList())
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -181,6 +191,7 @@ public class Nametags extends Module {
             .max(2)
             .sliderMin(0.1)
             .sliderMax(2)
+            .visible(displayItemEnchants::get)
             .build()
     );
 
@@ -212,126 +223,28 @@ public class Nametags extends Module {
             .build()
     );
 
-    private final Setting<SettingColor> normalName = sgPlayers.add(new ColorSetting.Builder()
-            .name("normal-color")
-            .description("The color of people not in your Friends List.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
-    );
-
-    private final Setting<SettingColor> meteorColor = sgPlayers.add(new ColorSetting.Builder()
-            .name("meteor-color")
-            .description("The color of M when the player is using Meteor.")
-            .defaultValue(new SettingColor(135, 0, 255))
-            .build()
-    );
-
-    private final Setting<SettingColor> gmColor = sgPlayers.add(new ColorSetting.Builder()
-            .name("gamemode-color")
-            .description("The color of the gamemode text.")
-            .defaultValue(new SettingColor(232, 185, 35))
-            .build()
-    );
-
-    private final Setting<SettingColor> pingColor = sgPlayers.add(new ColorSetting.Builder()
-            .name("ping-color")
-            .description("The color of the ping text.")
-            .defaultValue(new SettingColor(150, 150, 150))
-            .build()
-    );
-
-    private final Setting<SettingColor> distanceColor = sgPlayers.add(new ColorSetting.Builder()
-            .name("distance-color")
-            .description("The color of the distance text.")
-            .defaultValue(new SettingColor(150, 150, 150))
-            .build()
-    );
-
-    private final Setting<SettingColor> healthStage1 = sgPlayers.add(new ColorSetting.Builder()
-            .name("health-stage-1")
-            .description("The color if a player is full health.")
-            .defaultValue(new SettingColor(25, 252, 25))
-            .build()
-    );
-
-    private final Setting<SettingColor> healthStage2 = sgPlayers.add(new ColorSetting.Builder()
-            .name("health-stage-2")
-            .description("The color if a player is at two-thirds health.")
-            .defaultValue(new SettingColor(255, 105, 25))
-            .build()
-    );
-
-    private final Setting<SettingColor> healthStage3 = sgPlayers.add(new ColorSetting.Builder()
-            .name("health-stage-3")
-            .description("The color of a player if they are at one-third health.")
-            .defaultValue(new SettingColor(255, 25, 25))
-            .build()
-    );
-
-    private final Setting<SettingColor> enchantmentTextColor = sgPlayers.add(new ColorSetting.Builder()
-            .name("enchantment-text-color")
-            .description("The color of the enchantment text.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
-    );
-
     //Items
 
-    private final Setting<SettingColor> itemNameColor = sgItems.add(new ColorSetting.Builder()
-            .name("name-color")
-            .description("The color of the name of the item.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
-    );
-
     private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
-            .name("count-on-items")
-            .description("Shows the number of items in an item entities nametag.")
+            .name("count")
+            .description("Displays the number of items in the stack.")
             .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<SettingColor> itemCountColor = sgItems.add(new ColorSetting.Builder()
-            .name("item-count-color")
-            .description("The color of the item count.")
-            .defaultValue(new SettingColor(232, 185, 35))
-            .build()
-    );
-
-    //Other
-
-    private final Setting<SettingColor> otherNameColor = sgOther.add(new ColorSetting.Builder()
-            .name("name-color")
-            .description("The color of the name of the entity.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
-    );
-
-    private final Setting<SettingColor> otherHealthStage1 = sgOther.add(new ColorSetting.Builder()
-            .name("health-stage-1")
-            .description("The color of a mobs health if it's full health.")
-            .defaultValue(new SettingColor(25, 252, 25))
-            .build()
-    );
-
-    private final Setting<SettingColor> otherHealthStage2 = sgOther.add(new ColorSetting.Builder()
-            .name("health-stage-2")
-            .description("The color of a mobs health if it's at two-thirds health.")
-            .defaultValue(new SettingColor(255, 105, 25))
-            .build()
-    );
-
-    private final Setting<SettingColor> otherHealthStage3 = sgOther.add(new ColorSetting.Builder()
-            .name("health-stage-3")
-            .description("The color of a mobs health if they are at one-third health.")
-            .defaultValue(new SettingColor(255, 25, 25))
             .build()
     );
 
     private final Vec3 pos = new Vec3();
 
     private final double[] itemWidths = new double[6];
-    private final Color RED = new Color(255, 15, 15);
+
+    private final Color WHITE = new Color(255, 255, 255);
+    private final Color RED = new Color(255, 25, 25);
+    private final Color AMBER = new Color(255, 105, 25);
+    private final Color GREEN = new Color(25, 252, 25);
+    private final Color GOLD = new Color(232, 185, 35);
+    private final Color GREY = new Color(150, 150, 150);
+    private final Color METEOR = new Color(135, 0, 255);
+    private final Color BLUE = new Color(20, 170, 170);
+
     private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
     private final List<Entity> entityList = new ArrayList<>();
 
@@ -415,7 +328,7 @@ public class Nametags extends Module {
 
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);
-        String gmText = "ERR";
+        String gmText = "BOT";
         if (gm != null) {
             switch (gm) {
                 case SPECTATOR: gmText = "Sp"; break;
@@ -429,14 +342,11 @@ public class Nametags extends Module {
 
         // Name
         String name;
-        Color nameColor = Friends.get().getFriendColor(player);
+        Color nameColor = PlayerUtils.getPlayerColor(player, names.get());
 
-        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getGameProfile().getName());
-        else name = player.getGameProfile().getName();
+        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
+        else name = player.getEntityName();
 
-        if (Modules.get().get(FakePlayer.class).showID(player)) {
-            name += " [" + FakePlayerUtils.getID((FakePlayerEntity) player) + "]";
-        }
         name = name + " ";
 
         // Health
@@ -447,16 +357,16 @@ public class Nametags extends Module {
         String healthText = String.valueOf(health);
         Color healthColor;
 
-        if (healthPercentage <= 0.333) healthColor = healthStage3.get();
-        else if (healthPercentage <= 0.666) healthColor = healthStage2.get();
-        else healthColor = healthStage1.get();
+        if (healthPercentage <= 0.333) healthColor = RED;
+        else if (healthPercentage <= 0.666) healthColor = AMBER;
+        else healthColor = GREEN;
 
         // Ping
         int ping = EntityUtils.getPing(player);
         String pingText = " [" + ping + "ms]";
 
         // Distance
-        double dist = Math.round(Utils.distanceToCamera(player) * 10.0) / 10.0;
+        double dist = Math.round(PlayerUtils.distanceToCamera(player) * 10.0) / 10.0;
         String distText = " " + dist + "m";
 
         // Calc widths
@@ -483,14 +393,14 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        if (displayMeteor.get()) hX = text.render(usingMeteor, hX, hY, meteorColor.get());
+        if (displayMeteor.get()) hX = text.render(usingMeteor, hX, hY, METEOR);
 
-        if (displayGameMode.get()) hX = text.render(gmText, hX, hY, gmColor.get());
-        hX = text.render(name, hX, hY, nameColor != null ? nameColor : normalName.get());
+        if (displayGameMode.get()) hX = text.render(gmText, hX, hY, GOLD);
+        hX = text.render(name, hX, hY, nameColor);
 
         hX = text.render(healthText, hX, hY, healthColor);
-        if (displayPing.get()) hX = text.render(pingText, hX, hY, pingColor.get());
-        if (displayDistance.get()) text.render(distText, hX, hY, distanceColor.get());
+        if (displayPing.get()) hX = text.render(pingText, hX, hY, BLUE);
+        if (displayDistance.get()) text.render(distText, hX, hY, GREY);
         text.end();
 
         if (displayItems.get()) {
@@ -571,7 +481,7 @@ public class Nametags extends Module {
                     for (Enchantment enchantment : enchantmentsToShow.keySet()) {
                         String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShow.get(enchantment);
 
-                        Color enchantColor = enchantmentTextColor.get();
+                        Color enchantColor = WHITE;
                         if (enchantment.isCursed()) enchantColor = RED;
 
                         switch (enchantPos.get()) {
@@ -615,8 +525,8 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        hX = text.render(name, hX, hY, itemNameColor.get());
-        if (itemCount.get()) text.render(count, hX, hY, itemCountColor.get());
+        hX = text.render(name, hX, hY, WHITE);
+        if (itemCount.get()) text.render(count, hX, hY, GOLD);
         text.end();
 
         NametagUtils.end();
@@ -638,9 +548,9 @@ public class Nametags extends Module {
         String healthText = String.valueOf(health);
         Color healthColor;
 
-        if (healthPercentage <= 0.333) healthColor = otherHealthStage3.get();
-        else if (healthPercentage <= 0.666) healthColor = otherHealthStage2.get();
-        else healthColor = otherHealthStage1.get();
+        if (healthPercentage <= 0.333) healthColor = RED;
+        else if (healthPercentage <= 0.666) healthColor = AMBER;
+        else healthColor = GREEN;
 
         double nameWidth = text.getWidth(nameText);
         double healthWidth = text.getWidth(healthText);
@@ -655,7 +565,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        hX = text.render(nameText, hX, hY, otherNameColor.get());
+        hX = text.render(nameText, hX, hY, names.get());
         text.render(healthText, hX, hY, healthColor);
         text.end();
 
@@ -679,7 +589,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        text.render(fuseText, hX, hY, otherNameColor.get());
+        text.render(fuseText, hX, hY, names.get());
         text.end();
 
         NametagUtils.end();
@@ -712,16 +622,16 @@ public class Nametags extends Module {
     }
 
     private static String ticksToTime(int ticks){
-        if (ticks > 20*3600){
-            int h = ticks/20/3600;
-            return h+" h";
-        } else if (ticks > 20*60){
-            int m = ticks/20/60;
-            return m+" m";
+        if (ticks > 20 * 3600) {
+            int h = ticks / 20 / 3600;
+            return h + " h";
+        } else if (ticks > 20 * 60) {
+            int m = ticks / 20 / 60;
+            return m + " m";
         } else {
             int s = ticks / 20;
             int ms = (ticks % 20) / 2;
-            return s+"."+ms+" s";
+            return s + "."  +ms + " s";
         }
     }
 }

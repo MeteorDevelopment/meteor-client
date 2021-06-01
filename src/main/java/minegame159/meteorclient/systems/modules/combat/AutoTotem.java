@@ -6,167 +6,125 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.IntSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
-import minegame159.meteorclient.systems.friends.Friends;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.movement.NoFall;
-import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.player.DamageCalcUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.decoration.EndCrystalEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 
 public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgSmart = settings.createGroup("Smart");
 
-    private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
-            .name("smart")
-            .description("Only switches to a totem when you are close to death.")
-            .defaultValue(false)
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("Determines when to hold a totem, strict will always hold.")
+            .defaultValue(Mode.Smart)
             .build()
     );
 
-    private final Setting<Boolean> fallback = sgGeneral.add(new BoolSetting.Builder()
-            .name("fallback")
-            .description("Enables Offhand Extra when you run out of totems.")
-            .defaultValue(true)
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+            .name("delay")
+            .description("The ticks between slot movements.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
             .build()
     );
 
-    private final Setting<Boolean> inventorySwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("inventory")
-            .description("Whether or not to equip totems while in your inventory.")
-            .defaultValue(true)
-            .build()
-    );
+    // Smart settings
 
-    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> health = sgSmart.add(new IntSetting.Builder()
             .name("health")
-            .description("The health Auto Totem's smart mode activates at.")
+            .description("The health to hold a totem at.")
             .defaultValue(10)
             .min(0)
-            .sliderMax(20)
+            .sliderMax(36)
+            .max(36)
             .build()
     );
 
-    private final Setting<Boolean> elytraHold = sgGeneral.add(new BoolSetting.Builder()
-            .name("elytra-hold")
-            .description("Whether or not to always hold a totem when flying with an elytra.")
-            .defaultValue(false)
+    private final Setting<Boolean> elytra = sgSmart.add(new BoolSetting.Builder()
+            .name("elytra")
+            .description("Will always hold a totem when flying with elytra.")
+            .defaultValue(true)
             .build()
     );
 
-    private String totemCountString = "0";
+    private final Setting<Boolean> fall = sgSmart.add(new BoolSetting.Builder()
+            .name("fall")
+            .description("Will hold a totem when fall damage could kill you.")
+            .defaultValue(true)
+            .build()
+    );
 
-    private final MinecraftClient mc = MinecraftClient.getInstance();
+    private final Setting<Boolean> explosion = sgSmart.add(new BoolSetting.Builder()
+            .name("explosion")
+            .description("Will hold a totem when explosion damage could kill you.")
+            .defaultValue(true)
+            .build()
+    );
 
-    private boolean locked = false;
+    public boolean locked;
+    private int totems, ticks;
 
     public AutoTotem() {
-        super(Categories.Combat, "auto-totem", "Automatically equips totems in your offhand.");
+        super(Categories.Combat, "auto-totem", "Automatically equips a totem in your offhand.");
     }
 
-    @Override
-    public void onDeactivate() {
-        locked = false;
-    }
-
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onTick(TickEvent.Pre event) {
-        if (mc.currentScreen instanceof InventoryScreen && !inventorySwitch.get()) return;
-        if (mc.currentScreen != null && !(mc.currentScreen instanceof InventoryScreen)) return;
-
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
+        totems = result.count;
 
-        if (result.count <= 0) {
-            if (!Modules.get().isActive(OffhandExtra.class) && fallback.get()) {
-                Modules.get().get(OffhandExtra.class).toggle();
-            }
+        if (totems <= 0) locked = false;
+        else if (ticks >= delay.get()) {
+            boolean low = mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions(explosion.get(), fall.get()) <= health.get();
+            boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
 
-            Modules.get().get(OffhandExtra.class).setTotems(true);
-            locked = false;
-        } else {
-            Modules.get().get(OffhandExtra.class).setTotems(false);
+            locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
 
-            if (mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING && (!smart.get() || isLow() || elytraMove())) {
-                locked = true;
+            if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
                 InvUtils.move().from(result.slot).toOffhand();
-            } else if (smart.get() && !isLow() && !elytraMove()) {
-                locked = false;
             }
+
+            ticks = 0;
+            return;
         }
 
-        totemCountString = Integer.toString(result.count);
+        ticks++;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onReceivePacket(PacketEvent.Receive event) {
+        if (!(event.packet instanceof EntityStatusS2CPacket)) return;
+        EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
+        if (p.getStatus() != 35) return;
+
+        Entity entity = p.getEntity(mc.world);
+        if (entity == null || !(entity.equals(mc.player))) return;
+
+        ticks = 0;
+    }
+
+    public boolean isLocked() {
+        return isActive() && locked;
     }
 
     @Override
     public String getInfoString() {
-        return totemCountString;
+        return String.valueOf(totems);
     }
 
-    private double getHealthReduction(){
-        assert mc.world != null;
-        assert mc.player != null;
-        double damageTaken = 0;
-        if (mc.player.abilities.creativeMode) return damageTaken;
-        for(Entity entity : mc.world.getEntities()){
-            if(entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())){
-                damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
-            }else if(entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)){
-                if(Friends.get().notTrusted((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5){
-                    if(((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem){
-                        damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
-                    }
-                }
-            }
-        }
-        if(!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3){
-            double damage = mc.player.fallDistance * 0.5;
-            if(damage > damageTaken){
-                damageTaken = damage;
-            }
-        }
-        if (Utils.getDimension() != Dimension.Nether) {
-            for (BlockEntity blockEntity : mc.world.blockEntities) {
-                if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()))) {
-                    damageTaken = DamageCalcUtils.bedDamage(mc.player, new Vec3d(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ()));
-                }
-            }
-        }
-        return damageTaken;
+    public enum Mode {
+        Smart,
+        Strict
     }
-
-    private double getHealth(){
-        assert mc.player != null;
-        return mc.player.getHealth() + mc.player.getAbsorptionAmount();
-    }
-
-    public boolean getLocked(){
-        return locked;
-    }
-
-    private boolean isLow(){
-        return getHealth() < health.get() || (getHealth() - getHealthReduction()) < health.get();
-    }
-
-    private boolean elytraMove(){
-        return elytraHold.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
-    }
-
 }

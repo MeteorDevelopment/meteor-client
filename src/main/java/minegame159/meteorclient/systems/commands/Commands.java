@@ -42,7 +42,7 @@ public class Commands extends System<Commands> {
         add(new DropCommand());
         add(new EnchantCommand());
         add(new FakePlayerCommand());
-        add(new FriendCommand());
+        add(new FriendsCommand());
         add(new CommandsCommand());
         add(new InventoryCommand());
         add(new LocateCommand());
@@ -50,8 +50,7 @@ public class Commands extends System<Commands> {
         add(new NotebotCommand());
         add(new PanicCommand());
         add(new PeekCommand());
-        add(new PluginsCommand());
-        add(new ProfileCommand());
+        add(new ProfilesCommand());
         add(new ReloadCommand());
         add(new ResetCommand());
         add(new SayCommand());
@@ -63,6 +62,8 @@ public class Commands extends System<Commands> {
         add(new SaveMapCommand());
         add(new ModulesCommand());
         add(new BindsCommand());
+        add(new GiveCommand());
+        add(new NameHistoryCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }

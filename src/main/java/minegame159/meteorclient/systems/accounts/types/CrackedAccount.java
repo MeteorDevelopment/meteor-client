@@ -27,7 +27,7 @@ public class CrackedAccount extends Account<CrackedAccount> {
     public boolean fetchHead() {
         try {
             ProfileResponse response = HttpUtils.get("https://api.mojang.com/users/profiles/minecraft/" + cache.username, ProfileResponse.class);
-            return cache.makeHead("https://crafatar.com/avatars/" + response.getId() + "?size=8&overlay&default=MHF_Steve");
+            return cache.makeHead("https://www.mc-heads.net/avatar/" + response.getId() + "/8");
         } catch (Exception e) {
             return cache.makeHead("steve");
         }

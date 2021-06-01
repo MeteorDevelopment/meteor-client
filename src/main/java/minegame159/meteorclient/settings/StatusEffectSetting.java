@@ -16,8 +16,8 @@ import net.minecraft.util.registry.Registry;
 import java.util.function.Consumer;
 
 public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
-    public StatusEffectSetting(String name, String description, Object2IntMap<StatusEffect> defaultValue, Consumer<Object2IntMap<StatusEffect>> onChanged, Consumer<Setting<Object2IntMap<StatusEffect>>> onModuleActivated) {
-        super(name, description, defaultValue, onChanged, onModuleActivated);
+    public StatusEffectSetting(String name, String description, Object2IntMap<StatusEffect> defaultValue, Consumer<Object2IntMap<StatusEffect>> onChanged, Consumer<Setting<Object2IntMap<StatusEffect>>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
@@ -83,6 +83,7 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
         private Object2IntMap<StatusEffect> defaultValue;
         private Consumer<Object2IntMap<StatusEffect>> onChanged;
         private Consumer<Setting<Object2IntMap<StatusEffect>>> onModuleActivated;
+        private IVisible visible;
 
         public Builder name(String name) {
             this.name = name;
@@ -109,8 +110,13 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
             return this;
         }
 
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
         public StatusEffectSetting build() {
-            return new StatusEffectSetting(name, description, defaultValue, onChanged, onModuleActivated);
+            return new StatusEffectSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

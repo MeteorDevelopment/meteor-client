@@ -11,8 +11,8 @@ import minegame159.meteorclient.systems.modules.render.*;
 import minegame159.meteorclient.systems.modules.world.Ambience;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
@@ -20,7 +20,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,8 +35,6 @@ public abstract class WorldRendererMixin {
     @Shadow protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
     @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
-
-    @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
     private void onLoadEntityOutlineShader(CallbackInfo info) {
@@ -81,18 +78,21 @@ public abstract class WorldRendererMixin {
         if (vertexConsumers == Outlines.vertexConsumerProvider) return;
 
         ESP esp = Modules.get().get(ESP.class);
-        if (!esp.isActive() || !esp.isOutline()) return;
 
         Color color = esp.getOutlineColor(entity);
 
-        if (color != null) {
-            Framebuffer fbo = this.entityOutlinesFramebuffer;
+        if (esp.shouldDrawOutline(entity)) {
+            Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
 
+            Outlines.setUniform("width", esp.outlineWidth.get());
+            Outlines.setUniform("fillOpacity", esp.fillOpacity.get().floatValue() / 255f);
+            Outlines.setUniform("shapeMode", (float) esp.shapeMode.get().ordinal());
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
 
-            this.entityOutlinesFramebuffer = fbo;
+            this.entityOutlinesFramebuffer = prevBuffer;
         }
     }
     
@@ -115,33 +115,19 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
     private void onBlockBreakingInfo(int entityId, BlockPos pos, int stage, CallbackInfo ci) {
-        BreakIndicators bi = Modules.get().get(BreakIndicators.class);
-        if(!bi.isActive())
-            return;
-
-        if(!bi.multiple.get() && entityId != client.player.getEntityId())
-            return;
-
         if (0 <= stage && stage <= 8) {
             BlockBreakingInfo info = new BlockBreakingInfo(entityId, pos);
             info.setStage(stage);
-            bi.blocks.put(entityId, info);
+            BlockUtils.breakingBlocks.put(entityId, info);
 
-            if (bi.hideVanillaIndicators.get()) {
-                ci.cancel();
-            }
-
+            if (Modules.get().isActive(BreakIndicators.class)) ci.cancel();
         } else {
-            bi.blocks.remove(entityId);
+            BlockUtils.breakingBlocks.remove(entityId);
         }
     }
     @Inject(method = "removeBlockBreakingInfo", at = @At("TAIL"))
     private void onBlockBreakingInfoRemoval(BlockBreakingInfo info, CallbackInfo ci) {
-        BreakIndicators bi = Modules.get().get(BreakIndicators.class);
-        if(!bi.isActive())
-            return;
-
-        bi.blocks.values().removeIf(info::equals);
+        BlockUtils.breakingBlocks.values().removeIf(info::equals);
     }
 
     // Break Indicators end

@@ -9,13 +9,13 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.Target;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
@@ -76,17 +76,11 @@ public class Tracers extends Module {
             .build()
     );
 
-    public final Setting<Boolean> useNameColor = sgColors.add(new BoolSetting.Builder()
-            .name("use-name-color")
-            .description("Uses players displayname color for the tracer color (good for minigames).")
-            .defaultValue(false)
-            .build()
-    );
-
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-colors")
             .description("The player's color.")
             .defaultValue(new SettingColor(205, 205, 205, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -94,6 +88,7 @@ public class Tracers extends Module {
             .name("animals-color")
             .description("The animal's color.")
             .defaultValue(new SettingColor(145, 255, 145, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -101,6 +96,7 @@ public class Tracers extends Module {
             .name("water-animals-color")
             .description("The water animal's color.")
             .defaultValue(new SettingColor(145, 145, 255, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -108,6 +104,7 @@ public class Tracers extends Module {
             .name("monsters-color")
             .description("The monster's color.")
             .defaultValue(new SettingColor(255, 145, 145, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -115,6 +112,7 @@ public class Tracers extends Module {
             .name("ambient-color")
             .description("The ambient color.")
             .defaultValue(new SettingColor(75, 75, 75, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -122,6 +120,7 @@ public class Tracers extends Module {
             .name("misc-color")
             .description("The misc color.")
             .defaultValue(new SettingColor(145, 145, 145, 127))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -137,7 +136,6 @@ public class Tracers extends Module {
         count = 0;
         for (Entity entity : mc.world.getEntities()) {
             if (mc.player.distanceTo(entity) > maxDist.get()
-                    || (entity instanceof PlayerEntity && Friends.get().get(((PlayerEntity) entity)) != null && !Friends.get().show((PlayerEntity) entity))
                     || (!Modules.get().isActive(Freecam.class) && entity == mc.player)
                     || !entities.get().getBoolean(entity.getType())
                     || (!showInvis.get() && entity.isInvisible())
@@ -146,22 +144,19 @@ public class Tracers extends Module {
 
             Color color;
 
-            if (!distance.get()
-                    || !(entity instanceof PlayerEntity)
-                    || Friends.get().contains(Friends.get().get((PlayerEntity) entity))) {
-                color = EntityUtils.getEntityColor(
-                        entity,
-                        playersColor.get(),
-                        animalsColor.get(),
-                        waterAnimalsColor.get(),
-                        monstersColor.get(),
-                        ambientColor.get(),
-                        miscColor.get(),
-                        useNameColor.get()
-                );
-            }
-            else {
+            if (distance.get() && entity instanceof PlayerEntity) {
                 color = getColorFromDistance((PlayerEntity) entity);
+            } else if (entity instanceof PlayerEntity) {
+                color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+            } else {
+                switch (entity.getType().getSpawnGroup()) {
+                    case CREATURE:          color = animalsColor.get(); break;
+                    case WATER_AMBIENT:
+                    case WATER_CREATURE:    color = waterAnimalsColor.get(); break;
+                    case MONSTER:           color = monstersColor.get(); break;
+                    case AMBIENT:           color = ambientColor.get(); break;
+                    default:                color = miscColor.get(); break;
+                }
             }
 
             RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get());

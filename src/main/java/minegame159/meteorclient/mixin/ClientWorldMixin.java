@@ -9,9 +9,8 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.Search;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.systems.modules.world.Ambience;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.render.SkyProperties;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -21,8 +20,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(ClientWorld.class)
 public class ClientWorldMixin {
@@ -39,12 +40,6 @@ public class ClientWorldMixin {
     @Inject(method = "finishRemovingEntity", at = @At("TAIL"))
     private void onFinishRemovingEntity(Entity entity, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(EntityRemovedEvent.get(entity));
-    }
-
-    @Inject(method = "setBlockStateWithoutNeighborUpdates", at = @At("TAIL"))
-    private void onSetBlockStateWithoutNeighborUpdates(BlockPos blockPos, BlockState blockState, CallbackInfo info) {
-        Search search = Modules.get().get(Search.class);
-        if (search.isActive()) search.onBlockUpdate(blockPos, blockState);
     }
 
     /**
@@ -81,5 +76,10 @@ public class ClientWorldMixin {
         if (ambience.isActive() && ambience.changeCloudColor.get()) {
             info.setReturnValue(ambience.cloudColor.get().getVec3d());
         }
+    }
+
+    @ModifyArgs(method = "doRandomBlockDisplayTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;randomBlockDisplayTick(IIIILjava/util/Random;ZLnet/minecraft/util/math/BlockPos$Mutable;)V"))
+    private void doRandomBlockDisplayTicks(Args args) {
+        if (Modules.get().get(NoRender.class).noBarrierInvis()) args.set(5 , true);
     }
 }

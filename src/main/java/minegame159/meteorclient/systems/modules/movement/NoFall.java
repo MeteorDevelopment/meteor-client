@@ -16,6 +16,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.EquipmentSlot;
@@ -79,8 +80,17 @@ public class NoFall extends Module {
             .build()
     );
 
+    private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
+            .name("anchor")
+            .description("Centers the player and reduces movement when using bucket mode.")
+            .defaultValue(true)
+            .build()
+    );
+
     private boolean placedWater;
+    private boolean centeredPlayer;
     private int fallHeightBaritone;
+    private double x, z;
 
     public NoFall() {
         super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
@@ -93,6 +103,7 @@ public class NoFall extends Module {
             BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
         }
         placedWater = false;
+        centeredPlayer = false;
     }
 
     @Override
@@ -148,10 +159,21 @@ public class NoFall extends Module {
                 if (slot != -1 && mc.player.getBlockState().getFluidState().getFluid() == Fluids.WATER) {
                     useBucket(slot, false);
                 }
+
+                centeredPlayer = false;
             }
             else if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 // Place water
                 int slot = InvUtils.findItemInHotbar(Items.WATER_BUCKET);
+
+                if (anchor.get()) {
+                    if (!centeredPlayer || x != mc.player.getX() || z != mc.player.getZ()) {
+                        PlayerUtils.centerPlayer();
+                        x = mc.player.getX();
+                        z = mc.player.getZ();
+                        centeredPlayer = true;
+                    }
+                }
 
                 if (slot != -1) {
                     BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));

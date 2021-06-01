@@ -15,7 +15,6 @@ import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.world.Timer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -123,25 +122,25 @@ public class Burrow extends Module {
     @Override
     public void onActivate() {
         if (!mc.world.getBlockState(mc.player.getBlockPos()).getMaterial().isReplaceable()) {
-            ChatUtils.moduleError(this, "Already burrowed, disabling.");
+            error("Already burrowed, disabling.");
             toggle();
             return;
         }
 
-        if (!PlayerUtils.isInHole() && onlyInHole.get()) {
-            ChatUtils.moduleError(this, "Not in a hole, disabling.");
+        if (!PlayerUtils.isInHole(false) && onlyInHole.get()) {
+            error("Not in a hole, disabling.");
             toggle();
             return;
         }
 
         if (!checkHead()) {
-            ChatUtils.moduleError(this, "Not enough headroom to burrow, disabling.");
+            error("Not enough headroom to burrow, disabling.");
             toggle();
             return;
         }
 
         if (!checkInventory()) {
-            ChatUtils.moduleError(this, "No burrow block found, disabling.");
+            error("No burrow block found, disabling.");
             toggle();
             return;
         }
@@ -156,7 +155,7 @@ public class Burrow extends Module {
             if (instant.get()) shouldBurrow = true;
             else mc.player.jump();
         } else {
-            ChatUtils.moduleInfo(this, "Waiting for manual jump.");
+            info("Waiting for manual jump.");
         }
     }
 
@@ -172,37 +171,42 @@ public class Burrow extends Module {
 
         if (shouldBurrow) {
             if (!checkInventory()) return;
-
-            if (center.get()) PlayerUtils.centerPlayer();
-
-            if (instant.get()) {
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1, mc.player.getZ(), true));
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
+            if (!mc.player.isOnGround()) {
+                toggle();
+                return;
             }
 
-            mc.player.inventory.selectedSlot = slot;
-
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::placeBlock);
-            else placeBlock();
-
-            mc.player.inventory.selectedSlot = prevSlot;
-
-            if (instant.get()) {
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
-            } else {
-                mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
-            }
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
+            else burrow();
 
             toggle();
         }
     }
 
-    private void placeBlock() {
+    private void burrow() {
+        if (center.get()) PlayerUtils.centerPlayer();
+
+        if (instant.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
+        }
+
+        mc.player.inventory.selectedSlot = slot;
+
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
-        mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+        mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+
+        mc.player.inventory.selectedSlot = prevSlot;
+
+        if (instant.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
+        } else {
+            mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
+        }
     }
+
 
     @EventHandler
     private void onKey(KeyEvent event) {

@@ -7,7 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.NameProtect;
+import minegame159.meteorclient.systems.modules.misc.NameProtect;
 import minegame159.meteorclient.systems.proxies.Proxies;
 import minegame159.meteorclient.systems.proxies.Proxy;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -66,7 +66,7 @@ public class MultiplayerScreenMixin extends Screen {
         Proxy proxy = Proxies.get().getEnabled();
 
         String left = proxy != null ? "Using proxy " : "Not using a proxy";
-        String right = proxy != null ? proxy.ip + ":" + proxy.port : null;
+        String right = proxy != null ? "(" + proxy.name + ") " + proxy.ip + ":" + proxy.port : null;
 
         textRenderer.drawWithShadow(matrices, left, x, y, textColor1);
         if (right != null) textRenderer.drawWithShadow(matrices, right, x + textRenderer.getWidth(left), y, textColor2);

@@ -19,7 +19,6 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
@@ -90,7 +89,7 @@ public class MiddleClickExtra extends Module {
         InvUtils.FindItemResult result = InvUtils.findItemWithCount(mode.get().item);
 
         if (result.slot == -1 || result.slot > 8) {
-            if (notify.get()) ChatUtils.moduleWarning(this, "Unable to find specified item.");
+            if (notify.get()) warning("Unable to find specified item.");
             return;
         }
 

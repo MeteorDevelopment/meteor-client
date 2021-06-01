@@ -6,21 +6,19 @@
 package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.misc.IGetter;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import minegame159.meteorclient.utils.misc.Lazy;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
-public abstract class Setting<T> implements Lazy<T>, ISerializable<T> {
+public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
 
     public final String name, title, description;
@@ -30,17 +28,20 @@ public abstract class Setting<T> implements Lazy<T>, ISerializable<T> {
 
     private final Consumer<T> onChanged;
     public final Consumer<Setting<T>> onModuleActivated;
+    private final IVisible visible;
 
     public Module module;
+    public boolean lastWasVisible;
 
-    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated) {
+    public Setting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         this.name = name;
-        this.title = Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+        this.title = Utils.nameToTitle(name);
         this.description = description;
         this.defaultValue = defaultValue;
         reset(false);
         this.onChanged = onChanged;
         this.onModuleActivated = onModuleActivated;
+        this.visible = visible;
     }
 
     @Override
@@ -59,8 +60,13 @@ public abstract class Setting<T> implements Lazy<T>, ISerializable<T> {
         value = defaultValue;
         if (callbacks) changed();
     }
+
     public void reset() {
         reset(true);
+    }
+
+    public T getDefaultValue() {
+        return defaultValue;
     }
 
     public boolean parse(String str) {
@@ -82,6 +88,10 @@ public abstract class Setting<T> implements Lazy<T>, ISerializable<T> {
 
     public void onActivated() {
         if (onModuleActivated != null) onModuleActivated.accept(this);
+    }
+
+    public boolean isVisible() {
+        return visible == null || visible.isVisible();
     }
 
     protected abstract T parseImpl(String str);

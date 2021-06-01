@@ -17,9 +17,9 @@ import minegame159.meteorclient.utils.Utils;
 
 public class AntiVoid extends Module {
 
-    private final SettingGroup sgDefault = settings.getDefaultGroup();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Mode> mode = sgDefault.add(new EnumSetting.Builder<Mode>()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
             .description("The method to prevent you from falling into the void.")
             .defaultValue(Mode.Jump)
@@ -40,7 +40,9 @@ public class AntiVoid extends Module {
 
     @Override
     public void onDeactivate() {
-        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate()) Modules.get().get(Flight.class).toggle();
+        if (!wasFlightEnabled && mode.get() == Mode.Flight && Utils.canUpdate() && Modules.get().isActive(Flight.class)) {
+            Modules.get().get(Flight.class).toggle();
+        }
     }
 
     @EventHandler
