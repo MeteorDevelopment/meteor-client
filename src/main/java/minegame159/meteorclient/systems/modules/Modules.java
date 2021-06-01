@@ -364,7 +364,6 @@ public class Modules extends System<Modules> {
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
-        add(new AutoLog());
         add(new AutoTotem());
         add(new AutoTrap());
         add(new AutoWeapon());
@@ -521,6 +520,7 @@ public class Modules extends System<Modules> {
         add(new Announcer());
         add(new AntiPacketKick());
         add(new AutoClicker());
+        add(new AutoLog());
         add(new AutoReconnect());
         add(new AutoRespawn());
         add(new BetterChat());
