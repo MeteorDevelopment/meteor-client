@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.systems.modules.player;
+package minegame159.meteorclient.systems.modules.misc;
 
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -17,7 +17,7 @@ public class NameProtect extends Module {
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
             .name("name")
             .description("Name to be replaced with.")
-            .defaultValue("squidoodly")
+            .defaultValue("seasnail")
             .build()
     );
 

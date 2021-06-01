@@ -58,6 +58,7 @@ public class Commands extends System<Commands> {
         add(new SwarmCommand());
         add(new ToggleCommand());
         add(new SettingCommand());
+        add(new SpectateCommand());
         add(new GamemodeCommand());
         add(new SaveMapCommand());
         add(new ModulesCommand());

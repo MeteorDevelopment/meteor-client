@@ -84,13 +84,6 @@ public class ESP extends Module {
             .build()
     );
 
-    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
-            .name("show-invisible")
-            .description("Shows invisibile entities.")
-            .defaultValue(true)
-            .build()
-    );
-
     // Colors
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()

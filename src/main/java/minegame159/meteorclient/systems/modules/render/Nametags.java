@@ -20,7 +20,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.NameProtect;
+import minegame159.meteorclient.systems.modules.misc.NameProtect;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.misc.MeteorPlayers;
@@ -366,7 +366,7 @@ public class Nametags extends Module {
         String pingText = " [" + ping + "ms]";
 
         // Distance
-        double dist = Math.round(EntityUtils.distanceToCamera(player) * 10.0) / 10.0;
+        double dist = Math.round(PlayerUtils.distanceToCamera(player) * 10.0) / 10.0;
         String distText = " " + dist + "m";
 
         // Calc widths

@@ -16,7 +16,7 @@ import java.util.List;
 
 public class EnchListSettingScreen extends LeftRightListSettingScreen<Enchantment> {
     public EnchListSettingScreen(GuiTheme theme, Setting<List<Enchantment>> setting) {
-        super(theme, "Select items", setting, Registry.ENCHANTMENT);
+        super(theme, "Select items", setting, setting.get(), Registry.ENCHANTMENT);
     }
 
     @Override

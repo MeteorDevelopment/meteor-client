@@ -39,7 +39,6 @@ import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.world.BlockIterator;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
@@ -104,7 +103,6 @@ public class MeteorClient implements ClientModInitializer {
         Blur.init();
         Tabs.init();
         GuiThemes.init();
-        BlockUtils.init();
         Fonts.init();
 
         // Register categories

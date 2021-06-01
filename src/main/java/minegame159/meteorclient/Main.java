@@ -59,7 +59,7 @@ public class Main {
         }
     }
 
-    private static void openUrl(String url) {
+    public static void openUrl(String url) {
         String os = System.getProperty("os.name").toLowerCase();
 
         try {

@@ -9,6 +9,7 @@ import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -32,6 +33,13 @@ public class LookingAtHud extends DoubleTextHudElement {
             .build()
     );
 
+    private final Setting<Boolean> waterLogged = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-waterlogged-status")
+        .description("Displays if a block is waterlogged or not")
+        .defaultValue(true)
+        .build()
+    );
+
     public LookingAtHud(HUD hud) {
         super(hud, "looking-at", "Displays what entity or block you are looking at.", "Looking At: ");
     }
@@ -43,8 +51,11 @@ public class LookingAtHud extends DoubleTextHudElement {
         if (mc.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             String name = mc.world.getBlockState(((BlockHitResult) mc.crosshairTarget).getBlockPos()).getBlock().getName().getString();
             BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+            String result = blockPosition.get() ? String.format("%s [%d, %d, %d]", name, pos.getX(), pos.getY(), pos.getZ()) : name;
 
-            return blockPosition.get() ? String.format("%s [%d, %d, %d]", name, pos.getX(), pos.getY(), pos.getZ()) : name;
+            if(waterLogged.get()) result = blockPosition.get() ? String.format("%s %s[%d, %d, %d]", name, mc.world.getFluidState(pos).isIn(FluidTags.WATER) ? "(Waterlogged) " : "", pos.getX(), pos.getY(), pos.getZ()) : name;
+
+            return result;
         }
         else if (mc.crosshairTarget.getType() == HitResult.Type.ENTITY) {
             String name = ((EntityHitResult) mc.crosshairTarget).getEntity().getDisplayName().getString();
