@@ -127,7 +127,7 @@ public class Speed extends Module {
 
         Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
 
-        if(edgeJump.get())
+        if(edgeJump.get()&&mc.player.isOnGround())
             mc.player.jump();
 
         currentMode.onMove(event);
