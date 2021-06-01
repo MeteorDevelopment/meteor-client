@@ -6,7 +6,6 @@
 package minegame159.meteorclient.systems.modules.misc;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
@@ -15,13 +14,11 @@ import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.EntityTypeListSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.entity.Entity;
@@ -39,9 +36,14 @@ import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class Notifier extends Module {
 
+    public enum Event {
+        Spawn,
+        Despawn,
+        Both
+    }
+
     private final SettingGroup sgTotemPops = settings.createGroup("Totem Pops");
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
-    private final SettingGroup sgEntityLogger = settings.createGroup("Entity Logger");
 
     // Totem Pops
 
@@ -82,6 +84,20 @@ public class Notifier extends Module {
             .build()
     );
 
+    private final Setting<Event> event = sgVisualRange.add(new EnumSetting.Builder<Event>()
+            .name("event")
+            .description("When to log the entities.")
+            .defaultValue(Event.Both)
+            .build()
+    );
+
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
+            .name("entities")
+            .description("Which entities to nofity about.")
+            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+            .build()
+    );
+
     private final Setting<Boolean> visualRangeIgnoreFriends = sgVisualRange.add(new BoolSetting.Builder()
             .name("ignore-friends")
             .description("Ignores friends.")
@@ -93,15 +109,6 @@ public class Notifier extends Module {
             .name("ignore-fake-players")
             .description("Ignores fake players.")
             .defaultValue(true)
-            .build()
-    );
-
-    // Entity Logger
-
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntityLogger.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Select specific entities.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -120,14 +127,14 @@ public class Notifier extends Module {
     private void onEntityAdded(EntityAddedEvent event) {
         Entity entity = event.entity;
 
-        if (entity.equals(mc.player)) return;
+        if (entity.equals(mc.player) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Despawn) return;
 
-        if (visualRange.get() && entity instanceof PlayerEntity) {
-            if (!entity.equals(mc.player) && (!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
+        if (entity instanceof PlayerEntity) {
+            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
                 ChatUtils.sendMsg(event.entity.getEntityId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
             }
         }
-        else if (entities.get().getBoolean(event.entity.getType())) {
+        else {
             MutableText text = new LiteralText(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
             text.append(new LiteralText(" has spawned at ").formatted(Formatting.GRAY));
             text.append(formatCoords(event.entity.getPos()));
@@ -140,10 +147,18 @@ public class Notifier extends Module {
     private void onEntityRemoved(EntityRemovedEvent event) {
         Entity entity = event.entity;
 
-        if (visualRange.get() && entity instanceof PlayerEntity) {
-            if (!entity.equals(mc.player) && (!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
+        if (entity.equals(mc.player) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Spawn) return;
+
+        if (entity instanceof PlayerEntity) {
+            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
                 ChatUtils.sendMsg(event.entity.getEntityId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
             }
+        } else {
+            MutableText text = new LiteralText(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
+            text.append(new LiteralText(" has despawned at ").formatted(Formatting.GRAY));
+            text.append(formatCoords(event.entity.getPos()));
+            text.append(new LiteralText(".").formatted(Formatting.GRAY));
+            info(text);
         }
     }
 
