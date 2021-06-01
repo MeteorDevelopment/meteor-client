@@ -11,6 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.ReceiveMessageEvent;
 import minegame159.meteorclient.events.game.SendMessageEvent;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
+import minegame159.meteorclient.mixininterface.IChatHud;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.commands.commands.SayCommand;
@@ -22,6 +23,8 @@ import net.minecraft.client.gui.hud.ChatHudLine;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,6 +44,13 @@ public class BetterChat extends Module {
     private final Setting<Boolean> fancy = sgGeneral.add(new BoolSetting.Builder()
             .name("fancy-chat")
             .description("Makes your messages ғᴀɴᴄʏ!")
+            .defaultValue(false)
+            .build()
+    );
+
+    private final Setting<Boolean> timestamps = sgGeneral.add(new BoolSetting.Builder()
+            .name("timestamps")
+            .description("Adds client side time stamps to the beginning of chat messages.")
             .defaultValue(false)
             .build()
     );
@@ -157,34 +167,46 @@ public class BetterChat extends Module {
             .build()
     );
 
-    private static final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
+    private final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
+    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
-    static {
+    public BetterChat() {
+        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
+
         String[] a = "abcdefghijklmnopqrstuvwxyz".split("");
         String[] b = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴩqʀꜱᴛᴜᴠᴡxyᴢ".split("");
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
     }
 
-    public BetterChat() {
-        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
-    }
-
     @EventHandler
     private void onMessageRecieve(ReceiveMessageEvent event) {
-        if (!antiSpam.get()) return;
-
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
 
-        for (int i = 0; i < antiSpamDepth.get(); i++) {
-            Text antiSpammed = appendAntiSpam(event.message, i);
-            if (antiSpammed != null) {
-                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
-                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
-                ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(antiSpammed, event.id);
-                event.cancel();
+        Text message = event.message;
+
+        if (timestamps.get()) {
+            Matcher matcher = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)").matcher(message.getString());
+            if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
+
+            Text timestamp = new LiteralText("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
+
+            message = new LiteralText("").append(timestamp).append(message);
+        }
+
+        if (antiSpam.get()) {
+            for (int i = 0; i < antiSpamDepth.get(); i++) {
+                Text antiSpammed = appendAntiSpam(message, i);
+                if (antiSpammed != null) {
+                    message = antiSpammed;
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
+                }
             }
         }
+
+        event.cancel();
+        ((IChatHud) mc.inGameHud.getChatHud()).add(message, event.id, mc.inGameHud.getTicks(), false);
     }
 
     private Text appendAntiSpam(Text text, int index) {
@@ -202,8 +224,6 @@ public class BetterChat extends Module {
 
         String oldMessage = parsed.getString();
         String newMessage = text.getString();
-
-        if (newMessage.startsWith("[Meteor] ") || newMessage.startsWith("[Baritone] ")) return null;
 
         if (oldMessage.equals(newMessage)) {
             return parsed.append(new LiteralText(" (2)").formatted(Formatting.GRAY));
