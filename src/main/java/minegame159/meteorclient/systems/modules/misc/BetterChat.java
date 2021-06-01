@@ -8,8 +8,8 @@ package minegame159.meteorclient.systems.modules.misc;
 import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.entity.player.ReceiveMessageEvent;
-import minegame159.meteorclient.events.entity.player.SendMessageEvent;
+import minegame159.meteorclient.events.game.ReceiveMessageEvent;
+import minegame159.meteorclient.events.game.SendMessageEvent;
 import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.commands.Commands;
@@ -177,15 +177,19 @@ public class BetterChat extends Module {
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
 
         for (int i = 0; i < antiSpamDepth.get(); i++) {
-            if (antiSpamCheckMsg(event.message, event.id, i)) {
+            Text antiSpammed = appendAntiSpam(event.message, i);
+            if (antiSpammed != null) {
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(antiSpammed, event.id);
                 event.cancel();
             }
         }
     }
 
-    private boolean antiSpamCheckMsg(Text text, int id, int index) {
+    private Text appendAntiSpam(Text text, int index) {
         List<ChatHudLine<OrderedText>> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
-        if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return false;
+        if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return null;
 
         ChatHudLine<OrderedText> visibleMessage = visibleMessages.get(index);
 
@@ -199,38 +203,28 @@ public class BetterChat extends Module {
         String oldMessage = parsed.getString();
         String newMessage = text.getString();
 
-        if (newMessage.startsWith("[Meteor] ") || newMessage.startsWith("[Baritone] ")) return false;
+        if (newMessage.startsWith("[Meteor] ") || newMessage.startsWith("[Baritone] ")) return null;
 
         if (oldMessage.equals(newMessage)) {
-            parsed.append(new LiteralText(" (2)").formatted(Formatting.GRAY));
-
-            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(index);
-            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(index);
-            ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(parsed, id);
-            return true;
+            return parsed.append(new LiteralText(" (2)").formatted(Formatting.GRAY));
         }
         else {
             Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(oldMessage);
 
-            if (matcher.matches()) {
-                String group = matcher.group(matcher.groupCount());
-                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+            if (!matcher.matches()) return null;
 
-                String counter = " (" + number + ")";
+            String group = matcher.group(matcher.groupCount());
+            int number = Integer.parseInt(group.substring(1, group.length() - 1));
 
-                if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
-                    for (int i = 0; i < counter.length(); i++) parsed.getSiblings().remove(parsed.getSiblings().size() - 1);
-                    parsed.append(new LiteralText( " (" + (number + 1) + ")").formatted(Formatting.GRAY));
+            String counter = " (" + number + ")";
 
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(index);
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(index);
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(parsed, id);
-                    return true;
-                }
+            if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
+                for (int i = 0; i < counter.length(); i++) parsed.getSiblings().remove(parsed.getSiblings().size() - 1);
+                return parsed.append(new LiteralText( " (" + (number + 1) + ")").formatted(Formatting.GRAY));
             }
         }
 
-        return false;
+        return null;
     }
 
     @EventHandler

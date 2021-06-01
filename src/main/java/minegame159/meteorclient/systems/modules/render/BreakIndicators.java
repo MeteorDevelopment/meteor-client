@@ -60,14 +60,11 @@ public class BreakIndicators extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        ClientPlayerInteractionManagerAccessor iam;
-        boolean smooth;
-
         Map<Integer, BlockBreakingInfo> blocks = BlockUtils.breakingBlocks;
 
-        iam = (ClientPlayerInteractionManagerAccessor) mc.interactionManager;
-        BlockPos currentPos = iam.getCurrentBreakingBlockPos();
-        smooth = currentPos != null && iam.getBreakingProgress() > 0;
+        ClientPlayerInteractionManagerAccessor interactionManager = (ClientPlayerInteractionManagerAccessor) mc.interactionManager;
+        BlockPos currentPos = interactionManager.getCurrentBreakingBlockPos();
+        boolean smooth = currentPos != null && interactionManager.getBreakingProgress() > 0;
 
         if (smooth && blocks.values().stream().noneMatch(info -> info.getPos().equals(currentPos))) {
             blocks.put(mc.player.getEntityId(), new BlockBreakingInfo(mc.player.getEntityId(), currentPos));
@@ -84,8 +81,8 @@ public class BreakIndicators extends Module {
             Box box = orig;
 
             double shrinkFactor;
-            if (smooth && iam.getCurrentBreakingBlockPos().equals(pos)) {
-                shrinkFactor = 1d - iam.getBreakingProgress();
+            if (smooth && interactionManager.getCurrentBreakingBlockPos().equals(pos)) {
+                shrinkFactor = 1d - interactionManager.getBreakingProgress();
             } else {
                 shrinkFactor = (9 - (stage + 1)) / 9d;
             }
