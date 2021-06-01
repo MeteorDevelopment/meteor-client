@@ -10,8 +10,6 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 
-import static minegame159.meteorclient.utils.Utils.mc;
-
 public class TabScreen extends WidgetScreen {
     public final Tab tab;
 
