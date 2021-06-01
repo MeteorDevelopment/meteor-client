@@ -5,22 +5,25 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
-import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.settings.BoolSetting;
+import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.Freecam;
 
 public class Sneak extends Module {
+    public enum Mode {
+        Packet,
+        Vanilla
+    }
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> packet = sgGeneral.add(new BoolSetting.Builder()
-            .name("packet")
-            .description("Sneaks using packets")
-            .defaultValue(false)
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+            .name("mode")
+            .description("Which method to sneak.")
+            .defaultValue(Mode.Vanilla)
             .build()
     );
 
@@ -28,22 +31,11 @@ public class Sneak extends Module {
         super (Categories.Movement, "sneak", "Sneaks for you");
     }
 
-    @Override
-    public void onDeactivate() {
-        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.RELEASE_SHIFT_KEY));
-        mc.options.keySneak.setPressed(false);
-        mc.player.setSneaking(false);
+    public boolean doPacket() {
+        return isActive() && !Modules.get().isActive(Freecam.class) && mode.get() == Mode.Packet;
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (packet.get()) {
-            if (mc.options.keySneak.isPressed()) mc.options.keySneak.setPressed(false);
-            mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.PRESS_SHIFT_KEY));
-        } else {
-            mc.options.keySneak.setPressed(true);
-        }
+    public boolean doVanilla() {
+        return isActive() && !Modules.get().isActive(Freecam.class) && mode.get() == Mode.Vanilla;
     }
-
-
 }

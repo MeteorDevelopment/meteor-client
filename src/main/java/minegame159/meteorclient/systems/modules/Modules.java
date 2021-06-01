@@ -443,7 +443,7 @@ public class Modules extends System<Modules> {
         add(new SafeWalk());
         add(new Scaffold());
         add(new Slippy());
-      add(new Sneak());
+        add(new Sneak());
         add(new Speed());
         add(new Spider());
         add(new Sprint());
