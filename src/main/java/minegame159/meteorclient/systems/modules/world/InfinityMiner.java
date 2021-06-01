@@ -17,7 +17,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.combat.AutoLog;
+import minegame159.meteorclient.systems.modules.misc.AutoLog;
 import minegame159.meteorclient.systems.modules.movement.GUIMove;
 import minegame159.meteorclient.systems.modules.movement.Jesus;
 import minegame159.meteorclient.systems.modules.movement.NoFall;

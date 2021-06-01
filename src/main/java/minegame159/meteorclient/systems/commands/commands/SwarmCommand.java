@@ -11,97 +11,284 @@ import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.systems.commands.arguments.ModuleArgumentType;
 import minegame159.meteorclient.systems.commands.arguments.PlayerArgumentType;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.misc.Swarm;
+import minegame159.meteorclient.systems.modules.misc.swarm.Swarm;
+import minegame159.meteorclient.systems.modules.misc.swarm.SwarmConnection;
+import minegame159.meteorclient.systems.modules.misc.swarm.SwarmWorker;
 import minegame159.meteorclient.systems.modules.world.InfinityMiner;
-import net.minecraft.client.MinecraftClient;
+import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.LiteralText;
 
 import java.util.Random;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class SwarmCommand extends Command {
+
+    private final static SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(new LiteralText("The swarm module must be active to use this command."));
+
     public SwarmCommand() {
-        super("swarm", "Sends commands to connected swarm accouns.");
+        super("swarm", "Sends commands to connected swarm workers.");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("close").executes(context -> {
-                    try {
-                        Swarm swarm = Modules.get().get(Swarm.class);
-                        if(swarm.isActive()) {
-                            swarm.closeAllServerConnections();
-                            swarm.currentMode = Swarm.Mode.Idle;
-                            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            if (Modules.get().isActive(Swarm.class))
-                                Modules.get().get(Swarm.class).toggle();
-                        }
-                    } catch (Exception ignored) {
-                    }
-                    return SINGLE_SUCCESS;
-                })
+        builder.then(literal("disconnect").executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                swarm.close();
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("join")
+                .then(argument("ip", StringArgumentType.string())
+                        .then(argument("port", IntegerArgumentType.integer(0, 65535))
+                                .executes(context -> {
+                                        Swarm swarm = Modules.get().get(Swarm.class);
+                                        if (!swarm.isActive()) swarm.toggle();
+
+                                        swarm.close();
+                                        swarm.mode.set(Swarm.Mode.Worker);
+                                        swarm.worker = new SwarmWorker(StringArgumentType.getString(context, "ip"), IntegerArgumentType.getInteger(context, "port"));
+
+                                        return SINGLE_SUCCESS;
+                                })
+                        )
+                )
         );
 
-        builder.then(literal("escape").executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.currentMode != Swarm.Mode.Queen) {
-                            swarm.closeAllServerConnections();
-                            if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                            swarm.currentMode = Swarm.Mode.Idle;
-                            Modules.get().get(Swarm.class).toggle();
-                        } else {
-                            info("You are the queen.");
+        builder.then(literal("connections").executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    if (swarm.host.getConnectionCount() > 0) {
+                        ChatUtils.info("--- Swarm Connections (highlight)(%s/%s)(default) ---", swarm.host.getConnectionCount(), swarm.host.getConnections().length);
+
+                        for (int i = 0; i < swarm.host.getConnections().length; i++) {
+                            SwarmConnection connection = swarm.host.getConnections()[i];
+                            if (connection != null) ChatUtils.info("(highlight)Worker %s(default): %s.", i, connection.getConnection());
                         }
                     }
-                    return SINGLE_SUCCESS;
-                })
-        );
+                    else {
+                        warning("No active connections");
+                    }
+                }
+                else if (swarm.isWorker()) {
+                    info("Connected to (highlight)%s", swarm.worker.getConnection());
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+
+            return SINGLE_SUCCESS;
+        }));
 
         builder.then(literal("follow").executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null && mc.player != null) {
-                        swarm.server.sendMessage(context.getInput() + " " + mc.player.getDisplayName().getString());
-                    }
-                    return SINGLE_SUCCESS;
-                }).then(argument("player", PlayerArgumentType.player()).executes(context -> {
-                    PlayerEntity playerEntity = PlayerArgumentType.getPlayer(context);
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
-                        swarm.server.sendMessage(context.getInput());
-                    } else {
-                        if (playerEntity != null) {
-                            BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getDisplayName().asString().equalsIgnoreCase(playerEntity.getDisplayName().asString()));
-                        }
-                    }
-                    return SINGLE_SUCCESS;
-                })
-                )
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput() + " " + mc.player.getEntityName());
+                }
+                else if (swarm.isWorker()) {
+                    error("The follow host command must be used by the host.");
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+
+            return SINGLE_SUCCESS;
+        }).then(argument("player", PlayerArgumentType.player()).executes(context -> {
+            PlayerEntity playerEntity = PlayerArgumentType.getPlayer(context);
+
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                }
+                else if (swarm.isWorker() && playerEntity != null) {
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getEntityName().equalsIgnoreCase(playerEntity.getEntityName()));
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+            return SINGLE_SUCCESS;
+        }))
         );
 
         builder.then(literal("goto")
                 .then(argument("x", IntegerArgumentType.integer())
                         .then(argument("z", IntegerArgumentType.integer()).executes(context -> {
-                                    int x = context.getArgument("x", Integer.class);
-                                    int z = context.getArgument("z", Integer.class);
+                            Swarm swarm = Modules.get().get(Swarm.class);
+                            if (swarm.isActive()) {
+                                if (swarm.isHost()) {
+                                    swarm.host.sendMessage(context.getInput());
+                                }
+                                else if (swarm.isWorker()) {
+                                    int x = IntegerArgumentType.getInteger(context, "x");
+                                    int z = IntegerArgumentType.getInteger(context, "z");
+
+                                    BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
+                                }
+                            }
+                            else {
+                                throw SWARM_NOT_ACTIVE.create();
+                            }
+                            return SINGLE_SUCCESS;
+                        }))
+                )
+        );
+
+        builder.then(literal("infinity-miner").executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                }
+                else if (swarm.isWorker()) {
+                    runInfinityMiner();
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+            return SINGLE_SUCCESS;
+        })
+        .then(argument("target", BlockStateArgumentType.blockState()).executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                }
+                else if (swarm.isWorker()) {
+                    Modules.get().get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
+                    runInfinityMiner();
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+            return SINGLE_SUCCESS;
+        })
+        .then(argument("repair", BlockStateArgumentType.blockState()).executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                }
+                else if (swarm.isWorker()) {
+                    Modules.get().get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
+                    Modules.get().get(InfinityMiner.class).repairBlock.set(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock());
+                    runInfinityMiner();
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+            return SINGLE_SUCCESS;
+        })))
+        .then(literal("logout").then(argument("logout", BoolArgumentType.bool()).executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                }
+                else if (swarm.isWorker()) {
+                    Modules.get().get(InfinityMiner.class).autoLogOut.set(BoolArgumentType.getBool(context, "logout"));
+                }
+            }
+            else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+            return SINGLE_SUCCESS;
+        })))
+        .then(literal("walkhome").then(argument("walkhome", BoolArgumentType.bool()).executes(context -> {
+            Swarm swarm = Modules.get().get(Swarm.class);
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                } else if (swarm.isWorker()) {
+                    Modules.get().get(InfinityMiner.class).autoWalkHome.set(BoolArgumentType.getBool(context, "walkhome"));
+                }
+            } else {
+                throw SWARM_NOT_ACTIVE.create();
+            }
+            return SINGLE_SUCCESS;
+        }))));
+
+        builder.then(literal("mine")
+                .then(argument("block", BlockStateArgumentType.blockState()).executes(context -> {
+                    Swarm swarm = Modules.get().get(Swarm.class);
+                    if (swarm.isActive()) {
+                        if (swarm.isHost()) {
+                            swarm.host.sendMessage(context.getInput());
+                        } else if (swarm.isWorker()) {
+                            swarm.worker.target = context.getArgument("block", BlockStateArgument.class).getBlockState().getBlock();
+                        }
+                    } else {
+                        throw SWARM_NOT_ACTIVE.create();
+                    }
+                    return SINGLE_SUCCESS;
+                }))
+        );
+
+        builder.then(literal("toggle")
+                .then(argument("module", ModuleArgumentType.module())
+                        .executes(context -> {
+                            Swarm swarm = Modules.get().get(Swarm.class);
+                            if (swarm.isActive()) {
+                                if (swarm.isHost()) {
+                                    swarm.host.sendMessage(context.getInput());
+                                } else if (swarm.isWorker()) {
+                                    Module module = ModuleArgumentType.getModule(context, "module");
+                                    module.toggle();
+                                }
+                            } else {
+                                throw SWARM_NOT_ACTIVE.create();
+                            }
+                            return SINGLE_SUCCESS;
+                        }).then(literal("on")
+                                .executes(context -> {
                                     Swarm swarm = Modules.get().get(Swarm.class);
                                     if (swarm.isActive()) {
-                                        if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
-                                            swarm.server.sendMessage(context.getInput());
-                                        } else if (swarm.currentMode != Swarm.Mode.Queen) {
-                                            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
+                                        if (swarm.isHost()) {
+                                            swarm.host.sendMessage(context.getInput());
+                                        } else if (swarm.isWorker()) {
+                                            Module m = ModuleArgumentType.getModule(context, "module");
+                                            if (!m.isActive()) m.toggle();
                                         }
+                                    } else {
+                                        throw SWARM_NOT_ACTIVE.create();
+                                    }
+                                    return SINGLE_SUCCESS;
+                                })).then(literal("off")
+                                .executes(context -> {
+                                    Swarm swarm = Modules.get().get(Swarm.class);
+                                    if (swarm.isActive()) {
+                                        if (swarm.isHost()) {
+                                            swarm.host.sendMessage(context.getInput());
+                                        } else if (swarm.isWorker()) {
+                                            Module m = ModuleArgumentType.getModule(context, "module");
+                                            if (m.isActive()) m.toggle();
+                                        }
+                                    } else {
+                                        throw SWARM_NOT_ACTIVE.create();
                                     }
                                     return SINGLE_SUCCESS;
                                 })
@@ -109,177 +296,56 @@ public class SwarmCommand extends Command {
                 )
         );
 
-        builder.then(literal("im").executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.currentMode == Swarm.Mode.Queen) {
-                            swarm.server.sendMessage(context.getInput());
-                        } else {
-                            runInfinityMiner();
-                        }
-                    }
-                    return SINGLE_SUCCESS;
-                }).then(argument("target", BlockStateArgumentType.blockState()).executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.currentMode == Swarm.Mode.Queen) {
-                            swarm.server.sendMessage(context.getInput());
-                        } else {
-                            Modules.get().get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
-                            runInfinityMiner();
-                        }
-                    }
-                    return SINGLE_SUCCESS;
-                }).then(argument("repair", BlockStateArgumentType.blockState()).executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.currentMode == Swarm.Mode.Queen) {
-                            swarm.server.sendMessage(context.getInput());
-                        } else {
-                            Modules.get().get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
-                            Modules.get().get(InfinityMiner.class).repairBlock.set(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock());
-                            runInfinityMiner();
-                        }
-                    }
-                    return SINGLE_SUCCESS;
-                })))
-                        .then(literal("logout").then(argument("autologout", BoolArgumentType.bool()).executes(context -> {
-                            Swarm swarm = Modules.get().get(Swarm.class);
-                            if (swarm.isActive()) {
-                                if (swarm.currentMode == Swarm.Mode.Queen) {
-                                    swarm.server.sendMessage(context.getInput());
-                                } else {
-                                    boolean bool = context.getArgument("autologout", Boolean.class);
-                                    InfinityMiner infinityMiner = Modules.get().get(InfinityMiner.class);
-                                    infinityMiner.autoLogOut.set(bool);
-                                }
-                            }
-                            return SINGLE_SUCCESS;
-                        })))
-                        .then(literal("walkhome").then(argument("walkhome", BoolArgumentType.bool()).executes(context -> {
-                            Swarm swarm = Modules.get().get(Swarm.class);
-                            if (swarm.isActive()) {
-                                if (swarm.currentMode == Swarm.Mode.Queen) {
-                                    swarm.server.sendMessage(context.getInput());
-                                } else {
-                                    boolean bool = context.getArgument("walkhome", Boolean.class);
-                                    InfinityMiner infinityMiner = Modules.get().get(InfinityMiner.class);
-                                    infinityMiner.autoWalkHome.set(bool);
-                                }
-                            }
-                            return SINGLE_SUCCESS;
-                        })))
-        );
-
-        builder.then(literal("mine")
-                .then(argument("block", BlockStateArgumentType.blockState())
-                        .executes(context -> {
-                            try {
-                                Swarm swarm = Modules.get().get(Swarm.class);
-                                if (swarm.isActive()) {
-                                    if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null)
-                                        swarm.server.sendMessage(context.getInput());
-                                    if (swarm.currentMode != Swarm.Mode.Queen) {
-                                        swarm.targetBlock = context.getArgument("block",BlockStateArgument.class).getBlockState();
-                                    } else error("Null block.");
-                                }
-                            } catch (Exception e) {
-                                error("Error in baritone command. " + e.getClass().getSimpleName());
-                            }
-                            return SINGLE_SUCCESS;
-                        })
-                )
-        );
-
-        builder.then(literal("module").then(argument("m", ModuleArgumentType.module()).then(argument("bool", BoolArgumentType.bool()).executes(context -> {
-            Swarm swarm = Modules.get().get(Swarm.class);
-            if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
-                swarm.server.sendMessage(context.getInput());
-            } else {
-                Module module = context.getArgument("m", Module.class);
-                if (module.isActive() != context.getArgument("bool", Boolean.class)) {
-                    module.toggle();
-                }
-            }
-            return SINGLE_SUCCESS;
-        }))));
-
-        builder.then(literal("queen").executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.server == null)
-                            swarm.runServer();
-                    }
-                    return SINGLE_SUCCESS;
-                })
-
-        );
-
-        builder.then(literal("release").executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
-                            swarm.server.sendMessage("s stop");
-                            swarm.server.closeAllClients();
-                        }
-                    }
-                    return SINGLE_SUCCESS;
-                })
-        );
-
         builder.then(literal("scatter").executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if(swarm.isActive()){
-                if(swarm.currentMode == Swarm.Mode.Queen && swarm.server != null){
-                    swarm.server.sendMessage(context.getInput());
-                }
-                else{
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                } else if (swarm.isWorker()) {
                     scatter(100);
                 }
+            } else {
+                throw SWARM_NOT_ACTIVE.create();
             }
             return SINGLE_SUCCESS;
         }).then(argument("radius", IntegerArgumentType.integer()).executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if(swarm.isActive()){
-                if(swarm.currentMode == Swarm.Mode.Queen && swarm.server != null){
-                    swarm.server.sendMessage(context.getInput());
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                } else if (swarm.isWorker()) {
+                    scatter(IntegerArgumentType.getInteger(context, "radius"));
                 }
-                else{
-                    scatter(context.getArgument("radius",Integer.class));
-                }
+            } else {
+                throw SWARM_NOT_ACTIVE.create();
             }
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("slave").executes(context -> {
-                    Swarm swarm = Modules.get().get(Swarm.class);
-                    if (swarm.isActive()) {
-                        if (swarm.client == null)
-                            swarm.runClient();
-                    }
-                    return SINGLE_SUCCESS;
-                })
-        );
-
         builder.then(literal("stop").executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if(swarm.isActive()) {
-                if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
-                    swarm.server.sendMessage(context.getInput());
-                } else {
-                    swarm.idle();
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                } else if (swarm.isWorker()) {
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                 }
+            } else {
+                throw SWARM_NOT_ACTIVE.create();
             }
             return SINGLE_SUCCESS;
         }));
 
         builder.then(literal("exec").then(argument("command", StringArgumentType.greedyString()).executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
-            if (swarm.currentMode == Swarm.Mode.Queen && swarm.server != null) {
-                swarm.server.sendMessage(context.getInput());
+            if (swarm.isActive()) {
+                if (swarm.isHost()) {
+                    swarm.host.sendMessage(context.getInput());
+                } else if (swarm.isWorker()) {
+                    mc.player.sendChatMessage(StringArgumentType.getString(context, "command"));
+                }
             } else {
-                String command = context.getArgument("command", String.class);
-                MinecraftClient.getInstance().player.sendChatMessage(command);
+                throw SWARM_NOT_ACTIVE.create();
             }
             return SINGLE_SUCCESS;
         })));
@@ -293,15 +359,12 @@ public class SwarmCommand extends Command {
     }
 
     private void scatter(int radius) {
-        if(mc.player != null) {
-            Random random = new Random();
-            double a = random.nextDouble() * 2 * Math.PI;
-            double r = radius * Math.sqrt(random.nextDouble());
-            double x = mc.player.getX() + r * Math.cos(a);
-            double z = mc.player.getZ() + r * Math.sin(a);
-            if(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing())
-                BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int)x,(int)z));
-        }
+        Random random = new Random();
+        double a = random.nextDouble() * 2 * Math.PI;
+        double r = radius * Math.sqrt(random.nextDouble());
+        double x = mc.player.getX() + r * Math.cos(a);
+        double z = mc.player.getZ() + r * Math.sin(a);
+        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
     }
 }

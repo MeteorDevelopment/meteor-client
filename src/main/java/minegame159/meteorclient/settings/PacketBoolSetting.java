@@ -5,41 +5,43 @@
 
 package minegame159.meteorclient.settings;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import minegame159.meteorclient.utils.network.PacketUtils;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.Packet;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Consumer;
 
-public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends Packet<?>>>> {
+public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> {
     private static List<String> suggestions;
 
-    public PacketBoolSetting(String name, String description, Object2BooleanMap<Class<? extends Packet<?>>> defaultValue, Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated, IVisible visible) {
+    public PacketBoolSetting(String name, String description, Set<Class<? extends Packet<?>>> defaultValue, Consumer<Set<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
-        value = new Object2BooleanArrayMap<>(defaultValue);
+        value = new ObjectOpenHashSet<>(defaultValue);
     }
 
     @Override
     public void reset(boolean callbacks) {
-        value = new Object2BooleanArrayMap<>(defaultValue);
+        value = new ObjectOpenHashSet<>(defaultValue);
         if (callbacks) changed();
     }
 
     @Override
-    protected Object2BooleanMap<Class<? extends Packet<?>>> parseImpl(String str) {
+    protected Set<Class<? extends Packet<?>>> parseImpl(String str) {
         String[] values = str.split(",");
-        Object2BooleanMap<Class<? extends Packet<?>>> packets = new Object2BooleanOpenHashMap<>(values.length);
+        Set<Class<? extends Packet<?>>> packets = new ObjectOpenHashSet<>(values.length);
 
         try {
             for (String value : values) {
                 Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
-                if (packet != null) packets.put(packet, true);
+                if (packet != null) packets.add(packet);
             }
         } catch (Exception ignored) {}
 
@@ -47,7 +49,7 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
     }
 
     @Override
-    protected boolean isValueValid(Object2BooleanMap<Class<? extends Packet<?>>> value) {
+    protected boolean isValueValid(Set<Class<? extends Packet<?>>> value) {
         return true;
     }
 
@@ -72,9 +74,9 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
     public CompoundTag toTag() {
         CompoundTag tag = saveGeneral();
 
-        CompoundTag valueTag = new CompoundTag();
-        for (Class<? extends Packet<?>> packet : get().keySet()) {
-            valueTag.putBoolean(PacketUtils.getName(packet), get().getBoolean(packet));
+        ListTag valueTag = new ListTag();
+        for (Class<? extends Packet<?>> packet : get()) {
+            valueTag.add(StringTag.of(PacketUtils.getName(packet)));
         }
         tag.put("value", valueTag);
 
@@ -82,13 +84,15 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
     }
 
     @Override
-    public Object2BooleanMap<Class<? extends Packet<?>>> fromTag(CompoundTag tag) {
+    public Set<Class<? extends Packet<?>>> fromTag(CompoundTag tag) {
         get().clear();
 
-        CompoundTag valueTag = tag.getCompound("value");
-        for (String key : valueTag.getKeys()) {
-            Class<? extends Packet<?>> packet = PacketUtils.getPacket(key);
-            if (packet != null) get().put(packet, valueTag.getBoolean(key));
+        Tag valueTag = tag.get("value");
+        if (valueTag instanceof ListTag) {
+            for (Tag t : (ListTag) valueTag) {
+                Class<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString());
+                if (packet != null) get().add(packet);
+            }
         }
 
         changed();
@@ -97,9 +101,9 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private Object2BooleanMap<Class<? extends Packet<?>>> defaultValue;
-        private Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged;
-        private Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated;
+        private Set<Class<? extends Packet<?>>> defaultValue;
+        private Consumer<Set<Class<? extends Packet<?>>>> onChanged;
+        private Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated;
         private IVisible visible;
 
         public Builder name(String name) {
@@ -112,17 +116,17 @@ public class PacketBoolSetting extends Setting<Object2BooleanMap<Class<? extends
             return this;
         }
 
-        public Builder defaultValue(Object2BooleanMap<Class<? extends Packet<?>>> defaultValue) {
+        public Builder defaultValue(Set<Class<? extends Packet<?>>> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<Object2BooleanMap<Class<? extends Packet<?>>>> onChanged) {
+        public Builder onChanged(Consumer<Set<Class<? extends Packet<?>>>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<Object2BooleanMap<Class<? extends Packet<?>>>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }

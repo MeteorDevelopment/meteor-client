@@ -9,6 +9,7 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.systems.modules.world.Ambience;
 import net.minecraft.client.render.SkyProperties;
 import net.minecraft.client.world.ClientWorld;
@@ -19,8 +20,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(ClientWorld.class)
 public class ClientWorldMixin {
@@ -73,5 +76,10 @@ public class ClientWorldMixin {
         if (ambience.isActive() && ambience.changeCloudColor.get()) {
             info.setReturnValue(ambience.cloudColor.get().getVec3d());
         }
+    }
+
+    @ModifyArgs(method = "doRandomBlockDisplayTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;randomBlockDisplayTick(IIIILjava/util/Random;ZLnet/minecraft/util/math/BlockPos$Mutable;)V"))
+    private void doRandomBlockDisplayTicks(Args args) {
+        if (Modules.get().get(NoRender.class).noBarrierInvis()) args.set(5 , true);
     }
 }

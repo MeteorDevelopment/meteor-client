@@ -1,12 +1,85 @@
 import java.util.jar.JarFile
 
+final packetRegistryClass = """
+    private static class PacketRegistry extends Registry<Class<? extends Packet<?>>> {
+        public PacketRegistry() {
+            super(RegistryKey.ofRegistry(new Identifier("meteor-client", "packets")), Lifecycle.stable());
+        }
+
+        @Nullable
+        @Override
+        public Identifier getId(Class<? extends Packet<?>> entry) {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryKey<Class<? extends Packet<?>>>> getKey(Class<? extends Packet<?>> entry) {
+            return Optional.empty();
+        }
+
+        @Override
+        public int getRawId(@Nullable Class<? extends Packet<?>> entry) {
+            return 0;
+        }
+
+        @Nullable
+        @Override
+        public Class<? extends Packet<?>> get(@Nullable RegistryKey<Class<? extends Packet<?>>> key) {
+            return null;
+        }
+
+        @Nullable
+        @Override
+        public Class<? extends Packet<?>> get(@Nullable Identifier id) {
+            return null;
+        }
+
+        @Override
+        protected Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
+            return null;
+        }
+
+        @Override
+        public Lifecycle getLifecycle() {
+            return null;
+        }
+
+        @Override
+        public Set<Identifier> getIds() {
+            return null;
+        }
+
+        @Override
+        public Set<Map.Entry<RegistryKey<Class<? extends Packet<?>>>, Class<? extends Packet<?>>>> getEntries() {
+            return null;
+        }
+
+        @Override
+        public boolean containsId(Identifier id) {
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public Class<? extends Packet<?>> get(int index) {
+            return null;
+        }
+
+        @NotNull
+        @Override
+        public Iterator<Class<? extends Packet<?>>> iterator() {
+            return Iterators.concat(S2C_PACKETS.keySet().iterator(), C2S_PACKETS.keySet().iterator());
+        }
+    }
+"""
+
 task generatePacketUtils() {
     doLast {
         // Get minecraft jar file
         def mc = ""
-        def dir = new File(".gradle/loom-cache/${project.minecraft_version}-projectmapped-net.fabricmc.yarn-${project.yarn_mappings}-v2")
+        def dir = new File(System.getProperty("user.home"), ".gradle/caches/fabric-loom/${project.minecraft_version}-mapped-net.fabricmc.yarn-${project.yarn_version}-v2")
         for (def file in dir.listFiles()) {
-            if (file.name.contains("minecraft") && file.name.contains("mapped") && file.name.endsWith((String) project.yarn_mappings + "-v2.jar")) {
+            if (file.name.contains("minecraft") && file.name.contains("mapped") && file.name.endsWith((String) project.yarn_version + "-v2.jar")) {
                 mc = file.absolutePath
                 break
             }
@@ -27,15 +100,21 @@ task generatePacketUtils() {
         writer << "package minegame159.meteorclient.utils.network;\n\n"
 
         //   Write imports
+        writer << "import com.google.common.collect.Iterators;\n"
+        writer << "import com.mojang.serialization.Lifecycle;\n"
         writer << "import net.minecraft.network.Packet;\n"
-        writer << "import java.util.Map;\n"
-        writer << "import java.util.HashMap;\n"
-        writer << "import java.util.Set;\n"
+        writer << "import net.minecraft.util.Identifier;\n"
+        writer << "import net.minecraft.util.registry.Registry;\n"
+        writer << "import net.minecraft.util.registry.RegistryKey;\n"
+        writer << "import org.jetbrains.annotations.NotNull;\n"
+        writer << "import org.jetbrains.annotations.Nullable;\n\n"
+        writer << "import java.util.*;\n"
 
         //   Write class
         writer << "\npublic class PacketUtils {\n"
 
         //     Write fields
+        writer << "    public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();\n\n"
         writer << "    private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();\n"
         writer << "    private static final Map<Class<? extends Packet<?>>, String> C2S_PACKETS = new HashMap<>();\n\n"
         writer << "    private static final Map<String, Class<? extends Packet<?>>> S2C_PACKETS_R = new HashMap<>();\n"
@@ -74,7 +153,10 @@ task generatePacketUtils() {
         //     Write getC2SPackets method
         writer << "    public static Set<Class<? extends Packet<?>>> getC2SPackets() {\n"
         writer << "        return C2S_PACKETS.keySet();\n"
-        writer << "    }\n"
+        writer << "    }\n\n"
+
+        // Write PacketRegistry class
+        writer << packetRegistryClass
 
         //   Write end class
         writer << "}\n"

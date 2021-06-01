@@ -11,27 +11,40 @@
 Minecraft fabric utility mod for the latest Minecraft version.  
 Join our [Discord](https://discord.gg/bBGQZvd).
 
-## Installation
-Follow guide at [meteorclient.com](https://meteorclient.com/info).
+## Usage
 
-## Building
+### Building
 - Clone this repository
 - Run `./gradlew build`
 
-## Dev Builds
-You can find dev builds at [circleci](https://app.circleci.com/pipelines/github/MeteorDevelopment/meteor-client?branch=master).
+### Installation
+Follow guide on the [wiki](https://github.com/MeteorDevelopment/meteor-client/wiki/Installation).
 
-## Older Versions
-If you want to connect to servers that run older version you can download [multiconnect](https://www.curseforge.com/minecraft/mc-mods/multiconnect).
+## Contributions
+We will review all reasonable pull requests but we request that you maintain our code style as well as you can, as well as adding the license header to all files you contribute.
+
+## Bugs and Suggestions
+Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided. Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
 
 ## Donations
-We would appreciate if you donated to us through [PayPal](https://paypal.me/MineGame159). Include your Discord tag so we can give you donator role and contact you. Minimum for donator role is 5$.
+All of our work is completely free and non-profit, therefore we are very grateful for all donations made to help support us running our community. All of the money made through donations is used to pay for our servers, none of it is taken for profit.
 
-## Thank you
+Donations can be made to our [paypal](https://www.paypal.me/MineGame159), the minimum amount to get donator benefits is 5$.
+You will be rewarded with a role on our discord, an in-game cape and extra kit + a colored name on our pvp server (`pvp.meteorclient.com`).
+Make sure to include your **discord tag** and **Minecraft ign** so we can give you your rewards.
+
+## Credits
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [Minn](https://github.com/MinnDevelopment) for [Discord Rpc](https://github.com/MinnDevelopment/java-discord-rpc)  
 [G00fY2](https://github.com/G00fY2) for [Version Compare](https://github.com/G00fY2/version-compare)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
 
-## License
-If you are making a custom version of Meteor Client or using its features you are **required to publicly disclose the source code**, state changes, use the same license and follow the [license terms](https://github.com/MeteorDevelopment/meteor-client/blob/master/LICENSE).
+## Licensing
+This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). 
+
+If you use **ANY** code from the source:
+- You must disclose the source code of your modified work and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source (or obfuscated) application.
+- Your application must also be licensed under the same license.
+
+
+*If you have any other questions, check our [FAQ](https://github.com/MeteorDevelopment/meteor-client/wiki).*

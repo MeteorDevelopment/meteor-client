@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.systems.modules.misc;
+package minegame159.meteorclient.systems.modules.player;
 
 import io.netty.channel.Channel;
 import meteordevelopment.orbit.EventHandler;

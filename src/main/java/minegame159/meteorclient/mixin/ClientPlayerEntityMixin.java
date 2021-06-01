@@ -9,14 +9,15 @@ import baritone.api.BaritoneAPI;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.entity.player.SendMessageEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
+import minegame159.meteorclient.events.game.SendMessageEvent;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.PacketFly;
 import minegame159.meteorclient.systems.modules.movement.Scaffold;
+import minegame159.meteorclient.systems.modules.movement.Sneak;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.player.Portals;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -26,6 +27,7 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,36 +39,26 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerEntity.class)
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
+    @Shadow @Final public ClientPlayNetworkHandler networkHandler;
+
     public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
     }
 
-    @Shadow @Final public ClientPlayNetworkHandler networkHandler;
-
-    @Shadow public abstract void sendChatMessage(String string);
-
-    private boolean ignoreChatMessage;
-
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
-    private void onSendChatMessage(String msg, CallbackInfo info) {
-        if (ignoreChatMessage) return;
+    private void onSendChatMessage(String message, CallbackInfo info) {
+        if (!message.startsWith(Config.get().prefix) && !message.startsWith("/") && !message.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+            SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
-        if (!msg.startsWith(Config.get().prefix) && !msg.startsWith("/") && !msg.startsWith(BaritoneAPI.getSettings().prefix.value)) {
-            SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(msg));
-
-            if (!event.isCancelled()) {
-                ignoreChatMessage = true;
-                sendChatMessage(event.msg);
-                ignoreChatMessage = false;
-            }
+            if (!event.isCancelled()) networkHandler.sendPacket(new ChatMessageC2SPacket(event.message));
 
             info.cancel();
             return;
         }
 
-        if (msg.startsWith(Config.get().prefix)) {
+        if (message.startsWith(Config.get().prefix)) {
             try {
-                Commands.get().dispatch(msg.substring(Config.get().prefix.length()));
+                Commands.get().dispatch(message.substring(Config.get().prefix.length()));
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }
@@ -101,7 +93,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double d, CallbackInfo info) {
         Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.noPush.get()) {
+        if (velocity.isActive() && velocity.blocks.get()) {
             info.cancel();
         }
         if (Modules.get().get(PacketFly.class).isActive()) {
@@ -129,5 +121,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 1, shift = At.Shift.AFTER))
     private void onTickHasVehicleAfterSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
+    }
+
+    // Sneak
+    @Redirect(method = "sendMovementPackets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
+    private boolean isSneaking(ClientPlayerEntity clientPlayerEntity) {
+        return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || clientPlayerEntity.isSneaking();
     }
 }

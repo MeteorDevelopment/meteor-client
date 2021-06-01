@@ -16,7 +16,7 @@ import java.util.List;
 
 public class SoundEventListSettingScreen extends LeftRightListSettingScreen<SoundEvent> {
     public SoundEventListSettingScreen(GuiTheme theme, Setting<List<SoundEvent>> setting) {
-        super(theme, "Select sounds", setting, Registry.SOUND_EVENT);
+        super(theme, "Select sounds", setting, setting.get(), Registry.SOUND_EVENT);
     }
 
     @Override
