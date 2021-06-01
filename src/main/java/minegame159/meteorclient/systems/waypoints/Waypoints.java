@@ -18,7 +18,6 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.WaypointsModule;
 import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.files.StreamUtils;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -38,7 +37,7 @@ import java.io.IOException;
 import java.util.*;
 
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
-    private static final String[] BUILTIN_ICONS = { "square", "circle", "triangle", "star", "diamond" };
+    private static final String[] BUILTIN_ICONS = { "square", "circle", "triangle", "star", "diamond", "skull" };
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -138,7 +137,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             double z = getCoords(waypoint).z;
 
             // Compute scale
-            double dist = EntityUtils.distanceToCamera(x, y, z);
+            double dist = PlayerUtils.distanceToCamera(x, y, z);
             if (dist > waypoint.maxVisibleDistance) continue;
             double scale = 0.01 * waypoint.scale;
             if(dist > 8) scale *= dist / 8;
@@ -238,6 +237,10 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     @Override
     public Iterator<Waypoint> iterator() {
         return waypoints.iterator();
+    }
+
+    public ListIterator<Waypoint> iteratorReverse() {
+        return waypoints.listIterator(waypoints.size());
     }
 
     private void copyIcon(File file) {

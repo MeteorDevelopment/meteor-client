@@ -5,10 +5,13 @@
 
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.game.ChangePerspectiveEvent;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.GameOptions;
 import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.options.Perspective;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -28,5 +31,12 @@ public class GameOptionsMixin {
     @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/options/GameOptions;keysAll:[Lnet/minecraft/client/options/KeyBinding;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
     private void onInitAfterKeysAll(MinecraftClient client, File optionsFile, CallbackInfo info) {
         keysAll = KeyBinds.apply(keysAll);
+    }
+
+    @Inject(method = "setPerspective", at = @At("HEAD"), cancellable = true)
+    private void setPerspective(Perspective perspective, CallbackInfo info) {
+        ChangePerspectiveEvent event = MeteorClient.EVENT_BUS.post(ChangePerspectiveEvent.get(perspective));
+
+        if (event.isCancelled()) info.cancel();
     }
 }

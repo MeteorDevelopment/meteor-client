@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "minegame159.meteorclient.mixin.baritone",
+  "compatibilityLevel": "JAVA_8",
+  "client": [
+    "ComeCommandMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

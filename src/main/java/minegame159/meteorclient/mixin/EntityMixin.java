@@ -14,6 +14,7 @@ import minegame159.meteorclient.systems.modules.combat.Hitboxes;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.render.ESP;
+import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.block.Block;
@@ -60,9 +61,9 @@ public abstract class EntityMixin {
         double deltaZ = z - player.getVelocity().z;
 
         setVelocity(
-                player.getVelocity().x + deltaX * velocity.getHorizontal(),
-                player.getVelocity().y + deltaY * velocity.getVertical(),
-                player.getVelocity().z + deltaZ * velocity.getHorizontal()
+                player.getVelocity().x + deltaX * velocity.getHorizontal(velocity.entitiesHorizontal),
+                player.getVelocity().y + deltaY * velocity.getVertical(velocity.entitiesVertical),
+                player.getVelocity().z + deltaZ * velocity.getHorizontal(velocity.entitiesHorizontal)
         );
 
         info.cancel();
@@ -74,7 +75,7 @@ public abstract class EntityMixin {
 
         Velocity velocity = Modules.get().get(Velocity.class);
         if (velocity.isActive() && velocity.liquids.get()) {
-            vec = vec.multiply(velocity.getHorizontal(), velocity.getVertical(), velocity.getHorizontal());
+            vec = vec.multiply(velocity.getHorizontal(velocity.liquidsHorizontal), velocity.getVertical(velocity.liquidsVertical), velocity.getHorizontal(velocity.liquidsHorizontal));
         }
 
         return vec;
@@ -98,7 +99,10 @@ public abstract class EntityMixin {
 
         if ((Object) this != MinecraftClient.getInstance().player || Utils.isReleasingTrident || !velocity.entities.get()) return vec3d.add(x, y, z);
 
-        return vec3d.add(x * velocity.getHorizontal(), y * velocity.getVertical(), z * velocity.getHorizontal());
+        return vec3d.add(
+                x * velocity.getHorizontal(velocity.entitiesHorizontal),
+                y * velocity.getVertical(velocity.entitiesVertical),
+                z * velocity.getHorizontal(velocity.entitiesHorizontal));
     }
 
     @Inject(method = "move", at = @At("HEAD"))
@@ -125,10 +129,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (player == null) info.setReturnValue(false);
-
-        ESP esp = Modules.get().get(ESP.class);
-        if (esp.isActive() && esp.showInvis.get()) info.setReturnValue(false);
+        if (player == null || Modules.get().get(NoRender.class).noInvisibility()) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)

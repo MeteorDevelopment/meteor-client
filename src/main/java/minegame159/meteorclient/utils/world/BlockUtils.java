@@ -112,6 +112,7 @@ public class BlockUtils {
                 || block instanceof AbstractButtonBlock
                 || block instanceof AbstractPressurePlateBlock
                 || block instanceof BlockWithEntity
+                || block instanceof BedBlock
                 || block instanceof FenceGateBlock
                 || block instanceof DoorBlock
                 || block instanceof NoteBlock
