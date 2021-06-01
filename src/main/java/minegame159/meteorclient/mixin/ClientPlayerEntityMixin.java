@@ -16,6 +16,7 @@ import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
 import minegame159.meteorclient.systems.modules.movement.Scaffold;
+import minegame159.meteorclient.systems.modules.movement.Sneak;
 import minegame159.meteorclient.systems.modules.movement.Velocity;
 import minegame159.meteorclient.systems.modules.player.Portals;
 import minegame159.meteorclient.utils.player.ChatUtils;
@@ -116,5 +117,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 1, shift = At.Shift.AFTER))
     private void onTickHasVehicleAfterSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
+    }
+
+    // Sneak
+    @Redirect(method = "sendMovementPackets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
+    private boolean isSneaking(ClientPlayerEntity clientPlayerEntity) {
+        return Modules.get().get(Sneak.class).doPacket() || clientPlayerEntity.isSneaking();
     }
 }

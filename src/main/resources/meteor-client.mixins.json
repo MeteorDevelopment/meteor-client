@@ -86,6 +86,7 @@
     "ItemStackMixin",
     "JsonGlProgramMixin",
     "KeyBindingAccessor",
+    "KeyboardInputMixin",
     "KeyboardMixin",
     "LightmapTextureManagerMixin",
     "LightningEntityRendererMixin",
