@@ -49,6 +49,9 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
             if (!event.isCancelled()) networkHandler.sendPacket(new ChatMessageC2SPacket(event.message));
+
+            info.cancel();
+            return;
         }
 
         if (message.startsWith(Config.get().prefix)) {
@@ -57,9 +60,8 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }
+            info.cancel();
         }
-
-        info.cancel();
     }
 
     @Redirect(method = "updateNausea", at = @At(value = "FIELD", target = "Lnet/minecraft/client/MinecraftClient;currentScreen:Lnet/minecraft/client/gui/screen/Screen;"))
