@@ -222,17 +222,17 @@ public class Freecam extends Module {
     private void onKey(KeyEvent event) {
         boolean cancel = true;
 
-        if (mc.options.keyForward.matchesKey(event.key, 0)) {
+        if (mc.options.keyForward.matchesKey(event.key, 0) || mc.options.keyForward.matchesMouse(event.key)) {
             forward = event.action != KeyAction.Release;
-        } else if (mc.options.keyBack.matchesKey(event.key, 0)) {
+        } else if (mc.options.keyBack.matchesKey(event.key, 0) || mc.options.keyBack.matchesMouse(event.key)) {
             backward = event.action != KeyAction.Release;
-        } else if (mc.options.keyRight.matchesKey(event.key, 0)) {
+        } else if (mc.options.keyRight.matchesKey(event.key, 0) || mc.options.keyRight.matchesMouse(event.key)) {
             right = event.action != KeyAction.Release;
-        } else if (mc.options.keyLeft.matchesKey(event.key, 0)) {
+        } else if (mc.options.keyLeft.matchesKey(event.key, 0) || mc.options.keyLeft.matchesMouse(event.key)) {
             left = event.action != KeyAction.Release;
-        } else if (mc.options.keyJump.matchesKey(event.key, 0)) {
+        } else if (mc.options.keyJump.matchesKey(event.key, 0) || mc.options.keyJump.matchesMouse(event.key)) {
             up = event.action != KeyAction.Release;
-        } else if (mc.options.keySneak.matchesKey(event.key, 0)) {
+        } else if (mc.options.keySneak.matchesKey(event.key, 0) || mc.options.keySneak.matchesMouse(event.key)) {
             down = event.action != KeyAction.Release;
         } else {
             cancel = false;
