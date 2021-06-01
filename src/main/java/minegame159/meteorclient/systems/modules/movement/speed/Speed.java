@@ -92,6 +92,13 @@ public class Speed extends Module {
             .build()
     );
 
+    public final Setting<Boolean> edgeJump = sgGeneral.add(new BoolSetting.Builder()
+            .name("jump-at-edge")
+            .description("You jump when at the edge of the block.")
+            .defaultValue(false)
+            .build()
+    );
+
     private SpeedMode currentMode;
 
     public Speed() {
@@ -119,6 +126,9 @@ public class Speed extends Module {
         if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
 
         Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
+
+        if(edgeJump.get())
+            mc.player.jump();
 
         currentMode.onMove(event);
     }
