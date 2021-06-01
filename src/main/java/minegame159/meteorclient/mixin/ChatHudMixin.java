@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.entity.player.ReceiveMessageEvent;
+import minegame159.meteorclient.events.game.ReceiveMessageEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.BetterChat;
 import net.minecraft.client.gui.hud.ChatHud;
