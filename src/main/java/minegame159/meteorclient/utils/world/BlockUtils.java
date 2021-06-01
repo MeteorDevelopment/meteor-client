@@ -5,44 +5,21 @@
 
 package minegame159.meteorclient.utils.world;
 
-import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.BlockBreakingInfo;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
-
-    private static final ArrayList<BlockPos> blocks = new ArrayList<>();
-
-    public static final Map<Integer, BlockBreakingInfo> breakingBlocks = new HashMap<>();
-
-    public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);
-    }
-
-    @EventHandler
-    private void onGameLeft(GameLeftEvent event) {
-        breakingBlocks.clear();
-    }
 
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean checkEntities, boolean swap, boolean swapBack) {
         if (slot == -1 || !canPlace(blockPos, checkEntities)) return false;
@@ -107,7 +84,7 @@ public class BlockUtils {
     }
 
     public static boolean isClickable(Block block) {
-        boolean clickable = block instanceof CraftingTableBlock
+        return block instanceof CraftingTableBlock
                 || block instanceof AnvilBlock
                 || block instanceof AbstractButtonBlock
                 || block instanceof AbstractPressurePlateBlock
@@ -117,8 +94,6 @@ public class BlockUtils {
                 || block instanceof DoorBlock
                 || block instanceof NoteBlock
                 || block instanceof TrapdoorBlock;
-
-        return clickable;
     }
 
     private static Direction getPlaceSide(BlockPos blockPos) {
@@ -138,28 +113,6 @@ public class BlockUtils {
         }
 
         return null;
-    }
-
-    public static List<BlockPos> getSphere(BlockPos centerPos, int radius, int height) {
-        blocks.clear();
-
-        for (int i = centerPos.getX() - radius; i < centerPos.getX() + radius; i++) {
-            for (int j = centerPos.getY() - height; j < centerPos.getY() + height; j++) {
-                for (int k = centerPos.getZ() - radius; k < centerPos.getZ() + radius; k++) {
-                    BlockPos pos = new BlockPos(i, j, k);
-                    if (distanceBetween(centerPos, pos) <= radius && !blocks.contains(pos)) blocks.add(pos);
-                }
-            }
-        }
-
-        return blocks;
-    }
-
-    public static double distanceBetween(BlockPos blockPos1, BlockPos blockPos2) {
-        double d = blockPos1.getX() - blockPos2.getX();
-        double e = blockPos1.getY() - blockPos2.getY();
-        double f = blockPos1.getZ() - blockPos2.getZ();
-        return MathHelper.sqrt(d * d + e * e + f * f);
     }
 
 }

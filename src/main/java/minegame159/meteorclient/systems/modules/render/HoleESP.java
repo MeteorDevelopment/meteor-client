@@ -267,16 +267,19 @@ public class HoleESP extends Module {
         }
 
         public void render(MeshBuilder lines, MeshBuilder sides, ShapeMode mode, double height, boolean topQuad, boolean bottomQuad) {
-            Color top = getTopColor().copy();
-            Color bottom = getBottomColor().copy();
-
             int x = blockPos.getX();
             int y = blockPos.getY();
             int z = blockPos.getZ();
 
+            Color top = getTopColor();
+            Color bottom = getBottomColor();
+
+            int originalTopA = top.a;
+            int originalBottompA = bottom.a;
+
             if (mode != ShapeMode.Lines) {
-                top.a *= 0.5;
-                bottom.a *= 0.5;
+                top.a = originalTopA / 2;
+                bottom.a = originalBottompA / 2;
 
                 if (Dir.is(exclude, Dir.UP) && topQuad) sides.quad(x, y + height, z, x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y + height, z, top); // Top
                 if (Dir.is(exclude, Dir.DOWN) && bottomQuad) sides.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
@@ -286,11 +289,11 @@ public class HoleESP extends Module {
 
                 if (Dir.is(exclude, Dir.WEST)) sides.verticalGradientQuad(x, y + height, z, x, y + height, z + 1, x, y, z + 1, x, y, z, top, bottom); // East
                 if (Dir.is(exclude, Dir.EAST)) sides.verticalGradientQuad(x + 1, y + height, z, x + 1, y + height, z + 1, x + 1, y, z + 1, x + 1, y, z, top, bottom); // West
+
+                top.a = originalTopA;
+                bottom.a = originalBottompA;
             }
             if (mode != ShapeMode.Sides) {
-                top.a /= 0.5;
-                bottom.a /= 0.5;
-
                 if (Dir.is(exclude, Dir.WEST) && Dir.is(exclude, Dir.NORTH)) lines.line(x, y, z, x, y + height, z, bottom, top);
                 if (Dir.is(exclude, Dir.WEST) && Dir.is(exclude, Dir.SOUTH)) lines.line(x, y, z + 1, x, y + height, z + 1, bottom, top);
                 if (Dir.is(exclude, Dir.EAST) && Dir.is(exclude, Dir.NORTH)) lines.line(x + 1, y, z, x + 1, y + height, z, bottom, top);
