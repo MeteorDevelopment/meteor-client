@@ -85,7 +85,7 @@ public class Scaffold extends Module {
             .build()
     );
 
-    private final Setting<Boolean> nonSolid = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> filterNonSolid = sgGeneral.add(new BoolSetting.Builder()
             .name("filter-non-solid")
             .description("Filters out Non-Solid blocks.")
             .defaultValue(true)
@@ -235,7 +235,7 @@ public class Scaffold extends Module {
         slotBlockState = block.getDefaultState();
 
         // Filter out non solid blocks
-        if (nonSolid.get())
+        if (filterNonSolid.get())
             if (!Block.isShapeFullCube(slotBlockState.getCollisionShape(mc.world, setPos(0, -1, 0)))) return slot;
 
         // Filter out blocks that would fall
