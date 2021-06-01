@@ -78,15 +78,15 @@ public class Scaffold extends Module {
             .build()
     );
 
-    private final Setting<Boolean> filtFall = sgGeneral.add(new BoolSetting.Builder()
-            .name("Filter Falling Blocks")
+    private final Setting<Boolean> filterFallingBlocks = sgGeneral.add(new BoolSetting.Builder()
+            .name("filter-falling-blocks")
             .description("Filters out falling blocks like sand.")
             .defaultValue(true)
             .build()
     );
 
     private final Setting<Boolean> nonSolid = sgGeneral.add(new BoolSetting.Builder()
-            .name("Filter Non-Solid")
+            .name("filter-non-solid")
             .description("Filters out Non-Solid blocks.")
             .defaultValue(true)
             .build()
@@ -239,7 +239,7 @@ public class Scaffold extends Module {
             if (!Block.isShapeFullCube(slotBlockState.getCollisionShape(mc.world, setPos(0, -1, 0)))) return slot;
 
         // Filter out blocks that would fall
-        if(filtFall.get())
+        if(filterFallingBlocks.get())
             if (block instanceof FallingBlock && FallingBlock.canFallThrough(blockState)) return slot;
 
         slot = mc.player.inventory.selectedSlot;
