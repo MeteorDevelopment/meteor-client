@@ -64,7 +64,7 @@ public abstract class EntityMixin {
 
     @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     private void onPushAwayFrom(Args args) {
-        if (MinecraftClient.getInstance().player == (Object) this) {
+        if (Modules.get().get(Velocity.class).isActive() && MinecraftClient.getInstance().player == (Object) this) {
             double multiplier = Modules.get().get(Velocity.class).entityPushAmount.get();
             args.set(0, (double) args.get(0) * multiplier);
             args.set(2, (double) args.get(2) * multiplier);
