@@ -62,6 +62,7 @@
     "EntityMixin",
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
+    "EntityVelocityUpdateS2CPacketAccessor",
     "ExplosionMixin",
     "ExplosionS2CPacketMixin",
     "FireworkRocketEntityMixin",
