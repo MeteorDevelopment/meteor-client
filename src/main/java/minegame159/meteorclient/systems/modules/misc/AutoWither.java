@@ -61,7 +61,7 @@ public class AutoWither extends Module {
         BlockPos blockPos = mc.player.getBlockPos();
         blockPos = blockPos.offset(dir);
         
-        if (isValidSpawn(blockPos, dir)) {
+        if (!isValidSpawn(blockPos, dir)) {
             error("(default)Unable to spawn wither, obstructed by non air blocks");
             toggle();
             return;
