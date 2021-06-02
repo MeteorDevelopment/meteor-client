@@ -42,29 +42,16 @@ public class AutoWither extends Module {
     private void onTick(TickEvent.Post event) {
         
         // Check for soulsand and skull in hotbar
-        if ((InvUtils.findItemWithCount(Items.SOUL_SAND).count < 4 && InvUtils.findItemWithCount(Items.SOUL_SOIL).count < 4) ||
-                InvUtils.findItemWithCount(Items.WITHER_SKELETON_SKULL).count < 3) {
+        if (!hasEnoughMaterials()) {
             error("(default)Not enough resources in hotbar");
             toggle();
             return;
         }
         
-        
         // Find direction of player
         // North, South, East, West
-        Direction dir;
-        float yaw = mc.gameRenderer.getCamera().getYaw() % 360;
-        if (yaw < 0) yaw += 360;
+        Direction dir = getDirection(mc.gameRenderer.getCamera().getYaw() % 360);;
         
-        if (yaw >= 315 || yaw < 45) dir = Direction.SOUTH;
-        else if (yaw >= 45 && yaw < 135) dir = Direction.WEST;
-        else if (yaw >= 135 && yaw < 225) dir = Direction.NORTH;
-        else if (yaw >= 225 && yaw < 315) dir = Direction.EAST;
-        else {
-            error("(default)Yaw error");
-            toggle();
-            return;
-        }
         
         // Aligns player to center of block to avoid obstructing soulsand placement
         PlayerUtils.centerPlayer();
@@ -72,22 +59,9 @@ public class AutoWither extends Module {
         
         // Check if we can place a wither
         BlockPos blockPos = mc.player.getBlockPos();
-        boolean validSpawn;
-        if (dir == Direction.EAST) {
-            blockPos = blockPos.east();
-        }
-        else if (dir == Direction.NORTH) {
-            blockPos = blockPos.north();
-        }
-        else if (dir == Direction.WEST) {
-            blockPos = blockPos.west();
-        }
-        else {
-            blockPos = blockPos.south();
-        }
-        validSpawn = isValidSpawn(blockPos, dir);
+        blockPos = blockPos.offset(dir);
         
-        if (!validSpawn) {
+        if (isValidSpawn(blockPos, dir)) {
             error("(default)Unable to spawn wither, obstructed by non air blocks");
             toggle();
             return;
@@ -98,6 +72,23 @@ public class AutoWither extends Module {
         info("(default)Spawning wither");
         spawnWither(blockPos, dir);
         toggle();
+    }
+    
+    private boolean hasEnoughMaterials() {
+        if ((InvUtils.findItemWithCount(Items.SOUL_SAND).count < 4 && InvUtils.findItemWithCount(Items.SOUL_SOIL).count < 4) ||
+                InvUtils.findItemWithCount(Items.WITHER_SKELETON_SKULL).count < 3)
+            return false;
+        
+        return true;
+    }
+    
+    private Direction getDirection(float yaw) {
+        if (yaw < 0) yaw += 360;
+    
+        if (yaw >= 315 || yaw < 45) return Direction.SOUTH;
+        else if (yaw < 135) return Direction.WEST;
+        else if (yaw < 225) return Direction.NORTH;
+        else return Direction.EAST;
     }
     
     private boolean isValidSpawn(BlockPos blockPos, Direction direction) {
