@@ -514,6 +514,7 @@ public class Modules extends System<Modules> {
         add(new StashFinder());
         add(new Timer());
         add(new VeinMiner());
+        add(new AutoWither());
     }
 
     private void initMisc() {
