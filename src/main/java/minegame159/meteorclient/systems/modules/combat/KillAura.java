@@ -14,7 +14,6 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.TargetUtils;
@@ -128,8 +127,8 @@ public class KillAura extends Module {
     private final Setting<Double> range = sgTargeting.add(new DoubleSetting.Builder()
             .name("range")
             .description("The maximum range the entity can be to attack it.")
-            .defaultValue(4)
-            .min(0).max(6)
+            .defaultValue(4.5)
+            .min(0)
             .sliderMax(6)
             .build()
     );
@@ -137,8 +136,8 @@ public class KillAura extends Module {
     private final Setting<Double> wallsRange = sgTargeting.add(new DoubleSetting.Builder()
             .name("walls-range")
             .description("The maximum range the entity can be attacked through walls.")
-            .defaultValue(3)
-            .min(0).max(6)
+            .defaultValue(3.5)
+            .min(0)
             .sliderMax(6)
             .build()
     );
@@ -156,13 +155,6 @@ public class KillAura extends Module {
             .defaultValue(1)
             .min(1).max(10)
             .sliderMin(1).sliderMax(5)
-            .build()
-    );
-
-    private final Setting<Boolean> ignoreWalls = sgTargeting.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Whether or not to attack the entity through a wall.")
-            .defaultValue(true)
             .build()
     );
 
@@ -241,14 +233,10 @@ public class KillAura extends Module {
         TargetUtils.getList(entity -> {
             if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
             if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
-            if (entity.distanceTo(mc.player) > range.get()) return false;
+            if (PlayerUtils.distanceTo(entity) > range.get()) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
-            if (ignoreWalls.get()) {
-                if (EntityUtils.distanceToCamera(entity) > wallsRange.get()) return false;
-            } else {
-                if (!PlayerUtils.canSeeEntity(entity)) return false;
-            }
+            if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
             if (entity instanceof PlayerEntity) {
                 if (((PlayerEntity) entity).isCreative()) return false;
                 if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;

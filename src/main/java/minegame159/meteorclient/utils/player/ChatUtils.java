@@ -142,7 +142,7 @@ public class ChatUtils {
         coordsString = formatMsg(coordsString, Formatting.GRAY);
         BaseText coordsText = new LiteralText(coordsString);
         coordsText.setStyle(coordsText.getStyle()
-                .withFormatting(Formatting.UNDERLINE)
+                .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
                         String.format("%sb goto %d %d %d", Config.get().prefix, (int) pos.x, (int) pos.y, (int) pos.z)

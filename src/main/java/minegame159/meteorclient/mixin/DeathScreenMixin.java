@@ -5,8 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
-//Created by squidoodly 21/05/2020 :bruh:
-// Did squidoodly put his name on everything???
+//Created by squidoodly 21/05/2020
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.BypassDeathScreen;
@@ -29,10 +28,7 @@ public class DeathScreenMixin extends Screen {
     @Inject(method = "init", at = @At("HEAD"))
     protected void init(CallbackInfo ci) {
         if (Modules.get().isActive(BypassDeathScreen.class)) {
-            this.addButton(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> {
-                Modules.get().get(BypassDeathScreen.class).shouldBypass = true;
-                this.client.openScreen(null);
-            }));
+            this.addButton(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> client.openScreen(null)));
         }
     }
 }

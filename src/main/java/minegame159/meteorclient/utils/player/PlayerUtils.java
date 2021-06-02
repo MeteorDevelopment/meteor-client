@@ -8,6 +8,7 @@ package minegame159.meteorclient.utils.player;
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.Rotation;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoFall;
@@ -23,6 +24,7 @@ import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -49,7 +51,7 @@ public class PlayerUtils {
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
         if (Friends.get().isFriend(entity)) return color.set(Friends.get().color).a(defaultColor.a);
-        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE)) return color.set(color).a(defaultColor.a);
+        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor) return color.set(color).a(defaultColor.a);
         return defaultColor;
     }
 
@@ -244,6 +246,15 @@ public class PlayerUtils {
         float g = (float) (mc.player.getY() - y);
         float h = (float) (mc.player.getZ() - z);
         return MathHelper.sqrt(f * f + g * g + h * h);
+    }
+
+    public static double distanceToCamera(double x, double y, double z) {
+        Camera camera = mc.gameRenderer.getCamera();
+        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
+    }
+
+    public static double distanceToCamera(Entity entity) {
+        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
     }
 
     public static Dimension getDimension() {
