@@ -35,9 +35,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -48,27 +50,6 @@ public abstract class EntityMixin {
     @Shadow protected abstract BlockPos getVelocityAffectingPos();
 
     @Shadow public abstract void setVelocity(double x, double y, double z);
-
-    @Inject(method = "setVelocityClient", at = @At("HEAD"), cancellable = true)
-    private void onSetVelocityClient(double x, double y, double z, CallbackInfo info) {
-        PlayerEntity player = MinecraftClient.getInstance().player;
-        if (((Object) this) != player) return;
-
-        Velocity velocity = Modules.get().get(Velocity.class);
-        if (!velocity.isActive() || !velocity.entities.get()) return;
-
-        double deltaX = x - player.getVelocity().x;
-        double deltaY = y - player.getVelocity().y;
-        double deltaZ = z - player.getVelocity().z;
-
-        setVelocity(
-                player.getVelocity().x + deltaX * velocity.getHorizontal(velocity.entitiesHorizontal),
-                player.getVelocity().y + deltaY * velocity.getVertical(velocity.entitiesVertical),
-                player.getVelocity().z + deltaZ * velocity.getHorizontal(velocity.entitiesHorizontal)
-        );
-
-        info.cancel();
-    }
 
     @Redirect(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
     private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
@@ -84,7 +65,17 @@ public abstract class EntityMixin {
 
     @Inject(method = "pushAwayFrom", at = @At("HEAD"), cancellable = true)
     private void onPushAwayFrom(Entity entity, CallbackInfo info) {
-        if (Modules.get().get(PacketFly.class).isActive() && (Object) this == MinecraftClient.getInstance().player) info.cancel();
+        if (Modules.get().isActive(PacketFly.class) && (Object) this == MinecraftClient.getInstance().player) info.cancel();
+    }
+
+    @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
+    private void onPushAwayFrom(Args args) {
+        Velocity velocity = Modules.get().get(Velocity.class);
+        if (velocity.isActive() && velocity.entityPush.get()) && MinecraftClient.getInstance().player == (Object) this) {
+            double multiplier = velocity.entityPushAmount.get();
+            args.set(0, (double) args.get(0) * multiplier);
+            args.set(2, (double) args.get(2) * multiplier);
+        }
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
@@ -97,18 +88,6 @@ public abstract class EntityMixin {
             JumpVelocityMultiplierEvent event = MeteorClient.EVENT_BUS.post(JumpVelocityMultiplierEvent.get());
             info.setReturnValue(a * event.multiplier);
         }
-    }
-
-    @Redirect(method = "addVelocity", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3d;add(DDD)Lnet/minecraft/util/math/Vec3d;"))
-    private Vec3d addVelocityVec3dAddProxy(Vec3d vec3d, double x, double y, double z) {
-        Velocity velocity = Modules.get().get(Velocity.class);
-
-        if ((Object) this != MinecraftClient.getInstance().player || Utils.isReleasingTrident || !velocity.entities.get()) return vec3d.add(x, y, z);
-
-        return vec3d.add(
-                x * velocity.getHorizontal(velocity.entitiesHorizontal),
-                y * velocity.getVertical(velocity.entitiesVertical),
-                z * velocity.getHorizontal(velocity.entitiesHorizontal));
     }
 
     @Inject(method = "move", at = @At("HEAD"))
