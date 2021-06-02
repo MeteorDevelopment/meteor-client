@@ -83,7 +83,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "pushAwayFrom", at = @At("HEAD"), cancellable = true)
     private void onPushAwayFrom(Entity entity, CallbackInfo info) {
-        if (Modules.get().get(PacketFly.class).isActive() && entity == MinecraftClient.getInstance().player) info.cancel();
+        if (Modules.get().get(PacketFly.class).isActive() && (Object) this == MinecraftClient.getInstance().player) info.cancel();
     }
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
