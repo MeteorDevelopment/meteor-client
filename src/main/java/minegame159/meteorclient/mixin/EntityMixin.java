@@ -66,7 +66,7 @@ public abstract class EntityMixin {
     private void onPushAwayFrom(Args args) {
         Velocity velocity = Modules.get().get(Velocity.class);
         if (velocity.isActive() && velocity.entityPush.get() && MinecraftClient.getInstance().player == (Object) this) {
-            double multiplier = Modules.get().get(Velocity.class).entityPushAmount.get();
+            double multiplier = velocity.entityPushAmount.get();
             args.set(0, (double) args.get(0) * multiplier);
             args.set(2, (double) args.get(2) * multiplier);
         }
