@@ -99,6 +99,8 @@ public class AutoTool extends Module {
     private boolean shouldSwitch;
     private int ticks;
     
+    private BlockState blockState;
+    
     public AutoTool() {
         super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
     }
@@ -111,6 +113,13 @@ public class AutoTool extends Module {
         }
 
         wasPressed = mc.options.keyAttack.isPressed();
+    
+        
+        // Switch slots
+        if (shouldSwitch && ticks <= 0) {
+            switchSlots(blockState);
+            shouldSwitch = false;
+        }
         
         // Decrease ticks
         if (ticks > 0) ticks--;
@@ -120,8 +129,7 @@ public class AutoTool extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         
         // Get blockState
-        BlockState blockState = mc.world.getBlockState(event.blockPos);
-    
+        blockState = mc.world.getBlockState(event.blockPos);
         if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
     
         // Check if we should switch to a better tool
@@ -131,12 +139,6 @@ public class AutoTool extends Module {
             ticks = switchDelay.get();
         }
     
-        // If we should switch slots
-        if (shouldSwitch && ticks <= 0) {
-            switchSlots(blockState);
-            shouldSwitch = false;
-        }
-        
         // Anti break
         currentStack = mc.player.getMainHandStack();
         if (shouldStopUsing(currentStack) && currentStack.getItem() instanceof ToolItem) {
