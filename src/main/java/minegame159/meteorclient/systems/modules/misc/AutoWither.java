@@ -50,7 +50,7 @@ public class AutoWither extends Module {
         
         // Find direction of player
         // North, South, East, West
-        Direction dir = getDirection(mc.gameRenderer.getCamera().getYaw() % 360);;
+        Direction dir = getDirection(mc.gameRenderer.getCamera().getYaw() % 360);
         
         
         // Aligns player to center of block to avoid obstructing soulsand placement
