@@ -268,9 +268,11 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
-            for (Module module : active) {
-                MeteorClient.EVENT_BUS.subscribe(module);
-                module.onActivate();
+            for (Module module : modules) {
+                if (module.isActive()) {
+                    MeteorClient.EVENT_BUS.subscribe(module);
+                    module.onActivate();
+                }
             }
         }
     }
@@ -278,17 +280,19 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            for (Module module : active) {
-                MeteorClient.EVENT_BUS.unsubscribe(module);
-                module.onDeactivate();
+            for (Module module : modules) {
+                if (module.isActive()) {
+                    MeteorClient.EVENT_BUS.unsubscribe(module);
+                    module.onDeactivate();
+                }
             }
         }
     }
 
     public void disableAll() {
         synchronized (active) {
-            for (Module module : active.toArray(new Module[0])) {
-                module.toggle(Utils.canUpdate());
+            for (Module module : modules) {
+                if (module.isActive()) module.toggle(Utils.canUpdate());
             }
         }
     }
