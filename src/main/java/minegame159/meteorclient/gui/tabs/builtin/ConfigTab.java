@@ -137,6 +137,15 @@ public class ConfigTab extends Tab {
             .build()
     );
 
+    public static final Setting<Boolean> titleScreenSplashes = sgScreens.add(new BoolSetting.Builder()
+            .name("title-screen-splashes")
+            .description("Show Meteor splash texts on title screen")
+            .defaultValue(true)
+            .onChanged(aBool -> Config.get().titleScreenSplashes = aBool)
+            .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenSplashes))
+            .build()
+    );
+
     public static final Setting<Boolean> customWindowTitle = sgScreens.add(new BoolSetting.Builder()
             .name("custom-window-title")
             .description("Show custom text in the window title.")
