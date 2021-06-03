@@ -68,7 +68,7 @@ public class BetterTooltips extends Module {
             .build()
     );
 
-    public final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
             .name("middle-click-open")
             .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
             .defaultValue(true)
@@ -330,8 +330,11 @@ public class BetterTooltips extends Module {
         CompoundTag tag = stack.getTag();
         if (tag == null) return false;
         ListTag ltag = tag.getList("pages", 8);
-        if (ltag.size() < 1) return false;
-        return true;
+        return ltag.size() >= 1;
+    }
+
+    public boolean middleClickOpen() {
+        return isActive() && middleClickOpen.get();
     }
 
     public enum DisplayWhen {
