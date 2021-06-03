@@ -31,6 +31,7 @@ public class Config extends System<Config> {
     public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
 
     public boolean titleScreenCredits = ConfigTab.titleScreenCredits.get();
+    public boolean titleScreenSplashes = ConfigTab.titleScreenSplashes.get();
     public boolean customWindowTitle = ConfigTab.customWindowTitle.get();
     public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
 
@@ -70,6 +71,7 @@ public class Config extends System<Config> {
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
 
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
+        tag.putBoolean("titleScreenSplashes", titleScreenSplashes);
         tag.putBoolean("customWindowTitle", customWindowTitle);
         tag.putString("customWindowTitleText", customWindowTitleText);
 
@@ -93,6 +95,7 @@ public class Config extends System<Config> {
         rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
 
         titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
+        titleScreenSplashes = getBoolean(tag, "titleScreenSplashes", ConfigTab.titleScreenSplashes);
         customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.customWindowTitle);
         customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
 
