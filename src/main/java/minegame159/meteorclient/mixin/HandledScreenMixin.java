@@ -56,7 +56,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "textures/container.png");
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
-    private static final Identifier TEXTURE_BOOK_BACKGROUND = BookScreen.BOOK_TEXTURE;
 
     private static final ItemStack[] ITEMS = new ItemStack[27];
 
@@ -72,7 +71,10 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
         if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty() && toolips.middleClickOpen.get()) {
-            cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
+            ItemStack itemStack = focusedSlot.getStack();
+            if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
+                cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
+            }
         }
     }
 
@@ -221,7 +223,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         int x2 = x + 16;
         int z = 300;
 
-        mc.getTextureManager().bindTexture(TEXTURE_BOOK_BACKGROUND);
+        mc.getTextureManager().bindTexture(BookScreen.BOOK_TEXTURE);
         DrawableHelper.drawTexture(
             matrices,
             x1, y1, z,
