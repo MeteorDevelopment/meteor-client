@@ -104,6 +104,14 @@ public class CrystalAura extends Module {
             .build()
     );
 
+    private final Setting<Boolean> ignoreTerrain = sgGeneral.add(new BoolSetting.Builder()
+            .name("ignore-terrain")
+            .description("Completely ignores terrain if it can be blown up by end crystals.")
+            .defaultValue(true)
+            .build()
+    );
+
+
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
             .name("min-damage")
             .description("Minimum damage the crystal needs to deal to your target.")
@@ -689,7 +697,7 @@ public class CrystalAura extends Module {
 
         // Check damage to self and anti suicide
         blockPos.set(entity.getBlockPos()).move(0, -1, 0);
-        double selfDamage = DamageUtils.crystalDamage(mc.player, entity.getPos(), predictMovement.get(), raycastContext, blockPos);
+        double selfDamage = DamageUtils.crystalDamage(mc.player, entity.getPos(), predictMovement.get(), raycastContext, blockPos, ignoreTerrain.get());
         if (selfDamage > maxDamage.get() || (antiSuicide.get() && selfDamage >= EntityUtils.getTotalHealth(mc.player))) return 0;
 
         // Check damage to targets and face place
@@ -822,7 +830,7 @@ public class CrystalAura extends Module {
             if (isOutOfRange(vec3d, blockPos, true)) return;
 
             // Check damage to self and anti suicide
-            double selfDamage = DamageUtils.crystalDamage(mc.player, vec3d, predictMovement.get(), raycastContext, bp);
+            double selfDamage = DamageUtils.crystalDamage(mc.player, vec3d, predictMovement.get(), raycastContext, bp, ignoreTerrain.get());
             if (selfDamage > maxDamage.get() || (antiSuicide.get() && selfDamage >= EntityUtils.getTotalHealth(mc.player))) return;
 
             // Check damage to targets and face place
@@ -1052,13 +1060,13 @@ public class CrystalAura extends Module {
 
         if (fast) {
             PlayerEntity target = getNearestTarget();
-            if (!(smartDelay.get() && breaking && target.hurtTime > 0)) damage = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), raycastContext, obsidianPos);
+            if (!(smartDelay.get() && breaking && target.hurtTime > 0)) damage = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), raycastContext, obsidianPos, ignoreTerrain.get());
         }
         else {
             for (PlayerEntity target : targets) {
                 if (smartDelay.get() && breaking && target.hurtTime > 0) continue;
 
-                double dmg = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), raycastContext, obsidianPos);
+                double dmg = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), raycastContext, obsidianPos, ignoreTerrain.get());
 
                 // Update best target
                 if (dmg > bestTargetDamage) {
