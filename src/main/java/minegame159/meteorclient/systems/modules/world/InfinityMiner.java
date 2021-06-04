@@ -21,7 +21,10 @@ import minegame159.meteorclient.systems.modules.misc.AutoLog;
 import minegame159.meteorclient.systems.modules.movement.GUIMove;
 import minegame159.meteorclient.systems.modules.movement.Jesus;
 import minegame159.meteorclient.systems.modules.movement.NoFall;
-import minegame159.meteorclient.systems.modules.player.*;
+import minegame159.meteorclient.systems.modules.player.AntiHunger;
+import minegame159.meteorclient.systems.modules.player.AutoEat;
+import minegame159.meteorclient.systems.modules.player.AutoTool;
+import minegame159.meteorclient.systems.modules.player.NoBreakDelay;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
@@ -261,7 +264,6 @@ public class InfinityMiner extends Module {
                 Modules.get().get(NoFall.class),
                 Modules.get().get(AutoLog.class),
                 Modules.get().get(AutoTool.class),
-                Modules.get().get(AutoDrop.class),
                 Modules.get().get(GUIMove.class)
         );
     }

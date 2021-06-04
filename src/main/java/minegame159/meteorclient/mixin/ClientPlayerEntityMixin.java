@@ -9,6 +9,7 @@ import baritone.api.BaritoneAPI;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.entity.DropItemsEvent;
 import minegame159.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import minegame159.meteorclient.events.game.SendMessageEvent;
 import minegame159.meteorclient.systems.commands.Commands;
@@ -42,6 +43,11 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
+    }
+
+    @Inject(method = "dropSelectedItem", at = @At("HEAD"), cancellable = true)
+    private void onDropSelectedItem(boolean dropEntireStack, CallbackInfoReturnable<Boolean> info) {
+        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandStack())).isCancelled()) info.setReturnValue(false);
     }
 
     @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
