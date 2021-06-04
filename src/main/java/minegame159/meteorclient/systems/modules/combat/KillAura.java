@@ -6,12 +6,13 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import baritone.api.BaritoneAPI;
+import minegame159.meteorclient.events.packets.PacketEvent;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -19,7 +20,6 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.TargetUtils;
-import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
@@ -28,9 +28,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
-import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
 
@@ -323,7 +321,10 @@ public class KillAura extends Module {
         if (hitDelayTimer >= 0) {
             hitDelayTimer--;
             return false;
-        } else hitDelayTimer = hitDelay.get();
+        }
+        else {
+            hitDelayTimer = hitDelay.get();
+        }
 
         if (randomDelayEnabled.get()) {
             if (randomDelayTimer > 0) {
@@ -342,9 +343,11 @@ public class KillAura extends Module {
         if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return false;
         if (onlyWhenLook.get() && (!target.equals(mc.targetedEntity))) return false;
 
-        if (rotation.get() == RotationMode.OnHit) rotate(target, () -> hitEntity(target));
-        else hitEntity(target);
-
+        if (rotation.get() == RotationMode.OnHit) {
+            rotate(target, () -> hitEntity(target));
+        } else {
+            hitEntity(target);
+        }
 
         return true;
     }

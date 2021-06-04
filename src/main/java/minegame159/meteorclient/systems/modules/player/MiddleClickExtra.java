@@ -94,12 +94,12 @@ public class MiddleClickExtra extends Module {
         }
 
         preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = result.slot;
+        InvUtils.swap(result.slot);
 
         switch (mode.get().type) {
             case Immediate:
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                mc.player.inventory.selectedSlot = preSlot;
+                InvUtils.swap(preSlot);
 
                 break;
             case LongerSingleClick:
@@ -140,7 +140,7 @@ public class MiddleClickExtra extends Module {
     private void stopIfUsing() {
         if (isUsing) {
             mc.options.keyUse.setPressed(false);
-            mc.player.inventory.selectedSlot = preSlot;
+            InvUtils.swap(preSlot);
             isUsing = false;
         }
     }

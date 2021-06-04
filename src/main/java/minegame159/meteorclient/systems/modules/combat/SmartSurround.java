@@ -17,6 +17,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -80,7 +81,7 @@ public class SmartSurround extends Module {
 
                     if (item instanceof BlockItem) {
                         slot = i;
-                        mc.player.inventory.selectedSlot = slot;
+                        InvUtils.swap(slot);
                         break;
                     }
                 }
@@ -123,7 +124,7 @@ public class SmartSurround extends Module {
 
             if (mc.world.raycast(new RaycastContext(mc.player.getPos(), crystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() != HitResult.Type.MISS) {
                 slot = -1;
-                mc.player.inventory.selectedSlot = oldSlot;
+                InvUtils.swap(oldSlot);
             }
         }
     }
@@ -142,7 +143,7 @@ public class SmartSurround extends Module {
 
             if (item == Items.OBSIDIAN || item == Items.CRYING_OBSIDIAN) {
                 newSlot = i;
-                mc.player.inventory.selectedSlot = newSlot;
+                InvUtils.swap(newSlot);
                 break;
             }
         }

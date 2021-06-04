@@ -21,6 +21,7 @@ import minegame159.meteorclient.systems.modules.combat.BedAura;
 import minegame159.meteorclient.systems.modules.combat.CrystalAura;
 import minegame159.meteorclient.systems.modules.combat.KillAura;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -234,7 +235,7 @@ public class AutoGap extends Module {
     }
 
     private void changeSlot(int slot) {
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
         this.slot = slot;
     }
 

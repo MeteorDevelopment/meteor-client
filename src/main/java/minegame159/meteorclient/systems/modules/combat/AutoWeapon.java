@@ -12,6 +12,7 @@ import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.EntityGroup;
 import net.minecraft.item.AxeItem;
@@ -52,7 +53,7 @@ public class AutoWeapon extends Module {
 
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
-        mc.player.inventory.selectedSlot = getBestWeapon();
+        InvUtils.swap(getBestWeapon());
     }
 
     private int getBestWeapon(){

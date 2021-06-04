@@ -193,12 +193,12 @@ public class Burrow extends Module {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
         }
 
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
-        mc.player.inventory.selectedSlot = prevSlot;
+        InvUtils.swap(prevSlot);
 
         if (instant.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));

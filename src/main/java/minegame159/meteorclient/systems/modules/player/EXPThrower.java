@@ -66,8 +66,8 @@ public class EXPThrower extends Module {
 
     private void throwExp(int slot) {
         int preSelectedSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
         mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-        mc.player.inventory.selectedSlot = preSelectedSlot;
+        InvUtils.swap(preSelectedSlot);
     }
 }

@@ -19,6 +19,7 @@ import minegame159.meteorclient.systems.modules.combat.BedAura;
 import minegame159.meteorclient.systems.modules.combat.CrystalAura;
 import minegame159.meteorclient.systems.modules.combat.KillAura;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
@@ -193,7 +194,7 @@ public class AutoEat extends Module {
     }
 
     private void changeSlot(int slot) {
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
         this.slot = slot;
     }
 

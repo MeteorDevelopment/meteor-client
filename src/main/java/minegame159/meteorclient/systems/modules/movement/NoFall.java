@@ -191,9 +191,9 @@ public class NoFall extends Module {
     private void useBucket(int slot, boolean setPlacedWater) {
         Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
             int preSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = slot;
+            InvUtils.swap(slot);
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-            mc.player.inventory.selectedSlot = preSlot;
+            InvUtils.swap(preSlot);
 
             placedWater = setPlacedWater;
         });

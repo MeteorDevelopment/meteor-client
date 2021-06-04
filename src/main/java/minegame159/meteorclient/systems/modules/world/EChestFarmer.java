@@ -93,9 +93,7 @@ public class EChestFarmer extends Module {
                 if (mc.crosshairTarget.getType() != HitResult.Type.BLOCK) return;
                 BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
                 if(mc.world.getBlockState(pos).getBlock() == Blocks.ENDER_CHEST){
-                    if (mc.player.inventory.selectedSlot != slot) {
-                        mc.player.inventory.selectedSlot = slot;
-                    }
+                    InvUtils.swap(slot);
                     mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
                     numLeft -= 1;
                     if(numLeft == 0){

@@ -130,9 +130,9 @@ public class InstaMine extends Module {
                     int crystalSlot = InvUtils.findItemInHotbar(Items.END_CRYSTAL);
                     int prevSlot = mc.player.inventory.selectedSlot;
 
-                    if (crystalHand != Hand.OFF_HAND && crystalSlot != -1) mc.player.inventory.selectedSlot = crystalSlot;
+                    if (crystalHand != Hand.OFF_HAND && crystalSlot != -1) InvUtils.swap(crystalSlot);
                     mc.interactionManager.interactBlock(mc.player, mc.world, crystalHand, new BlockHitResult(mc.player.getPos(), direction, blockPos, false));
-                    if (crystalHand != Hand.OFF_HAND) mc.player.inventory.selectedSlot = prevSlot;
+                    if (crystalHand != Hand.OFF_HAND) InvUtils.swap(prevSlot);
                 }
 
                 if (rotate.get()) {

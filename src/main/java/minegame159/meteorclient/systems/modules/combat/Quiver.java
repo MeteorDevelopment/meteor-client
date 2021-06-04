@@ -102,7 +102,7 @@ public class Quiver extends Module {
             if (chatInfo.get()) error("No bow found... disabling.");
             toggle();
             return;
-        } else mc.player.inventory.selectedSlot = bowSlot;
+        } else InvUtils.swap(bowSlot);
 
         for (Map.Entry<ArrowType, Integer> slot : getAllArrows().entrySet()) {
             if (slot.getKey() == ArrowType.Strength && !foundStrength) {
@@ -132,7 +132,7 @@ public class Quiver extends Module {
 
     @Override
     public void onDeactivate() {
-        mc.player.inventory.selectedSlot = prevSlot;
+        InvUtils.swap(prevSlot);
     }
 
     @EventHandler

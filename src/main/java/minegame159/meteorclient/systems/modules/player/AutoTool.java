@@ -18,6 +18,7 @@ import minegame159.meteorclient.mixin.ShovelItemAccessor;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -108,7 +109,7 @@ public class AutoTool extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && prevSlot != -1) {
-            mc.player.inventory.selectedSlot = prevSlot;
+            InvUtils.swap(prevSlot);
             prevSlot = -1;
         }
 
@@ -176,7 +177,7 @@ public class AutoTool extends Module {
     
         if (bestSlot != -1) {
             if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = bestSlot;
+            InvUtils.swap(bestSlot);
         }
     }
 

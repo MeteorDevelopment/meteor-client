@@ -120,7 +120,7 @@ public class AutoCity extends Module {
             BlockUtils.place(blockPosTarget.down(1), Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
         }
 
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
 
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPosTarget), Rotations.getPitch(blockPosTarget), () -> mine(blockPosTarget));
         else mine(blockPosTarget);
