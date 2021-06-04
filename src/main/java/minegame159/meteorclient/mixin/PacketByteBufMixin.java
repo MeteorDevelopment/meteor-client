@@ -5,15 +5,15 @@
 
 package minegame159.meteorclient.mixin;
 
-import net.minecraft.network.PacketInflater;
+import net.minecraft.network.PacketByteBuf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
-@Mixin(PacketInflater.class)
-public class PacketInflaterMixin {
-    @ModifyConstant(method = "decode", constant = @Constant(intValue = 2097152))
-    private int increaseLimit(int old) {
-        return 2000000000;
+@Mixin(PacketByteBuf.class)
+public class PacketByteBufMixin {
+    @ModifyConstant(method = "readCompoundTag",constant = @Constant(longValue = 2097152L))
+    private long increaseLimit(long old) {
+        return 2000000000L;
     }
 }
