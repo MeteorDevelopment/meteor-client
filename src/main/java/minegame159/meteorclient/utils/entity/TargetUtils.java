@@ -26,7 +26,7 @@ public class TargetUtils {
 
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
         ENTITIES.clear();
-        getList(isGood, sortPriority, ENTITIES, 1);
+        getList(ENTITIES, isGood, sortPriority, 1);
         if (!ENTITIES.isEmpty()) {
             return ENTITIES.get(0);
         }
@@ -34,7 +34,7 @@ public class TargetUtils {
         return null;
     }
 
-    public static void getList(Predicate<Entity> isGood, SortPriority sortPriority, List<Entity> targetList, int maxCount) {
+    public static void getList(List<Entity> targetList, Predicate<Entity> isGood, SortPriority sortPriority, int maxCount) {
         targetList.clear();
 
         for (Entity entity : mc.world.getEntities()) {
