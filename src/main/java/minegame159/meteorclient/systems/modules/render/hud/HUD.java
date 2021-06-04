@@ -118,6 +118,7 @@ public class HUD extends Module {
         bottomCenter = new HudElementLayer(RENDERER, elements, AlignmentX.Center, AlignmentY.Bottom, 48, 64);
         bottomCenter.add(new ArmorHud(this));
         bottomCenter.add(new CompassHud(this));
+        bottomCenter.add(new ContainerViewerHud(this));
         bottomCenter.add(new TotemHud(this));
 
         // Bottom Right
