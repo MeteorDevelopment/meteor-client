@@ -392,7 +392,6 @@ public class Modules extends System<Modules> {
 
     private void initPlayer() {
         add(new AntiHunger());
-        add(new AutoDrop());
         add(new AutoEat());
         add(new AutoFish());
         add(new AutoGap());
@@ -542,6 +541,7 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new TPSSync());
         add(new VanillaSpoof());
+        add(new InventoryTweaks());
     }
 
     public static class ModuleRegistry extends Registry<Module> {

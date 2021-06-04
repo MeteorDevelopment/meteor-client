@@ -6,6 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.entity.DropItemsEvent;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
 import minegame159.meteorclient.events.entity.player.BreakBlockEvent;
 import minegame159.meteorclient.events.entity.player.InteractItemEvent;
@@ -18,6 +19,8 @@ import minegame159.meteorclient.systems.modules.world.Nuker;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -37,6 +40,22 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Shadow private int blockBreakingCooldown;
 
     @Shadow protected abstract void syncSelectedSlot();
+
+    @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
+    private void onClickSlot(int syncId, int slotId, int clickData, SlotActionType actionType, PlayerEntity player, CallbackInfoReturnable<ItemStack> info) {
+        if (actionType == SlotActionType.THROW && slotId >= 0 && slotId < player.currentScreenHandler.slots.size()) {
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.slots.get(slotId).getStack())).isCancelled()) info.setReturnValue(ItemStack.EMPTY);
+        }
+        else if (slotId == -999) {
+            // Clicking outside of inventory
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.inventory.getCursorStack())).isCancelled()) info.setReturnValue(ItemStack.EMPTY);
+        }
+    }
+
+    @Inject(method = "dropCreativeStack", at = @At("HEAD"), cancellable = true)
+    private void onDropCreativeStack(ItemStack stack, CallbackInfo info) {
+        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) info.cancel();
+    }
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {

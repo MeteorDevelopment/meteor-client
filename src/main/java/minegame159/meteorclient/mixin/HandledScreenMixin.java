@@ -7,6 +7,7 @@ package minegame159.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.misc.InventoryTweaks;
 import minegame159.meteorclient.systems.modules.render.BetterTooltips;
 import minegame159.meteorclient.systems.modules.render.ItemHighlight;
 import minegame159.meteorclient.utils.Utils;
@@ -29,6 +30,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
@@ -46,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import javax.annotation.Nullable;
 
 import static minegame159.meteorclient.utils.Utils.mc;
+import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
@@ -54,6 +57,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Shadow protected int x;
     @Shadow protected int y;
 
+    @Shadow @org.jetbrains.annotations.Nullable protected abstract Slot getSlotAt(double xPosition, double yPosition);
+
+    @Shadow public abstract T getScreenHandler();
+
+    @Shadow private boolean doubleClicking;
+
+    @Shadow protected abstract void onMouseClick(Slot slot, int invSlot, int clickData, SlotActionType actionType);
+
     private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "textures/container.png");
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
 
@@ -61,6 +72,15 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     public HandledScreenMixin(Text title) {
         super(title);
+    }
+
+    // Inventory Tweaks
+    @Inject(method = "mouseDragged", at = @At("TAIL"))
+    private void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> info) {
+        if (button != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
+
+        Slot slot = getSlotAt(mouseX, mouseY);
+        if (slot != null && slot.hasStack() && hasShiftDown()) onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
     }
 
     // Better Tooltips
