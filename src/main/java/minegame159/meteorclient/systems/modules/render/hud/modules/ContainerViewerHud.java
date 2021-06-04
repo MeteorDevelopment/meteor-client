@@ -18,14 +18,13 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
 public class ContainerViewerHud extends HudElement {
-
     private static final Identifier TEXTURE = new Identifier("meteor-client", "textures/container.png");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Scale of inventory viewer.")
+        .description("Scale of container viewer.")
         .defaultValue(3)
         .min(0.1)
         .sliderMin(0.1)
@@ -35,7 +34,7 @@ public class ContainerViewerHud extends HudElement {
 
     private final Setting<Boolean> echestNoItem = sgGeneral.add(new BoolSetting.Builder()
         .name("echest-when-empty")
-        .description("Display contents of ender chest if not holding any other container")
+        .description("Display contents of ender chest if not holding any other container.")
         .defaultValue(false)
         .build()
     );
@@ -43,7 +42,7 @@ public class ContainerViewerHud extends HudElement {
     private final ItemStack[] inventory = new ItemStack[9 * 3];
 
     public ContainerViewerHud(HUD hud) {
-        super(hud, "container-viewer", "Displays containers.", false);
+        super(hud, "container-viewer", "Displays held containers.", false);
     }
 
     @Override
@@ -97,6 +96,4 @@ public class ContainerViewerHud extends HudElement {
         mc.getTextureManager().bindTexture(TEXTURE);
         DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
     }
-
-
 }
