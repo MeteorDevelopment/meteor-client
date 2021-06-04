@@ -82,7 +82,14 @@ public class NoInteract extends Module {
     }
     
     private boolean filterBlocks(Block block) {
-        // Storage blocks
+        return isStorageBlock(block) || isRedstoneBlock(block) ||
+                
+                // Others
+                block instanceof RespawnAnchorBlock ||
+                block instanceof BedBlock;
+    }
+    
+    private boolean isStorageBlock(Block block) {
         return block instanceof ChestBlock ||
                 block instanceof EnderChestBlock ||
                 block instanceof AbstractFurnaceBlock ||
@@ -90,20 +97,17 @@ public class NoInteract extends Module {
                 block instanceof BarrelBlock ||
                 block instanceof HopperBlock ||
                 block instanceof ShulkerBoxBlock ||
-                block instanceof DispenserBlock ||
-        
-                // Redstone blocks
-                block instanceof TrapdoorBlock ||
+                block instanceof DispenserBlock;
+    }
+    
+    private boolean isRedstoneBlock(Block block) {
+        return block instanceof TrapdoorBlock ||
                 block instanceof DoorBlock ||
                 block instanceof FenceGateBlock ||
                 block instanceof LeverBlock ||
                 block instanceof AbstractButtonBlock ||
                 block instanceof AbstractPressurePlateBlock ||
                 block instanceof RepeaterBlock ||
-                block instanceof ComparatorBlock ||
-        
-                // Other blocks
-                block instanceof RespawnAnchorBlock ||
-                block instanceof BedBlock;
+                block instanceof ComparatorBlock;
     }
 }
