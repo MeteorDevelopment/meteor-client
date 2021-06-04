@@ -310,7 +310,7 @@ public class BedAura extends Module {
         int slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem);
         if (slot == -1) return;
 
-        if (autoSwitch.get()) mc.player.inventory.selectedSlot = slot;
+        if (autoSwitch.get()) InvUtils.swap(slot);
 
         Hand hand = InvUtils.getHand(itemStack -> itemStack.getItem() instanceof BedItem);
         if (hand == null) return;

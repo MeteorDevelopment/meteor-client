@@ -386,11 +386,11 @@ public class AnchorAura extends Module {
 
         if (glowSlot != -1 && nonGlowSlot != -1) {
             int preSlot = mc.player.inventory.selectedSlot;
-            mc.player.inventory.selectedSlot = glowSlot;
+            InvUtils.swap(glowSlot);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-            mc.player.inventory.selectedSlot = nonGlowSlot;
+            InvUtils.swap(nonGlowSlot);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-            mc.player.inventory.selectedSlot = preSlot;
+            InvUtils.swap(preSlot);
         }
     }
 

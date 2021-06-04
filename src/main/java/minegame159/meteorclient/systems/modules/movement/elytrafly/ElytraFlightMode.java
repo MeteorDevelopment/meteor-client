@@ -97,10 +97,10 @@ public class ElytraFlightMode {
                 ticksLeft = settings.autoPilotFireworkDelay.get() * 20;
                 if (slot != -1) {
                     int prevSlot = mc.player.inventory.selectedSlot;
-                    mc.player.inventory.selectedSlot = slot;
+                    InvUtils.swap(slot);
                     mc.interactionManager.interactItem(mc.player, mc.world, hand);
                     mc.player.swingHand(hand);
-                    mc.player.inventory.selectedSlot = prevSlot;
+                    InvUtils.swap(prevSlot);
                 } else if (mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET) {
                     mc.interactionManager.interactItem(mc.player, mc.world, hand);
                     mc.player.swingHand(hand);

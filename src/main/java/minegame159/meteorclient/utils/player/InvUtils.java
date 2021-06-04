@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils.player;
 
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
@@ -43,13 +44,15 @@ public class InvUtils {
         return ACTION;
     }
 
-    // Hand
+    public static boolean swap(int slot) {
+        if (slot < 0 || slot > 8) return false;
 
-    public static Hand getHand(Item item) {
-        Hand hand = Hand.MAIN_HAND;
-        if (mc.player.getOffHandStack().getItem() == item) hand = Hand.OFF_HAND;
-        return hand;
+        mc.player.inventory.selectedSlot = slot;
+        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+        return true;
     }
+
+    // Find item in hand
 
     public static Hand getHand(Predicate<ItemStack> isGood) {
         Hand hand = null;
@@ -59,7 +62,11 @@ public class InvUtils {
         return hand;
     }
 
-    // Find item
+    public static Hand getHand(Item item) {
+        return getHand(itemStack -> itemStack.getItem() == item);
+    }
+
+    // Find item and count
 
     public static FindItemResult findItemWithCount(Item item) {
         findItemResult.slot = -1;
@@ -77,33 +84,66 @@ public class InvUtils {
         return findItemResult;
     }
 
-    // Find slot
+    // Find count
 
-    //Hotbar
-    public static int findItemInHotbar(Predicate<ItemStack> isGood) {
-        return findItem(isGood, 0, 8);
+    public static int getCountInHotbar(Item item) {
+        return getCountInHotbar(itemStack -> itemStack.getItem() == item);
     }
+
+    public static int getCountInHotbar(Predicate<ItemStack> isGood) {
+        return getCount(isGood, 0, 8);
+    }
+
+    public static int getCountInInventory(Item item) {
+        return getCountInInventory(itemStack -> itemStack.getItem() == item);
+    }
+
+    public static int getCountInInventory(Predicate<ItemStack> isGood) {
+        return getCount(isGood, 9, 35);
+    }
+
+    public static int getCountInWhole(Item item) {
+        return getCountInWhole(itemStack -> itemStack.getItem() == item);
+    }
+
+    public static int getCountInWhole(Predicate<ItemStack> isGood) {
+        return getCount(isGood, 0, 35);
+    }
+
+    public static int getCount(Predicate<ItemStack> isGood, int startSlot, int endSlot) {
+        int count = 0;
+
+        for (int i = startSlot; i <= endSlot; i++) {
+            if (isGood.test(mc.player.inventory.getStack(i))) count++;
+        }
+
+        return count;
+    }
+
+    // Find slot
 
     public static int findItemInHotbar(Item item) {
         return findItemInHotbar(itemStack -> itemStack.getItem() == item);
     }
 
-    //Main
-    public static int findItemInInventory(Predicate<ItemStack> isGood) {
-        return findItem(isGood, 9, 35);
+    public static int findItemInHotbar(Predicate<ItemStack> isGood) {
+        return findItem(isGood, 0, 8);
     }
 
     public static int findItemInInventory(Item item) {
         return findItemInInventory(itemStack -> itemStack.getItem() == item);
     }
 
-    // Whole
-    public static int findItemInWhole(Predicate<ItemStack> isGood) {
-        return findItem(isGood, 0, 35);
+    public static int findItemInInventory(Predicate<ItemStack> isGood) {
+        return findItem(isGood, 9, 35);
     }
 
     public static int findItemInWhole(Item item) {
         return findItemInWhole(itemStack -> itemStack.getItem() == item);
+    }
+
+    public static int findItemInWhole(Predicate<ItemStack> isGood) {
+        return findItem(isGood, 0, 35);
     }
 
     private static int findItem(Predicate<ItemStack> isGood, int startSlot, int endSlot) {

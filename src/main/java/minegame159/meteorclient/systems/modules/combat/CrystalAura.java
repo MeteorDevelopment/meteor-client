@@ -16,7 +16,6 @@ import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IBox;
-import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.mixininterface.IRaycastContext;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.rendering.Renderer;
@@ -723,8 +722,7 @@ public class CrystalAura extends Module {
                     int slot = InvUtils.findItemInHotbar(this::isValidWeaknessItem);
                     if (slot == -1) return;
 
-                    mc.player.inventory.selectedSlot = slot;
-                    ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+                    InvUtils.swap(slot);
 
                     switchTimer = 1;
                     return;
@@ -931,8 +929,7 @@ public class CrystalAura extends Module {
         int prevSlot = mc.player.inventory.selectedSlot;
 
         if (autoSwitch.get() != AutoSwitchMode.None && hand != Hand.OFF_HAND && slot != -1) {
-            mc.player.inventory.selectedSlot = slot;
-            ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+            InvUtils.swap(slot);
         }
 
         // Place
@@ -961,8 +958,7 @@ public class CrystalAura extends Module {
 
         // Switch back
         if (autoSwitch.get() == AutoSwitchMode.Silent) {
-            mc.player.inventory.selectedSlot = prevSlot;
-            ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+            InvUtils.swap(prevSlot);
         }
     }
 

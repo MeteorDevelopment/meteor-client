@@ -12,6 +12,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -79,7 +80,7 @@ public class AutoNametag extends Module {
                     ItemStack itemStack = mc.player.inventory.getStack(i);
                     if (itemStack.getItem() instanceof NameTagItem) {
                         preSlot = mc.player.inventory.selectedSlot;
-                        mc.player.inventory.selectedSlot = i;
+                        InvUtils.swap(i);
                         foundNametag = true;
                         break;
                     }
@@ -99,6 +100,6 @@ public class AutoNametag extends Module {
 
     private void interact() {
         mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
-        mc.player.inventory.selectedSlot = preSlot;
+        InvUtils.swap(preSlot);
     }
 }

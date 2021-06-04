@@ -83,7 +83,7 @@ public class AutoShearer extends Module {
                 int slot = InvUtils.findItemInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
 
                 if (slot != -1) {
-                    mc.player.inventory.selectedSlot = slot;
+                    InvUtils.swap(slot);
                     foundShears = true;
                 }
             }
@@ -101,6 +101,6 @@ public class AutoShearer extends Module {
 
     private void interact() {
         mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
-        mc.player.inventory.selectedSlot = preSlot;
+        InvUtils.swap(preSlot);
     }
 }
