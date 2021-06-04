@@ -9,7 +9,9 @@ import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -28,6 +30,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.SwordItem;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.world.GameMode;
 
@@ -209,8 +212,16 @@ public class KillAura extends Module {
             .build()
     );
 
-    private int hitDelayTimer;
-    private int randomDelayTimer;
+    private final Setting<Integer> switchDelay = sgDelay.add(new IntSetting.Builder()
+            .name("switch-delay")
+            .description("How many ticks to wait before hitting an entity after switching hotbar slots.")
+            .defaultValue(0)
+            .min(0)
+            .sliderMax(10)
+            .build()
+    );
+
+    private int hitDelayTimer, randomDelayTimer, switchTimer;
     private boolean wasPathing;
 
     private final List<Entity> entityList = new ArrayList<>();
@@ -257,6 +268,24 @@ public class KillAura extends Module {
             wasPathing = true;
         }
 
+        if (autoSwitch.get()) {
+            int slot = InvUtils.findItemInHotbar(itemStack -> {
+                Item item = itemStack.getItem();
+
+                switch(weapon.get()) {
+                    case Axe:        return item instanceof AxeItem;
+                    case Sword:      return item instanceof SwordItem;
+                    case Both:       return item instanceof AxeItem || item instanceof SwordItem;
+                    default:         return true;
+                }
+            });
+
+            if (slot != -1) {
+                mc.player.inventory.selectedSlot = slot;
+                ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+            }
+        }
+
         if (delayCheck()) {
             entityList.forEach(this::attack);
         }
@@ -271,20 +300,30 @@ public class KillAura extends Module {
         }
     }
 
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
+            switchTimer = switchDelay.get();
+        }
+    }
+
     private double randomOffset() {
         return Math.random() * 4 - 2;
     }
 
     private boolean delayCheck() {
+        if (switchTimer > 0) {
+            switchTimer--;
+            return false;
+        }
+
+
         if (smartDelay.get()) return mc.player.getAttackCooldownProgress(0.5f) >= 1;
 
         if (hitDelayTimer >= 0) {
             hitDelayTimer--;
             return false;
-        }
-        else {
-            hitDelayTimer = hitDelay.get();
-        }
+        } else hitDelayTimer = hitDelay.get();
 
         if (randomDelayEnabled.get()) {
             if (randomDelayTimer > 0) {
@@ -303,32 +342,14 @@ public class KillAura extends Module {
         if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return false;
         if (onlyWhenLook.get() && (!target.equals(mc.targetedEntity))) return false;
 
-        if (rotation.get() == RotationMode.OnHit) {
-            rotate(target, () -> hitEntity(target));
-        } else {
-            hitEntity(target);
-        }
+        if (rotation.get() == RotationMode.OnHit) rotate(target, () -> hitEntity(target));
+        else hitEntity(target);
+
 
         return true;
     }
 
     private void hitEntity(Entity target) {
-        if (autoSwitch.get()) {
-            int slot = InvUtils.findItemInHotbar(itemStack -> {
-                Item item = itemStack.getItem();
-
-                switch(weapon.get()) {
-                    case Axe:        return item instanceof AxeItem;
-                    case Sword:      return item instanceof SwordItem;
-                    case Both:       return item instanceof AxeItem || item instanceof SwordItem;
-                    default:         return true;
-                }
-            });
-
-            if (slot == -1) return;
-            mc.player.inventory.selectedSlot = slot;
-        }
-
         if (!itemInHand()) return;
 
         mc.interactionManager.attackEntity(mc.player, target);
