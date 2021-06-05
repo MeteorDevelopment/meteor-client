@@ -63,7 +63,9 @@ shadowJar {
 processResources {
 	inputs.property "version", project.version
 
-	from(sourceSets.main.resources.srcDirs) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
 		expand "version": project.version
 
