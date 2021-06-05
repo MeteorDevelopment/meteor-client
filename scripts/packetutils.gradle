@@ -97,6 +97,17 @@ task generatePacketUtils() {
 
         // Generate PacketUtils.java
         def writer = new File("src/main/java/minegame159/meteorclient/utils/network/PacketUtils.java").newWriter()
+
+        /*
+        * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+        * Copyright (c) 2021 Meteor Development.
+        */
+
+        writer << "/*\n"
+        writer << "* This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).\n"
+        writer << "* Copyright (c) 2021 Meteor Development.\n"
+        writer << "*/\n\n"
+
         writer << "package minegame159.meteorclient.utils.network;\n\n"
 
         //   Write imports
