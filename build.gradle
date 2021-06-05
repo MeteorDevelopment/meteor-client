@@ -100,7 +100,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
+    archiveClassifier.set("javadoc")
     from javadoc
 }
 
