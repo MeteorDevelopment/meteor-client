@@ -19,6 +19,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.Vec3;
+import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.client.options.Perspective;
@@ -27,6 +28,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.lwjgl.glfw.GLFW;
 
 public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -173,7 +175,7 @@ public class Freecam extends Module {
                 }
             }
         }
-        
+
         double s = 0.5;
         if (mc.options.keySprint.isPressed()) s = 1;
 
@@ -220,6 +222,8 @@ public class Freecam extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
+        if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+
         boolean cancel = true;
 
         if (mc.options.keyForward.matchesKey(event.key, 0) || mc.options.keyForward.matchesMouse(event.key)) {
