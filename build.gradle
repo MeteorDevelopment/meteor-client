@@ -99,6 +99,11 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 	from sourceSets.main.allSource
 }
 
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
 publishing {
     publications {
         maven(MavenPublication) {
@@ -108,6 +113,10 @@ publishing {
 
             artifact(sourcesJar) {
                 builtBy remapSourcesJar
+            }
+
+            artifact(javadocJar) {
+                builtBy javadocJar
             }
         }
     }
