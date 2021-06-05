@@ -103,7 +103,6 @@
     "MouseMixin",
     "MultiplayerScreenMixin",
     "NamespaceResourceManagerMixin",
-    "PacketByteBufMixin",
     "PacketInflaterMixin",
     "ParticleManagerMixin",
     "PickaxeItemAccessor",
