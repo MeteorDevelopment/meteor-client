@@ -51,7 +51,7 @@ public class SpawnProofer extends Module{
             .name("delay")
             .description("Delay in ticks between placing blocks")
             .defaultValue(0)
-            .min(0).max(10)
+            .min(0)
             .build()
     );
     
@@ -102,6 +102,7 @@ public class SpawnProofer extends Module{
                     (potentialSpawns.get() && spawn == BlockUtils.MobSpawning.Potential)) positions.add(blockPos);
         });
         
+        // Place blocks
         BlockIterator.after(() -> {
             if (delay.get() == 0) {
                 
