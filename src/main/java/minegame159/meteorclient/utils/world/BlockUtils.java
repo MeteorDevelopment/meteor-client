@@ -9,6 +9,8 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.BlockHalf;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.Hand;
@@ -16,11 +18,18 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
 public class BlockUtils {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
+    public enum MobSpawning {
+        Always,
+        Potential,
+        Never
+    }
 
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int priority, boolean swing, boolean checkEntities, boolean swap, boolean swapBack) {
         if (slot == -1 || !canPlace(blockPos, checkEntities)) return false;
@@ -115,5 +124,26 @@ public class BlockUtils {
 
         return null;
     }
-
+    
+    public static MobSpawning validSpawn(BlockPos blockPos) {
+        BlockState blockState = mc.world.getBlockState(blockPos);
+    
+        if (blockPos.getY() == 0) return MobSpawning.Never;
+        if (!(blockState.getBlock() instanceof AirBlock)) return MobSpawning.Never;
+    
+        if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
+            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawning.Never;
+            if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawning.Never;
+        }
+    
+        if (mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawning.Potential;
+        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawning.Always;
+    
+        return MobSpawning.Never;
+    }
+    
+    public static boolean topSurface(BlockState blockState) {
+        if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
+        else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
+    }
 }

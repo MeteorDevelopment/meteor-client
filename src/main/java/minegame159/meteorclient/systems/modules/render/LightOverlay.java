@@ -17,16 +17,9 @@ import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockIterator;
-import net.minecraft.block.AirBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SlabBlock;
-import net.minecraft.block.StairsBlock;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.block.enums.SlabType;
+import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.LightType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +92,7 @@ public class LightOverlay extends Module {
         crosses.clear();
 
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-            switch (validSpawn(blockPos, blockState)) {
+            switch (BlockUtils.validSpawn(blockPos)) {
                 case Never:
                     break;
                 case Potential:
@@ -144,25 +137,5 @@ public class LightOverlay extends Module {
             mb.line(x, y, z, x + 1, y, z + 1, c);
             mb.line(x + 1, y, z, x, y, z + 1, c);
         }
-    }
-
-    private Spawn validSpawn(BlockPos blockPos, BlockState blockState) {
-        if (!(blockState.getBlock() instanceof AirBlock)) return Spawn.Never;
-
-        bp.set(blockPos).move(0, -1, 0);
-        if (!topSurface(mc.world.getBlockState(bp))) {
-            if (mc.world.getBlockState(bp).getCollisionShape(mc.world, bp) != VoxelShapes.fullCube()) return Spawn.Never;
-            if (mc.world.getBlockState(bp).isTranslucent(mc.world, bp)) return Spawn.Never;
-        }
-
-        if (mc.world.getLightLevel(blockPos, 0) <= 7) return Spawn.Potential;
-        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return Spawn.Always;
-
-        return Spawn.Never;
-    }
-
-    private boolean topSurface(BlockState blockState) {
-        if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
-        else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
     }
 }
