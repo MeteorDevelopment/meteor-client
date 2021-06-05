@@ -100,18 +100,17 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 publishing {
-	publications {
-		maven(MavenPublication) {
-			artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
-				classifier null
-				builtBy remapJar
-			}
+    publications {
+        maven(MavenPublication) {
+            artifact(remapJar) {
+                builtBy remapJar
+            }
 
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+        }
+    }
 }
 
 apply from: "scripts/packetutils.gradle"
