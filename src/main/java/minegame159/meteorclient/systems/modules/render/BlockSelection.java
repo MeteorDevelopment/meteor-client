@@ -92,8 +92,16 @@ public class BlockSelection extends Module {
         }
         else {
             if (advanced.get()) {
-                for (Box b : shape.getBoundingBoxes()) {
-                    render(bp, b);
+                if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Lines) {
+                    shape.forEachEdge((minX, minY, minZ, maxX, maxY, maxZ) -> {
+                        Renderer.LINES.line(bp.getX() + minX, bp.getY() + minY, bp.getZ() + minZ, bp.getX() + maxX, bp.getY() + maxY, bp.getZ() + maxZ, lineColor.get());
+                    });
+                }
+
+                if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Sides) {
+                    for (Box b : shape.getBoundingBoxes()) {
+                        render(bp, b);
+                    }
                 }
             }
             else {
