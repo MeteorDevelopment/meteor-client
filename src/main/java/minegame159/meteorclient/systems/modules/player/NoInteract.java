@@ -8,9 +8,6 @@ package minegame159.meteorclient.systems.modules.player;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.orbit.EventPriority;
-import minegame159.meteorclient.events.entity.player.InteractBlockEvent;
-import minegame159.meteorclient.events.entity.player.InteractEntityEvent;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
@@ -18,12 +15,12 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
 import net.minecraft.block.*;
 import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
@@ -58,18 +55,12 @@ public class NoInteract extends Module {
         if (!event.screen.isPauseScreen() && !(event.screen instanceof AbstractInventoryScreen) && (event.screen instanceof HandledScreen)) event.setCancelled(true);
     }
     
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private void onInteractBlock(InteractBlockEvent event) {
-        if (event.blockHitResult.getType() == HitResult.Type.BLOCK &&
-                blocks.get().contains(mc.world.getBlockState(event.blockHitResult.getBlockPos()).getBlock())) {
-            event.cancel();
-        }
+    public boolean noInteractBlock(Block block) {
+        return Modules.get().get(this.getClass()).isActive() && blocks.get().contains(block);
     }
     
-    @EventHandler(priority = EventPriority.HIGHEST)
-    private void onInteractEntity(InteractEntityEvent event) {
-        if (!(event.entity instanceof LivingEntity)) return;
-        if (entities.get().containsKey(event.entity.getType())) event.setCancelled(entities.get().getBoolean(event.entity.getType()));
+    public boolean noInteractEntity(Entity entity) {
+        return Modules.get().get(this.getClass()).isActive() && entities.get().getBoolean(entity.getType());
     }
     
     private List<Block> getDefaultBlocks() {

@@ -11,8 +11,10 @@ import minegame159.meteorclient.events.entity.player.*;
 import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.NoBreakDelay;
+import minegame159.meteorclient.systems.modules.player.NoInteract;
 import minegame159.meteorclient.systems.modules.player.Reach;
 import minegame159.meteorclient.systems.modules.world.Nuker;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
@@ -27,6 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,6 +40,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
+    @Final @Shadow private MinecraftClient client;
+    
     @Shadow private int blockBreakingCooldown;
 
     @Shadow protected abstract void syncSelectedSlot();
@@ -102,16 +107,14 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
     private void onInteractBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> info) {
-        InteractBlockEvent event = MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player, world, hand, hitResult));
-        if (event.toReturn != null) info.setReturnValue(event.toReturn);
-        if (event.isCancelled()) info.cancel();
+        if (Modules.get().get(NoInteract.class).noInteractBlock(client.world.getBlockState(hitResult.getBlockPos()).getBlock()))
+            info.setReturnValue(ActionResult.FAIL);
     }
     
     @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true)
     private void onInteractEntity(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> info) {
-        InteractEntityEvent event = MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(player, entity, hand));
-        
-        if (event.isCancelled()) info.cancel();
+        if (Modules.get().get(NoInteract.class).noInteractEntity(entity))
+            info.setReturnValue(ActionResult.FAIL);
     }
 
     @Override
