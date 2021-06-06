@@ -10,14 +10,12 @@ import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
 import minegame159.meteorclient.rendering.gl.Shader;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 
+import static minegame159.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 
 public class Blur {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final int ITERATIONS = 4;
     private static final int OFFSET = 4;
 

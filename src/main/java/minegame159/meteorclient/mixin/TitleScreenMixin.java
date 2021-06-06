@@ -14,7 +14,6 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -23,6 +22,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
@@ -83,7 +84,8 @@ public class TitleScreenMixin extends Screen {
 
             MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com/api/version", s -> {
                 Version latestVer = new Version(s);
-                if (latestVer.isHigherThan(Config.get().version)) MinecraftClient.getInstance().openScreen(new NewUpdateScreen(GuiThemes.get(), latestVer));
+                if (latestVer.isHigherThan(Config.get().version))
+                    mc.openScreen(new NewUpdateScreen(GuiThemes.get(), latestVer));
             }));
         }
     }

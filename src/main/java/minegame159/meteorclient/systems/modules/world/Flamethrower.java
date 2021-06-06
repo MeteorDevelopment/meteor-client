@@ -138,7 +138,7 @@ public class Flamethrower extends Module {
 
         InvUtils.swap(preSlot);
     }
-    
+
     private boolean selectSlot() {
         preSlot = mc.player.inventory.selectedSlot;
 
@@ -155,7 +155,7 @@ public class Flamethrower extends Module {
 
         boolean foundFlintAndSteel = !findNewFlintAndSteel;
         if (findNewFlintAndSteel) {
-            foundFlintAndSteel = InvUtils.swap(InvUtils.findItemInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL));
+            foundFlintAndSteel = InvUtils.swap(InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL).getSlot());
         }
         return foundFlintAndSteel;
     }

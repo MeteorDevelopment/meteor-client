@@ -10,16 +10,16 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.events.world.BlockActivateEvent;
 import net.minecraft.block.EnderChestBlock;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class EChestMemory {
     public static final DefaultedList<ItemStack> ITEMS = DefaultedList.ofSize(27, ItemStack.EMPTY);
-    private static final MinecraftClient MC = MinecraftClient.getInstance();
     private static int echestOpenedState;
 
     public static void init() {
@@ -39,8 +39,8 @@ public class EChestMemory {
         }
         if (echestOpenedState == 0) return;
 
-        if (!(MC.currentScreen instanceof GenericContainerScreen)) return;
-        GenericContainerScreenHandler container = ((GenericContainerScreen) MC.currentScreen).getScreenHandler();
+        if (!(mc.currentScreen instanceof GenericContainerScreen)) return;
+        GenericContainerScreenHandler container = ((GenericContainerScreen) mc.currentScreen).getScreenHandler();
         if (container == null) return;
         Inventory inv = container.getInventory();
 

@@ -22,7 +22,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -40,10 +39,9 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
 import static minegame159.meteorclient.utils.Utils.WHITE;
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class PlayerUtils {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
@@ -258,10 +256,13 @@ public class PlayerUtils {
     }
 
     public static Dimension getDimension() {
-        switch (MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath()) {
-            case "the_nether": return Dimension.Nether;
-            case "the_end":    return Dimension.End;
-            default:           return Dimension.Overworld;
+        switch (mc.world.getRegistryKey().getValue().getPath()) {
+            case "the_nether":
+                return Dimension.Nether;
+            case "the_end":
+                return Dimension.End;
+            default:
+                return Dimension.Overworld;
         }
     }
 

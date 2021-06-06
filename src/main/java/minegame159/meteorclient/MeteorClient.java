@@ -53,6 +53,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
@@ -60,8 +62,6 @@ public class MeteorClient implements ClientModInitializer {
     public static final Logger LOG = LogManager.getLogger();
 
     public static CustomTextRenderer FONT;
-
-    private MinecraftClient mc;
 
     public Screen screenToOpen;
 
@@ -72,15 +72,14 @@ public class MeteorClient implements ClientModInitializer {
             return;
         }
 
+        Utils.mc = MinecraftClient.getInstance();
+
         LOG.info("Initializing Meteor Client");
 
         List<MeteorAddon> addons = new ArrayList<>();
         for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
             addons.add(entrypoint.getEntrypoint());
         }
-
-        mc = MinecraftClient.getInstance();
-        Utils.mc = mc;
 
         Systems.addPreLoadTask(() -> {
             if (!Modules.get().getFile().exists()) {

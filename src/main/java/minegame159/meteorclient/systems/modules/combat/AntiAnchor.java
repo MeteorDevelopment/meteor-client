@@ -17,7 +17,6 @@ import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SlabBlock;
-import net.minecraft.util.Hand;
 
 public class AntiAnchor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -42,25 +41,18 @@ public class AntiAnchor extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.world.getBlockState(mc.player.getBlockPos().add(0, 2, 0)).getBlock() == Blocks.RESPAWN_ANCHOR
-                && mc.world.getBlockState(mc.player.getBlockPos().add(0, 1, 0)).getBlock() == Blocks.AIR){
-
-            boolean notSneaking = !mc.player.isSneaking();
-            if (notSneaking) mc.player.setSneaking(true);
+        if (mc.world.getBlockState(mc.player.getBlockPos().up(2)).getBlock() == Blocks.RESPAWN_ANCHOR
+            && mc.world.getBlockState(mc.player.getBlockPos().up()).getBlock() == Blocks.AIR) {
 
             BlockUtils.place(
-                    mc.player.getBlockPos().add(0, 1, 0),
-                    Hand.MAIN_HAND,
-                    InvUtils.findItemInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof SlabBlock),
-                    rotate.get(),
-                    15,
-                    swing.get(),
-                    true,
-                    true,
-                    true
+                mc.player.getBlockPos().add(0, 1, 0),
+                InvUtils.findInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof SlabBlock),
+                rotate.get(),
+                15,
+                swing.get(),
+                false,
+                true
             );
-
-            if (notSneaking) mc.player.setSneaking(false);
         }
     }
 }

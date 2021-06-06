@@ -15,9 +15,11 @@ import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.world.Timer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
+import net.minecraft.block.AnvilBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -32,18 +34,55 @@ import net.minecraft.util.math.Direction;
  */
 public class Burrow extends Module {
 
-    public enum Block {
-        EChest,
-        Obsidian
+    @Override
+    public void onActivate() {
+        if (!mc.world.getBlockState(mc.player.getBlockPos()).getMaterial().isReplaceable()) {
+            error("Already burrowed, disabling.");
+            toggle();
+            return;
+        }
+
+        if (!PlayerUtils.isInHole(false) && onlyInHole.get()) {
+            error("Not in a hole, disabling.");
+            toggle();
+            return;
+        }
+
+        if (!checkHead()) {
+            error("Not enough headroom to burrow, disabling.");
+            toggle();
+            return;
+        }
+
+        FindItemResult result = getItem();
+
+        if (!result.isHotbar() && !result.isOffhand()) {
+            error("No burrow block found, disabling.");
+            toggle();
+            return;
+        }
+
+        blockPos.set(mc.player.getBlockPos());
+
+        Modules.get().get(Timer.class).setOverride(this.timer.get());
+
+        shouldBurrow = false;
+
+        if (automatic.get()) {
+            if (instant.get()) shouldBurrow = true;
+            else mc.player.jump();
+        } else {
+            info("Waiting for manual jump.");
+        }
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Block> block = sgGeneral.add(new EnumSetting.Builder<Block>()
-            .name("block-to-use")
-            .description("The block to use for Burrow.")
-            .defaultValue(Block.EChest)
-            .build()
+        .name("block-to-use")
+        .description("The block to use for Burrow.")
+        .defaultValue(Block.EChest)
+        .build()
     );
 
     private final Setting<Boolean> instant = sgGeneral.add(new BoolSetting.Builder()
@@ -105,57 +144,39 @@ public class Burrow extends Module {
             .name("rotate")
             .description("Faces the block you place server-side.")
             .defaultValue(true)
-            .build()
+        .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-
-    private int prevSlot;
-    private int slot;
-
     private boolean shouldBurrow;
 
     public Burrow() {
         super(Categories.Combat, "Burrow", "Attempts to clip you into a block.");
     }
 
-    @Override
-    public void onActivate() {
-        if (!mc.world.getBlockState(mc.player.getBlockPos()).getMaterial().isReplaceable()) {
-            error("Already burrowed, disabling.");
-            toggle();
-            return;
+    private void burrow() {
+        if (center.get()) PlayerUtils.centerPlayer();
+
+        if (instant.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
         }
 
-        if (!PlayerUtils.isInHole(false) && onlyInHole.get()) {
-            error("Not in a hole, disabling.");
-            toggle();
-            return;
-        }
 
-        if (!checkHead()) {
-            error("Not enough headroom to burrow, disabling.");
-            toggle();
-            return;
-        }
+        int prevSlot = mc.player.inventory.selectedSlot;
+        InvUtils.swap(getItem().getSlot());
 
-        if (!checkInventory()) {
-            error("No burrow block found, disabling.");
-            toggle();
-            return;
-        }
+        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
+        mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
-        blockPos.set(mc.player.getBlockPos());
+        InvUtils.swap(prevSlot);
 
-        Modules.get().get(Timer.class).setOverride(this.timer.get());
-
-        shouldBurrow = false;
-
-        if (automatic.get()) {
-            if (instant.get()) shouldBurrow = true;
-            else mc.player.jump();
+        if (instant.get()) {
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
         } else {
-            info("Waiting for manual jump.");
+            mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
         }
     }
 
@@ -170,49 +191,37 @@ public class Burrow extends Module {
         if (!shouldBurrow && instant.get()) blockPos.set(mc.player.getBlockPos());
 
         if (shouldBurrow) {
-            if (!checkInventory()) return;
             if (!mc.player.isOnGround()) {
                 toggle();
                 return;
             }
 
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
             else burrow();
 
             toggle();
         }
     }
 
-    private void burrow() {
-        if (center.get()) PlayerUtils.centerPlayer();
-
-        if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
-        }
-
-        InvUtils.swap(slot);
-
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
-        mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
-
-        InvUtils.swap(prevSlot);
-
-        if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
-        } else {
-            mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
+    private FindItemResult getItem() {
+        switch (block.get()) {
+            case EChest:
+                return InvUtils.findInHotbar(Items.ENDER_CHEST);
+            case Anvil:
+                return InvUtils.findInHotbar(itemStack -> net.minecraft.block.Block.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock);
+            case Held:
+                return InvUtils.findInHotbar(itemStack -> true);
+            default:
+                return InvUtils.findInHotbar(Items.OBSIDIAN, Items.CRYING_OBSIDIAN);
         }
     }
-
 
     @EventHandler
     private void onKey(KeyEvent event) {
         if (instant.get() && !shouldBurrow) {
             if (event.action == KeyAction.Press && mc.options.keyJump.matchesKey(event.key, 0))
-            shouldBurrow = true;
+                shouldBurrow = true;
             blockPos.set(mc.player.getBlockPos());
         }
     }
@@ -230,12 +239,10 @@ public class Burrow extends Module {
         return air1 & air2 & air3 & air4;
     }
 
-    private boolean checkInventory() {
-        prevSlot = mc.player.inventory.selectedSlot;
-        switch (block.get()) {
-            case Obsidian:  slot = InvUtils.findItemInHotbar(Items.OBSIDIAN); break;
-            case EChest:    slot = InvUtils.findItemInHotbar(Items.ENDER_CHEST); break;
-        }
-        return slot != -1;
+    public enum Block {
+        EChest,
+        Obsidian,
+        Anvil,
+        Held
     }
 }

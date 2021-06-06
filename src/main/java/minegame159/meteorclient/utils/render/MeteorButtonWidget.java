@@ -6,7 +6,6 @@
 package minegame159.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
@@ -14,10 +13,13 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class MeteorButtonWidget extends AbstractPressableButtonWidget {
     public static final Identifier BUTTON_TEXTURE = new Identifier("meteor-client", "textures/button.png");
 
-    public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {};
+    public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {
+    };
     protected final MeteorButtonWidget.PressAction onPress;
     protected final MeteorButtonWidget.TooltipSupplier tooltipSupplier;
 
@@ -44,9 +46,8 @@ public class MeteorButtonWidget extends AbstractPressableButtonWidget {
     }
 
     public void customRender(MatrixStack matrices) {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        TextRenderer textRenderer = minecraftClient.textRenderer;
-        minecraftClient.getTextureManager().bindTexture(BUTTON_TEXTURE);
+        TextRenderer textRenderer = mc.textRenderer;
+        mc.getTextureManager().bindTexture(BUTTON_TEXTURE);
         int j = this.active ? 16777215 : 10526880;
 
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);

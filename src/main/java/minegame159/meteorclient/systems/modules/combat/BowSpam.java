@@ -58,7 +58,8 @@ public class BowSpam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.abilities.creativeMode && InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
+        if (!mc.player.abilities.creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
+            return;
 
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;

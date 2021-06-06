@@ -7,9 +7,10 @@ package minegame159.meteorclient.utils.misc.input;
 
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.utils.misc.CursorStyle;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.options.KeyBinding;
 import org.lwjgl.glfw.GLFW;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Input {
     private static final boolean[] keys = new boolean[512];
@@ -47,7 +48,7 @@ public class Input {
 
     public static void setCursorStyle(CursorStyle style) {
         if (lastCursorStyle != style) {
-            GLFW.glfwSetCursor(MinecraftClient.getInstance().getWindow().getHandle(), style.getGlfwCursor());
+            GLFW.glfwSetCursor(mc.getWindow().getHandle(), style.getGlfwCursor());
             lastCursorStyle = style;
         }
     }

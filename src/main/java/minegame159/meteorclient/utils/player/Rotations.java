@@ -12,7 +12,6 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.misc.Pool;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
@@ -22,8 +21,9 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class Rotations {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);
     private static final List<Rotation> rotations = new ArrayList<>();
     public static float serverYaw;

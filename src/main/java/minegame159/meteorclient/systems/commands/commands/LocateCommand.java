@@ -11,6 +11,7 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.systems.commands.Command;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -143,7 +144,9 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("stronghold").executes(s -> {
-            if (InvUtils.findItemInHotbar(Items.ENDER_EYE) >= 0) {
+            FindItemResult eye = InvUtils.findInHotbar(Items.ENDER_EYE);
+
+            if (eye.found()) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
                 firstStart = null;
                 firstEnd = null;
@@ -151,10 +154,9 @@ public class LocateCommand extends Command {
                 secondEnd = null;
                 MeteorClient.EVENT_BUS.subscribe(this);
                 info("Please throw the first Eye of Ender");
-                return SINGLE_SUCCESS;
             } else {
                 Vec3d coords = findByBlockList(strongholdBlocks);
-                if (coords == null ) {
+                if (coords == null) {
                     error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
                     return SINGLE_SUCCESS;
                 }
@@ -162,8 +164,8 @@ public class LocateCommand extends Command {
                 text.append(formatCoords(coords));
                 text.append(".");
                 info(text);
-                return SINGLE_SUCCESS;
             }
+            return SINGLE_SUCCESS;
         }));
 
         builder.then(literal("nether_fortress").executes(s -> {

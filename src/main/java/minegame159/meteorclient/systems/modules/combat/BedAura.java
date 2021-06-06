@@ -270,7 +270,7 @@ public class BedAura extends Module {
             return;
         }
 
-        if (place.get() && InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof BedItem) != -1) {
+        if (place.get() && InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem).found()) {
             switch (stage) {
                 case Placing:
                     bestPos = getPlacePos(target);
@@ -303,28 +303,27 @@ public class BedAura extends Module {
     }
 
     private void placeBed(BlockPos pos) {
-        if (pos == null || InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof BedItem) == -1) return;
+        FindItemResult result = InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem);
 
-        if (autoMove.get()) doAutoMove();
+        if (result.isMain() && autoMove.get()) doAutoMove();
 
-        int slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem);
-        if (slot == -1) return;
+        result = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BedItem);
+        if (!result.found()) return;
+        if (result.getHand() == null && !autoSwitch.get()) return;
 
-        if (autoSwitch.get()) InvUtils.swap(slot);
-
-        Hand hand = InvUtils.getHand(itemStack -> itemStack.getItem() instanceof BedItem);
-        if (hand == null) return;
-
-        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, hand, slot, false, 100, !noSwing.get(), true, autoSwitch.get(), swapBack.get()));
+        FindItemResult finalRes = result;
+        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, finalRes, false, 0, !noSwing.get(), true, swapBack.get()));
     }
 
     private void breakBed(BlockPos pos) {
         if (pos == null) return;
 
         boolean wasSneaking = mc.player.isSneaking();
-        if (wasSneaking) mc.player.input.sneaking = false;
+        if (wasSneaking) mc.player.setSneaking(false);
+
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, bestPos, false));
-        if (wasSneaking) mc.player.input.sneaking = true;
+
+        mc.player.setSneaking(wasSneaking);
     }
 
     private BlockPos getPlacePos(PlayerEntity target) {
@@ -362,39 +361,34 @@ public class BedAura extends Module {
     private BlockPos getBreakPos(PlayerEntity target) {
         BlockPos targetPos = target.getBlockPos();
 
-        if (checkBreak(Direction.NORTH, target, true)) return targetPos.up().north();
-        if (checkBreak(Direction.SOUTH, target, true)) return targetPos.up().south();
-        if (checkBreak(Direction.EAST, target, true)) return targetPos.up().east();
-        if (checkBreak(Direction.WEST, target, true)) return targetPos.up().west();
+        for (Direction value : Direction.values()) {
+            if (value == Direction.UP || value == Direction.DOWN) continue;
 
-        if (checkBreak(Direction.NORTH, target, false)) return targetPos.north();
-        if (checkBreak(Direction.SOUTH, target, false)) return targetPos.south();
-        if (checkBreak(Direction.EAST, target, false)) return targetPos.east();
-        if (checkBreak(Direction.WEST, target, false)) return targetPos.west();
+            if (checkBreak(target, targetPos.up(), value)) return targetPos.up().offset(value);
+            if (checkBreak(target, targetPos, value)) return targetPos.offset(value);
+            if (checkBreak(target, targetPos.up(2), value)) return targetPos.up(2).offset(value);
+        }
 
         return null;
     }
 
-    private boolean checkBreak(Direction direction, PlayerEntity target, boolean up) {
-        BlockPos headPos = up ? target.getBlockPos().up() : target.getBlockPos();
-
-        if (mc.world.getBlockState(headPos).getBlock() instanceof BedBlock
-                && mc.world.getBlockState(headPos.offset(direction)).getBlock() instanceof BedBlock
-                && (breakMode.get() == Safety.Suicide
-                || (DamageCalcUtils.bedDamage(target, Utils.vec3d(headPos)) >= minDamage.get()
-                && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos.offset(direction))) < maxSelfDamage.get()
-                && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos)) < maxSelfDamage.get()))) {
-            this.direction = direction;
+    private boolean checkBreak(PlayerEntity player, BlockPos targetPos, Direction offset) {
+        if (mc.world.getBlockState(targetPos).getBlock() instanceof BedBlock
+            && mc.world.getBlockState(targetPos.offset(offset)).getBlock() instanceof BedBlock
+            && (breakMode.get() == Safety.Suicide || (DamageCalcUtils.bedDamage(player, Utils.vec3d(targetPos)) >= minDamage.get()
+            && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(targetPos.offset(offset))) < maxSelfDamage.get()
+            && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(targetPos)) < maxSelfDamage.get()))) {
+            this.direction = offset;
             return true;
         }
         return false;
     }
 
     private void doAutoMove() {
-        if (InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() instanceof BedItem) == -1) {
-            int slot = InvUtils.findItemInInventory(itemStack -> itemStack.getItem() instanceof BedItem);
-            InvUtils.move().from(slot).toHotbar(autoMoveSlot.get() - 1);
-        }
+        FindItemResult bed = InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem);
+
+        if (bed.found() && bed.getSlot() != autoMoveSlot.get() - 1)
+            InvUtils.move().from(bed.getSlot()).toHotbar(autoMoveSlot.get() - 1);
     }
 
     private float yawFromDir(Direction direction) {

@@ -6,7 +6,8 @@
 package minegame159.meteorclient.utils.network;
 
 import minegame159.meteorclient.systems.config.Config;
-import net.minecraft.client.MinecraftClient;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class OnlinePlayers {
     private static long lastPingTime;
@@ -18,7 +19,7 @@ public class OnlinePlayers {
             MeteorExecutor.execute(() -> {
                 String url = "http://meteorclient.com/api/online/ping";
 
-                String uuid = MinecraftClient.getInstance().getSession().getUuid();
+                String uuid = mc.getSession().getUuid();
                 if (uuid != null && !uuid.isEmpty() && Config.get().sendDataToApi) url += "?uuid=" + uuid;
 
                 HttpUtils.post(url);

@@ -34,7 +34,6 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
@@ -49,7 +48,7 @@ import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
-    
+
     private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
 
     private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
@@ -201,7 +200,7 @@ public class WaypointsModule extends Module {
         }
     }
 
-    private static class EditWaypointScreen extends WindowScreen {
+    private class EditWaypointScreen extends WindowScreen {
         private final Waypoint waypoint;
         private final boolean newWaypoint;
         private final Runnable action;
@@ -216,8 +215,6 @@ public class WaypointsModule extends Module {
             this.waypoint.validateIcon();
 
             if (newWaypoint) {
-                MinecraftClient mc = MinecraftClient.getInstance();
-
                 this.waypoint.x = (int) mc.player.getX();
                 this.waypoint.y = (int) mc.player.getY() + 2;
                 this.waypoint.z = (int) mc.player.getZ();
@@ -255,7 +252,7 @@ public class WaypointsModule extends Module {
             table.add(theme.label("Color:"));
             list = table.add(theme.horizontalList()).widget();
             list.add(theme.quad(waypoint.color));
-            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
+            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> mc.openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();

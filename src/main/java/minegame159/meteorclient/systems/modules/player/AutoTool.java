@@ -83,105 +83,30 @@ public class AutoTool extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Integer> switchDelay = sgGeneral.add((new IntSetting.Builder()
             .name("switch-delay")
             .description("Delay in ticks before switching tools.")
             .defaultValue(0)
             .build()
     ));
-    
+
     private static final Set<Material> EMPTY_MATERIALS = new HashSet<>(0);
     private static final Set<Block> EMPTY_BLOCKS = new HashSet<>(0);
-    
+
     private int prevSlot;
     private boolean wasPressed;
-    
+
     private boolean shouldSwitch;
     private int ticks;
-    
+
     private BlockState blockState;
-    
+
     public AutoTool() {
         super(Categories.Player, "auto-tool", "Automatically switches to the most effective tool when performing an action.");
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && prevSlot != -1) {
-            InvUtils.swap(prevSlot);
-            prevSlot = -1;
-        }
-
-        wasPressed = mc.options.keyAttack.isPressed();
-    
-        
-        // Switch slots
-        if (shouldSwitch && ticks <= 0) {
-            switchSlots(blockState);
-            shouldSwitch = false;
-        }
-        
-        // Decrease ticks
-        if (ticks > 0) ticks--;
-    }
-
-    @EventHandler(priority = EventPriority.HIGH)
-    private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-        
-        // Get blockState
-        blockState = mc.world.getBlockState(event.blockPos);
-        if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
-    
-        // Check if we should switch to a better tool
-        ItemStack currentStack = mc.player.getMainHandStack();
-        if (!isEffectiveOn(currentStack.getItem(), blockState) || shouldStopUsing(currentStack) || !(currentStack.getItem() instanceof ToolItem)) {
-            shouldSwitch = true;
-            ticks = switchDelay.get();
-        }
-    
-        // Anti break
-        currentStack = mc.player.getMainHandStack();
-        if (shouldStopUsing(currentStack) && currentStack.getItem() instanceof ToolItem) {
-            mc.options.keyAttack.setPressed(false);
-            event.setCancelled(true);
-        }
-    }
-    
-    private void switchSlots(BlockState blockState) {
-        int bestScore = -1;
-        int bestSlot = -1;
-    
-        for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
-        
-            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
-        
-            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
-        
-            int score = 0;
-        
-            score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
-            score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
-            score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
-        
-            if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
-            if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
-            if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
-        
-            if (score > bestScore) {
-                bestScore = score;
-                bestSlot = i;
-            }
-        }
-    
-        if (bestSlot != -1) {
-            if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
-            InvUtils.swap(bestSlot);
-        }
-    }
-
-    public boolean isEffectiveOn(Item item, BlockState blockState) {
+    public static boolean isEffectiveOn(Item item, BlockState blockState) {
         if (item.isEffectiveOn(blockState)) return true;
 
         Set<Material> effectiveMaterials;
@@ -207,6 +132,81 @@ public class AutoTool extends Module {
         }
 
         return effectiveMaterials.contains(blockState.getMaterial()) || effectiveBlocks.contains(blockState.getBlock());
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && prevSlot != -1) {
+            InvUtils.swap(prevSlot);
+            prevSlot = -1;
+        }
+
+        wasPressed = mc.options.keyAttack.isPressed();
+
+
+        // Switch slots
+        if (shouldSwitch && ticks <= 0) {
+            switchSlots(blockState);
+            shouldSwitch = false;
+        }
+
+        // Decrease ticks
+        if (ticks > 0) ticks--;
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onStartBreakingBlock(StartBreakingBlockEvent event) {
+
+        // Get blockState
+        blockState = mc.world.getBlockState(event.blockPos);
+        if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
+
+        // Check if we should switch to a better tool
+        ItemStack currentStack = mc.player.getMainHandStack();
+        if (!isEffectiveOn(currentStack.getItem(), blockState) || shouldStopUsing(currentStack) || !(currentStack.getItem() instanceof ToolItem)) {
+            shouldSwitch = true;
+            ticks = switchDelay.get();
+        }
+
+        // Anti break
+        currentStack = mc.player.getMainHandStack();
+        if (shouldStopUsing(currentStack) && currentStack.getItem() instanceof ToolItem) {
+            mc.options.keyAttack.setPressed(false);
+            event.setCancelled(true);
+        }
+    }
+
+    private void switchSlots(BlockState blockState) {
+        int bestScore = -1;
+        int bestSlot = -1;
+
+        for (int i = 0; i < 9; i++) {
+            ItemStack itemStack = mc.player.inventory.getStack(i);
+
+            if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
+
+            if (silkTouchForEnderChest.get() && blockState.getBlock() == Blocks.ENDER_CHEST && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+
+            int score = 0;
+
+            score += Math.round(itemStack.getMiningSpeedMultiplier(blockState));
+            score += EnchantmentHelper.getLevel(Enchantments.UNBREAKING, itemStack);
+            score += EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, itemStack);
+
+            if (preferMending.get()) score += EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack);
+            if (prefer.get() == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
+            if (prefer.get() == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestSlot = i;
+            }
+        }
+
+        if (bestSlot != -1) {
+            if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
+            InvUtils.swap(bestSlot);
+        }
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {

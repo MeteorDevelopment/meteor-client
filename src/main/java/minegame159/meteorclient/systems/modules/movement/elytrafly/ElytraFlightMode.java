@@ -7,6 +7,7 @@ package minegame159.meteorclient.systems.modules.movement.elytrafly;
 
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
@@ -40,9 +41,9 @@ public class ElytraFlightMode {
 
             if (chestStack.getItem() == Items.ELYTRA) {
                 if (chestStack.getMaxDamage() - chestStack.getDamage() <= settings.replaceDurability.get()) {
-                    int slot = InvUtils.findItemInWhole(stack -> stack.getMaxDamage() - stack.getDamage() > settings.replaceDurability.get() && stack.getItem() == Items.ELYTRA);
+                    FindItemResult elytra = InvUtils.find(stack -> stack.getMaxDamage() - stack.getDamage() > settings.replaceDurability.get() && stack.getItem() == Items.ELYTRA);
 
-                    InvUtils.move().from(slot).toArmor(2);
+                    InvUtils.move().from(elytra.getSlot()).toArmor(2);
                 }
             }
         }
@@ -85,25 +86,31 @@ public class ElytraFlightMode {
     }
 
     public void handleAutopilot() {
-        if (settings.moveForward.get()) if (mc.player.getY() > settings.autoPilotMinimumHeight.get()) mc.options.keyForward.setPressed(true);
-        lastForwardPressed = true;
-        if (settings.useFireworks.get()) {
-            int slot = InvUtils.findItemInHotbar(Items.FIREWORK_ROCKET);
+        if (!mc.player.isFallFlying()) return;
 
-            if (!mc.player.isFallFlying()) return;
-            if (slot == -1 && mc.player.getOffHandStack().getItem() != Items.FIREWORK_ROCKET) return;
-            Hand hand = InvUtils.getHand(Items.FIREWORK_ROCKET);
+        if (settings.moveForward.get() && mc.player.getY() > settings.autoPilotMinimumHeight.get()) {
+            mc.options.keyForward.setPressed(true);
+            lastForwardPressed = true;
+        }
+
+        if (settings.useFireworks.get()) {
             if (ticksLeft <= 0) {
                 ticksLeft = settings.autoPilotFireworkDelay.get() * 20;
-                if (slot != -1) {
+
+                FindItemResult itemResult = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
+                if (!itemResult.found()) return;
+
+                if (itemResult.isOffhand()) {
+                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+                    mc.player.swingHand(Hand.OFF_HAND);
+                } else {
                     int prevSlot = mc.player.inventory.selectedSlot;
-                    InvUtils.swap(slot);
-                    mc.interactionManager.interactItem(mc.player, mc.world, hand);
-                    mc.player.swingHand(hand);
+                    InvUtils.swap(itemResult.getSlot());
+
+                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                    mc.player.swingHand(Hand.MAIN_HAND);
+
                     InvUtils.swap(prevSlot);
-                } else if (mc.player.getOffHandStack().getItem() == Items.FIREWORK_ROCKET) {
-                    mc.interactionManager.interactItem(mc.player, mc.world, hand);
-                    mc.player.swingHand(hand);
                 }
             }
             ticksLeft--;
