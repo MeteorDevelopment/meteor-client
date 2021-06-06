@@ -6,7 +6,7 @@ orbs:
 parameters:
   version:
     type: string
-    default: 0.4.3
+    default: 0.4.4
 
 general:
   branches:
@@ -43,7 +43,7 @@ jobs:
 
       - store_artifacts:
           path: build/libs/
-      
+
       - node/install:
           install-yarn: true
 
