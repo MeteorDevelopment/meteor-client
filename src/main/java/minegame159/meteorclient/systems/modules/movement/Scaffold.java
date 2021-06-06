@@ -33,37 +33,44 @@ public class Scaffold extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Selected blocks.")
         .defaultValue(new ArrayList<>())
         .build()
     );
+
     private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("blocks-filter")
         .description("How to use the block list setting")
         .defaultValue(ListMode.Blacklist)
         .build()
     );
+
     private final Setting<Boolean> fastTower = sgGeneral.add(new BoolSetting.Builder()
         .name("fast-tower")
         .description("Whether or not to scaffold upwards faster.")
         .defaultValue(false)
         .build()
     );
+
     private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
         .name("swing")
         .description("Renders your client-side swing.")
         .defaultValue(false)
         .build()
     );
+
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-switch")
         .description("Automatically swaps to a block before placing.")
         .defaultValue(true)
         .build()
     );
+
     // Render
+
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
@@ -77,6 +84,7 @@ public class Scaffold extends Module {
         .defaultValue(true)
         .build()
     );
+
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .description("The side color of the target block rendering.")
@@ -127,10 +135,8 @@ public class Scaffold extends Module {
         FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack, blockPos));
         if (!item.found()) return;
 
-        if (item.getHand() == null) {
-            if (autoSwitch.get()) InvUtils.swap(item.getSlot());
-            else return;
-        }
+
+        if (item.getHand() == null && !autoSwitch.get()) return;
 
         // Move down if shifting
         if (mc.options.keySneak.isPressed() && !mc.options.keyJump.isPressed()) {
