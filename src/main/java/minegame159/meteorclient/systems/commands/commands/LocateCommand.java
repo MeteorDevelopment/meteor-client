@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.commands.commands;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
@@ -19,8 +18,8 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
@@ -29,6 +28,7 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,19 +65,19 @@ public class LocateCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("buried_treasure").executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {
                 error("You need to hold a treasure map first");
                 return SINGLE_SUCCESS;
             }
-            CompoundTag tag = stack.getTag();
-            ListTag nbt1 = (ListTag) tag.get("Decorations");
+            NbtCompound tag = stack.getTag();
+            NbtList nbt1 = (NbtList) tag.get("Decorations");
             if (nbt1 == null) {
                 error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
                 return SINGLE_SUCCESS;
             }
 
-            CompoundTag iconNBT = nbt1.getCompound(0);
+            NbtCompound iconNBT = nbt1.getCompound(0);
             if (iconNBT == null) {
                 error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
                 return SINGLE_SUCCESS;
@@ -92,17 +92,17 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("lodestone").executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.COMPASS) {
                 error("You need to hold a lodestone compass");
                 return SINGLE_SUCCESS;
             }
-            CompoundTag tag = stack.getTag();
+            NbtCompound tag = stack.getTag();
             if (tag == null) {
                 error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
             }
-            CompoundTag nbt1 = tag.getCompound("LodestonePos");
+            NbtCompound nbt1 = tag.getCompound("LodestonePos");
             if (nbt1 == null) {
                 error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
@@ -117,19 +117,19 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("mansion").executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {
                 error("You need to hold a woodland explorer map first");
                 return SINGLE_SUCCESS;
             }
-            CompoundTag tag = stack.getTag();
-            ListTag nbt1 = (ListTag) tag.get("Decorations");
+            NbtCompound tag = stack.getTag();
+            NbtList nbt1 = (NbtList) tag.get("Decorations");
             if (nbt1 == null) {
                 error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
             }
 
-            CompoundTag iconNBT = nbt1.getCompound(0);
+            NbtCompound iconNBT = nbt1.getCompound(0);
             if (iconNBT == null) {
                 error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
                 return SINGLE_SUCCESS;
@@ -147,7 +147,8 @@ public class LocateCommand extends Command {
             FindItemResult eye = InvUtils.findInHotbar(Items.ENDER_EYE);
 
             if (eye.found()) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
+                // TODO: Baritone
+                //BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
                 firstStart = null;
                 firstEnd = null;
                 secondStart = null;
@@ -182,12 +183,12 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("monument").executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() == Items.FILLED_MAP) {
-                CompoundTag tag = stack.getTag();
-                ListTag nbt1 = (ListTag) tag.get("Decorations");
+                NbtCompound tag = stack.getTag();
+                NbtList nbt1 = (NbtList) tag.get("Decorations");
                 if (nbt1 != null) {
-                    CompoundTag iconNBT = nbt1.getCompound(0);
+                    NbtCompound iconNBT = nbt1.getCompound(0);
                     if (iconNBT != null) {
                         Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
                         BaseText text = new LiteralText("Monument located at ");
@@ -222,8 +223,10 @@ public class LocateCommand extends Command {
     }
 
     private Vec3d findByBlockList(List<Block> blockList) {
-        List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(),
-                blockList,64,10,32);
+        // TODO: Baritone
+        /*List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(),
+                blockList,64,10,32);*/
+        List<BlockPos> posList = new ArrayList<>();
         if (posList.isEmpty()) {
             return null;
         }
@@ -286,7 +289,8 @@ public class LocateCommand extends Command {
             cancel();
             return;
         }
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
+        // TODO: Baritone
+        //BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
         MeteorClient.EVENT_BUS.unsubscribe(this);
         Vec3d coords = new Vec3d(intersection[0],0,intersection[1]);
         BaseText text = new LiteralText("Stronghold roughly located at ");

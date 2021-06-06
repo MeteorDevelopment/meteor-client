@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.rendering;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
@@ -13,7 +12,6 @@ import minegame159.meteorclient.rendering.gl.Shader;
 import net.minecraft.client.gl.Framebuffer;
 
 import static minegame159.meteorclient.utils.Utils.mc;
-import static org.lwjgl.opengl.GL13.GL_TEXTURE0;
 
 public class Blur {
     private static final int ITERATIONS = 4;
@@ -32,8 +30,8 @@ public class Blur {
         Framebuffer fbo = mc.getFramebuffer();
 
         // Bind framebuffer texture and begin post process quad rendering
-        GlStateManager.activeTexture(GL_TEXTURE0);
-        GlStateManager.bindTexture(fbo.getColorAttachment());
+        //GlStateManager.activeTexture(GL_TEXTURE0);
+        //GlStateManager.bindTexture(fbo.getColorAttachment());
 
         PostProcessRenderer.begin();
 
@@ -63,7 +61,7 @@ public class Blur {
         shaderUp.unbind();
 
         // Unbind framebuffer texture and end post process quad rendering
-        GlStateManager.bindTexture(0);
+        //GlStateManager.bindTexture(0);
 
         PostProcessRenderer.end();
     }

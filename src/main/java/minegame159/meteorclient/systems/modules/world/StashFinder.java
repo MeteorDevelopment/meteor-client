@@ -5,12 +5,9 @@
 
 package minegame159.meteorclient.systems.modules.world;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
@@ -59,7 +56,7 @@ public class StashFinder extends Module {
             .min(1)
             .build()
     );
-    
+
     private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
             .name("minimum-distance")
             .description("The minimum distance you must be from spawn to record a certain chunk.")
@@ -138,7 +135,8 @@ public class StashFinder extends Module {
                             else timer += currentTime - lastTime;
 
                             manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
+                            // TODO: Test
+                            //RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
                             manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
                             manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
@@ -185,7 +183,8 @@ public class StashFinder extends Module {
             open.action = () -> mc.openScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+            // TODO: Baritone
+            //gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {

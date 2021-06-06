@@ -18,7 +18,6 @@ import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashTextResourceSupplierMixin {
-
     private boolean override = true;
     private final Random random = new Random();
 
@@ -27,7 +26,7 @@ public class SplashTextResourceSupplierMixin {
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
     private void onApply(CallbackInfoReturnable<String> cir) {
         if (Config.get() == null || !Config.get().titleScreenSplashes) return;
-        
+
         if (override) cir.setReturnValue(meteorSplashes.get(random.nextInt(meteorSplashes.size())));
         override = !override;
     }

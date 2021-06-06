@@ -117,13 +117,13 @@ public class NotebotCommand extends Command {
     }
 
     @EventHandler
-    public void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Post event) {
         if (ticks==-1) return;
         ticks++;
     }
 
     @EventHandler
-    public void onReadPacket(PacketEvent.Receive event) {
+    private void onReadPacket(PacketEvent.Receive event) {
         if (event.packet instanceof PlaySoundS2CPacket) {
             PlaySoundS2CPacket sound = (PlaySoundS2CPacket) event.packet;
             if (sound.getSound() == SoundEvents.BLOCK_NOTE_BLOCK_HARP) {

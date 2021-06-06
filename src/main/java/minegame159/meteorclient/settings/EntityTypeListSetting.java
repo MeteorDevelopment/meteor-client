@@ -9,10 +9,10 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.entity.EntityType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -60,13 +60,13 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for (EntityType<?> entityType : get().keySet()) {
             if (get().getBoolean(entityType)) {
-                valueTag.add(StringTag.of(Registry.ENTITY_TYPE.getId(entityType).toString()));
+                valueTag.add(NbtString.of(Registry.ENTITY_TYPE.getId(entityType).toString()));
             }
         }
         tag.put("value", valueTag);
@@ -75,11 +75,11 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
     }
 
     @Override
-    public Object2BooleanMap<EntityType<?>> fromTag(CompoundTag tag) {
+    public Object2BooleanMap<EntityType<?>> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tagI : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tagI : valueTag) {
             EntityType<?> type = Registry.ENTITY_TYPE.get(new Identifier(tagI.asString()));
             if (!onlyAttackable || EntityUtils.isAttackable(type)) get().put(type, true);
         }

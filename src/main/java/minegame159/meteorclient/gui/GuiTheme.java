@@ -29,7 +29,7 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -44,7 +44,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public boolean disableHoverColor;
 
     protected SettingsWidgetFactory settingsFactory;
-    
+
     protected final Map<String, WindowConfig> windowConfigs = new HashMap<>();
 
     public GuiTheme(String name) {
@@ -197,7 +197,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public WidgetScreen proxiesScreen() {
         return new ProxiesScreen(this);
     }
-    
+
     // Colors
 
     public abstract Color textColor();
@@ -255,13 +255,13 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     // Saving / Loading
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
         tag.put("settings", settings.toTag());
 
-        CompoundTag configs = new CompoundTag();
+        NbtCompound configs = new NbtCompound();
         for (String id : windowConfigs.keySet()) {
             configs.put(id, windowConfigs.get(id).toTag());
         }
@@ -271,10 +271,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     @Override
-    public GuiTheme fromTag(CompoundTag tag) {
+    public GuiTheme fromTag(NbtCompound tag) {
         settings.fromTag(tag.getCompound("settings"));
 
-        CompoundTag configs = tag.getCompound("windowConfigs");
+        NbtCompound configs = tag.getCompound("windowConfigs");
         for (String id : configs.getKeys()) {
             windowConfigs.put(id, new WindowConfig().fromTag(configs.getCompound(id)));
         }

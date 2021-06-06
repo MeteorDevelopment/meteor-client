@@ -6,10 +6,10 @@
 package minegame159.meteorclient.settings;
 
 import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -60,12 +60,12 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for (Item item : get()) {
-            valueTag.add(StringTag.of(Registry.ITEM.getId(item).toString()));
+            valueTag.add(NbtString.of(Registry.ITEM.getId(item).toString()));
         }
         tag.put("value", valueTag);
 
@@ -73,11 +73,11 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public List<Item> fromTag(CompoundTag tag) {
+    public List<Item> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tagI : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tagI : valueTag) {
             Item item = Registry.ITEM.get(new Identifier(tagI.asString()));
 
             if (filter == null || filter.test(item)) get().add(item);

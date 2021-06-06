@@ -36,16 +36,16 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -299,12 +299,12 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
-        ListTag modulesTag = new ListTag();
+        NbtList modulesTag = new NbtList();
         for (Module module : getAll()) {
-            CompoundTag moduleTag = module.toTag();
+            NbtCompound moduleTag = module.toTag();
             if (moduleTag != null) modulesTag.add(moduleTag);
         }
         tag.put("modules", modulesTag);
@@ -313,12 +313,12 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public Modules fromTag(CompoundTag tag) {
+    public Modules fromTag(NbtCompound tag) {
         disableAll();
 
-        ListTag modulesTag = tag.getList("modules", 10);
-        for (Tag moduleTagI : modulesTag) {
-            CompoundTag moduleTag = (CompoundTag) moduleTagI;
+        NbtList modulesTag = tag.getList("modules", 10);
+        for (NbtElement moduleTagI : modulesTag) {
+            NbtCompound moduleTag = (NbtCompound) moduleTagI;
             Module module = get(moduleTag.getString("name"));
             if (module != null) module.fromTag(moduleTag);
         }
@@ -550,7 +550,6 @@ public class Modules extends System<Modules> {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
         }
 
-        @Nullable
         @Override
         public Identifier getId(Module entry) {
             return null;
@@ -562,19 +561,17 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public int getRawId(@Nullable Module entry) {
+        public int getRawId(Module entry) {
             return 0;
         }
 
-        @Nullable
         @Override
-        public Module get(@Nullable RegistryKey<Module> key) {
+        public Module get(RegistryKey<Module> key) {
             return null;
         }
 
-        @Nullable
         @Override
-        public Module get(@Nullable Identifier id) {
+        public Module get(Identifier id) {
             return null;
         }
 
@@ -612,6 +609,17 @@ public class Modules extends System<Modules> {
         @Override
         public Iterator<Module> iterator() {
             return new ModuleIterator();
+        }
+
+        @org.jetbrains.annotations.Nullable
+        @Override
+        public Module getRandom(Random random) {
+            return null;
+        }
+
+        @Override
+        public boolean contains(RegistryKey<Module> key) {
+            return false;
         }
 
         private static class ModuleIterator implements Iterator<Module> {

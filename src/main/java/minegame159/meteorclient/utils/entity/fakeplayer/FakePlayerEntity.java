@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
-
     public FakePlayerEntity(String name, float health, boolean copyInv) {
         super(mc.world, new GameProfile(mc.player.getUuid(), name));
 
@@ -37,17 +36,17 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
             setAbsorptionAmount(health - 20);
         }
 
-        if (copyInv) inventory.clone(mc.player.inventory);
+        if (copyInv) getInventory().clone(mc.player.getInventory());
 
         spawn();
     }
     private void spawn() {
-        removed = false;
-        mc.world.addEntity(getEntityId(), this);
+        unsetRemoved();
+        mc.world.addEntity(getId(), this);
     }
 
     public void despawn() {
-        mc.world.removeEntity(getEntityId());
-        removed = true;
+        mc.world.removeEntity(getId(), RemovalReason.DISCARDED);
+        setRemoved(RemovalReason.DISCARDED);
     }
 }

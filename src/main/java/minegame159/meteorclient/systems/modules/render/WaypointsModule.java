@@ -5,9 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
-import baritone.api.pathing.goals.GoalGetToBlock;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.gui.GuiTheme;
@@ -37,7 +34,6 @@ import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
@@ -186,14 +182,15 @@ public class WaypointsModule extends Module {
             // Goto
             if (waypoint.actualDimension == dimension) {
                 WButton gotoB = table.add(theme.button("Goto")).widget();
-                gotoB.action = () -> {
+                // TODO: Baritone
+                /*gotoB.action = () -> {
                     if (mc.player == null || mc.world == null) return;
                     IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                     if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
                     Vec3d vec = Waypoints.get().getCoords(waypoint);
                     BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
                     baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
-                };
+                };*/
             }
 
             table.row();

@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.rendering;
 
+import net.minecraft.client.render.VertexFormat;
 import org.lwjgl.opengl.GL11;
 
 public enum DrawMode {
@@ -16,5 +17,13 @@ public enum DrawMode {
         if (this == Triangles) return GL11.GL_TRIANGLES;
         else if (this == Quads) return GL11.GL_QUADS;
         return GL11.GL_LINES;
+    }
+
+    public VertexFormat.DrawMode getDrawMode() {
+        return switch (this) {
+            case Triangles -> VertexFormat.DrawMode.TRIANGLES;
+            case Lines     -> VertexFormat.DrawMode.DEBUG_LINES;
+            case Quads     -> VertexFormat.DrawMode.QUADS;
+        };
     }
 }

@@ -7,7 +7,7 @@ package minegame159.meteorclient.settings;
 
 import com.google.common.collect.ImmutableList;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,14 +49,14 @@ public class ColorSetting extends Setting<SettingColor> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
         tag.put("value", get().toTag());
         return tag;
     }
 
     @Override
-    public SettingColor fromTag(CompoundTag tag) {
+    public SettingColor fromTag(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
         changed();

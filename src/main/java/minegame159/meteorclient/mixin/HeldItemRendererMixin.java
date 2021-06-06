@@ -6,7 +6,6 @@
 package minegame159.meteorclient.mixin;
 
 import com.google.common.base.MoreObjects;
-import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.HandView;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
@@ -25,7 +24,6 @@ import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(HeldItemRenderer.class)
 public abstract class HeldItemRendererMixin {
-
     @ModifyVariable(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At(value = "STORE", ordinal = 0), index = 6)
     private float modifySwing(float swingProgress) {
         HandView module = Modules.get().get(HandView.class);
@@ -46,10 +44,11 @@ public abstract class HeldItemRendererMixin {
     private void sex(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
         HandView module = Modules.get().get(HandView.class);
         if (!module.isActive()) return;
-        GlStateManager.scaled(module.scaleX.get(), module.scaleY.get(), module.scaleZ.get());
+        // TODO: Fix
+        /*GlStateManager.scaled(module.scaleX.get(), module.scaleY.get(), module.scaleZ.get());
         GlStateManager.translated(module.posX.get(), module.posY.get(), module.posZ.get());
         GlStateManager.rotatef((module.rotationY.get().floatValue() * 360.0f), 1.0f, 0.0f, 0.0f);
         GlStateManager.rotatef(-(module.rotationX.get().floatValue() * 360.0f), 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef((module.rotationZ.get().floatValue() * 360.0f), 0.0f, 0.0f, 1.0f);
+        GlStateManager.rotatef((module.rotationZ.get().floatValue() * 360.0f), 0.0f, 0.0f, 1.0f);*/
     }
 }

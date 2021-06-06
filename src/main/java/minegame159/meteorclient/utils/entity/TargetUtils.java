@@ -95,11 +95,11 @@ public class TargetUtils {
         else if (e1l && !e2l) return 1;
         else if (!e1l) return -1;
 
-        double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.yaw);
-        double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.yaw);
+        double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.getYaw());
+        double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.getYaw());
 
-        double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.pitch);
-        double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.pitch);
+        double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.getPitch());
+        double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.getPitch());
 
         return Double.compare(Math.sqrt(e1yaw * e1yaw + e1pitch * e1pitch), Math.sqrt(e2yaw * e2yaw + e2pitch * e2pitch));
     }

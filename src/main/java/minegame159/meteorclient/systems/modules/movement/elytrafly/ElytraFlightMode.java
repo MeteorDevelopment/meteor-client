@@ -37,7 +37,7 @@ public class ElytraFlightMode {
 
     public void onTick() {
         if (settings.replace.get()) {
-            ItemStack chestStack = mc.player.inventory.getArmorStack(2);
+            ItemStack chestStack = mc.player.getInventory().getArmorStack(2);
 
             if (chestStack.getItem() == Items.ELYTRA) {
                 if (chestStack.getMaxDamage() - chestStack.getDamage() <= settings.replaceDurability.get()) {
@@ -104,7 +104,7 @@ public class ElytraFlightMode {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
                     mc.player.swingHand(Hand.OFF_HAND);
                 } else {
-                    int prevSlot = mc.player.inventory.selectedSlot;
+                    int prevSlot = mc.player.getInventory().selectedSlot;
                     InvUtils.swap(itemResult.getSlot());
 
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);

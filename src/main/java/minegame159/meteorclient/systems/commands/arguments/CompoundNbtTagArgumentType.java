@@ -9,7 +9,7 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.StringNbtReader;
 
 import java.util.Arrays;
@@ -17,14 +17,14 @@ import java.util.Collection;
 
 import static net.minecraft.nbt.StringNbtReader.EXPECTED_VALUE;
 
-public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
+public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
     private static final Collection<String> EXAMPLES = Arrays.asList("{foo:bar}", "{foo:[aa, bb],bar:15}");
 
     public static CompoundNbtTagArgumentType nbtTag() {
         return new CompoundNbtTagArgumentType();
     }
 
-    public CompoundTag parse(StringReader reader) throws CommandSyntaxException {
+    public NbtCompound parse(StringReader reader) throws CommandSyntaxException {
         reader.skipWhitespace();
         if (!reader.canRead()) {
             throw EXPECTED_VALUE.createWithContext(reader);
@@ -50,8 +50,8 @@ public class CompoundNbtTagArgumentType implements ArgumentType<CompoundTag> {
         );
     }
 
-    public static CompoundTag getTag(final CommandContext<?> context, String name) {
-        return context.getArgument(name, CompoundTag.class);
+    public static NbtCompound getTag(final CommandContext<?> context, String name) {
+        return context.getArgument(name, NbtCompound.class);
     }
 
     public Collection<String> getExamples() {

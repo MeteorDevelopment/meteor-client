@@ -45,7 +45,7 @@ public class EXPThrower extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (autoToggle.get()) {
-            for (ItemStack itemStack : mc.player.inventory.armor) {
+            for (ItemStack itemStack : mc.player.getInventory().armor) {
                 if (itemStack.isEmpty() || EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) < 1 || itemStack.isDamaged())
                     continue;
                 toggle();
@@ -56,7 +56,7 @@ public class EXPThrower extends Module {
         FindItemResult exp = InvUtils.findInHotbar(Items.EXPERIENCE_BOTTLE);
 
         if (exp.found()) {
-            if (lookDown.get()) Rotations.rotate(mc.player.yaw, 90, () -> throwExp(exp));
+            if (lookDown.get()) Rotations.rotate(mc.player.getYaw(), 90, () -> throwExp(exp));
             else throwExp(exp);
         }
     }
@@ -65,7 +65,7 @@ public class EXPThrower extends Module {
         if (exp.isOffhand()) {
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
         } else {
-            int prevSlot = mc.player.inventory.selectedSlot;
+            int prevSlot = mc.player.getInventory().selectedSlot;
             InvUtils.swap(exp.getSlot());
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
             InvUtils.swap(prevSlot);

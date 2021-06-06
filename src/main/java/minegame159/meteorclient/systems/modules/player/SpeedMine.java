@@ -47,7 +47,7 @@ public class SpeedMine extends Module {
     }
 
     @EventHandler
-    public void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Post event) {
         Mode mode = this.mode.get();
 
         if (mode == Mode.Haste1 || mode == Mode.Haste2) {

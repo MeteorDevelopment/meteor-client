@@ -46,7 +46,7 @@ public class AntiVoid extends Module {
     }
 
     @EventHandler
-    public void onPreTick(TickEvent.Pre event) {
+    private void onPreTick(TickEvent.Pre event) {
         if (mc.player.getY() > 0 || mc.player.getY() < -15) {
             if (hasRun && mode.get() == Mode.Flight && Modules.get().isActive(Flight.class)) {
                 Modules.get().get(Flight.class).toggle();

@@ -50,6 +50,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,9 +73,10 @@ public class MeteorClient implements ClientModInitializer {
             return;
         }
 
-        Utils.mc = MinecraftClient.getInstance();
-
         LOG.info("Initializing Meteor Client");
+
+        Utils.mc = MinecraftClient.getInstance();
+        EVENT_BUS.registerLambdaFactory("minegame159.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
         List<MeteorAddon> addons = new ArrayList<>();
         for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {

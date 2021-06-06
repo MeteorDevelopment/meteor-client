@@ -127,7 +127,7 @@ public class DamageUtils {
     }
 
     private static BlockHitResult raycast(RaycastContext context, BlockPos obsidianPos, boolean ignoreTerrain) {
-        return BlockView.raycast(context, (raycastContext, blockPos) -> {
+        return BlockView.raycast(context.getStart(), context.getEnd(), context, (raycastContext, blockPos) -> {
             BlockState blockState;
             if (blockPos.equals(obsidianPos)) blockState = Blocks.OBSIDIAN.getDefaultState();
             else {

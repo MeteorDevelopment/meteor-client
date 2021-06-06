@@ -313,7 +313,7 @@ public class Notebot extends Module {
 
     public void Play() {
         if (mc.player == null) return;
-        if (mc.player.abilities.creativeMode && stage != Stage.Preview) {
+        if (mc.player.getAbilities().creativeMode && stage != Stage.Preview) {
             error("You need to be in survival mode.");
         }
         else if (stage == Stage.Preview || stage == Stage.Playing) {

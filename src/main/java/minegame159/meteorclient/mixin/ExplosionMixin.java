@@ -20,28 +20,12 @@ import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(Explosion.class)
 public class ExplosionMixin implements IExplosion {
-    @Shadow
-    @Final
-    @Mutable
-    private World world;
-    @Shadow
-    @Final
-    @Mutable
-    @Nullable
-    private Entity entity;
+    @Shadow @Final @Mutable private World world;
+    @Shadow @Final @Mutable @Nullable private Entity entity;
 
-    @Shadow
-    @Final
-    @Mutable
-    private double x;
-    @Shadow
-    @Final
-    @Mutable
-    private double y;
-    @Shadow
-    @Final
-    @Mutable
-    private double z;
+    @Shadow @Final @Mutable private double x;
+    @Shadow @Final @Mutable private double y;
+    @Shadow @Final @Mutable private double z;
 
     @Shadow @Final @Mutable private float power;
     @Shadow @Final @Mutable private boolean createFire;

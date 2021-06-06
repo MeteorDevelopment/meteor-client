@@ -16,7 +16,7 @@ import minegame159.meteorclient.utils.misc.ICopyable;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class SBlockData implements ICopyable<SBlockData>, ISerializable<SBlockData>, IChangeable, IBlockData<SBlockData>, IScreenFactory {
     public ShapeMode shapeMode;
@@ -82,8 +82,8 @@ public class SBlockData implements ICopyable<SBlockData>, ISerializable<SBlockDa
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("shapeMode", shapeMode.name());
         tag.put("lineColor", lineColor.toTag());
@@ -98,7 +98,7 @@ public class SBlockData implements ICopyable<SBlockData>, ISerializable<SBlockDa
     }
 
     @Override
-    public SBlockData fromTag(CompoundTag tag) {
+    public SBlockData fromTag(NbtCompound tag) {
         shapeMode = ShapeMode.valueOf(tag.getString("shapeMode"));
         lineColor.fromTag(tag.getCompound("lineColor"));
         sideColor.fromTag(tag.getCompound("sideColor"));

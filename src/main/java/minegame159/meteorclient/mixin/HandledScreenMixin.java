@@ -26,8 +26,8 @@ import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
@@ -45,14 +45,12 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import javax.annotation.Nullable;
-
 import static minegame159.meteorclient.utils.Utils.mc;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
 @Mixin(HandledScreen.class)
 public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen implements ScreenHandlerProvider<T> {
-    @Shadow @Nullable protected Slot focusedSlot;
+    @Shadow protected Slot focusedSlot;
 
     @Shadow protected int x;
     @Shadow protected int y;
@@ -90,7 +88,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty() && toolips.middleClickOpen()) {
+        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && toolips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
             if (Utils.hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
                 cir.setReturnValue(Utils.openContainer(focusedSlot.getStack(), ITEMS, false));
@@ -101,14 +99,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     //Rendering previews
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty()) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             // Shulker Preview
             if (Utils.hasItems(focusedSlot.getStack()) && toolips.previewShulkers()) {
-                CompoundTag compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
+                NbtCompound compoundTag = focusedSlot.getStack().getSubTag("BlockEntityTag");
                 DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.fromTag(compoundTag, itemStacks);
+                Inventories.readNbt(compoundTag, itemStacks);
                 draw(matrices, itemStacks, mouseX, mouseY, Utils.getShulkerColor(focusedSlot.getStack()));
             }
 
@@ -123,8 +121,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
 
             //Book preview
-            else if ((focusedSlot.getStack().getItem() == Items.WRITABLE_BOOK 
-                ||focusedSlot.getStack().getItem() == Items.WRITTEN_BOOK) 
+            else if ((focusedSlot.getStack().getItem() == Items.WRITABLE_BOOK
+                ||focusedSlot.getStack().getItem() == Items.WRITTEN_BOOK)
                 && toolips.previewBooks()) {
                     drawBookPreview(matrices, focusedSlot.getStack(), mouseX, mouseY);
             }
@@ -134,7 +132,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     // Hiding vanilla tooltips
     @Inject(method = "drawMouseoverTooltip", at = @At("HEAD"), cancellable = true)
     private void onDrawMouseoverTooltip(MatrixStack matrices, int x, int y, CallbackInfo info) {
-        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty()) {
+        if (focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
             if (focusedSlot.getStack().getItem() == Items.FILLED_MAP && toolips.previewMaps()) info.cancel();
@@ -148,7 +146,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     private void draw(MatrixStack matrices, DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY, Color color) {
-        RenderSystem.disableLighting();
+        // TODO: Fix
+        //RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
@@ -157,8 +156,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
         drawBackground(matrices, mouseX, mouseY, color);
 
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        DiffuseLighting.enable();
+        //RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        //DiffuseLighting.enable();
 
         int row = 0;
         int i = 0;
@@ -172,21 +171,21 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
         }
 
-        DiffuseLighting.disable();
+        //DiffuseLighting.disable();
         RenderSystem.enableDepthTest();
     }
 
     private void drawBackground(MatrixStack matrices, int x, int y, Color color) {
-        RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
+        //RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
         client.getTextureManager().bindTexture(TEXTURE_CONTAINER_BACKGROUND);
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, 176, 67, 67, 176);
     }
 
     private void drawMapPreview(MatrixStack matrices, ItemStack stack, int x, int y, int dimensions) {
         GL11.glEnable(GL11.GL_BLEND);
-        RenderSystem.pushMatrix();
+        /*RenderSystem.pushMatrix();
         RenderSystem.disableLighting();
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);*/
 
         int y1 = y - 12;
         int y2 = y1 + dimensions;
@@ -198,7 +197,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
-        buffer.begin(GL11.GL_QUADS, VertexFormats.POSITION_TEXTURE);
+        buffer.begin(VertexFormat.DrawMode.QUADS, VertexFormats.POSITION_TEXTURE);
         buffer.vertex(x1, y2, z).texture(0.0f, 1.0f).next();
         buffer.vertex(x2, y2, z).texture(1.0f, 1.0f).next();
         buffer.vertex(x2, y1, z).texture(1.0f, 0.0f).next();
@@ -215,23 +214,23 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             z = 310;
             double scale = (double) (dimensions - 16) / 128.0D;
 
-            RenderSystem.translatef(x1, y1, z);
-            RenderSystem.scaled(scale, scale, 0);
+            /*RenderSystem.translatef(x1, y1, z);
+            RenderSystem.scaled(scale, scale, 0);*/
             VertexConsumerProvider.Immediate consumer = client.getBufferBuilders().getEntityVertexConsumers();
-            client.gameRenderer.getMapRenderer().draw(matrices, consumer, mapState, false, 0xF000F0);
+            //client.gameRenderer.getMapRenderer().draw(matrices, consumer, mapState, false, 0xF000F0);
         }
 
-        RenderSystem.enableLighting();
-        RenderSystem.popMatrix();
+        /*RenderSystem.enableLighting();
+        RenderSystem.popMatrix();*/
     }
 
 
     private void drawBookPreview(MatrixStack matrices, ItemStack stack, int x, int y) {
         float scale = 0.7f * Modules.get().get(BetterTooltips.class).booksScale.get().floatValue();
         Text page;
-        CompoundTag tag = stack.getTag();
+        NbtCompound tag = stack.getTag();
         if (tag == null) return;
-        ListTag ltag = tag.getList("pages", 8);
+        NbtList ltag = tag.getList("pages", 8);
         if (ltag.size() < 1) return;
         if (stack.getItem() == Items.WRITABLE_BOOK) page = new LiteralText(ltag.getString(0));
         else page = Text.Serializer.fromLenientJson(ltag.getString(0));

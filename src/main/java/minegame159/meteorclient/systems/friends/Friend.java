@@ -7,7 +7,7 @@ package minegame159.meteorclient.systems.friends;
 
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.Objects;
 
@@ -23,19 +23,19 @@ public class Friend implements ISerializable<Friend> {
         this(player.getEntityName());
     }
 
-    public Friend(CompoundTag tag) {
+    public Friend(NbtCompound tag) {
         fromTag(tag);
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
         tag.putString("name", name);
         return tag;
     }
 
     @Override
-    public Friend fromTag(CompoundTag tag) {
+    public Friend fromTag(NbtCompound tag) {
         name = tag.getString("name");
         return this;
     }

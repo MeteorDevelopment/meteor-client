@@ -31,7 +31,7 @@ public class FindItemResult {
 
     public Hand getHand() {
         if (slot == SlotUtils.OFFHAND) return Hand.OFF_HAND;
-        else if (slot == mc.player.inventory.selectedSlot) return Hand.MAIN_HAND;
+        else if (slot == mc.player.getInventory().selectedSlot) return Hand.MAIN_HAND;
         return null;
     }
 

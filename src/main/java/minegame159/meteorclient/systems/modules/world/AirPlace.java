@@ -60,7 +60,7 @@ public class AirPlace extends Module {
             return;
 
         if (mc.options.keyUse.isPressed()) {
-            BlockUtils.place(((BlockHitResult) mc.crosshairTarget).getBlockPos(), Hand.MAIN_HAND, mc.player.inventory.selectedSlot, false, 0, true, true, false);
+            BlockUtils.place(((BlockHitResult) mc.crosshairTarget).getBlockPos(), Hand.MAIN_HAND, mc.player.getInventory().selectedSlot, false, 0, true, true, false);
         }
     }
 

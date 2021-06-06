@@ -1,10 +1,10 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
 	id 'com.github.johnrengelman.shadow' version '6.0.0'
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
@@ -37,10 +37,10 @@ dependencies {
 	modImplementation fabricApi.module("fabric-renderer-indigo", project.api_version)
 
 	// For XRay compatibility
-	modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
+	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-	modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
+	/*modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
 		exclude(group: "net.java.jinput", module: "jinput-platform")
@@ -48,7 +48,7 @@ dependencies {
 		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
 		exclude(group: "org.ow2.asm", module: "asm-debug-all")
 	}
-	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
+	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"

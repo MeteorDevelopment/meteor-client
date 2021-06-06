@@ -106,8 +106,8 @@ public class PlayerModelHud extends HudElement {
         PlayerEntity player = mc.player;
         if (isInEditor()) player = FakeClientPlayer.getPlayer();
 
-        float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.yaw - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
-        float pitch = copyPitch.get() ? player.pitch : (float) customPitch.get();
+        float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
+        float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
         InventoryScreen.drawEntity((int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
     }

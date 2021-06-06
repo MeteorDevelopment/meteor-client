@@ -62,7 +62,7 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double bedDamage(LivingEntity player, Vec3d bed) {
-        if (player instanceof PlayerEntity && ((PlayerEntity) player).abilities.creativeMode) return 0;
+        if (player instanceof PlayerEntity && ((PlayerEntity) player).getAbilities().creativeMode) return 0;
 
         double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
         if (modDistance > 10) return 0;

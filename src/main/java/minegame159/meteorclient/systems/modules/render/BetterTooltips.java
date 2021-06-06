@@ -24,8 +24,8 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -191,7 +191,7 @@ public class BetterTooltips extends Module {
         // Item size tooltip
         if (byteSize.get()) {
             try {
-                event.itemStack.toTag(new CompoundTag()).write(ByteCountDataOutput.INSTANCE);
+                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
 
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
                 String count;
@@ -210,12 +210,12 @@ public class BetterTooltips extends Module {
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
-                CompoundTag tag = event.itemStack.getTag();
+                NbtCompound tag = event.itemStack.getTag();
                 if (tag != null) {
-                    ListTag effects = tag.getList("Effects", 10);
+                    NbtList effects = tag.getList("Effects", 10);
                     if (effects != null) {
                         for (int i = 0; i < effects.size(); i++) {
-                            CompoundTag effectTag = effects.getCompound(i);
+                            NbtCompound effectTag = effects.getCompound(i);
                             byte effectId = effectTag.getByte("EffectId");
                             int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
                             StatusEffectInstance effect = new StatusEffectInstance(StatusEffect.byRawId(effectId), effectDuration, 0);
@@ -238,17 +238,17 @@ public class BetterTooltips extends Module {
         //Beehive
         if (beehive.get()) {
             if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
-                CompoundTag tag = event.itemStack.getTag();
+                NbtCompound tag = event.itemStack.getTag();
                 if (tag != null) {
-                    CompoundTag blockStateTag = tag.getCompound("BlockStateTag");
+                    NbtCompound blockStateTag = tag.getCompound("BlockStateTag");
                     if (blockStateTag != null) {
                         int level = blockStateTag.getInt("honey_level");
                         event.list.add(1, new LiteralText(String.format("%sHoney level: %s%d%s.", 
                             Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
                     }
-                    CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
+                    NbtCompound blockEntityTag = tag.getCompound("BlockEntityTag");
                     if (blockEntityTag != null) {
-                        ListTag beesTag = blockEntityTag.getList("Bees", 10);
+                        NbtList beesTag = blockEntityTag.getList("Bees", 10);
                         event.list.add(1, new LiteralText(String.format("%sBees: %s%d%s.", 
                             Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
                     }
@@ -279,7 +279,7 @@ public class BetterTooltips extends Module {
     }
 
     public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
-        CompoundTag tag = stack.getSubTag("BlockEntityTag");
+        NbtCompound tag = stack.getSubTag("BlockEntityTag");
         if (tag != null) {
             if (tag.contains("LootTable", 8)) {
                 tooltip.add(new LiteralText("???????"));
@@ -287,7 +287,7 @@ public class BetterTooltips extends Module {
 
             if (tag.contains("Items", 9)) {
                 DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.fromTag(tag, items);
+                Inventories.readNbt(tag, items);
 
                 Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
 
@@ -327,9 +327,9 @@ public class BetterTooltips extends Module {
 
     public static boolean willRenderBookPreview(ItemStack stack) {
         if (stack.getItem() != Items.WRITABLE_BOOK && stack.getItem() != Items.WRITTEN_BOOK) return false;
-        CompoundTag tag = stack.getTag();
+        NbtCompound tag = stack.getTag();
         if (tag == null) return false;
-        ListTag ltag = tag.getList("pages", 8);
+        NbtList ltag = tag.getList("pages", 8);
         return ltag.size() >= 1;
     }
 

@@ -30,14 +30,14 @@ public class GiveCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("item", ItemStackArgumentType.itemStack()).executes(context -> {
-            if (!mc.player.abilities.creativeMode) throw NOT_IN_CREATIVE.create();
+            if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
             addItem(item);
-            
+
             return SINGLE_SUCCESS;
         }).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
-            if (!mc.player.abilities.creativeMode) throw NOT_IN_CREATIVE.create();
+            if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "number"), false);
             addItem(item);
@@ -48,7 +48,7 @@ public class GiveCommand extends Command {
 
     private void addItem(ItemStack item) {
 		for(int i = 0; i < 36; i++) {
-		    ItemStack stack = mc.player.inventory.getStack(SlotUtils.indexToId(i));
+		    ItemStack stack = mc.player.getInventory().getStack(SlotUtils.indexToId(i));
 			if (!stack.isEmpty()) continue;
 			mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(SlotUtils.indexToId(i), item));
 			return;

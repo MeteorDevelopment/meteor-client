@@ -6,7 +6,7 @@
 package minegame159.meteorclient.events.game;
 
 import minegame159.meteorclient.events.Cancellable;
-import net.minecraft.client.options.Perspective;
+import net.minecraft.client.option.Perspective;
 
 public class ChangePerspectiveEvent extends Cancellable {
     private static final ChangePerspectiveEvent INSTANCE = new ChangePerspectiveEvent();
