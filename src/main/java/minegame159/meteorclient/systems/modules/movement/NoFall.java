@@ -37,14 +37,6 @@ public class NoFall extends Module {
         Bucket
     }
 
-    private final Setting<PlaceMode> airplaceMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
-        .name("place-mode")
-        .description("Whether place mode places before you die or before you take damage.")
-        .defaultValue(PlaceMode.BeforeDeath)
-        .visible(() -> mode.get() == Mode.AirPlace)
-        .build()
-    );
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -53,6 +45,7 @@ public class NoFall extends Module {
         .defaultValue(Mode.Packet)
         .build()
     );
+
     private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
         .name("anchor")
         .description("Centers the player and reduces movement when using bucket mode.")
@@ -60,12 +53,22 @@ public class NoFall extends Module {
         .visible(() -> mode.get() == Mode.Bucket)
         .build()
     );
+
+    private final Setting<PlaceMode> airplaceMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
+        .name("place-mode")
+        .description("Whether place mode places before you die or before you take damage.")
+        .defaultValue(PlaceMode.BeforeDeath)
+        .visible(() -> mode.get() == Mode.AirPlace)
+        .build()
+    );
+
     private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
         .name("elytra-compatibility")
         .description("Stops No Fall from working when using an elytra.")
         .defaultValue(true)
         .build()
     );
+
     private final Setting<Integer> minFallHeight = sgGeneral.add(new IntSetting.Builder()
         .name("min-fall-height")
         .description("The minimum height to fall from for no fall to work.")
