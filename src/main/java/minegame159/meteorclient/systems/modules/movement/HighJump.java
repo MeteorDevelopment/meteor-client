@@ -15,7 +15,7 @@ import minegame159.meteorclient.systems.modules.Module;
 
 public class HighJump extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> multiplier = sgGeneral.add(new DoubleSetting.Builder()
             .name("jump-multiplier")
             .description("Jump height multiplier.")

@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.gui.renderer.packer;
 
+import com.mojang.blaze3d.platform.TextureUtil;
 import minegame159.meteorclient.utils.render.ByteTexture;
-import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.util.Identifier;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -38,7 +38,7 @@ public class TexturePacker {
                 ByteBuffer rawImageBuffer = null;
 
                 try {
-                    rawImageBuffer = TextureUtil.readAllToByteBuffer(in);
+                    rawImageBuffer = TextureUtil.readResource(in);
                     ((Buffer) rawImageBuffer).rewind();
 
                     IntBuffer w = stack.mallocInt(1);

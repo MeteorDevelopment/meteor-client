@@ -27,13 +27,11 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
-
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
     @Shadow protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
-    @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
+    @Shadow private Framebuffer entityOutlinesFramebuffer;
 
     @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
     private void onLoadEntityOutlineShader(CallbackInfo info) {
@@ -94,7 +92,7 @@ public abstract class WorldRendererMixin {
             this.entityOutlinesFramebuffer = prevBuffer;
         }
     }
-    
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
         Outlines.endRender(tickDelta);

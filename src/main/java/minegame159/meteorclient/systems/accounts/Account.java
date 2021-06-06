@@ -11,7 +11,7 @@ import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.util.Session;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
@@ -59,8 +59,8 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("type", type.name());
         tag.putString("name", name);
@@ -70,7 +70,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     @Override
-    public T fromTag(CompoundTag tag) {
+    public T fromTag(NbtCompound tag) {
         if (!tag.contains("name") || !tag.contains("cache")) throw new NbtException();
 
         name = tag.getString("name");

@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(FoliageColors.class)
 public class FoliageColorsMixin {
-
     @Inject(method = "getBirchColor", at = @At("HEAD"), cancellable = true)
     private static void onGetBirchColor(CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);

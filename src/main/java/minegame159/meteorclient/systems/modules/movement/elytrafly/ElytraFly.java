@@ -230,8 +230,8 @@ public class ElytraFly extends Module {
             currentMode.velX = 0;
             currentMode.velY = event.movement.y;
             currentMode.velZ = 0;
-            currentMode.forward = Vec3d.fromPolar(0, mc.player.yaw).multiply(0.1);
-            currentMode.right = Vec3d.fromPolar(0, mc.player.yaw + 90).multiply(0.1);
+            currentMode.forward = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(0.1);
+            currentMode.right = Vec3d.fromPolar(0, mc.player.getYaw() + 90).multiply(0.1);
 
             // Handle stopInWater
             if (mc.player.isTouchingWater() && stopInWater.get()) {
@@ -320,7 +320,7 @@ public class ElytraFly extends Module {
         private void onInstadropTick(TickEvent.Post event) {
             if (mc.player != null && mc.player.isFallFlying()) {
                 mc.player.setVelocity(0, 0, 0);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
             } else {
                 disableInstaDropListener();
             }

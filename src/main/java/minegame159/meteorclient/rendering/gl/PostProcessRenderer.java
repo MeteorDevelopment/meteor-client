@@ -34,9 +34,9 @@ public class PostProcessRenderer {
         RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();
-        RenderSystem.disableLighting();
+        //RenderSystem.disableLighting();
         RenderSystem.disableCull();
-        RenderSystem.disableAlphaTest();
+        //RenderSystem.disableAlphaTest();
 
         glPushMatrix();
         glLoadIdentity();

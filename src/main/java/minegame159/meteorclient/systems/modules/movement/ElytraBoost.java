@@ -13,6 +13,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Keybind;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.item.FireworkItem;
 import net.minecraft.item.ItemStack;
@@ -81,7 +82,7 @@ public class ElytraBoost extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        fireworks.removeIf(fireworkRocketEntity -> fireworkRocketEntity.removed);
+        fireworks.removeIf(Entity::isRemoved);
     }
 
     private void boost() {
@@ -93,7 +94,7 @@ public class ElytraBoost extends Module {
             FireworkRocketEntity entity = new FireworkRocketEntity(mc.world, itemStack, mc.player);
             fireworks.add(entity);
             if (playSound.get()) mc.world.playSoundFromEntity(mc.player, entity, SoundEvents.ENTITY_FIREWORK_ROCKET_LAUNCH, SoundCategory.AMBIENT, 3.0F, 1.0F);
-            mc.world.addEntity(entity.getEntityId(), entity);
+            mc.world.addEntity(entity.getId(), entity);
         }
     }
 

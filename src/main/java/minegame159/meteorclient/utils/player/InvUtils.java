@@ -38,7 +38,7 @@ public class InvUtils {
         }
 
         if (isGood.test(mc.player.getMainHandStack())) {
-            return new FindItemResult(mc.player.inventory.selectedSlot, mc.player.getMainHandStack().getCount());
+            return new FindItemResult(mc.player.getInventory().selectedSlot, mc.player.getMainHandStack().getCount());
         }
 
         return find(isGood, 0, 8);
@@ -54,14 +54,14 @@ public class InvUtils {
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood) {
-        return find(isGood, 0, mc.player.inventory.size());
+        return find(isGood, 0, mc.player.getInventory().size());
     }
 
     private static FindItemResult find(Predicate<ItemStack> isGood, int start, int end) {
         int slot = -1, count = 0;
 
         for (int i = start; i <= end; i++) {
-            ItemStack stack = mc.player.inventory.getStack(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
 
             if (isGood.test(stack)) {
                 if (slot == -1) slot = i;
@@ -77,7 +77,7 @@ public class InvUtils {
     public static boolean swap(int slot) {
         if (slot < 0 || slot > 8) return false;
 
-        mc.player.inventory.selectedSlot = slot;
+        mc.player.getInventory().selectedSlot = slot;
         ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
         return true;
     }
@@ -199,7 +199,7 @@ public class InvUtils {
         // Other
 
         private void run() {
-            boolean hadEmptyCursor = mc.player.inventory.getCursorStack().isEmpty();
+            boolean hadEmptyCursor = mc.player.currentScreenHandler.getCursorStack().isEmpty();
 
             if (type != null && from != -1 && to != -1) {
                click(from);
@@ -217,7 +217,7 @@ public class InvUtils {
             to = -1;
             data = 0;
 
-            if (!isRecursive && hadEmptyCursor && preType == SlotActionType.PICKUP && preTwo && (preFrom != -1 && preTo != -1) && !mc.player.inventory.getCursorStack().isEmpty()) {
+            if (!isRecursive && hadEmptyCursor && preType == SlotActionType.PICKUP && preTwo && (preFrom != -1 && preTo != -1) && !mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
                 isRecursive = true;
                 InvUtils.click().slotId(preFrom);
                 isRecursive = false;

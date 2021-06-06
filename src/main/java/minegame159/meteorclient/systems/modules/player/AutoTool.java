@@ -11,10 +11,6 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.mixin.AxeItemAccessor;
-import minegame159.meteorclient.mixin.HoeItemAccessor;
-import minegame159.meteorclient.mixin.PickaxeItemAccessor;
-import minegame159.meteorclient.mixin.ShovelItemAccessor;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -107,23 +103,30 @@ public class AutoTool extends Module {
     }
 
     public static boolean isEffectiveOn(Item item, BlockState blockState) {
-        if (item.isEffectiveOn(blockState)) return true;
+        if (item.isSuitableFor(blockState)) return true;
 
         Set<Material> effectiveMaterials;
         Set<Block> effectiveBlocks;
 
+        // TODO: Fix
+
         if (item instanceof PickaxeItem) {
             effectiveMaterials = EMPTY_MATERIALS;
-            effectiveBlocks = PickaxeItemAccessor.getEffectiveBlocks();
+            //effectiveBlocks = PickaxeItemAccessor.getEffectiveBlocks();
+            effectiveBlocks = EMPTY_BLOCKS;
         } else if (item instanceof AxeItem) {
-            effectiveMaterials = AxeItemAccessor.getEffectiveMaterials();
-            effectiveBlocks = AxeItemAccessor.getEffectiveBlocks();
+            effectiveMaterials = EMPTY_MATERIALS;
+            effectiveBlocks = EMPTY_BLOCKS;
+            //effectiveMaterials = AxeItemAccessor.getEffectiveMaterials();
+            //effectiveBlocks = AxeItemAccessor.getEffectiveBlocks();
         } else if (item instanceof ShovelItem) {
             effectiveMaterials = EMPTY_MATERIALS;
-            effectiveBlocks = ShovelItemAccessor.getEffectiveBlocks();
+            //effectiveBlocks = ShovelItemAccessor.getEffectiveBlocks();
+            effectiveBlocks = EMPTY_BLOCKS;
         } else if (item instanceof HoeItem) {
             effectiveMaterials = EMPTY_MATERIALS;
-            effectiveBlocks = HoeItemAccessor.getEffectiveBlocks();
+            effectiveBlocks = EMPTY_BLOCKS;
+            //effectiveBlocks = HoeItemAccessor.getEffectiveBlocks();
         } else if (item instanceof SwordItem) {
             effectiveMaterials = EMPTY_MATERIALS;
             effectiveBlocks = EMPTY_BLOCKS;
@@ -181,7 +184,7 @@ public class AutoTool extends Module {
         int bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (!isEffectiveOn(itemStack.getItem(), blockState) || shouldStopUsing(itemStack) || !(itemStack.getItem() instanceof ToolItem)) continue;
 
@@ -204,7 +207,7 @@ public class AutoTool extends Module {
         }
 
         if (bestSlot != -1) {
-            if (prevSlot == -1) prevSlot = mc.player.inventory.selectedSlot;
+            if (prevSlot == -1) prevSlot = mc.player.getInventory().selectedSlot;
             InvUtils.swap(bestSlot);
         }
     }

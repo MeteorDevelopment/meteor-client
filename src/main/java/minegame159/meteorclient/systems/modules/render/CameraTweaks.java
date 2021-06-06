@@ -14,7 +14,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import net.minecraft.client.options.Perspective;
+import net.minecraft.client.option.Perspective;
 
 public class CameraTweaks extends Module {
 

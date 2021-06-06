@@ -12,7 +12,7 @@ import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -63,15 +63,15 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
         tag.put("profiles", NbtUtils.listToTag(profiles));
         return tag;
     }
 
     @Override
-    public Profiles fromTag(CompoundTag tag) {
-        profiles = NbtUtils.listFromTag(tag.getList("profiles", 10), tag1 -> new Profile().fromTag((CompoundTag) tag1));
+    public Profiles fromTag(NbtCompound tag) {
+        profiles = NbtUtils.listFromTag(tag.getList("profiles", 10), tag1 -> new Profile().fromTag((NbtCompound) tag1));
         return this;
     }
 

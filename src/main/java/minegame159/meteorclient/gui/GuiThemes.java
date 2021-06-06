@@ -7,7 +7,7 @@ package minegame159.meteorclient.gui;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.themes.meteor.MeteorGuiTheme;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 
 import java.io.File;
@@ -31,7 +31,7 @@ public class GuiThemes {
     public static void postInit() {
         if (FILE.exists()) {
             try {
-                CompoundTag tag = NbtIo.read(FILE);
+                NbtCompound tag = NbtIo.read(FILE);
 
                 if (tag != null) select(tag.getString("currentTheme"));
             } catch (IOException e) {
@@ -78,7 +78,7 @@ public class GuiThemes {
                 File file = new File(THEMES_FOLDER, get().name + ".nbt");
 
                 if (file.exists()) {
-                    CompoundTag tag = NbtIo.read(file);
+                    NbtCompound tag = NbtIo.read(file);
                     if (tag != null) get().fromTag(tag);
                 }
             } catch (IOException e) {
@@ -109,7 +109,7 @@ public class GuiThemes {
     private static void saveTheme() {
         if (get() != null) {
             try {
-                CompoundTag tag = get().toTag();
+                NbtCompound tag = get().toTag();
 
                 THEMES_FOLDER.mkdirs();
                 NbtIo.write(tag, new File(THEMES_FOLDER, get().name + ".nbt"));
@@ -121,7 +121,7 @@ public class GuiThemes {
 
     private static void saveGlobal() {
         try {
-            CompoundTag tag = new CompoundTag();
+            NbtCompound tag = new NbtCompound();
             tag.putString("currentTheme", get().name);
 
             FOLDER.mkdirs();

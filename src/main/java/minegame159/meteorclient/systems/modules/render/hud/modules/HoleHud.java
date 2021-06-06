@@ -70,7 +70,7 @@ public class HoleHud extends HudElement {
 
     private Direction get(Facing dir) {
         if (!Utils.canUpdate() || isInEditor()) return Direction.DOWN;
-        return Direction.fromRotation(MathHelper.wrapDegrees(mc.player.yaw + dir.offset));
+        return Direction.fromRotation(MathHelper.wrapDegrees(mc.player.getYaw() + dir.offset));
     }
 
     private void drawBlock(Direction dir, double x, double y) {

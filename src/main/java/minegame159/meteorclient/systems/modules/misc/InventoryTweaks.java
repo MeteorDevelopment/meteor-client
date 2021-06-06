@@ -66,8 +66,8 @@ public class InventoryTweaks extends Module {
         // Auto Drop
         if (mc.currentScreen instanceof HandledScreen<?> || autoDropItems.get().isEmpty()) return;
 
-        for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.inventory.size(); i++) {
-            if (autoDropItems.get().contains(mc.player.inventory.getStack(i).getItem())) {
+        for (int i = autoDropExcludeHotbar.get() ? 9 : 0; i < mc.player.getInventory().size(); i++) {
+            if (autoDropItems.get().contains(mc.player.getInventory().getStack(i).getItem())) {
                 InvUtils.drop().slot(i);
             }
         }

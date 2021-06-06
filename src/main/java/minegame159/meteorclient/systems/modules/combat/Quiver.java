@@ -84,7 +84,7 @@ public class Quiver extends Module {
     public void onActivate() {
         shooting = false;
         int arrowsToShoot = 0;
-        prevSlot = mc.player.inventory.selectedSlot;
+        prevSlot = mc.player.getInventory().selectedSlot;
 
         shotStrength = false;
         shotSpeed = false;
@@ -138,8 +138,8 @@ public class Quiver extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
-        Rotations.setCamRotation(mc.player.yaw, -90);
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
+        Rotations.setCamRotation(mc.player.getYaw(), -90);
 
         boolean canStop = false;
 
@@ -194,7 +194,7 @@ public class Quiver extends Module {
         boolean hasSpeed = mc.player.getActiveStatusEffects().containsKey(StatusEffects.SPEED);
 
         for (int i = 35; i >= 0; i--) {
-            if (mc.player.inventory.getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.inventory.selectedSlot) continue;
+            if (mc.player.getInventory().getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.getInventory().selectedSlot) continue;
 
             if (checkEffects.get()) {
                 if (isType("effect.minecraft.strength", i) && !hasStrength)  arrowSlotMap.put(ArrowType.Strength, i);
@@ -210,7 +210,7 @@ public class Quiver extends Module {
 
     private boolean isType(String type, int slot) {
         assert mc.player != null;
-        ItemStack stack = mc.player.inventory.getStack(slot);
+        ItemStack stack = mc.player.getInventory().getStack(slot);
         if (stack.getItem() == Items.TIPPED_ARROW) {
             List<StatusEffectInstance> effects = PotionUtil.getPotion(stack).getEffects();
             if (effects.size() > 0) {
@@ -233,7 +233,7 @@ public class Quiver extends Module {
         int slot = -1;
         assert mc.player != null;
 
-        for (int i = 0; i < 9; i++) if (mc.player.inventory.getStack(i).getItem() == Items.BOW) slot = i;
+        for (int i = 0; i < 9; i++) if (mc.player.getInventory().getStack(i).getItem() == Items.BOW) slot = i;
 
         return slot;
     }

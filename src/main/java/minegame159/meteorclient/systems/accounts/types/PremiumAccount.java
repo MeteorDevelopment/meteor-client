@@ -17,7 +17,7 @@ import minegame159.meteorclient.systems.accounts.Account;
 import minegame159.meteorclient.systems.accounts.AccountType;
 import minegame159.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.util.Session;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
@@ -89,8 +89,8 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = super.toTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = super.toTag();
 
         tag.putString("password", password);
 
@@ -98,7 +98,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     @Override
-    public PremiumAccount fromTag(CompoundTag tag) {
+    public PremiumAccount fromTag(NbtCompound tag) {
         super.fromTag(tag);
         if (!tag.contains("password")) throw new NbtException();
 

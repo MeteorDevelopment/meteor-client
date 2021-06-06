@@ -5,39 +5,14 @@
 
 package minegame159.meteorclient.mixin.sodium;
 
-import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuad;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadViewMutable;
-import me.jellysquid.mods.sodium.client.model.quad.blender.BiomeColorBlender;
-import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadFacing;
-import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadOrientation;
-import me.jellysquid.mods.sodium.client.model.quad.sink.ModelQuadSinkDelegate;
-import me.jellysquid.mods.sodium.client.render.pipeline.BlockRenderer;
-import me.jellysquid.mods.sodium.client.util.ModelQuadUtil;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.WallHack;
-import minegame159.meteorclient.systems.modules.render.Xray;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.color.block.BlockColorProvider;
-import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.BakedQuad;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.BlockRenderView;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.MinecraftClient;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-@Mixin(value = BlockRenderer.class, remap = false)
+// TODO: Sodium
+@Mixin(MinecraftClient.class)
+//@Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
-
-    @Shadow
+    /*@Shadow
     @Final
     private ModelQuad cachedQuad;
 
@@ -100,5 +75,5 @@ public class SodiumBlockRendererMixin {
         }
 
         consumer.get(facing).write(copy);
-    }
+    }*/
 }

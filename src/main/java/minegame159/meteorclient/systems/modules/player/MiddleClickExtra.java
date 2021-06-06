@@ -94,24 +94,19 @@ public class MiddleClickExtra extends Module {
             return;
         }
 
-        preSlot = mc.player.inventory.selectedSlot;
+        preSlot = mc.player.getInventory().selectedSlot;
         InvUtils.swap(result.getSlot());
 
         switch (mode.get().type) {
-            case Immediate:
+            case Immediate -> {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                 InvUtils.swap(preSlot);
-
-                break;
-            case LongerSingleClick:
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-
-                break;
-            case Longer:
+            }
+            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+            case Longer -> {
                 mc.options.keyUse.setPressed(true);
                 isUsing = true;
-
-                break;
+            }
         }
     }
 

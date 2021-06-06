@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.settings;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -67,12 +67,12 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for (ParticleType<?> particleType : get()) {
-            valueTag.add(StringTag.of(Registry.PARTICLE_TYPE.getId((ParticleType<?>) particleType).toString()));
+            valueTag.add(NbtString.of(Registry.PARTICLE_TYPE.getId((ParticleType<?>) particleType).toString()));
         }
         tag.put("value", valueTag);
 
@@ -80,11 +80,11 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public List<ParticleType<?>> fromTag(CompoundTag tag) {
+    public List<ParticleType<?>> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tagI : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tagI : valueTag) {
             get().add((ParticleType<?>) Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString())));
         }
 

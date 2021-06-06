@@ -20,7 +20,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WorldChunk.class)
 public class WorldChunkMixin {
-    @Shadow @Final private World world;
+    @Shadow @Final World world;
 
     @Inject(method = "setBlockState", at = @At("TAIL"))
     private void onSetBlockState(BlockPos pos, BlockState state, boolean moved, CallbackInfoReturnable<BlockState> info) {

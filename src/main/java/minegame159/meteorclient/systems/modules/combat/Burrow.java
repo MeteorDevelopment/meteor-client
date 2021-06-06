@@ -158,14 +158,14 @@ public class Burrow extends Module {
         if (center.get()) PlayerUtils.centerPlayer();
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
         }
 
 
-        int prevSlot = mc.player.inventory.selectedSlot;
+        int prevSlot = mc.player.getInventory().selectedSlot;
         InvUtils.swap(getItem().getSlot());
 
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
@@ -174,7 +174,7 @@ public class Burrow extends Module {
         InvUtils.swap(prevSlot);
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
         } else {
             mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
         }

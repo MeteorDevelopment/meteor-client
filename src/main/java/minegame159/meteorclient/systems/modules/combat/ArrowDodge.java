@@ -114,8 +114,8 @@ public class ArrowDodge extends Module {
                 }
 
                 if (!didMove) { //If didn't find a suitable position, run back
-                    double yaw = Math.toRadians(e.yaw);
-                    double pitch = Math.toRadians(e.pitch);
+                    double yaw = Math.toRadians(e.getYaw());
+                    double pitch = Math.toRadians(e.getPitch());
                     move(
                             Math.sin(yaw) * Math.cos(pitch) * speed,
                             Math.sin(pitch) * speed,
@@ -136,8 +136,8 @@ public class ArrowDodge extends Module {
             case Client:    mc.player.setVelocity(velX, velY, velZ); break;
             case Packet:
                 Vec3d newPos = mc.player.getPos().add(velX, velY, velZ);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x, newPos.y, newPos.z, false));
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(newPos.x, newPos.y - 0.01, newPos.z, true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y, newPos.z, false));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y - 0.01, newPos.z, true));
                 break;
         }
     }

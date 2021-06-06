@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -80,8 +79,9 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
-        fallHeightBaritone = BaritoneAPI.getSettings().maxFallHeightNoWater.get();
-        BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        // TODO: Baritone
+        /*fallHeightBaritone = BaritoneAPI.getSettings().maxFallHeightNoWater.get();
+        BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;*/
         placedWater = false;
         centeredPlayer = false;
     }
@@ -97,12 +97,13 @@ public class NoFall extends Module {
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
+        // TODO: Baritone
+        //BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player.abilities.creativeMode) return;
+        if (mc.player.getAbilities().creativeMode) return;
 
         if (event.packet instanceof PlayerMoveC2SPacket) {
             if (elytra.get() && mc.player.isFallFlying()) {
@@ -125,7 +126,7 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.player.abilities.creativeMode) return;
+        if (mc.player.getAbilities().creativeMode) return;
 
         if (mode.get() == Mode.AirPlace && ((airplaceMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2) || (airplaceMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance)))) {
             PlayerUtils.centerPlayer();
@@ -136,7 +137,7 @@ public class NoFall extends Module {
                 // Remove water
                 FindItemResult bucket = InvUtils.findInHotbar(Items.BUCKET);
 
-                if (bucket.isHotbar() && mc.player.getBlockState().getFluidState().getFluid() == Fluids.WATER) {
+                if (bucket.isHotbar() && mc.player.getBlockStateAtPos().getFluidState().getFluid() == Fluids.WATER) {
                     useBucket(bucket.getSlot(), false);
                 }
 
@@ -174,8 +175,8 @@ public class NoFall extends Module {
     }
 
     private void useBucket(int slot, boolean setPlacedWater) {
-        Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
-            int preSlot = mc.player.inventory.selectedSlot;
+        Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
+            int preSlot = mc.player.getInventory().selectedSlot;
             InvUtils.swap(slot);
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
             InvUtils.swap(preSlot);

@@ -67,7 +67,7 @@ public class SmartSurround extends Module {
 
         if (!obsidian.found()) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
+        int prevSlot = mc.player.getInventory().selectedSlot;
 
         if ((rPosX >= 2) && (rPosZ == 0)) {
             placeObi(crystal, rPosX - 1, 0, obsidian);

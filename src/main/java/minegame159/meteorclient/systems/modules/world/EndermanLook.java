@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.world;
 
-import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -37,12 +36,12 @@ public class EndermanLook extends Module {
         super(Categories.World, "enderman-look", "Either looks at all Endermen or prevents you from looking at Endermen.");
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (lookMode.get() == Mode.LookAway) {
-            if (mc.player.abilities.creativeMode || !shouldLook()) return;
 
-            Rotations.rotate(mc.player.yaw, 90, -75, null);
+    public void onTick(TickEvent.Pre event) {
+        if (lookMode.get() == Mode.LookAway) {
+            if (mc.player.getAbilities().creativeMode || !shouldLook()) return;
+
+            Rotations.rotate(mc.player.getYaw(), 90, -75, null);
         }
         else {
             for (Entity entity : mc.world.getEntities()) {

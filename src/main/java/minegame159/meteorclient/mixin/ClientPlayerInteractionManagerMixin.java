@@ -42,13 +42,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Shadow protected abstract void syncSelectedSlot();
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
-    private void onClickSlot(int syncId, int slotId, int clickData, SlotActionType actionType, PlayerEntity player, CallbackInfoReturnable<ItemStack> info) {
+    private void onClickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {
         if (actionType == SlotActionType.THROW && slotId >= 0 && slotId < player.currentScreenHandler.slots.size()) {
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.slots.get(slotId).getStack())).isCancelled()) info.setReturnValue(ItemStack.EMPTY);
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.slots.get(slotId).getStack())).isCancelled()) info.cancel();
         }
         else if (slotId == -999) {
             // Clicking outside of inventory
-            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.inventory.getCursorStack())).isCancelled()) info.setReturnValue(ItemStack.EMPTY);
+            if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.getCursorStack())).isCancelled()) info.cancel();
         }
     }
 

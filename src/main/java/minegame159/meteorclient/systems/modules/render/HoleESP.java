@@ -215,7 +215,7 @@ public class HoleESP extends Module {
     private boolean validHole(BlockPos pos) {
         if ((ignoreOwn.get() && (mc.player.getBlockPos().equals(pos)))) return false;
 
-        if (!webs.get() && mc.world.getBlockState(pos).getBlock().is(Blocks.COBWEB)) return false;
+        if (!webs.get() && mc.world.getBlockState(pos).getBlock() == Blocks.COBWEB) return false;
 
         if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return false;
 

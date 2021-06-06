@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.utils;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -26,13 +25,13 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.options.ServerList;
+import net.minecraft.client.option.ServerList;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -76,10 +75,10 @@ public class Utils {
         enchantments.clear();
 
         if (!itemStack.isEmpty()) {
-            ListTag listTag = itemStack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.getEnchantmentTag(itemStack) : itemStack.getEnchantments();
+            NbtList listTag = itemStack.getItem() == Items.ENCHANTED_BOOK ? EnchantedBookItem.getEnchantmentNbt(itemStack) : itemStack.getEnchantments();
 
             for (int i = 0; i < listTag.size(); ++i) {
-                CompoundTag tag = listTag.getCompound(i);
+                NbtCompound tag = listTag.getCompound(i);
 
                 Registry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent((enchantment) -> enchantments.put(enchantment, tag.getInt("lvl")));
             }
@@ -118,22 +117,23 @@ public class Utils {
         return mc.getWindow().getFramebufferHeight();
     }
 
+    // TODO: Fix
     public static void unscaledProjection() {
-        RenderSystem.matrixMode(5889);
+        /*RenderSystem.matrixMode(5889);
         RenderSystem.loadIdentity();
         RenderSystem.ortho(0.0D, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0.0D, 1000.0D, 3000.0D);
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
+        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);*/
     }
 
     public static void scaledProjection() {
-        RenderSystem.matrixMode(5889);
+        /*RenderSystem.matrixMode(5889);
         RenderSystem.loadIdentity();
         RenderSystem.ortho(0.0D, mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor(), mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor(), 0.0D, 1000.0D, 3000.0D);
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
+        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);*/
     }
 
     public static Vec3d vec3d(BlockPos pos) {
@@ -160,14 +160,14 @@ public class Utils {
         }
 
         Arrays.fill(items, ItemStack.EMPTY);
-        CompoundTag nbt = itemStack.getTag();
+        NbtCompound nbt = itemStack.getTag();
 
         if (nbt != null && nbt.contains("BlockEntityTag")) {
-            CompoundTag nbt2 = nbt.getCompound("BlockEntityTag");
+            NbtCompound nbt2 = nbt.getCompound("BlockEntityTag");
             if (nbt2.contains("Items")) {
-                ListTag nbt3 = (ListTag) nbt2.get("Items");
+                NbtList nbt3 = (NbtList) nbt2.get("Items");
                 for (int i = 0; i < nbt3.size(); i++) {
-                    items[nbt3.getCompound(i).getByte("Slot")] = ItemStack.fromTag(nbt3.getCompound(i));
+                    items[nbt3.getCompound(i).getByte("Slot")] = ItemStack.fromNbt(nbt3.getCompound(i));
                 }
             }
         }
@@ -186,7 +186,7 @@ public class Utils {
     }
 
     public static boolean hasItems(ItemStack itemStack) {
-        CompoundTag compoundTag = itemStack.getSubTag("BlockEntityTag");
+        NbtCompound compoundTag = itemStack.getSubTag("BlockEntityTag");
         return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
@@ -400,12 +400,12 @@ public class Utils {
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
-        CompoundTag tag = itemStack.getOrCreateTag();
-        ListTag listTag;
+        NbtCompound tag = itemStack.getOrCreateTag();
+        NbtList listTag;
 
         // Get list tag
         if (!tag.contains("Enchantments", 9)) {
-            listTag = new ListTag();
+            listTag = new NbtList();
             tag.put("Enchantments", listTag);
         } else {
             listTag = tag.getList("Enchantments", 10);
@@ -414,8 +414,8 @@ public class Utils {
         // Check if item already has the enchantment and modify the level
         String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
 
-        for (Tag _t : listTag) {
-            CompoundTag t = (CompoundTag) _t;
+        for (NbtElement _t : listTag) {
+            NbtCompound t = (NbtCompound) _t;
 
             if (t.getString("id").equals(enchId)) {
                 t.putShort("lvl", (short) level);
@@ -424,7 +424,7 @@ public class Utils {
         }
 
         // Add the enchantment if it doesn't already have it
-        CompoundTag enchTag = new CompoundTag();
+        NbtCompound enchTag = new NbtCompound();
         enchTag.putString("id", enchId);
         enchTag.putShort("lvl", (short) level);
 

@@ -25,7 +25,7 @@ public class VClipCommand extends Command {
             assert player != null;
 
             double blocks = context.getArgument("blocks", Double.class);
-            player.updatePosition(player.getX(), player.getY() + blocks, player.getZ());
+            player.setPosition(player.getX(), player.getY() + blocks, player.getZ());
 
             return SINGLE_SUCCESS;
         }));

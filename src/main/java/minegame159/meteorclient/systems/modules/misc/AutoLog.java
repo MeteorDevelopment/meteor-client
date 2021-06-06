@@ -26,7 +26,7 @@ import net.minecraft.text.LiteralText;
 
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
             .description("Automatically disconnects when health is lower or equal to this value.")
@@ -64,7 +64,7 @@ public class AutoLog extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
             .name("range")
             .description("How close a crystal has to be to you before you disconnect.")

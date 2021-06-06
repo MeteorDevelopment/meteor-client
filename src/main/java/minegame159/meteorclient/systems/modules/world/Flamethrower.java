@@ -118,8 +118,8 @@ public class Flamethrower extends Module {
     private void interact() {
         Block block = mc.world.getBlockState(entity.getBlockPos()).getBlock();
         Block bottom = mc.world.getBlockState(entity.getBlockPos().down()).getBlock();
-        if (block.is(Blocks.WATER) || bottom.is(Blocks.WATER) || bottom.is(Blocks.GRASS_PATH)) return;
-        if (block.is(Blocks.GRASS))  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
+        if (block == Blocks.WATER || bottom == Blocks.WATER || bottom == Blocks.DIRT_PATH) return;
+        if (block == Blocks.GRASS)  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
         LivingEntity animal = (LivingEntity) entity;
 
         if (putOutFire.get() && animal.getHealth() < 1) {
@@ -140,14 +140,14 @@ public class Flamethrower extends Module {
     }
 
     private boolean selectSlot() {
-        preSlot = mc.player.inventory.selectedSlot;
+        preSlot = mc.player.getInventory().selectedSlot;
 
         boolean findNewFlintAndSteel = false;
-        if (mc.player.inventory.getMainHandStack().getItem() == Items.FLINT_AND_STEEL) {
-            if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1)
+        if (mc.player.getInventory().getMainHandStack().getItem() == Items.FLINT_AND_STEEL) {
+            if (antiBreak.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1)
                 findNewFlintAndSteel = true;
-        } else if (mc.player.inventory.offHand.get(0).getItem() == Items.FLINT_AND_STEEL) {
-            if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1)
+        } else if (mc.player.getInventory().offHand.get(0).getItem() == Items.FLINT_AND_STEEL) {
+            if (antiBreak.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1)
                 findNewFlintAndSteel = true;
         } else {
             findNewFlintAndSteel = true;

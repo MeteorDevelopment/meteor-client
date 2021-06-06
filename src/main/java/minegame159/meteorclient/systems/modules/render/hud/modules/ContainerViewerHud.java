@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
@@ -83,7 +82,7 @@ public class ContainerViewerHud extends HudElement {
     private ItemStack getContainer() {
         if (isInEditor()) return Items.ENDER_CHEST.getDefaultStack();
 
-        ItemStack item = mc.player.inventory.getMainHandStack();
+        ItemStack item = mc.player.getInventory().getMainHandStack();
         if (!(item.getItem() instanceof BlockItem)) item = mc.player.getOffHandStack();
         if (item.getItem() == Items.ENDER_CHEST) return item;
         if (!(item.getItem() instanceof BlockItem)) return echestNoItem.get()?Items.ENDER_CHEST.getDefaultStack():null;
@@ -99,7 +98,8 @@ public class ContainerViewerHud extends HudElement {
 
         Color color = Utils.getShulkerColor(container);
 
-        RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
+        // TODO: Fix
+        //RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
         mc.getTextureManager().bindTexture(TEXTURE);
         DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
     }

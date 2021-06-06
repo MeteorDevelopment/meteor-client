@@ -22,7 +22,7 @@ import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.Rotations;
-import net.minecraft.client.options.Perspective;
+import net.minecraft.client.option.Perspective;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -99,8 +99,8 @@ public class Freecam extends Module {
 
     @Override
     public void onActivate() {
-        yaw = mc.player.yaw;
-        pitch = mc.player.pitch;
+        yaw = mc.player.getYaw();
+        pitch = mc.player.getPitch();
 
         perspective = mc.options.getPerspective();
 

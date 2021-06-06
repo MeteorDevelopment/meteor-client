@@ -18,10 +18,10 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.Rotations;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,7 +151,7 @@ public class AntiAFK extends Module {
 
     @Override
     public void onActivate() {
-        prevYaw = mc.player.yaw;
+        prevYaw = mc.player.getYaw();
         timer = delay.get() * 20;
     }
 
@@ -171,7 +171,7 @@ public class AntiAFK extends Module {
                 prevYaw += spinSpeed.get();
                 switch (spinMode.get()) {
                     case Client:
-                        mc.player.yaw = prevYaw;
+                        mc.player.setYaw(prevYaw);
                         break;
                     case Server:
                         Rotations.rotate(prevYaw, pitch.get(), -15, null);
@@ -266,25 +266,25 @@ public class AntiAFK extends Module {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = super.toTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = super.toTag();
 
         messages.removeIf(String::isEmpty);
-        ListTag messagesTag = new ListTag();
+        NbtList messagesTag = new NbtList();
 
-        for (String message : messages) messagesTag.add(StringTag.of(message));
+        for (String message : messages) messagesTag.add(NbtString.of(message));
         tag.put("messages", messagesTag);
 
         return tag;
     }
 
     @Override
-    public Module fromTag(CompoundTag tag) {
+    public Module fromTag(NbtCompound tag) {
         messages.clear();
 
         if (tag.contains("messages")) {
-            ListTag messagesTag = tag.getList("messages", 8);
-            for (Tag messageTag : messagesTag) messages.add(messageTag.asString());
+            NbtList messagesTag = tag.getList("messages", 8);
+            for (NbtElement messageTag : messagesTag) messages.add(messageTag.asString());
         } else {
             messages.add("This is an AntiAFK message. Meteor on Crack!");
         }

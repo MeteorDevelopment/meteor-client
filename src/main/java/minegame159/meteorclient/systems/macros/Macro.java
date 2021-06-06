@@ -8,10 +8,10 @@ package minegame159.meteorclient.systems.macros;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,29 +45,29 @@ public class Macro implements ISerializable<Macro> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         // General
         tag.putString("name", name);
         tag.put("keybind", keybind.toTag());
 
         // Messages
-        ListTag messagesTag = new ListTag();
-        for (String message : messages) messagesTag.add(StringTag.of(message));
+        NbtList messagesTag = new NbtList();
+        for (String message : messages) messagesTag.add(NbtString.of(message));
         tag.put("messages", messagesTag);
 
         return tag;
     }
 
     @Override
-    public Macro fromTag(CompoundTag tag) {
+    public Macro fromTag(NbtCompound tag) {
         name = tag.getString("name");
 
         if (tag.contains("key")) keybind.set(true, tag.getInt("key"));
         else keybind.fromTag(tag.getCompound("keybind"));
 
-        messages = NbtUtils.listFromTag(tag.getList("messages", 8), Tag::asString);
+        messages = NbtUtils.listFromTag(tag.getList("messages", 8), NbtElement::asString);
 
         return this;
     }

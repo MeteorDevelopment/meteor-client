@@ -9,7 +9,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.IGetter;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -106,8 +106,8 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return NO_SUGGESTIONS;
     }
 
-    protected CompoundTag saveGeneral() {
-        CompoundTag tag = new CompoundTag();
+    protected NbtCompound saveGeneral() {
+        NbtCompound tag = new NbtCompound();
         tag.putString("name", name);
         return tag;
     }

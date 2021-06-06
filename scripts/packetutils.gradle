@@ -6,7 +6,6 @@ final packetRegistryClass = """
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "packets")), Lifecycle.stable());
         }
 
-        @Nullable
         @Override
         public Identifier getId(Class<? extends Packet<?>> entry) {
             return null;
@@ -18,19 +17,17 @@ final packetRegistryClass = """
         }
 
         @Override
-        public int getRawId(@Nullable Class<? extends Packet<?>> entry) {
+        public int getRawId(Class<? extends Packet<?>> entry) {
             return 0;
         }
 
-        @Nullable
         @Override
-        public Class<? extends Packet<?>> get(@Nullable RegistryKey<Class<? extends Packet<?>>> key) {
+        public Class<? extends Packet<?>> get(RegistryKey<Class<? extends Packet<?>>> key) {
             return null;
         }
 
-        @Nullable
         @Override
-        public Class<? extends Packet<?>> get(@Nullable Identifier id) {
+        public Class<? extends Packet<?>> get(Identifier id) {
             return null;
         }
 
@@ -59,7 +56,6 @@ final packetRegistryClass = """
             return false;
         }
 
-        @Nullable
         @Override
         public Class<? extends Packet<?>> get(int index) {
             return null;
@@ -69,6 +65,16 @@ final packetRegistryClass = """
         @Override
         public Iterator<Class<? extends Packet<?>>> iterator() {
             return Iterators.concat(S2C_PACKETS.keySet().iterator(), C2S_PACKETS.keySet().iterator());
+        }
+
+        @Override
+        public Class<? extends Packet<?>> getRandom(Random random) {
+            return null;
+        }
+
+        @Override
+        public boolean contains(RegistryKey<Class<? extends Packet<?>>> key) {
+            return false;
         }
     }
 """
@@ -113,7 +119,6 @@ task generatePacketUtils() {
         writer << "import net.minecraft.util.registry.Registry;\n"
         writer << "import net.minecraft.util.registry.RegistryKey;\n"
         writer << "import org.jetbrains.annotations.NotNull;\n"
-        writer << "import org.jetbrains.annotations.Nullable;\n\n"
         writer << "import java.util.*;\n"
 
         //   Write class
