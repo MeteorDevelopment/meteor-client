@@ -6,7 +6,6 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.mixininterface.IExplosion;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
@@ -17,14 +16,32 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 @Mixin(Explosion.class)
 public class ExplosionMixin implements IExplosion {
-    @Shadow @Final @Mutable private World world;
-    @Shadow @Final @Mutable @Nullable private Entity entity;
+    @Shadow
+    @Final
+    @Mutable
+    private World world;
+    @Shadow
+    @Final
+    @Mutable
+    @Nullable
+    private Entity entity;
 
-    @Shadow @Final @Mutable private double x;
-    @Shadow @Final @Mutable private double y;
-    @Shadow @Final @Mutable private double z;
+    @Shadow
+    @Final
+    @Mutable
+    private double x;
+    @Shadow
+    @Final
+    @Mutable
+    private double y;
+    @Shadow
+    @Final
+    @Mutable
+    private double z;
 
     @Shadow @Final @Mutable private float power;
     @Shadow @Final @Mutable private boolean createFire;
@@ -32,7 +49,7 @@ public class ExplosionMixin implements IExplosion {
 
     @Override
     public void set(Vec3d pos, float power, boolean createFire) {
-        this.world = MinecraftClient.getInstance().world;
+        this.world = mc.world;
         this.entity = null;
         this.x = pos.x;
         this.y = pos.y;

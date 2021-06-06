@@ -18,6 +18,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.TargetUtils;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -134,7 +135,7 @@ public class KillAura extends Module {
             .sliderMax(6)
             .build()
     );
-    
+
     private final Setting<Double> wallsRange = sgTargeting.add(new DoubleSetting.Builder()
             .name("walls-range")
             .description("The maximum range the entity can be attacked through walls.")
@@ -271,18 +272,22 @@ public class KillAura extends Module {
         }
 
         if (autoSwitch.get()) {
-            int slot = InvUtils.findItemInHotbar(itemStack -> {
+            FindItemResult weaponResult = InvUtils.findInHotbar(itemStack -> {
                 Item item = itemStack.getItem();
 
-                switch(weapon.get()) {
-                    case Axe:        return item instanceof AxeItem;
-                    case Sword:      return item instanceof SwordItem;
-                    case Both:       return item instanceof AxeItem || item instanceof SwordItem;
-                    default:         return true;
+                switch (weapon.get()) {
+                    case Axe:
+                        return item instanceof AxeItem;
+                    case Sword:
+                        return item instanceof SwordItem;
+                    case Both:
+                        return item instanceof AxeItem || item instanceof SwordItem;
+                    default:
+                        return true;
                 }
             });
 
-            InvUtils.swap(slot);
+            InvUtils.swap(weaponResult.getSlot());
         }
 
         if (!itemInHand()) return;

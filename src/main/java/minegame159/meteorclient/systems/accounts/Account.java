@@ -10,9 +10,10 @@ import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.CompoundTag;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public abstract class Account<T extends Account<?>> implements ISerializable<T> {
     protected AccountType type;
@@ -31,7 +32,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchHead();
 
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) MinecraftClient.getInstance().getSessionService();
+        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
         AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/");
         AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/join");
         AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/hasJoined");
@@ -53,8 +54,8 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     protected void setSession(Session session) {
-        ((MinecraftClientAccessor) MinecraftClient.getInstance()).setSession(session);
-        MinecraftClient.getInstance().getSessionProperties().clear();
+        ((MinecraftClientAccessor) mc).setSession(session);
+        mc.getSessionProperties().clear();
     }
 
     @Override

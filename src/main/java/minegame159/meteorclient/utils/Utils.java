@@ -121,7 +121,7 @@ public class Utils {
     public static void unscaledProjection() {
         RenderSystem.matrixMode(5889);
         RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, MinecraftClient.getInstance().getWindow().getFramebufferWidth(), MinecraftClient.getInstance().getWindow().getFramebufferHeight(), 0.0D, 1000.0D, 3000.0D);
+        RenderSystem.ortho(0.0D, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0.0D, 1000.0D, 3000.0D);
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
         RenderSystem.translatef(0.0F, 0.0F, -2000.0F);
@@ -130,7 +130,7 @@ public class Utils {
     public static void scaledProjection() {
         RenderSystem.matrixMode(5889);
         RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, MinecraftClient.getInstance().getWindow().getFramebufferWidth() / MinecraftClient.getInstance().getWindow().getScaleFactor(), MinecraftClient.getInstance().getWindow().getFramebufferHeight() / MinecraftClient.getInstance().getWindow().getScaleFactor(), 0.0D, 1000.0D, 3000.0D);
+        RenderSystem.ortho(0.0D, mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor(), mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor(), 0.0D, 1000.0D, 3000.0D);
         RenderSystem.matrixMode(5888);
         RenderSystem.loadIdentity();
         RenderSystem.translatef(0.0F, 0.0F, -2000.0F);

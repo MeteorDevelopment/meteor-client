@@ -12,10 +12,12 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
@@ -43,31 +45,30 @@ public class EXPThrower extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (autoToggle.get()) {
-            int count = 0;
-            int set = 0;
-
-            for (int i = 0; i < 4; i++) {
-                if (!mc.player.inventory.armor.get(i).isEmpty() && EnchantmentHelper.getLevel(Enchantments.MENDING, mc.player.inventory.getArmorStack(i)) == 1) set++;
-                if (!mc.player.inventory.armor.get(i).isDamaged()) count++;
-            }
-            if (count == set && set != 0) {
+            for (ItemStack itemStack : mc.player.inventory.armor) {
+                if (itemStack.isEmpty() || EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) < 1 || itemStack.isDamaged())
+                    continue;
                 toggle();
                 return;
             }
         }
 
-        int slot = InvUtils.findItemInHotbar(Items.EXPERIENCE_BOTTLE);
+        FindItemResult exp = InvUtils.findInHotbar(Items.EXPERIENCE_BOTTLE);
 
-        if (slot != -1) {
-            if (lookDown.get()) Rotations.rotate(mc.player.yaw, 90, () -> throwExp(slot));
-            else throwExp(slot);
+        if (exp.found()) {
+            if (lookDown.get()) Rotations.rotate(mc.player.yaw, 90, () -> throwExp(exp));
+            else throwExp(exp);
         }
     }
 
-    private void throwExp(int slot) {
-        int preSelectedSlot = mc.player.inventory.selectedSlot;
-        InvUtils.swap(slot);
-        mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-        InvUtils.swap(preSelectedSlot);
+    private void throwExp(FindItemResult exp) {
+        if (exp.isOffhand()) {
+            mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+        } else {
+            int prevSlot = mc.player.inventory.selectedSlot;
+            InvUtils.swap(exp.getSlot());
+            mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+            InvUtils.swap(prevSlot);
+        }
     }
 }

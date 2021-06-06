@@ -7,9 +7,10 @@ package minegame159.meteorclient.gui.widgets;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.item.ItemStack;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class WItem extends WWidget {
     protected ItemStack itemStack;
@@ -38,7 +39,7 @@ public class WItem extends WWidget {
             GlStateManager.pushMatrix();
             GlStateManager.scaled(s, s, 1);
             GlStateManager.translated(x / s, y / s, 0);
-            MinecraftClient.getInstance().getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
+            mc.getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
             GlStateManager.popMatrix();
         });
     }

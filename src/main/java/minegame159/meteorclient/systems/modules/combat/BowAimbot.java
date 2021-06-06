@@ -94,7 +94,7 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         if (playerIsDead() || !itemInHand()) return;
-        if (InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
+        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;

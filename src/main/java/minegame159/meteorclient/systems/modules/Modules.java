@@ -36,7 +36,6 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -49,6 +48,8 @@ import org.lwjgl.glfw.GLFW;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
@@ -241,7 +242,7 @@ public class Modules extends System<Modules> {
     }
 
     private void onAction(boolean isKey, int value, boolean isPress) {
-        if (MinecraftClient.getInstance().currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
+        if (mc.currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : moduleInstances.values()) {
                 if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
                     module.toggle();
@@ -360,7 +361,7 @@ public class Modules extends System<Modules> {
     private void initCombat() {
         add(new AimAssist());
         add(new AnchorAura());
-        add(new AntiAnchor());
+//        add(new AntiAnchor());
         add(new AntiAnvil());
         add(new AntiBed());
         add(new AntiHit());
@@ -386,7 +387,7 @@ public class Modules extends System<Modules> {
         add(new SelfAnvil());
         add(new SelfTrap());
         add(new SelfWeb());
-        add(new SmartSurround());
+//        add(new SmartSurround());
         add(new Surround());
     }
 

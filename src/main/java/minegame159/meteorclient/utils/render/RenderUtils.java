@@ -14,16 +14,15 @@ import minegame159.meteorclient.systems.modules.render.Freecam;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-public class RenderUtils {
+import static minegame159.meteorclient.utils.Utils.mc;
 
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+public class RenderUtils {
 
     //Items
     public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {

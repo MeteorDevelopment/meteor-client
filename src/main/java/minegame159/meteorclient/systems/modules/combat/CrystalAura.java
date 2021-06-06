@@ -30,10 +30,7 @@ import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.Vec3;
-import minegame159.meteorclient.utils.player.DamageUtils;
-import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.PlayerUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.player.*;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockIterator;
@@ -474,7 +471,6 @@ public class CrystalAura extends Module {
 
     private int breakTimer, placeTimer, switchTimer;
     private final List<PlayerEntity> targets = new ArrayList<>();
-    private Hand hand;
 
     private final Vec3d vec3d = new Vec3d(0, 0, 0);
     private final Vec3d playerEyePos = new Vec3d(0, 0, 0);
@@ -719,10 +715,7 @@ public class CrystalAura extends Module {
                 // Check if the item in your hand is already valid
                 if (!isValidWeaknessItem(mc.player.getMainHandStack())) {
                     // Find valid item to break with
-                    int slot = InvUtils.findItemInHotbar(this::isValidWeaknessItem);
-                    if (slot == -1) return;
-
-                    InvUtils.swap(slot);
+                    if (!InvUtils.swap(InvUtils.findInHotbar(this::isValidWeaknessItem).getSlot())) return;
 
                     switchTimer = 1;
                     return;
@@ -775,6 +768,9 @@ public class CrystalAura extends Module {
         // Attack
         mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, mc.player.isSneaking()));
 
+        Hand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
+        if (hand == null) hand = Hand.MAIN_HAND;
+
         if (renderSwing.get()) mc.player.swingHand(hand);
         else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
     }
@@ -792,7 +788,7 @@ public class CrystalAura extends Module {
         if (!doPlace.get() || placeTimer > 0) return;
 
         // Return if there are no crystals in hotbar or offhand
-        if (mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL && InvUtils.findItemInHotbar(Items.END_CRYSTAL) == -1) return;
+        if (!InvUtils.findInHotbar(Items.END_CRYSTAL).found()) return;
 
         // Return if there are no crystals in either hand and auto switch mode is none
         if (autoSwitch.get() == AutoSwitchMode.None && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) return;
@@ -911,26 +907,17 @@ public class CrystalAura extends Module {
         // Switch
         Item targetItem = supportBlock == null ? Items.END_CRYSTAL : Items.OBSIDIAN;
 
-        int slot = -1;
-        boolean triedFindingSlot = false;
-
-        hand = Hand.OFF_HAND;
-        if (mc.player.getOffHandStack().getItem() != targetItem) {
-            hand = Hand.MAIN_HAND;
-
-            if (mc.player.getMainHandStack().getItem() != targetItem) {
-                slot = InvUtils.findItemInHotbar(targetItem);
-                triedFindingSlot = true;
-            }
-        }
-
-        if (triedFindingSlot && slot == -1) return;
+        FindItemResult item = InvUtils.findInHotbar(targetItem);
+        if (!item.found()) return;
 
         int prevSlot = mc.player.inventory.selectedSlot;
 
-        if (autoSwitch.get() != AutoSwitchMode.None && hand != Hand.OFF_HAND && slot != -1) {
-            InvUtils.swap(slot);
+        if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) {
+            InvUtils.swap(item.getSlot());
         }
+
+        Hand hand = item.getHand();
+        if (hand == null) return;
 
         // Place
         if (supportBlock == null) {
@@ -950,7 +937,7 @@ public class CrystalAura extends Module {
         }
         else {
             // Place support block
-            BlockUtils.place(supportBlock, hand, slot, false, 0, renderSwing.get(), true, true, false);
+            BlockUtils.place(supportBlock, item, false, 0, renderSwing.get(), true, false);
             placeTimer += supportDelay.get();
 
             if (supportDelay.get() == 0) placeCrystal(result, damage, null);

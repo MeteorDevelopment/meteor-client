@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.Identifier;
 
 import java.io.BufferedReader;
@@ -17,6 +16,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import static minegame159.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL30C.*;
 
 public class Shader {
@@ -98,7 +98,7 @@ public class Shader {
 
     private String read(String path) {
         try {
-            InputStream in = MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("meteor-client", path)).getInputStream();
+            InputStream in = mc.getResourceManager().getResource(new Identifier("meteor-client", path)).getInputStream();
             StringBuilder sb = new StringBuilder();
 
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {

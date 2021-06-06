@@ -8,7 +8,6 @@ package minegame159.meteorclient.gui.widgets.containers;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import static minegame159.meteorclient.utils.Utils.getWindowHeight;
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public abstract class WContainer extends WWidget {
     public final List<Cell<?>> cells = new ArrayList<>();
@@ -50,7 +50,7 @@ public abstract class WContainer extends WWidget {
         for (Cell<?> cell : cells) {
             cell.move(deltaX, deltaY);
 
-            Mouse mouse = MinecraftClient.getInstance().mouse;
+            Mouse mouse = mc.mouse;
             cell.widget().mouseMoved(mouse.getX(), mouse.getY(), mouse.getX(), mouse.getY());
         }
     }

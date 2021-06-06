@@ -14,11 +14,12 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.RotationUtils;
+import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.potion.PotionUtil;
 
 import java.util.HashMap;
@@ -137,7 +138,8 @@ public class Quiver extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        RotationUtils.packetRotate(mc.player.yaw, -90);
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookOnly(mc.player.yaw, -90, mc.player.isOnGround()));
+        Rotations.setCamRotation(mc.player.yaw, -90);
 
         boolean canStop = false;
 

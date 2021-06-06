@@ -64,7 +64,7 @@ public class NotebotCommand extends Command {
         }));
         builder.then(literal("stop").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
-            notebot.Stop();
+            notebot.stop();
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("play").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {

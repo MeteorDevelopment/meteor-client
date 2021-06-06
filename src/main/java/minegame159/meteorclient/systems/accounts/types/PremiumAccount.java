@@ -16,9 +16,10 @@ import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.systems.accounts.Account;
 import minegame159.meteorclient.systems.accounts.AccountType;
 import minegame159.meteorclient.utils.misc.NbtException;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.CompoundTag;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class PremiumAccount extends Account<PremiumAccount> {
     private static final Gson GSON = new Gson();
@@ -79,7 +80,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     public YggdrasilUserAuthentication getAuth() {
-        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) MinecraftClient.getInstance()).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
+        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
         auth.setPassword(password);

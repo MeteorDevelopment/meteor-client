@@ -8,7 +8,6 @@ package minegame159.meteorclient.systems.macros;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -17,6 +16,8 @@ import net.minecraft.nbt.Tag;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Macro implements ISerializable<Macro> {
     public String name = "";
@@ -32,9 +33,9 @@ public class Macro implements ISerializable<Macro> {
     }
 
     public boolean onAction(boolean isKey, int value) {
-        if (keybind.matches(isKey, value) && MinecraftClient.getInstance().currentScreen == null) {
+        if (keybind.matches(isKey, value) && mc.currentScreen == null) {
             for (String command : messages) {
-                MinecraftClient.getInstance().player.sendChatMessage(command);
+                mc.player.sendChatMessage(command);
             }
 
             return true;

@@ -6,7 +6,6 @@
 package minegame159.meteorclient.mixin;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookEditScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -31,15 +30,22 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 @Mixin(BookEditScreen.class)
 public abstract class BookEditScreenMixin extends Screen {
-    @Shadow @Final private List<String> pages;
+    @Shadow
+    @Final
+    private List<String> pages;
 
-    @Shadow private int currentPage;
+    @Shadow
+    private int currentPage;
 
-    @Shadow private boolean dirty;
+    @Shadow
+    private boolean dirty;
 
-    @Shadow protected abstract void updateButtons();
+    @Shadow
+    protected abstract void updateButtons();
 
     public BookEditScreenMixin(Text title) {
         super(title);
@@ -64,14 +70,14 @@ public abstract class BookEditScreenMixin extends Screen {
             }
 
             try {
-                GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+                GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
             } catch (OutOfMemoryError exception) {
-                GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), exception.toString());
+                GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), exception.toString());
             }
         }));
 
         addButton(new ButtonWidget(4, 4 + 16 + 4, 70, 16, new LiteralText("Paste"), button -> {
-            String clipboard = GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle());
+            String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().getHandle());
             if (clipboard == null) return;
 
             byte[] bytes;

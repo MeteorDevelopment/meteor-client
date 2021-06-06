@@ -15,12 +15,12 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.TargetUtils;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -156,13 +156,16 @@ public class AutoTrap extends Module {
             return;
         }
 
-        if (InvUtils.findItemInHotbar(Items.OBSIDIAN) == -1) {
+        FindItemResult obsidian = InvUtils.findInHotbar(Items.OBSIDIAN);
+
+        if (!obsidian.isHotbar() && !obsidian.isOffhand()) {
             placePositions.clear();
             placed = false;
             return;
         }
 
-        if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+        if (TargetUtils.isBadTarget(target, range.get()))
+            target = TargetUtils.getPlayerTarget(range.get(), priority.get());
         if (TargetUtils.isBadTarget(target, range.get())) return;
 
         fillPlaceArray(target);
@@ -170,7 +173,7 @@ public class AutoTrap extends Module {
         if (timer >= delay.get() && placePositions.size() > 0) {
             BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.OBSIDIAN), rotate.get(), 50, true)) {
+            if (BlockUtils.place(blockPos, obsidian, rotate.get(), 50, true)) {
                 placePositions.remove(blockPos);
                 placed = true;
             }

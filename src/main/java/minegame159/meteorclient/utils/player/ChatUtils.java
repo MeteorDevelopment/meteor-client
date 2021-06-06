@@ -9,15 +9,14 @@ import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.render.color.RainbowColor;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
-public class ChatUtils {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+import static minegame159.meteorclient.utils.Utils.mc;
 
+public class ChatUtils {
     private static final RainbowColor RAINBOW = new RainbowColor();
 
     // Default

@@ -17,27 +17,15 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.player.DamageCalcUtils;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
-import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.RaycastContext;
 
 public class SmartSurround extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Boolean> onlyObsidian = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-obsidian")
-            .description("Only uses Obsidian as a surround block.")
-            .defaultValue(false)
-            .build()
-    );
 
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
             .name("min-damage")
@@ -53,13 +41,11 @@ public class SmartSurround extends Module {
             .build()
     );
 
-    private int oldSlot;
-    private int slot = -1;
     private int rPosX;
     private int rPosZ;
     private Entity crystal;
 
-    public SmartSurround(){
+    public SmartSurround() {
         super(Categories.Combat, "smart-surround", "Attempts to save you from crystals automatically.");
     }
 
@@ -69,28 +55,6 @@ public class SmartSurround extends Module {
 
         if (event.entity.getType() == EntityType.END_CRYSTAL) {
             if (DamageCalcUtils.crystalDamage(mc.player, event.entity.getPos()) > minDamage.get()) {
-                slot = findObiInHotbar();
-
-                if (slot == -1 && onlyObsidian.get()) {
-                    error("No obsidian in hotbar... disabling.");
-                    return;
-                }
-
-                for (int i = 0; i < 9; i++) {
-                    Item item = mc.player.inventory.getStack(i).getItem();
-
-                    if (item instanceof BlockItem) {
-                        slot = i;
-                        InvUtils.swap(slot);
-                        break;
-                    }
-                }
-
-                if (slot == -1) {
-                    error("No blocks in hotbar... disabling.");
-                    return;
-                }
-
                 rPosX = mc.player.getBlockPos().getX() - event.entity.getBlockPos().getX();
                 rPosZ = mc.player.getBlockPos().getZ() - event.entity.getBlockPos().getZ();
             }
@@ -99,55 +63,38 @@ public class SmartSurround extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (slot != -1) {
-            if ((rPosX >= 2) && (rPosZ == 0)) {
-                placeObi(rPosX - 1, 0, crystal);
-            } else if ((rPosX > 1) && (rPosZ > 1)) {
-                placeObi(rPosX, rPosZ - 1, crystal);
-                placeObi(rPosX - 1, rPosZ, crystal);
-            } else if ((rPosX == 0) && (rPosZ >= 2)) {
-                placeObi(0, rPosZ - 1, crystal);
-            } else if ((rPosX < -1) && (rPosZ < -1)) {
-                placeObi(rPosX, rPosZ + 1, crystal);
-                placeObi(rPosX + 1, rPosZ, crystal);
-            } else if ((rPosX == 0) && (rPosZ <= -2)) {
-                placeObi(0, rPosZ + 1, crystal);
-            } else if ((rPosX > 1) && (rPosZ < -1)) {
-                placeObi(rPosX, rPosZ + 1, crystal);
-                placeObi(rPosX - 1, rPosZ, crystal);
-            } else if ((rPosX <= -2) && (rPosZ == 0)) {
-                placeObi(rPosX + 1, 0, crystal);
-            } else if ((rPosX < -1) && (rPosZ > 1)) {
-                placeObi(rPosX, rPosZ - 1, crystal);
-                placeObi(rPosX + 1, rPosZ, crystal);
-            }
+        FindItemResult obsidian = InvUtils.findInHotbar(Items.OBSIDIAN, Items.CRYING_OBSIDIAN);
 
-            if (mc.world.raycast(new RaycastContext(mc.player.getPos(), crystal.getPos(), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() != HitResult.Type.MISS) {
-                slot = -1;
-                InvUtils.swap(oldSlot);
-            }
-        }
-    }
+        if (!obsidian.found()) return;
 
-    private void placeObi(int x, int z, Entity crystal) {
-        BlockPos blockPos = crystal.getBlockPos().add(x, -1, z);
-        BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100, true);
-    }
+        int prevSlot = mc.player.inventory.selectedSlot;
 
-    private int findObiInHotbar() {
-        oldSlot = mc.player.inventory.selectedSlot;
-        int newSlot = -1;
-
-        for (int i = 0; i < 9; i++) {
-            Item item = mc.player.inventory.getStack(i).getItem();
-
-            if (item == Items.OBSIDIAN || item == Items.CRYING_OBSIDIAN) {
-                newSlot = i;
-                InvUtils.swap(newSlot);
-                break;
-            }
+        if ((rPosX >= 2) && (rPosZ == 0)) {
+            placeObi(crystal, rPosX - 1, 0, obsidian);
+        } else if ((rPosX > 1) && (rPosZ > 1)) {
+            placeObi(crystal, rPosX, rPosZ - 1, obsidian);
+            placeObi(crystal, rPosX - 1, rPosZ, obsidian);
+        } else if ((rPosX == 0) && (rPosZ >= 2)) {
+            placeObi(crystal, 0, rPosZ - 1, obsidian);
+        } else if ((rPosX < -1) && (rPosZ < -1)) {
+            placeObi(crystal, rPosX, rPosZ + 1, obsidian);
+            placeObi(crystal, rPosX + 1, rPosZ, obsidian);
+        } else if ((rPosX == 0) && (rPosZ <= -2)) {
+            placeObi(crystal, 0, rPosZ + 1, obsidian);
+        } else if ((rPosX > 1) && (rPosZ < -1)) {
+            placeObi(crystal, rPosX, rPosZ + 1, obsidian);
+            placeObi(crystal, rPosX - 1, rPosZ, obsidian);
+        } else if ((rPosX <= -2) && (rPosZ == 0)) {
+            placeObi(crystal, rPosX + 1, 0, obsidian);
+        } else if ((rPosX < -1) && (rPosZ > 1)) {
+            placeObi(crystal, rPosX, rPosZ - 1, obsidian);
+            placeObi(crystal, rPosX + 1, rPosZ, obsidian);
         }
 
-        return newSlot;
+        InvUtils.swap(prevSlot);
+    }
+
+    private void placeObi(Entity crystal, int x, int z, FindItemResult findItemResult) {
+        BlockUtils.place(crystal.getBlockPos().add(x, -1, z), findItemResult, rotate.get(), 100, false, true, false);
     }
 }

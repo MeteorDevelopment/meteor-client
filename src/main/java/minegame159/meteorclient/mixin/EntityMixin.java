@@ -19,7 +19,6 @@ import minegame159.meteorclient.utils.render.Outlines;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
@@ -39,15 +38,21 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow public World world;
+    @Shadow
+    public World world;
 
-    @Shadow public abstract BlockPos getBlockPos();
+    @Shadow
+    public abstract BlockPos getBlockPos();
 
-    @Shadow protected abstract BlockPos getVelocityAffectingPos();
+    @Shadow
+    protected abstract BlockPos getVelocityAffectingPos();
 
-    @Shadow public abstract void setVelocity(double x, double y, double z);
+    @Shadow
+    public abstract void setVelocity(double x, double y, double z);
 
     @Redirect(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
     private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
@@ -64,7 +69,7 @@ public abstract class EntityMixin {
     @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     private void onPushAwayFrom(Args args) {
         Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.entityPush.get() && MinecraftClient.getInstance().player == (Object) this) {
+        if (velocity.isActive() && velocity.entityPush.get() && mc.player == (Object) this) {
             double multiplier = velocity.entityPushAmount.get();
             args.set(0, (double) args.get(0) * multiplier);
             args.set(2, (double) args.get(2) * multiplier);
@@ -73,7 +78,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "getJumpVelocityMultiplier", at = @At("HEAD"), cancellable = true)
     private void onGetJumpVelocityMultiplier(CallbackInfoReturnable<Float> info) {
-        if ((Object) this == MinecraftClient.getInstance().player) {
+        if ((Object) this == mc.player) {
             float f = world.getBlockState(getBlockPos()).getBlock().getJumpVelocityMultiplier();
             float g = world.getBlockState(getVelocityAffectingPos()).getBlock().getJumpVelocityMultiplier();
             float a = f == 1.0D ? g : f;
@@ -85,7 +90,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "move", at = @At("HEAD"))
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
-        if ((Object) this == MinecraftClient.getInstance().player) {
+        if ((Object) this == mc.player) {
             MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
         } else if ((Object) this instanceof LivingEntity) {
             MeteorClient.EVENT_BUS.post(LivingEntityMoveEvent.get((LivingEntity) (Object) this, movement));

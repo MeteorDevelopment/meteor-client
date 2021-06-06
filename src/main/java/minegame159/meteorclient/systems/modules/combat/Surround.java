@@ -19,14 +19,13 @@ import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Collections;
 import java.util.List;
 
 public class Surround extends Module {
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> doubleHeight = sgGeneral.add(new BoolSetting.Builder()
@@ -35,7 +34,7 @@ public class Surround extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Works only when you standing on blocks.")
@@ -84,7 +83,7 @@ public class Surround extends Module {
             .defaultValue(true)
             .build()
     );
-    
+
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("block")
             .description("What blocks to use for surround.")
@@ -153,21 +152,22 @@ public class Surround extends Module {
             if (doubleHeightPlaced || !doubleHeight.get()) toggle();
         }
     }
-    
+
     private boolean blockFilter(Block block) {
         return block == Blocks.OBSIDIAN ||
-                block == Blocks.ENDER_CHEST ||
-                block == Blocks.RESPAWN_ANCHOR;
+            block == Blocks.CRYING_OBSIDIAN ||
+            block == Blocks.NETHERITE_BLOCK ||
+            block == Blocks.ENDER_CHEST ||
+            block == Blocks.RESPAWN_ANCHOR;
     }
-    
+
     private boolean place(int x, int y, int z) {
         setBlockPos(x, y, z);
         BlockState blockState = mc.world.getBlockState(blockPos);
 
         if (!blockState.getMaterial().isReplaceable()) return true;
 
-        int slot = findSlot();
-        if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 100, true)) {
+        if (BlockUtils.place(blockPos, InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem()))), rotate.get(), 100, true)) {
             return_ = true;
         }
 
@@ -176,9 +176,5 @@ public class Surround extends Module {
 
     private void setBlockPos(int x, int y, int z) {
         blockPos.set(mc.player.getX() + x, mc.player.getY() + y, mc.player.getZ() + z);
-    }
-
-    private int findSlot() {
-        return InvUtils.findItemInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
     }
 }

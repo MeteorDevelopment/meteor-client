@@ -16,6 +16,8 @@ import net.minecraft.util.Identifier;
 
 import java.io.IOException;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class Outlines {
     public static boolean loadingOutlineShader;
     public static boolean renderingOutlines;
@@ -26,8 +28,6 @@ public class Outlines {
 
     public static void load() {
         try {
-            MinecraftClient mc = MinecraftClient.getInstance();
-
             if (outlinesShader != null) {
                 outlinesShader.close();
             }
@@ -45,11 +45,11 @@ public class Outlines {
 
     public static void beginRender() {
         outlinesFbo.clear(MinecraftClient.IS_SYSTEM_MAC);
-        MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
+        mc.getFramebuffer().beginWrite(false);
     }
 
     public static void endRender(float tickDelta) {
-        WorldRenderer worldRenderer = MinecraftClient.getInstance().worldRenderer;
+        WorldRenderer worldRenderer = mc.worldRenderer;
         WorldRendererAccessor wra = (WorldRendererAccessor) worldRenderer;
 
         Framebuffer fbo = worldRenderer.getEntityOutlinesFramebuffer();
@@ -58,12 +58,10 @@ public class Outlines {
         wra.setEntityOutlinesFramebuffer(fbo);
 
         outlinesShader.render(tickDelta);
-        MinecraftClient.getInstance().getFramebuffer().beginWrite(false);
+        mc.getFramebuffer().beginWrite(false);
     }
 
     public static void renderFbo() {
-        MinecraftClient mc = MinecraftClient.getInstance();
-
         outlinesFbo.draw(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false);
     }
 

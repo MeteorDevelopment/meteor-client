@@ -13,6 +13,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
@@ -23,7 +24,7 @@ import net.minecraft.util.Hand;
 
 public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("The maximum distance the sheep have to be to be sheared.")
@@ -80,12 +81,9 @@ public class AutoShearer extends Module {
 
             boolean foundShears = !findNewShears;
             if (findNewShears) {
-                int slot = InvUtils.findItemInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
+                FindItemResult shears = InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
 
-                if (slot != -1) {
-                    InvUtils.swap(slot);
-                    foundShears = true;
-                }
+                if (InvUtils.swap(shears.getSlot())) foundShears = true;
             }
 
             if (foundShears) {

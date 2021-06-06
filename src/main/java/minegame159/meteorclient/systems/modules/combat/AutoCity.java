@@ -16,6 +16,7 @@ import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.TargetUtils;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
@@ -105,10 +106,9 @@ public class AutoCity extends Module {
             sentMessage = true;
         }
 
-        int slot = InvUtils.findItemInHotbar(itemStack -> itemStack.getItem() == Items.DIAMOND_PICKAXE || itemStack.getItem() == Items.NETHERITE_PICKAXE);
-        if (mc.player.abilities.creativeMode) slot = mc.player.inventory.selectedSlot;
+        FindItemResult pickaxe = InvUtils.find(itemStack -> itemStack.getItem() == Items.DIAMOND_PICKAXE || itemStack.getItem() == Items.NETHERITE_PICKAXE);
 
-        if (slot == -1) {
+        if (!pickaxe.isHotbar()) {
             if (selfToggle.get()) {
                 error("No pickaxe found... disabling.");
                 toggle();
@@ -117,10 +117,10 @@ public class AutoCity extends Module {
         }
 
         if (support.get()) {
-            BlockUtils.place(blockPosTarget.down(1), Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
+            BlockUtils.place(blockPosTarget.down(1), InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
         }
 
-        InvUtils.swap(slot);
+        InvUtils.swap(pickaxe.getSlot());
 
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPosTarget), Rotations.getPitch(blockPosTarget), () -> mine(blockPosTarget));
         else mine(blockPosTarget);
