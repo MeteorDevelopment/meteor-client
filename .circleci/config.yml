@@ -15,7 +15,7 @@ general:
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: cimg/openjdk:16.0.0
 
     working_directory: ~/repo
 
