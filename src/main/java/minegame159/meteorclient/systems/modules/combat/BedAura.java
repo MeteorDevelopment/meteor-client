@@ -361,24 +361,29 @@ public class BedAura extends Module {
     private BlockPos getBreakPos(PlayerEntity target) {
         BlockPos targetPos = target.getBlockPos();
 
-        for (Direction value : Direction.values()) {
-            if (value == Direction.UP || value == Direction.DOWN) continue;
+        if (checkBreak(Direction.NORTH, target, true)) return targetPos.up().north();
+        if (checkBreak(Direction.SOUTH, target, true)) return targetPos.up().south();
+        if (checkBreak(Direction.EAST, target, true)) return targetPos.up().east();
+        if (checkBreak(Direction.WEST, target, true)) return targetPos.up().west();
 
-            if (checkBreak(target, targetPos.up(), value)) return targetPos.up().offset(value);
-            if (checkBreak(target, targetPos, value)) return targetPos.offset(value);
-            if (checkBreak(target, targetPos.up(2), value)) return targetPos.up(2).offset(value);
-        }
+        if (checkBreak(Direction.NORTH, target, false)) return targetPos.north();
+        if (checkBreak(Direction.SOUTH, target, false)) return targetPos.south();
+        if (checkBreak(Direction.EAST, target, false)) return targetPos.east();
+        if (checkBreak(Direction.WEST, target, false)) return targetPos.west();
 
         return null;
     }
 
-    private boolean checkBreak(PlayerEntity player, BlockPos targetPos, Direction offset) {
-        if (mc.world.getBlockState(targetPos).getBlock() instanceof BedBlock
-            && mc.world.getBlockState(targetPos.offset(offset)).getBlock() instanceof BedBlock
-            && (breakMode.get() == Safety.Suicide || (DamageCalcUtils.bedDamage(player, Utils.vec3d(targetPos)) >= minDamage.get()
-            && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(targetPos.offset(offset))) < maxSelfDamage.get()
-            && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(targetPos)) < maxSelfDamage.get()))) {
-            this.direction = offset;
+    private boolean checkBreak(Direction direction, PlayerEntity target, boolean up) {
+        BlockPos headPos = up ? target.getBlockPos().up() : target.getBlockPos();
+
+        if (mc.world.getBlockState(headPos).getBlock() instanceof BedBlock
+            && mc.world.getBlockState(headPos.offset(direction)).getBlock() instanceof BedBlock
+            && (breakMode.get() == Safety.Suicide
+            || (DamageCalcUtils.bedDamage(target, Utils.vec3d(headPos)) >= minDamage.get()
+            && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos.offset(direction))) < maxSelfDamage.get()
+            && DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(headPos)) < maxSelfDamage.get()))) {
+            this.direction = direction;
             return true;
         }
         return false;
