@@ -20,6 +20,8 @@ import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -28,6 +30,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -36,20 +39,27 @@ public class VeinMiner extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Set<Vec3i> blockNeighbours = Sets.newHashSet(
-        new Vec3i(1,-1,1),new Vec3i(0,-1,1),new Vec3i(-1,-1,1),
-        new Vec3i(1,-1,0),new Vec3i(0,-1,0),new Vec3i(-1,-1,0),
-        new Vec3i(1,-1,-1),new Vec3i(0,-1,-1),new Vec3i(-1,-1,-1),
+        new Vec3i(1, -1, 1), new Vec3i(0, -1, 1), new Vec3i(-1, -1, 1),
+        new Vec3i(1, -1, 0), new Vec3i(0, -1, 0), new Vec3i(-1, -1, 0),
+        new Vec3i(1, -1, -1), new Vec3i(0, -1, -1), new Vec3i(-1, -1, -1),
 
-        new Vec3i(1,0,1),new Vec3i(0,0,1),new Vec3i(-1,0,1),
-        new Vec3i(1,0,0),/*new Vec3i(0,0,0),*/new Vec3i(-1,0,0),
-        new Vec3i(1,0,-1),new Vec3i(0,0,-1),new Vec3i(-1,0,-1),
+        new Vec3i(1, 0, 1), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1),
+        new Vec3i(1, 0, 0), new Vec3i(-1, 0, 0),
+        new Vec3i(1, 0, -1), new Vec3i(0, 0, -1), new Vec3i(-1, 0, -1),
 
-        new Vec3i(1,1,1),new Vec3i(0,1,1),new Vec3i(-1,1,1),
-        new Vec3i(1,1,0),new Vec3i(0,1,0),new Vec3i(-1,1,0),
-        new Vec3i(1,1,-1),new Vec3i(0,1,-1),new Vec3i(-1,1,-1)
+        new Vec3i(1, 1, 1), new Vec3i(0, 1, 1), new Vec3i(-1, 1, 1),
+        new Vec3i(1, 1, 0), new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0),
+        new Vec3i(1, 1, -1), new Vec3i(0, 1, -1), new Vec3i(-1, 1, -1)
     );
 
     // General
+
+    private final Setting<List<Block>> blacklist = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blacklist")
+        .description("Which blocks to ignore.")
+        .defaultValue(Arrays.asList(Blocks.STONE, Blocks.DIRT, Blocks.GRASS))
+        .build()
+    );
 
     private final Setting<Integer> depth = sgGeneral.add(new IntSetting.Builder()
             .name("depth")
@@ -122,8 +132,8 @@ public class VeinMiner extends Module {
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-
-        if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
+        BlockState state = mc.world.getBlockState(event.blockPos);
+        if (state.getHardness(mc.world, event.blockPos) < 0 || blacklist.get().contains(state.getBlock())) return;
 
         foundBlockPositions.clear();
 
