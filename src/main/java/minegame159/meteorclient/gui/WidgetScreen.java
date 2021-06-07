@@ -204,10 +204,10 @@ public abstract class WidgetScreen extends Screen {
         return false;
     }
 
-    public void keyRepeated(int key, int mods) {
+    public void keyRepeated(int key, int modifiers) {
         if (locked) return;
 
-        root.keyRepeated(key, mods);
+        root.keyRepeated(key, modifiers);
     }
 
     @Override
