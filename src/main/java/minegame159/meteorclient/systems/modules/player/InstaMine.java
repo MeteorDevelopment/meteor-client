@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.systems.modules.world;
+package minegame159.meteorclient.systems.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
@@ -23,9 +23,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
-/**
- * @author seasnail8169
- */
 public class InstaMine extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -90,7 +87,7 @@ public class InstaMine extends Module {
     private Direction direction;
 
     public InstaMine() {
-        super(Categories.World, "insta-mine", "Attempts to instantly mine blocks.");
+        super(Categories.Player, "insta-mine", "Attempts to instantly mine blocks.");
     }
 
     @Override

@@ -28,18 +28,15 @@ public abstract class KeyboardMixin {
     @Shadow @Final private MinecraftClient client;
 
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
-    public void onKey(long window, int key, int scancode, int i, int j, CallbackInfo info) {
+    public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo info) {
         if (key != GLFW.GLFW_KEY_UNKNOWN) {
-            if (client.currentScreen instanceof WidgetScreen && i == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) client.currentScreen).keyRepeated(key, j);
+            if (client.currentScreen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
+                ((WidgetScreen) client.currentScreen).keyRepeated(key, modifiers);
             }
 
             if (GuiKeyEvents.canUseKeys) {
-                Input.setKeyState(key, i != GLFW.GLFW_RELEASE);
-
-                KeyEvent event = MeteorClient.EVENT_BUS.post(KeyEvent.get(key, KeyAction.get(i)));
-
-                if (event.isCancelled()) info.cancel();
+                Input.setKeyState(key, action != GLFW.GLFW_RELEASE);
+                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(key, modifiers, KeyAction.get(action))).isCancelled()) info.cancel();
             }
         }
     }
@@ -47,9 +44,7 @@ public abstract class KeyboardMixin {
     @Inject(method = "onChar", at = @At("HEAD"), cancellable = true)
     private void onChar(long window, int i, int j, CallbackInfo info) {
         if (Utils.canUpdate() && !client.isPaused() && (client.currentScreen == null || client.currentScreen instanceof WidgetScreen)) {
-            CharTypedEvent event = MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) i));
-
-            if (event.isCancelled()) info.cancel();
+            if (MeteorClient.EVENT_BUS.post(CharTypedEvent.get((char) i)).isCancelled()) info.cancel();
         }
     }
 }

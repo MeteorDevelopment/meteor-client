@@ -28,6 +28,7 @@ public class Reach extends Module {
     }
 
     public float getReach() {
+        if (!isActive()) return mc.interactionManager.getCurrentGameMode().isCreative() ? 5.0F : 4.5F;
         return reach.get().floatValue();
     }
 }

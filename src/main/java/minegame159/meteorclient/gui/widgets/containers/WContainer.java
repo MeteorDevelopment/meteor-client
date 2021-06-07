@@ -165,25 +165,25 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean keyPressed(int key, int mods) {
+    public boolean keyPressed(int key, int modifiers) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().keyPressed(key, mods)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().keyPressed(key, modifiers)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return onKeyPressed(key, mods);
+        return onKeyPressed(key, modifiers);
     }
 
     @Override
-    public boolean keyRepeated(int key, int mods) {
+    public boolean keyRepeated(int key, int modifiers) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(key, mods)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(key, modifiers)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return onKeyRepeated(key, mods);
+        return onKeyRepeated(key, modifiers);
     }
 
     @Override

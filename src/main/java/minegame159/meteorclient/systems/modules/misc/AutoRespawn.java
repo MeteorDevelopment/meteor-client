@@ -6,9 +6,12 @@
 package minegame159.meteorclient.systems.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.WaypointsModule;
 import net.minecraft.client.gui.screen.DeathScreen;
 
 public class AutoRespawn extends Module {
@@ -16,10 +19,11 @@ public class AutoRespawn extends Module {
         super(Categories.Player, "auto-respawn", "Automatically respawns after death.");
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGH)
     private void onOpenScreenEvent(OpenScreenEvent event) {
         if (!(event.screen instanceof DeathScreen)) return;
 
+        Modules.get().get(WaypointsModule.class).addDeath(mc.player.getPos());
         mc.player.requestRespawn();
         event.cancel();
     }
