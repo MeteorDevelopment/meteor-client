@@ -6,10 +6,10 @@
 package minegame159.meteorclient.settings;
 
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -56,13 +56,13 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
 
         for (StatusEffect effect : get()) {
-            valueTag.add(StringTag.of(Registry.STATUS_EFFECT.getId(effect).toString()));
+            valueTag.add(NbtString.of(Registry.STATUS_EFFECT.getId(effect).toString()));
         }
         tag.put("value", valueTag);
 
@@ -70,11 +70,11 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     }
 
     @Override
-    public List<StatusEffect> fromTag(CompoundTag tag) {
+    public List<StatusEffect> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tagI : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tagI : valueTag) {
             get().add(Registry.STATUS_EFFECT.get(new Identifier(tagI.asString())));
         }
 

@@ -106,7 +106,7 @@ public class EChestFarmer extends Module {
     public void onActivate() {
         target = null;
         startCount = InvUtils.find(Items.OBSIDIAN).getCount();
-        prevSlot = mc.player.inventory.selectedSlot;
+        prevSlot = mc.player.getInventory().selectedSlot;
     }
 
     @Override

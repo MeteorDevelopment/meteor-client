@@ -27,7 +27,6 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
 import java.util.function.Predicate;
@@ -116,8 +115,8 @@ public class NoFall extends Module {
         if (event.packet instanceof PlayerMoveC2SPacket) {
             // Elytra compat
             if (mc.player.isFallFlying()) {
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, elytraStopHeight.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));    
-                
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, elytraStopHeight.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+
                 if (result != null && result.getType() == HitResult.Type.BLOCK) {
                     ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
                     return;
@@ -145,7 +144,7 @@ public class NoFall extends Module {
             // Center and place block
             if (anchor.get()) PlayerUtils.centerPlayer();
 
-            Rotations.rotate(mc.player.yaw, 90, Integer.MAX_VALUE, () -> {
+            Rotations.rotate(mc.player.getYaw(), 90, Integer.MAX_VALUE, () -> {
                 double preY = mc.player.getVelocity().y;
                 ((IVec3d) mc.player.getVelocity()).setY(0);
 
@@ -176,7 +175,7 @@ public class NoFall extends Module {
             }
 
             // Remove water
-            if (placedWater && mc.player.getBlockState().getFluidState().getFluid() == Fluids.WATER) {
+            if (placedWater && mc.player.getBlockStateAtPos().getFluidState().getFluid() == Fluids.WATER) {
                 useBucket(InvUtils.findInHotbar(Items.BUCKET), false);
             }
         }
@@ -184,13 +183,13 @@ public class NoFall extends Module {
 
     private void useBucket(FindItemResult bucket, boolean placedWater) {
       if (!bucket.found()) return;
-      
-      Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
+
+      Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
         if (bucket.isOffhand()) {
           mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
         }
         else {
-          int preSlot = mc.player.inventory.selectedSlot;
+          int preSlot = mc.player.getInventory().selectedSlot;
           InvUtils.swap(bucket.getSlot());
 
           mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
