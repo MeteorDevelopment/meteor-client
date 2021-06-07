@@ -17,7 +17,7 @@ import java.util.function.Predicate;
 
 public class ItemListSettingScreen extends LeftRightListSettingScreen<Item> {
     public ItemListSettingScreen(GuiTheme theme, ItemListSetting setting) {
-        super(theme, "Select items", setting, setting.get(), Registry.ITEM);
+        super(theme, "Select Items", setting, setting.get(), Registry.ITEM);
     }
 
     @Override

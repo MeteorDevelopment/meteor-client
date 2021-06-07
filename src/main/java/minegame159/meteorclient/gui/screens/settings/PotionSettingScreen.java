@@ -14,7 +14,7 @@ import minegame159.meteorclient.utils.misc.MyPotion;
 
 public class PotionSettingScreen extends WindowScreen {
     public PotionSettingScreen(GuiTheme theme, PotionSetting setting) {
-        super(theme, "Select potion");
+        super(theme, "Select Potion");
 
         WTable table = add(theme.table()).expandX().widget();
 
