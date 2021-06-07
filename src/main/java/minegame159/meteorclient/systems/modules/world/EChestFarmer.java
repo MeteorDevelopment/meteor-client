@@ -13,7 +13,9 @@ import minegame159.meteorclient.rendering.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.AutoTool;
+import minegame159.meteorclient.systems.modules.player.PacketMine;
 import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
@@ -167,7 +169,7 @@ public class EChestFarmer extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        if (target == null || !render.get()) return;
+        if (target == null || !render.get() || Modules.get().get(PacketMine.class).isMiningBlock(target)) return;
 
         Box box = SHAPE.getBoundingBoxes().get(0);
         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, target.getX() + box.minX, target.getY() + box.minY, target.getZ() + box.minZ, target.getX() + box.maxX, target.getY() + box.maxY, target.getZ() + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
