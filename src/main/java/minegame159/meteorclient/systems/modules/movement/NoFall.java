@@ -11,6 +11,7 @@ import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -30,11 +31,28 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
+import java.util.function.Predicate;
+
 public class NoFall extends Module {
     public enum Mode {
         Packet,
         AirPlace,
         Bucket
+    }
+
+    public enum PlaceMode {
+        BeforeDamage(height -> height > 2),
+        BeforeDeath(height -> height > Math.max(PlayerUtils.getTotalHealth(), 2));
+
+        private final Predicate<Float> fallHeight;
+
+        PlaceMode(Predicate<Float> fallHeight) {
+            this.fallHeight = fallHeight;
+        }
+
+        public boolean test(float fallheight) {
+            return fallHeight.test(fallheight);
+        }
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -46,15 +64,7 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
-        .name("anchor")
-        .description("Centers the player and reduces movement when using bucket mode.")
-        .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Bucket)
-        .build()
-    );
-
-    private final Setting<PlaceMode> airplaceMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
+    private final Setting<PlaceMode> airPlaceMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
         .name("place-mode")
         .description("Whether place mode places before you die or before you take damage.")
         .defaultValue(PlaceMode.BeforeDeath)
@@ -62,51 +72,59 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
+        .name("anchor")
+        .description("Centers the player and reduces movement when using bucket or air place mode.")
+        .defaultValue(true)
+        .visible(() -> mode.get() != Mode.Packet)
+        .build()
+    );
+
+    private final Setting<Boolean> elytraCompat = sgGeneral.add(new BoolSetting.Builder()
         .name("elytra-compatibility")
-        .description("Stops No Fall from working when using an elytra.")
+        .description("Prevents you from hitting the ground extremely hard whilst flying with an elytra.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Integer> minFallHeight = sgGeneral.add(new IntSetting.Builder()
-        .name("min-fall-height")
-        .description("The minimum height to fall from for no fall to work.")
-        .defaultValue(3)
-        .min(1)
+    private final Setting<Double> elytraHeight = sgGeneral.add(new DoubleSetting.Builder()
+        .name("elytra-stop-height")
+        .description("The height at which you will stop elytra flying.")
+        .defaultValue(0.5)
+        .min(0.1)
         .sliderMax(10)
+        .visible(elytraCompat::get)
         .build()
     );
 
-    @Override
-    public void onActivate() {
-        fallHeightBaritone = BaritoneAPI.getSettings().maxFallHeightNoWater.get();
-        BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
-        placedWater = false;
-        centeredPlayer = false;
-    }
-
     private boolean placedWater;
-    private boolean centeredPlayer;
-    private int fallHeightBaritone;
-    private double x, z;
+    private int preBaritoneFallHeight;
 
     public NoFall() {
-        super(Categories.Movement, "no-fall", "Prevents you from taking fall damage.");
+        super(Categories.Movement, "no-fall", "Attempts to prevent you from taking fall damage.");
+    }
+
+    @Override
+    public void onActivate() {
+        preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
+        if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
+        BaritoneAPI.getSettings().maxFallHeightNoWater.value = preBaritoneFallHeight;
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        // Ignore creative
         if (mc.player.abilities.creativeMode) return;
 
         if (event.packet instanceof PlayerMoveC2SPacket) {
-            if (elytra.get() && mc.player.isFallFlying()) {
-                for (int i = 0; i <= minFallHeight.get(); i++) {
+            // Stop fall flying if min height is reached
+            if (elytraCompat.get() && mc.player.isFallFlying()) {
+                for (int i = 0; i <= elytraHeight.get(); i++) {
                     BlockPos pos = mc.player.getBlockPos().down(i);
 
                     if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
@@ -114,8 +132,10 @@ public class NoFall extends Module {
                         return;
                     }
                 }
-            } else if (mode.get() == Mode.Packet) {
-                // Packet mode
+            }
+
+            // Packet mode
+            else if (mode.get() == Mode.Packet) {
                 if (((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
                     ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
                 }
@@ -125,62 +145,71 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        // Ignore creative
         if (mc.player.abilities.creativeMode) return;
 
-        if (mode.get() == Mode.AirPlace && ((airplaceMode.get() == PlaceMode.BeforeDamage && mc.player.fallDistance > 2) || (airplaceMode.get() == PlaceMode.BeforeDeath && ((mc.player.getHealth() + mc.player.getAbsorptionAmount()) < mc.player.fallDistance)))) {
-            PlayerUtils.centerPlayer();
-            BlockUtils.place(mc.player.getBlockPos().down(2), InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem), true, 50, true);
-        } else if (mode.get() == Mode.Bucket) {
-            // Bucket mode
-            if (placedWater) {
-                // Remove water
-                FindItemResult bucket = InvUtils.findInHotbar(Items.BUCKET);
+        // Airplace mode
+        if (mode.get() == Mode.AirPlace) {
+            // Test if fall damage setting is valid
+            if (!airPlaceMode.get().test(mc.player.fallDistance)) return;
 
-                if (bucket.isHotbar() && mc.player.getBlockState().getFluidState().getFluid() == Fluids.WATER) {
-                    useBucket(bucket.getSlot(), false);
-                }
+            // Center and place block
+            if (anchor.get()) PlayerUtils.centerPlayer();
 
-                centeredPlayer = false;
-            }
-            else if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
-                // Place water
-                FindItemResult bucket = InvUtils.findInHotbar(Items.WATER_BUCKET);
+            Rotations.rotate(mc.player.yaw, 90, Integer.MAX_VALUE, () -> {
+                double preY = mc.player.getVelocity().y;
+                ((IVec3d) mc.player.getVelocity()).setY(0);
 
-                if (anchor.get()) {
-                    if (!centeredPlayer || x != mc.player.getX() || z != mc.player.getZ()) {
-                        PlayerUtils.centerPlayer();
-                        x = mc.player.getX();
-                        z = mc.player.getZ();
-                        centeredPlayer = true;
-                    }
-                }
+                BlockUtils.place(mc.player.getBlockPos().down(), InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem), false, 0, true);
 
-                if (bucket.isHotbar()) {
-                    BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
-
-                    if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                        useBucket(bucket.getSlot(), true);
-                    }
-                }
-            }
+                ((IVec3d) mc.player.getVelocity()).setY(preY);
+            });
         }
 
-        if (mc.player.fallDistance == 0) placedWater = false;
+        // Bucket mode
+        if (mode.get() == Mode.Bucket) {
+            if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
+                // Place water
+                FindItemResult waterBucket = InvUtils.findInHotbar(Items.WATER_BUCKET);
+
+                if (!waterBucket.found()) return;
+
+                // Center player
+                if (anchor.get()) PlayerUtils.centerPlayer();
+
+                // Check if there is a block within 5 blocks
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+
+                // Place water
+                if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                    useBucket(waterBucket, true);
+                }
+            }
+
+            // Remove water
+            if (placedWater && mc.player.getBlockState().getFluidState().getFluid() == Fluids.WATER) {
+                useBucket(InvUtils.findInHotbar(Items.BUCKET), false);
+            }
+        }
     }
 
-    public enum PlaceMode {
-        BeforeDeath,
-        BeforeDamage
-    }
+    private void useBucket(FindItemResult bucket, boolean placedWater) {
+        if (!bucket.found()) return;
 
-    private void useBucket(int slot, boolean setPlacedWater) {
         Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
-            int preSlot = mc.player.inventory.selectedSlot;
-            InvUtils.swap(slot);
-            mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-            InvUtils.swap(preSlot);
+            if (bucket.isOffhand()) {
+                mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+            }
+            else {
+                int preSlot = mc.player.inventory.selectedSlot;
+                InvUtils.swap(bucket.getSlot());
 
-            placedWater = setPlacedWater;
+                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+
+                InvUtils.swap(preSlot);
+            }
+
+            this.placedWater = placedWater;
         });
     }
 
