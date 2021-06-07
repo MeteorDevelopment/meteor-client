@@ -143,7 +143,6 @@ public class AutoTool extends Module {
 
         wasPressed = mc.options.keyAttack.isPressed();
 
-
         // Switch slots
         if (shouldSwitch && ticks <= 0) {
             switchSlots(blockState);
