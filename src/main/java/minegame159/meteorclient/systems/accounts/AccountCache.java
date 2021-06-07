@@ -6,9 +6,9 @@
 package minegame159.meteorclient.systems.accounts;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.renderer.Texture;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
-import minegame159.meteorclient.utils.render.ByteTexture;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
@@ -19,13 +19,12 @@ import java.net.URL;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class AccountCache implements ISerializable<AccountCache> {
-
     public String username = "";
     public String uuid = "";
 
-    private ByteTexture headTexture;
+    private Texture headTexture;
 
-    public ByteTexture getHeadTexture() {
+    public Texture getHeadTexture() {
         return headTexture;
     }
 
@@ -53,7 +52,7 @@ public class AccountCache implements ISerializable<AccountCache> {
                 }
             }
 
-            headTexture = new ByteTexture(8, 8, head, ByteTexture.Format.RGB, ByteTexture.Filter.Nearest, ByteTexture.Filter.Nearest);
+            headTexture = new Texture(8, 8, head, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest);
             return true;
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to read skin url. (" + skinUrl + ")");

@@ -27,6 +27,7 @@
     "BossBarHudMixin",
     "BoxMixin",
     "BrewingStandScreenMixin",
+    "BufferRendererAccessor",
     "CactusBlockMixin",
     "CameraMixin",
     "ChatHudAccessor",

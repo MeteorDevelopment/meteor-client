@@ -26,7 +26,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Screen.class)
 public abstract class ScreenMixin {
-
     @Shadow public int width, height;
 
     @Shadow public abstract void tick();

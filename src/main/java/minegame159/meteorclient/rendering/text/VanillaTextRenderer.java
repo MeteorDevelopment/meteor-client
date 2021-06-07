@@ -10,6 +10,7 @@ import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
@@ -80,7 +81,7 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void end() {
+    public void end(MatrixStack matrices) {
         // Vanilla renderer doesn't support batching
 
         // Vanilla font is twice as small as our custom font (vanilla = 9, custom = 18)
