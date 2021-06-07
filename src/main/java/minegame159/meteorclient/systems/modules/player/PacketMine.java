@@ -22,9 +22,15 @@ import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -180,6 +186,60 @@ public class PacketMine extends Module {
         }
     }
 
+    private double getBreakDelta(int slot, BlockState state) {
+        float hardness = state.getHardness(null, null);
+        if (hardness == -1) return 0;
+        else {
+            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.inventory.main.get(slot).isEffectiveOn(state) ? 30 : 100);
+        }
+    }
+
+    private double getBlockBreakingSpeed(int slot, BlockState block) {
+        double speed = mc.player.inventory.main.get(slot).getMiningSpeedMultiplier(block);
+
+        if (speed > 1) {
+            ItemStack tool = mc.player.inventory.getStack(slot);
+
+            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
+
+            if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
+        }
+
+        if (StatusEffectUtil.hasHaste(mc.player)) {
+            speed *= 1 + (StatusEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
+        }
+
+        if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
+            float k;
+            switch(mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+                case 0:
+                    k = 0.3F;
+                    break;
+                case 1:
+                    k = 0.09F;
+                    break;
+                case 2:
+                    k = 0.0027F;
+                    break;
+                case 3:
+                default:
+                    k = 8.1E-4F;
+            }
+
+            speed *= k;
+        }
+
+        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
+            speed /= 5.0F;
+        }
+
+        if (!mc.player.isOnGround()) {
+            speed /= 5.0F;
+        }
+
+        return speed;
+    }
+
     private class MyBlock {
         public BlockPos blockPos;
         public BlockState blockState;
@@ -222,13 +282,8 @@ public class PacketMine extends Module {
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
             else sendMinePackets();
 
-            FindItemResult tool = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), blockState) && itemStack.getItem() instanceof ToolItem);
-
-            if (!tool.isHotbar()) return;
-            int pre = mc.player.inventory.selectedSlot;
-            InvUtils.swap(tool.getSlot());
-            progress += blockState.calcBlockBreakingDelta(mc.player, mc.world, blockPos);
-            InvUtils.swap(pre);
+            FindItemResult tool = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), blockState));
+            progress += getBreakDelta(tool.isHotbar() ? tool.getSlot() : mc.player.inventory.selectedSlot, blockState);
         }
 
         private void sendMinePackets() {
