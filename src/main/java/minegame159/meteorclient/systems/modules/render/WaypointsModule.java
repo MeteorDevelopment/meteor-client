@@ -78,13 +78,15 @@ public class WaypointsModule extends Module {
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof DeathScreen)) return;
-        if (mc.player == null) return;
-        Vec3d dmgPos = mc.player.getPos();
 
+        if (!event.isCancelled()) addDeath(mc.player.getPos());
+    }
+
+    public void addDeath(Vec3d deathPos) {
         String time = dateFormat.format(new Date());
         if (dpChat.get()) {
             BaseText text = new LiteralText("Died at ");
-            text.append(formatCoords(dmgPos));
+            text.append(formatCoords(deathPos));
             text.append(String.format(" on %s.", time));
             info(text);
         }
@@ -94,9 +96,10 @@ public class WaypointsModule extends Module {
             Waypoint waypoint = new Waypoint();
             waypoint.name = "Death " + time;
             waypoint.icon = "skull";
-            waypoint.x = (int) dmgPos.x;
-            waypoint.y = (int) dmgPos.y + 2;
-            waypoint.z = (int) dmgPos.z;
+            waypoint.scale = 2;
+            waypoint.x = (int) deathPos.x;
+            waypoint.y = (int) deathPos.y + 2;
+            waypoint.z = (int) deathPos.z;
             waypoint.maxVisibleDistance = Integer.MAX_VALUE;
             waypoint.actualDimension = PlayerUtils.getDimension();
 
@@ -114,6 +117,7 @@ public class WaypointsModule extends Module {
 
             Waypoints.get().add(waypoint);
         }
+
         cleanDeathWPs(maxDeathPositions.get());
     }
 
