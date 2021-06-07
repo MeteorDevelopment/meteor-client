@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.systems.modules.world;
+package minegame159.meteorclient.systems.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
@@ -16,11 +16,20 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
+import minegame159.meteorclient.utils.player.FindItemResult;
+import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -65,6 +74,20 @@ public class PacketMine extends Module {
             .description("How the shapes are rendered.")
             .defaultValue(ShapeMode.Both)
             .build()
+    );
+
+    private final Setting<SettingColor> readySideColor = sgRender.add(new ColorSetting.Builder()
+        .name("ready-side-color")
+        .description("The color of the sides of the blocks that can be broken.")
+        .defaultValue(new SettingColor(0, 204, 0, 10))
+        .build()
+    );
+
+    private final Setting<SettingColor> readyLineColor = sgRender.add(new ColorSetting.Builder()
+        .name("ready-line-color")
+        .description("The color of the lines of the blocks that can be broken.")
+        .defaultValue(new SettingColor(0, 204, 0, 255))
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()

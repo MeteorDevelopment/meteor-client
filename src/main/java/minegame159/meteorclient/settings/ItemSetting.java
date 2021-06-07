@@ -6,7 +6,7 @@
 package minegame159.meteorclient.settings;
 
 import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -38,8 +38,8 @@ public class ItemSetting extends Setting<Item> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("value", Registry.ITEM.getId(get()).toString());
 
@@ -47,7 +47,7 @@ public class ItemSetting extends Setting<Item> {
     }
 
     @Override
-    public Item fromTag(CompoundTag tag) {
+    public Item fromTag(NbtCompound tag) {
         value = Registry.ITEM.get(new Identifier(tag.getString("value")));
 
         if (filter != null && !filter.test(value)) {
