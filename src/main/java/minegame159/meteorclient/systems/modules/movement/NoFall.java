@@ -80,20 +80,12 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Boolean> elytraCompat = sgGeneral.add(new BoolSetting.Builder()
-        .name("elytra-compatibility")
-        .description("Prevents you from hitting the ground extremely hard whilst flying with an elytra.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Double> elytraHeight = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> elytraStopHeight = sgGeneral.add(new DoubleSetting.Builder()
         .name("elytra-stop-height")
         .description("The height at which you will stop elytra flying.")
         .defaultValue(0.5)
-        .min(0.1)
+        .min(0)
         .sliderMax(10)
-        .visible(elytraCompat::get)
         .build()
     );
 
@@ -122,15 +114,13 @@ public class NoFall extends Module {
         if (mc.player.abilities.creativeMode) return;
 
         if (event.packet instanceof PlayerMoveC2SPacket) {
-            // Stop fall flying if min height is reached
-            if (elytraCompat.get() && mc.player.isFallFlying()) {
-                for (int i = 0; i <= elytraHeight.get(); i++) {
-                    BlockPos pos = mc.player.getBlockPos().down(i);
-
-                    if (!mc.world.getBlockState(pos).getMaterial().isReplaceable()) {
-                        ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                        return;
-                    }
+            // Elytra compat
+            if (mc.player.isFallFlying()) {
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, elytraStopHeight.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));    
+                
+                if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+                    return;
                 }
             }
 
