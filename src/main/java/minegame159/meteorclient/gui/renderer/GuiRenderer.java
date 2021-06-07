@@ -9,18 +9,15 @@ import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.renderer.operations.TextOperation;
 import minegame159.meteorclient.gui.renderer.packer.GuiTexture;
 import minegame159.meteorclient.gui.renderer.packer.TexturePacker;
-import minegame159.meteorclient.gui.renderer.packer.TextureRegion;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.renderer.Renderer2D;
+import minegame159.meteorclient.renderer.Texture;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.render.ByteTexture;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.VertexFormats;
-import net.minecraft.client.texture.AbstractTexture;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Identifier;
-import org.lwjgl.opengl.GL11;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,8 +40,8 @@ public class GuiRenderer {
 
     public GuiTheme theme;
 
-    private final MeshBuilder mb = new MeshBuilder();
-    private final MeshBuilder mbTex = new MeshBuilder();
+    private final Renderer2D r = new Renderer2D(false);
+    private final Renderer2D rTex = new Renderer2D(true);
 
     private final Pool<Scissor> scissorPool = new Pool<>(Scissor::new);
     private final Stack<Scissor> scissorStack = new Stack<>();
@@ -57,6 +54,8 @@ public class GuiRenderer {
     public String tooltip, lastTooltip;
     public WWidget tooltipWidget;
     private double tooltipAnimProgress;
+
+    private MatrixStack matrices;
 
     public static GuiTexture addTexture(Identifier id) {
         return TEXTURE_PACKER.add(id);
@@ -71,12 +70,16 @@ public class GuiRenderer {
         TEXTURE = TEXTURE_PACKER.pack();
     }
 
-    public void begin() {
+    public void begin(MatrixStack matrices) {
+        this.matrices = matrices;
+
         glEnable(GL_SCISSOR_TEST);
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
-    public void end() {
+    public void end(MatrixStack matrices) {
+        this.matrices = matrices;
+
         scissorEnd();
 
         for (Runnable task : postTasks) task.run();
@@ -86,29 +89,32 @@ public class GuiRenderer {
     }
 
     private void beginRender() {
-        mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        mbTex.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
+        r.begin();
+        rTex.begin();
     }
 
     private void endRender() {
-        mb.end();
+        r.end();
+        rTex.end();
+
+        r.render(matrices);
+
         TEXTURE.bindTexture();
-        mbTex.texture = true;
-        mbTex.end();
+        rTex.render(matrices);
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
         for (TextOperation text : texts) {
             if (!text.title) text.run(textPool);
         }
-        theme.textRenderer().end();
+        theme.textRenderer().end(matrices);
 
         // Title text
         theme.textRenderer().begin(theme.scale(1.25));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }
-        theme.textRenderer().end();
+        theme.textRenderer().end(matrices);
 
         texts.clear();
     }
@@ -142,7 +148,7 @@ public class GuiRenderer {
         scissorPool.free(scissor);
     }
 
-    public boolean renderTooltip(double mouseX, double mouseY, double delta) {
+    public boolean renderTooltip(double mouseX, double mouseY, double delta, MatrixStack matrices) {
         tooltipAnimProgress += (tooltip != null ? 1 : -1) * delta * 14;
         tooltipAnimProgress = Utils.clamp(tooltipAnimProgress, 0, 1);
 
@@ -158,9 +164,9 @@ public class GuiRenderer {
 
             setAlpha(tooltipAnimProgress);
 
-            begin();
+            begin(matrices);
             tooltipWidget.render(this, mouseX, mouseY, delta);
-            end();
+            end(matrices);
 
             setAlpha(1);
 
@@ -173,8 +179,8 @@ public class GuiRenderer {
     }
 
     public void setAlpha(double a) {
-        mb.alpha = a;
-        mbTex.alpha = a;
+        r.setAlpha(a);
+        rTex.setAlpha(a);
 
         theme.textRenderer().setAlpha(a);
     }
@@ -184,7 +190,7 @@ public class GuiRenderer {
     }
 
     public void quad(double x, double y, double width, double height, Color cTopLeft, Color cTopRight, Color cBottomRight, Color cBottomLeft) {
-        mb.quad(x, y, width, height, cTopLeft, cTopRight, cBottomRight, cBottomLeft);
+        r.quad(x, y, width, height, cTopLeft, cTopRight, cBottomRight, cBottomLeft);
     }
     public void quad(double x, double y, double width, double height, Color colorLeft, Color colorRight) {
         quad(x, y, width, height, colorLeft, colorRight, colorRight, colorLeft);
@@ -196,62 +202,25 @@ public class GuiRenderer {
         quad(widget.x, widget.y, widget.width, widget.height, color);
     }
     public void quad(double x, double y, double width, double height, GuiTexture texture, Color color) {
-        mbTex.texQuad(x, y, width, height, texture.get(width, height), color);
+        rTex.texQuad(x, y, width, height, texture.get(width, height), color);
     }
 
     public void rotatedQuad(double x, double y, double width, double height, double rotation, GuiTexture texture, Color color) {
-        TextureRegion region = texture.get(width, height);
-
-        double rad = Math.toRadians(rotation);
-        double cos = Math.cos(rad);
-        double sin = Math.sin(rad);
-
-        double oX = x + width / 2;
-        double oY = y + height / 2;
-
-        double _x1 = ((x - oX) * cos) - ((y - oY) * sin) + oX;
-        double _y1 = ((y - oY) * cos) + ((x - oX) * sin) + oY;
-        mbTex.pos(_x1, _y1, 0).color(color).texture(region.x1, region.y1).endVertex();
-
-        double _x = ((x + width - oX) * cos) - ((y - oY) * sin) + oX;
-        double _y = ((y - oY) * cos) + ((x + width - oX) * sin) + oY;
-        mbTex.pos(_x, _y, 0).color(color).texture(region.x2, region.y1).endVertex();
-
-        double _x2 = ((x + width - oX) * cos) - ((y + height - oY) * sin) + oX;
-        double _y2 = ((y + height - oY) * cos) + ((x + width - oX) * sin) + oY;
-        mbTex.pos(_x2, _y2, 0).color(color).texture(region.x2, region.y2).endVertex();
-
-        mbTex.pos(_x1, _y1, 0).color(color).texture(region.x1, region.y1).endVertex();
-
-        mbTex.pos(_x2, _y2, 0).color(color).texture(region.x2, region.y2).endVertex();
-
-        _x = ((x - oX) * cos) - ((y + height - oY) * sin) + oX;
-        _y = ((y + height - oY) * cos) + ((x - oX) * sin) + oY;
-        mbTex.pos(_x, _y, 0).color(color).texture(region.x1, region.y2).endVertex();
+        rTex.texQuad(x, y, width, height, rotation, texture.get(width, height), color);
     }
 
     public void text(String text, double x, double y, Color color, boolean title) {
         texts.add(getOp(textPool, x, y, color).set(text, theme.textRenderer(), title));
     }
 
-    public void texture(double x, double y, double width, double height, double rotation, AbstractTexture texture) {
+    public void texture(double x, double y, double width, double height, double rotation, Texture texture) {
         post(() -> {
-            mbTex.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
+            rTex.begin();
+            rTex.texQuad(x, y, width, height, rotation, 0, 0, 1, 1, WHITE);
+            rTex.end();
 
-            mbTex.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
-            mbTex.pos(x + width, y, 0).color(WHITE).texture(1, 0).endVertex();
-            mbTex.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
-            mbTex.pos(x, y, 0).color(WHITE).texture(0, 0).endVertex();
-            mbTex.pos(x + width, y + height, 0).color(WHITE).texture(1, 1).endVertex();
-            mbTex.pos(x, y + height, 0).color(WHITE).texture(0, 1).endVertex();
-
-            texture.bindTexture();
-            GL11.glPushMatrix();
-            GL11.glTranslated(x + width / 2, y + height / 2, 0);
-            GL11.glRotated(rotation, 0, 0, 1);
-            GL11.glTranslated(-x - width / 2, -y - height / 2, 0);
-            mbTex.end();
-            GL11.glPopMatrix();
+            texture.bind();
+            rTex.render(matrices);
         });
     }
 

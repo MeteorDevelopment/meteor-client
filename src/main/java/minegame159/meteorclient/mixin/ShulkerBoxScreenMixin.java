@@ -29,9 +29,9 @@ public abstract class ShulkerBoxScreenMixin extends HandledScreen<ShulkerBoxScre
         AutoSteal autoSteal = Modules.get().get(AutoSteal.class);
 
         if (autoSteal.isActive() && autoSteal.getStealButtonEnabled())
-            addDrawable(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
+            addDrawableChild(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
         if (autoSteal.isActive() && autoSteal.getDumpButtonEnabled())
-            addDrawable(new MeteorButtonWidget(x + backgroundWidth - 46, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
+            addDrawableChild(new MeteorButtonWidget(x + backgroundWidth - 46, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
 
         if (autoSteal.isActive() && autoSteal.getAutoStealEnabled()) steal(handler);
         else if (autoSteal.isActive() && autoSteal.getAutoDumpEnabled()) dump(handler);

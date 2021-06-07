@@ -28,7 +28,7 @@ public class DeathScreenMixin extends Screen {
     @Inject(method = "init", at = @At("HEAD"))
     protected void init(CallbackInfo ci) {
         if (Modules.get().isActive(BypassDeathScreen.class)) {
-            this.addDrawable(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> client.openScreen(null)));
+            this.addDrawableChild(new ButtonWidget(this.width / 2 - 100, this.height / 4 + 48, 200, 20, new LiteralText("Ghost Spectate"), (buttonWidgetx) -> client.openScreen(null)));
         }
     }
 }

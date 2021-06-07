@@ -8,6 +8,7 @@ package minegame159.meteorclient.rendering.text;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.render.color.Color;
+import net.minecraft.client.util.math.MatrixStack;
 
 public interface TextRenderer {
     static TextRenderer get() {
@@ -32,5 +33,6 @@ public interface TextRenderer {
 
     boolean isBuilding();
 
-    void end();
+    default void end() { end(null); }
+    void end(MatrixStack matrices);
 }

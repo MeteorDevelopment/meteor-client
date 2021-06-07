@@ -6,14 +6,14 @@
 package minegame159.meteorclient.gui.widgets;
 
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.client.texture.AbstractTexture;
+import minegame159.meteorclient.renderer.Texture;
 
 public class WTexture extends WWidget {
     private final double width, height;
     private final double rotation;
-    private final AbstractTexture texture;
+    private final Texture texture;
 
-    public WTexture(double width, double height, double rotation, AbstractTexture texture) {
+    public WTexture(double width, double height, double rotation, Texture texture) {
         this.width = width;
         this.height = height;
         this.rotation = rotation;
@@ -28,6 +28,6 @@ public class WTexture extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.texture(x, y, super.width, super.height, rotation, texture);
+        if (texture.isValid()) renderer.texture(x, y, super.width, super.height, rotation, texture);
     }
 }

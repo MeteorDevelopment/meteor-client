@@ -16,6 +16,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.Tabs;
+import minegame159.meteorclient.renderer.Shaders;
 import minegame159.meteorclient.rendering.Blur;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
@@ -105,6 +106,8 @@ public class MeteorClient implements ClientModInitializer {
         Tabs.init();
         GuiThemes.init();
         Fonts.init();
+
+        Shaders.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;

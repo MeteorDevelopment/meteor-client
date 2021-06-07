@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -35,6 +36,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -117,23 +119,12 @@ public class Utils {
         return mc.getWindow().getFramebufferHeight();
     }
 
-    // TODO: Fix
     public static void unscaledProjection() {
-        /*RenderSystem.matrixMode(5889);
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), 0.0D, 1000.0D, 3000.0D);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);*/
+        RenderSystem.setProjectionMatrix(Matrix4f.projectionMatrix(0, mc.getWindow().getFramebufferWidth(), 0, mc.getWindow().getFramebufferHeight(), 1000, 3000));
     }
 
     public static void scaledProjection() {
-        /*RenderSystem.matrixMode(5889);
-        RenderSystem.loadIdentity();
-        RenderSystem.ortho(0.0D, mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor(), mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor(), 0.0D, 1000.0D, 3000.0D);
-        RenderSystem.matrixMode(5888);
-        RenderSystem.loadIdentity();
-        RenderSystem.translatef(0.0F, 0.0F, -2000.0F);*/
+        RenderSystem.setProjectionMatrix(Matrix4f.projectionMatrix(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), 0, (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 1000, 3000));
     }
 
     public static Vec3d vec3d(BlockPos pos) {

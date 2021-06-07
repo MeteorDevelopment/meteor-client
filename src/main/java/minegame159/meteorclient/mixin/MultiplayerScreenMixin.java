@@ -42,11 +42,11 @@ public class MultiplayerScreenMixin extends Screen {
         loggedInAs = "Logged in as ";
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
-        addDrawable(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> {
+        addDrawableChild(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> {
             client.openScreen(GuiThemes.get().accountsScreen());
         }));
 
-        addDrawable(new ButtonWidget(this.width - 75 - 3 - 75 - 2, 3, 75, 20, new LiteralText("Proxies"), button -> {
+        addDrawableChild(new ButtonWidget(this.width - 75 - 3 - 75 - 2, 3, 75, 20, new LiteralText("Proxies"), button -> {
             client.openScreen(GuiThemes.get().proxiesScreen());
         }));
     }
