@@ -166,7 +166,7 @@ public class PacketMine extends Module {
                     FindItemResult tool = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), block.blockState) && itemStack.getItem() instanceof ToolItem);
 
                     if (!tool.found()) continue;
-                    prevSlot = mc.player.inventory.selectedSlot;
+                    prevSlot = mc.player.getInventory().selectedSlot;
                     InvUtils.swap(tool.getSlot());
                     needsSwapBack = true;
                     break;
@@ -190,15 +190,16 @@ public class PacketMine extends Module {
         float hardness = state.getHardness(null, null);
         if (hardness == -1) return 0;
         else {
-            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.inventory.main.get(slot).isEffectiveOn(state) ? 30 : 100);
+            // TODO: fix
+            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || /*mc.player.getInventory().main.get(slot).isEffectiveOn(state)*/ false ? 30 : 100);
         }
     }
 
     private double getBlockBreakingSpeed(int slot, BlockState block) {
-        double speed = mc.player.inventory.main.get(slot).getMiningSpeedMultiplier(block);
+        double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
 
         if (speed > 1) {
-            ItemStack tool = mc.player.inventory.getStack(slot);
+            ItemStack tool = mc.player.getInventory().getStack(slot);
 
             int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
 
@@ -283,7 +284,7 @@ public class PacketMine extends Module {
             else sendMinePackets();
 
             FindItemResult tool = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), blockState));
-            progress += getBreakDelta(tool.isHotbar() ? tool.getSlot() : mc.player.inventory.selectedSlot, blockState);
+            progress += getBreakDelta(tool.isHotbar() ? tool.getSlot() : mc.player.getInventory().selectedSlot, blockState);
         }
 
         private void sendMinePackets() {
