@@ -78,7 +78,7 @@ public class InvUtils {
         if (slot < 0 || slot > 8) return false;
 
         mc.player.getInventory().selectedSlot = slot;
-        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
+        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelected();
         return true;
     }
 

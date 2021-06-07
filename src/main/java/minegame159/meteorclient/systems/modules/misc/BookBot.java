@@ -141,7 +141,7 @@ public class BookBot extends Module {
             FindItemResult result = InvUtils.findEmpty();
 
             if (result.isHotbar())
-                InvUtils.move().from(itemResult.slot).toHotbar(result.slot);
+                InvUtils.move().from(itemResult.getSlot()).toHotbar(result.getSlot());
         }
 
         itemResult = InvUtils.findInHotbar(Items.WRITABLE_BOOK);
