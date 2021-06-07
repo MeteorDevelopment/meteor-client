@@ -10,14 +10,12 @@ import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 
 public class NotebotHelpScreen extends WindowScreen {
-
-
     public NotebotHelpScreen(GuiTheme theme) {
         super(theme, "Notebot - Help");
 
         add(theme.label("Loading songs", true)).widget();
         add(theme.label("To load songs you need to put a file with supported format inside: "));
-        add(theme.label(String.format(" \"%s\"", MeteorClient.FOLDER.toPath().resolve("notebot").toString())));
+        add(theme.label(String.format(" \"%s\"", MeteorClient.FOLDER.toPath().resolve("notebot"))));
 
         add(theme.label("Supported formats", true)).padTop(10);
         add(theme.label("- Classic .nbs files"));
@@ -37,6 +35,4 @@ public class NotebotHelpScreen extends WindowScreen {
         add(theme.label("3. Run \".notebot record save <name>\""));
         add(theme.label("After that you will see your new recording inside the list of recordings"));
     }
-    
-
 }

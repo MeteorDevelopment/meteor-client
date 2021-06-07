@@ -175,7 +175,7 @@ public class Nametags extends Module {
             .build()
     );
 
-    private final Setting<List<Enchantment>> displayedEnchantments = sgPlayers.add(new EnchListSetting.Builder()
+    private final Setting<List<Enchantment>> displayedEnchantments = sgPlayers.add(new EnchantmentListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
             .defaultValue(setDefaultList())

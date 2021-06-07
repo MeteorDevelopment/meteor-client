@@ -79,7 +79,7 @@ public class CombatHud extends HudElement {
             .build()
     );
 
-    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
+    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
             .defaultValue(getDefaultEnchantments())

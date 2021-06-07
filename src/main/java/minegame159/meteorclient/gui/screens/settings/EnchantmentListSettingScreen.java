@@ -14,9 +14,9 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.List;
 
-public class EnchListSettingScreen extends LeftRightListSettingScreen<Enchantment> {
-    public EnchListSettingScreen(GuiTheme theme, Setting<List<Enchantment>> setting) {
-        super(theme, "Select items", setting, setting.get(), Registry.ENCHANTMENT);
+public class EnchantmentListSettingScreen extends LeftRightListSettingScreen<Enchantment> {
+    public EnchantmentListSettingScreen(GuiTheme theme, Setting<List<Enchantment>> setting) {
+        super(theme, "Select Enchantments", setting, setting.get(), Registry.ENCHANTMENT);
     }
 
     @Override

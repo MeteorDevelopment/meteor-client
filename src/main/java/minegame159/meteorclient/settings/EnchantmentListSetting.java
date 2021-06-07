@@ -5,13 +5,11 @@
 
 package minegame159.meteorclient.settings;
 
-//Created by squidoodly 25/07/2020
-
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtList;
-import net.minecraft.nbt.NbtString;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -19,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class EnchListSetting extends Setting<List<Enchantment>> {
-    public EnchListSetting(String name, String description, List<Enchantment> defaultValue, Consumer<List<Enchantment>> onChanged, Consumer<Setting<List<Enchantment>>> onModuleActivated, IVisible visible) {
+public class EnchantmentListSetting extends Setting<List<Enchantment>> {
+    public EnchantmentListSetting(String name, String description, List<Enchantment> defaultValue, Consumer<List<Enchantment>> onChanged, Consumer<Setting<List<Enchantment>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new ArrayList<>(defaultValue);
@@ -48,7 +46,9 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    protected boolean isValueValid(List<Enchantment> value) { return true; }
+    protected boolean isValueValid(List<Enchantment> value) {
+        return true;
+    }
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
@@ -56,16 +56,12 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public CompoundTag toTag() {
+        CompoundTag tag = saveGeneral();
 
-        NbtList valueTag = new NbtList();
-        for(Enchantment ench : get()) {
-            try {
-                valueTag.add(NbtString.of(Registry.ENCHANTMENT.getId(ench).toString()));
-            } catch (NullPointerException ignored) {
-                //Cringe. Idk what's going on but it crashed me so...
-            }
+        ListTag valueTag = new ListTag();
+        for (Enchantment ench : get()) {
+            valueTag.add(StringTag.of(Registry.ENCHANTMENT.getId(ench).toString()));
         }
         tag.put("value", valueTag);
 
@@ -73,12 +69,12 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public List<Enchantment> fromTag(NbtCompound tag) {
+    public List<Enchantment> fromTag(CompoundTag tag) {
         get().clear();
 
-        NbtList valueTag = tag.getList("value", 8);
-        for (NbtElement tag1 : valueTag) {
-            get().add(Registry.ENCHANTMENT.get(new Identifier(tag1.asString())));
+        ListTag valueTag = tag.getList("value", 8);
+        for (Tag tagI : valueTag) {
+            get().add(Registry.ENCHANTMENT.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -122,8 +118,8 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
             return this;
         }
 
-        public EnchListSetting build() {
-            return new EnchListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        public EnchantmentListSetting build() {
+            return new EnchantmentListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }
