@@ -44,7 +44,7 @@ public class CombatHud extends HudElement {
     private static final Color GREEN = new Color(15, 255, 15);
     private static final Color RED = new Color(255, 15, 15);
     private static final Color BLACK = new Color(0, 0, 0, 255);
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
@@ -80,7 +80,7 @@ public class CombatHud extends HudElement {
             .build()
     );
 
-    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
+    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
             .defaultValue(getDefaultEnchantments())

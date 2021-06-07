@@ -17,13 +17,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
-public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> {
+public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> {
+    public final Predicate<Class<? extends Packet<?>>> filter;
     private static List<String> suggestions;
 
-    public PacketBoolSetting(String name, String description, Set<Class<? extends Packet<?>>> defaultValue, Consumer<Set<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated, IVisible visible) {
+    public PacketListSetting(String name, String description, Set<Class<? extends Packet<?>>> defaultValue, Consumer<Set<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated, Predicate<Class<? extends Packet<?>>> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
+        this.filter = filter;
         value = new ObjectOpenHashSet<>(defaultValue);
     }
 
@@ -41,7 +44,7 @@ public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         try {
             for (String value : values) {
                 Class<? extends Packet<?>> packet = PacketUtils.getPacket(value.trim());
-                if (packet != null) packets.add(packet);
+                if (packet != null && (filter == null || filter.test(packet))) packets.add(packet);
             }
         } catch (Exception ignored) {}
 
@@ -91,7 +94,7 @@ public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         if (valueTag instanceof ListTag) {
             for (Tag t : (ListTag) valueTag) {
                 Class<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString());
-                if (packet != null) get().add(packet);
+                if (packet != null && (filter == null || filter.test(packet))) get().add(packet);
             }
         }
 
@@ -104,6 +107,7 @@ public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         private Set<Class<? extends Packet<?>>> defaultValue;
         private Consumer<Set<Class<? extends Packet<?>>>> onChanged;
         private Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated;
+        private Predicate<Class<? extends Packet<?>>> filter;
         private IVisible visible;
 
         public Builder name(String name) {
@@ -131,13 +135,18 @@ public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> 
             return this;
         }
 
+        public Builder filter(Predicate<Class<? extends Packet<?>>> filter) {
+            this.filter = filter;
+            return this;
+        }
+
         public Builder visible(IVisible visible) {
             this.visible = visible;
             return this;
         }
 
-        public PacketBoolSetting build() {
-            return new PacketBoolSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        public PacketListSetting build() {
+            return new PacketListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter, visible);
         }
     }
 }
