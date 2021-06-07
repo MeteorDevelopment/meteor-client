@@ -199,7 +199,7 @@ public class InvUtils {
         // Other
 
         private void run() {
-            boolean hadEmptyCursor = mc.player.inventory.getCursorStack().isEmpty();
+            boolean hadEmptyCursor = mc.player.currentScreenHandler.getCursorStack().isEmpty();
 
             if (type != null && from != -1 && to != -1) {
                click(from);
