@@ -404,6 +404,7 @@ public class Modules extends System<Modules> {
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
+        add(new InstaMine());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new NoBreakDelay());
@@ -411,6 +412,7 @@ public class Modules extends System<Modules> {
         add(new NoMiningTrace());
         add(new NoRotate());
         add(new OffhandCrash());
+        add(new PacketMine());
         add(new Portals());
         add(new PotionSaver());
         add(new PotionSpoof());
@@ -510,11 +512,9 @@ public class Modules extends System<Modules> {
         add(new EntityLogger());
         add(new Flamethrower());
         add(new InfinityMiner());
-        add(new InstaMine());
         add(new LiquidFiller());
         add(new MountBypass());
         add(new Nuker());
-        add(new PacketMine());
         add(new StashFinder());
         add(new Timer());
         add(new VeinMiner());
