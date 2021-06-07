@@ -15,7 +15,6 @@ import minegame159.meteorclient.systems.modules.player.OffhandCrash;
 import minegame159.meteorclient.systems.modules.render.HandView;
 import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -33,6 +32,8 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -78,7 +79,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
     private void onEquipStack(ItemStack stack, CallbackInfo info) {
-        if ((Object) this == MinecraftClient.getInstance().player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
+        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
             info.cancel();
         }
     }
@@ -86,7 +87,7 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
     private Hand setHand(Hand hand) {
         HandView handView = Modules.get().get(HandView.class);
-        if ((Object) this == MinecraftClient.getInstance().player && handView.isActive()) {
+        if ((Object) this == mc.player && handView.isActive()) {
             if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
             return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
         }

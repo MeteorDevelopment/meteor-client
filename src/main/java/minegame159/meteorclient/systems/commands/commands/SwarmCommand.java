@@ -5,8 +5,6 @@
 
 package minegame159.meteorclient.systems.commands.commands;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -122,7 +120,8 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker() && playerEntity != null) {
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getEntityName().equalsIgnoreCase(playerEntity.getEntityName()));
+                    // TODO: Baritone
+                    //BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getEntityName().equalsIgnoreCase(playerEntity.getEntityName()));
                 }
             }
             else {
@@ -144,7 +143,8 @@ public class SwarmCommand extends Command {
                                     int x = IntegerArgumentType.getInteger(context, "x");
                                     int z = IntegerArgumentType.getInteger(context, "z");
 
-                                    BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
+                                    // TODO: Baritone
+                                    //BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
                                 }
                             }
                             else {
@@ -328,7 +328,8 @@ public class SwarmCommand extends Command {
                 if (swarm.isHost()) {
                     swarm.host.sendMessage(context.getInput());
                 } else if (swarm.isWorker()) {
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                    // TODO: Baritone
+                    //BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                 }
             } else {
                 throw SWARM_NOT_ACTIVE.create();
@@ -364,7 +365,8 @@ public class SwarmCommand extends Command {
         double r = radius * Math.sqrt(random.nextDouble());
         double x = mc.player.getX() + r * Math.cos(a);
         double z = mc.player.getZ() + r * Math.sin(a);
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
+        // TODO: Baritone
+        /*BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));*/
     }
 }

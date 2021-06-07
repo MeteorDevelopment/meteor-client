@@ -32,7 +32,7 @@ public class AutoClicker extends Module {
             .name("mode")
             .description("The method of clicking.")
             .defaultValue(Mode.Press)
-            .build() 
+            .build()
     );
 
     private final Setting<Button> button = sgGeneral.add(new EnumSetting.Builder<Button>()

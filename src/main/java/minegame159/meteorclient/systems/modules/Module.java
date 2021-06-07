@@ -16,8 +16,8 @@ import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -122,9 +122,9 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     @Override
-    public CompoundTag toTag() {
+    public NbtCompound toTag() {
         if (!serialize) return null;
-        CompoundTag tag = new CompoundTag();
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
         tag.put("keybind", keybind.toTag());
@@ -138,7 +138,7 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     @Override
-    public Module fromTag(CompoundTag tag) {
+    public Module fromTag(NbtCompound tag) {
         // General
         if (tag.contains("key")) keybind.set(true, tag.getInt("key"));
         else keybind.fromTag(tag.getCompound("keybind"));
@@ -146,8 +146,8 @@ public abstract class Module implements ISerializable<Module> {
         toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease");
 
         // Settings
-        Tag settingsTag = tag.get("settings");
-        if (settingsTag instanceof CompoundTag) settings.fromTag((CompoundTag) settingsTag);
+        NbtElement settingsTag = tag.get("settings");
+        if (settingsTag instanceof NbtCompound) settings.fromTag((NbtCompound) settingsTag);
 
         boolean active = tag.getBoolean("active");
         if (active != isActive()) toggle(Utils.canUpdate());

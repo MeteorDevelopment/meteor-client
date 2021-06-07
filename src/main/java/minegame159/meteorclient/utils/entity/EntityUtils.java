@@ -43,9 +43,9 @@ public class EntityUtils {
     }
 
     public static GameMode getGameMode(PlayerEntity player) {
-        if (player == null) return GameMode.NOT_SET;
+        if (player == null) return GameMode.SPECTATOR;
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
-        if (playerListEntry == null) return GameMode.NOT_SET;
+        if (playerListEntry == null) return GameMode.SPECTATOR;
         return playerListEntry.getGameMode();
     }
 

@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
@@ -49,14 +49,14 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
         tag.putDouble("value", get());
         return tag;
     }
 
     @Override
-    public Double fromTag(CompoundTag tag) {
+    public Double fromTag(NbtCompound tag) {
         set(tag.getDouble("value"));
 
         return get();

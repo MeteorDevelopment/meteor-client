@@ -179,6 +179,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noBlockBreakOverlay = sgWorld.add(new BoolSetting.Builder()
+            .name("block-break-overlay")
+            .description("Disables rendering of block-break overlay.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> noSkylightUpdates = sgWorld.add(new BoolSetting.Builder()
             .name("skylight-updates")
             .description("Disables rendering of skylight updates.")
@@ -347,6 +354,10 @@ public class NoRender extends Module {
 
     public boolean noBlockBreakParticles() {
         return isActive() && noBlockBreakParticles.get();
+    }
+
+    public boolean noBlockBreakOverlay() {
+        return isActive() && noBlockBreakOverlay.get();
     }
 
     public boolean noSkylightUpdates() {

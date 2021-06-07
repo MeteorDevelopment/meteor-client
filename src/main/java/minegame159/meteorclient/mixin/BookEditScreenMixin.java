@@ -6,14 +6,13 @@
 package minegame159.meteorclient.mixin;
 
 import it.unimi.dsi.fastutil.io.FastByteArrayOutputStream;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.BookEditScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -31,15 +30,22 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 @Mixin(BookEditScreen.class)
 public abstract class BookEditScreenMixin extends Screen {
-    @Shadow @Final private List<String> pages;
+    @Shadow
+    @Final
+    private List<String> pages;
 
-    @Shadow private int currentPage;
+    @Shadow
+    private int currentPage;
 
-    @Shadow private boolean dirty;
+    @Shadow
+    private boolean dirty;
 
-    @Shadow protected abstract void updateButtons();
+    @Shadow
+    protected abstract void updateButtons();
 
     public BookEditScreenMixin(Text title) {
         super(title);
@@ -47,11 +53,11 @@ public abstract class BookEditScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addButton(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
-            ListTag listTag = new ListTag();
-            pages.stream().map(StringTag::of).forEach(listTag::add);
+        addDrawable(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
+            NbtList listTag = new NbtList();
+            pages.stream().map(NbtString::of).forEach(listTag::add);
 
-            CompoundTag tag = new CompoundTag();
+            NbtCompound tag = new NbtCompound();
             tag.put("pages", listTag);
             tag.putInt("currentPage", currentPage);
 
@@ -64,14 +70,14 @@ public abstract class BookEditScreenMixin extends Screen {
             }
 
             try {
-                GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+                GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
             } catch (OutOfMemoryError exception) {
-                GLFW.glfwSetClipboardString(MinecraftClient.getInstance().getWindow().getHandle(), exception.toString());
+                GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), exception.toString());
             }
         }));
 
-        addButton(new ButtonWidget(4, 4 + 16 + 4, 70, 16, new LiteralText("Paste"), button -> {
-            String clipboard = GLFW.glfwGetClipboardString(MinecraftClient.getInstance().getWindow().getHandle());
+        addDrawable(new ButtonWidget(4, 4 + 16 + 4, 70, 16, new LiteralText("Paste"), button -> {
+            String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().getHandle());
             if (clipboard == null) return;
 
             byte[] bytes;
@@ -83,9 +89,9 @@ public abstract class BookEditScreenMixin extends Screen {
             DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
             try {
-                CompoundTag tag = NbtIo.read(in);
+                NbtCompound tag = NbtIo.read(in);
 
-                ListTag listTag = tag.getList("pages", 8).copy();
+                NbtList listTag = tag.getList("pages", 8).copy();
 
                 pages.clear();
                 for(int i = 0; i < listTag.size(); ++i) {

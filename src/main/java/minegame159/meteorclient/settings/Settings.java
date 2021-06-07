@@ -12,9 +12,9 @@ import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -114,18 +114,18 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
         tag.put("groups", NbtUtils.listToTag(groups));
         return tag;
     }
 
     @Override
-    public Settings fromTag(CompoundTag tag) {
-        ListTag groupsTag = tag.getList("groups", 10);
+    public Settings fromTag(NbtCompound tag) {
+        NbtList groupsTag = tag.getList("groups", 10);
 
-        for (Tag t : groupsTag) {
-            CompoundTag groupTag = (CompoundTag) t;
+        for (NbtElement t : groupsTag) {
+            NbtCompound groupTag = (NbtCompound) t;
 
             SettingGroup sg = getGroup(groupTag.getString("name"));
             if (sg != null) sg.fromTag(groupTag);

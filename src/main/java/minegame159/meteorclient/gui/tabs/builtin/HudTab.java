@@ -19,7 +19,6 @@ import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
@@ -94,7 +93,7 @@ public class HudTab extends Tab {
             if (hoveredModule != null) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                     if (!selectedElements.isEmpty()) selectedElements.clear();
-                    MinecraftClient.getInstance().openScreen(new HudElementScreen(theme, hoveredModule));
+                    mc.openScreen(new HudElementScreen(theme, hoveredModule));
                 }
                 else {
                     dragging = true;
@@ -110,7 +109,7 @@ public class HudTab extends Tab {
                 return true;
             }
 
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             selecting = true;
             mouseStartX = mouseX * s;
@@ -149,7 +148,7 @@ public class HudTab extends Tab {
 
         @Override
         public void mouseMoved(double mouseX, double mouseY) {
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             mouseX *= s;
             mouseY *= s;
@@ -274,7 +273,7 @@ public class HudTab extends Tab {
 
         @Override
         public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             mouseX *= s;
             mouseY *= s;

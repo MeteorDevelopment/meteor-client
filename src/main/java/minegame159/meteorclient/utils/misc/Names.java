@@ -9,7 +9,6 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.ResourcePacksReloadedEvent;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.WeightedSoundSet;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -25,6 +24,8 @@ import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Names {
     private static final Map<StatusEffect, String> statusEffectNames = new HashMap<>(16);
@@ -77,7 +78,7 @@ public class Names {
 
     public static String getSoundName(Identifier id) {
         return soundNames.computeIfAbsent(id, identifier -> {
-            WeightedSoundSet soundSet = MinecraftClient.getInstance().getSoundManager().get(identifier);
+            WeightedSoundSet soundSet = mc.getSoundManager().get(identifier);
             if (soundSet == null) return identifier.getPath();
 
             Text text = soundSet.getSubtitle();

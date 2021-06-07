@@ -12,7 +12,6 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -21,17 +20,19 @@ import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
 
     private static Collection<String> EXAMPLES;
 
     static {
-        if (MinecraftClient.getInstance().world != null) {
-           EXAMPLES = MinecraftClient.getInstance().world.getPlayers()
-                    .stream()
-                    .limit(3)
-                    .map(PlayerEntity::getEntityName)
-                    .collect(Collectors.toList());
+        if (mc.world != null) {
+            EXAMPLES = mc.world.getPlayers()
+                .stream()
+                .limit(3)
+                .map(PlayerEntity::getEntityName)
+                .collect(Collectors.toList());
         }
     }
 
@@ -50,7 +51,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
     public PlayerEntity parse(StringReader reader) throws CommandSyntaxException {
         String argument = reader.readString();
         PlayerEntity playerEntity = null;
-        for (PlayerEntity p : MinecraftClient.getInstance().world.getPlayers()) {
+        for (PlayerEntity p : mc.world.getPlayers()) {
             if (p.getEntityName().equalsIgnoreCase(argument)) {
                 playerEntity = p;
                 break;
@@ -62,7 +63,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(MinecraftClient.getInstance().world.getPlayers().stream().map(PlayerEntity::getEntityName), builder);
+        return CommandSource.suggestMatching(mc.world.getPlayers().stream().map(PlayerEntity::getEntityName), builder);
     }
 
     @Override

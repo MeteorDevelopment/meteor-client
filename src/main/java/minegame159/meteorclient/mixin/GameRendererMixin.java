@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.mixin;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -59,13 +58,14 @@ public abstract class GameRendererMixin {
     private void onRenderWorldHead(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
         Matrices.begin(matrix);
         Matrices.push();
-        RenderSystem.pushMatrix();
+        // TODO: Fix
+        //RenderSystem.pushMatrix();
 
         a = true;
     }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack2, Matrix4f matrix4f) {
+    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack, double d, Matrix4f matrix4f) {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().push("meteor-client_render");
@@ -92,7 +92,7 @@ public abstract class GameRendererMixin {
     private void onRenderBeforeGuiRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
         if (a) {
             Matrices.pop();
-            RenderSystem.popMatrix();
+            //RenderSystem.popMatrix();
         }
     }
 
@@ -143,8 +143,8 @@ public abstract class GameRendererMixin {
             double prevX = camera.prevX;
             double prevY = camera.prevY;
             double prevZ = camera.prevZ;
-            float yaw = camera.yaw;
-            float pitch = camera.pitch;
+            float yaw = camera.getYaw();
+            float pitch = camera.getPitch();
             float prevYaw = camera.prevYaw;
             float prevPitch = camera.prevPitch;
 
@@ -152,8 +152,8 @@ public abstract class GameRendererMixin {
             camera.prevX = freecam.prevPos.x;
             camera.prevY = freecam.prevPos.y - camera.getEyeHeight(camera.getPose());
             camera.prevZ = freecam.prevPos.z;
-            camera.yaw = freecam.yaw;
-            camera.pitch = freecam.pitch;
+            camera.setYaw(freecam.yaw);
+            camera.setPitch(freecam.pitch);
             camera.prevYaw = freecam.prevYaw;
             camera.prevPitch = freecam.prevPitch;
 
@@ -165,8 +165,8 @@ public abstract class GameRendererMixin {
             camera.prevX = prevX;
             camera.prevY = prevY;
             camera.prevZ = prevZ;
-            camera.yaw = yaw;
-            camera.pitch = pitch;
+            camera.setYaw(yaw);
+            camera.setPitch(pitch);
             camera.prevYaw = prevYaw;
             camera.prevPitch = prevPitch;
         }

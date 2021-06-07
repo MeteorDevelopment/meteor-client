@@ -47,7 +47,7 @@ public class MeshBuilder {
             offsetZ = 0;
         }
 
-        buffer.begin(drawMode.toOpenGl(), format);
+        buffer.begin(drawMode.getDrawMode(), format);
         count = 0;
     }
 
@@ -56,25 +56,25 @@ public class MeshBuilder {
 
         //if (count > 0) {
             glPushMatrix();
-            RenderSystem.multMatrix(Matrices.getTop());
+            //RenderSystem.multMatrix(Matrices.getTop());
 
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
             if (depthTest) RenderSystem.enableDepthTest();
             else RenderSystem.disableDepthTest();
-            RenderSystem.disableAlphaTest();
+            //RenderSystem.disableAlphaTest();
             if (texture) RenderSystem.enableTexture();
             else RenderSystem.disableTexture();
-            RenderSystem.disableLighting();
+            //RenderSystem.disableLighting();
             RenderSystem.disableCull();
             glEnable(GL_LINE_SMOOTH);
             RenderSystem.lineWidth(1);
-            RenderSystem.color4f(1, 1, 1, 1);
-            GlStateManager.shadeModel(GL_SMOOTH);
+            //RenderSystem.color4f(1, 1, 1, 1);
+            //GlStateManager.shadeModel(GL_SMOOTH);
 
             BufferRenderer.draw(buffer);
 
-            RenderSystem.enableAlphaTest();
+            //RenderSystem.enableAlphaTest();
             RenderSystem.enableDepthTest();
             RenderSystem.enableTexture();
             glDisable(GL_LINE_SMOOTH);

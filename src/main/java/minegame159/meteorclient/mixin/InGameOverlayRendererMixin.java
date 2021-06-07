@@ -29,7 +29,7 @@ public class InGameOverlayRendererMixin {
     }
 
     @Inject(method = "renderInWallOverlay", at = @At("HEAD"), cancellable = true)
-    private static void render(MinecraftClient minecraftClient, Sprite sprite, MatrixStack matrixStack, CallbackInfo info) {
+    private static void render(Sprite sprite, MatrixStack matrices, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noInWallOverlay()) info.cancel();
     }
 }

@@ -17,7 +17,6 @@ import net.minecraft.block.SkullBlock;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.json.ModelTransformation;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -25,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 import net.minecraft.util.shape.VoxelShape;
 
 public class ItemPhysics extends Module {
@@ -40,7 +40,8 @@ public class ItemPhysics extends Module {
 
         event.matrixStack.push();
 
-        BakedModel bakedModel = event.itemRenderer.getHeldItemModel(itemStack, event.itemEntity.world, null);
+        // TODO: Test
+        BakedModel bakedModel = event.itemRenderer.getHeldItemModel(itemStack, event.itemEntity.world, null, 0);
         boolean hasDepthInGui = bakedModel.hasDepth();
         int renderCount = getRenderedAmount(itemStack);
         IItemEntity rotator = (IItemEntity) event.itemEntity;
@@ -60,21 +61,21 @@ public class ItemPhysics extends Module {
 
         if (!renderBlockFlat) {
             event.matrixStack.translate(0, .185, .0);
-            event.matrixStack.multiply(Vector3f.POSITIVE_X.getRadialQuaternion(1.571F));
+            event.matrixStack.multiply(Vec3f.POSITIVE_X.getRadialQuaternion(1.571F));
             event.matrixStack.translate(0, -.185, -.0);
         }
 
         boolean isAboveWater = event.itemEntity.world.getBlockState(event.itemEntity.getBlockPos()).getFluidState().getFluid().isIn(FluidTags.WATER);
         if (!event.itemEntity.isOnGround() && (!event.itemEntity.isSubmergedInWater() && !isAboveWater)) {
-            float rotation = ((float) event.itemEntity.getAge() + event.tickDelta) / 20.0F + event.itemEntity.hoverHeight; // calculate rotation based on age and ticks
+            float rotation = ((float) event.itemEntity.getItemAge() + event.tickDelta) / 20.0F + event.itemEntity.uniqueOffset; // calculate rotation based on age and ticks
 
             if (!renderBlockFlat) {
                 event.matrixStack.translate(0, .185, .0);
-                event.matrixStack.multiply(Vector3f.POSITIVE_Z.getRadialQuaternion(rotation));
+                event.matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(rotation));
                 event.matrixStack.translate(0, -.185, .0);
                 rotator.setRotation(new Vec3d(0, 0, rotation));
             } else {
-                event.matrixStack.multiply(Vector3f.POSITIVE_Y.getRadialQuaternion(rotation));
+                event.matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion(rotation));
                 rotator.setRotation(new Vec3d(0, rotation, 0));
                 event.matrixStack.translate(0, -.065, 0);
             }
@@ -90,13 +91,13 @@ public class ItemPhysics extends Module {
 
         else if (event.itemEntity.getStack().getItem() instanceof AliasedBlockItem){
             event.matrixStack.translate(0, .185, .0);
-            event.matrixStack.multiply(Vector3f.POSITIVE_Z.getRadialQuaternion((float) rotator.getRotation().z));
+            event.matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) rotator.getRotation().z));
             event.matrixStack.translate(0, -.185, .0);
             event.matrixStack.translate(0, 0, .195);
         }
 
         else if (renderBlockFlat) {
-            event.matrixStack.multiply(Vector3f.POSITIVE_Y.getRadialQuaternion((float) rotator.getRotation().y));
+            event.matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion((float) rotator.getRotation().y));
             event.matrixStack.translate(0, -.065, 0);
         }
 
@@ -107,7 +108,7 @@ public class ItemPhysics extends Module {
             }
 
             event.matrixStack.translate(0, .185, .0);
-            event.matrixStack.multiply(Vector3f.POSITIVE_Z.getRadialQuaternion((float) rotator.getRotation().z));
+            event.matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) rotator.getRotation().z));
             event.matrixStack.translate(0, -.185, .0);
         }
 
@@ -146,7 +147,7 @@ public class ItemPhysics extends Module {
                     x = (event.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
                     y = (event.random.nextFloat() * 2.0F - 1.0F) * 0.15F * 0.5F;
                     event.matrixStack.translate(x, y, 0.0D);
-                    event.matrixStack.multiply(Vector3f.POSITIVE_Z.getRadialQuaternion(event.random.nextFloat()));
+                    event.matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion(event.random.nextFloat()));
                 }
             }
 

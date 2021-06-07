@@ -10,7 +10,6 @@ import minegame159.meteorclient.events.entity.player.FinishUsingItem;
 import minegame159.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -26,6 +25,8 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
     @Inject(method = "getTooltip", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
@@ -37,14 +38,14 @@ public abstract class ItemStackMixin {
 
     @Inject(method = "finishUsing", at = @At("HEAD"))
     private void onFinishUsing(World world, LivingEntity user, CallbackInfoReturnable<ItemStack> info) {
-        if (user == MinecraftClient.getInstance().player) {
+        if (user == mc.player) {
             MeteorClient.EVENT_BUS.post(FinishUsingItem.get((ItemStack) (Object) this));
         }
     }
 
     @Inject(method = "onStoppedUsing", at = @At("HEAD"))
     private void onStoppedUsing(World world, LivingEntity user, int remainingUseTicks, CallbackInfo info) {
-        if (user == MinecraftClient.getInstance().player) {
+        if (user == mc.player) {
             MeteorClient.EVENT_BUS.post(StoppedUsingItemEvent.get((ItemStack) (Object) this));
         }
     }

@@ -11,8 +11,8 @@ import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -92,9 +92,9 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
-        ListTag friendsTag = new ListTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
+        NbtList friendsTag = new NbtList();
 
         for (Friend friend : friends) friendsTag.add(friend.toTag());
         tag.put("friends", friendsTag);
@@ -105,8 +105,8 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     @Override
-    public Friends fromTag(CompoundTag tag) {
-        friends = NbtUtils.listFromTag(tag.getList("friends", 10), tag1 -> new Friend((CompoundTag) tag1));
+    public Friends fromTag(NbtCompound tag) {
+        friends = NbtUtils.listFromTag(tag.getList("friends", 10), tag1 -> new Friend((NbtCompound) tag1));
         if (tag.contains("color")) color.fromTag(tag.getCompound("color"));
         attack = tag.contains("attack") && tag.getBoolean("attack");
         return this;

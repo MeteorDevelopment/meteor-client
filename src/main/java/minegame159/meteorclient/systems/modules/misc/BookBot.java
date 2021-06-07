@@ -11,15 +11,15 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.TextHandlerAccessor;
-import minegame159.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.text.Style;
 
@@ -95,7 +95,7 @@ public class BookBot extends Module {
 
     //Please don't ask my why they are global. I have no answer for you.
     private static final Random RANDOM = new Random();
-    private ListTag pages = new ListTag();
+    private NbtList pages = new NbtList();
     private int booksLeft;
     private int ticksLeft = 0;
     private boolean firstTime;
@@ -107,7 +107,7 @@ public class BookBot extends Module {
     private final StringBuilder lineSb = new StringBuilder();
     private String fileString;
 
-    public BookBot(){
+    public BookBot() {
         super(Categories.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
     }
 
@@ -122,52 +122,54 @@ public class BookBot extends Module {
     public void onDeactivate() {
         // Reset everything for next time. Don't know if it's needed but we're gonna do it anyway.
         booksLeft = 0;
-        pages = new ListTag();
+        pages = new NbtList();
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         // Make sure we aren't in the inventory.
-        if(mc.currentScreen instanceof HandledScreen<?>) return;
+        if (mc.currentScreen instanceof HandledScreen) return;
         // If there are no books left to write we are done.
-        if(booksLeft <= 0){
+        if (booksLeft <= 0) {
             toggle();
             return;
         }
-        //If the player isn't holding a book
-        if(mc.player.getMainHandStack().getItem() != Items.WRITABLE_BOOK){
-            // Find one
-            InvUtils.FindItemResult itemResult = InvUtils.findItemWithCount(Items.WRITABLE_BOOK);
-            // If it's in their hotbar then just switch to it (no need to switch back later)
-            if (itemResult.slot <= 8 && itemResult.slot != -1) {
-                mc.player.inventory.selectedSlot = itemResult.slot;
-                ((IClientPlayerInteractionManager) mc.interactionManager).syncSelectedSlot2();
-            } else if (itemResult.slot > 8){ //Else if it's in their inventory then swap their current item with the writable book
-                InvUtils.move().from(itemResult.slot).toHotbar(mc.player.inventory.selectedSlot);
-            } else { // Otherwise we are out and we can just wait for more books.
-                // I'm always waiting. Watching. Get more books. I dare you. :))))
-                return;
-            }
+
+        FindItemResult itemResult = InvUtils.find(Items.WRITABLE_BOOK);
+
+        if (!itemResult.isHotbar() && !itemResult.isOffhand()) {
+            FindItemResult result = InvUtils.findEmpty();
+
+            if (result.isHotbar())
+                InvUtils.move().from(itemResult.slot).toHotbar(result.slot);
         }
-        if(ticksLeft <= 0){
+
+        itemResult = InvUtils.findInHotbar(Items.WRITABLE_BOOK);
+
+        if (!itemResult.found()) return;
+        InvUtils.swap(itemResult.getSlot());
+
+        if (InvUtils.findInHotbar(Items.WRITABLE_BOOK).getHand() == null) return;
+
+        if (ticksLeft <= 0) {
             ticksLeft = delay.get();
-        }else{
+        } else {
             ticksLeft -= 50;
             return;
         }
-        if(mode.get() == Mode.Random){
+        if (mode.get() == Mode.Random) {
             // Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
             stream = charGenerator.limit(23000).iterator();
             firstChar = true;
             writeBook();
-        }else if(mode.get() == Mode.Ascii){
+        } else if (mode.get() == Mode.Ascii) {
             // Generates a random stream of integers??
             IntStream charGenerator = RANDOM.ints(0x20, 0x7f);
             stream = charGenerator.limit(35000).iterator();
             firstChar = true;
             writeBook();
-        }else if(mode.get() == Mode.File){
+        } else if (mode.get() == Mode.File) {
             if (firstTime) {
                 //Fetch the file and initialise the IntList
                 File file = new File(MeteorClient.FOLDER, fileName.get());
@@ -252,14 +254,14 @@ public class BookBot extends Module {
                 }
             }
 
-            pages.add(StringTag.of(pageSb.toString()));
+            pages.add(NbtString.of(pageSb.toString()));
             if (endOfStream) break;
         }
 
         mc.player.getMainHandStack().putSubTag("pages", pages);
-        mc.player.getMainHandStack().putSubTag("author", StringTag.of("squidoodly"));
-        mc.player.getMainHandStack().putSubTag("title", StringTag.of(name.get()));
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.inventory.selectedSlot));
+        mc.player.getMainHandStack().putSubTag("author", NbtString.of("squidoodly"));
+        mc.player.getMainHandStack().putSubTag("title", NbtString.of(name.get()));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.getInventory().selectedSlot));
         booksLeft--;
     }
 

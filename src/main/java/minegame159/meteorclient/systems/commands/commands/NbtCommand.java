@@ -13,7 +13,7 @@ import minegame159.meteorclient.systems.config.Config;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
@@ -31,10 +31,10 @@ public class NbtCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("add").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (validBasic(stack)) {
-                CompoundTag tag = CompoundNbtTagArgumentType.getTag(s, "nbt_data");
-                CompoundTag source = stack.getTag();
+                NbtCompound tag = CompoundNbtTagArgumentType.getTag(s, "nbt_data");
+                NbtCompound source = stack.getTag();
 
                 if (tag != null && source != null) {
                     stack.getTag().copyFrom(tag);
@@ -46,16 +46,16 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         })));
         builder.then(literal("set").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (validBasic(stack)) {
-                CompoundTag tag = s.getArgument("nbt_data", CompoundTag.class);
+                NbtCompound tag = s.getArgument("nbt_data", NbtCompound.class);
                 stack.setTag(tag);
                 setStack(stack);
             }
             return SINGLE_SUCCESS;
         })));
         builder.then(literal("remove").then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (validBasic(stack)) {
                 NbtPathArgumentType.NbtPath path = s.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
                 path.remove(stack.getTag());
@@ -63,11 +63,11 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         })));
         builder.then(literal("get").executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                CompoundTag tag = stack.getTag();
+                NbtCompound tag = stack.getTag();
                 String nbt = tag == null ? "none" : tag.asString();
 
                 BaseText copyButton = new LiteralText("NBT");
@@ -91,11 +91,11 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("copy").executes(s -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                CompoundTag tag = stack.getTag();
+                NbtCompound tag = stack.getTag();
                 if (tag == null)
                     error("No NBT data on this item.");
                 else {
@@ -118,7 +118,7 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("count").then(argument("count", IntegerArgumentType.integer(-127, 127)).executes(context -> {
-            ItemStack stack = mc.player.inventory.getMainHandStack();
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
                 int count = IntegerArgumentType.getInteger(context, "count");
@@ -132,11 +132,11 @@ public class NbtCommand extends Command {
     }
 
     private void setStack(ItemStack stack) {
-        mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.inventory.selectedSlot, stack));
+        mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(36 + mc.player.getInventory().selectedSlot, stack));
     }
 
     private boolean validBasic(ItemStack stack) {
-        if (!mc.player.abilities.creativeMode) {
+        if (!mc.player.getAbilities().creativeMode) {
             error("Creative mode only.");
             return false;
         }

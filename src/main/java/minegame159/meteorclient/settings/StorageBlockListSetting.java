@@ -7,10 +7,10 @@ package minegame159.meteorclient.settings;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.block.entity.BlockEntityType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
@@ -64,13 +64,13 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for (BlockEntityType<?> type : get()) {
             Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(type);
-            if (id != null) valueTag.add(StringTag.of(id.toString()));
+            if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -78,11 +78,11 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    public List<BlockEntityType<?>> fromTag(CompoundTag tag) {
+    public List<BlockEntityType<?>> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tagI : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tagI : valueTag) {
             BlockEntityType<?> type = Registry.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString()));
             if (type != null) get().add(type);
         }
@@ -201,6 +201,17 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         @Override
         public Iterator<BlockEntityType<?>> iterator() {
             return new ObjectArrayIterator<>(STORAGE_BLOCKS);
+        }
+
+        @Nullable
+        @Override
+        public BlockEntityType<?> getRandom(Random random) {
+            return null;
+        }
+
+        @Override
+        public boolean contains(RegistryKey<BlockEntityType<?>> key) {
+            return false;
         }
     }
 }

@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.text.TextRenderer;
@@ -44,7 +43,7 @@ public class CombatHud extends HudElement {
     private static final Color GREEN = new Color(15, 255, 15);
     private static final Color RED = new Color(255, 15, 15);
     private static final Color BLACK = new Color(0, 0, 0, 255);
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
@@ -202,8 +201,8 @@ public class CombatHud extends HudElement {
                     (int) (x + (25 * scale.get())),
                     (int) (y + (66 * scale.get())),
                     (int) (30 * scale.get()),
-                    -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.yaw - playerEntity.prevYaw) * mc.getTickDelta()),
-                    -playerEntity.pitch, playerEntity
+                    -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
+                    -playerEntity.getPitch(), playerEntity
             );
 
             // Moving pos to past player model
@@ -311,8 +310,9 @@ public class CombatHud extends HudElement {
             int slot = 5;
 
             // Drawing armor
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
+            // TODO: Fix
+            /*RenderSystem.pushMatrix();
+            RenderSystem.scaled(scale.get(), scale.get(), 1);*/
 
             x /= scale.get();
             y /= scale.get();
@@ -348,14 +348,14 @@ public class CombatHud extends HudElement {
             }
 
             TextRenderer.get().end();
-            RenderSystem.popMatrix();
+            //RenderSystem.popMatrix();
 
             y = (int) (box.getY() + 75 * scale.get());
             x = box.getX();
 
             // Health bar
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
+            //RenderSystem.pushMatrix();
+            //RenderSystem.scaled(scale.get(), scale.get(), 1);
 
             x /= scale.get();
             y /= scale.get();
@@ -391,7 +391,7 @@ public class CombatHud extends HudElement {
             Renderer.NORMAL.horizontalGradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
             Renderer.NORMAL.end();
 
-            RenderSystem.popMatrix();
+            //RenderSystem.popMatrix();
         });
     }
 
@@ -411,7 +411,7 @@ public class CombatHud extends HudElement {
 
         if (i == 5) return playerEntity.getMainHandStack();
         else if (i == 4) return playerEntity.getOffHandStack();
-        return playerEntity.inventory.getArmorStack(i);
+        return playerEntity.getInventory().getArmorStack(i);
     }
 
     public static List<Enchantment> getDefaultEnchantments() {

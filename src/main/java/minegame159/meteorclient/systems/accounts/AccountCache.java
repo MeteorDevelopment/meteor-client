@@ -9,13 +9,14 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
 import minegame159.meteorclient.utils.render.ByteTexture;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.URL;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class AccountCache implements ISerializable<AccountCache> {
 
@@ -35,7 +36,7 @@ public class AccountCache implements ISerializable<AccountCache> {
             int[] pixel = new int[4];
 
             if (skinUrl.equals("steve"))
-                skin = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("meteor-client", "textures/steve.png")).getInputStream());
+                skin = ImageIO.read(mc.getResourceManager().getResource(new Identifier("meteor-client", "textures/steve.png")).getInputStream());
             else skin = ImageIO.read(new URL(skinUrl));
 
             // Whole picture
@@ -61,8 +62,8 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("username", username);
         tag.putString("uuid", uuid);
@@ -71,7 +72,7 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     @Override
-    public AccountCache fromTag(CompoundTag tag) {
+    public AccountCache fromTag(NbtCompound tag) {
         if (!tag.contains("username") || !tag.contains("uuid")) throw new NbtException();
 
         username = tag.getString("username");

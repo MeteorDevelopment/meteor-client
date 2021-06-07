@@ -5,9 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
-import baritone.api.pathing.goals.GoalGetToBlock;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.game.OpenScreenEvent;
 import minegame159.meteorclient.gui.GuiTheme;
@@ -34,11 +31,9 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
@@ -49,7 +44,7 @@ import static minegame159.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
-    
+
     private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
 
     private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
@@ -187,21 +182,22 @@ public class WaypointsModule extends Module {
             // Goto
             if (waypoint.actualDimension == dimension) {
                 WButton gotoB = table.add(theme.button("Goto")).widget();
-                gotoB.action = () -> {
+                // TODO: Baritone
+                /*gotoB.action = () -> {
                     if (mc.player == null || mc.world == null) return;
                     IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                     if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
                     Vec3d vec = Waypoints.get().getCoords(waypoint);
                     BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
                     baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
-                };
+                };*/
             }
 
             table.row();
         }
     }
 
-    private static class EditWaypointScreen extends WindowScreen {
+    private class EditWaypointScreen extends WindowScreen {
         private final Waypoint waypoint;
         private final boolean newWaypoint;
         private final Runnable action;
@@ -216,8 +212,6 @@ public class WaypointsModule extends Module {
             this.waypoint.validateIcon();
 
             if (newWaypoint) {
-                MinecraftClient mc = MinecraftClient.getInstance();
-
                 this.waypoint.x = (int) mc.player.getX();
                 this.waypoint.y = (int) mc.player.getY() + 2;
                 this.waypoint.z = (int) mc.player.getZ();
@@ -255,7 +249,7 @@ public class WaypointsModule extends Module {
             table.add(theme.label("Color:"));
             list = table.add(theme.horizontalList()).widget();
             list.add(theme.quad(waypoint.color));
-            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> MinecraftClient.getInstance().openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
+            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> mc.openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();

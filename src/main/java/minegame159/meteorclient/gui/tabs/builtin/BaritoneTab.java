@@ -5,19 +5,14 @@
 
 package minegame159.meteorclient.gui.tabs.builtin;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.utils.SettingsUtil;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.WindowTabScreen;
 import minegame159.meteorclient.gui.widgets.input.WTextBox;
-import minegame159.meteorclient.settings.*;
-import minegame159.meteorclient.utils.render.color.SettingColor;
+import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.Settings;
 import net.minecraft.client.gui.screen.Screen;
-
-import java.awt.*;
-import java.lang.reflect.Field;
 
 public class BaritoneTab extends Tab {
     private static Settings settings;
@@ -46,7 +41,8 @@ public class BaritoneTab extends Tab {
         SettingGroup sgInt = settings.createGroup("Whole Numbers");
         SettingGroup sgColor = settings.createGroup("Colors");
 
-        try {
+        // TODO: Baritone
+        /*try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
             for (Field field : klass.getDeclaredFields()) {
                 Object obj = field.get(BaritoneAPI.getSettings());
@@ -115,7 +111,7 @@ public class BaritoneTab extends Tab {
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }
+        }*/
 
         return settings;
     }
@@ -137,9 +133,10 @@ public class BaritoneTab extends Tab {
             add(theme.settings(getSettings(), filter.get().trim())).expandX();
         }
 
-        @Override
+        // TODO: Baritone
+        /*@Override
         protected void onClosed() {
             SettingsUtil.save(BaritoneAPI.getSettings());
-        }
+        }*/
     }
 }

@@ -21,7 +21,6 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -188,7 +187,8 @@ public class LogoutSpots extends Module {
 
         RenderSystem.disableDepthTest();
         RenderSystem.disableTexture();
-        DiffuseLighting.disable();
+        // TODO: Test
+        //DiffuseLighting.disable();
         RenderSystem.enableBlend();
     }
 

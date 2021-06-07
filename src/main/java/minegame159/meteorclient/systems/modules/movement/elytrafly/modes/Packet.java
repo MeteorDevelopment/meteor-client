@@ -23,22 +23,22 @@ public class Packet extends ElytraFlightMode {
 
     @Override
     public void onDeactivate() {
-        mc.player.abilities.flying = false;
-        mc.player.abilities.allowFlying = false;
+        mc.player.getAbilities().flying = false;
+        mc.player.getAbilities().allowFlying = false;
     }
 
     @Override
     public void onTick() {
         super.onTick();
 
-        if (mc.player.inventory.getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.keySneak.isPressed()) return;
+        if (mc.player.getInventory().getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.keySneak.isPressed()) return;
 
         if (mc.options.keyForward.isPressed()) {
             vec3d.add(0, 0, settings.horizontalSpeed.get());
-            vec3d.rotateY(-(float) Math.toRadians(mc.player.yaw));
+            vec3d.rotateY(-(float) Math.toRadians(mc.player.getYaw()));
         } else if (mc.options.keyBack.isPressed()) {
             vec3d.add(0, 0, settings.horizontalSpeed.get());
-            vec3d.rotateY((float) Math.toRadians(mc.player.yaw));
+            vec3d.rotateY((float) Math.toRadians(mc.player.getYaw()));
         }
 
         if (mc.options.keyJump.isPressed()) {
@@ -49,7 +49,7 @@ public class Packet extends ElytraFlightMode {
 
         mc.player.setVelocity(vec3d);
         mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
     }
 
     //Walalalalalalalalalalalala
@@ -62,7 +62,7 @@ public class Packet extends ElytraFlightMode {
 
     @Override
     public void onPlayerMove() {
-        mc.player.abilities.flying = true;
-        mc.player.abilities.setFlySpeed(settings.horizontalSpeed.get().floatValue() / 20);
+        mc.player.getAbilities().flying = true;
+        mc.player.getAbilities().setFlySpeed(settings.horizontalSpeed.get().floatValue() / 20);
     }
 }

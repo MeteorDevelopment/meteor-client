@@ -17,9 +17,11 @@ import net.minecraft.command.CommandSource;
 
 import java.util.*;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class Commands extends System<Commands> {
     private final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
-    private final CommandSource COMMAND_SOURCE = new ChatCommandSource(MinecraftClient.getInstance());
+    private final CommandSource COMMAND_SOURCE = new ChatCommandSource(mc);
     private final List<Command> commands = new ArrayList<>();
     private final Map<Class<? extends Command>, Command> commandInstances = new HashMap<>();
 
@@ -70,7 +72,7 @@ public class Commands extends System<Commands> {
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
-        dispatch(message, new ChatCommandSource(MinecraftClient.getInstance()));
+        dispatch(message, new ChatCommandSource(mc));
     }
 
     public void dispatch(String message, CommandSource source) throws CommandSyntaxException {

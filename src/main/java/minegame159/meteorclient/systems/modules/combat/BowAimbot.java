@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
@@ -94,7 +93,7 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onRender(RenderEvent event) {
         if (playerIsDead() || !itemInHand()) return;
-        if (InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
+        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
@@ -111,18 +110,20 @@ public class BowAimbot extends Module {
         }, priority.get());
 
         if (target == null) {
-            if (wasPathing) {
+            // TODO: Baritone
+            /*if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }
+            }*/
             return;
         }
 
         if (mc.options.keyUse.isPressed() && itemInHand()) {
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            // TODO: Baritone
+            /*if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
-            }
+            }*/
             aim(event.tickDelta);
         }
     }

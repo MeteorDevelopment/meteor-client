@@ -13,7 +13,7 @@ import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.gui.widgets.WKeybind;
 import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
@@ -76,8 +76,8 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
         tag.put("value", get().toTag());
 
@@ -85,7 +85,7 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    public Keybind fromTag(CompoundTag tag) {
+    public Keybind fromTag(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
         return get();

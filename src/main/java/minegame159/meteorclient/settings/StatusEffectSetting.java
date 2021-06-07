@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -51,10 +51,10 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        CompoundTag valueTag = new CompoundTag();
+        NbtCompound valueTag = new NbtCompound();
         for (StatusEffect statusEffect : get().keySet()) {
             Identifier id = Registry.STATUS_EFFECT.getId(statusEffect);
             if (id != null) valueTag.putInt(id.toString(), get().getInt(statusEffect));
@@ -65,10 +65,10 @@ public class StatusEffectSetting extends Setting<Object2IntMap<StatusEffect>> {
     }
 
     @Override
-    public Object2IntMap<StatusEffect> fromTag(CompoundTag tag) {
+    public Object2IntMap<StatusEffect> fromTag(NbtCompound tag) {
         get().clear();
 
-        CompoundTag valueTag = tag.getCompound("value");
+        NbtCompound valueTag = tag.getCompound("value");
         for (String key : valueTag.getKeys()) {
             StatusEffect statusEffect = Registry.STATUS_EFFECT.get(new Identifier(key));
             if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key));

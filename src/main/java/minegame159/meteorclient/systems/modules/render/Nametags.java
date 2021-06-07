@@ -576,7 +576,7 @@ public class Nametags extends Module {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
-        String fuseText = ticksToTime(entity.getFuseTimer());
+        String fuseText = ticksToTime(entity.getFuse());
 
         double width = text.getWidth(fuseText);
         double heightDown = text.getHeight();
@@ -604,15 +604,15 @@ public class Nametags extends Module {
     }
 
     private ItemStack getItem(PlayerEntity entity, int index) {
-        switch (index) {
-            case 0: return entity.getMainHandStack();
-            case 1: return entity.inventory.armor.get(3);
-            case 2: return entity.inventory.armor.get(2);
-            case 3: return entity.inventory.armor.get(1);
-            case 4: return entity.inventory.armor.get(0);
-            case 5: return entity.getOffHandStack();
-        }
-        return ItemStack.EMPTY;
+        return switch (index) {
+            case 0  -> entity.getMainHandStack();
+            case 1  -> entity.getInventory().armor.get(3);
+            case 2  -> entity.getInventory().armor.get(2);
+            case 3  -> entity.getInventory().armor.get(1);
+            case 4  -> entity.getInventory().armor.get(0);
+            case 5  -> entity.getOffHandStack();
+            default -> ItemStack.EMPTY;
+        };
     }
 
     private void drawBg(double x, double y, double width, double height) {

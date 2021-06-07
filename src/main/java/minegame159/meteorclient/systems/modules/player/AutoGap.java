@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.player;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -21,6 +20,7 @@ import minegame159.meteorclient.systems.modules.combat.BedAura;
 import minegame159.meteorclient.systems.modules.combat.CrystalAura;
 import minegame159.meteorclient.systems.modules.combat.KillAura;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -133,7 +133,7 @@ public class AutoGap extends Module {
             // If we are eating check if we should still be still eating
             if (shouldEat()) {
                 // Check if the item in current slot is not gap or egap
-                if (isNotGapOrEGap(mc.player.inventory.getStack(slot))) {
+                if (isNotGapOrEGap(mc.player.getInventory().getStack(slot))) {
                     // If not try finding a new slot
                     int slot = findSlot();
 
@@ -174,7 +174,7 @@ public class AutoGap extends Module {
     }
 
     private void startEating() {
-        prevSlot = mc.player.inventory.selectedSlot;
+        prevSlot = mc.player.getInventory().selectedSlot;
         eat();
 
         // Pause auras
@@ -192,10 +192,11 @@ public class AutoGap extends Module {
 
         // Pause baritone
         wasBaritone = false;
-        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        // TODO: Baritone
+        /*if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
             wasBaritone = true;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-        }
+        }*/
     }
 
     private void eat() {
@@ -224,9 +225,10 @@ public class AutoGap extends Module {
         }
 
         // Resume baritone
-        if (pauseBaritone.get() && wasBaritone) {
+        // TODO: Baritone
+        /*if (pauseBaritone.get() && wasBaritone) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-        }
+        }*/
     }
 
     private void setPressed(boolean pressed) {
@@ -234,7 +236,7 @@ public class AutoGap extends Module {
     }
 
     private void changeSlot(int slot) {
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
         this.slot = slot;
     }
 
@@ -283,7 +285,7 @@ public class AutoGap extends Module {
 
         for (int i = 0; i < 9; i++) {
             // Skip if item stack is empty
-            ItemStack stack = mc.player.inventory.getStack(i);
+            ItemStack stack = mc.player.getInventory().getStack(i);
             if (stack.isEmpty()) continue;
 
             // Skip if item isn't a gap or egap

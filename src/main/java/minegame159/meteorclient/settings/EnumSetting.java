@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -50,14 +50,14 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
         tag.putString("value", get().toString());
         return tag;
     }
 
     @Override
-    public T fromTag(CompoundTag tag) {
+    public T fromTag(NbtCompound tag) {
         parse(tag.getString("value"));
 
         return get();

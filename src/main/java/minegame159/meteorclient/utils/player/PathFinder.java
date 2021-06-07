@@ -11,7 +11,6 @@ import minegame159.meteorclient.events.entity.player.PlayerMoveEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.command.argument.EntityAnchorArgumentType;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -19,17 +18,14 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class PathFinder {
     private final static int PATH_AHEAD = 3;
     private final static int QUAD_1 = 1, QUAD_2 = 2, SOUTH = 0, NORTH = 180;
     private final ArrayList<PathBlock> path = new ArrayList<>(PATH_AHEAD);
-    private final MinecraftClient mc;
     private Entity target;
     private PathBlock currentPathBlock;
-
-    public PathFinder() {
-        mc = MinecraftClient.getInstance();
-    }
 
     public PathBlock getNextPathBlock() {
         PathBlock nextBlock = new PathBlock(new BlockPos(getNextStraightPos()));
@@ -64,7 +60,7 @@ public class PathFinder {
         Vec3d nextPos = new Vec3d(mc.player.getX(), mc.player.getY(), mc.player.getZ());
         double multiplier = 1.0;
         while (nextPos == mc.player.getPos()) {
-            nextPos = new Vec3d((int) (mc.player.getX() + multiplier * Math.cos(Math.toRadians(mc.player.yaw))), (int) (mc.player.getY()), (int) (mc.player.getZ() + multiplier * Math.sin(Math.toRadians(mc.player.yaw))));
+            nextPos = new Vec3d((int) (mc.player.getX() + multiplier * Math.cos(Math.toRadians(mc.player.getYaw()))), (int) (mc.player.getY()), (int) (mc.player.getZ() + multiplier * Math.sin(Math.toRadians(mc.player.getYaw()))));
             multiplier += .1;
         }
         return nextPos;
@@ -123,11 +119,11 @@ public class PathFinder {
     }
 
     public boolean isAir(Block block) {
-        return block.is(Blocks.AIR);
+        return block == Blocks.AIR;
     }
 
     public boolean isWater(Block block) {
-        return block.is(Blocks.WATER);
+        return block == Blocks.WATER;
     }
 
     public void lookAtDestination(PathBlock pathBlock) {

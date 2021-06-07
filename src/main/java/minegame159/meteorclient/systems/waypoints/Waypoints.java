@@ -23,12 +23,11 @@ import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.Vec3d;
 
 import java.io.File;
@@ -36,8 +35,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.*;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
-    private static final String[] BUILTIN_ICONS = { "square", "circle", "triangle", "star", "diamond", "skull" };
+    private static final String[] BUILTIN_ICONS = {"square", "circle", "triangle", "star", "diamond", "skull"};
 
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
@@ -130,7 +131,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         for (Waypoint waypoint : this) {
             if (!waypoint.visible || !checkDimension(waypoint)) continue;
 
-            Camera camera = MinecraftClient.getInstance().gameRenderer.getCamera();
+            Camera camera = mc.gameRenderer.getCamera();
 
             double x = getCoords(waypoint).x;
             double y = getCoords(waypoint).y;
@@ -153,7 +154,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             BACKGROUND.a *= a;
             TEXT.a *= a;
 
-            double maxViewDist = MinecraftClient.getInstance().options.viewDistance * 16;
+            double maxViewDist = mc.options.viewDistance * 16;
             if (dist > maxViewDist) {
                 double dx = x - camera.getPos().x;
                 double dy = y - camera.getPos().y;
@@ -221,15 +222,15 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
         tag.put("waypoints", NbtUtils.listToTag(waypoints));
         return tag;
     }
 
     @Override
-    public Waypoints fromTag(CompoundTag tag) {
-        waypoints = NbtUtils.listFromTag(tag.getList("waypoints", 10), tag1 -> new Waypoint().fromTag((CompoundTag) tag1));
+    public Waypoints fromTag(NbtCompound tag) {
+        waypoints = NbtUtils.listFromTag(tag.getList("waypoints", 10), tag1 -> new Waypoint().fromTag((NbtCompound) tag1));
 
         return this;
     }

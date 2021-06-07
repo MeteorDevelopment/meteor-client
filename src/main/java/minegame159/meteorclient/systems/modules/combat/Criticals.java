@@ -11,16 +11,12 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -62,7 +58,8 @@ public class Criticals extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
+        // TODO: Fix
+        /*if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
 
             if (skipCrit()) return;
 
@@ -99,7 +96,7 @@ public class Criticals extends Module {
 
                 event.cancel();
             }
-        }
+        }*/
     }
 
     @EventHandler
@@ -125,7 +122,7 @@ public class Criticals extends Module {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionOnly(x, y + height, z, false);
+        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false);
         ((IPlayerMoveC2SPacket) packet).setTag(1337);
 
         mc.player.networkHandler.sendPacket(packet);

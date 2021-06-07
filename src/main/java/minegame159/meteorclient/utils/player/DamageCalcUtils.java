@@ -11,7 +11,6 @@ package minegame159.meteorclient.utils.player;
 
 import minegame159.meteorclient.mixininterface.IExplosion;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.DamageUtil;
@@ -28,9 +27,10 @@ import net.minecraft.world.explosion.Explosion;
 
 import java.util.Objects;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class DamageCalcUtils {
     private static final Explosion explosion = new Explosion(null, null, 0, 0, 0, 6, false, Explosion.DestructionType.DESTROY);
-    public static MinecraftClient mc = MinecraftClient.getInstance();
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double crystalDamage(LivingEntity player, Vec3d crystal) {
@@ -62,7 +62,7 @@ public class DamageCalcUtils {
 
     //Always Calculate damage, then armour, then enchantments, then potion effect
     public static double bedDamage(LivingEntity player, Vec3d bed) {
-        if (player instanceof PlayerEntity && ((PlayerEntity) player).abilities.creativeMode) return 0;
+        if (player instanceof PlayerEntity && ((PlayerEntity) player).getAbilities().creativeMode) return 0;
 
         double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
         if (modDistance > 10) return 0;

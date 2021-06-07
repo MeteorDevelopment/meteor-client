@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.misc;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.Objects;
 
@@ -33,8 +33,8 @@ public class Vector2 implements ISerializable<Vector2> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putDouble("x", x);
         tag.putDouble("y", y);
@@ -43,7 +43,7 @@ public class Vector2 implements ISerializable<Vector2> {
     }
 
     @Override
-    public Vector2 fromTag(CompoundTag tag) {
+    public Vector2 fromTag(NbtCompound tag) {
         x = tag.getDouble("x");
         y = tag.getDouble("y");
 

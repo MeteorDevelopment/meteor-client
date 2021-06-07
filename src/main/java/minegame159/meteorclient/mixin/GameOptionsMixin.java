@@ -9,9 +9,9 @@ import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.ChangePerspectiveEvent;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.options.GameOptions;
-import net.minecraft.client.options.KeyBinding;
-import net.minecraft.client.options.Perspective;
+import net.minecraft.client.option.GameOptions;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.option.Perspective;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -25,10 +25,9 @@ import java.io.File;
 
 @Mixin(GameOptions.class)
 public class GameOptionsMixin {
-    @Shadow @Final @Mutable
-    public KeyBinding[] keysAll;
+    @Shadow @Final @Mutable public KeyBinding[] keysAll;
 
-    @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/options/GameOptions;keysAll:[Lnet/minecraft/client/options/KeyBinding;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
+    @Inject(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/client/option/GameOptions;keysAll:[Lnet/minecraft/client/option/KeyBinding;", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
     private void onInitAfterKeysAll(MinecraftClient client, File optionsFile, CallbackInfo info) {
         keysAll = KeyBinds.apply(keysAll);
     }
