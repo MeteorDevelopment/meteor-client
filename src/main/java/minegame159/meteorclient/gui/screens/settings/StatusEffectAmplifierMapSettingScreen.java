@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-public class StatusEffectSettingScreen extends WindowScreen {
+public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
     private final Setting<Object2IntMap<StatusEffect>> setting;
     private final WTextBox filter;
 
@@ -28,8 +28,8 @@ public class StatusEffectSettingScreen extends WindowScreen {
 
     private WTable table;
 
-    public StatusEffectSettingScreen(GuiTheme theme, Setting<Object2IntMap<StatusEffect>> setting) {
-        super(theme, "Select potions");
+    public StatusEffectAmplifierMapSettingScreen(GuiTheme theme, Setting<Object2IntMap<StatusEffect>> setting) {
+        super(theme, "Modify Amplifiers");
 
         this.setting = setting;
 

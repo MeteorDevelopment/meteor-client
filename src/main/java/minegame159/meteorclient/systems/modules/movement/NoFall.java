@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -27,6 +28,7 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
 import java.util.function.Predicate;
@@ -182,22 +184,21 @@ public class NoFall extends Module {
     }
 
     private void useBucket(FindItemResult bucket, boolean placedWater) {
-      if (!bucket.found()) return;
+        if (!bucket.found()) return;
 
-      Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
-        if (bucket.isOffhand()) {
-          mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
-        }
-        else {
-          int preSlot = mc.player.getInventory().selectedSlot;
-          InvUtils.swap(bucket.getSlot());
+        Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
+            if (bucket.isOffhand()) {
+                mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+            }
+            else {
+                int preSlot = mc.player.getInventory().selectedSlot;
+                InvUtils.swap(bucket.getSlot());
+                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                InvUtils.swap(preSlot);
+            }
 
-          mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-
-          InvUtils.swap(preSlot);
-        }
-        this.placedWater = placedWater;
-      });
+            this.placedWater = placedWater;
+        });
     }
 
     @Override

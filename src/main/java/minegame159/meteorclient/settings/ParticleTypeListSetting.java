@@ -40,7 +40,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
         try {
             for (String value : values) {
                 ParticleType<?> particleType = parseId(Registry.PARTICLE_TYPE, value);
-                if (particleType instanceof ParticleType<?>) particleTypes.add((ParticleType<?>) particleType);
+                if (particleType != null) particleTypes.add(particleType);
             }
         } catch (Exception ignored) {}
 
@@ -54,16 +54,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        if (suggestions == null) {
-            suggestions = new ArrayList<>(Registry.PARTICLE_TYPE.getIds().size());
-
-            for (Identifier id : Registry.PARTICLE_TYPE.getIds()) {
-                ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(id);
-                if (particleType instanceof ParticleType<?>) suggestions.add(id);
-            }
-        }
-
-        return suggestions;
+        return Registry.PARTICLE_TYPE.getIds();
     }
 
     @Override
@@ -85,7 +76,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            get().add((ParticleType<?>) Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString())));
+            get().add(Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -99,27 +90,27 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
         private Consumer<Setting<List<ParticleType<?>>>> onModuleActivated;
         private IVisible visible;
 
-        public ParticleTypeListSetting.Builder name(String name) {
+        public Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        public ParticleTypeListSetting.Builder description(String description) {
+        public Builder description(String description) {
             this.description = description;
             return this;
         }
 
-        public ParticleTypeListSetting.Builder defaultValue(List<ParticleType<?>> defaultValue) {
+        public Builder defaultValue(List<ParticleType<?>> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public ParticleTypeListSetting.Builder onChanged(Consumer<List<ParticleType<?>>> onChanged) {
+        public Builder onChanged(Consumer<List<ParticleType<?>>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public ParticleTypeListSetting.Builder onModuleActivated(Consumer<Setting<List<ParticleType<?>>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<ParticleType<?>>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }

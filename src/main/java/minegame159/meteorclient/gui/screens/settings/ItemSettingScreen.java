@@ -11,23 +11,23 @@ import minegame159.meteorclient.gui.widgets.WItemWithLabel;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
 import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
-import minegame159.meteorclient.settings.BlockSetting;
+import minegame159.meteorclient.settings.ItemSetting;
 import minegame159.meteorclient.utils.misc.Names;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.StringUtils;
 
-public class BlockSettingScreen extends WindowScreen {
-    private final BlockSetting setting;
+public class ItemSettingScreen extends WindowScreen {
+    private final ItemSetting setting;
 
     private final WTextBox filter;
     private WTable table;
 
     private String filterText = "";
 
-    public BlockSettingScreen(GuiTheme theme, BlockSetting setting) {
-        super(theme, "Select Block");
+    public ItemSettingScreen(GuiTheme theme, ItemSetting setting) {
+        super(theme, "Select item");
 
         this.setting = setting;
 
@@ -46,33 +46,27 @@ public class BlockSettingScreen extends WindowScreen {
     }
 
     private void initWidgets() {
-        for (Block block : Registry.BLOCK) {
+        for (Item item : Registry.ITEM) {
             if (setting.filter != null) {
-                if (!setting.filter.test(block)) continue;
+                if (!setting.filter.test(item)) continue;
             }
             else {
-                if (block == Blocks.AIR) continue;
+                if (item == Items.AIR) continue;
             }
 
-            if (skipValue(block)) continue;
-
-            WItemWithLabel item = theme.itemWithLabel(block.asItem().getDefaultStack(), Names.get(block));
+            WItemWithLabel itemLabel = theme.itemWithLabel(item.getDefaultStack(), Names.get(item));
             if (!filterText.isEmpty()) {
-                if (!StringUtils.containsIgnoreCase(item.getLabelText(), filterText)) continue;
+                if (!StringUtils.containsIgnoreCase(itemLabel.getLabelText(), filterText)) continue;
             }
-            table.add(item);
+            table.add(itemLabel);
 
             WButton select = table.add(theme.button("Select")).expandCellX().right().widget();
             select.action = () -> {
-                setting.set(block);
+                setting.set(item);
                 onClose();
             };
 
             table.row();
         }
-    }
-
-    protected boolean skipValue(Block value) {
-        return Registry.BLOCK.getId(value).getPath().endsWith("_wall_banner");
     }
 }

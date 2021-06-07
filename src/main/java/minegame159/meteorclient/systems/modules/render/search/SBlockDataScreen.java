@@ -14,7 +14,7 @@ import net.minecraft.block.Block;
 
 public class SBlockDataScreen extends WindowScreen {
     public SBlockDataScreen(GuiTheme theme, SBlockData blockData, Block block, BlockDataSetting<SBlockData> setting) {
-        super(theme, "Configure block");
+        super(theme, "Configure Block");
 
         Settings settings = new Settings();
         SettingGroup sgGeneral = settings.getDefaultGroup();

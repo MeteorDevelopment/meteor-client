@@ -60,7 +60,7 @@ public class AutoArmor extends Module {
             .build()
     );
 
-    private final Setting<List<Enchantment>> avoidedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
+    private final Setting<List<Enchantment>> avoidedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("avoided-enchantments")
             .description("Enchantments that should be avoided.")
             .defaultValue(Lists.newArrayList(Enchantments.BINDING_CURSE, Enchantments.FROST_WALKER))
