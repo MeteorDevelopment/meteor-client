@@ -138,7 +138,7 @@ public class PacketMine extends Module {
         }
     }
 
-    private boolean isMiningBlock(BlockPos pos) {
+    public boolean isMiningBlock(BlockPos pos) {
         for (MyBlock block : blocks) {
             if (block.blockPos.equals(pos)) return true;
         }
