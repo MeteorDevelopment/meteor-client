@@ -8,10 +8,10 @@ package minegame159.meteorclient.settings;
 //Created by squidoodly 25/07/2020
 
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -56,13 +56,13 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for(Enchantment ench : get()) {
             try {
-                valueTag.add(StringTag.of(Registry.ENCHANTMENT.getId(ench).toString()));
+                valueTag.add(NbtString.of(Registry.ENCHANTMENT.getId(ench).toString()));
             } catch (NullPointerException ignored) {
                 //Cringe. Idk what's going on but it crashed me so...
             }
@@ -73,11 +73,11 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public List<Enchantment> fromTag(CompoundTag tag) {
+    public List<Enchantment> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tag1 : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tag1 : valueTag) {
             get().add(Registry.ENCHANTMENT.get(new Identifier(tag1.asString())));
         }
 

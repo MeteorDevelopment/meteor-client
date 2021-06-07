@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -98,20 +97,21 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
-        preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
-        if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        // TODO: Baritone
+        // preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
+        // if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
         placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().maxFallHeightNoWater.value = preBaritoneFallHeight;
+        // TODO: Baritone
+        //BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        // Ignore creative
-        if (mc.player.abilities.creativeMode) return;
+        if (mc.player.getAbilities().creativeMode) return;
 
         if (event.packet instanceof PlayerMoveC2SPacket) {
             // Elytra compat
@@ -135,8 +135,7 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        // Ignore creative
-        if (mc.player.abilities.creativeMode) return;
+        if (mc.player.getAbilities().creativeMode) return;
 
         // Airplace mode
         if (mode.get() == Mode.AirPlace) {
@@ -184,23 +183,22 @@ public class NoFall extends Module {
     }
 
     private void useBucket(FindItemResult bucket, boolean placedWater) {
-        if (!bucket.found()) return;
+      if (!bucket.found()) return;
+      
+      Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
+        if (bucket.isOffhand()) {
+          mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+        }
+        else {
+          int preSlot = mc.player.inventory.selectedSlot;
+          InvUtils.swap(bucket.getSlot());
 
-        Rotations.rotate(mc.player.yaw, 90, 10, true, () -> {
-            if (bucket.isOffhand()) {
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
-            }
-            else {
-                int preSlot = mc.player.inventory.selectedSlot;
-                InvUtils.swap(bucket.getSlot());
+          mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
 
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-
-                InvUtils.swap(preSlot);
-            }
-
-            this.placedWater = placedWater;
-        });
+          InvUtils.swap(preSlot);
+        }
+        this.placedWater = placedWater;
+      });
     }
 
     @Override

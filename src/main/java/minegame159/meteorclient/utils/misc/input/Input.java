@@ -7,7 +7,7 @@ package minegame159.meteorclient.utils.misc.input;
 
 import minegame159.meteorclient.gui.GuiKeyEvents;
 import minegame159.meteorclient.utils.misc.CursorStyle;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import org.lwjgl.glfw.GLFW;
 
 import static minegame159.meteorclient.utils.Utils.mc;

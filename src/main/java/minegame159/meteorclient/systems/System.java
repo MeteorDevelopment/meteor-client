@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.utils.files.StreamUtils;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 
 import java.io.File;
@@ -29,7 +29,7 @@ public abstract class System<T> implements ISerializable<T> {
         File file = getFile();
         if (file == null) return;
 
-        CompoundTag tag = toTag();
+        NbtCompound tag = toTag();
         if (tag == null) return;
 
         try {
@@ -74,12 +74,12 @@ public abstract class System<T> implements ISerializable<T> {
     }
 
     @Override
-    public CompoundTag toTag() {
+    public NbtCompound toTag() {
         return null;
     }
 
     @Override
-    public T fromTag(CompoundTag tag) {
+    public T fromTag(NbtCompound tag) {
         return null;
     }
 }

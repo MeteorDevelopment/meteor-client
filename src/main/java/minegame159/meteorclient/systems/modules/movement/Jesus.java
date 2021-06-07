@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
@@ -144,17 +143,19 @@ public class Jesus extends Module {
 
     @Override
     public void onActivate() {
-        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
+        // TODO: Baritone
+        /*preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
         preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
 
         BaritoneAPI.getSettings().assumeWalkOnWater.value = walkOnWater.get();
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();*/
     }
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
+        // TODO: Baritone
+        /*BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;*/
     }
 
     @EventHandler
@@ -207,7 +208,7 @@ public class Jesus extends Module {
         PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
 
         // Check if packet contains a position
-        if (!(packet instanceof PlayerMoveC2SPacket.PositionOnly || packet instanceof PlayerMoveC2SPacket.Both)) return;
+        if (!(packet instanceof PlayerMoveC2SPacket.PositionAndOnGround || packet instanceof PlayerMoveC2SPacket.Full)) return;
 
         // Check inWater, fallDistance and if over liquid
         if (mc.player.isTouchingWater() || mc.player.isInLava() || mc.player.fallDistance > 3f || !isOverLiquid()) return;
@@ -232,10 +233,10 @@ public class Jesus extends Module {
 
         // Create new packet
         Packet<?> newPacket;
-        if (packet instanceof PlayerMoveC2SPacket.PositionOnly)
-            newPacket = new PlayerMoveC2SPacket.PositionOnly(x, y, z, true);
+        if (packet instanceof PlayerMoveC2SPacket.PositionAndOnGround)
+            newPacket = new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true);
         else
-            newPacket = new PlayerMoveC2SPacket.Both(x, y, z, packet.getYaw(0), packet.getPitch(0), true);
+            newPacket = new PlayerMoveC2SPacket.Full(x, y, z, packet.getYaw(0), packet.getPitch(0), true);
 
         // Send new packet
         mc.getNetworkHandler().getConnection().send(newPacket);
@@ -247,7 +248,7 @@ public class Jesus extends Module {
                 !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get()) &&
                 !(dipIntoWaterIfBurning.get() && mc.player.isOnFire()) &&
                 !(EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) &&
-                !(mc.player.abilities.flying);
+                !(mc.player.getAbilities().flying);
     }
 
     private boolean lavaIsSafe() {
@@ -263,7 +264,7 @@ public class Jesus extends Module {
                 !(dipIntoLava.get() && mc.player.fallDistance > dipIntoLavaHeight.get()) &&
                 !(lavaIsSafe() && mc.player.fallDistance > 3) &&
                 !(EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) &&
-                !(mc.player.abilities.flying);
+                !(mc.player.getAbilities().flying);
     }
 
     private boolean isOverLiquid() {

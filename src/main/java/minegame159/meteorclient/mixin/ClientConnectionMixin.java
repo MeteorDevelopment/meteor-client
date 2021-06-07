@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 @Mixin(ClientConnection.class)
 public class ClientConnectionMixin {
@@ -33,7 +33,7 @@ public class ClientConnectionMixin {
     }
 
     @Inject(method = "connect", at = @At("HEAD"))
-    private static void onConnect(InetAddress address, int port, boolean shouldUseNativeTransport, CallbackInfoReturnable<ClientConnection> info) {
+    private static void onConnect(InetSocketAddress address, boolean useEpoll, CallbackInfoReturnable<ClientConnection> info) {
         MeteorClient.EVENT_BUS.post(ConnectToServerEvent.get());
     }
 

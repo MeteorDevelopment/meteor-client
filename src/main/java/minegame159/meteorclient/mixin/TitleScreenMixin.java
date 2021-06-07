@@ -27,7 +27,6 @@ import static minegame159.meteorclient.utils.Utils.mc;
 
 @Mixin(TitleScreen.class)
 public class TitleScreenMixin extends Screen {
-
     private final int WHITE = Color.fromRGBA(255, 255, 255, 255);
     private final int GRAY = Color.fromRGBA(175, 175, 175, 255);
 

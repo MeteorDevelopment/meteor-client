@@ -14,7 +14,6 @@ import minegame159.meteorclient.systems.modules.render.Freecam;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -26,20 +25,21 @@ public class RenderUtils {
 
     //Items
     public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
-        RenderSystem.disableLighting();
-        RenderSystem.disableDepthTest();
-        DiffuseLighting.enable();
+        // TODO: Fix
+        //RenderSystem.disableLighting();
+        //RenderSystem.disableDepthTest();
+        //DiffuseLighting.enable();
         mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
         if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
-        DiffuseLighting.disable();
+        //DiffuseLighting.disable();
         RenderSystem.enableDepthTest();
     }
 
     public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
-        RenderSystem.pushMatrix();
-        RenderSystem.scaled(scale, scale, 1);
+        //RenderSystem.pushMatrix();
+        //RenderSystem.scaled(scale, scale, 1);
         drawItem(itemStack, (int) (x / scale), (int) (y / scale), overlay);
-        RenderSystem.popMatrix();
+        //RenderSystem.popMatrix();
     }
 
     //Tracers

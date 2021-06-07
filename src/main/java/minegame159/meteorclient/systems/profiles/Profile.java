@@ -13,10 +13,10 @@ import minegame159.meteorclient.systems.macros.Macros;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.waypoints.Waypoints;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -77,8 +77,8 @@ public class Profile implements ISerializable<Profile> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
         tag.putBoolean("onLaunch", onLaunch);
@@ -92,15 +92,15 @@ public class Profile implements ISerializable<Profile> {
 
         loadOnJoinIps.removeIf(String::isEmpty);
 
-        ListTag ipsTag = new ListTag();
-        for (String ip : loadOnJoinIps) ipsTag.add(StringTag.of(ip));
+        NbtList ipsTag = new NbtList();
+        for (String ip : loadOnJoinIps) ipsTag.add(NbtString.of(ip));
         tag.put("loadOnJoinIps", ipsTag);
 
         return tag;
     }
 
     @Override
-    public Profile fromTag(CompoundTag tag) {
+    public Profile fromTag(NbtCompound tag) {
         name = tag.getString("name");
         onLaunch = tag.contains("onLaunch") && tag.getBoolean("onLaunch");
 
@@ -114,8 +114,8 @@ public class Profile implements ISerializable<Profile> {
         loadOnJoinIps.clear();
 
         if (tag.contains("loadOnJoinIps")) {
-            ListTag ipsTag = tag.getList("loadOnJoinIps", 8);
-            for (Tag ip : ipsTag) loadOnJoinIps.add(ip.asString());
+            NbtList ipsTag = tag.getList("loadOnJoinIps", 8);
+            for (NbtElement ip : ipsTag) loadOnJoinIps.add(ip.asString());
         }
 
         return this;

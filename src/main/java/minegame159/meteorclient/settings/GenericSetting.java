@@ -8,7 +8,7 @@ package minegame159.meteorclient.settings;
 import minegame159.meteorclient.gui.utils.IScreenFactory;
 import minegame159.meteorclient.utils.misc.ICopyable;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
@@ -36,8 +36,8 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
         tag.put("value", get().toTag());
 
@@ -45,7 +45,7 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public T fromTag(CompoundTag tag) {
+    public T fromTag(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
         return get();

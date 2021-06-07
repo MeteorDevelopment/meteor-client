@@ -20,8 +20,8 @@ public class NoRotate extends Module {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         if (event.packet instanceof PlayerPositionLookS2CPacket) {
-            ((PlayerPositionLookS2CPacketAccessor) event.packet).setPitch(mc.player.pitch);
-            ((PlayerPositionLookS2CPacketAccessor) event.packet).setYaw(mc.player.yaw);
+            ((PlayerPositionLookS2CPacketAccessor) event.packet).setPitch(mc.player.getPitch());
+            ((PlayerPositionLookS2CPacketAccessor) event.packet).setYaw(mc.player.getYaw());
         }
     }
 }

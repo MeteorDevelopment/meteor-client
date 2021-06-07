@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.misc.swarm;
 
-import baritone.api.BaritoneAPI;
 import minegame159.meteorclient.systems.commands.Commands;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import net.minecraft.block.Block;
@@ -68,7 +67,8 @@ public class SwarmWorker extends Thread {
             e.printStackTrace();
         }
 
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        // TODO: Baritone
+        //BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         ChatUtils.info("Swarm", "Disconnected from host.");
 
@@ -77,8 +77,9 @@ public class SwarmWorker extends Thread {
 
     public void tick() {
         if (target == null) return;
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(target);
+        // TODO: Baritone
+        /*BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(target);*/
         target = null;
     }
 

@@ -5,11 +5,13 @@
 
 package minegame159.meteorclient.rendering.text;
 
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.renderer.DrawMode;
+import minegame159.meteorclient.renderer.Mesh;
+import minegame159.meteorclient.renderer.ShaderMesh;
+import minegame159.meteorclient.renderer.Shaders;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.BufferUtils;
 
 import java.io.File;
@@ -19,7 +21,7 @@ import java.nio.ByteBuffer;
 public class CustomTextRenderer implements TextRenderer {
     private static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
 
-    private final MeshBuilder mb = new MeshBuilder(16384);
+    private final Mesh mesh = new ShaderMesh(Shaders.TEXT, DrawMode.Triangles, Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
 
     private final Font[] fonts;
     private Font font;
@@ -37,20 +39,18 @@ public class CustomTextRenderer implements TextRenderer {
             ((Buffer) buffer).flip();
             fonts[i] = new Font(buffer, (int) Math.round(18 * ((i * 0.5) + 1)));
         }
-
-        mb.texture = true;
     }
 
     @Override
     public void setAlpha(double a) {
-        mb.alpha = a;
+        mesh.alpha = a;
     }
 
     @Override
     public void begin(double scale, boolean scaleOnly, boolean big) {
         if (building) throw new RuntimeException("CustomTextRenderer.begin() called twice");
 
-        if (!scaleOnly) mb.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR_TEXTURE);
+        if (!scaleOnly) mesh.begin();
 
         if (big) {
             this.font = fonts[fonts.length - 1];
@@ -94,10 +94,10 @@ public class CustomTextRenderer implements TextRenderer {
 
         double r;
         if (shadow) {
-            r = font.render(mb, text, x + 1, y + 1, SHADOW_COLOR, scale);
-            font.render(mb,text, x, y, color, scale);
+            r = font.render(mesh, text, x + 1, y + 1, SHADOW_COLOR, scale);
+            font.render(mesh, text, x, y, color, scale);
         }
-        else r = font.render(mb, text, x, y, color, scale);
+        else r = font.render(mesh, text, x, y, color, scale);
 
         if (!wasBuilding) end();
         return r;
@@ -109,12 +109,14 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void end() {
+    public void end(MatrixStack matrices) {
         if (!building) throw new RuntimeException("CustomTextRenderer.end() called without calling begin()");
 
         if (!scaleOnly) {
+            mesh.end();
+
             font.texture.bindTexture();
-            mb.end();
+            mesh.render(matrices);
         }
 
         building = false;

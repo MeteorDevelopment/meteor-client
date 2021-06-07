@@ -124,8 +124,8 @@ public class AutoArmor extends Module {
         for (ArmorPiece armorPiece : armorPieces) armorPiece.reset();
 
         // Loop through items in inventory
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (itemStack.isEmpty() || !(itemStack.getItem() instanceof ArmorItem)) continue;
 
             // Check for durability if anti break is enabled
@@ -167,7 +167,7 @@ public class AutoArmor extends Module {
 
     private int getScore(ItemStack itemStack) {
         if (itemStack.isEmpty()) return 0;
-        
+
         // Score calculated based on enchantments, protection and toughness
         int score = 0;
 
@@ -183,7 +183,7 @@ public class AutoArmor extends Module {
         score += enchantments.getInt(Enchantments.UNBREAKING);
         score += 2 * enchantments.getInt(Enchantments.MENDING);
         score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getProtection() : 0;
-        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).method_26353() : 0;
+        score += itemStack.getItem() instanceof ArmorItem ? ((ArmorItem) itemStack.getItem()).getToughness() : 0;
 
         return score;
     }
@@ -200,8 +200,8 @@ public class AutoArmor extends Module {
     }
 
     private void moveToEmpty(int armorSlotId) {
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            if (mc.player.inventory.getStack(i).isEmpty()) {
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            if (mc.player.getInventory().getStack(i).isEmpty()) {
                 InvUtils.move().fromArmor(armorSlotId).to(i);
 
                 // Apply delay
@@ -245,7 +245,7 @@ public class AutoArmor extends Module {
         public void calculate() {
             if (cannotSwap()) return;
 
-            ItemStack itemStack = mc.player.inventory.getArmorStack(id);
+            ItemStack itemStack = mc.player.getInventory().getArmorStack(id);
 
             // Check if the item is an elytra
             if ((ignoreElytra.get() || Modules.get().isActive(ChestSwap.class)) && itemStack.getItem() == Items.ELYTRA) {

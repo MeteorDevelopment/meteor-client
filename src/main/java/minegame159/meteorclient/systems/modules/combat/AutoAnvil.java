@@ -16,7 +16,10 @@ import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.AbstractPressurePlateBlock;
+import net.minecraft.block.AnvilBlock;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.ingame.AnvilScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -109,17 +112,17 @@ public class AutoAnvil extends Module {
     // Given a position, this function say if, that position, is surrounded by blocks
     private boolean isHole(BlockPos pos) {
         BlockPos.Mutable posStart = new BlockPos.Mutable(pos.getX(), pos.getY(), pos.getZ());
-        return mc.world.getBlockState(posStart.add(1,0,0)).getBlock().is(Blocks.AIR) ||
-                mc.world.getBlockState(posStart.add(-1,0,0)).getBlock().is(Blocks.AIR) ||
-                mc.world.getBlockState(posStart.add(0,0,1)).getBlock().is(Blocks.AIR) ||
-                mc.world.getBlockState(posStart.add(0,0,-1)).getBlock().is(Blocks.AIR);
+        return mc.world.getBlockState(posStart.add(1,0,0)).isAir() ||
+                mc.world.getBlockState(posStart.add(-1,0,0)).isAir() ||
+                mc.world.getBlockState(posStart.add(0,0,1)).isAir() ||
+                mc.world.getBlockState(posStart.add(0,0,-1)).isAir();
 
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         // Head check
-        if (toggleOnBreak.get() && target != null && target.inventory.getArmorStack(3).isEmpty()) {
+        if (toggleOnBreak.get() && target != null && target.getInventory().getArmorStack(3).isEmpty()) {
             error("Target head slot is empty... disabling.");
             toggle();
             return;

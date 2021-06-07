@@ -102,7 +102,7 @@ public class AutoReplenish extends Module {
 
             // Hotbar
             for (int i = 0; i < 9; i++) {
-                ItemStack stack = mc.player.inventory.getStack(i);
+                ItemStack stack = mc.player.getInventory().getStack(i);
                 checkSlot(i, stack);
             }
 
@@ -147,8 +147,8 @@ public class AutoReplenish extends Module {
         int slot = -1;
         int count = 0;
 
-        for (int i = mc.player.inventory.size() - 2; i >= (searchHotbar.get() ? 0 : 9); i--) {
-            ItemStack stack = mc.player.inventory.getStack(i);
+        for (int i = mc.player.getInventory().size() - 2; i >= (searchHotbar.get() ? 0 : 9); i--) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
 
             if (i != excludedSlot && stack.getItem() == itemStack.getItem() && ItemStack.areTagsEqual(itemStack, stack)) {
                 if (stack.getCount() > count) {
@@ -169,7 +169,7 @@ public class AutoReplenish extends Module {
 
     private void fillItems() {
         for (int i = 0; i < 9; i++) {
-            setItem(i, mc.player.inventory.getStack(i));
+            setItem(i, mc.player.getInventory().getStack(i));
         }
 
         setItem(SlotUtils.OFFHAND, mc.player.getOffHandStack());

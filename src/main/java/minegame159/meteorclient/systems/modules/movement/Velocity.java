@@ -122,8 +122,8 @@ public class Velocity extends Module {
     }
 
     @EventHandler
-    public void onPacketReceive(PacketEvent.Receive event) {
-        if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket && ((EntityVelocityUpdateS2CPacket) event.packet).getId() == mc.player.getEntityId()) {
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket && ((EntityVelocityUpdateS2CPacket) event.packet).getId() == mc.player.getId()) {
             EntityVelocityUpdateS2CPacket packet = (EntityVelocityUpdateS2CPacket) event.packet;
             double velX = (packet.getVelocityX() / 8000d - mc.player.getVelocity().x) * knockbackHorizontal.get();
             double velY = (packet.getVelocityY() / 8000d - mc.player.getVelocity().y) * knockbackVertical.get();

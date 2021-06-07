@@ -239,17 +239,17 @@ public abstract class WidgetScreen extends Screen {
         RENDERER.theme = theme;
         theme.beforeRender();
 
-        RENDERER.begin();
+        RENDERER.begin(matrices);
         RENDERER.setAlpha(animProgress);
         root.render(RENDERER, mouseX, mouseY, delta / 20);
         RENDERER.setAlpha(1);
-        RENDERER.end();
+        RENDERER.end(matrices);
 
-        boolean tooltip = RENDERER.renderTooltip(mouseX, mouseY, delta / 20);
+        boolean tooltip = RENDERER.renderTooltip(mouseX, mouseY, delta / 20, matrices);
 
         if (debug) {
-            DEBUG_RENDERER.render(root);
-            if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget);
+            DEBUG_RENDERER.render(root, matrices);
+            if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget, matrices);
         }
 
         Utils.scaledProjection();
@@ -305,7 +305,12 @@ public abstract class WidgetScreen extends Screen {
                 for (Runnable action : onClosed) action.run();
             }
 
-            if (onClose) mc.openScreen(parent);
+            if (onClose) {
+                taskAfterRender = () -> {
+                    locked = true;
+                    mc.openScreen(parent);
+                };
+            }
         }
     }
 

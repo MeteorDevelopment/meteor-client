@@ -7,7 +7,7 @@ package minegame159.meteorclient.utils.misc;
 
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -77,8 +77,8 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     // Serialization
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putBoolean("isKey", isKey);
         tag.putInt("value", value);
@@ -87,7 +87,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     @Override
-    public Keybind fromTag(CompoundTag tag) {
+    public Keybind fromTag(NbtCompound tag) {
         isKey = tag.getBoolean("isKey");
         value = tag.getInt("value");
 

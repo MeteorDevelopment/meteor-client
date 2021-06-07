@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
@@ -242,7 +241,8 @@ public class KillAura extends Module {
 
         TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
 
-        if (targets.isEmpty()) {
+        // TODO: Baritone
+        /*if (targets.isEmpty()) {
             if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
@@ -253,7 +253,7 @@ public class KillAura extends Module {
         if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
             wasPathing = true;
-        }
+        }*/
 
         Entity primary = targets.get(0);
 
@@ -295,7 +295,7 @@ public class KillAura extends Module {
         if (delayCheck()) targets.forEach(this::attack);
 
         if (randomTeleport.get() && !onlyWhenLook.get()) {
-            mc.player.updatePosition(primary.getX() + randomOffset(), primary.getY(), primary.getZ() + randomOffset());
+            mc.player.setPosition(primary.getX() + randomOffset(), primary.getY(), primary.getZ() + randomOffset());
         }
     }
 

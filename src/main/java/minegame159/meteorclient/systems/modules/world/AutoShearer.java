@@ -68,11 +68,11 @@ public class AutoShearer extends Module {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNewShears = false;
-            if (mc.player.inventory.getMainHandStack().getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
+            if (mc.player.getInventory().getMainHandStack().getItem() instanceof ShearsItem) {
+                if (antiBreak.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1) findNewShears = true;
             }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1) findNewShears = true;
+            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof ShearsItem) {
+                if (antiBreak.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1) findNewShears = true;
                 else offHand = true;
             }
             else {

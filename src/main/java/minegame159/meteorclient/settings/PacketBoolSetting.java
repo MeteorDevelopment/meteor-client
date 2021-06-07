@@ -7,10 +7,10 @@ package minegame159.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import minegame159.meteorclient.utils.network.PacketUtils;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.Packet;
 
 import java.util.ArrayList;
@@ -71,12 +71,12 @@ public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for (Class<? extends Packet<?>> packet : get()) {
-            valueTag.add(StringTag.of(PacketUtils.getName(packet)));
+            valueTag.add(NbtString.of(PacketUtils.getName(packet)));
         }
         tag.put("value", valueTag);
 
@@ -84,12 +84,12 @@ public class PacketBoolSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     }
 
     @Override
-    public Set<Class<? extends Packet<?>>> fromTag(CompoundTag tag) {
+    public Set<Class<? extends Packet<?>>> fromTag(NbtCompound tag) {
         get().clear();
 
-        Tag valueTag = tag.get("value");
-        if (valueTag instanceof ListTag) {
-            for (Tag t : (ListTag) valueTag) {
+        NbtElement valueTag = tag.get("value");
+        if (valueTag instanceof NbtList) {
+            for (NbtElement t : (NbtList) valueTag) {
                 Class<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString());
                 if (packet != null) get().add(packet);
             }

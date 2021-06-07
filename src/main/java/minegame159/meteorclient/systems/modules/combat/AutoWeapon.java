@@ -57,17 +57,17 @@ public class AutoWeapon extends Module {
     }
 
     private int getBestWeapon(){
-        int slotS = mc.player.inventory.selectedSlot;
-        int slotA = mc.player.inventory.selectedSlot;
-        int slot = mc.player.inventory.selectedSlot;
+        int slotS = mc.player.getInventory().selectedSlot;
+        int slotA = mc.player.getInventory().selectedSlot;
+        int slot = mc.player.getInventory().selectedSlot;
         double damageS = 0;
         double damageA = 0;
         double currentDamageS;
         double currentDamageA;
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getStack(i).getItem() instanceof SwordItem
-                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)){
-                currentDamageS = ((SwordItem) mc.player.inventory.getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getStack(i), EntityGroup.DEFAULT) + 2;
+            if(mc.player.getInventory().getStack(i).getItem() instanceof SwordItem
+                    && (!antiBreak.get() || (mc.player.getInventory().getStack(i).getMaxDamage() - mc.player.getInventory().getStack(i).getDamage()) > 10)){
+                currentDamageS = ((SwordItem) mc.player.getInventory().getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.getInventory().getStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamageS > damageS){
                     damageS = currentDamageS;
                     slotS = i;
@@ -75,9 +75,9 @@ public class AutoWeapon extends Module {
             }
         }
         for(int i = 0; i < 9; i++){
-            if(mc.player.inventory.getStack(i).getItem() instanceof AxeItem
-                    && (!antiBreak.get() || (mc.player.inventory.getStack(i).getMaxDamage() - mc.player.inventory.getStack(i).getDamage()) > 10)){
-                currentDamageA = ((AxeItem) mc.player.inventory.getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.inventory.getStack(i), EntityGroup.DEFAULT) + 2;
+            if(mc.player.getInventory().getStack(i).getItem() instanceof AxeItem
+                    && (!antiBreak.get() || (mc.player.getInventory().getStack(i).getMaxDamage() - mc.player.getInventory().getStack(i).getDamage()) > 10)){
+                currentDamageA = ((AxeItem) mc.player.getInventory().getStack(i).getItem()).getMaterial().getAttackDamage() + EnchantmentHelper.getAttackDamage(mc.player.getInventory().getStack(i), EntityGroup.DEFAULT) + 2;
                 if(currentDamageA > damageA){
                     damageA = currentDamageA;
                     slotA = i;

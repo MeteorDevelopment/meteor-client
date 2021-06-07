@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.rendering.text;
 
-import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.renderer.Mesh;
 import minegame159.meteorclient.utils.render.ByteTexture;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.texture.AbstractTexture;
@@ -20,7 +20,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class Font {
-    public final AbstractTexture texture;
+    public AbstractTexture texture;
 
     private final int height;
     private final float scale;
@@ -96,7 +96,7 @@ public class Font {
         return height;
     }
 
-    public double render(MeshBuilder mb, String string, double x, double y, Color color, double scale) {
+    public double render(Mesh mesh, String string, double x, double y, Color color, double scale) {
         y += ascent * this.scale * scale;
 
         for (int i = 0; i < string.length(); i++) {
@@ -104,13 +104,12 @@ public class Font {
             if (cp < 32 || cp > 128) cp = 32;
             CharData c = charData[cp - 32];
 
-            mb.pos(x + c.x0 * scale, y + c.y0 * scale, 0).color(color).texture(c.u0, c.v0).endVertex();
-            mb.pos(x + c.x1 * scale, y + c.y0 * scale, 0).color(color).texture(c.u1, c.v0).endVertex();
-            mb.pos(x + c.x1 * scale, y + c.y1 * scale, 0).color(color).texture(c.u1, c.v1).endVertex();
-
-            mb.pos(x + c.x0 * scale, y + c.y0 * scale, 0).color(color).texture(c.u0, c.v0).endVertex();
-            mb.pos(x + c.x1 * scale, y + c.y1 * scale, 0).color(color).texture(c.u1, c.v1).endVertex();
-            mb.pos(x + c.x0 * scale, y + c.y1 * scale, 0).color(color).texture(c.u0, c.v1).endVertex();
+            mesh.quad(
+                mesh.vec2(x + c.x0 * scale, y + c.y0 * scale).vec2(c.u0, c.v0).color(color).next(),
+                mesh.vec2(x + c.x0 * scale, y + c.y1 * scale).vec2(c.u0, c.v1).color(color).next(),
+                mesh.vec2(x + c.x1 * scale, y + c.y1 * scale).vec2(c.u1, c.v1).color(color).next(),
+                mesh.vec2(x + c.x1 * scale, y + c.y0 * scale).vec2(c.u1, c.v0).color(color).next()
+            );
 
             x += c.xAdvance * scale;
         }

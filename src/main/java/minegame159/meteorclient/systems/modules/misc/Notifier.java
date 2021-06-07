@@ -131,7 +131,7 @@ public class Notifier extends Module {
 
         if (entity instanceof PlayerEntity) {
             if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
-                ChatUtils.sendMsg(event.entity.getEntityId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
+                ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
             }
         }
         else {
@@ -151,7 +151,7 @@ public class Notifier extends Module {
 
         if (entity instanceof PlayerEntity) {
             if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) entity))) && (!visualRangeIgnoreFakes.get() || !(entity instanceof FakePlayerEntity))) {
-                ChatUtils.sendMsg(event.entity.getEntityId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
+                ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
             }
         } else {
             MutableText text = new LiteralText(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);

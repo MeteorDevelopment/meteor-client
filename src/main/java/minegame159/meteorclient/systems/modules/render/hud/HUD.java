@@ -20,9 +20,9 @@ import minegame159.meteorclient.systems.modules.render.hud.modules.*;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class HUD extends Module {
     );
 
     public final List<HudElement> elements = new ArrayList<>();
-    
+
     private final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
 
     public final Runnable reset = () -> {
@@ -173,10 +173,10 @@ public class HUD extends Module {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = super.toTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = super.toTag();
 
-        ListTag modulesTag = new ListTag();
+        NbtList modulesTag = new NbtList();
         for (HudElement module : elements) modulesTag.add(module.toTag());
         tag.put("modules", modulesTag);
 
@@ -184,12 +184,12 @@ public class HUD extends Module {
     }
 
     @Override
-    public Module fromTag(CompoundTag tag) {
+    public Module fromTag(NbtCompound tag) {
         if (tag.contains("modules")) {
-            ListTag modulesTag = tag.getList("modules", 10);
+            NbtList modulesTag = tag.getList("modules", 10);
 
-            for (Tag t : modulesTag) {
-                CompoundTag moduleTag = (CompoundTag) t;
+            for (NbtElement t : modulesTag) {
+                NbtCompound moduleTag = (NbtCompound) t;
 
                 HudElement module = getModule(moduleTag.getString("name"));
                 if (module != null) module.fromTag(moduleTag);

@@ -312,7 +312,7 @@ public class BedAura extends Module {
         if (result.getHand() == null && !autoSwitch.get()) return;
 
         FindItemResult finalRes = result;
-        Rotations.rotate(yawFromDir(direction), mc.player.pitch, () -> BlockUtils.place(pos, finalRes, false, 0, !noSwing.get(), true, swapBack.get()));
+        Rotations.rotate(yawFromDir(direction), mc.player.getPitch(), () -> BlockUtils.place(pos, finalRes, false, 0, !noSwing.get(), true, swapBack.get()));
     }
 
     private void breakBed(BlockPos pos) {

@@ -18,8 +18,8 @@ import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.text.Style;
 
@@ -95,7 +95,7 @@ public class BookBot extends Module {
 
     //Please don't ask my why they are global. I have no answer for you.
     private static final Random RANDOM = new Random();
-    private ListTag pages = new ListTag();
+    private NbtList pages = new NbtList();
     private int booksLeft;
     private int ticksLeft = 0;
     private boolean firstTime;
@@ -122,7 +122,7 @@ public class BookBot extends Module {
     public void onDeactivate() {
         // Reset everything for next time. Don't know if it's needed but we're gonna do it anyway.
         booksLeft = 0;
-        pages = new ListTag();
+        pages = new NbtList();
     }
 
     @EventHandler
@@ -254,14 +254,14 @@ public class BookBot extends Module {
                 }
             }
 
-            pages.add(StringTag.of(pageSb.toString()));
+            pages.add(NbtString.of(pageSb.toString()));
             if (endOfStream) break;
         }
 
         mc.player.getMainHandStack().putSubTag("pages", pages);
-        mc.player.getMainHandStack().putSubTag("author", StringTag.of("squidoodly"));
-        mc.player.getMainHandStack().putSubTag("title", StringTag.of(name.get()));
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.inventory.selectedSlot));
+        mc.player.getMainHandStack().putSubTag("author", NbtString.of("squidoodly"));
+        mc.player.getMainHandStack().putSubTag("title", NbtString.of(name.get()));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.getInventory().selectedSlot));
         booksLeft--;
     }
 

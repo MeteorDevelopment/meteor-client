@@ -44,13 +44,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.util.Hand;
-import net.minecraft.util.collection.TypeFilterableList;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
-import net.minecraft.world.chunk.ChunkManager;
-import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -521,7 +518,7 @@ public class CrystalAura extends Module {
         placing = false;
         placingTimer = 0;
 
-        serverYaw = mc.player.yaw;
+        serverYaw = mc.player.getYaw();
 
         bestTargetDamage = 0;
         bestTargetTimer = 0;
@@ -619,7 +616,7 @@ public class CrystalAura extends Module {
         if (placing && event.entity.getBlockPos().equals(placingCrystalBlockPos)) {
             placing = false;
             placingTimer = 0;
-            placedCrystals.add(event.entity.getEntityId());
+            placedCrystals.add(event.entity.getId());
         }
 
         if (fastBreak.get() && !didRotateThisTick) {
@@ -631,9 +628,9 @@ public class CrystalAura extends Module {
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
         if (event.entity instanceof EndCrystalEntity) {
-            placedCrystals.remove(event.entity.getEntityId());
-            removed.remove(event.entity.getEntityId());
-            waitingToExplode.remove(event.entity.getEntityId());
+            placedCrystals.remove(event.entity.getId());
+            removed.remove(event.entity.getId());
+            waitingToExplode.remove(event.entity.getId());
         }
     }
 
@@ -676,13 +673,13 @@ public class CrystalAura extends Module {
         if (!(entity instanceof EndCrystalEntity)) return 0;
 
         // Check only break own
-        if (onlyBreakOwn.get() && !placedCrystals.contains(entity.getEntityId())) return 0;
+        if (onlyBreakOwn.get() && !placedCrystals.contains(entity.getId())) return 0;
 
         // Check if it should already be removed
-        if (removed.contains(entity.getEntityId())) return 0;
+        if (removed.contains(entity.getId())) return 0;
 
         // Check attempted breaks
-        if (attemptedBreaks.get(entity.getEntityId()) > breakAttempts.get()) return 0;
+        if (attemptedBreaks.get(entity.getId()) > breakAttempts.get()) return 0;
 
         // Check crystal age
         if (checkCrystalAge && entity.age < minimumCrystalAge.get()) return 0;
@@ -747,9 +744,9 @@ public class CrystalAura extends Module {
 
         if (attacked) {
             // Update state
-            removed.add(crystal.getEntityId());
-            attemptedBreaks.put(crystal.getEntityId(), attemptedBreaks.get(crystal.getEntityId()) + 1);
-            waitingToExplode.put(crystal.getEntityId(), 0);
+            removed.add(crystal.getId());
+            attemptedBreaks.put(crystal.getId(), attemptedBreaks.get(crystal.getId()) + 1);
+            waitingToExplode.put(crystal.getId(), 0);
 
             // Break render
             breakRenderPos.set(crystal.getBlockPos().down());
@@ -766,7 +763,7 @@ public class CrystalAura extends Module {
 
     private void attackCrystal(Entity entity) {
         // Attack
-        mc.player.networkHandler.sendPacket(new PlayerInteractEntityC2SPacket(entity, mc.player.isSneaking()));
+        mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(entity, mc.player.isSneaking()));
 
         Hand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
         if (hand == null) hand = Hand.MAIN_HAND;
@@ -910,7 +907,7 @@ public class CrystalAura extends Module {
         FindItemResult item = InvUtils.findInHotbar(targetItem);
         if (!item.found()) return;
 
-        int prevSlot = mc.player.inventory.selectedSlot;
+        int prevSlot = mc.player.getInventory().selectedSlot;
 
         if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) {
             InvUtils.swap(item.getSlot());
@@ -1075,7 +1072,7 @@ public class CrystalAura extends Module {
 
         // Players
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.abilities.creativeMode || player == mc.player) continue;
+            if (player.getAbilities().creativeMode || player == mc.player) continue;
 
             if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && player.distanceTo(mc.player) <= targetRange.get()) {
                 targets.add(player);
@@ -1091,8 +1088,11 @@ public class CrystalAura extends Module {
     }
 
     private boolean intersectsWithEntities(Box box) {
+        // TODO: Improve
+        return mc.world.getOtherEntities(mc.player, box, entity -> !entity.isSpectator() && !removed.contains(entity.getId())).size() > 0;
+
         // Not using mc.world.getOtherEntities() just because this is a bit faster
-        int startX = MathHelper.floor((box.minX - 2) / 16);
+        /*int startX = MathHelper.floor((box.minX - 2) / 16);
         int endX = MathHelper.floor((box.maxX + 2) / 16);
         int startZ = MathHelper.floor((box.minZ - 2) / 16);
         int endZ = MathHelper.floor((box.maxZ + 2) / 16);
@@ -1114,7 +1114,7 @@ public class CrystalAura extends Module {
                         TypeFilterableList<Entity> entitySection = entitySections[y];
 
                         for (Entity entity : entitySection) {
-                            if (entity.getBoundingBox().intersects(box) && !entity.isSpectator() && !removed.contains(entity.getEntityId())) {
+                            if (entity.getBoundingBox().intersects(box) && !entity.isSpectator() && !removed.contains(entity.getId())) {
                                 return true;
                             }
                         }
@@ -1123,7 +1123,7 @@ public class CrystalAura extends Module {
             }
         }
 
-        return false;
+        return false;*/
     }
 
     // Render

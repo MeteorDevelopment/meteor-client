@@ -38,7 +38,8 @@ public abstract class InGameHudMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getArmorStack(I)Lnet/minecraft/item/ItemStack;"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
         client.getProfiler().push("meteor-client_render_2d");
-        RenderSystem.pushMatrix();
+        // TODO: Fix
+        //RenderSystem.pushMatrix();
 
         Utils.unscaledProjection();
         RenderSystem.enableBlend();
@@ -52,7 +53,7 @@ public abstract class InGameHudMixin {
         RenderSystem.lineWidth(1);
         Utils.scaledProjection();
 
-        RenderSystem.popMatrix();
+        //RenderSystem.popMatrix();
         client.getProfiler().pop();
     }
 
@@ -66,10 +67,11 @@ public abstract class InGameHudMixin {
         if (Modules.get().get(NoRender.class).noPortalOverlay()) info.cancel();
     }
 
-    @Inject(method = "renderPumpkinOverlay", at = @At("HEAD"), cancellable = true)
+    // TODO: Fix
+    /*@Inject(method = "renderPumpkinOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderPumpkinOverlay(CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noPumpkinOverlay()) info.cancel();
-    }
+    }*/
 
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderVignetteOverlay(Entity entity, CallbackInfo info) {

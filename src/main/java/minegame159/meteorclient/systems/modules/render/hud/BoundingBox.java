@@ -9,8 +9,8 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.render.AlignmentX;
 import minegame159.meteorclient.utils.render.AlignmentY;
-import net.minecraft.nbt.AbstractNumberTag;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.AbstractNbtNumber;
+import net.minecraft.nbt.NbtCompound;
 
 public class BoundingBox implements ISerializable<BoundingBox> {
     public AlignmentX x = AlignmentX.Left;
@@ -164,8 +164,8 @@ public class BoundingBox implements ISerializable<BoundingBox> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("x", x.name());
         tag.putString("y", y.name());
@@ -176,13 +176,13 @@ public class BoundingBox implements ISerializable<BoundingBox> {
     }
 
     @Override
-    public BoundingBox fromTag(CompoundTag tag) {
+    public BoundingBox fromTag(NbtCompound tag) {
         x = AlignmentX.valueOf(tag.getString("x"));
         y = AlignmentY.valueOf(tag.getString("y"));
 
         // It's done this way because before 0.4.2 they were stored as ints
-        xOffset = ((AbstractNumberTag) tag.get("xOffset")).getDouble();
-        yOffset = ((AbstractNumberTag) tag.get("yOffset")).getDouble();
+        xOffset = ((AbstractNbtNumber) tag.get("xOffset")).doubleValue();
+        yOffset = ((AbstractNbtNumber) tag.get("yOffset")).doubleValue();
 
         return this;
     }

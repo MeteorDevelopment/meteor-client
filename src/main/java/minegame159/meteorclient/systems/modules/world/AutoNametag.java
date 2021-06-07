@@ -29,7 +29,7 @@ public class AutoNametag extends Module {
             .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
-    
+
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("The maximum distance a nametagged entity can be to be nametagged.")
@@ -66,10 +66,10 @@ public class AutoNametag extends Module {
             if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNametag = true;
-            if (mc.player.inventory.getMainHandStack().getItem() instanceof NameTagItem) {
+            if (mc.player.getInventory().getMainHandStack().getItem() instanceof NameTagItem) {
                 findNametag = false;
             }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof NameTagItem) {
+            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof NameTagItem) {
                 findNametag = false;
                 offHand = true;
             }
@@ -77,9 +77,9 @@ public class AutoNametag extends Module {
             boolean foundNametag = !findNametag;
             if (findNametag) {
                 for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = mc.player.inventory.getStack(i);
+                    ItemStack itemStack = mc.player.getInventory().getStack(i);
                     if (itemStack.getItem() instanceof NameTagItem) {
-                        preSlot = mc.player.inventory.selectedSlot;
+                        preSlot = mc.player.getInventory().selectedSlot;
                         InvUtils.swap(i);
                         foundNametag = true;
                         break;

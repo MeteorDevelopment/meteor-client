@@ -12,9 +12,9 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractQuadRender
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
+import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,10 +36,10 @@ public abstract class AbstractQuadRendererMixin {
 
     @Final
     @Shadow
-    protected Vector3f normalVec;
+    protected Vec3f normalVec;
 
     @Shadow
-    public static void bufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vector3f normalVec) { }
+    public static void bufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec) { }
 
     @Shadow protected abstract Matrix4f matrix();
 
@@ -67,13 +67,13 @@ public abstract class AbstractQuadRendererMixin {
 
     //https://github.com/FabricMC/fabric/blob/351679a7decdd3044d778e74001de67463bee205/fabric-renderer-indigo/src/main/java/net/fabricmc/fabric/impl/client/indigo/renderer/render/AbstractQuadRenderer.java#L86
     //Again, nasty problem with mixins and for loops, hopefully I can fix this at a later date - Wala
-    private static void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vector3f normalVec, WallHack wallHack) {
+    private static void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec, WallHack wallHack) {
         final boolean useNormals = quad.hasVertexNormals();
 
         if (useNormals) {
             quad.populateMissingNormals();
         } else {
-            final Vector3f faceNormal = quad.faceNormal();
+            final Vec3f faceNormal = quad.faceNormal();
             normalVec.set(faceNormal.getX(), faceNormal.getY(), faceNormal.getZ());
             normalVec.transform(normalMatrix);
         }

@@ -131,12 +131,12 @@ public class AimAssist extends Module {
         double toRotate;
 
         if (instant) {
-            mc.player.yaw = (float) angle;
+            mc.player.setYaw((float) angle);
         } else {
-            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.yaw);
+            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.getYaw());
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
             if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-            mc.player.yaw += toRotate;
+            mc.player.setYaw((float) toRotate);
         }
 
         // Pitch
@@ -144,12 +144,12 @@ public class AimAssist extends Module {
         angle = -Math.toDegrees(Math.atan2(deltaY, idk));
 
         if (instant) {
-            mc.player.pitch = (float) angle;
+            mc.player.setPitch((float) angle);
         } else {
-            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.pitch);
+            deltaAngle = MathHelper.wrapDegrees(angle - mc.player.getPitch());
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
             if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-            mc.player.pitch += toRotate;
+            mc.player.setPitch((float) toRotate);
         }
     }
 

@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.utils.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.BetterTooltips;
 import minegame159.meteorclient.utils.Utils;
@@ -27,7 +26,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     private final ItemStack storageBlock;
 
     public PeekScreen(ItemStack storageBlock, ItemStack[] contents) {
-        super(new ShulkerBoxScreenHandler(0, mc.player.inventory, new SimpleInventory(contents)), mc.player.inventory, storageBlock.getName());
+        super(new ShulkerBoxScreenHandler(0, mc.player.getInventory(), new SimpleInventory(contents)), mc.player.getInventory(), storageBlock.getName());
         this.contents = contents;
         this.storageBlock = storageBlock;
     }
@@ -36,7 +35,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
 
-        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.inventory.getCursorStack().isEmpty() && toolips.middleClickOpen()) {
+        if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && toolips.middleClickOpen()) {
             return Utils.openContainer(focusedSlot.getStack(), contents, false);
         }
         return false;
@@ -69,7 +68,8 @@ public class PeekScreen extends ShulkerBoxScreen {
 
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         Color color = Utils.getShulkerColor(storageBlock);
-        RenderSystem.color4f(color.r / 255f, color.g / 255f, color.b / 255f, 1.0F);
+        // TODO: Fix
+        //RenderSystem.color4f(color.r / 255f, color.g / 255f, color.b / 255f, 1.0F);
 
         this.client.getTextureManager().bindTexture(TEXTURE);
         int i = (this.width - this.backgroundWidth) / 2;

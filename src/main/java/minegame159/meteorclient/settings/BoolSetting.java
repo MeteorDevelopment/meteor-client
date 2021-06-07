@@ -6,7 +6,7 @@
 package minegame159.meteorclient.settings;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -37,14 +37,14 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
         tag.putBoolean("value", get());
         return tag;
     }
 
     @Override
-    public Boolean fromTag(CompoundTag tag) {
+    public Boolean fromTag(NbtCompound tag) {
         set(tag.getBoolean("value"));
 
         return get();

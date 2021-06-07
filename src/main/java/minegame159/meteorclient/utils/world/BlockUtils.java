@@ -46,7 +46,7 @@ public class BlockUtils {
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (findItemResult.isOffhand()) {
-            return place(blockPos, Hand.OFF_HAND, mc.player.inventory.selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
         } else if (findItemResult.isHotbar()) {
             return place(blockPos, Hand.MAIN_HAND, findItemResult.getSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }
@@ -74,7 +74,7 @@ public class BlockUtils {
 
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
-                int prevSlot = mc.player.inventory.selectedSlot;
+                int prevSlot = mc.player.getInventory().selectedSlot;
                 InvUtils.swap(slot);
 
                 place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
@@ -82,7 +82,7 @@ public class BlockUtils {
                 if (swapBack) InvUtils.swap(prevSlot);
             });
         } else {
-            int prevSlot = mc.player.inventory.selectedSlot;
+            int prevSlot = mc.player.getInventory().selectedSlot;
             InvUtils.swap(slot);
 
             place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
@@ -112,7 +112,7 @@ public class BlockUtils {
         if (blockPos == null) return false;
 
         // Check y level
-        if (World.isOutOfBuildLimitVertically(blockPos)) return false;
+        if (!World.isValid(blockPos)) return false;
 
         // Check if current block is replaceable
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;

@@ -15,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SkyProperties.class)
 public class SkyPropertiesMixin {
-
     @Inject(method = "shouldBrightenLighting", at = @At(value = "HEAD"), cancellable = true)
     private void onShouldBrightenLighting(CallbackInfoReturnable<Boolean> cir) {
         Fullbright fullbright = Modules.get().get(Fullbright.class);

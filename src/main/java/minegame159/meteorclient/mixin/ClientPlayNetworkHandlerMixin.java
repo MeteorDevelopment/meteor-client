@@ -23,16 +23,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.world.chunk.WorldChunk;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
-    @Shadow private MinecraftClient client;
+    @Shadow @Final private MinecraftClient client;
 
     @Shadow private ClientWorld world;
 
@@ -68,9 +68,9 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(ContainerSlotUpdateEvent.get(packet));
     }
 
-    @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(I)V"), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onEntityDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo info, int i, int j) {
-        MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(j)));
+    @Inject(method = "onEntityDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(ILnet/minecraft/entity/Entity$RemovalReason;)V"))
+    private void onEntityDestroy(EntityDestroyS2CPacket packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(packet.getEntityId())));
     }
 
     @Inject(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER))

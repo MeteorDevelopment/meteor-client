@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.utils.misc;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public interface ISerializable<T> {
-    CompoundTag toTag();
+    NbtCompound toTag();
 
-    T fromTag(CompoundTag tag);
+    T fromTag(NbtCompound tag);
 }

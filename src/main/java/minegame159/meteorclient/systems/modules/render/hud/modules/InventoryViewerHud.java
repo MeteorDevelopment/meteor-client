@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.rendering.DrawMode;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.Renderer;
@@ -88,7 +87,7 @@ public class InventoryViewerHud extends HudElement {
 
     private ItemStack getStack(int i) {
         if (isInEditor()) return editorInv[i - 9];
-        return mc.player.inventory.getStack(i);
+        return mc.player.getInventory().getStack(i);
     }
 
     private void drawBackground(int x, int y) {
@@ -98,7 +97,8 @@ public class InventoryViewerHud extends HudElement {
         switch(background.get()) {
             case Texture:
             case Outline:
-                RenderSystem.color4f(color.get().r / 255F, color.get().g / 255F, color.get().b / 255F, color.get().a / 255F);
+                // TODO: Fix
+                //RenderSystem.color4f(color.get().r / 255F, color.get().g / 255F, color.get().b / 255F, color.get().a / 255F);
                 mc.getTextureManager().bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
                 DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
                 break;

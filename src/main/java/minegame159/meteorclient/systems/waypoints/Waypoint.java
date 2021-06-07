@@ -12,7 +12,7 @@ import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.Map;
 
@@ -109,8 +109,8 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
         tag.putString("icon", icon);
@@ -134,7 +134,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     @Override
-    public Waypoint fromTag(CompoundTag tag) {
+    public Waypoint fromTag(NbtCompound tag) {
         name = tag.getString("name");
         icon = tag.getString("icon");
         color.fromTag(tag.getCompound("color"));
