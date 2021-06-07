@@ -59,6 +59,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(ParticleTypeListSetting.class, (table, setting) -> particleEffectListW(table, (ParticleTypeListSetting) setting));
         factories.put(SoundEventListSetting.class, (table, setting) -> soundEventListW(table, (SoundEventListSetting) setting));
         factories.put(StatusEffectSetting.class, (table, setting) -> statusEffectW(table, (StatusEffectSetting) setting));
+        factories.put(StatusEffectListSetting.class, (table, setting) -> statusEffectListW(table, (StatusEffectListSetting) setting));
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataSettingW(table, (BlockDataSetting<?>) setting));
     }
@@ -285,6 +286,10 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void statusEffectW(WTable table, StatusEffectSetting setting) {
         selectW(table, setting, () -> mc.openScreen(new StatusEffectSettingScreen(theme, setting)));
+    }
+
+    private void statusEffectListW(WTable table, StatusEffectListSetting setting) {
+        selectW(table, setting, () -> mc.openScreen(new StatusEffectListSettingScreen(theme, setting)));
     }
 
     private void storageBlockListW(WTable table, StorageBlockListSetting setting) {

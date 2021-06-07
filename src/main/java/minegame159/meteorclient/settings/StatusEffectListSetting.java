@@ -5,11 +5,11 @@
 
 package minegame159.meteorclient.settings;
 
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
-import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -17,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class SoundEventListSetting extends Setting<List<SoundEvent>> {
-    public SoundEventListSetting(String name, String description, List<SoundEvent> defaultValue, Consumer<List<SoundEvent>> onChanged, Consumer<Setting<List<SoundEvent>>> onModuleActivated, IVisible visible) {
+public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
+    public StatusEffectListSetting(String name, String description, List<StatusEffect> defaultValue, Consumer<List<StatusEffect>> onChanged, Consumer<Setting<List<StatusEffect>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new ArrayList<>(defaultValue);
@@ -31,28 +31,28 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    protected List<SoundEvent> parseImpl(String str) {
+    protected List<StatusEffect> parseImpl(String str) {
         String[] values = str.split(",");
-        List<SoundEvent> sounds = new ArrayList<>(values.length);
+        List<StatusEffect> effects = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                SoundEvent sound = parseId(Registry.SOUND_EVENT, value);
-                if (sound != null) sounds.add(sound);
+                StatusEffect effect = parseId(Registry.STATUS_EFFECT, value);
+                if (effect != null) effects.add(effect);
             }
         } catch (Exception ignored) {}
 
-        return sounds;
+        return effects;
     }
 
     @Override
-    protected boolean isValueValid(List<SoundEvent> value) {
+    protected boolean isValueValid(List<StatusEffect> value) {
         return true;
     }
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.SOUND_EVENT.getIds();
+        return Registry.STATUS_EFFECT.getIds();
     }
 
     @Override
@@ -60,8 +60,9 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
         CompoundTag tag = saveGeneral();
 
         ListTag valueTag = new ListTag();
-        for (SoundEvent sound : get()) {
-            valueTag.add(StringTag.of(Registry.SOUND_EVENT.getId(sound).toString()));
+
+        for (StatusEffect effect : get()) {
+            valueTag.add(StringTag.of(Registry.STATUS_EFFECT.getId(effect).toString()));
         }
         tag.put("value", valueTag);
 
@@ -69,12 +70,12 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    public List<SoundEvent> fromTag(CompoundTag tag) {
+    public List<StatusEffect> fromTag(CompoundTag tag) {
         get().clear();
 
         ListTag valueTag = tag.getList("value", 8);
         for (Tag tagI : valueTag) {
-            get().add(Registry.SOUND_EVENT.get(new Identifier(tagI.asString())));
+            get().add(Registry.STATUS_EFFECT.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -83,9 +84,9 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private List<SoundEvent> defaultValue;
-        private Consumer<List<SoundEvent>> onChanged;
-        private Consumer<Setting<List<SoundEvent>>> onModuleActivated;
+        private List<StatusEffect> defaultValue;
+        private Consumer<List<StatusEffect>> onChanged;
+        private Consumer<Setting<List<StatusEffect>>> onModuleActivated;
         private IVisible visible;
 
         public Builder name(String name) {
@@ -98,17 +99,17 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
             return this;
         }
 
-        public Builder defaultValue(List<SoundEvent> defaultValue) {
+        public Builder defaultValue(List<StatusEffect> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<List<SoundEvent>> onChanged) {
+        public Builder onChanged(Consumer<List<StatusEffect>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<List<SoundEvent>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<StatusEffect>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
@@ -118,8 +119,8 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
             return this;
         }
 
-        public SoundEventListSetting build() {
-            return new SoundEventListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        public StatusEffectListSetting build() {
+            return new StatusEffectListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }
