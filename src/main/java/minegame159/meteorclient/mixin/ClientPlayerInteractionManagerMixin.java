@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
     @Shadow private int blockBreakingCooldown;
-
     @Shadow protected abstract void syncSelectedSlot();
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
@@ -59,33 +58,28 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
     private void onAttackEntity(PlayerEntity player, Entity target, CallbackInfo info) {
-        AttackEntityEvent event = MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(target));
-
-        if (event.isCancelled()) info.cancel();
+        if (MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(target)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
-        StartBreakingBlockEvent event = MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction));
-
-        if (event.isCancelled()) info.cancel();
+        if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        if (Modules.get().isActive(Reach.class)) info.setReturnValue(Modules.get().get(Reach.class).getReach());
+        info.setReturnValue(Modules.get().get(Reach.class).getReach());
     }
 
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onMethod_2902SetField_3716Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (Modules.get().isActive(Nuker.class)) value = 0;
-        if (Modules.get().isActive(NoBreakDelay.class)) value = 0;
+        if (Modules.get().isActive(NoBreakDelay.class) || Modules.get().isActive(Nuker.class)) value = 0;
         blockBreakingCooldown = value;
     }
 
     @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
     private void onAttackBlockSetField_3719Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (Modules.get().isActive(Nuker.class)) value = 0;
+        if (Modules.get().isActive(NoBreakDelay.class) || Modules.get().isActive(Nuker.class)) value = 0;
         blockBreakingCooldown = value;
     }
 
@@ -101,7 +95,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     }
 
     @Override
-    public void syncSelectedSlot2() {
+    public void syncSelected() {
         syncSelectedSlot();
     }
 }
