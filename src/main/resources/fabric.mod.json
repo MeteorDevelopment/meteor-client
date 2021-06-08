@@ -26,6 +26,7 @@
       "minegame159.meteorclient.MeteorClient"
     ]
   },
+
   "mixins": [
     "meteor-client.mixins.json",
     "meteor-client-sodium.mixins.json",
@@ -40,7 +41,7 @@
   },
 
   "depends": {
-    "fabricloader": ">=0.7.4",
-    "minecraft": "1.17-rc.2"
+    "fabricloader": ">=0.11.0",
+    "minecraft": "1.17.*"
   }
 }
