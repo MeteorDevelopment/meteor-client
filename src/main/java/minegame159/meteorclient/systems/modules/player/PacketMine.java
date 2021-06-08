@@ -30,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.ToolItem;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -46,48 +47,78 @@ public class PacketMine extends Module {
     // General
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between mining blocks in ticks.")
-            .defaultValue(1)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("delay")
+        .description("Delay between mining blocks in ticks.")
+        .defaultValue(1)
+        .min(0)
+        .sliderMax(10)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Sends rotation packets to the server when mining.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Sends rotation packets to the server when mining.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<Boolean> switchWhenReady = sgGeneral.add(new BoolSetting.Builder()
-        .name("switch-when-ready")
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-switch")
         .description("Automatically switches to the best tool when the block is ready to be mined instantly.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> notOnUse = sgGeneral.add(new BoolSetting.Builder()
+        .name("not-on-use")
+        .description("Won't auto switch if you're using an item.")
         .defaultValue(true)
+        .visible(autoSwitch::get)
         .build()
     );
 
     // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-            .name("render")
-            .description("Whether or not to render the block being mined.")
-            .defaultValue(true)
-            .build()
+        .name("render")
+        .description("Whether or not to render the block being mined.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
+    );
+
+    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
+        .name("side-color")
+        .description("The color of the sides of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 10))
+        .build()
+    );
+
+    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
+        .name("line-color")
+        .description("The color of the lines of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 255))
+        .build()
+    );
+
+    private final Setting<Boolean> readyRender = sgRender.add(new BoolSetting.Builder()
+        .name("ready-render")
+        .description("Whether or not to render another color for a block that can be broken.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<SettingColor> readySideColor = sgRender.add(new ColorSetting.Builder()
         .name("ready-side-color")
         .description("The color of the sides of the blocks that can be broken.")
         .defaultValue(new SettingColor(0, 204, 0, 10))
+        .visible(readyRender::get)
         .build()
     );
 
@@ -95,27 +126,14 @@ public class PacketMine extends Module {
         .name("ready-line-color")
         .description("The color of the lines of the blocks that can be broken.")
         .defaultValue(new SettingColor(0, 204, 0, 255))
+        .visible(readyRender::get)
         .build()
-    );
-
-    private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The color of the sides of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 10))
-            .build()
-    );
-
-    private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The color of the lines of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 255))
-            .build()
     );
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
     private final List<MyBlock> blocks = new ArrayList<>();
 
-    private boolean needsSwapBack;
+    private boolean swapped, shouldUpdateSlot;
     private int prevSlot;
 
     public PacketMine() {
@@ -124,13 +142,18 @@ public class PacketMine extends Module {
 
     @Override
     public void onActivate() {
-        needsSwapBack = false;
+        swapped = false;
+        prevSlot = mc.player.inventory.selectedSlot;
     }
 
     @Override
     public void onDeactivate() {
         for (MyBlock block : blocks) blockPool.free(block);
         blocks.clear();
+        if (shouldUpdateSlot){
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(prevSlot));
+            shouldUpdateSlot = false;
+        }
     }
 
     @EventHandler
@@ -138,6 +161,9 @@ public class PacketMine extends Module {
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
 
         event.cancel();
+
+        swapped = false;
+        shouldUpdateSlot = false;
 
         if (!isMiningBlock(event.blockPos)) {
             blocks.add(blockPool.get().set(event));
@@ -156,26 +182,27 @@ public class PacketMine extends Module {
     private void onTick(TickEvent.Pre event) {
         blocks.removeIf(MyBlock::shouldRemove);
 
+        prevSlot = mc.player.inventory.selectedSlot;
+
+        if (shouldUpdateSlot) {
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(prevSlot));
+            shouldUpdateSlot = false;
+        }
+
         if (!blocks.isEmpty()) blocks.get(0).mine();
 
-        if (!switchWhenReady.get()) return;
-
-        if (!needsSwapBack) {
+        if (!swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
             for (MyBlock block : blocks) {
                 if (block.isReady()) {
                     FindItemResult tool = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), block.blockState) && itemStack.getItem() instanceof ToolItem);
 
-                    if (!tool.found()) continue;
-                    prevSlot = mc.player.inventory.selectedSlot;
-                    InvUtils.swap(tool.getSlot());
-                    needsSwapBack = true;
+                    if (!tool.found() || mc.player.inventory.selectedSlot == tool.getSlot()) continue;
+                    swapped = true;
+                    mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(tool.getSlot()));
+                    shouldUpdateSlot = true;
                     break;
                 }
             }
-        }
-        else {
-            InvUtils.swap(prevSlot);
-            needsSwapBack = false;
         }
     }
 
@@ -319,7 +346,7 @@ public class PacketMine extends Module {
                 z2 = blockPos.getZ() + shape.getMax(Direction.Axis.Z);
             }
 
-            if (isReady()) {
+            if (isReady() && readyRender.get()) {
                 Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, readySideColor.get(), readyLineColor.get(), shapeMode.get(), 0);
             } else {
                 Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
