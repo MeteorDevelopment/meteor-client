@@ -39,7 +39,7 @@ public class AutoMend extends Module {
             .defaultValue(false)
             .build()
     );
-    
+
     private final Setting<Boolean> autoDisable = sgGeneral.add(new BoolSetting.Builder()
             .name("auto-disable")
             .description("Automatically disables when there are no more items to repair.")
@@ -95,8 +95,8 @@ public class AutoMend extends Module {
     }
 
     private int getSlot() {
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            ItemStack itemStack = mc.player.inventory.getStack(i);
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (blacklist.get().contains(itemStack.getItem())) continue;
 
             if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0 && itemStack.getDamage() > 0) {
@@ -108,8 +108,8 @@ public class AutoMend extends Module {
     }
 
     private int getEmptySlot() {
-        for (int i = 0; i < mc.player.inventory.main.size(); i++) {
-            if (mc.player.inventory.getStack(i).isEmpty()) return i;
+        for (int i = 0; i < mc.player.getInventory().main.size(); i++) {
+            if (mc.player.getInventory().getStack(i).isEmpty()) return i;
         }
 
         return -1;

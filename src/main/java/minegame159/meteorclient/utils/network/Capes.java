@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.utils.network;
 
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.entity.player.PlayerEntity;
@@ -14,6 +13,8 @@ import net.minecraft.util.Identifier;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Capes {
     private static final String CAPE_OWNERS_URL = "http://meteorclient.com/api/capeowners";
@@ -145,7 +146,7 @@ public class Capes {
         }
 
         public void register() {
-            MinecraftClient.getInstance().getTextureManager().registerTexture(this, new NativeImageBackedTexture(img));
+            mc.getTextureManager().registerTexture(this, new NativeImageBackedTexture(img));
             img = null;
 
             downloading = false;

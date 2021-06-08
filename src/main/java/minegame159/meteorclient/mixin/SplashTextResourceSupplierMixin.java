@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
+import minegame159.meteorclient.systems.config.Config;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +18,6 @@ import java.util.Random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashTextResourceSupplierMixin {
-
     private boolean override = true;
     private final Random random = new Random();
 
@@ -25,9 +25,9 @@ public class SplashTextResourceSupplierMixin {
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
     private void onApply(CallbackInfoReturnable<String> cir) {
-        if (override) {
-            cir.setReturnValue(meteorSplashes.get(random.nextInt(meteorSplashes.size())));
-        }
+        if (Config.get() == null || !Config.get().titleScreenSplashes) return;
+
+        if (override) cir.setReturnValue(meteorSplashes.get(random.nextInt(meteorSplashes.size())));
         override = !override;
     }
 

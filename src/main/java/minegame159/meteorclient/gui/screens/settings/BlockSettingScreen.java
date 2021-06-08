@@ -27,7 +27,7 @@ public class BlockSettingScreen extends WindowScreen {
     private String filterText = "";
 
     public BlockSettingScreen(GuiTheme theme, BlockSetting setting) {
-        super(theme, "Select blocks");
+        super(theme, "Select Block");
 
         this.setting = setting;
 

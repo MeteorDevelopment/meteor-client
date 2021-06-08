@@ -8,7 +8,6 @@ package minegame159.meteorclient.gui.widgets.containers;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 
 import java.util.ArrayList;
@@ -16,6 +15,7 @@ import java.util.ConcurrentModificationException;
 import java.util.List;
 
 import static minegame159.meteorclient.utils.Utils.getWindowHeight;
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public abstract class WContainer extends WWidget {
     public final List<Cell<?>> cells = new ArrayList<>();
@@ -50,7 +50,7 @@ public abstract class WContainer extends WWidget {
         for (Cell<?> cell : cells) {
             cell.move(deltaX, deltaY);
 
-            Mouse mouse = MinecraftClient.getInstance().mouse;
+            Mouse mouse = mc.mouse;
             cell.widget().mouseMoved(mouse.getX(), mouse.getY(), mouse.getX(), mouse.getY());
         }
     }
@@ -165,25 +165,25 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public boolean keyPressed(int key, int mods) {
+    public boolean keyPressed(int key, int modifiers) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().keyPressed(key, mods)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().keyPressed(key, modifiers)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return onKeyPressed(key, mods);
+        return onKeyPressed(key, modifiers);
     }
 
     @Override
-    public boolean keyRepeated(int key, int mods) {
+    public boolean keyRepeated(int key, int modifiers) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(key, mods)) return true;
+                if (propagateEvents(cell.widget()) && cell.widget().keyRepeated(key, modifiers)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        return onKeyRepeated(key, mods);
+        return onKeyRepeated(key, modifiers);
     }
 
     @Override

@@ -16,9 +16,9 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.utils.world.TickRate;
 import net.minecraft.client.network.ClientCommandSource;
+import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
-import net.minecraft.network.ServerAddress;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.server.integrated.IntegratedServer;
@@ -103,11 +103,11 @@ public class ServerCommand extends Command {
             ipText = new LiteralText(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
-                    ClickEvent.Action.COPY_TO_CLIPBOARD, 
+                    ClickEvent.Action.COPY_TO_CLIPBOARD,
                     server.address
                 ))
                 .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT, 
+                    HoverEvent.Action.SHOW_TEXT,
                     new LiteralText("Copy to clipboard")
                 ))
             );
@@ -116,22 +116,22 @@ public class ServerCommand extends Command {
             ipText = new LiteralText(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
-                    ClickEvent.Action.COPY_TO_CLIPBOARD, 
+                    ClickEvent.Action.COPY_TO_CLIPBOARD,
                     server.address
                 ))
                 .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT, 
+                    HoverEvent.Action.SHOW_TEXT,
                     new LiteralText("Copy to clipboard")
                 ))
             );
             BaseText ipv4Text = new LiteralText(String.format("%s (%s)", Formatting.GRAY, ipv4));
             ipv4Text.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
-                    ClickEvent.Action.COPY_TO_CLIPBOARD, 
+                    ClickEvent.Action.COPY_TO_CLIPBOARD,
                     ipv4
                 ))
                 .withHoverEvent(new HoverEvent(
-                    HoverEvent.Action.SHOW_TEXT, 
+                    HoverEvent.Action.SHOW_TEXT,
                     new LiteralText("Copy to clipboard")
                 ))
             );
@@ -162,9 +162,9 @@ public class ServerCommand extends Command {
         }
         info("Permission level: %d", permission_level);
     }
-    
+
     @EventHandler
-    public void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Post event) {
         ticks++;
 
         if (ticks >= 5000) {
@@ -175,7 +175,7 @@ public class ServerCommand extends Command {
     }
 
     @EventHandler
-    public void onReadPacket(PacketEvent.Receive event) {
+    private void onReadPacket(PacketEvent.Receive event) {
         try {
             if (event.packet instanceof CommandSuggestionsS2CPacket) {
                 CommandSuggestionsS2CPacket packet = (CommandSuggestionsS2CPacket) event.packet;

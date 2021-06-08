@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.proxies;
 
 import minegame159.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.regex.Pattern;
 
@@ -28,8 +28,8 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("type", type.name());
         tag.putString("ip", ip);
@@ -45,7 +45,7 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     @Override
-    public Proxy fromTag(CompoundTag tag) {
+    public Proxy fromTag(NbtCompound tag) {
         type = ProxyType.valueOf(tag.getString("type"));
         ip = tag.getString("ip");
         port = tag.getInt("port");

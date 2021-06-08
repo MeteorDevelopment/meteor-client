@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.utils.render.color;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class SettingColor extends Color {
 
@@ -64,14 +64,14 @@ public class SettingColor extends Color {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = super.toTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = super.toTag();
         tag.putBoolean("rainbow", rainbow);
         return tag;
     }
 
     @Override
-    public SettingColor fromTag(CompoundTag tag) {
+    public SettingColor fromTag(NbtCompound tag) {
         super.fromTag(tag);
         rainbow = tag.getBoolean("rainbow");
         return this;

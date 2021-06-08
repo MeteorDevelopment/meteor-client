@@ -13,7 +13,7 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class Config extends System<Config> {
     public final Version version;
@@ -31,8 +31,11 @@ public class Config extends System<Config> {
     public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
 
     public boolean titleScreenCredits = ConfigTab.titleScreenCredits.get();
+    public boolean titleScreenSplashes = ConfigTab.titleScreenSplashes.get();
     public boolean customWindowTitle = ConfigTab.customWindowTitle.get();
     public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
+
+    public boolean useTeamColor = ConfigTab.useTeamColor.get();
 
     public Config() {
         super("config");
@@ -51,8 +54,8 @@ public class Config extends System<Config> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
         tag.putString("version", version.getOriginalString());
 
         tag.putString("font", font);
@@ -67,16 +70,18 @@ public class Config extends System<Config> {
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
 
-
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
+        tag.putBoolean("titleScreenSplashes", titleScreenSplashes);
         tag.putBoolean("customWindowTitle", customWindowTitle);
         tag.putString("customWindowTitleText", customWindowTitleText);
+
+        tag.putBoolean("useTeamColor", useTeamColor);
 
         return tag;
     }
 
     @Override
-    public Config fromTag(CompoundTag tag) {
+    public Config fromTag(NbtCompound tag) {
         font = getString(tag, "font", ConfigTab.font);
         customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
         RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
@@ -90,25 +95,28 @@ public class Config extends System<Config> {
         rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
 
         titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
+        titleScreenSplashes = getBoolean(tag, "titleScreenSplashes", ConfigTab.titleScreenSplashes);
         customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.customWindowTitle);
         customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
+
+        useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
 
         return this;
     }
 
-    private boolean getBoolean(CompoundTag tag, String key, Setting<Boolean> setting) {
+    private boolean getBoolean(NbtCompound tag, String key, Setting<Boolean> setting) {
         return tag.contains(key) ? tag.getBoolean(key) : setting.get();
     }
 
-    private String getString(CompoundTag tag, String key, Setting<String> setting) {
+    private String getString(NbtCompound tag, String key, Setting<String> setting) {
         return tag.contains(key) ? tag.getString(key) : setting.get();
     }
 
-    private double getDouble(CompoundTag tag, String key, Setting<Double> setting) {
+    private double getDouble(NbtCompound tag, String key, Setting<Double> setting) {
         return tag.contains(key) ? tag.getDouble(key) : setting.get();
     }
 
-    private int getInt(CompoundTag tag, String key, Setting<Integer> setting) {
+    private int getInt(NbtCompound tag, String key, Setting<Integer> setting) {
         return tag.contains(key) ? tag.getInt(key) : setting.get();
     }
 }

@@ -8,14 +8,14 @@ package minegame159.meteorclient.rendering.text;
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Tessellator;
 import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.util.math.MatrixStack;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class VanillaTextRenderer implements TextRenderer {
     public static final TextRenderer INSTANCE = new VanillaTextRenderer();
-
-    private final net.minecraft.client.font.TextRenderer mr = MinecraftClient.getInstance().textRenderer;
 
     // Vanilla font is almost twice as small as our custom font (vanilla = 9, custom = 18)
     private double scale = 1.74;
@@ -35,12 +35,12 @@ public class VanillaTextRenderer implements TextRenderer {
     public double getWidth(String text, int length) {
         String string = text;
         if (length != string.length()) string = string.substring(0, length);
-        return mr.getWidth(string) * scale;
+        return mc.textRenderer.getWidth(string) * scale;
     }
 
     @Override
     public double getHeight() {
-        return mr.fontHeight * scale;
+        return mc.textRenderer.fontHeight * scale;
     }
 
     @Override
@@ -65,7 +65,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
         RenderSystem.disableDepthTest();
         VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        double r = mr.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, Matrices.getTop(), immediate, true, 0, 15728880);
+        double r = mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, Matrices.getTop(), immediate, true, 0, 15728880);
         immediate.draw();
         RenderSystem.enableDepthTest();
 
@@ -81,7 +81,7 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public void end() {
+    public void end(MatrixStack matrices) {
         // Vanilla renderer doesn't support batching
 
         // Vanilla font is twice as small as our custom font (vanilla = 9, custom = 18)

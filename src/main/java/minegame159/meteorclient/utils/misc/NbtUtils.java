@@ -5,9 +5,9 @@
 
 package minegame159.meteorclient.utils.misc;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,28 +15,28 @@ import java.util.List;
 import java.util.Map;
 
 public class NbtUtils {
-    public static <T extends ISerializable<?>> ListTag listToTag(Iterable<T> list) {
-        ListTag tag = new ListTag();
+    public static <T extends ISerializable<?>> NbtList listToTag(Iterable<T> list) {
+        NbtList tag = new NbtList();
         for (T item : list) tag.add(item.toTag());
         return tag;
     }
 
-    public static <T> List<T> listFromTag(ListTag tag, ToValue<T> toItem) {
+    public static <T> List<T> listFromTag(NbtList tag, ToValue<T> toItem) {
         List<T> list = new ArrayList<>(tag.size());
-        for (Tag itemTag : tag) {
+        for (NbtElement itemTag : tag) {
             T value = toItem.toValue(itemTag);
             if (value != null) list.add(value);
         }
         return list;
     }
 
-    public static <K, V extends ISerializable<?>> CompoundTag mapToTag(Map<K, V> map) {
-        CompoundTag tag = new CompoundTag();
+    public static <K, V extends ISerializable<?>> NbtCompound mapToTag(Map<K, V> map) {
+        NbtCompound tag = new NbtCompound();
         for (K key : map.keySet()) tag.put(key.toString(), map.get(key).toTag());
         return tag;
     }
 
-    public static <K, V> Map<K, V> mapFromTag(CompoundTag tag, ToKey<K> toKey, ToValue<V> toValue) {
+    public static <K, V> Map<K, V> mapFromTag(NbtCompound tag, ToKey<K> toKey, ToValue<V> toValue) {
         Map<K, V> map = new HashMap<>(tag.getSize());
         for (String key : tag.getKeys()) map.put(toKey.toKey(key), toValue.toValue(tag.get(key)));
         return map;
@@ -47,6 +47,6 @@ public class NbtUtils {
     }
 
     public interface ToValue<T> {
-        T toValue(Tag tag);
+        T toValue(NbtElement tag);
     }
 }

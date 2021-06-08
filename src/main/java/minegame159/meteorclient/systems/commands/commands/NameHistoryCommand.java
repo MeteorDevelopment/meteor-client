@@ -8,13 +8,13 @@ package minegame159.meteorclient.systems.commands.commands;
 import com.google.common.reflect.TypeToken;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import minegame159.meteorclient.systems.commands.Command;
-import minegame159.meteorclient.systems.commands.arguments.PlayerArgumentType;
+import minegame159.meteorclient.systems.commands.arguments.PlayerListEntryArgumentType;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.player.ChatUtils;
 import minegame159.meteorclient.utils.render.color.Color;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
@@ -34,18 +34,18 @@ public class NameHistoryCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
-            PlayerEntity lookUpTarget = PlayerArgumentType.getPlayer(context);
+        builder.then(argument("player", PlayerListEntryArgumentType.playerListEntry()).executes(context -> {
+            PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.getPlayerListEntry(context);
 
             Type type = new TypeToken<List<NameHistoryObject>>(){}.getType();
-            List<NameHistoryObject> nameHistoryObjects = HttpUtils.get("https://api.mojang.com/user/profiles/" + lookUpTarget.getUuid().toString().replace("-", "") + "/names", type);
+            List<NameHistoryObject> nameHistoryObjects = HttpUtils.get("https://api.mojang.com/user/profiles/" + lookUpTarget.getProfile().getId().toString().replace("-", "") + "/names", type);
 
             if (nameHistoryObjects == null || nameHistoryObjects.isEmpty()) {
                 error("There was an error fetching that users name history.");
                 return SINGLE_SUCCESS;
             }
 
-            BaseText initial = new LiteralText(lookUpTarget.getEntityName());
+            BaseText initial = new LiteralText(lookUpTarget.getProfile().getName());
             initial.append(new LiteralText("'s"));
 
             Color nameColor = TextUtils.getMostPopularColor(lookUpTarget.getDisplayName());
@@ -54,7 +54,7 @@ public class NameHistoryCommand extends Command {
                     .withColor(new TextColor(nameColor.getPacked()))
                     .withClickEvent(new ClickEvent(
                                     ClickEvent.Action.OPEN_URL,
-                                    "https://namemc.com/search?q=" + lookUpTarget.getEntityName()
+                                    "https://namemc.com/search?q=" + lookUpTarget.getProfile().getName()
                             )
                     )
                     .withHoverEvent(new HoverEvent(

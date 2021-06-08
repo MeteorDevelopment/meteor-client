@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
@@ -33,14 +33,14 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
         tag.putString("value", get());
         return tag;
     }
 
     @Override
-    public String fromTag(CompoundTag tag) {
+    public String fromTag(NbtCompound tag) {
         set(tag.getString("value"));
 
         return get();

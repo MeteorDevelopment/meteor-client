@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity> implements IEntityRenderer {
-
     @Shadow public abstract Identifier getTexture(Entity entity);
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)

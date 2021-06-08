@@ -12,13 +12,14 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Pool;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class BlockIterator {
     private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);
@@ -38,7 +39,6 @@ public class BlockIterator {
     @EventHandler(priority = EventPriority.LOWEST - 1)
     private static void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
-        MinecraftClient mc = MinecraftClient.getInstance();
 
         int px = (int) mc.player.getX();
         int py = (int) mc.player.getY();

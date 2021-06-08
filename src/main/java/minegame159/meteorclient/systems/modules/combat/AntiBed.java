@@ -84,7 +84,7 @@ public class AntiBed extends Module {
 
     private void place(BlockPos blockPos) {
         if (mc.world.getBlockState(blockPos).getBlock().asItem() != Items.STRING) {
-            BlockUtils.place(blockPos, Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.STRING), true, 50, false);
+            BlockUtils.place(blockPos, InvUtils.findInHotbar(Items.STRING), 50, false);
         }
     }
 

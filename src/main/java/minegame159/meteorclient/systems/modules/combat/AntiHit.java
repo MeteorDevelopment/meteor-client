@@ -10,16 +10,18 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.AttackEntityEvent;
-import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.EntityTypeListSetting;
-import minegame159.meteorclient.settings.Setting;
-import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
+import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import net.minecraft.block.Block;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AntiHit extends Module {
 
@@ -53,6 +55,13 @@ public class AntiHit extends Module {
             .defaultValue(false)
             .build()
     );
+    
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+            .name("blocks")
+            .description("Blocks to avoid hitting.")
+            .defaultValue(new ArrayList<>())
+            .build()
+    );
 
     public AntiHit() {
         super(Categories.Combat, "anti-hit", "Prevents you from attacking certain entities.");
@@ -71,5 +80,10 @@ public class AntiHit extends Module {
 
         // Entities
         if (entities.get().getBoolean(event.entity.getType())) event.cancel();
+    }
+    
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
+        if (blocks.get().contains(mc.world.getBlockState(event.blockPos).getBlock())) event.cancel();
     }
 }

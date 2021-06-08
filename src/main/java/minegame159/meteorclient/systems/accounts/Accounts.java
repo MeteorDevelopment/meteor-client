@@ -13,7 +13,7 @@ import minegame159.meteorclient.systems.accounts.types.TheAlteningAccount;
 import minegame159.meteorclient.utils.misc.NbtException;
 import minegame159.meteorclient.utils.misc.NbtUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -58,8 +58,8 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.put("accounts", NbtUtils.listToTag(accounts));
 
@@ -67,9 +67,9 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     @Override
-    public Accounts fromTag(CompoundTag tag) {
+    public Accounts fromTag(NbtCompound tag) {
         MeteorExecutor.execute(() -> accounts = NbtUtils.listFromTag(tag.getList("accounts", 10), tag1 -> {
-            CompoundTag t = (CompoundTag) tag1;
+            NbtCompound t = (NbtCompound) tag1;
             if (!t.contains("type")) return null;
 
             AccountType type = AccountType.valueOf(t.getString("type"));

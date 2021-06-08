@@ -122,7 +122,7 @@ public class ConfigTab extends Tab {
     public static final Setting<Boolean> rainbowPrefix = sgChat.add(new BoolSetting.Builder()
             .name("rainbow-prefix")
             .description("Makes the [Meteor] prefix on chat info rainbow.")
-            .defaultValue(true)
+            .defaultValue(false)
             .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
             .build()
@@ -134,6 +134,15 @@ public class ConfigTab extends Tab {
             .defaultValue(true)
             .onChanged(aBool -> Config.get().titleScreenCredits = aBool)
             .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenCredits))
+            .build()
+    );
+
+    public static final Setting<Boolean> titleScreenSplashes = sgScreens.add(new BoolSetting.Builder()
+            .name("title-screen-splashes")
+            .description("Show Meteor splash texts on title screen")
+            .defaultValue(true)
+            .onChanged(aBool -> Config.get().titleScreenSplashes = aBool)
+            .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenSplashes))
             .build()
     );
 
@@ -153,6 +162,15 @@ public class ConfigTab extends Tab {
             .onChanged(titleText -> Config.get().customWindowTitleText = titleText)
             .onModuleActivated(stringSetting -> stringSetting.set(Config.get().customWindowTitleText))
             .visible(customWindowTitle::get)
+            .build()
+    );
+
+    public static final Setting<Boolean> useTeamColor = sgGeneral.add(new BoolSetting.Builder()
+            .name("use-team-color")
+            .description("Uses player's team color for rendering things like esp and tracers.")
+            .defaultValue(true)
+            .onChanged(aBoolean -> Config.get().useTeamColor = aBoolean)
+            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().useTeamColor))
             .build()
     );
 

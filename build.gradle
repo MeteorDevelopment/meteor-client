@@ -1,11 +1,10 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
-	id 'com.github.johnrengelman.shadow' version '6.0.0'
+	id 'com.github.johnrengelman.shadow' version '7.0.0'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
@@ -38,10 +37,10 @@ dependencies {
 	modImplementation fabricApi.module("fabric-renderer-indigo", project.api_version)
 
 	// For XRay compatibility
-	modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}-SNAPSHOT"
+	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-	modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}-SNAPSHOT") {
+	/*modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
 		exclude(group: "net.java.jinput", module: "jinput-platform")
@@ -49,7 +48,7 @@ dependencies {
 		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
 		exclude(group: "org.ow2.asm", module: "asm-debug-all")
 	}
-	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}-SNAPSHOT"
+	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
@@ -64,10 +63,12 @@ shadowJar {
 processResources {
 	inputs.property "version", project.version
 
-	from(sourceSets.main.resources.srcDirs) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
 		expand "version": project.version
-		
+
 		filter { line -> line.replace("@devbuild@", System.getenv("CIRCLE_BUILD_NUM") != null ? System.getenv("CIRCLE_BUILD_NUM") : "") }
 	}
 
@@ -94,22 +95,31 @@ remapJar {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
+    archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
 
-publishing {
-	publications {
-		maven(MavenPublication) {
-			artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
-				classifier null
-				builtBy remapJar
-			}
-
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
+task javadocJar(type: Jar) {
+    archiveClassifier.set("javadoc")
+    from javadoc
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+
+            artifact(javadocJar) {
+                builtBy javadocJar
+            }
+        }
+    }
+}
+
+apply from: "scripts/packetutils.gradle"

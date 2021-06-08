@@ -10,19 +10,13 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class NotebotUtils {
-    private final static MinecraftClient mc = MinecraftClient.getInstance();
-
-    public enum InstrumentType {
-        Any, NotDrums, Harp, Bass, Bells, Flute, Chimes, Guitar, Xylophone, IronXylophone, CowBell, Didgeridoo, Bit,
-        Banjo, Pling
-    }
-
     public static boolean isValidInstrument(BlockPos pos, InstrumentType instrument) {
         switch (instrument) {
             case Any:
@@ -38,10 +32,7 @@ public class NotebotUtils {
                         return false;
                     else if (instr == Instrument.SNARE)
                         return false;
-                    else if (instr == Instrument.COW_BELL)
-                        return false;
-                    else
-                        return true;
+                    else return instr != Instrument.COW_BELL;
                 } else {
                     BlockState block = mc.world.getBlockState(pos.down());
                     if (block.getMaterial() == Material.AGGREGATE)
@@ -50,10 +41,7 @@ public class NotebotUtils {
                         return false;
                     else if (block.getMaterial() == Material.STONE)
                         return false;
-                    else if (block.getBlock() == Blocks.IRON_BLOCK)
-                        return false;
-                    else
-                        return true;
+                    else return block.getBlock() != Blocks.IRON_BLOCK;
                 }
             }
 
@@ -91,10 +79,7 @@ public class NotebotUtils {
                         return false;
                     else if (block.getBlock() == Blocks.HAY_BLOCK)
                         return false;
-                    else if (block.getBlock() == Blocks.GLOWSTONE)
-                        return false;
-                    else
-                        return true;
+                    else return block.getBlock() != Blocks.GLOWSTONE;
                 }
             }
             case Banjo: {
@@ -151,6 +136,48 @@ public class NotebotUtils {
 
     }
 
+    public static boolean isValidInstrumentNbsFile(byte type, InstrumentType instrument) {
+        switch (instrument) {
+            case Any:
+                return true;
+
+            case NotDrums: {
+                if (type == 2) return false; //basedrum
+                else if (type == 3) return false; //snare
+                else return type != 4; //hat
+            }
+
+            case Harp:
+                return (type == 0);
+            case Bass:
+                return (type == 1);
+            case Bells:
+                return (type == 7);
+            case Flute:
+                return (type == 6);
+            case Chimes:
+                return (type == 8);
+            case Guitar:
+                return (type == 5);
+            case Xylophone:
+                return (type == 9);
+            case IronXylophone:
+                return (type == 10);
+            case CowBell:
+                return (type == 11);
+            case Didgeridoo:
+                return (type == 12);
+            case Bit:
+                return (type == 13);
+            case Banjo:
+                return (type == 14);
+            case Pling:
+                return (type == 15);
+            default:
+                return true;
+        }
+    }
+
     public static boolean isValidIntrumentTextFile(int type, InstrumentType instrument) {
         switch (instrument) {
             case Any:
@@ -198,47 +225,8 @@ public class NotebotUtils {
         }
     }
 
-    public static boolean isValidInstrumentNbsFile(byte type, InstrumentType instrument) {
-        switch (instrument) {
-            case Any:
-                return true;
-        
-            case NotDrums: {
-               if (type == 2) return false; //basedrum
-               else if (type == 3) return false; //snare
-               else if (type == 4) return false; //hat
-               else return true;
-            }
-
-            case Harp:
-                return (type == 0);
-            case Bass:
-                return (type == 1);            
-            case Bells:
-                return (type == 7);
-            case Flute:
-                return (type == 6);
-            case Chimes:
-                return (type == 8);
-            case Guitar:
-                return (type == 5);
-            case Xylophone:
-                return (type == 9);
-            case IronXylophone:
-                return (type == 10);
-            case CowBell:
-                return (type == 11);
-            case Didgeridoo:
-                return (type == 12);
-            case Bit:
-                return (type == 13);
-            case Banjo:
-                return (type == 14);
-            case Pling:
-                return (type == 15);
-            default:
-                return true;
-        }
+    public enum InstrumentType {
+        Any, NotDrums, Harp, Bass, Bells, Flute, Chimes, Guitar, Xylophone, IronXylophone, CowBell, Didgeridoo, Bit, Banjo, Pling
     }
 
     public static SoundEvent getInstrumentSound(InstrumentType instrument) {

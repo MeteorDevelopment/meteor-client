@@ -22,6 +22,7 @@ import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.modules.combat.*;
 import minegame159.meteorclient.systems.modules.misc.*;
+import minegame159.meteorclient.systems.modules.misc.swarm.Swarm;
 import minegame159.meteorclient.systems.modules.movement.*;
 import minegame159.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import minegame159.meteorclient.systems.modules.movement.speed.Speed;
@@ -35,19 +36,20 @@ import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.ChatUtils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
+import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
-import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
@@ -78,6 +80,9 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
+
+        // This is here because some hud elements depend on modules to be initialised before them
+        add(new HUD());
     }
 
     public void sortModules() {
@@ -237,7 +242,7 @@ public class Modules extends System<Modules> {
     }
 
     private void onAction(boolean isKey, int value, boolean isPress) {
-        if (MinecraftClient.getInstance().currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
+        if (mc.currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
             for (Module module : moduleInstances.values()) {
                 if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
                     module.toggle();
@@ -264,9 +269,11 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
-            for (Module module : active) {
-                MeteorClient.EVENT_BUS.subscribe(module);
-                module.onActivate();
+            for (Module module : modules) {
+                if (module.isActive()) {
+                    MeteorClient.EVENT_BUS.subscribe(module);
+                    module.onActivate();
+                }
             }
         }
     }
@@ -274,28 +281,30 @@ public class Modules extends System<Modules> {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
-            for (Module module : active) {
-                MeteorClient.EVENT_BUS.unsubscribe(module);
-                module.onDeactivate();
+            for (Module module : modules) {
+                if (module.isActive()) {
+                    MeteorClient.EVENT_BUS.unsubscribe(module);
+                    module.onDeactivate();
+                }
             }
         }
     }
 
     public void disableAll() {
         synchronized (active) {
-            for (Module module : active.toArray(new Module[0])) {
-                module.toggle(Utils.canUpdate());
+            for (Module module : modules) {
+                if (module.isActive()) module.toggle(Utils.canUpdate());
             }
         }
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
-        ListTag modulesTag = new ListTag();
+        NbtList modulesTag = new NbtList();
         for (Module module : getAll()) {
-            CompoundTag moduleTag = module.toTag();
+            NbtCompound moduleTag = module.toTag();
             if (moduleTag != null) modulesTag.add(moduleTag);
         }
         tag.put("modules", modulesTag);
@@ -304,12 +313,12 @@ public class Modules extends System<Modules> {
     }
 
     @Override
-    public Modules fromTag(CompoundTag tag) {
+    public Modules fromTag(NbtCompound tag) {
         disableAll();
 
-        ListTag modulesTag = tag.getList("modules", 10);
-        for (Tag moduleTagI : modulesTag) {
-            CompoundTag moduleTag = (CompoundTag) moduleTagI;
+        NbtList modulesTag = tag.getList("modules", 10);
+        for (NbtElement moduleTagI : modulesTag) {
+            NbtCompound moduleTag = (NbtCompound) moduleTagI;
             Module module = get(moduleTag.getString("name"));
             if (module != null) module.fromTag(moduleTag);
         }
@@ -349,30 +358,25 @@ public class Modules extends System<Modules> {
         module.settings.registerColorSettings(module);
     }
 
-    /** Only for backwards compatibility **/
-    @Deprecated
-    public void addModule(Module module) {
-        add(module);
-    }
-
     private void initCombat() {
         add(new AimAssist());
         add(new AnchorAura());
+//        add(new AntiAnchor());
         add(new AntiAnvil());
-        add(new AntiAnchor());
         add(new AntiBed());
         add(new AntiHit());
         add(new ArrowDodge());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
-        add(new AutoLog());
         add(new AutoTotem());
         add(new AutoTrap());
         add(new AutoWeapon());
         add(new AutoWeb());
         add(new BedAura());
+        add(new BowAimbot());
         add(new BowSpam());
+        add(new Burrow());
         add(new Criticals());
         add(new CrystalAura());
         add(new Hitboxes());
@@ -383,55 +387,48 @@ public class Modules extends System<Modules> {
         add(new SelfAnvil());
         add(new SelfTrap());
         add(new SelfWeb());
-        add(new SmartSurround());
+//        add(new SmartSurround());
         add(new Surround());
-        add(new Swarm());
-        add(new Burrow());
     }
 
     private void initPlayer() {
-        add(new AirPlace());
-        add(new AntiAFK());
         add(new AntiHunger());
-        add(new AutoClicker());
-        add(new AutoDrop());
+        add(new AutoEat());
         add(new AutoFish());
+        add(new AutoGap());
         add(new AutoMend());
         add(new AutoReplenish());
-        add(new AutoRespawn());
         add(new AutoTool());
         add(new ChestSwap());
-        add(new DeathPosition());
         add(new EXPThrower());
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
+        add(new InstaMine());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new NameProtect());
         add(new NoBreakDelay());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
+        add(new OffhandCrash());
+        add(new PacketMine());
         add(new Portals());
+        add(new PotionSaver());
         add(new PotionSpoof());
         add(new Reach());
         add(new Rotation());
         add(new SpeedMine());
-        add(new Trail());
         add(new XCarry());
-        add(new AutoGap());
-        add(new AutoEat());
-        add(new PotionSaver());
-        add(new BowAimbot());
     }
 
     private void initMovement() {
         add(new AirJump());
         add(new Anchor());
+        add(new AntiAFK());
         add(new AntiLevitation());
+        add(new AntiVoid());
         add(new AutoJump());
-        add(new Sprint());
         add(new AutoWalk());
         add(new Blink());
         add(new BoatFly());
@@ -451,53 +448,54 @@ public class Modules extends System<Modules> {
         add(new ReverseStep());
         add(new SafeWalk());
         add(new Scaffold());
+        add(new Slippy());
+        add(new Sneak());
         add(new Speed());
         add(new Spider());
-        add(new Slippy());
+        add(new Sprint());
         add(new Step());
         add(new Velocity());
-        add(new AntiVoid());
     }
 
     private void initRender() {
+        add(new BetterTooltips());
         add(new BlockSelection());
+        add(new BossStack());
         add(new Breadcrumbs());
         add(new BreakIndicators());
-        add(new CameraClip());
+        add(new CameraTweaks());
         add(new Chams());
         add(new CityESP());
         add(new CustomFOV());
-        add(new ESP());
         add(new EntityOwner());
-        add(new FreeLook());
+        add(new ESP());
         add(new Freecam());
+        add(new FreeLook());
         add(new Fullbright());
-        add(new HUD());
         add(new HandView());
         add(new HoleESP());
         add(new ItemPhysics());
+        add(new ItemHighlight());
+        add(new LightOverlay());
         add(new LogoutSpots());
         add(new Nametags());
         add(new NoRender());
-        add(new ParticleBlocker());
         add(new Search());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
+        add(new Trail());
         add(new Trajectories());
         add(new UnfocusedCPU());
         add(new VoidESP());
-        add(new Xray());
-        add(new BossStack());
-        add(new ItemHighlight());
-        add(new LightOverlay());
-        add(new Zoom());
         add(new WallHack());
         add(new WaypointsModule());
-        add(new BetterTooltips());
+        add(new Xray());
+        add(new Zoom());
     }
 
     private void initWorld() {
+        add(new AirPlace());
         add(new Ambience());
         add(new AntiCactus());
         add(new AutoBreed());
@@ -514,33 +512,37 @@ public class Modules extends System<Modules> {
         add(new EntityLogger());
         add(new Flamethrower());
         add(new InfinityMiner());
-        add(new Nuker());
         add(new LiquidFiller());
         add(new MountBypass());
-        add(new PacketMine());
+        add(new Nuker());
         add(new StashFinder());
         add(new Timer());
         add(new VeinMiner());
-        add(new InstaMine());
     }
 
     private void initMisc() {
+        add(new Swarm());
         add(new Announcer());
         add(new AntiPacketKick());
+        add(new AutoClicker());
+        add(new AutoLog());
         add(new AutoReconnect());
+        add(new AutoRespawn());
         add(new BetterChat());
+        add(new BetterTab());
         add(new BookBot());
         add(new DiscordPresence());
         add(new MessageAura());
         add(new MiddleClickFriend());
+        add(new NameProtect());
         add(new Notebot());
-        add(new OffhandCrash());
+        add(new Notifier());
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
+        add(new TPSSync());
         add(new VanillaSpoof());
-        add(new BetterTab());
-        add(new Notifier());
+        add(new InventoryTweaks());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
@@ -548,7 +550,6 @@ public class Modules extends System<Modules> {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
         }
 
-        @Nullable
         @Override
         public Identifier getId(Module entry) {
             return null;
@@ -560,19 +561,17 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public int getRawId(@Nullable Module entry) {
+        public int getRawId(Module entry) {
             return 0;
         }
 
-        @Nullable
         @Override
-        public Module get(@Nullable RegistryKey<Module> key) {
+        public Module get(RegistryKey<Module> key) {
             return null;
         }
 
-        @Nullable
         @Override
-        public Module get(@Nullable Identifier id) {
+        public Module get(Identifier id) {
             return null;
         }
 
@@ -609,10 +608,21 @@ public class Modules extends System<Modules> {
 
         @Override
         public Iterator<Module> iterator() {
-            return new ToggleModuleIterator();
+            return new ModuleIterator();
         }
 
-        private static class ToggleModuleIterator implements Iterator<Module> {
+        @org.jetbrains.annotations.Nullable
+        @Override
+        public Module getRandom(Random random) {
+            return null;
+        }
+
+        @Override
+        public boolean contains(RegistryKey<Module> key) {
+            return false;
+        }
+
+        private static class ModuleIterator implements Iterator<Module> {
             private final Iterator<Module> iterator = Modules.get().getAll().iterator();
 
             @Override

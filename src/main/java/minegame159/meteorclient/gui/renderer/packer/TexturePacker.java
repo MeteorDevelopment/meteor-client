@@ -5,9 +5,8 @@
 
 package minegame159.meteorclient.gui.renderer.packer;
 
+import com.mojang.blaze3d.platform.TextureUtil;
 import minegame159.meteorclient.utils.render.ByteTexture;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.texture.TextureUtil;
 import net.minecraft.util.Identifier;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
@@ -23,8 +22,9 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class TexturePacker {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
     private static final int maxWidth = 2048;
 
     private final List<Image> images = new ArrayList<>();
@@ -38,7 +38,7 @@ public class TexturePacker {
                 ByteBuffer rawImageBuffer = null;
 
                 try {
-                    rawImageBuffer = TextureUtil.readAllToByteBuffer(in);
+                    rawImageBuffer = TextureUtil.readResource(in);
                     ((Buffer) rawImageBuffer).rewind();
 
                     IntBuffer w = stack.mallocInt(1);

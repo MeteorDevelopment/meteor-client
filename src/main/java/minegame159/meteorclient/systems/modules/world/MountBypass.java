@@ -9,7 +9,6 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import net.minecraft.entity.passive.AbstractDonkeyEntity;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 
 public class MountBypass extends Module {
@@ -20,7 +19,7 @@ public class MountBypass extends Module {
     }
 
     @EventHandler
-    public void onSendPacket(PacketEvent.Send event) {
+    private void onSendPacket(PacketEvent.Send event) {
 
         if (dontCancel) {
             dontCancel = false;
@@ -30,8 +29,9 @@ public class MountBypass extends Module {
         if (!(event.packet instanceof PlayerInteractEntityC2SPacket)) return;
         PlayerInteractEntityC2SPacket packet = (PlayerInteractEntityC2SPacket) event.packet;
 
-        if (packet.getType() == PlayerInteractEntityC2SPacket.InteractionType.INTERACT_AT && packet.getEntity(mc.world) instanceof AbstractDonkeyEntity) {
+        // TODO: Fix
+        /*if (packet.getType() == PlayerInteractEntityC2SPacket.InteractionType.INTERACT_AT && packet.getEntity(mc.world) instanceof AbstractDonkeyEntity) {
             event.cancel();
-        }
+        }*/
     }
 }

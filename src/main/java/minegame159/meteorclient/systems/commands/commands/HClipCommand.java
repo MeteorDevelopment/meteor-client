@@ -26,8 +26,8 @@ public class HClipCommand extends Command {
             assert player != null;
 
             double blocks = context.getArgument("blocks", Double.class);
-            Vec3d forward = Vec3d.fromPolar(0, player.yaw).normalize();
-            player.updatePosition(player.getX() + forward.x * blocks, player.getY(), player.getZ() + forward.z * blocks);
+            Vec3d forward = Vec3d.fromPolar(0, player.getYaw()).normalize();
+            player.setPosition(player.getX() + forward.x * blocks, player.getY(), player.getZ() + forward.z * blocks);
 
             return SINGLE_SUCCESS;
         }));

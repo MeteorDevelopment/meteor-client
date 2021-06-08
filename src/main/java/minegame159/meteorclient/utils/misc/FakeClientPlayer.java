@@ -6,7 +6,6 @@
 package minegame159.meteorclient.utils.misc;
 
 import minegame159.meteorclient.mixin.DimensionTypeAccessor;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -21,9 +20,9 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
 
-public class FakeClientPlayer {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+import static minegame159.meteorclient.utils.Utils.mc;
 
+public class FakeClientPlayer {
     private static ClientWorld world;
     private static PlayerEntity player;
     private static PlayerListEntry playerListEntry;

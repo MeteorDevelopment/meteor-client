@@ -16,7 +16,6 @@ import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
-import net.minecraft.util.Hand;
 
 public class AutoWeb extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -63,7 +62,8 @@ public class AutoWeb extends Module {
         }
         if (TargetUtils.isBadTarget(target, range.get())) return;
 
-        BlockUtils.place(target.getBlockPos(), Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0, false);
-        if (doubles.get()) BlockUtils.place(target.getBlockPos().add(0, 1, 0), Hand.MAIN_HAND, InvUtils.findItemInHotbar(Items.COBWEB), rotate.get(), 0, false);
+        BlockUtils.place(target.getBlockPos(), InvUtils.findInHotbar(Items.COBWEB), rotate.get(), 0, false);
+        if (doubles.get())
+            BlockUtils.place(target.getBlockPos().add(0, 1, 0), InvUtils.findInHotbar(Items.COBWEB), rotate.get(), 0, false);
     }
 }

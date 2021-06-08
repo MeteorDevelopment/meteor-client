@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.player.NameProtect;
+import minegame159.meteorclient.systems.modules.misc.NameProtect;
 import net.minecraft.client.font.TextVisitFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

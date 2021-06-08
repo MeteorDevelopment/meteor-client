@@ -16,9 +16,10 @@ import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.systems.accounts.Account;
 import minegame159.meteorclient.systems.accounts.AccountType;
 import minegame159.meteorclient.utils.misc.NbtException;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class PremiumAccount extends Account<PremiumAccount> {
     private static final Gson GSON = new Gson();
@@ -49,7 +50,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
     @Override
     public boolean fetchHead() {
         try {
-            return cache.makeHead("https://crafatar.com/avatars/" + cache.uuid + "?size=8&overlay&default=MHF_Steve");
+            return cache.makeHead("https://www.mc-heads.net/avatar/" + cache.uuid + "/8");
         } catch (Exception e) {
             return false;
         }
@@ -79,7 +80,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     public YggdrasilUserAuthentication getAuth() {
-        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) MinecraftClient.getInstance()).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
+        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "").createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
         auth.setPassword(password);
@@ -88,8 +89,8 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = super.toTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = super.toTag();
 
         tag.putString("password", password);
 
@@ -97,7 +98,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     @Override
-    public PremiumAccount fromTag(CompoundTag tag) {
+    public PremiumAccount fromTag(NbtCompound tag) {
         super.fromTag(tag);
         if (!tag.contains("password")) throw new NbtException();
 

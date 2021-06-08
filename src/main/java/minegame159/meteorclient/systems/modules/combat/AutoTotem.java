@@ -12,6 +12,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.Entity;
@@ -81,8 +82,8 @@ public class AutoTotem extends Module {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onTick(TickEvent.Pre event) {
-        InvUtils.FindItemResult result = InvUtils.findItemWithCount(Items.TOTEM_OF_UNDYING);
-        totems = result.count;
+        FindItemResult result = InvUtils.find(Items.TOTEM_OF_UNDYING);
+        totems = result.getCount();
 
         if (totems <= 0) locked = false;
         else if (ticks >= delay.get()) {
@@ -92,7 +93,7 @@ public class AutoTotem extends Module {
             locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
 
             if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
-                InvUtils.move().from(result.slot).toOffhand();
+                InvUtils.move().from(result.getSlot()).toOffhand();
             }
 
             ticks = 0;

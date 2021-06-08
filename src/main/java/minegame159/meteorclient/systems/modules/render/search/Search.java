@@ -91,8 +91,9 @@ public class Search extends Module {
 
         int viewDist = getRenderDistance() + 1;
 
-        for (int x = mc.player.chunkX - viewDist; x <= mc.player.chunkX + viewDist; x++) {
-            for (int z = mc.player.chunkZ - viewDist; z <= mc.player.chunkZ + viewDist; z++) {
+        // TODO: Optimize getChunkPos()
+        for (int x = mc.player.getChunkPos().x - viewDist; x <= mc.player.getChunkPos().x + viewDist; x++) {
+            for (int z = mc.player.getChunkPos().z - viewDist; z <= mc.player.getChunkPos().z + viewDist; z++) {
                 if (mc.world.getChunkManager().isChunkLoaded(x, z)) searchChunk(mc.world.getChunk(x, z), null);
             }
         }

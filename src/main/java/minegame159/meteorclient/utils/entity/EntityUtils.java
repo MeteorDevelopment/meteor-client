@@ -10,7 +10,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -44,8 +43,9 @@ public class EntityUtils {
     }
 
     public static GameMode getGameMode(PlayerEntity player) {
+        if (player == null) return GameMode.SPECTATOR;
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(player.getUuid());
-        if (playerListEntry == null) return null;
+        if (playerListEntry == null) return GameMode.SPECTATOR;
         return playerListEntry.getGameMode();
     }
 
@@ -113,14 +113,5 @@ public class EntityUtils {
         List<BlockPos> posList = getSurroundBlocks(player);
         posList.sort(Comparator.comparingDouble(PlayerUtils::distanceTo));
         return posList.isEmpty() ? null : posList.get(0);
-    }
-
-    public static double distanceToCamera(double x, double y, double z) {
-        Camera camera = mc.gameRenderer.getCamera();
-        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
-    }
-
-    public static double distanceToCamera(Entity entity) {
-        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
     }
 }

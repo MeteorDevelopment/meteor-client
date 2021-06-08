@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.systems.commands.Command;
-import net.minecraft.block.MaterialColor;
+import net.minecraft.block.MapColor;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.FilledMapItem;
@@ -50,7 +50,7 @@ public class SaveMapCommand extends Command {
             ItemStack map = getMap();
             if (map == null) throw MAP_NOT_FOUND.create();
 
-            MapState state = FilledMapItem.getMapState(map, mc.world);
+            MapState state = FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
             if (state == null) throw MAP_NOT_FOUND.create();
 
             String path = TinyFileDialogs.tinyfd_saveFileDialog("Save image", null, filters, null);
@@ -64,7 +64,7 @@ public class SaveMapCommand extends Command {
                     int c = state.colors[x + y * 128] & 255;
 
                     if (c / 4 == 0) image.setPixelColor(x, y, 0);
-                    else image.setPixelColor(x, y, MaterialColor.COLORS[c / 4].getRenderColor(c & 3));
+                    else image.setPixelColor(x, y, MapColor.COLORS[c / 4].getRenderColor(c & 3));
                 }
             }
 

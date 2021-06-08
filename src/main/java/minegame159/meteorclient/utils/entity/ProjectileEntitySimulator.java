@@ -10,7 +10,6 @@ import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.MissHitResult;
 import minegame159.meteorclient.utils.misc.Vec3;
-import net.minecraft.client.util.math.Vector3f;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ProjectileUtil;
 import net.minecraft.fluid.FluidState;
@@ -73,8 +72,8 @@ public class ProjectileEntitySimulator {
     public void set(Entity user, double roll, double speed, double simulated, double gravity, double waterDrag, boolean accurate, double tickDelta) {
         pos.set(user, tickDelta).add(0, user.getEyeHeight(user.getPose()), 0);
 
-        double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.yaw);
-        double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.pitch);
+        double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.getYaw());
+        double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.getPitch());
 
         double x, y, z;
 
@@ -85,9 +84,9 @@ public class ProjectileEntitySimulator {
         }
         else {
             Vec3d vec3d = user.getOppositeRotationVector(1.0F);
-            Quaternion quaternion = new Quaternion(new Vector3f(vec3d), (float) simulated, true);
+            Quaternion quaternion = new Quaternion(new Vec3f(vec3d), (float) simulated, true);
             Vec3d vec3d2 = user.getRotationVec(1.0F);
-            Vector3f vector3f = new Vector3f(vec3d2);
+            Vec3f vector3f = new Vec3f(vec3d2);
             vector3f.rotate(quaternion);
 
             x = vector3f.getX();
@@ -108,8 +107,8 @@ public class ProjectileEntitySimulator {
     }
 
     public void setFishingBobber(Entity user, double tickDelta) {
-        double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.yaw);
-        double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.pitch);
+        double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.getYaw());
+        double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.getPitch());
 
         double h = Math.cos(-yaw * 0.017453292F - 3.1415927F);
         double i = Math.sin(-yaw * 0.017453292F - 3.1415927F);

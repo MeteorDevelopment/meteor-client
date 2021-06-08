@@ -66,7 +66,8 @@ public class SChunk {
 
     public boolean shouldBeDeleted() {
         int viewDist = getRenderDistance() + 1;
-        return x > mc.player.chunkX + viewDist || x < mc.player.chunkX - viewDist || z > mc.player.chunkZ + viewDist || z < mc.player.chunkZ - viewDist;
+        // TODO: Optimize getChunkPos()
+        return x > mc.player.getChunkPos().x + viewDist || x < mc.player.getChunkPos().x - viewDist || z > mc.player.getChunkPos().z + viewDist || z < mc.player.getChunkPos().z - viewDist;
     }
 
     public void render() {

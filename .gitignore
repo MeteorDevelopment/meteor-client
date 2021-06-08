@@ -3,7 +3,6 @@
 .settings
 .project
 .classpath
-.idea
 build
 out
 run
@@ -13,3 +12,6 @@ logs
 *.iws
 *.ipr
 *.iml
+.idea/*
+!.idea/scopes/*
+!.idea/copyright/*

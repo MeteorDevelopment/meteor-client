@@ -13,6 +13,7 @@ import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
@@ -23,7 +24,7 @@ import net.minecraft.util.Hand;
 
 public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
             .name("distance")
             .description("The maximum distance the sheep have to be to be sheared.")
@@ -67,11 +68,11 @@ public class AutoShearer extends Module {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
 
             boolean findNewShears = false;
-            if (mc.player.inventory.getMainHandStack().getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.inventory.getMainHandStack().getDamage() >= mc.player.inventory.getMainHandStack().getMaxDamage() - 1) findNewShears = true;
+            if (mc.player.getInventory().getMainHandStack().getItem() instanceof ShearsItem) {
+                if (antiBreak.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1) findNewShears = true;
             }
-            else if (mc.player.inventory.offHand.get(0).getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.inventory.offHand.get(0).getDamage() >= mc.player.inventory.offHand.get(0).getMaxDamage() - 1) findNewShears = true;
+            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof ShearsItem) {
+                if (antiBreak.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1) findNewShears = true;
                 else offHand = true;
             }
             else {
@@ -80,12 +81,9 @@ public class AutoShearer extends Module {
 
             boolean foundShears = !findNewShears;
             if (findNewShears) {
-                int slot = InvUtils.findItemInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
+                FindItemResult shears = InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
 
-                if (slot != -1) {
-                    mc.player.inventory.selectedSlot = slot;
-                    foundShears = true;
-                }
+                if (InvUtils.swap(shears.getSlot())) foundShears = true;
             }
 
             if (foundShears) {
@@ -101,6 +99,6 @@ public class AutoShearer extends Module {
 
     private void interact() {
         mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
-        mc.player.inventory.selectedSlot = preSlot;
+        InvUtils.swap(preSlot);
     }
 }

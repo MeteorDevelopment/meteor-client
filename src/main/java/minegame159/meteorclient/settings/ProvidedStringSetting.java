@@ -25,37 +25,37 @@ public class ProvidedStringSetting extends StringSetting {
         private IVisible visible;
         private Supplier<String[]> supplier;
 
-        public Builder name(String name) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder name(String name) {
             this.name = name;
             return this;
         }
 
-        public Builder description(String description) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder description(String description) {
             this.description = description;
             return this;
         }
 
-        public Builder defaultValue(String defaultValue) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder defaultValue(String defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<String> onChanged) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder onChanged(Consumer<String> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<String>> onModuleActivated) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder onModuleActivated(Consumer<Setting<String>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
 
-        public Builder visible(IVisible visible) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder visible(IVisible visible) {
             this.visible = visible;
             return this;
         }
 
-        public Builder supplier(Supplier<String[]> supplier) {
+        public minegame159.meteorclient.settings.ProvidedStringSetting.Builder supplier(Supplier<String[]> supplier) {
             this.supplier = supplier;
             return this;
         }

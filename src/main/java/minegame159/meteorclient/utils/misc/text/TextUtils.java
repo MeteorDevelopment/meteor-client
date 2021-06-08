@@ -39,7 +39,7 @@ public class TextUtils {
     }
 
     /**
-     * Takes a {@link List}<{@link ColoredText}> and returns a {@link HashMap}, where the keys are all the existing {@link Color}s in the
+     * Takes a {@link List} of {@link ColoredText} and returns a {@link HashMap}, where the keys are all the existing {@link Color}s in the
      * aforementioned list, and the corresponding keys are the number of characters that have that color.
      *
      * @param coloredTexts The list of {@link ColoredText} to obtain the color count of. Best paired with the output from {@link #toColoredTextList(Text)}
