@@ -7,6 +7,8 @@ package minegame159.meteorclient.systems.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.world.ChunkOcclusionEvent;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EntityTypeListSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -183,6 +185,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noCaveCulling = sgWorld.add(new BoolSetting.Builder()
+            .name("no-cave-culling")
+            .description("Disables Minecraft's cave culling algorithm.")
+            .defaultValue(false)
+            .build()
+    );
+
     // Entity
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
@@ -298,6 +307,11 @@ public class NoRender extends Module {
         return isActive() && noFallingBlocks.get();
     }
 
+    @EventHandler
+    private void onChunkOcclusion(ChunkOcclusionEvent event) {
+        if (noCaveCulling.get()) event.cancel();
+    }
+
     // Entity
 
     public boolean noEntity(Entity entity) {
@@ -307,4 +321,5 @@ public class NoRender extends Module {
     public boolean noArmor() {
         return isActive() && noArmor.get();
     }
+
 }

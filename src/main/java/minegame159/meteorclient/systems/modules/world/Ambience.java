@@ -57,6 +57,7 @@ public class Ambience extends Module {
             .name("sky-color")
             .description("The color to change the sky to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeSkyColor::get)
             .build()
     );
 
@@ -78,6 +79,7 @@ public class Ambience extends Module {
             .name("clouds-color")
             .description("The color to change the clouds to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeCloudColor::get)
             .build()
     );
 
@@ -92,6 +94,7 @@ public class Ambience extends Module {
             .name("lightning-color")
             .description("The color to change lightning to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeLightningColor::get)
             .build()
     );
 
@@ -108,6 +111,7 @@ public class Ambience extends Module {
             .name("water-color")
             .description("The color to change water to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeWaterColor::get)
             .build()
     );
 
@@ -122,6 +126,7 @@ public class Ambience extends Module {
             .name("lava-color")
             .description("The color to change lava to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeLavaColor::get)
             .build()
     );
 
@@ -136,6 +141,7 @@ public class Ambience extends Module {
             .name("foliage-color")
             .description("The color to change the foliage to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeFoliageColor::get)
             .build()
     );
 
@@ -150,6 +156,7 @@ public class Ambience extends Module {
             .name("grass-color")
             .description("The color to change grass to.")
             .defaultValue(new SettingColor(102, 0, 0, 255))
+            .visible(changeGrassColor::get)
             .build()
     );
 

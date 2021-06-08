@@ -15,7 +15,7 @@
         { "name": "InSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
         { "name": "OutSize", "type": "float", "count": 2, "values": [ 1.0, 1.0 ] },
         { "name": "width", "type": "float", "count": 1, "values": [ 1.0 ] },
-        { "name": "opacity", "type": "float", "count": 1, "values": [ 1.0 ] },
+        { "name": "shapeMode", "type": "float", "count": 1, "values": [ 2.0 ] },
         { "name": "fillOpacity", "type": "float", "count": 1, "values": [ 0.35 ] }
     ]
 }
