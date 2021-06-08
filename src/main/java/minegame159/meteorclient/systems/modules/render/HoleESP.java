@@ -9,9 +9,8 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.Renderer3D;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -23,7 +22,6 @@ import minegame159.meteorclient.utils.world.BlockIterator;
 import minegame159.meteorclient.utils.world.Dir;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
@@ -31,7 +29,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class HoleESP extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
@@ -157,9 +154,6 @@ public class HoleESP extends Module {
             .build()
     );
 
-    private final MeshBuilder LINES = new MeshBuilder(16384);
-    private final MeshBuilder SIDES = new MeshBuilder(16384);
-
     private final Pool<Hole> holePool = new Pool<>(Hole::new);
     private final List<Hole> holes = new ArrayList<>();
 
@@ -228,13 +222,7 @@ public class HoleESP extends Module {
 
     @EventHandler
     private void onRender(RenderEvent event) {
-        LINES.begin(event, DrawMode.Lines, VertexFormats.POSITION_COLOR);
-        SIDES.begin(event, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-
-        for (HoleESP.Hole hole : holes) hole.render(LINES, SIDES, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
-
-        LINES.end();
-        SIDES.end();
+        for (HoleESP.Hole hole : holes) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
     }
 
     private static class Hole {
@@ -251,22 +239,22 @@ public class HoleESP extends Module {
         }
 
         public Color getTopColor() {
-            switch (this.type) {
-                case Obsidian:  return Modules.get().get(HoleESP.class).obsidianColorTop.get();
-                case Bedrock:   return Modules.get().get(HoleESP.class).bedrockColorTop.get();
-                default:        return Modules.get().get(HoleESP.class).mixedColorTop.get();
-            }
+            return switch (this.type) {
+                case Obsidian -> Modules.get().get(HoleESP.class).obsidianColorTop.get();
+                case Bedrock  -> Modules.get().get(HoleESP.class).bedrockColorTop.get();
+                default       -> Modules.get().get(HoleESP.class).mixedColorTop.get();
+            };
         }
 
         public Color getBottomColor() {
-            switch (this.type) {
-                case Obsidian:  return Modules.get().get(HoleESP.class).obsidianColorBottom.get();
-                case Bedrock:   return Modules.get().get(HoleESP.class).bedrockColorBottom.get();
-                default:        return Modules.get().get(HoleESP.class).mixedColorBottom.get();
-            }
+            return switch (this.type) {
+                case Obsidian -> Modules.get().get(HoleESP.class).obsidianColorBottom.get();
+                case Bedrock  -> Modules.get().get(HoleESP.class).bedrockColorBottom.get();
+                default       -> Modules.get().get(HoleESP.class).mixedColorBottom.get();
+            };
         }
 
-        public void render(MeshBuilder lines, MeshBuilder sides, ShapeMode mode, double height, boolean topQuad, boolean bottomQuad) {
+        public void render(Renderer3D renderer, ShapeMode mode, double height, boolean topQuad, boolean bottomQuad) {
             int x = blockPos.getX();
             int y = blockPos.getY();
             int z = blockPos.getZ();
@@ -277,37 +265,38 @@ public class HoleESP extends Module {
             int originalTopA = top.a;
             int originalBottompA = bottom.a;
 
-            if (mode != ShapeMode.Lines) {
+            if (mode.lines()) {
+                if (Dir.isNot(exclude, Dir.WEST) && Dir.isNot(exclude, Dir.NORTH)) renderer.line(x, y, z, x, y + height, z, bottom, top);
+                if (Dir.isNot(exclude, Dir.WEST) && Dir.isNot(exclude, Dir.SOUTH)) renderer.line(x, y, z + 1, x, y + height, z + 1, bottom, top);
+                if (Dir.isNot(exclude, Dir.EAST) && Dir.isNot(exclude, Dir.NORTH)) renderer.line(x + 1, y, z, x + 1, y + height, z, bottom, top);
+                if (Dir.isNot(exclude, Dir.EAST) && Dir.isNot(exclude, Dir.SOUTH)) renderer.line(x + 1, y, z + 1, x + 1, y + height, z + 1, bottom, top);
+
+                if (Dir.isNot(exclude, Dir.NORTH)) renderer.line(x, y, z, x + 1, y, z, bottom);
+                if (Dir.isNot(exclude, Dir.NORTH)) renderer.line(x, y + height, z, x + 1, y + height, z, top);
+                if (Dir.isNot(exclude, Dir.SOUTH)) renderer.line(x, y, z + 1, x + 1, y, z + 1, bottom);
+                if (Dir.isNot(exclude, Dir.SOUTH)) renderer.line(x, y + height, z + 1, x + 1, y + height, z + 1, top);
+
+                if (Dir.isNot(exclude, Dir.WEST)) renderer.line(x, y, z, x, y, z + 1, bottom);
+                if (Dir.isNot(exclude, Dir.WEST)) renderer.line(x, y + height, z, x, y + height, z + 1, top);
+                if (Dir.isNot(exclude, Dir.EAST)) renderer.line(x + 1, y, z, x + 1, y, z + 1, bottom);
+                if (Dir.isNot(exclude, Dir.EAST)) renderer.line(x + 1, y + height, z, x + 1, y + height, z + 1, top);
+            }
+
+            if (mode.sides()) {
                 top.a = originalTopA / 2;
                 bottom.a = originalBottompA / 2;
 
-                if (Dir.is(exclude, Dir.UP) && topQuad) sides.quad(x, y + height, z, x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y + height, z, top); // Top
-                if (Dir.is(exclude, Dir.DOWN) && bottomQuad) sides.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
+                if (Dir.isNot(exclude, Dir.UP) && topQuad) renderer.quad(x, y + height, z, x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y + height, z, top); // Top
+                if (Dir.isNot(exclude, Dir.DOWN) && bottomQuad) renderer.quad(x, y, z, x, y, z + 1, x + 1, y, z + 1, x + 1, y, z, bottom); // Bottom
 
-                if (Dir.is(exclude, Dir.NORTH)) sides.verticalGradientQuad(x, y + height, z, x + 1, y + height, z, x + 1, y, z, x, y, z, top, bottom); // North
-                if (Dir.is(exclude, Dir.SOUTH)) sides.verticalGradientQuad( x, y + height, z + 1, x + 1, y + height, z + 1, x + 1, y, z + 1, x, y, z + 1, top, bottom); // South
+                if (Dir.isNot(exclude, Dir.NORTH)) renderer.gradientQuadVertical(x, y, z, x + 1, y + height, z, top, bottom); // North
+                if (Dir.isNot(exclude, Dir.SOUTH)) renderer.gradientQuadVertical(x, y, z + 1, x + 1, y + height, z + 1, top, bottom); // South
 
-                if (Dir.is(exclude, Dir.WEST)) sides.verticalGradientQuad(x, y + height, z, x, y + height, z + 1, x, y, z + 1, x, y, z, top, bottom); // East
-                if (Dir.is(exclude, Dir.EAST)) sides.verticalGradientQuad(x + 1, y + height, z, x + 1, y + height, z + 1, x + 1, y, z + 1, x + 1, y, z, top, bottom); // West
+                if (Dir.isNot(exclude, Dir.WEST)) renderer.gradientQuadVertical(x, y, z, x, y + height, z + 1, top, bottom); // West
+                if (Dir.isNot(exclude, Dir.EAST)) renderer.gradientQuadVertical(x + 1, y, z, x + 1, y + height, z + 1, top, bottom); // East
 
                 top.a = originalTopA;
                 bottom.a = originalBottompA;
-            }
-            if (mode != ShapeMode.Sides) {
-                if (Dir.is(exclude, Dir.WEST) && Dir.is(exclude, Dir.NORTH)) lines.line(x, y, z, x, y + height, z, bottom, top);
-                if (Dir.is(exclude, Dir.WEST) && Dir.is(exclude, Dir.SOUTH)) lines.line(x, y, z + 1, x, y + height, z + 1, bottom, top);
-                if (Dir.is(exclude, Dir.EAST) && Dir.is(exclude, Dir.NORTH)) lines.line(x + 1, y, z, x + 1, y + height, z, bottom, top);
-                if (Dir.is(exclude, Dir.EAST) && Dir.is(exclude, Dir.SOUTH)) lines.line(x + 1, y, z + 1, x + 1, y + height, z + 1, bottom, top);
-
-                if (Dir.is(exclude, Dir.NORTH)) lines.line(x, y, z, x + 1, y, z, bottom);
-                if (Dir.is(exclude, Dir.NORTH)) lines.line(x, y + height, z, x + 1, y + height, z, top);
-                if (Dir.is(exclude, Dir.SOUTH)) lines.line(x, y, z + 1, x + 1, y, z + 1, bottom);
-                if (Dir.is(exclude, Dir.SOUTH)) lines.line(x, y + height, z + 1, x + 1, y + height, z + 1, top);
-
-                if (Dir.is(exclude, Dir.WEST)) lines.line(x, y, z, x, y, z + 1, bottom);
-                if (Dir.is(exclude, Dir.WEST)) lines.line(x, y + height, z, x, y + height, z + 1, top);
-                if (Dir.is(exclude, Dir.EAST)) lines.line(x + 1, y, z, x + 1, y, z + 1, bottom);
-                if (Dir.is(exclude, Dir.EAST)) lines.line(x + 1, y + height, z, x + 1, y + height, z + 1, top);
             }
         }
 

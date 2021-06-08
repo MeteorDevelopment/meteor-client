@@ -5,8 +5,8 @@
 
 package minegame159.meteorclient.systems.modules.render.search;
 
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
@@ -164,7 +164,7 @@ public class SBlock {
         return state.getBlock() == mc.world.getBlockState(blockPos).getBlock();
     }
 
-    public void render() {
+    public void render(RenderEvent event) {
         double x1 = x;
         double y1 = y;
         double z1 = z;
@@ -190,60 +190,60 @@ public class SBlock {
         Color sideColor = blockData.sideColor;
 
         if (neighbours == 0) {
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
+            event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
         }
         else {
             // Lines
             if (shapeMode != ShapeMode.Sides) {
                 // Vertical, BA_LE
                 if (((neighbours & LE) != LE && (neighbours & BA) != BA) || ((neighbours & LE) == LE && (neighbours & BA) == BA && (neighbours & BA_LE) != BA_LE)) {
-                    Renderer.LINES.line(x1, y1, z1, x1, y2, z1, lineColor);
+                    event.renderer.line(x1, y1, z1, x1, y2, z1, lineColor);
                 }
                 // Vertical, FO_LE
                 if (((neighbours & LE) != LE && (neighbours & FO) != FO) || ((neighbours & LE) == LE && (neighbours & FO) == FO && (neighbours & FO_LE) != FO_LE)) {
-                    Renderer.LINES.line(x1, y1, z2, x1, y2, z2, lineColor);
+                    event.renderer.line(x1, y1, z2, x1, y2, z2, lineColor);
                 }
                 // Vertical, BA_RI
                 if (((neighbours & RI) != RI && (neighbours & BA) != BA) || ((neighbours & RI) == RI && (neighbours & BA) == BA && (neighbours & BA_RI) != BA_RI)) {
-                    Renderer.LINES.line(x2, y1, z1, x2, y2, z1, lineColor);
+                    event.renderer.line(x2, y1, z1, x2, y2, z1, lineColor);
                 }
                 // Vertical, FO_RI
                 if (((neighbours & RI) != RI && (neighbours & FO) != FO) || ((neighbours & RI) == RI && (neighbours & FO) == FO && (neighbours & FO_RI) != FO_RI)) {
-                    Renderer.LINES.line(x2, y1, z2, x2, y2, z2, lineColor);
+                    event.renderer.line(x2, y1, z2, x2, y2, z2, lineColor);
                 }
 
                 // Horizontal bottom, BA_LE - BA_RI
                 if (((neighbours & BA) != BA && (neighbours & BO) != BO) || ((neighbours & BA) != BA && (neighbours & BO_BA) == BO_BA)) {
-                    Renderer.LINES.line(x1, y1, z1, x2, y1, z1, lineColor);
+                    event.renderer.line(x1, y1, z1, x2, y1, z1, lineColor);
                 }
                 // Horizontal bottom, FO_LE - FO_RI
                 if (((neighbours & FO) != FO && (neighbours & BO) != BO) || ((neighbours & FO) != FO && (neighbours & BO_FO) == BO_FO)) {
-                    Renderer.LINES.line(x1, y1, z2, x2, y1, z2, lineColor);
+                    event.renderer.line(x1, y1, z2, x2, y1, z2, lineColor);
                 }
                 // Horizontal top, BA_LE - BA_RI
                 if (((neighbours & BA) != BA && (neighbours & TO) != TO) || ((neighbours & BA) != BA && (neighbours & TO_BA) == TO_BA)) {
-                    Renderer.LINES.line(x1, y2, z1, x2, y2, z1, lineColor);
+                    event.renderer.line(x1, y2, z1, x2, y2, z1, lineColor);
                 }
                 // Horizontal top, FO_LE - FO_RI
                 if (((neighbours & FO) != FO && (neighbours & TO) != TO) || ((neighbours & FO) != FO && (neighbours & TO_FO) == TO_FO)) {
-                    Renderer.LINES.line(x1, y2, z2, x2, y2, z2, lineColor);
+                    event.renderer.line(x1, y2, z2, x2, y2, z2, lineColor);
                 }
 
                 // Horizontal bottom, BA_LE - FO_LE
                 if (((neighbours & LE) != LE && (neighbours & BO) != BO) || ((neighbours & LE) != LE && (neighbours & BO_LE) == BO_LE)) {
-                    Renderer.LINES.line(x1, y1, z1, x1, y1, z2, lineColor);
+                    event.renderer.line(x1, y1, z1, x1, y1, z2, lineColor);
                 }
                 // Horizontal bottom, BA_RI - FO_RI
                 if (((neighbours & RI) != RI && (neighbours & BO) != BO) || ((neighbours & RI) != RI && (neighbours & BO_RI) == BO_RI)) {
-                    Renderer.LINES.line(x2, y1, z1, x2, y1, z2, lineColor);
+                    event.renderer.line(x2, y1, z1, x2, y1, z2, lineColor);
                 }
                 // Horizontal top, BA_LE - FO_LE
                 if (((neighbours & LE) != LE && (neighbours & TO) != TO) || ((neighbours & LE) != LE && (neighbours & TO_LE) == TO_LE)) {
-                    Renderer.LINES.line(x1, y2, z1, x1, y2, z2, lineColor);
+                    event.renderer.line(x1, y2, z1, x1, y2, z2, lineColor);
                 }
                 // Horizontal top, BA_RI - FO_RI
                 if (((neighbours & RI) != RI && (neighbours & TO) != TO) || ((neighbours & RI) != RI && (neighbours & TO_RI) == TO_RI)) {
-                    Renderer.LINES.line(x2, y2, z1, x2, y2, z2, lineColor);
+                    event.renderer.line(x2, y2, z1, x2, y2, z2, lineColor);
                 }
             }
 
@@ -251,27 +251,27 @@ public class SBlock {
             if (shapeMode != ShapeMode.Lines) {
                 // Bottom
                 if ((neighbours & BO) != BO) {
-                    Renderer.NORMAL.horizontalQuad(x1, z1, x2, z2, y1, sideColor);
+                    event.renderer.quadHorizontal(x1, z1, x2, z2, y1, sideColor);
                 }
                 // Top
                 if ((neighbours & TO) != TO) {
-                    Renderer.NORMAL.horizontalQuad(x1, z1, x2, z2, y2, sideColor);
+                    event.renderer.quadHorizontal(x1, z1, x2, z2, y2, sideColor);
                 }
                 // Front
                 if ((neighbours & FO) != FO) {
-                    Renderer.NORMAL.verticalQuad(x1, y1, z2, x2, y2, z2, sideColor);
+                    event.renderer.quadVertical(x1, y1, z2, x2, y2, z2, sideColor);
                 }
                 // Back
                 if ((neighbours & BA) != BA) {
-                    Renderer.NORMAL.verticalQuad(x1, y1, z1, x2, y2, z1, sideColor);
+                    event.renderer.quadVertical(x1, y1, z1, x2, y2, z1, sideColor);
                 }
                 // Right
                 if ((neighbours & RI) != RI) {
-                    Renderer.NORMAL.verticalQuad(x2, y1, z1, x2, y2, z2, sideColor);
+                    event.renderer.quadVertical(x2, y1, z1, x2, y2, z2, sideColor);
                 }
                 // Left
                 if ((neighbours & LE) != LE) {
-                    Renderer.NORMAL.verticalQuad(x1, y1, z1, x1, y2, z2, sideColor);
+                    event.renderer.quadVertical(x1, y1, z1, x1, y2, z2, sideColor);
                 }
             }
         }

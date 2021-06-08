@@ -6,6 +6,7 @@
 package minegame159.meteorclient.rendering;
 
 import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;

@@ -7,8 +7,7 @@ package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -220,14 +219,14 @@ public class Trajectories extends Module {
             Vec3 lastPoint = null;
 
             for (Vec3 point : points) {
-                if (lastPoint != null) Renderer.LINES.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
+                if (lastPoint != null) event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
                 lastPoint = point;
             }
 
             // Render hit quad
             if (hitQuad) {
-                if (hitQuadHorizontal) Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, 0.5, sideColor.get(), lineColor.get(), shapeMode.get());
-                else Renderer.quadWithLinesVertical(Renderer.NORMAL, Renderer.LINES, hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
+                if (hitQuadHorizontal) event.renderer.sideHorizontal(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX1 + 0.5, hitQuadZ1, sideColor.get(), lineColor.get(), shapeMode.get());
+                else event.renderer.sideVertical(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
             }
 
             // Render entity
@@ -237,7 +236,7 @@ public class Trajectories extends Module {
                 double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
                 Box box = entity.getBoundingBox();
-                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
             }
         }
     }

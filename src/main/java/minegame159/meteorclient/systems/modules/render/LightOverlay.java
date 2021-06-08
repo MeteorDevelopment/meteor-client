@@ -8,8 +8,10 @@ package minegame159.meteorclient.systems.modules.render;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.renderer.DrawMode;
+import minegame159.meteorclient.renderer.Mesh;
+import minegame159.meteorclient.renderer.ShaderMesh;
+import minegame159.meteorclient.renderer.Shaders;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -23,7 +25,6 @@ import net.minecraft.block.SlabBlock;
 import net.minecraft.block.StairsBlock;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
@@ -87,7 +88,7 @@ public class LightOverlay extends Module {
 
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
 
-    private final MeshBuilder mb = new MeshBuilder();
+    private final Mesh mesh = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec3, Mesh.Attrib.Color);
 
     public LightOverlay() {
         super(Categories.Render, "light-overlay", "Shows blocks where mobs can spawn.");
@@ -116,12 +117,20 @@ public class LightOverlay extends Module {
     private void onRender(RenderEvent event) {
         if (crosses.isEmpty()) return;
 
-        mb.depthTest = !seeThroughBlocks.get();
-        mb.begin(event, DrawMode.Lines, VertexFormats.POSITION_COLOR);
+        mesh.depthTest = !seeThroughBlocks.get();
+        mesh.begin();
 
         for (Cross cross : crosses) cross.render();
 
-        mb.end();
+        mesh.end();
+        mesh.render(event.matrices);
+    }
+
+    private void line(double x1, double y1, double z1, double x2, double y2, double z2, Color color) {
+        mesh.line(
+            mesh.vec3(x1, y1, z1).color(color).next(),
+            mesh.vec3(x2, y2, z2).color(color).next()
+        );
     }
 
     private class Cross {
@@ -141,8 +150,8 @@ public class LightOverlay extends Module {
         public void render() {
             Color c = potential ? potentialColor.get() : color.get();
 
-            mb.line(x, y, z, x + 1, y, z + 1, c);
-            mb.line(x + 1, y, z, x, y, z + 1, c);
+            line(x, y, z, x + 1, y, z + 1, c);
+            line(x + 1, y, z, x, y, z + 1, c);
         }
     }
 
