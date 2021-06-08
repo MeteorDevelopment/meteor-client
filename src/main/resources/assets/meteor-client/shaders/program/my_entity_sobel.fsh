@@ -13,7 +13,7 @@ void main() {
 
     int widthInt = int(width);
     int shapeModeInt = int(shapeMode);
-    float mindist = width * width;
+    float minDist = width * width;
 
     if (center.a != 0.0) {
         if (shapeModeInt == 0) discard;
@@ -31,10 +31,10 @@ void main() {
                 }
             }
         }
-        if (dist > mindist) {
+        if (dist > minDist) {
             center.a = 0.0;
         } else {
-            center.a = min((1.0 - (dist / mindist)) * 3.5, 1.0);
+            center.a = min((1.0 - (dist / minDist)) * 3.5, 1.0);
         }
     }
 
