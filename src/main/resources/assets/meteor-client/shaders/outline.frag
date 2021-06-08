@@ -1,4 +1,4 @@
-#version 150 core
+#version 330 core
 
 out vec4 color;
 
@@ -11,7 +11,7 @@ in vec2 v_TexCoord;
 in vec2 v_OneTexel;
 
 void main() {
-    vec4 center = texture2D(u_Texture, v_TexCoord);
+    vec4 center = texture(u_Texture, v_TexCoord);
 
     int widthInt = int(u_Width);
     int shapeModeInt = int(u_ShapeMode);
@@ -29,7 +29,7 @@ void main() {
 
         for (int x = -widthInt; x <= widthInt; x++) {
             for (int y = -widthInt; y <= widthInt; y++) {
-                vec4 offset = texture2D(u_Texture, v_TexCoord + vec2(x, y) * v_OneTexel);
+                vec4 offset = texture(u_Texture, v_TexCoord + vec2(x, y) * v_OneTexel);
 
                 if (offset.a != 0) {
                     float ndist = x * x + y * y - 1.0;

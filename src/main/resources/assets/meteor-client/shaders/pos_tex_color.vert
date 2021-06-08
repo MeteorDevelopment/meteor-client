@@ -1,8 +1,8 @@
-#version 150 core
+#version 330 core
 
-in vec4 pos;
-in vec2 texCoords;
-in vec4 color;
+layout (location = 0) in vec4 pos;
+layout (location = 1) in vec2 texCoords;
+layout (location = 2) in vec4 color;
 
 uniform mat4 u_Proj;
 uniform mat4 u_ModelView;
