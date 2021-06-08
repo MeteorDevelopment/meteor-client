@@ -10,7 +10,10 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.*;
+import minegame159.meteorclient.renderer.ShapeMode;
+import minegame159.meteorclient.rendering.DrawMode;
+import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -237,8 +240,8 @@ public class LogoutSpots extends Module {
             double healthPercentage = (double) health / maxHealth;
 
             // Render quad
-            if (fullHeight.get()) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            else Renderer.quadWithLinesHorizontal(Renderer.NORMAL, Renderer.LINES, x, y, z, xWidth, sideColor.get(), lineColor.get(), shapeMode.get());
+            if (fullHeight.get()) event.renderer.box(x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            else event.renderer.sideHorizontal(x, y, z, x + xWidth, z, sideColor.get(), lineColor.get(), shapeMode.get());
 
             // Get health color
             Color healthColor;

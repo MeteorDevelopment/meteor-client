@@ -12,7 +12,7 @@ import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.events.world.BlockUpdateEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -248,7 +248,7 @@ public class Search extends Module {
 
                     it.remove();
                 }
-                else chunk.render();
+                else chunk.render(event);
             }
 
             if (tracers.get()) {

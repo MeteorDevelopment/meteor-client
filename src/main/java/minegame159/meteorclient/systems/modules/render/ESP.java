@@ -8,8 +8,7 @@ package minegame159.meteorclient.systems.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.RenderEvent;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -154,7 +153,7 @@ public class ESP extends Module {
         double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
         Box box = entity.getBoundingBox();
-        Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
+        event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
 
         lineColor.a = prevLineA;
         sideColor.a = prevSideA;
@@ -184,14 +183,14 @@ public class ESP extends Module {
 
     public Color getColor(Entity entity) {
         if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-        switch (entity.getType().getSpawnGroup()) {
-            case CREATURE:          return animalsColor.get();
-            case WATER_AMBIENT:
-            case WATER_CREATURE:    return waterAnimalsColor.get();
-            case MONSTER:           return monstersColor.get();
-            case AMBIENT:           return ambientColor.get();
-            default:                return miscColor.get();
-        }
+
+        return switch (entity.getType().getSpawnGroup()) {
+            case CREATURE                      -> animalsColor.get();
+            case WATER_AMBIENT, WATER_CREATURE -> waterAnimalsColor.get();
+            case MONSTER                       -> monstersColor.get();
+            case AMBIENT                       -> ambientColor.get();
+            default                            -> miscColor.get();
+        };
     }
 
     // Outlines

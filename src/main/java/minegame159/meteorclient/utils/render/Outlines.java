@@ -5,16 +5,18 @@
 
 package minegame159.meteorclient.utils.render;
 
-import minegame159.meteorclient.mixin.ShaderEffectAccessor;
+import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
+import minegame159.meteorclient.renderer.PostProcessRenderer;
+import minegame159.meteorclient.renderer.Shader;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.render.ESP;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
-import net.minecraft.client.gl.ShaderEffect;
+import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.OutlineVertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
-import net.minecraft.util.Identifier;
-
-import java.io.IOException;
+import org.lwjgl.opengl.GL32C;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
@@ -24,23 +26,14 @@ public class Outlines {
 
     public static Framebuffer outlinesFbo;
     public static OutlineVertexConsumerProvider vertexConsumerProvider;
-    private static ShaderEffect outlinesShader;
+    private static Shader outlinesShader;
 
     public static void load() {
-        try {
-            if (outlinesShader != null) {
-                outlinesShader.close();
-            }
-
-            loadingOutlineShader = true;
-            outlinesShader = new ShaderEffect(mc.getTextureManager(), mc.getResourceManager(), mc.getFramebuffer(), new Identifier("meteor-client", "shaders/post/my_entity_outline.json"));
-            outlinesShader.setupDimensions(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
-            outlinesFbo = outlinesShader.getSecondaryTarget("final");
-            vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
-            loadingOutlineShader = false;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        loadingOutlineShader = true;
+        outlinesShader = new Shader("outline.vert", "outline.frag");
+        outlinesFbo = new SimpleFramebuffer(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false, false);
+        vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
+        loadingOutlineShader = false;
     }
 
     public static void beginRender() {
@@ -48,7 +41,7 @@ public class Outlines {
         mc.getFramebuffer().beginWrite(false);
     }
 
-    public static void endRender(float tickDelta) {
+    public static void endRender() {
         WorldRenderer worldRenderer = mc.worldRenderer;
         WorldRendererAccessor wra = (WorldRendererAccessor) worldRenderer;
 
@@ -57,19 +50,25 @@ public class Outlines {
         vertexConsumerProvider.draw();
         wra.setEntityOutlinesFramebuffer(fbo);
 
-        outlinesShader.render(tickDelta);
-        mc.getFramebuffer().beginWrite(false);
-    }
+        ESP esp = Modules.get().get(ESP.class);
 
-    public static void renderFbo() {
-        outlinesFbo.draw(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false);
+        mc.getFramebuffer().beginWrite(false);
+
+        GlStateManager._activeTexture(GL32C.GL_TEXTURE0);
+        GlStateManager._bindTexture(outlinesFbo.getColorAttachment());
+
+        outlinesShader.bind();
+        outlinesShader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
+        outlinesShader.set("u_Texture", 0);
+        outlinesShader.set("u_Width", (double) esp.outlineWidth.get());
+        outlinesShader.set("u_FillOpacity", esp.fillOpacity.get().floatValue() / 255.0);
+        outlinesShader.set("u_ShapeMode", (double) esp.shapeMode.get().ordinal());
+        PostProcessRenderer.render();
+
+        GlStateManager._bindTexture(0);
     }
 
     public static void onResized(int width, int height) {
-        if (outlinesShader != null) outlinesShader.setupDimensions(width, height);
-    }
-
-    public static void setUniform(String name, float value) {
-        ((ShaderEffectAccessor) outlinesShader).getPasses().get(0).getProgram().getUniformByName(name).set(value);
+        if (outlinesFbo != null) outlinesFbo.resize(width, height, false);
     }
 }

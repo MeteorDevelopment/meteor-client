@@ -3,13 +3,13 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.rendering;
+package minegame159.meteorclient.renderer;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
-import minegame159.meteorclient.rendering.gl.Shader;
 import net.minecraft.client.gl.Framebuffer;
+import org.lwjgl.opengl.GL32C;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
@@ -20,8 +20,8 @@ public class Blur {
     private static Shader shaderDown, shaderUp;
 
     public static void init() {
-        shaderDown = new Shader("shaders/simple.vert", "shaders/kawase_down.frag");
-        shaderUp = new Shader("shaders/simple.vert", "shaders/kawase_up.frag");
+        shaderDown = new Shader("simple.vert", "kawase_down.frag");
+        shaderUp = new Shader("simple.vert", "kawase_up.frag");
     }
 
     public static void render() {
@@ -30,39 +30,33 @@ public class Blur {
         Framebuffer fbo = mc.getFramebuffer();
 
         // Bind framebuffer texture and begin post process quad rendering
-        //GlStateManager.activeTexture(GL_TEXTURE0);
-        //GlStateManager.bindTexture(fbo.getColorAttachment());
-
-        PostProcessRenderer.begin();
+        GlStateManager._activeTexture(GL32C.GL_TEXTURE0);
+        GlStateManager._bindTexture(fbo.getColorAttachment());
 
         // Apply kawase down
         shaderDown.bind();
         shaderDown.set("u_Texture", 0);
         shaderDown.set("u_Size", fbo.textureWidth, fbo.textureHeight);
-        shaderDown.set("u_Offset", (float) OFFSET, (float) OFFSET);
-        shaderDown.set("u_HalfPixel", 0.5f / fbo.textureWidth, 0.5f / fbo.textureHeight);
+        shaderDown.set("u_Offset", OFFSET, OFFSET);
+        shaderDown.set("u_HalfPixel", 0.5 / fbo.textureWidth, 0.5 / fbo.textureHeight);
 
-        for (int i = 0; i < ITERATIONS; i++) PostProcessRenderer.renderMesh();
+        for (int i = 0; i < ITERATIONS; i++) PostProcessRenderer.render();
 
         // Apply kawase up
         shaderUp.bind();
         shaderUp.set("u_Texture", 0);
         shaderUp.set("u_Size", fbo.textureWidth, fbo.textureHeight);
-        shaderUp.set("u_Offset", (float) OFFSET, (float) OFFSET);
-        shaderUp.set("u_HalfPixel", 0.5f / fbo.textureWidth, 0.5f / fbo.textureHeight);
+        shaderUp.set("u_Offset", OFFSET, OFFSET);
+        shaderUp.set("u_HalfPixel", 0.5 / fbo.textureWidth, 0.5 / fbo.textureHeight);
         shaderUp.set("u_Alpha", 1f);
 
         for (int i = 0; i < ITERATIONS; i++) {
             if (i == ITERATIONS - 1) shaderUp.set("u_Alpha", (float) ((WidgetScreen) mc.currentScreen).animProgress);
 
-            PostProcessRenderer.renderMesh();
+            PostProcessRenderer.render();
         }
 
-        shaderUp.unbind();
-
         // Unbind framebuffer texture and end post process quad rendering
-        //GlStateManager.bindTexture(0);
-
-        PostProcessRenderer.end();
+        GlStateManager._bindTexture(0);
     }
 }

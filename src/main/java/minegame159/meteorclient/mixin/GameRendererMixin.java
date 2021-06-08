@@ -8,8 +8,9 @@ package minegame159.meteorclient.mixin;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.RenderEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.renderer.Blur;
+import minegame159.meteorclient.renderer.Renderer3D;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.player.LiquidInteract;
 import minegame159.meteorclient.systems.modules.player.NoMiningTrace;
@@ -31,6 +32,7 @@ import net.minecraft.util.math.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -45,7 +47,8 @@ public abstract class GameRendererMixin {
 
     @Shadow public abstract void reset();
 
-    private boolean a = false;
+    @Unique private boolean a = false;
+    @Unique private Renderer3D renderer;
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRenderHead(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
@@ -65,19 +68,27 @@ public abstract class GameRendererMixin {
     }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack, double d, Matrix4f matrix4f) {
+    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack, double d, Matrix4f matrix4f) {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().push("meteor-client_render");
 
-        RenderEvent event = RenderEvent.get(matrix, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
+        if (renderer == null) renderer = new Renderer3D();
+        RenderEvent event = RenderEvent.get(matrices, renderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
-        Renderer.begin(event);
-        NametagUtils.onRender(matrix, matrix4f);
+        renderer.begin();
+        NametagUtils.onRender(matrices, matrix4f);
         MeteorClient.EVENT_BUS.post(event);
-        Renderer.end();
+        renderer.end();
+
+        renderer.render(matrices);
 
         client.getProfiler().pop();
+    }
+
+    @Inject(method = "renderWorld", at = @At("TAIL"))
+    private void onRenderWorldTail(CallbackInfo info) {
+        Blur.render();
     }
 
     @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)

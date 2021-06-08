@@ -2,6 +2,7 @@ package minegame159.meteorclient.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.mixin.BufferRendererAccessor;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
@@ -31,6 +32,7 @@ public class Mesh {
     public double alpha = 1;
 
     private final DrawMode drawMode;
+    private final int primitiveVerticesSize;
 
     private final int vao, vbo, ibo;
 
@@ -39,10 +41,14 @@ public class Mesh {
     private int vertexI, indicesCount;
 
     public Mesh(DrawMode drawMode, Attrib... attributes) {
-        this.drawMode = drawMode;
+        int stride = 0;
+        for (Attrib attribute : attributes) stride += attribute.size * 4;
 
-        vertices = BufferUtils.createFloatBuffer(2048 * 32);
-        indices = BufferUtils.createIntBuffer(2048 * 32);
+        this.drawMode = drawMode;
+        this.primitiveVerticesSize = stride / 4 * drawMode.indicesCount;
+
+        vertices = BufferUtils.createFloatBuffer(primitiveVerticesSize * 256);
+        indices = BufferUtils.createIntBuffer(drawMode.indicesCount * 512);
 
         vao = glGenVertexArrays();
         glBindVertexArray(vao);
@@ -52,9 +58,6 @@ public class Mesh {
 
         ibo = glGenBuffers();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-
-        int stride = 0;
-        for (Attrib attribute : attributes) stride += attribute.size * 4;
 
         int offset = 0;
         for (int i = 0; i < attributes.length; i++) {
@@ -70,7 +73,9 @@ public class Mesh {
         glBindBuffer(GL_ARRAY_BUFFER, 0);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        resetBufferBuilderBoundBuffers();
+        BufferRendererAccessor.setCurrentVertexArray(0);
+        BufferRendererAccessor.setCurrentVertexBuffer(0);
+        BufferRendererAccessor.setCurrentElementBuffer(0);
     }
 
     public void begin() {
@@ -114,6 +119,7 @@ public class Mesh {
         indices.put(i2);
 
         indicesCount += 2;
+        growIfNeeded();
     }
 
     public void quad(int i1, int i2, int i3, int i4) {
@@ -126,6 +132,35 @@ public class Mesh {
         indices.put(i1);
 
         indicesCount += 6;
+        growIfNeeded();
+    }
+
+    private void growIfNeeded() {
+        // Vertices
+        if ((vertexI + 1) * primitiveVerticesSize >= vertices.capacity()) {
+            int newSize = vertices.capacity() * 2;
+            if (newSize % primitiveVerticesSize != 0) newSize += newSize % primitiveVerticesSize;
+
+            FloatBuffer newVertices = BufferUtils.createFloatBuffer(newSize);
+
+            vertices.flip();
+            newVertices.put(vertices);
+
+            vertices = newVertices;
+        }
+
+        // Indices
+        if (indicesCount >= indices.capacity()) {
+            int newSize = indices.capacity() * 2;
+            if (newSize % drawMode.indicesCount != 0) newSize += newSize % drawMode.indicesCount;
+
+            IntBuffer newIndices = BufferUtils.createIntBuffer(newSize);
+
+            indices.flip();
+            newIndices.put(indices);
+
+            indices = newIndices;
+        }
     }
 
     public void end() {
@@ -139,24 +174,29 @@ public class Mesh {
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        resetBufferBuilderBoundBuffers();
+        BufferRendererAccessor.setCurrentVertexBuffer(0);
+        BufferRendererAccessor.setCurrentElementBuffer(0);
     }
 
-    public void render(MatrixStack matrices) {
+    public void render(MatrixStack matrices, boolean rendering3D) {
         if (indicesCount > 0) {
             // Setup opengl state and matrix stack
             if (!depthTest) glDisable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glDisable(GL_CULL_FACE);
             glEnable(GL_LINE_SMOOTH);
             glLineWidth(1);
 
             MatrixStack matrixStack = RenderSystem.getModelViewStack();
-            matrixStack.push();
 
-            Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
-            matrixStack.method_34425(matrices.peek().getModel());
-            matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            if (rendering3D) {
+                matrixStack.push();
+
+                Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
+                matrixStack.method_34425(matrices.peek().getModel());
+                matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+            }
 
             // Render
             beforeRender();
@@ -170,19 +210,21 @@ public class Mesh {
             glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-            matrixStack.pop();
+            BufferRendererAccessor.setCurrentVertexArray(0);
+            BufferRendererAccessor.setCurrentElementBuffer(0);
+
+            if (rendering3D) matrixStack.pop();
 
             glDisable(GL_LINE_SMOOTH);
+            glEnable(GL_CULL_FACE);
             glDisable(GL_BLEND);
             if (!depthTest) glEnable(GL_DEPTH_TEST);
         }
     }
 
-    protected void beforeRender() {}
-
-    private static void resetBufferBuilderBoundBuffers() {
-        BufferRendererAccessor.setCurrentVertexArray(0);
-        BufferRendererAccessor.setCurrentVertexBuffer(0);
-        BufferRendererAccessor.setCurrentElementBuffer(0);
+    public void render(MatrixStack matrices) {
+        render(matrices, Utils.rendering3D);
     }
+
+    protected void beforeRender() {}
 }

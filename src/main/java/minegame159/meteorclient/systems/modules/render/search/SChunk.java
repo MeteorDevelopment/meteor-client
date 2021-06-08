@@ -7,6 +7,7 @@ package minegame159.meteorclient.systems.modules.render.search;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import minegame159.meteorclient.events.render.RenderEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -70,8 +71,8 @@ public class SChunk {
         return x > mc.player.getChunkPos().x + viewDist || x < mc.player.getChunkPos().x - viewDist || z > mc.player.getChunkPos().z + viewDist || z < mc.player.getChunkPos().z - viewDist;
     }
 
-    public void render() {
-        for (SBlock block : blocks.values()) block.render();
+    public void render(RenderEvent event) {
+        for (SBlock block : blocks.values()) block.render(event);
     }
 
 
