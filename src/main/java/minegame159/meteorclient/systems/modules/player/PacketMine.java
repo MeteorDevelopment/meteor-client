@@ -150,7 +150,7 @@ public class PacketMine extends Module {
     public void onDeactivate() {
         for (MyBlock block : blocks) blockPool.free(block);
         blocks.clear();
-        if (shouldUpdateSlot){
+        if (shouldUpdateSlot) {
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(prevSlot));
             shouldUpdateSlot = false;
         }
