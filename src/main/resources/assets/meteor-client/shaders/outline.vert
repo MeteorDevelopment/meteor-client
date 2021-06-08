@@ -1,6 +1,6 @@
-#version 150 core
+#version 330 core
 
-in vec4 pos;
+layout (location = 0) in vec4 pos;
 
 uniform vec2 u_Size;
 

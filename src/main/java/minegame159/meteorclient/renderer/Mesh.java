@@ -63,8 +63,8 @@ public class Mesh {
         for (int i = 0; i < attributes.length; i++) {
             int attribute = attributes[i].size;
 
-            glVertexAttribPointer(i, attribute, GL_FLOAT, false, stride, offset);
             glEnableVertexAttribArray(i);
+            glVertexAttribPointer(i, attribute, GL_FLOAT, false, stride, offset);
 
             offset += attribute * 4;
         }
@@ -166,12 +166,12 @@ public class Mesh {
     public void end() {
         vertices.flip();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         indices.flip();
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         BufferRendererAccessor.setCurrentVertexBuffer(0);
@@ -207,11 +207,11 @@ public class Mesh {
             glDrawElements(drawMode.getGL(), indicesCount, GL_UNSIGNED_INT, 0);
 
             // Cleanup opengl state and matrix stack
-            glBindVertexArray(0);
             glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            glBindVertexArray(0);
 
-            BufferRendererAccessor.setCurrentVertexArray(0);
             BufferRendererAccessor.setCurrentElementBuffer(0);
+            BufferRendererAccessor.setCurrentVertexArray(0);
 
             if (rendering3D) matrixStack.pop();
 

@@ -91,6 +91,8 @@ public class MeteorClient implements ClientModInitializer {
             }
         });
 
+        Shaders.init();
+
         Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
         Capes.init();
@@ -106,8 +108,6 @@ public class MeteorClient implements ClientModInitializer {
         Tabs.init();
         GuiThemes.init();
         Fonts.init();
-
-        Shaders.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
