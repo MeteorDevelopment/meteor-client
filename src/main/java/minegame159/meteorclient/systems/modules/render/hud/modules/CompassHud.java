@@ -15,7 +15,6 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.util.math.MathHelper;
 
 public class CompassHud extends HudElement {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
@@ -102,5 +101,4 @@ public class CompassHud extends HudElement {
     public enum Mode {
         Axis, Pole
     }
-
 }

@@ -5,15 +5,13 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -98,9 +96,9 @@ public class PlayerModelHud extends HudElement {
         double y = box.getY();
 
         if (background.get()) {
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quad(x, y, box.width, box.height, backgroundColor.get());
-            Renderer.NORMAL.end();
+            Renderer2D.COLOR.begin();
+            Renderer2D.COLOR.quad(x, y, box.width, box.height, backgroundColor.get());
+            Renderer2D.COLOR.render(null);
         }
 
         PlayerEntity player = mc.player;

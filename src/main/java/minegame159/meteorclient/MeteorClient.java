@@ -18,6 +18,7 @@ import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.Tabs;
 import minegame159.meteorclient.renderer.Blur;
 import minegame159.meteorclient.renderer.PostProcessRenderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.renderer.Shaders;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
@@ -92,6 +93,7 @@ public class MeteorClient implements ClientModInitializer {
         });
 
         Shaders.init();
+        Renderer2D.init();
 
         Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
