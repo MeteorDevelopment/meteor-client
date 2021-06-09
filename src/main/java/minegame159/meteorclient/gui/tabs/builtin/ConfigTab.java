@@ -74,9 +74,9 @@ public class ConfigTab extends Tab {
     );
 
     public static final Setting<Integer> rotationHoldTicks = sgGeneral.add(new IntSetting.Builder()
-            .name("rotation-hold-ticks")
+            .name("rotation-hold")
             .description("Hold long to hold server side rotation when not sending any packets.")
-            .defaultValue(9)
+            .defaultValue(4)
             .onChanged(integer -> Config.get().rotationHoldTicks = integer)
             .onModuleActivated(integerSetting -> integerSetting.set(Config.get().rotationHoldTicks))
             .build()
