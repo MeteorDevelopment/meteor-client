@@ -7,7 +7,7 @@ package minegame159.meteorclient.systems.modules.player;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.rendering.Renderer;
@@ -130,7 +130,7 @@ public class InstaMine extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (!render.get() || !shouldMine()) return;
         Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, blockPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }

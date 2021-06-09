@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems.modules.render;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.rendering.DrawMode;
@@ -185,7 +185,7 @@ public class LogoutSpots extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         for (Entry player : players) player.render(event);
 
         RenderSystem.disableDepthTest();
@@ -226,7 +226,7 @@ public class LogoutSpots extends Module {
             healthText = " " + health;
         }
 
-        public void render(RenderEvent event) {
+        public void render(Render3DEvent event) {
             Camera camera = mc.gameRenderer.getCamera();
 
             // Compute scale

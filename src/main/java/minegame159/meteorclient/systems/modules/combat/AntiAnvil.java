@@ -24,15 +24,15 @@ public class AntiAnvil extends Module {
     private final Setting<Boolean> swing = sgGeneral.add(new BoolSetting.Builder()
         .name("swing")
         .description("Swings your hand client-side when placing.")
-            .defaultValue(true)
-            .build()
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Makes you rotate when placing.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Makes you rotate when placing.")
+        .defaultValue(true)
+        .build()
     );
 
     public AntiAnvil() {

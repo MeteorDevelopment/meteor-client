@@ -114,4 +114,10 @@ public class EntityUtils {
         posList.sort(Comparator.comparingDouble(PlayerUtils::distanceTo));
         return posList.isEmpty() ? null : posList.get(0);
     }
+
+    public static String getName(Entity entity) {
+        if (entity == null) return null;
+        if (entity instanceof PlayerEntity) return entity.getEntityName();
+        return entity.getType().getName().getString();
+    }
 }

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
@@ -38,7 +38,7 @@ public class CustomFOV extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (fovSetting.get() != mc.options.fov) {
             mc.options.fov = fovSetting.get();
         }

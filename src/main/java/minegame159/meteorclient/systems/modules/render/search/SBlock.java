@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.render.search;
 
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.render.color.Color;
@@ -164,7 +164,7 @@ public class SBlock {
         return state.getBlock() == mc.world.getBlockState(blockPos).getBlock();
     }
 
-    public void render(RenderEvent event) {
+    public void render(Render3DEvent event) {
         double x1 = x;
         double y1 = y;
         double z1 = z;

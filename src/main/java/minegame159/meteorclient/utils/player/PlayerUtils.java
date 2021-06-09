@@ -273,6 +273,10 @@ public class PlayerUtils {
         return mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
+    public static boolean isAlive() {
+        return mc.player.isAlive() && !mc.player.isDead();
+    }
+
     public static int getPing() {
         if (mc.getNetworkHandler() == null) return 0;
 

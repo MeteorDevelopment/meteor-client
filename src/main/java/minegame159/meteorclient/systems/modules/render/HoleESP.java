@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixin.AbstractBlockAccessor;
 import minegame159.meteorclient.renderer.Renderer3D;
@@ -221,7 +221,7 @@ public class HoleESP extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         for (HoleESP.Hole hole : holes) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
     }
 

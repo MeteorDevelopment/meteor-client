@@ -5,19 +5,20 @@
 
 package minegame159.meteorclient.rendering;
 
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.BlockPos;
 
+@Deprecated
 public class Renderer {
     public static final MeshBuilder NORMAL = new MeshBuilder();
     public static final MeshBuilder LINES = new MeshBuilder();
 
     private static boolean building;
 
-    public static void begin(RenderEvent event) {
+    public static void begin(Render3DEvent event) {
         if (!building) {
             NORMAL.begin(event, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
             LINES.begin(event, DrawMode.Lines, VertexFormats.POSITION_COLOR);

@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems.modules.render.search;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.BlockUpdateEvent;
 import minegame159.meteorclient.events.world.ChunkDataEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -233,7 +233,7 @@ public class Search extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         synchronized (chunks) {
             for (Iterator<SChunk> it = chunks.values().iterator(); it.hasNext();) {
                 SChunk chunk = it.next();

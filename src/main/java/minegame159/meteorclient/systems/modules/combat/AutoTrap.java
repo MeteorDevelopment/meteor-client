@@ -6,17 +6,18 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
-import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
+import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,107 +28,105 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoTrap extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("target-range")
-            .description("The range players can be targeted.")
-            .defaultValue(4)
-            .build()
+        .name("target-range")
+        .description("The range players can be targeted.")
+        .defaultValue(4)
+        .build()
     );
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
-            .name("target-priority")
-            .description("How to select the player to target.")
-            .defaultValue(SortPriority.LowestHealth)
-            .build()
+        .name("target-priority")
+        .description("How to select the player to target.")
+        .defaultValue(SortPriority.LowestHealth)
+        .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("place-delay")
-            .description("How many ticks between block placements.")
-            .defaultValue(1)
-            .build()
+        .name("place-delay")
+        .description("How many ticks between block placements.")
+        .defaultValue(1)
+        .build()
     );
 
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
-            .name("top-blocks")
-            .description("Which blocks to place on the top half of the target.")
-            .defaultValue(TopMode.Full)
-            .build()
+        .name("top-blocks")
+        .description("Which blocks to place on the top half of the target.")
+        .defaultValue(TopMode.Full)
+        .build()
     );
 
     private final Setting<BottomMode> bottomPlacement = sgGeneral.add(new EnumSetting.Builder<BottomMode>()
-            .name("bottom-blocks")
-            .description("Which blocks to place on the bottom half of the target.")
-            .defaultValue(BottomMode.Platform)
-            .build()
+        .name("bottom-blocks")
+        .description("Which blocks to place on the bottom half of the target.")
+        .defaultValue(BottomMode.Platform)
+        .build()
     );
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
-            .description("Turns off after placing all blocks.")
-            .defaultValue(true)
-            .build()
+        .name("self-toggle")
+        .description("Turns off after placing all blocks.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates towards blocks when placing.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Rotates towards blocks when placing.")
+        .defaultValue(true)
+        .build()
     );
 
     // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-            .name("render")
-            .description("Renders an overlay where blocks will be placed.")
-            .defaultValue(true)
-            .build()
+        .name("render")
+        .description("Renders an overlay where blocks will be placed.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color of the target block rendering.")
-            .defaultValue(new SettingColor(197, 137, 232, 10))
-            .build()
+        .name("side-color")
+        .description("The side color of the target block rendering.")
+        .defaultValue(new SettingColor(197, 137, 232, 10))
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color of the target block rendering.")
-            .defaultValue(new SettingColor(197, 137, 232))
-            .build()
+        .name("line-color")
+        .description("The line color of the target block rendering.")
+        .defaultValue(new SettingColor(197, 137, 232))
+        .build()
     );
 
     private final Setting<SettingColor> nextSideColor = sgRender.add(new ColorSetting.Builder()
-            .name("next-side-color")
-            .description("The side color of the next block to be placed.")
-            .defaultValue(new SettingColor(227, 196, 245, 10))
-            .build()
+        .name("next-side-color")
+        .description("The side color of the next block to be placed.")
+        .defaultValue(new SettingColor(227, 196, 245, 10))
+        .build()
     );
 
     private final Setting<SettingColor> nextLineColor = sgRender.add(new ColorSetting.Builder()
-            .name("next-line-color")
-            .description("The line color of the next block to be placed.")
-            .defaultValue(new SettingColor(227, 196, 245))
-            .build()
+        .name("next-line-color")
+        .description("The line color of the next block to be placed.")
+        .defaultValue(new SettingColor(227, 196, 245))
+        .build()
     );
-
-    private PlayerEntity target;
     private final List<BlockPos> placePositions = new ArrayList<>();
+    private PlayerEntity target;
     private boolean placed;
     private int timer;
 
@@ -164,8 +163,7 @@ public class AutoTrap extends Module {
             return;
         }
 
-        if (TargetUtils.isBadTarget(target, range.get()))
-            target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+        if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
         if (TargetUtils.isBadTarget(target, range.get())) return;
 
         fillPlaceArray(target);
@@ -185,15 +183,16 @@ public class AutoTrap extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
 
         for (BlockPos pos : placePositions) {
-            if (pos.equals(placePositions.get(placePositions.size() - 1))) {
-                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, nextSideColor.get(), nextLineColor.get(), shapeMode.get(), 0);
-            } else {
-                Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            }
+            boolean isFirst = pos.equals(placePositions.get(placePositions.size() - 1));
+
+            Color side = isFirst ? nextSideColor.get() : sideColor.get();
+            Color line = isFirst ? nextSideColor.get() : sideColor.get();
+
+            event.renderer.box(pos, side, line, shapeMode.get(), 0);
         }
     }
 
@@ -202,39 +201,37 @@ public class AutoTrap extends Module {
         BlockPos targetPos = target.getBlockPos();
 
         switch (topPlacement.get()) {
-            case Full:
+            case Full -> {
                 add(targetPos.add(0, 2, 0));
                 add(targetPos.add(1, 1, 0));
                 add(targetPos.add(-1, 1, 0));
                 add(targetPos.add(0, 1, 1));
                 add(targetPos.add(0, 1, -1));
-                break;
-            case Face:
+            }
+            case Face -> {
                 add(targetPos.add(1, 1, 0));
                 add(targetPos.add(-1, 1, 0));
                 add(targetPos.add(0, 1, 1));
                 add(targetPos.add(0, 1, -1));
-                break;
-            case Top:
-                add(targetPos.add(0, 2, 0));
+            }
+            case Top -> add(targetPos.add(0, 2, 0));
         }
 
         switch (bottomPlacement.get()) {
-            case Platform:
+            case Platform -> {
                 add(targetPos.add(0, -1, 0));
                 add(targetPos.add(1, -1, 0));
                 add(targetPos.add(0, -1, 0));
                 add(targetPos.add(0, -1, 1));
                 add(targetPos.add(0, -1, -1));
-                break;
-            case Full:
+            }
+            case Full -> {
                 add(targetPos.add(1, 0, 0));
                 add(targetPos.add(-1, 0, 0));
                 add(targetPos.add(0, 0, -1));
                 add(targetPos.add(0, 0, 1));
-                break;
-            case Single:
-                add(targetPos.add(0, -1, 0));
+            }
+            case Single -> add(targetPos.add(0, -1, 0));
         }
     }
 
@@ -245,8 +242,7 @@ public class AutoTrap extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null) return target.getEntityName();
-        return null;
+        return EntityUtils.getName(target);
     }
 
     public enum TopMode {

@@ -10,7 +10,7 @@ import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.rendering.Matrices;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.systems.System;
@@ -125,7 +125,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (!Modules.get().isActive(WaypointsModule.class)) return;
 
         for (Waypoint waypoint : this) {

@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.ColorSetting;
@@ -66,7 +66,7 @@ public class CityESP extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (target == null) return;
 
         event.renderer.box(target, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
