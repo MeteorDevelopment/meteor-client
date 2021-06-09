@@ -1,11 +1,13 @@
 
-<h1 style="text-align: center; font-size: xxx-large">
-<img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" style="width: 30%"/><br>
-Meteor Client<br>
-<p style="font-size: medium; font-weight: lighter; color: lightgray;">Minecraft Fabric Utility Mod for the latest Minecraft release</p>
-</h1>
+<p align="center">
+<img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="20%"/>
+</p>
 
-<div style="text-align: center;">
+<h1 align="center">Meteor Client</h1>
+
+<p align="center">Minecraft Fabric Utility Mod for the latest Minecraft release</p>
+
+<div align="center">
     <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client" alt="GitHub commit activity"/>
     <br>
@@ -17,7 +19,6 @@ Meteor Client<br>
     <img src="https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=shield" alt="CircleCI"/>
     <br><br>
     <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
-    
 </div>
 
 ## Usage
