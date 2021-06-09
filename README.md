@@ -1,15 +1,24 @@
-# Meteor Client
-![Discord](https://img.shields.io/discord/689197705683140636?logo=discord)
-[![CodeFactor](https://www.codefactor.io/repository/github/meteordevelopment/meteor-client/badge)](https://www.codefactor.io/repository/github/meteordevelopment/meteor-client)
-![GitHub last commit](https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client)
-![GitHub commit activity](https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client)
-![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/MeteorDevelopment/meteor-client)
-![GitHub lines of code](https://tokei.rs/b1/github/MeteorDevelopment/meteor-client)
-![GitHub contributors](https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client)
-![CircleCI](https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=svg)
 
-Minecraft fabric utility mod for the latest Minecraft version.  
-Join our [Discord](https://discord.gg/bBGQZvd).
+<h1 style="text-align: center; font-size: xxx-large">
+<img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" style="width: 30%"/><br>
+Meteor Client<br>
+<p style="font-size: medium; font-weight: lighter; color: lightgray;">Minecraft Fabric Utility Mod for the latest Minecraft release</p>
+</h1>
+
+<div style="text-align: center;">
+    <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
+    <img src="https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client" alt="GitHub commit activity"/>
+    <br>
+    <img src="https://img.shields.io/github/languages/code-size/MeteorDevelopment/meteor-client" alt="GitHub code size in bytes"/>
+    <img src="https://tokei.rs/b1/github/MeteorDevelopment/meteor-client" alt="GitHub lines of code"/>
+    <img src="https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client" alt="GitHub contributors"/>
+    <br>
+    <img src="https://www.codefactor.io/repository/github/meteordevelopment/meteor-client/badge" alt="CodeFactor"/>
+    <img src="https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=shield" alt="CircleCI"/>
+    <br><br>
+    <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
+    
+</div>
 
 ## Usage
 
@@ -21,7 +30,7 @@ Join our [Discord](https://discord.gg/bBGQZvd).
 Follow guide on the [wiki](https://github.com/MeteorDevelopment/meteor-client/wiki/Installation).
 
 ## Contributions
-We will review all reasonable pull requests but we request that you maintain our code style as well as you can, as well as adding the license header to all files you contribute.
+We will review all reasonable pull requests, but we request that you maintain our code style as well as you can as well as adding the license header to all files you contribute.
 
 ## Bugs and Suggestions
 Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided. Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
@@ -43,7 +52,7 @@ The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/F
 This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). 
 
 If you use **ANY** code from the source:
-- You must disclose the source code of your modified work and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source (or obfuscated) application.
+- You must disclose the source code of your modified work, and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source and/or obfuscated application.
 - Your application must also be licensed under the same license.
 
 
