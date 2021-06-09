@@ -254,6 +254,10 @@ public abstract class WidgetScreen extends Screen {
 
         Utils.scaledProjection();
 
+        runAfterRenderTasks();
+    }
+
+    protected void runAfterRenderTasks() {
         if (taskAfterRender != null) {
             taskAfterRender.run();
             taskAfterRender = null;

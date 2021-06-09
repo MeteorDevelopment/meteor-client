@@ -14,6 +14,7 @@ import minegame159.meteorclient.systems.modules.render.Freecam;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
@@ -22,27 +23,27 @@ import net.minecraft.util.math.Vec3d;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RenderUtils {
-
-    //Items
-    public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
-        // TODO: Fix
-        //RenderSystem.disableLighting();
-        //RenderSystem.disableDepthTest();
-        //DiffuseLighting.enable();
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, null);
-        //DiffuseLighting.disable();
-        RenderSystem.enableDepthTest();
-    }
-
+    // Items
     public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
-        //RenderSystem.pushMatrix();
-        //RenderSystem.scaled(scale, scale, 1);
-        drawItem(itemStack, (int) (x / scale), (int) (y / scale), overlay);
-        //RenderSystem.popMatrix();
+        //RenderSystem.disableDepthTest();
+
+        MatrixStack matrices = RenderSystem.getModelViewStack();
+
+        matrices.push();
+        matrices.scale((float) scale, (float) scale, 1);
+
+        mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / scale), (int) (y / scale));
+        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
+
+        matrices.pop();
+        //RenderSystem.enableDepthTest();
     }
 
-    //Tracers
+    public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
+        drawItem(itemStack, x, y, 1, overlay);
+    }
+
+    // Tracers
     public static Vec3d getCameraVector() {
         boolean dist = Modules.get().isActive(Freecam.class) || Modules.get().get(FreeLook.class).playerMode();
         return new Vec3d(0, 0, dist ? 1 : 75)

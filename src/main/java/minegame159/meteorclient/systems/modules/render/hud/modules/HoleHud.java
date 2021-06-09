@@ -6,8 +6,7 @@
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.settings.BlockListSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -19,7 +18,6 @@ import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
@@ -27,7 +25,6 @@ import java.util.Arrays;
 import java.util.List;
 
 public class HoleHud extends HudElement {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
@@ -62,10 +59,14 @@ public class HoleHud extends HudElement {
         double x = box.getX();
         double y = box.getY();
 
+        Renderer2D.COLOR.begin();
+
         drawBlock(get(Facing.Left), x, y + 16 * scale.get()); // Left
         drawBlock(get(Facing.Front), x + 16 * scale.get(), y); // Front
         drawBlock(get(Facing.Right), x + 32 * scale.get(), y + 16 * scale.get()); // Right
         drawBlock(get(Facing.Back), x + 16 * scale.get(), y + 32 * scale.get()); // Back
+
+        Renderer2D.COLOR.render(null);
     }
 
     private Direction get(Facing dir) {
@@ -89,13 +90,11 @@ public class HoleHud extends HudElement {
     }
 
     private void renderBreaking(double x, double y, double percent) {
-        Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        Renderer.NORMAL.quad(x, y, (16 * percent) * scale.get(), 16 * scale.get(), BG_COLOR);
-        Renderer.NORMAL.quad(x, y, 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        Renderer.NORMAL.quad(x, y + 15 * scale.get(), 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        Renderer.NORMAL.quad(x, y, 1 * scale.get(), 16 * scale.get(),OL_COLOR);
-        Renderer.NORMAL.quad(x + 15 * scale.get(), y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
-        Renderer.NORMAL.end();
+        Renderer2D.COLOR.quad(x, y, (16 * percent) * scale.get(), 16 * scale.get(), BG_COLOR);
+        Renderer2D.COLOR.quad(x, y, 16 * scale.get(), 1 * scale.get(), OL_COLOR);
+        Renderer2D.COLOR.quad(x, y + 15 * scale.get(), 16 * scale.get(), 1 * scale.get(), OL_COLOR);
+        Renderer2D.COLOR.quad(x, y, 1 * scale.get(), 16 * scale.get(),OL_COLOR);
+        Renderer2D.COLOR.quad(x + 15 * scale.get(), y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
     }
 
     private enum Facing {

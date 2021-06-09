@@ -40,6 +40,8 @@ public class Mesh {
     private IntBuffer indices;
     private int vertexI, indicesCount;
 
+    private boolean building;
+
     public Mesh(DrawMode drawMode, Attrib... attributes) {
         int stride = 0;
         for (Attrib attribute : attributes) stride += attribute.size * 4;
@@ -79,11 +81,15 @@ public class Mesh {
     }
 
     public void begin() {
+        if (building) throw new IllegalStateException("Mesh.end() called while already building.");
+
         vertices.clear();
         indices.clear();
 
         vertexI = 0;
         indicesCount = 0;
+
+        building = true;
     }
 
     public Mesh vec3(double x, double y, double z) {
@@ -164,6 +170,8 @@ public class Mesh {
     }
 
     public void end() {
+        if (!building) throw new IllegalStateException("Mesh.end() called while not building.");
+
         vertices.flip();
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
@@ -176,9 +184,13 @@ public class Mesh {
 
         BufferRendererAccessor.setCurrentVertexBuffer(0);
         BufferRendererAccessor.setCurrentElementBuffer(0);
+
+        building = false;
     }
 
     public void render(MatrixStack matrices, boolean rendering3D) {
+        if (building) end();
+
         if (indicesCount > 0) {
             // Setup opengl state and matrix stack
             if (!depthTest) glDisable(GL_DEPTH_TEST);
@@ -194,7 +206,7 @@ public class Mesh {
                 matrixStack.push();
 
                 Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
-                matrixStack.method_34425(matrices.peek().getModel());
+                if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
                 matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
             }
 

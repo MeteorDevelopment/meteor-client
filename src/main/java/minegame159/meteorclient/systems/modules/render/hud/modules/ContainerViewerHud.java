@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import minegame159.meteorclient.rendering.Matrices;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -14,10 +14,8 @@ import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.RenderUtils;
-import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.block.AbstractChestBlock;
 import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -72,7 +70,7 @@ public class ContainerViewerHud extends HudElement {
         for (int row = 0; row < 3; row++) {
             for (int i = 0; i < 9; i++) {
                 ItemStack stack = inventory[row * 9 + i];
-                if (stack == null) continue;
+                if (stack == null || stack.isEmpty()) continue;
 
                 RenderUtils.drawItem(stack, (int) (x + (8 + i * 18) * scale.get()), (int) (y + (7 + row * 18) * scale.get()), scale.get(), true);
             }
@@ -93,14 +91,10 @@ public class ContainerViewerHud extends HudElement {
     }
 
     private void drawBackground(int x, int y, ItemStack container) {
-        int w = (int) box.width;
-        int h = (int) box.height;
-
-        Color color = Utils.getShulkerColor(container);
-
-        // TODO: Fix
-        //RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
         mc.getTextureManager().bindTexture(TEXTURE);
-        DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
+
+        Renderer2D.TEXTURE.begin();
+        Renderer2D.TEXTURE.texQuad(x, y, box.width, box.height, Utils.getShulkerColor(container));
+        Renderer2D.TEXTURE.render(null);
     }
 }

@@ -21,7 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class TextRadarHud extends HudElement {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> distance = sgGeneral.add(new BoolSetting.Builder()
@@ -104,6 +103,7 @@ public class TextRadarHud extends HudElement {
         players.clear();
         players.addAll(mc.world.getPlayers());
         players.sort(Comparator.comparingDouble(e -> e.distanceTo(mc.getCameraEntity())));
+
         return players;
     }
 }

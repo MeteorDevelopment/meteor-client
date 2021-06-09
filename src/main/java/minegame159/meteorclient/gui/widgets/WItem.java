@@ -5,8 +5,12 @@
 
 package minegame159.meteorclient.gui.widgets;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class WItem extends WWidget {
     protected ItemStack itemStack;
@@ -26,18 +30,17 @@ public class WItem extends WWidget {
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         renderer.post(() -> {
-            // TODO: Fix
-            /*GlStateManager.enableTexture();
-            DiffuseLighting.enable();
-            GlStateManager.enableDepthTest();
-
             double s = theme.scale(2);
 
-            GlStateManager.pushMatrix();
-            GlStateManager.scaled(s, s, 1);
-            GlStateManager.translated(x / s, y / s, 0);
+            MatrixStack matrices = RenderSystem.getModelViewStack();
+
+            matrices.push();
+            matrices.scale((float) s, (float) s, 1);
+            matrices.translate(x / s, y / s, 0);
+
             mc.getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
-            GlStateManager.popMatrix();*/
+
+            matrices.pop();
         });
     }
 

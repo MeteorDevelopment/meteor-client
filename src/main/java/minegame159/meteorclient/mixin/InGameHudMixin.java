@@ -5,8 +5,12 @@
 
 package minegame159.meteorclient.mixin;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.NoRender;
+import minegame159.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.util.math.MatrixStack;
@@ -18,6 +22,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import static org.lwjgl.opengl.GL11C.GL_BLEND;
+import static org.lwjgl.opengl.GL11C.glEnable;
 
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
@@ -32,22 +39,15 @@ public abstract class InGameHudMixin {
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getArmorStack(I)Lnet/minecraft/item/ItemStack;"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
         client.getProfiler().push("meteor-client_render_2d");
-        // TODO: Fix
-        //RenderSystem.pushMatrix();
 
-        /*Utils.unscaledProjection();
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.lineWidth(1);
-        GL11.glEnable(GL11.GL_LINE_SMOOTH);
+        Utils.unscaledProjection();
 
         MeteorClient.EVENT_BUS.post(Render2DEvent.get(scaledWidth, scaledHeight, tickDelta));
 
-        GL11.glDisable(GL11.GL_LINE_SMOOTH);
-        RenderSystem.lineWidth(1);
-        Utils.scaledProjection();*/
+        Utils.scaledProjection();
+        RenderSystem.applyModelViewMatrix();
+        glEnable(GL_BLEND);
 
-        //RenderSystem.popMatrix();
         client.getProfiler().pop();
     }
 
