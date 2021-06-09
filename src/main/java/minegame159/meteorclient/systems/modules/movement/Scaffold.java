@@ -9,7 +9,6 @@ import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
-import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -179,7 +178,7 @@ public class Scaffold extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         renderBlocks.sort(Comparator.comparingInt(o -> -o.ticks));
-        renderBlocks.forEach(renderBlock -> renderBlock.render(sideColor.get(), lineColor.get(), shapeMode.get()));
+        renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeMode.get()));
     }
 
     // Rendering
@@ -204,14 +203,14 @@ public class Scaffold extends Module {
             ticks--;
         }
 
-        public void render(Color sides, Color lines, ShapeMode shapeMode) {
+        public void render(Render3DEvent event, Color sides, Color lines, ShapeMode shapeMode) {
             int preSideA = sides.a;
             int preLineA = lines.a;
 
             sides.a *= (double) ticks / 8;
             lines.a *= (double) ticks / 8;
 
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sides, lines, shapeMode, 0);
+            event.renderer.box(pos, sides, lines, shapeMode, 0);
 
             sides.a = preSideA;
             lines.a = preLineA;
