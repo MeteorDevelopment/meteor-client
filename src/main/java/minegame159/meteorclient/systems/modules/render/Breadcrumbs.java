@@ -98,7 +98,17 @@ public class Breadcrumbs extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        for (Section section : sections) section.render(event);
+        int iLast = -1;
+
+        for (Section section : sections) {
+            if (iLast == -1) {
+                iLast = event.renderer.lines.vec3(section.x1, section.y1, section.z1).color(color.get()).next();
+            }
+
+            int i = event.renderer.lines.vec3(section.x2, section.y2, section.z2).color(color.get()).next();
+            event.renderer.lines.line(iLast, i);
+            iLast = i;
+        }
     }
 
     private boolean isFarEnough(double x, double y, double z) {
