@@ -11,6 +11,7 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.FindItemResult;
@@ -91,12 +92,12 @@ public class AutoAnvil extends Module {
         .build()
     );
 
+    private PlayerEntity target;
+    private int timer;
+
     public AutoAnvil() {
         super(Categories.Combat, "auto-anvil", "Automatically places anvils above players to destroy helmets.");
     }
-
-    private PlayerEntity target;
-    private int timer;
 
     @Override
     public void onActivate() {
@@ -107,16 +108,6 @@ public class AutoAnvil extends Module {
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         if (event.screen instanceof AnvilScreen) event.cancel();
-    }
-
-    // Given a position, this function say if, that position, is surrounded by blocks
-    private boolean isHole(BlockPos pos) {
-        BlockPos.Mutable posStart = new BlockPos.Mutable(pos.getX(), pos.getY(), pos.getZ());
-        return mc.world.getBlockState(posStart.add(1,0,0)).isAir() ||
-                mc.world.getBlockState(posStart.add(-1,0,0)).isAir() ||
-                mc.world.getBlockState(posStart.add(0,0,1)).isAir() ||
-                mc.world.getBlockState(posStart.add(0,0,-1)).isAir();
-
     }
 
     @EventHandler
@@ -162,7 +153,6 @@ public class AutoAnvil extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null) return target.getEntityName();
-        return null;
+        return EntityUtils.getName(target);
     }
 }

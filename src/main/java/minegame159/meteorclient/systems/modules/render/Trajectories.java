@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -106,7 +106,7 @@ public class Trajectories extends Module {
         return path;
     }
 
-    private void calculatePath(RenderEvent event) {
+    private void calculatePath(Render3DEvent event) {
         // Clear paths
         for (Path path : paths) path.clear();
 
@@ -130,7 +130,7 @@ public class Trajectories extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         calculatePath(event);
 
         for (Path path : paths) path.render(event);
@@ -214,7 +214,7 @@ public class Trajectories extends Module {
             }
         }
 
-        public void render(RenderEvent event) {
+        public void render(Render3DEvent event) {
             // Render path
             Vec3 lastPoint = null;
 

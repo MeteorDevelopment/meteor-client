@@ -32,33 +32,33 @@ public class AutoCity extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> targetRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("target-range")
-            .description("The radius in which players get targeted.")
-            .defaultValue(4)
-            .min(0)
-            .sliderMax(5)
-            .build()
+        .name("target-range")
+        .description("The radius in which players get targeted.")
+        .defaultValue(4)
+        .min(0)
+        .sliderMax(5)
+        .build()
     );
 
     private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
-            .name("support")
-            .description("If there is no block below a city block it will place one before mining.")
-            .defaultValue(true)
-            .build()
+        .name("support")
+        .description("If there is no block below a city block it will place one before mining.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically rotates you towards the city block.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically rotates you towards the city block.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> selfToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-toggle")
-            .description("Automatically toggles off after activation.")
-            .defaultValue(true)
-            .build()
+        .name("self-toggle")
+        .description("Automatically toggles off after activation.")
+        .defaultValue(true)
+        .build()
     );
 
     private PlayerEntity target;
@@ -136,7 +136,6 @@ public class AutoCity extends Module {
 
     @Override
     public String getInfoString() {
-        if (target != null) return target.getEntityName();
-        return null;
+        return EntityUtils.getName(target);
     }
 }

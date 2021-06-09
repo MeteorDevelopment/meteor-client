@@ -7,7 +7,7 @@ package minegame159.meteorclient.rendering;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.gui.renderer.packer.TextureRegion;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
@@ -17,6 +17,7 @@ import net.minecraft.client.render.VertexFormat;
 
 import static org.lwjgl.opengl.GL11.*;
 
+@Deprecated
 public class MeshBuilder {
     private final BufferBuilder buffer;
     private double offsetX, offsetY, offsetZ;
@@ -36,7 +37,7 @@ public class MeshBuilder {
         buffer = new BufferBuilder(2097152);
     }
 
-    public void begin(RenderEvent event, DrawMode drawMode, VertexFormat format) {
+    public void begin(Render3DEvent event, DrawMode drawMode, VertexFormat format) {
         if (event != null) {
             offsetX = -event.offsetX;
             offsetY = -event.offsetY;

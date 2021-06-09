@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.renderer.Blur;
 import minegame159.meteorclient.renderer.Renderer3D;
@@ -74,7 +74,7 @@ public abstract class GameRendererMixin {
         client.getProfiler().push("meteor-client_render");
 
         if (renderer == null) renderer = new Renderer3D();
-        RenderEvent event = RenderEvent.get(matrices, renderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
+        Render3DEvent event = Render3DEvent.get(matrices, renderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
         renderer.begin();
         NametagUtils.onRender(matrices, matrix4f);

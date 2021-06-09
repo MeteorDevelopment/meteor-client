@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.DrawMode;
 import minegame159.meteorclient.renderer.Mesh;
@@ -37,7 +37,7 @@ public class LightOverlay extends Module {
         Never,
         Potential,
         Always
-    };
+    }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
@@ -114,7 +114,7 @@ public class LightOverlay extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (crosses.isEmpty()) return;
 
         mesh.depthTest = !seeThroughBlocks.get();

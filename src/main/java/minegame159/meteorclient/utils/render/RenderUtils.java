@@ -6,7 +6,7 @@
 package minegame159.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.FreeLook;
@@ -51,7 +51,7 @@ public class RenderUtils {
                 .add(mc.gameRenderer.getCamera().getPos());
     }
 
-    public static void drawTracerToEntity(RenderEvent event, Entity entity, Color color, Target target, boolean stem) {
+    public static void drawTracerToEntity(Render3DEvent event, Entity entity, Color color, Target target, boolean stem) {
         double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
         double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
         double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
@@ -64,11 +64,11 @@ public class RenderUtils {
         if (stem) Renderer.LINES.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
     }
 
-    public static void drawTracerToPos(BlockPos pos, Color color, RenderEvent event) {
+    public static void drawTracerToPos(BlockPos pos, Color color, Render3DEvent event) {
         drawLine(getCameraVector(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, color, event);
     }
 
-    public static void drawLine(Vec3d vec, double x2, double y2, double z2, Color color, RenderEvent event) {
+    public static void drawLine(Vec3d vec, double x2, double y2, double z2, Color color, Render3DEvent event) {
         Renderer.LINES.line(
                 vec.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX),
                 vec.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY),
@@ -76,7 +76,7 @@ public class RenderUtils {
                 x2, y2, z2, color);
     }
 
-    public static void drawTracerToBlockEntity(BlockEntity blockEntity, Color color, RenderEvent event) {
+    public static void drawTracerToBlockEntity(BlockEntity blockEntity, Color color, Render3DEvent event) {
         drawTracerToPos(blockEntity.getPos(), color, event);
     }
 }

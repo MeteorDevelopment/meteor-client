@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -97,7 +97,7 @@ public class Breadcrumbs extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         for (Section section : sections) section.render(event);
     }
 
@@ -121,7 +121,7 @@ public class Breadcrumbs extends Module {
             z2 = (float) mc.player.getZ();
         }
 
-        public void render(RenderEvent event) {
+        public void render(Render3DEvent event) {
             event.renderer.line(x1, y1, z1, x2, y2, z2, color.get());
         }
     }

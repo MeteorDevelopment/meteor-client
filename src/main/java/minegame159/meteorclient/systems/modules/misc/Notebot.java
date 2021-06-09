@@ -7,7 +7,7 @@ package minegame159.meteorclient.systems.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.screens.NotebotHelpScreen;
@@ -175,7 +175,7 @@ public class Notebot extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (!render.get()) return;
 
         if (stage != Stage.SetUp && stage != Stage.Tune && !isPlaying) return;

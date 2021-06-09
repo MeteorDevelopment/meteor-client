@@ -7,7 +7,7 @@ package minegame159.meteorclient.systems.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
@@ -136,7 +136,7 @@ public class ESP extends Module {
         super(Categories.Render, "esp", "Renders entities through walls.");
     }
 
-    private void render(RenderEvent event, Entity entity) {
+    private void render(Render3DEvent event, Entity entity) {
         lineColor.set(getColor(entity));
         sideColor.set(lineColor).a(fillOpacity.get());
 
@@ -160,7 +160,7 @@ public class ESP extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {

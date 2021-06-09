@@ -13,13 +13,12 @@ import minegame159.meteorclient.events.entity.EntityAddedEvent;
 import minegame159.meteorclient.events.entity.EntityRemovedEvent;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.render.Render2DEvent;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IBox;
 import minegame159.meteorclient.mixininterface.IRaycastContext;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.renderer.ShapeMode;
-import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
@@ -1129,9 +1128,9 @@ public class CrystalAura extends Module {
     // Render
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (renderTimer > 0 && render.get()) {
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, renderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            event.renderer.box(renderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
 
         if (breakRenderTimer > 0 && renderBreak.get() && !mc.world.getBlockState(breakRenderPos).isAir()) {
@@ -1143,7 +1142,7 @@ public class CrystalAura extends Module {
             lineColor.get().a -= 20;
             lineColor.get().validate();
 
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            event.renderer.box(breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
 
             sideColor.get().a = preSideA;
             lineColor.get().a = preLineA;

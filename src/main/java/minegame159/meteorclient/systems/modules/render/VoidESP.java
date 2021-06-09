@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
@@ -142,7 +142,7 @@ public class VoidESP extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         for (Void voidHole : voidHoles) voidHole.render(event);
     }
 
@@ -165,7 +165,7 @@ public class VoidESP extends Module {
             return this;
         }
 
-        public void render(RenderEvent event) {
+        public void render(Render3DEvent event) {
             event.renderer.box(x, y, z, x + 1, y + 1, z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), excludeDir);
         }
     }
