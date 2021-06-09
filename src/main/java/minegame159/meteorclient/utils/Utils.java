@@ -64,6 +64,8 @@ public class Utils {
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static final Color WHITE = new Color(255, 255, 255);
+    public static boolean rendering3D = true;
+    public static boolean renderingEntityOutline = false;
 
     static {
         df = new DecimalFormat("0");
@@ -121,10 +123,12 @@ public class Utils {
 
     public static void unscaledProjection() {
         RenderSystem.setProjectionMatrix(Matrix4f.projectionMatrix(0, mc.getWindow().getFramebufferWidth(), 0, mc.getWindow().getFramebufferHeight(), 1000, 3000));
+        rendering3D = false;
     }
 
     public static void scaledProjection() {
         RenderSystem.setProjectionMatrix(Matrix4f.projectionMatrix(0, (float) (mc.getWindow().getFramebufferWidth() / mc.getWindow().getScaleFactor()), 0, (float) (mc.getWindow().getFramebufferHeight() / mc.getWindow().getScaleFactor()), 1000, 3000));
+        rendering3D = true;
     }
 
     public static Vec3d vec3d(BlockPos pos) {

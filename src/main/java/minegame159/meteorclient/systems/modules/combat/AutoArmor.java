@@ -29,74 +29,59 @@ import java.util.Comparator;
 import java.util.List;
 
 public class AutoArmor extends Module {
-    public enum Protection {
-        Protection(Enchantments.PROTECTION),
-        BlastProtection(Enchantments.BLAST_PROTECTION),
-        FireProtection(Enchantments.FIRE_PROTECTION),
-        ProjectileProtection(Enchantments.PROJECTILE_PROTECTION);
-
-        private final Enchantment enchantment;
-
-        Protection(Enchantment enchantment) {
-            this.enchantment = enchantment;
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Protection> preferredProtection = sgGeneral.add(new EnumSetting.Builder<Protection>()
-            .name("preferred-protection")
-            .description("Which type of protection to prefer.")
-            .defaultValue(Protection.Protection)
-            .build()
+        .name("preferred-protection")
+        .description("Which type of protection to prefer.")
+        .defaultValue(Protection.Protection)
+        .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("swap-delay")
-            .description("The delay between equipping armor pieces.")
-            .defaultValue(1)
-            .min(0)
-            .sliderMax(5)
-            .build()
+        .name("swap-delay")
+        .description("The delay between equipping armor pieces.")
+        .defaultValue(1)
+        .min(0)
+        .sliderMax(5)
+        .build()
     );
 
     private final Setting<List<Enchantment>> avoidedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
-            .name("avoided-enchantments")
-            .description("Enchantments that should be avoided.")
-            .defaultValue(Lists.newArrayList(Enchantments.BINDING_CURSE, Enchantments.FROST_WALKER))
-            .build()
+        .name("avoided-enchantments")
+        .description("Enchantments that should be avoided.")
+        .defaultValue(Lists.newArrayList(Enchantments.BINDING_CURSE, Enchantments.FROST_WALKER))
+        .build()
     );
 
     private final Setting<Boolean> blastLeggings = sgGeneral.add(new BoolSetting.Builder()
-            .name("blast-prot-leggings")
-            .description("Uses blast protection for leggings regardless of preferred protection.")
-            .defaultValue(true)
-            .build()
+        .name("blast-prot-leggings")
+        .description("Uses blast protection for leggings regardless of preferred protection.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-break")
-            .description("Takes off armor if it is about to break.")
-            .defaultValue(false)
-            .build()
+        .name("anti-break")
+        .description("Takes off armor if it is about to break.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> ignoreElytra = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-elytra")
-            .description("Will not replace your elytra if you have it equipped.")
-            .defaultValue(true)
-            .build()
+        .name("ignore-elytra")
+        .description("Will not replace your elytra if you have it equipped.")
+        .defaultValue(true)
+        .build()
     );
 
-    private int timer;
-
     private final Object2IntMap<Enchantment> enchantments = new Object2IntOpenHashMap<>();
-
     private final ArmorPiece[] armorPieces = new ArmorPiece[4];
     private final ArmorPiece helmet = new ArmorPiece(3);
     private final ArmorPiece chestplate = new ArmorPiece(2);
     private final ArmorPiece leggings = new ArmorPiece(1);
     private final ArmorPiece boots = new ArmorPiece(0);
+    private int timer;
 
     public AutoArmor() {
         super(Categories.Combat, "auto-armor", "Automatically equips armor.");
@@ -129,7 +114,9 @@ public class AutoArmor extends Module {
             if (itemStack.isEmpty() || !(itemStack.getItem() instanceof ArmorItem)) continue;
 
             // Check for durability if anti break is enabled
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) continue;
+            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+                continue;
+            }
 
             // Get enchantments on the item
             Utils.getEnchantments(itemStack, enchantments);
@@ -139,10 +126,10 @@ public class AutoArmor extends Module {
 
             // Add the item to the correct armor piece
             switch (getItemSlotId(itemStack)) {
-                case 0: boots.add(itemStack, i); break;
-                case 1: leggings.add(itemStack, i); break;
-                case 2: chestplate.add(itemStack, i); break;
-                case 3: helmet.add(itemStack, i); break;
+                case 0 -> boots.add(itemStack, i);
+                case 1 -> leggings.add(itemStack, i);
+                case 2 -> chestplate.add(itemStack, i);
+                case 3 -> helmet.add(itemStack, i);
             }
         }
 
@@ -173,7 +160,9 @@ public class AutoArmor extends Module {
 
         // Prefer blast protection on leggings if enabled
         Enchantment protection = preferredProtection.get().enchantment;
-        if (itemStack.getItem() instanceof ArmorItem && blastLeggings.get() && getItemSlotId(itemStack) == 1) protection = Enchantments.BLAST_PROTECTION;
+        if (itemStack.getItem() instanceof ArmorItem && blastLeggings.get() && getItemSlotId(itemStack) == 1) {
+            protection = Enchantments.BLAST_PROTECTION;
+        }
 
         score += 3 * enchantments.getInt(protection);
         score += enchantments.getInt(Enchantments.PROTECTION);
@@ -209,6 +198,19 @@ public class AutoArmor extends Module {
 
                 break;
             }
+        }
+    }
+
+    public enum Protection {
+        Protection(Enchantments.PROTECTION),
+        BlastProtection(Enchantments.BLAST_PROTECTION),
+        FireProtection(Enchantments.FIRE_PROTECTION),
+        ProjectileProtection(Enchantments.PROJECTILE_PROTECTION);
+
+        private final Enchantment enchantment;
+
+        Protection(Enchantment enchantment) {
+            this.enchantment = enchantment;
         }
     }
 
@@ -298,7 +300,9 @@ public class AutoArmor extends Module {
         }
 
         private int applyAntiBreakScore(int score, ItemStack itemStack) {
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) return -1;
+            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
+                return -1;
+            }
 
             return score;
         }

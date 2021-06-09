@@ -21,21 +21,21 @@ public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge")
-            .description("How long to charge the bow before releasing in ticks.")
-            .defaultValue(5)
-            .min(5)
-            .max(20)
-            .sliderMin(5)
-            .sliderMax(20)
-            .build()
+        .name("charge")
+        .description("How long to charge the bow before releasing in ticks.")
+        .defaultValue(5)
+        .min(5)
+        .max(20)
+        .sliderMin(5)
+        .sliderMax(20)
+        .build()
     );
 
     private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("when-holding-right-click")
-            .description("Works only when holding right click.")
-            .defaultValue(false)
-            .build()
+        .name("when-holding-right-click")
+        .description("Works only when holding right click.")
+        .defaultValue(false)
+        .build()
     );
 
     private boolean wasBow = false;

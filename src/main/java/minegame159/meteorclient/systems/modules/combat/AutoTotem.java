@@ -22,55 +22,55 @@ import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 
 public class AutoTotem extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgSmart = settings.createGroup("Smart");
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Determines when to hold a totem, strict will always hold.")
-            .defaultValue(Mode.Smart)
-            .build()
+        .name("mode")
+        .description("Determines when to hold a totem, strict will always hold.")
+        .defaultValue(Mode.Smart)
+        .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The ticks between slot movements.")
-            .defaultValue(0)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("delay")
+        .description("The ticks between slot movements.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(10)
+        .build()
     );
 
-    // Smart settings
-
-    private final Setting<Integer> health = sgSmart.add(new IntSetting.Builder()
-            .name("health")
-            .description("The health to hold a totem at.")
-            .defaultValue(10)
-            .min(0)
-            .sliderMax(36)
-            .max(36)
-            .build()
+    private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
+        .name("health")
+        .description("The health to hold a totem at.")
+        .defaultValue(10)
+        .min(0).max(36)
+        .sliderMax(36)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
     );
 
-    private final Setting<Boolean> elytra = sgSmart.add(new BoolSetting.Builder()
-            .name("elytra")
-            .description("Will always hold a totem when flying with elytra.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> elytra = sgGeneral.add(new BoolSetting.Builder()
+        .name("elytra")
+        .description("Will always hold a totem when flying with elytra.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
     );
 
-    private final Setting<Boolean> fall = sgSmart.add(new BoolSetting.Builder()
-            .name("fall")
-            .description("Will hold a totem when fall damage could kill you.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> fall = sgGeneral.add(new BoolSetting.Builder()
+        .name("fall")
+        .description("Will hold a totem when fall damage could kill you.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
     );
 
-    private final Setting<Boolean> explosion = sgSmart.add(new BoolSetting.Builder()
-            .name("explosion")
-            .description("Will hold a totem when explosion damage could kill you.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> explosion = sgGeneral.add(new BoolSetting.Builder()
+        .name("explosion")
+        .description("Will hold a totem when explosion damage could kill you.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Smart)
+        .build()
     );
 
     public boolean locked;
@@ -105,8 +105,7 @@ public class AutoTotem extends Module {
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (!(event.packet instanceof EntityStatusS2CPacket)) return;
-        EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
+        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);
