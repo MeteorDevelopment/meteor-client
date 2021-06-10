@@ -13,9 +13,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.renderer.Renderer2D;
+import minegame159.meteorclient.renderer.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -27,9 +26,9 @@ import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.NametagUtils;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
@@ -42,8 +41,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 
 import java.util.*;
-
-import static org.lwjgl.opengl.GL11.*;
 
 public class Nametags extends Module {
     public enum Position {
@@ -259,7 +256,7 @@ public class Nametags extends Module {
         boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
         Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
-        mc.world.getEntities().forEach(entity -> {
+        for (Entity entity : mc.world.getEntities()) {
             EntityType<?> type = entity.getType();
             if (!entities.get().containsKey(type)) return;
 
@@ -270,7 +267,7 @@ public class Nametags extends Module {
             if (!culling.get() || entity.getPos().distanceTo(cameraPos) < maxCullRange.get()) {
                 entityList.add(entity);
             }
-        });
+        }
 
         entityList.sort(Comparator.comparing(e -> e.squaredDistanceTo(cameraPos)));
     }
@@ -330,12 +327,12 @@ public class Nametags extends Module {
         GameMode gm = EntityUtils.getGameMode(player);
         String gmText = "BOT";
         if (gm != null) {
-            switch (gm) {
-                case SPECTATOR: gmText = "Sp"; break;
-                case SURVIVAL:  gmText = "S"; break;
-                case CREATIVE:  gmText = "C"; break;
-                case ADVENTURE: gmText = "A"; break;
-            }
+            gmText = switch (gm) {
+                case SPECTATOR -> "Sp";
+                case SURVIVAL  -> "S";
+                case CREATIVE  -> "C";
+                case ADVENTURE -> "A";
+            };
         }
 
         gmText = "[" + gmText + "] ";
@@ -444,17 +441,11 @@ public class Nametags extends Module {
             double y = -heightDown - 7 - itemsHeight;
             double x = -itemWidthHalf;
 
-            //Rendering items and enchants
+            // Rendering items and enchants
             for (int i = 0; i < 6; i++) {
                 ItemStack stack = getItem(player, i);
 
-                glPushMatrix();
-                glScaled(2, 2, 1);
-
-                mc.getItemRenderer().renderGuiItemIcon(stack, (int) (x / 2), (int) (y / 2));
-                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, stack, (int) (x / 2), (int) (y / 2));
-
-                glPopMatrix();
+                RenderUtils.drawItem(stack, (int) x, (int) y, 2, true);
 
                 if (maxEnchantCount > 0 && displayItemEnchants.get()) {
                     text.begin(0.5 * enchantTextScale.get(), false, true);
@@ -470,13 +461,12 @@ public class Nametags extends Module {
                     double aW = itemWidths[i];
                     double enchantY = 0;
 
-                    double addY = 0;
-                    switch (enchantPos.get()) {
-                        case Above: addY = -((enchantmentsToShow.size() + 1) * text.getHeight()); break;
-                        case OnTop: addY = (itemsHeight - enchantmentsToShow.size() * text.getHeight()) / 2; break;
-                    }
+                    double addY = switch (enchantPos.get()) {
+                        case Above -> -((enchantmentsToShow.size() + 1) * text.getHeight());
+                        case OnTop -> (itemsHeight - enchantmentsToShow.size() * text.getHeight()) / 2;
+                    };
 
-                    double enchantX = x;
+                    double enchantX;
 
                     for (Enchantment enchantment : enchantmentsToShow.keySet()) {
                         String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShow.get(enchantment);
@@ -484,10 +474,10 @@ public class Nametags extends Module {
                         Color enchantColor = WHITE;
                         if (enchantment.isCursed()) enchantColor = RED;
 
-                        switch (enchantPos.get()) {
-                            case Above: enchantX = x + (aW / 2) - (text.getWidth(enchantName) / 2); break;
-                            case OnTop: enchantX = x + (aW - text.getWidth(enchantName)) / 2; break;
-                        }
+                        enchantX = switch (enchantPos.get()) {
+                            case Above -> x + (aW / 2) - (text.getWidth(enchantName) / 2);
+                            case OnTop -> x + (aW - text.getWidth(enchantName)) / 2;
+                        };
 
                         text.render(enchantName, enchantX, y + addY + enchantY, enchantColor);
 
@@ -616,19 +606,21 @@ public class Nametags extends Module {
     }
 
     private void drawBg(double x, double y, double width, double height) {
-        Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        Renderer.NORMAL.quad(x - 1, y - 1, width + 2, height + 2, background.get());
-        Renderer.NORMAL.end();
+        Renderer2D.COLOR.begin();
+        Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2, background.get());
+        Renderer2D.COLOR.render(null);
     }
 
     private static String ticksToTime(int ticks){
         if (ticks > 20 * 3600) {
             int h = ticks / 20 / 3600;
             return h + " h";
-        } else if (ticks > 20 * 60) {
+        }
+        else if (ticks > 20 * 60) {
             int m = ticks / 20 / 60;
             return m + " m";
-        } else {
+        }
+        else {
             int s = ticks / 20;
             int ms = (ticks % 20) / 2;
             return s + "."  +ms + " s";

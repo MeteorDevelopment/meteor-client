@@ -17,6 +17,8 @@ import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
@@ -177,8 +179,10 @@ public class PlayerUtils {
         return possibleHealthReductions(true, true);
     }
 
+    private static double damageTaken;
+
     public static double possibleHealthReductions(boolean entities, boolean fall) {
-        double damageTaken = 0;
+        damageTaken = 0;
 
         if (entities) {
             for (Entity entity : mc.world.getEntities()) {
@@ -197,9 +201,8 @@ public class PlayerUtils {
             }
 
             // Check for beds if in nether
-            // TODO: Fix
-            /*if (PlayerUtils.getDimension() != Dimension.Overworld) {
-                for (BlockEntity blockEntity : mc.world.blockEntities) {
+            if (PlayerUtils.getDimension() != Dimension.Overworld) {
+                for (BlockEntity blockEntity : Utils.blockEntities()) {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
 
@@ -207,7 +210,7 @@ public class PlayerUtils {
                         damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
                     }
                 }
-            }*/
+            }
         }
 
         // Check for fall distance with water check

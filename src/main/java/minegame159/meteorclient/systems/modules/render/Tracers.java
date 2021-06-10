@@ -134,39 +134,46 @@ public class Tracers extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         count = 0;
+
         for (Entity entity : mc.world.getEntities()) {
-            if (mc.player.distanceTo(entity) > maxDist.get()
-                    || (!Modules.get().isActive(Freecam.class) && entity == mc.player)
-                    || !entities.get().getBoolean(entity.getType())
-                    || (!showInvis.get() && entity.isInvisible())
-                    || !EntityUtils.isInRenderDistance(entity)
-            ) continue;
+            if (mc.player.distanceTo(entity) > maxDist.get() || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
 
             Color color;
 
-            if (distance.get() && entity instanceof PlayerEntity) {
-                color = getColorFromDistance((PlayerEntity) entity);
-            } else if (entity instanceof PlayerEntity) {
+            if (distance.get()) {
+                color = getColorFromDistance(entity);
+            }
+            else if (entity instanceof PlayerEntity) {
                 color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-            } else {
-                switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE:          color = animalsColor.get(); break;
-                    case WATER_AMBIENT:
-                    case WATER_CREATURE:    color = waterAnimalsColor.get(); break;
-                    case MONSTER:           color = monstersColor.get(); break;
-                    case AMBIENT:           color = ambientColor.get(); break;
-                    default:                color = miscColor.get(); break;
-                }
+            }
+            else {
+                color = switch (entity.getType().getSpawnGroup()) {
+                    case CREATURE                      -> animalsColor.get();
+                    case WATER_AMBIENT, WATER_CREATURE -> waterAnimalsColor.get();
+                    case MONSTER                       -> monstersColor.get();
+                    case AMBIENT                       -> ambientColor.get();
+                    default                            -> miscColor.get();
+                };
             }
 
-            RenderUtils.drawTracerToEntity(event, entity, color, target.get(), stem.get());
+            double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
+            double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
+            double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
+
+            double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
+            if (target.get() == Target.Head) y += height;
+            else if (target.get() == Target.Body) y += height / 2;
+
+            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, x, y, z, color);
+            if (stem.get()) event.renderer.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
+
             count++;
         }
     }
 
-    private Color getColorFromDistance(PlayerEntity player) {
-        //Credit to Icy from Stackoverflow
-        double distance = mc.player.distanceTo(player);
+    private Color getColorFromDistance(Entity entity) {
+        // Credit to Icy from Stackoverflow
+        double distance = mc.gameRenderer.getCamera().getPos().distanceTo(entity.getPos());
         double percent = distance / 60;
 
         if (percent < 0 || percent > 1) {
@@ -178,17 +185,16 @@ public class Tracers extends Module {
 
         if (percent < 0.5) {
             r = 255;
-            g = (int) (255 * percent / 0.5);  //closer to 0.5, closer to yellow (255,255,0)
+            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
         }
         else {
             g = 255;
-            r = 255 - (int) (255 * (percent - 0.5) / 0.5); //closer to 1.0, closer to green (0,255,0)
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
         }
 
         distanceColor.set(r, g, 0, 255);
         return distanceColor;
     }
-
 
     @Override
     public String getInfoString() {

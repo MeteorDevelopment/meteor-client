@@ -5,7 +5,7 @@
 
 package minegame159.meteorclient.systems.modules.render.hud;
 
-import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.renderer.text.TextRenderer;
 import minegame159.meteorclient.utils.render.color.Color;
 
 import java.util.ArrayList;
