@@ -33,8 +33,7 @@ public abstract class DisconnectedScreenMixin extends ScreenMixin {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-            // TODO: Test
-            reconnectBtn = addDrawable(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address), Modules.get().get(AutoReconnect.class).lastServerInfo)));
+            reconnectBtn = addDrawableChild(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address), Modules.get().get(AutoReconnect.class).lastServerInfo)));
         }
     }
 

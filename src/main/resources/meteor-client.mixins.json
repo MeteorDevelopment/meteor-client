@@ -131,6 +131,8 @@
     "TitleScreenMixin",
     "TridentItemMixin",
     "Vec3dMixin",
+    "WorldAccessor",
+    "WorldChunkAccessor",
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin"

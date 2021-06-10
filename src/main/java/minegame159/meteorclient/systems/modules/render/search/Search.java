@@ -27,10 +27,9 @@ import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.*;
-
-import static minegame159.meteorclient.utils.Utils.getRenderDistance;
 
 public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -89,13 +88,8 @@ public class Search extends Module {
             groups.clear();
         }
 
-        int viewDist = getRenderDistance() + 1;
-
-        // TODO: Optimize getChunkPos()
-        for (int x = mc.player.getChunkPos().x - viewDist; x <= mc.player.getChunkPos().x + viewDist; x++) {
-            for (int z = mc.player.getChunkPos().z - viewDist; z <= mc.player.getChunkPos().z + viewDist; z++) {
-                if (mc.world.getChunkManager().isChunkLoaded(x, z)) searchChunk(mc.world.getChunk(x, z), null);
-            }
+        for (WorldChunk chunk : Utils.chunks()) {
+            searchChunk(chunk, null);
         }
 
         lastDimension = PlayerUtils.getDimension();

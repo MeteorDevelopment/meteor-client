@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.mixin;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.mixininterface.IVec3d;
@@ -19,6 +20,7 @@ import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.systems.modules.render.UnfocusedCPU;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.NametagUtils;
+import minegame159.meteorclient.utils.render.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
@@ -76,13 +78,14 @@ public abstract class GameRendererMixin {
         if (renderer == null) renderer = new Renderer3D();
         Render3DEvent event = Render3DEvent.get(matrices, renderer, tickDelta, camera.getPos().x, camera.getPos().y, camera.getPos().z);
 
-        renderer.begin();
+        RenderUtils.updateScreenCenter();
         NametagUtils.onRender(matrices, matrix4f);
-        MeteorClient.EVENT_BUS.post(event);
-        renderer.end();
 
+        renderer.begin();
+        MeteorClient.EVENT_BUS.post(event);
         renderer.render(matrices);
 
+        RenderSystem.applyModelViewMatrix();
         client.getProfiler().pop();
     }
 

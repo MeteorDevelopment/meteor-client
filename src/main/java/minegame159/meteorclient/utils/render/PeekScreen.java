@@ -5,11 +5,13 @@
 
 package minegame159.meteorclient.utils.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.BetterTooltips;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
+import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -20,7 +22,6 @@ import org.lwjgl.glfw.GLFW;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class PeekScreen extends ShulkerBoxScreen {
-
     private final Identifier TEXTURE = new Identifier("textures/gui/container/shulker_box.png");
     private final ItemStack[] contents;
     private final ItemStack storageBlock;
@@ -65,13 +66,12 @@ public class PeekScreen extends ShulkerBoxScreen {
     }
 
     @Override
-
     protected void drawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY) {
         Color color = Utils.getShulkerColor(storageBlock);
-        // TODO: Fix
-        //RenderSystem.color4f(color.r / 255f, color.g / 255f, color.b / 255f, 1.0F);
 
-        this.client.getTextureManager().bindTexture(TEXTURE);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
+        RenderSystem.setShaderTexture(0, TEXTURE);
         int i = (this.width - this.backgroundWidth) / 2;
         int j = (this.height - this.backgroundHeight) / 2;
         this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
