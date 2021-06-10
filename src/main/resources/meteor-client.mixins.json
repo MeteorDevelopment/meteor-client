@@ -31,7 +31,6 @@
     "CactusBlockMixin",
     "CameraMixin",
     "ChatHudAccessor",
-    "ChatHudLineAccessor",
     "ChatHudMixin",
     "ChatScreenMixin",
     "ChunkOcclusionDataBuilderMixin",
