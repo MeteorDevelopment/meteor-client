@@ -33,9 +33,6 @@ public abstract class ScreenMixin {
     @Shadow public abstract void tick();
     @Shadow @Nullable protected MinecraftClient client;
 
-    @Shadow
-    protected abstract <T extends Drawable> T addDrawable(T drawable);
-
     @Shadow protected abstract <T extends Element & Drawable & Selectable> T addDrawableChild(T drawableElement);
 
     @Inject(method = "renderBackground(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At("HEAD"), cancellable = true)
