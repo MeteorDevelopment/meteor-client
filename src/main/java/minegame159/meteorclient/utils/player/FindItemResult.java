@@ -10,7 +10,7 @@ import net.minecraft.util.Hand;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class FindItemResult {
-    public final int slot, count;
+    private final int slot, count;
 
     public FindItemResult(int slot, int count) {
         this.slot = slot;

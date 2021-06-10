@@ -18,6 +18,7 @@ import minegame159.meteorclient.gui.widgets.*;
 import minegame159.meteorclient.gui.widgets.containers.*;
 import minegame159.meteorclient.gui.widgets.input.*;
 import minegame159.meteorclient.gui.widgets.pressable.*;
+import minegame159.meteorclient.renderer.Texture;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.Settings;
 import minegame159.meteorclient.systems.accounts.Account;
@@ -27,7 +28,6 @@ import minegame159.meteorclient.utils.misc.Keybind;
 import minegame159.meteorclient.utils.misc.Names;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
 
@@ -151,7 +151,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return itemWithLabel(stack, Names.get(stack.getItem()));
     }
 
-    public WTexture texture(double width, double height, double rotation, AbstractTexture texture) {
+    public WTexture texture(double width, double height, double rotation, Texture texture) {
         return w(new WTexture(width, height, rotation, texture));
     }
 

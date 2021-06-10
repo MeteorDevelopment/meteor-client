@@ -28,38 +28,38 @@ public class Offhand extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Item> item = sgGeneral.add(new EnumSetting.Builder<Item>()
-            .name("item")
-            .description("Which item to hold in your offhand.")
-            .defaultValue(Item.EGap)
-            .build()
+        .name("item")
+        .description("Which item to hold in your offhand.")
+        .defaultValue(Item.EGap)
+        .build()
     );
 
     private final Setting<Boolean> hotbar = sgGeneral.add(new BoolSetting.Builder()
-            .name("hotbar")
-            .description("Whether to use items from your hotbar.")
-            .defaultValue(false)
-            .build()
+        .name("hotbar")
+        .description("Whether to use items from your hotbar.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> rightClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("right-click")
-            .description("Only holds the item in your offhand when you are holding right click.")
-            .defaultValue(false)
-            .build()
+        .name("right-click")
+        .description("Only holds the item in your offhand when you are holding right click.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> swordGap = sgGeneral.add(new BoolSetting.Builder()
-            .name("sword-gap")
-            .description("Holds an Enchanted Golden Apple when you are holding a sword.")
-            .defaultValue(false)
-            .build()
+        .name("sword-gap")
+        .description("Holds an Enchanted Golden Apple when you are holding a sword.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> crystalCa = sgGeneral.add(new BoolSetting.Builder()
-            .name("crystal-on-ca")
-            .description("Holds a crystal when you have Crystal Aura enabled.")
-            .defaultValue(false)
-            .build()
+        .name("crystal-on-ca")
+        .description("Holds a crystal when you have Crystal Aura enabled.")
+        .defaultValue(false)
+        .build()
     );
 
     private boolean isClicking;
@@ -82,7 +82,9 @@ public class Offhand extends Module {
         AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
 
         // Sword Gap and CA checks
-        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && swordGap.get()) currentItem = Item.EGap;
+        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && swordGap.get()) {
+            currentItem = Item.EGap;
+        }
         else if (Modules.get().isActive(CrystalAura.class) && crystalCa.get()) currentItem = Item.Crystal;
         else currentItem = item.get();
 
@@ -125,9 +127,9 @@ public class Offhand extends Module {
 
     private boolean usableItem() {
         return mc.player.getMainHandStack().getItem() == Items.BOW
-                || mc.player.getMainHandStack().getItem() == Items.TRIDENT
-                || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
-                || mc.player.getMainHandStack().getItem().isFood();
+            || mc.player.getMainHandStack().getItem() == Items.TRIDENT
+            || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
+            || mc.player.getMainHandStack().getItem().isFood();
     }
 
     @Override

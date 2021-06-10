@@ -6,9 +6,8 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.Renderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -98,8 +97,18 @@ public class Breadcrumbs extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
-        for (Section section : sections) section.render();
+    private void onRender(Render3DEvent event) {
+        int iLast = -1;
+
+        for (Section section : sections) {
+            if (iLast == -1) {
+                iLast = event.renderer.lines.vec3(section.x1, section.y1, section.z1).color(color.get()).next();
+            }
+
+            int i = event.renderer.lines.vec3(section.x2, section.y2, section.z2).color(color.get()).next();
+            event.renderer.lines.line(iLast, i);
+            iLast = i;
+        }
     }
 
     private boolean isFarEnough(double x, double y, double z) {
@@ -122,8 +131,8 @@ public class Breadcrumbs extends Module {
             z2 = (float) mc.player.getZ();
         }
 
-        public void render() {
-            Renderer.LINES.line(x1, y1, z1, x2, y2, z2, color.get());
+        public void render(Render3DEvent event) {
+            event.renderer.line(x1, y1, z1, x2, y2, z2, color.get());
         }
     }
 }

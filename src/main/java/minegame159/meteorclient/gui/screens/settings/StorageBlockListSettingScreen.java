@@ -17,7 +17,7 @@ import java.util.List;
 
 public class StorageBlockListSettingScreen extends LeftRightListSettingScreen<BlockEntityType<?>> {
     public StorageBlockListSettingScreen(GuiTheme theme, Setting<List<BlockEntityType<?>>> setting) {
-        super(theme, "Select storage blocks", setting, setting.get(), StorageBlockListSetting.REGISTRY);
+        super(theme, "Select Storage Blocks", setting, setting.get(), StorageBlockListSetting.REGISTRY);
     }
 
     @Override

@@ -5,9 +5,7 @@
 
 package minegame159.meteorclient.settings;
 
-//Created by squidoodly 25/07/2020
-
-import net.minecraft.enchantment.Enchantment;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -19,8 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class EnchListSetting extends Setting<List<Enchantment>> {
-    public EnchListSetting(String name, String description, List<Enchantment> defaultValue, Consumer<List<Enchantment>> onChanged, Consumer<Setting<List<Enchantment>>> onModuleActivated, IVisible visible) {
+public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
+    public StatusEffectListSetting(String name, String description, List<StatusEffect> defaultValue, Consumer<List<StatusEffect>> onChanged, Consumer<Setting<List<StatusEffect>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         value = new ArrayList<>(defaultValue);
@@ -33,26 +31,28 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    protected List<Enchantment> parseImpl(String str) {
+    protected List<StatusEffect> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Enchantment> enchs = new ArrayList<>(values.length);
+        List<StatusEffect> effects = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                Enchantment ench = parseId(Registry.ENCHANTMENT, value);
-                if (ench != null) enchs.add(ench);
+                StatusEffect effect = parseId(Registry.STATUS_EFFECT, value);
+                if (effect != null) effects.add(effect);
             }
         } catch (Exception ignored) {}
 
-        return enchs;
+        return effects;
     }
 
     @Override
-    protected boolean isValueValid(List<Enchantment> value) { return true; }
+    protected boolean isValueValid(List<StatusEffect> value) {
+        return true;
+    }
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.ENCHANTMENT.getIds();
+        return Registry.STATUS_EFFECT.getIds();
     }
 
     @Override
@@ -60,12 +60,9 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
         NbtCompound tag = saveGeneral();
 
         NbtList valueTag = new NbtList();
-        for(Enchantment ench : get()) {
-            try {
-                valueTag.add(NbtString.of(Registry.ENCHANTMENT.getId(ench).toString()));
-            } catch (NullPointerException ignored) {
-                //Cringe. Idk what's going on but it crashed me so...
-            }
+
+        for (StatusEffect effect : get()) {
+            valueTag.add(NbtString.of(Registry.STATUS_EFFECT.getId(effect).toString()));
         }
         tag.put("value", valueTag);
 
@@ -73,12 +70,12 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public List<Enchantment> fromTag(NbtCompound tag) {
+    public List<StatusEffect> fromTag(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
-        for (NbtElement tag1 : valueTag) {
-            get().add(Registry.ENCHANTMENT.get(new Identifier(tag1.asString())));
+        for (NbtElement tagI : valueTag) {
+            get().add(Registry.STATUS_EFFECT.get(new Identifier(tagI.asString())));
         }
 
         changed();
@@ -87,9 +84,9 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private List<Enchantment> defaultValue;
-        private Consumer<List<Enchantment>> onChanged;
-        private Consumer<Setting<List<Enchantment>>> onModuleActivated;
+        private List<StatusEffect> defaultValue;
+        private Consumer<List<StatusEffect>> onChanged;
+        private Consumer<Setting<List<StatusEffect>>> onModuleActivated;
         private IVisible visible;
 
         public Builder name(String name) {
@@ -102,17 +99,17 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
             return this;
         }
 
-        public Builder defaultValue(List<Enchantment> defaultValue) {
+        public Builder defaultValue(List<StatusEffect> defaultValue) {
             this.defaultValue = defaultValue;
             return this;
         }
 
-        public Builder onChanged(Consumer<List<Enchantment>> onChanged) {
+        public Builder onChanged(Consumer<List<StatusEffect>> onChanged) {
             this.onChanged = onChanged;
             return this;
         }
 
-        public Builder onModuleActivated(Consumer<Setting<List<Enchantment>>> onModuleActivated) {
+        public Builder onModuleActivated(Consumer<Setting<List<StatusEffect>>> onModuleActivated) {
             this.onModuleActivated = onModuleActivated;
             return this;
         }
@@ -122,8 +119,8 @@ public class EnchListSetting extends Setting<List<Enchantment>> {
             return this;
         }
 
-        public EnchListSetting build() {
-            return new EnchListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        public StatusEffectListSetting build() {
+            return new StatusEffectListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
 }

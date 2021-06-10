@@ -8,127 +8,98 @@ package minegame159.meteorclient.systems.modules.combat;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.BoolSetting;
-import minegame159.meteorclient.settings.IntSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
+import minegame159.meteorclient.settings.StatusEffectListSetting;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
-import minegame159.meteorclient.utils.player.Rotations;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.potion.PotionUtil;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 public class Quiver extends Module {
-    public enum ArrowType {
-        Strength,
-        Speed
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge-delay")
-            .description("The amount of delay for bow charging in ticks.")
-            .defaultValue(6)
-            .min(5)
-            .max(20)
-            .sliderMin(5)
-            .sliderMax(20)
-            .build()
+    private final Setting<List<StatusEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
+        .name("effects")
+        .description("Which effects to shoot you with.")
+        .defaultValue(Collections.singletonList(StatusEffects.STRENGTH))
+        .build()
     );
 
     private final Setting<Boolean> checkEffects = sgGeneral.add(new BoolSetting.Builder()
-            .name("check-effects")
-            .description("Won't shoot you with effects you already have active.")
-            .defaultValue(true)
-            .build()
+        .name("check-existing-effects")
+        .description("Won't shoot you with effects you already have.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
-            .name("chat-info")
-            .description("Sends you information about the module when toggled.")
-            .defaultValue(true)
-            .build()
-    );
-
-    public Quiver() {
-        super(Categories.Combat, "quiver", "Automatically shoots positive effect arrows at you.");
-    }
-
-    private boolean shooting;
-
-    private ArrowType shootingArrow;
-
+    private final List<Integer> arrowSlots = new ArrayList<>();
     private int prevSlot;
 
-    private int strengthSlot;
-    private int speedSlot;
-
-    private boolean foundStrength;
-    private boolean foundSpeed;
-
-    private boolean shotStrength;
-    private boolean shotSpeed;
-
-    private boolean shouldShoot;
+    public Quiver() {
+        super(Categories.Combat, "quiver", "Shoots arrows at yourself.");
+    }
 
     @Override
     public void onActivate() {
-        shooting = false;
-        int arrowsToShoot = 0;
         prevSlot = mc.player.getInventory().selectedSlot;
 
-        shotStrength = false;
-        shotSpeed = false;
+        FindItemResult bow = InvUtils.findInHotbar(Items.BOW);
 
-        foundStrength = false;
-        foundSpeed = false;
-
-        shootingArrow = null;
-
-        strengthSlot = -1;
-        speedSlot = -1;
-
-        int bowSlot = findBow();
-
-        if (bowSlot == -1) {
-            if (chatInfo.get()) error("No bow found... disabling.");
+        if (!bow.isHotbar()) {
+            error("No bow found... disabling.");
             toggle();
-            return;
-        } else InvUtils.swap(bowSlot);
-
-        for (Map.Entry<ArrowType, Integer> slot : getAllArrows().entrySet()) {
-            if (slot.getKey() == ArrowType.Strength && !foundStrength) {
-                strengthSlot = slot.getValue();
-                foundStrength = true;
-            }
-            if (slot.getKey() == ArrowType.Speed && !foundSpeed) {
-                speedSlot = slot.getValue();
-                foundSpeed = true;
-            }
         }
 
-        if (strengthSlot != -1) arrowsToShoot++;
-        if (speedSlot != -1) arrowsToShoot++;
+        mc.options.keyUse.setPressed(false);
+        mc.interactionManager.stopUsingItem(mc.player);
 
-        if (arrowsToShoot == 0) {
-            if (chatInfo.get()) error("No appropriate arrows found... disabling.");
-            toggle();
-            return;
+        InvUtils.swap(bow.getSlot());
+
+        arrowSlots.clear();
+
+        List<StatusEffect> usedEffects = new ArrayList<>();
+
+        for (int i = mc.player.getInventory().size(); i > 0; i--) {
+            if (i == mc.player.getInventory().selectedSlot) continue;
+
+            ItemStack item = mc.player.getInventory().getStack(i);
+
+            if (item.getItem() != Items.TIPPED_ARROW)  continue;
+
+            List<StatusEffectInstance> effects = PotionUtil.getPotionEffects(item);
+
+            if (effects.isEmpty()) continue;
+
+            StatusEffect effect = effects.get(0).getEffectType();
+
+            if (this.effects.get().contains(effect)
+                && !usedEffects.contains(effect)
+                && (!hasEffect(effect) || !checkEffects.get())) {
+                usedEffects.add(effect);
+                arrowSlots.add(i);
+            }
+        }
+    }
+
+    private boolean hasEffect(StatusEffect effect) {
+        for (StatusEffectInstance statusEffect : mc.player.getStatusEffects()) {
+            if (statusEffect.getEffectType() == effect) return true;
         }
 
-        shouldShoot = true;
-
-        if (!foundSpeed) shotSpeed = true;
-        if (!foundStrength) shotStrength = true;
+        return false;
     }
 
     @Override
@@ -137,104 +108,28 @@ public class Quiver extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
-        Rotations.setCamRotation(mc.player.getYaw(), -90);
-
-        boolean canStop = false;
-
-        if (shooting && mc.player.getItemUseTime() >= charge.get()) {
-            if (shootingArrow == ArrowType.Strength) endShooting(strengthSlot);
-            if (shootingArrow == ArrowType.Speed) endShooting(speedSlot);
-            canStop = true;
-        }
-
-        if (shotStrength && shotSpeed && canStop) {
-            if (chatInfo.get()) info("Quiver complete... disabling.");
+    private void onTick(TickEvent.Pre event) {
+        if (arrowSlots.isEmpty() || !InvUtils.findInHotbar(Items.BOW).isMainHand()) {
             toggle();
             return;
         }
 
-        if (shouldShoot) {
-            if (!shooting && !shotStrength && foundStrength) {
-                shoot(strengthSlot);
-                shootingArrow = ArrowType.Strength;
-                if (chatInfo.get()) info("Quivering a strength arrow.");
-                shotStrength = true;
-            }
+        boolean charging = mc.options.keyUse.isPressed();
 
-            if (!shooting && !shotSpeed && foundSpeed && shotStrength) {
-                shoot(speedSlot);
-                shootingArrow = ArrowType.Speed;
-                if (chatInfo.get()) info("Quivering a speed arrow.");
-                shotSpeed = true;
+        if (!charging) {
+            InvUtils.move().from(arrowSlots.get(0)).to(9);
+            mc.options.keyUse.setPressed(true);
+        }
+        else {
+            if (BowItem.getPullProgress(mc.player.getItemUseTime()) >= 0.12) {
+                int targetSlot = arrowSlots.get(0);
+                arrowSlots.remove(0);
+
+                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
+                mc.options.keyUse.setPressed(false);
+                mc.interactionManager.stopUsingItem(mc.player);
+                if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);
             }
         }
-    }
-
-    private void shoot(int moveSlot) {
-        if (moveSlot != 9) moveItems(moveSlot, 9);
-        setPressed(true);
-        shooting = true;
-    }
-
-    private void endShooting(int moveSlot) {
-        setPressed(false);
-        mc.player.stopUsingItem();
-        mc.interactionManager.stopUsingItem(mc.player);
-        if (moveSlot != 9) moveItems(9, moveSlot);
-        shooting = false;
-    }
-
-    private Map<ArrowType, Integer> getAllArrows() {
-
-        Map<ArrowType, Integer> arrowSlotMap = new HashMap<>();
-
-        boolean hasStrength = mc.player.getActiveStatusEffects().containsKey(StatusEffects.STRENGTH);
-        boolean hasSpeed = mc.player.getActiveStatusEffects().containsKey(StatusEffects.SPEED);
-
-        for (int i = 35; i >= 0; i--) {
-            if (mc.player.getInventory().getStack(i).getItem() != Items.TIPPED_ARROW || i == mc.player.getInventory().selectedSlot) continue;
-
-            if (checkEffects.get()) {
-                if (isType("effect.minecraft.strength", i) && !hasStrength)  arrowSlotMap.put(ArrowType.Strength, i);
-                else if (isType("effect.minecraft.speed", i) && !hasSpeed) arrowSlotMap.put(ArrowType.Speed, i);
-            } else {
-                if (isType("effect.minecraft.strength", i)) arrowSlotMap.put(ArrowType.Strength, i);
-                else if (isType("effect.minecraft.speed", i)) arrowSlotMap.put(ArrowType.Speed, i);
-            }
-        }
-
-        return arrowSlotMap;
-    }
-
-    private boolean isType(String type, int slot) {
-        assert mc.player != null;
-        ItemStack stack = mc.player.getInventory().getStack(slot);
-        if (stack.getItem() == Items.TIPPED_ARROW) {
-            List<StatusEffectInstance> effects = PotionUtil.getPotion(stack).getEffects();
-            if (effects.size() > 0) {
-                StatusEffectInstance effect = effects.get(0);
-                return effect.getTranslationKey().equals(type);
-            }
-        }
-        return false;
-    }
-
-    private void setPressed(boolean pressed) {
-        mc.options.keyUse.setPressed(pressed);
-    }
-
-    private void moveItems(int from, int to) {
-        InvUtils.move().from(from).to(to);
-    }
-
-    private int findBow() {
-        int slot = -1;
-        assert mc.player != null;
-
-        for (int i = 0; i < 9; i++) if (mc.player.getInventory().getStack(i).getItem() == Items.BOW) slot = i;
-
-        return slot;
     }
 }

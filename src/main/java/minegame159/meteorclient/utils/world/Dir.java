@@ -16,22 +16,21 @@ public class Dir {
     public static final byte EAST = 1 << 6;
 
     public static byte get(Direction dir) {
-        switch (dir) {
-            case UP:    return UP;
-            case DOWN:  return DOWN;
-            case NORTH: return NORTH;
-            case SOUTH: return SOUTH;
-            case WEST:  return WEST;
-            case EAST:  return EAST;
-            default:    return 0;
-        }
+        return switch (dir) {
+            case UP    -> UP;
+            case DOWN  -> DOWN;
+            case NORTH -> NORTH;
+            case SOUTH -> SOUTH;
+            case WEST  -> WEST;
+            case EAST  -> EAST;
+        };
     }
 
     public static boolean is(int dir, byte idk) {
-        return (dir & idk) != idk;
+        return (dir & idk) == idk;
     }
 
     public static boolean isNot(int dir, byte idk) {
-        return (dir & idk) == idk;
+        return (dir & idk) != idk;
     }
 }

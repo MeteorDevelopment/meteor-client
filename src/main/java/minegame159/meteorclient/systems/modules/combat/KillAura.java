@@ -14,6 +14,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.TargetUtils;
@@ -37,187 +38,175 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KillAura extends Module {
-    public enum Weapon {
-        Sword,
-        Axe,
-        Both,
-        Any
-    }
-
-    public enum RotationMode {
-        Always,
-        OnHit,
-        None
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTargeting = settings.createGroup("Targeting");
     private final SettingGroup sgDelay = settings.createGroup("Delay");
 
     // General
 
-    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-switch")
-            .description("Switches to your selected weapon when attacking the target.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
+        .name("weapon")
+        .description("Only attacks an entity when a specified item is in your hand.")
+        .defaultValue(Weapon.Both)
+        .build()
     );
 
-    private final Setting<Weapon> weapon = sgGeneral.add(new EnumSetting.Builder<Weapon>()
-            .name("weapon")
-            .description("Only attacks an entity when a specified item is in your hand.")
-            .defaultValue(Weapon.Both)
-            .build()
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-switch")
+        .description("Switches to your selected weapon when attacking the target.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-on-click")
-            .description("Only attacks when hold left click.")
-            .defaultValue(false)
-            .build()
+        .name("only-on-click")
+        .description("Only attacks when hold left click.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> onlyWhenLook = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-when-look")
-            .description("Only attacks when you are looking at the entity.")
-            .defaultValue(false)
-            .build()
+        .name("only-when-look")
+        .description("Only attacks when you are looking at the entity.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> randomTeleport = sgGeneral.add(new BoolSetting.Builder()
-            .name("random-teleport")
-            .description("Randomly teleport around the target")
-            .defaultValue(false)
-            .visible(() -> !onlyWhenLook.get())
-            .build()
+        .name("random-teleport")
+        .description("Randomly teleport around the target")
+        .defaultValue(false)
+        .visible(() -> !onlyWhenLook.get())
+        .build()
     );
 
     private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
-            .name("rotate")
-            .description("Determines when you should rotate towards the target.")
-            .defaultValue(RotationMode.Always)
-            .build()
+        .name("rotate")
+        .description("Determines when you should rotate towards the target.")
+        .defaultValue(RotationMode.Always)
+        .build()
     );
 
     private final Setting<Double> hitChance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("hit-chance")
-            .description("The probability of your hits landing.")
-            .defaultValue(100)
-            .min(0)
-            .max(100)
-            .sliderMax(100)
-            .build()
+        .name("hit-chance")
+        .description("The probability of your hits landing.")
+        .defaultValue(100)
+        .min(0)
+        .max(100)
+        .sliderMax(100)
+        .build()
     );
 
-    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-on-combat")
-            .description("Freezes Baritone temporarily until you are finished attacking the entity.")
-            .defaultValue(true)
-            .build()
-    );
+    // TODO: Baritone
+//    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
+//        .name("pause-on-combat")
+//        .description("Freezes Baritone temporarily until you are finished attacking the entity.")
+//        .defaultValue(true)
+//        .build()
+//    );
 
     // Targeting
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to attack.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
-            .onlyAttackable()
-            .build()
+        .name("entities")
+        .description("Entities to attack.")
+        .defaultValue(new Object2BooleanOpenHashMap<>(0))
+        .onlyAttackable()
+        .build()
     );
 
     private final Setting<Double> range = sgTargeting.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The maximum range the entity can be to attack it.")
-            .defaultValue(4.5)
-            .min(0)
-            .sliderMax(6)
-            .build()
+        .name("range")
+        .description("The maximum range the entity can be to attack it.")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     private final Setting<Double> wallsRange = sgTargeting.add(new DoubleSetting.Builder()
-            .name("walls-range")
-            .description("The maximum range the entity can be attacked through walls.")
-            .defaultValue(3.5)
-            .min(0)
-            .sliderMax(6)
-            .build()
+        .name("walls-range")
+        .description("The maximum range the entity can be attacked through walls.")
+        .defaultValue(3.5)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     private final Setting<SortPriority> priority = sgTargeting.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
-            .description("How to filter targets within range.")
-            .defaultValue(SortPriority.LowestHealth)
-            .build()
+        .name("priority")
+        .description("How to filter targets within range.")
+        .defaultValue(SortPriority.LowestHealth)
+        .build()
     );
 
     private final Setting<Integer> maxTargets = sgTargeting.add(new IntSetting.Builder()
-            .name("max-targets")
-            .description("How many entities to target at once.")
-            .defaultValue(1)
-            .min(1).max(10)
-            .sliderMin(1).sliderMax(5)
-            .build()
+        .name("max-targets")
+        .description("How many entities to target at once.")
+        .defaultValue(1)
+        .min(1).max(10)
+        .sliderMin(1).sliderMax(5)
+        .build()
     );
 
     private final Setting<Boolean> babies = sgTargeting.add(new BoolSetting.Builder()
-            .name("babies")
-            .description("Whether or not to attack baby variants of the entity.")
-            .defaultValue(true)
-            .build()
+        .name("babies")
+        .description("Whether or not to attack baby variants of the entity.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> nametagged = sgTargeting.add(new BoolSetting.Builder()
-            .name("nametagged")
-            .description("Whether or not to attack mobs with a name tag.")
-            .defaultValue(false)
-            .build()
+        .name("nametagged")
+        .description("Whether or not to attack mobs with a name tag.")
+        .defaultValue(false)
+        .build()
     );
 
     // Delay
 
     private final Setting<Boolean> smartDelay = sgDelay.add(new BoolSetting.Builder()
-            .name("smart-delay")
-            .description("Uses the vanilla cooldown to attack entities.")
-            .defaultValue(true)
-            .build()
+        .name("smart-delay")
+        .description("Uses the vanilla cooldown to attack entities.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> hitDelay = sgDelay.add(new IntSetting.Builder()
-            .name("hit-delay")
-            .description("How fast you hit the entity in ticks.")
-            .defaultValue(0)
-            .min(0)
-            .sliderMax(60)
-            .visible(() -> !smartDelay.get())
-            .build()
+        .name("hit-delay")
+        .description("How fast you hit the entity in ticks.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(60)
+        .visible(() -> !smartDelay.get())
+        .build()
     );
 
     private final Setting<Boolean> randomDelayEnabled = sgDelay.add(new BoolSetting.Builder()
-            .name("random-delay-enabled")
-            .description("Adds a random delay between hits to attempt to bypass anti-cheats.")
-            .defaultValue(false)
-            .visible(() -> !smartDelay.get())
-            .build()
+        .name("random-delay-enabled")
+        .description("Adds a random delay between hits to attempt to bypass anti-cheats.")
+        .defaultValue(false)
+        .visible(() -> !smartDelay.get())
+        .build()
     );
 
     private final Setting<Integer> randomDelayMax = sgDelay.add(new IntSetting.Builder()
-            .name("random-delay-max")
-            .description("The maximum value for random delay.")
-            .defaultValue(4)
-            .min(0)
-            .sliderMax(20)
-            .visible(() -> randomDelayEnabled.get() && !smartDelay.get())
-            .build()
+        .name("random-delay-max")
+        .description("The maximum value for random delay.")
+        .defaultValue(4)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> randomDelayEnabled.get() && !smartDelay.get())
+        .build()
     );
 
     private final Setting<Integer> switchDelay = sgDelay.add(new IntSetting.Builder()
-            .name("switch-delay")
-            .description("How many ticks to wait before hitting an entity after switching hotbar slots.")
-            .defaultValue(0)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("switch-delay")
+        .description("How many ticks to wait before hitting an entity after switching hotbar slots.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(10)
+        .build()
     );
 
     private final List<Entity> targets = new ArrayList<>();
@@ -242,15 +231,15 @@ public class KillAura extends Module {
         TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
 
         // TODO: Baritone
-        /*if (targets.isEmpty()) {
-            if (wasPathing) {
+        if (targets.isEmpty()) {
+      /*      if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }
+            }*/
             return;
         }
 
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+/*        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
             wasPathing = true;
         }*/
@@ -275,16 +264,12 @@ public class KillAura extends Module {
             FindItemResult weaponResult = InvUtils.findInHotbar(itemStack -> {
                 Item item = itemStack.getItem();
 
-                switch (weapon.get()) {
-                    case Axe:
-                        return item instanceof AxeItem;
-                    case Sword:
-                        return item instanceof SwordItem;
-                    case Both:
-                        return item instanceof AxeItem || item instanceof SwordItem;
-                    default:
-                        return true;
-                }
+                return switch (weapon.get()) {
+                    case Axe -> item instanceof AxeItem;
+                    case Sword -> item instanceof SwordItem;
+                    case Both -> item instanceof AxeItem || item instanceof SwordItem;
+                    default -> true;
+                };
             });
 
             InvUtils.swap(weaponResult.getSlot());
@@ -336,8 +321,7 @@ public class KillAura extends Module {
         if (hitDelayTimer >= 0) {
             hitDelayTimer--;
             return false;
-        }
-        else {
+        } else {
             hitDelayTimer = hitDelay.get();
         }
 
@@ -356,12 +340,8 @@ public class KillAura extends Module {
     private void attack(Entity target) {
         if (Math.random() > hitChance.get() / 100) return;
 
-        if (rotation.get() == RotationMode.OnHit) {
-            rotate(target, () -> hitEntity(target));
-        } else {
-            hitEntity(target);
-        }
-
+        if (rotation.get() == RotationMode.OnHit) rotate(target, () -> hitEntity(target));
+        else hitEntity(target);
     }
 
     private void hitEntity(Entity target) {
@@ -375,26 +355,35 @@ public class KillAura extends Module {
     }
 
     private boolean itemInHand() {
-        switch(weapon.get()) {
-            case Axe:        return mc.player.getMainHandStack().getItem() instanceof AxeItem;
-            case Sword:      return mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            case Both:       return mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
-            default:         return true;
-        }
-    }
-
-    @Override
-    public String getInfoString() {
-        if (!targets.isEmpty()) {
-            Entity targetFirst = targets.get(0);
-            if (targetFirst instanceof PlayerEntity) return targetFirst.getEntityName();
-            return targetFirst.getType().getName().getString();
-        }
-        return null;
+        return switch (weapon.get()) {
+            case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
+            case Sword -> mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            case Both -> mc.player.getMainHandStack().getItem() instanceof AxeItem || mc.player.getMainHandStack().getItem() instanceof SwordItem;
+            default -> true;
+        };
     }
 
     public Entity getTarget() {
         if (!targets.isEmpty()) return targets.get(0);
         return null;
+    }
+
+    @Override
+    public String getInfoString() {
+        if (!targets.isEmpty()) EntityUtils.getName(getTarget());
+        return null;
+    }
+
+    public enum Weapon {
+        Sword,
+        Axe,
+        Both,
+        Any
+    }
+
+    public enum RotationMode {
+        Always,
+        OnHit,
+        None
     }
 }

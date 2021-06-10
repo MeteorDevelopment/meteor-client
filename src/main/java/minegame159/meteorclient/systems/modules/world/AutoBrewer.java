@@ -34,7 +34,7 @@ public class AutoBrewer extends Module {
     private int timer;
 
     public AutoBrewer() {
-        super(Categories.World, "auto-brewer", "Automatically brews specified potions.");
+        super(Categories.World, "auto-brewer", "Automatically brews the specified potion.");
     }
 
     @Override

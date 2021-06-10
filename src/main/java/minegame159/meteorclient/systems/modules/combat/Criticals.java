@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
-//Updated by squidoodly 18/07/2020
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
@@ -26,27 +25,26 @@ public class Criticals extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The mode on how Criticals will function.")
-            .defaultValue(Mode.Packet)
-            .build()
+        .name("mode")
+        .description("The mode on how Criticals will function.")
+        .defaultValue(Mode.Packet)
+        .build()
     );
 
     private final Setting<Boolean> ka = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-killaura")
-            .description("Only performs crits when using killaura.")
-            .defaultValue(false)
-            .build()
+        .name("only-killaura")
+        .description("Only performs crits when using killaura.")
+        .defaultValue(false)
+        .build()
     );
-
-    public Criticals() {
-        super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
-    }
 
     private PlayerInteractEntityC2SPacket attackPacket;
     private HandSwingC2SPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
+    public Criticals() {
+        super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
+    }
 
     @Override
     public void onActivate() {
@@ -129,7 +127,7 @@ public class Criticals extends Module {
     }
 
     private boolean skipCrit() {
-        return !mc.player.isOnGround() || mc.player.isSubmergedInWater() || mc.player.isInLava()  || mc.player.isClimbing();
+        return !mc.player.isOnGround() || mc.player.isSubmergedInWater() || mc.player.isInLava() || mc.player.isClimbing();
     }
 
     @Override

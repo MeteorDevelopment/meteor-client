@@ -6,11 +6,10 @@
 package minegame159.meteorclient.systems.modules.render;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import minegame159.meteorclient.mixin.WorldRendererAccessor;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.ColorSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -59,7 +58,7 @@ public class BreakIndicators extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         Map<Integer, BlockBreakingInfo> blocks = ((WorldRendererAccessor) mc.worldRenderer).getBlockBreakingInfos();
 
         float ownBreakingStage = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress();
@@ -121,7 +120,7 @@ public class BreakIndicators extends Module {
                     (int) Math.round(c1Lines.a + (c2Lines.a - c1Lines.a) * progress)
             );
 
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, cSides, cLines, shapeMode.get(), 0);
+            event.renderer.box(x1, y1, z1, x2, y2, z2, cSides, cLines, shapeMode.get(), 0);
         });
     }
 }

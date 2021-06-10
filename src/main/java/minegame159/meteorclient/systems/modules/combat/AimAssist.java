@@ -7,13 +7,14 @@ package minegame159.meteorclient.systems.modules.combat;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.Target;
 import minegame159.meteorclient.utils.entity.TargetUtils;
@@ -30,64 +31,58 @@ public class AimAssist extends Module {
 
     // General
 
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The range at which an entity can be targeted.")
-            .defaultValue(5)
-            .min(0)
-            .build()
-    );
-
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to aim at.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
-            .build()
+        .name("entities")
+        .description("Entities to aim at.")
+        .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+        .build()
     );
 
-    private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
-            .name("friends")
-            .description("Whether or not to aim at friends.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+        .name("range")
+        .description("The range at which an entity can be targeted.")
+        .defaultValue(5)
+        .min(0)
+        .build()
     );
 
     private final Setting<Boolean> ignoreWalls = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-walls")
-            .description("Whether or not to ignore aiming through walls.")
-            .defaultValue(false)
-            .build()
+        .name("ignore-walls")
+        .description("Whether or not to ignore aiming through walls.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
-            .description("How to select target from entities in range.")
-            .defaultValue(SortPriority.LowestHealth)
-            .build()
+        .name("priority")
+        .description("How to select target from entities in range.")
+        .defaultValue(SortPriority.LowestHealth)
+        .build()
     );
 
     private final Setting<Target> bodyTarget = sgGeneral.add(new EnumSetting.Builder<Target>()
-            .name("target")
-            .description("Which part of the entities body to aim at.")
-            .defaultValue(Target.Body)
-            .build()
+        .name("aim-target")
+        .description("Which part of the entities body to aim at.")
+        .defaultValue(Target.Body)
+        .build()
     );
 
     // Aim Speed
 
     private final Setting<Boolean> instant = sgSpeed.add(new BoolSetting.Builder()
-            .name("instant-look")
-            .description("Instantly looks at the entity.")
-            .defaultValue(false)
-            .build()
+        .name("instant-look")
+        .description("Instantly looks at the entity.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Double> speed = sgSpeed.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("How fast to aim at the entity.")
-            .defaultValue(5)
-            .min(0)
-            .build()
+        .name("speed")
+        .description("How fast to aim at the entity.")
+        .defaultValue(5)
+        .min(0)
+        .visible(() -> !instant.get())
+        .build()
     );
 
     private final Vec3 vec3d1 = new Vec3();
@@ -110,11 +105,11 @@ public class AimAssist extends Module {
             }
 
             return true;
-            }, priority.get());
+        }, priority.get());
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (target != null) aim(target, event.tickDelta, instant.get());
     }
 
@@ -157,16 +152,13 @@ public class AimAssist extends Module {
         vec.set(entity, tickDelta);
 
         switch (bodyTarget.get()) {
-            case Head: vec.add(0, entity.getEyeHeight(entity.getPose()), 0); break;
-            case Body: vec.add(0, entity.getEyeHeight(entity.getPose()) / 2, 0); break;
+            case Head -> vec.add(0, entity.getEyeHeight(entity.getPose()), 0);
+            case Body -> vec.add(0, entity.getEyeHeight(entity.getPose()) / 2, 0);
         }
     }
 
     @Override
     public String getInfoString() {
-        if (target != null && target instanceof PlayerEntity) return target.getEntityName();
-        if (target != null) return target.getType().getName().getString();
-
-        return null;
+        return EntityUtils.getName(target);
     }
 }

@@ -12,15 +12,13 @@ import minegame159.meteorclient.gui.screens.HudElementScreen;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.WindowTabScreen;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
@@ -288,7 +286,7 @@ public class HudTab extends Tab {
                 Utils.unscaledProjection();
             }
 
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            Renderer2D.COLOR.begin();
 
             for (HudElement element : hud.elements) {
                 if (element.active) continue;
@@ -317,8 +315,10 @@ public class HudTab extends Tab {
                 }
             }
 
-            Renderer.NORMAL.end();
+            Renderer2D.COLOR.render(new MatrixStack());
             Utils.scaledProjection();
+
+            runAfterRenderTasks();
         }
 
         private void renderElement(HudElement module, Color bgColor, Color olColor) {
@@ -326,11 +326,11 @@ public class HudTab extends Tab {
         }
 
         private void renderQuad(double x, double y, double w, double h, Color bgColor, Color olColor) {
-            Renderer.NORMAL.quad(x, y, w, h, bgColor);
-            Renderer.NORMAL.quad(x - 1, y - 1, w + 2, 1, olColor);
-            Renderer.NORMAL.quad(x - 1, y + h - 1, w + 2, 1, olColor);
-            Renderer.NORMAL.quad(x - 1, y, 1, h, olColor);
-            Renderer.NORMAL.quad(x + w, y, 1, h, olColor);
+            Renderer2D.COLOR.quad(x, y, w, h, bgColor);
+            Renderer2D.COLOR.quad(x - 1, y - 1, w + 2, 1, olColor);
+            Renderer2D.COLOR.quad(x - 1, y + h - 1, w + 2, 1, olColor);
+            Renderer2D.COLOR.quad(x - 1, y, 1, h, olColor);
+            Renderer2D.COLOR.quad(x + w, y, 1, h, olColor);
         }
     }
 }

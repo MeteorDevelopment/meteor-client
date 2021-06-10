@@ -7,7 +7,7 @@ package minegame159.meteorclient.rendering;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.gui.renderer.packer.TextureRegion;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
@@ -17,6 +17,7 @@ import net.minecraft.client.render.VertexFormat;
 
 import static org.lwjgl.opengl.GL11.*;
 
+@Deprecated
 public class MeshBuilder {
     private final BufferBuilder buffer;
     private double offsetX, offsetY, offsetZ;
@@ -36,7 +37,7 @@ public class MeshBuilder {
         buffer = new BufferBuilder(2097152);
     }
 
-    public void begin(RenderEvent event, DrawMode drawMode, VertexFormat format) {
+    public void begin(Render3DEvent event, DrawMode drawMode, VertexFormat format) {
         if (event != null) {
             offsetX = -event.offsetX;
             offsetY = -event.offsetY;
@@ -169,14 +170,14 @@ public class MeshBuilder {
     }
 
     public void boxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        if (Dir.is(excludeDir, Dir.DOWN)) quad(x1, y1, z1, x1, y1, z2, x2, y1, z2, x2, y1, z1, color); // Bottom
-        if (Dir.is(excludeDir, Dir.UP)) quad(x1, y2, z1, x1, y2, z2, x2, y2, z2, x2, y2, z1, color); // Top
+        if (Dir.isNot(excludeDir, Dir.DOWN)) quad(x1, y1, z1, x1, y1, z2, x2, y1, z2, x2, y1, z1, color); // Bottom
+        if (Dir.isNot(excludeDir, Dir.UP)) quad(x1, y2, z1, x1, y2, z2, x2, y2, z2, x2, y2, z1, color); // Top
 
-        if (Dir.is(excludeDir, Dir.NORTH)) quad(x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, color); // Front
-        if (Dir.is(excludeDir, Dir.SOUTH)) quad(x1, y1, z2, x1, y2, z2, x2, y2, z2, x2, y1, z2, color); // Back
+        if (Dir.isNot(excludeDir, Dir.NORTH)) quad(x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, color); // Front
+        if (Dir.isNot(excludeDir, Dir.SOUTH)) quad(x1, y1, z2, x1, y2, z2, x2, y2, z2, x2, y1, z2, color); // Back
 
-        if (Dir.is(excludeDir, Dir.WEST)) quad(x1, y1, z1, x1, y2, z1, x1, y2, z2, x1, y1, z2, color); // Left
-        if (Dir.is(excludeDir, Dir.EAST)) quad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, color); // Right
+        if (Dir.isNot(excludeDir, Dir.WEST)) quad(x1, y1, z1, x1, y2, z1, x1, y2, z2, x1, y1, z2, color); // Left
+        if (Dir.isNot(excludeDir, Dir.EAST)) quad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, color); // Right
     }
 
     // Rounded quad
@@ -328,20 +329,20 @@ public class MeshBuilder {
     }
 
     public void boxEdges(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.NORTH)) line(x1, y1, z1, x1, y2, z1, color);
-        if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x1, y2, z2, color);
-        if (Dir.is(excludeDir, Dir.EAST) && Dir.is(excludeDir, Dir.NORTH)) line(x2, y1, z1, x2, y2, z1, color);
-        if (Dir.is(excludeDir, Dir.EAST) && Dir.is(excludeDir, Dir.SOUTH)) line(x2, y1, z2, x2, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.NORTH)) line(x1, y1, z1, x1, y2, z1, color);
+        if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x1, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.NORTH)) line(x2, y1, z1, x2, y2, z1, color);
+        if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.SOUTH)) line(x2, y1, z2, x2, y2, z2, color);
 
-        if (Dir.is(excludeDir, Dir.NORTH)) line(x1, y1, z1, x2, y1, z1, color);
-        if (Dir.is(excludeDir, Dir.NORTH)) line(x1, y2, z1, x2, y2, z1, color);
-        if (Dir.is(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x2, y1, z2, color);
-        if (Dir.is(excludeDir, Dir.SOUTH)) line(x1, y2, z2, x2, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.NORTH)) line(x1, y1, z1, x2, y1, z1, color);
+        if (Dir.isNot(excludeDir, Dir.NORTH)) line(x1, y2, z1, x2, y2, z1, color);
+        if (Dir.isNot(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x2, y1, z2, color);
+        if (Dir.isNot(excludeDir, Dir.SOUTH)) line(x1, y2, z2, x2, y2, z2, color);
 
-        if (Dir.is(excludeDir, Dir.WEST)) line(x1, y1, z1, x1, y1, z2, color);
-        if (Dir.is(excludeDir, Dir.WEST)) line(x1, y2, z1, x1, y2, z2, color);
-        if (Dir.is(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
-        if (Dir.is(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.WEST)) line(x1, y1, z1, x1, y1, z2, color);
+        if (Dir.isNot(excludeDir, Dir.WEST)) line(x1, y2, z1, x1, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
+        if (Dir.isNot(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
     }
 
     public void boxEdges(double x, double y, double width, double height, Color color) {

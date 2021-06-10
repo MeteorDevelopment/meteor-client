@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems.modules.render.search;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.utils.IScreenFactory;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.BlockDataSetting;
 import minegame159.meteorclient.settings.IBlockData;
 import minegame159.meteorclient.utils.misc.IChangeable;

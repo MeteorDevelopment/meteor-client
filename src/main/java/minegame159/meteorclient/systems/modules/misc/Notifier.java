@@ -186,17 +186,18 @@ public class Notifier extends Module {
 
         Entity entity = p.getEntity(mc.world);
 
-        if (entity == null
-                || (entity.equals(mc.player) && totemsIgnoreOwn.get())
-                || (Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreOthers.get())
-                || (!Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreFriends.get())
+        if (!(entity instanceof PlayerEntity)) return;
+
+        if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
+            || (Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreOthers.get())
+            || (!Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreFriends.get())
         ) return;
 
         synchronized (totemPopMap) {
             int pops = totemPopMap.getOrDefault(entity.getUuid(), 0);
             totemPopMap.put(entity.getUuid(), ++pops);
 
-            ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", ((PlayerEntity) entity).getEntityName(), pops, pops == 1 ? "totem" : "totems");
+            ChatUtils.sendMsg(getChatId(entity), Formatting.GRAY, "(highlight)%s (default)popped (highlight)%d (default)%s.", entity.getEntityName(), pops, pops == 1 ? "totem" : "totems");
         }
     }
 

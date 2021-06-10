@@ -8,23 +8,28 @@ package minegame159.meteorclient.gui.renderer;
 import minegame159.meteorclient.gui.utils.Cell;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WContainer;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.renderer.DrawMode;
+import minegame159.meteorclient.renderer.Mesh;
+import minegame159.meteorclient.renderer.ShaderMesh;
+import minegame159.meteorclient.renderer.Shaders;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
 
 public class GuiDebugRenderer {
     private static final Color CELL_COLOR = new Color(25, 225, 25);
     private static final Color WIDGET_COLOR = new Color(25, 25, 225);
 
-    private final MeshBuilder mb = new MeshBuilder();
+    private final Mesh mesh = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
 
-    public void render(WWidget widget) {
+    public void render(WWidget widget, MatrixStack matrices) {
         if (widget == null) return;
 
-        mb.begin(null, DrawMode.Lines, VertexFormats.POSITION_COLOR);
+        mesh.begin();
+
         renderWidget(widget);
-        mb.end();
+
+        mesh.end();
+        mesh.render(matrices);
     }
 
     private void renderWidget(WWidget widget) {
@@ -46,7 +51,9 @@ public class GuiDebugRenderer {
     }
 
     private void line(double x1, double y1, double x2, double y2, Color color) {
-        mb.pos(x1, y1, 0).color(color).endVertex();
-        mb.pos(x2, y2, 0).color(color).endVertex();
+        mesh.line(
+            mesh.vec2(x1, y1).color(color).next(),
+            mesh.vec2(x2, y2).color(color).next()
+        );
     }
 }

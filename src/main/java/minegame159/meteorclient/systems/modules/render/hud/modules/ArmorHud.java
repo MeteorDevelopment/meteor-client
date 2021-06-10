@@ -5,10 +5,12 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.render.RenderUtils;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -65,11 +67,8 @@ public class ArmorHud extends HudElement {
     @Override
     public void update(HudRenderer renderer) {
         switch (orientation.get()) {
-            case Horizontal:
-                box.setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
-                break;
-            case Vertical:
-                box.setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
+            case Horizontal -> box.setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
+            case Vertical   -> box.setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
         }
     }
 
@@ -80,13 +79,14 @@ public class ArmorHud extends HudElement {
         double armorX;
         double armorY;
 
+        MatrixStack matrices = RenderSystem.getModelViewStack();
+
+        matrices.push();
+        matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
+
         int slot = flipOrder.get() ? 3 : 0;
         for (int position = 0; position < 4; position++) {
             ItemStack itemStack = getItem(slot);
-
-            // TODO: Fix
-            /*RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);*/
 
             if (orientation.get() == Orientation.Vertical) {
                 armorX = x / scale.get();
@@ -118,11 +118,11 @@ public class ArmorHud extends HudElement {
                 renderer.text(message, armorX, armorY, hud.primaryColor.get());
             }
 
-            //RenderSystem.popMatrix();
-
             if (flipOrder.get()) slot--;
             else slot++;
         }
+
+        matrices.pop();
     }
 
     private ItemStack getItem(int i) {

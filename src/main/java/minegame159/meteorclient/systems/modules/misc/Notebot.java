@@ -7,7 +7,7 @@ package minegame159.meteorclient.systems.modules.misc;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.screens.NotebotHelpScreen;
@@ -15,8 +15,7 @@ import minegame159.meteorclient.gui.widgets.WLabel;
 import minegame159.meteorclient.gui.widgets.WWidget;
 import minegame159.meteorclient.gui.widgets.containers.WTable;
 import minegame159.meteorclient.gui.widgets.pressable.WButton;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -175,7 +174,7 @@ public class Notebot extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (!render.get()) return;
 
         if (stage != Stage.SetUp && stage != Stage.Tune && !isPlaying) return;
@@ -188,7 +187,7 @@ public class Notebot extends Module {
             double y2 = blockPos.getY() + 1;
             double z2 = blockPos.getZ() + 1;
 
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         });
     }
 
