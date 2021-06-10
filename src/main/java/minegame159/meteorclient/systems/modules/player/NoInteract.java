@@ -100,16 +100,14 @@ public class NoInteract extends Module {
     private void onSendPacket(PacketEvent.Send event) {
         if (blockInteract.get() == BlockInteractMode.Packet && event.packet instanceof PlayerInteractBlockC2SPacket) {
             switch (((PlayerInteractBlockC2SPacket) event.packet).getHand()) {
-                case MAIN_HAND:
+                case MAIN_HAND -> {
                     if ((blockInteractHand.get() == Hand.Mainhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL))
-                        event.cancel();
-                    break;
-                case OFF_HAND:
+                        && (!onlyCrystals.get() || mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
+                }
+                case OFF_HAND -> {
                     if ((blockInteractHand.get() == Hand.Offhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL))
-                        event.cancel();
-                    break;
+                        && (!onlyCrystals.get() || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
+                }
             }
         }
     }
@@ -118,16 +116,14 @@ public class NoInteract extends Module {
     private void onInteractBlock(InteractBlockEvent event) {
         if (blockInteract.get() == BlockInteractMode.Normal) {
             switch (event.hand) {
-                case MAIN_HAND:
+                case MAIN_HAND -> {
                     if ((blockInteractHand.get() == Hand.Mainhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL))
-                        event.cancel();
-                    break;
-                case OFF_HAND:
+                        && (!onlyCrystals.get() || mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
+                }
+                case OFF_HAND -> {
                     if ((blockInteractHand.get() == Hand.Offhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL))
-                        event.cancel();
-                    break;
+                        && (!onlyCrystals.get() || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
+                }
             }
         }
     }

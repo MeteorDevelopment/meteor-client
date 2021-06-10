@@ -69,7 +69,7 @@ public class NoSlow extends Module {
     }
 
     public boolean airStrict() {
-        return isActive() && airStrict.get() && mc.player.isUsingItem() && !mc.player.isOnGround();
+        return isActive() && airStrict.get() && mc.player.isUsingItem();
     }
 
     public boolean items() {
