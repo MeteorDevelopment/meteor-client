@@ -5,9 +5,13 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
+import meteordevelopment.orbit.EventHandler;
+import minegame159.meteorclient.events.entity.player.CobwebEntityCollisionEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.systems.modules.Modules;
+import minegame159.meteorclient.systems.modules.world.Timer;
 
 public class NoSlow extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -76,10 +80,6 @@ public class NoSlow extends Module {
         return isActive() && items.get();
     }
 
-    public boolean web() {
-        return isActive() && web.get() != WebMode.None;
-    }
-
     public boolean soulSand() {
         return isActive() && soulSand.get();
     }
@@ -90,6 +90,19 @@ public class NoSlow extends Module {
 
     public boolean sneaking() {
         return isActive() && sneaking.get();
+    }
+
+    @EventHandler
+    private void onWebEntityCollision(CobwebEntityCollisionEvent event) {
+        if (web.get() != WebMode.None) {
+            switch (web.get()) {
+                case Vanilla -> event.cancel();
+                case Timer -> {
+                    if (!mc.player.isOnGround()) Modules.get().get(Timer.class).setOverride(webTimer.get());
+                    else Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                }
+            }
+        }
     }
 
     public enum WebMode {
