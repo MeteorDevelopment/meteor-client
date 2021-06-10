@@ -2,10 +2,12 @@
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
  * Copyright (c) 2021 Meteor Development.
  */
+
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoSlow;
+import minegame159.meteorclient.systems.modules.world.Timer;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.CobwebBlock;
 import net.minecraft.entity.Entity;
@@ -22,6 +24,15 @@ import static minegame159.meteorclient.utils.Utils.mc;
 public class CobwebBlockMixin {
     @Inject(method = "onEntityCollision", at = @At("HEAD"), cancellable = true)
     private void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo info) {
-        if (Modules.get().get(NoSlow.class).web() && entity == mc.player) info.cancel();
+        NoSlow noSlow = Modules.get().get(NoSlow.class);
+        if (noSlow.web() && entity == mc.player) {
+            switch (noSlow.web.get()) {
+                case Vanilla -> info.cancel();
+                case Timer -> {
+                    if (!entity.isOnGround()) Modules.get().get(Timer.class).setOverride(noSlow.webTimer.get());
+                    else Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                }
+            }
+        }
     }
 }
