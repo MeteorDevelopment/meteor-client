@@ -10,16 +10,10 @@ import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.NoRender;
 import minegame159.meteorclient.utils.Utils;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Drawable;
-import net.minecraft.client.gui.Element;
-import net.minecraft.client.gui.Selectable;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
@@ -28,13 +22,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Screen.class)
 public abstract class ScreenMixin {
-    @Shadow public int width, height;
-
-    @Shadow public abstract void tick();
-    @Shadow @Nullable protected MinecraftClient client;
-
-    @Shadow protected abstract <T extends Element & Drawable & Selectable> T addDrawableChild(T drawableElement);
-
     @Inject(method = "renderBackground(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At("HEAD"), cancellable = true)
     private void onRenderBackground(CallbackInfo info) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
