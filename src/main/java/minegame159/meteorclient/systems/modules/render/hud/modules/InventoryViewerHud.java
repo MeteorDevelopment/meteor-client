@@ -95,12 +95,12 @@ public class InventoryViewerHud extends HudElement {
                 mc.getTextureManager().bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
 
                 Renderer2D.TEXTURE.begin();
-                Renderer2D.TEXTURE.texQuad(x, y, box.width, box.height, color.get(), GuiThemes.get().roundAmount(), true);
+                Renderer2D.TEXTURE.texQuad(x, y, box.width, box.height, color.get());
                 Renderer2D.TEXTURE.render(null);
             }
             case Flat -> {
                 Renderer2D.COLOR.begin();
-                Renderer2D.COLOR.quad(x, y, w, h, color.get(), GuiThemes.get().roundAmount(), true);
+                Renderer2D.COLOR.quadRounded(x, y, w, h, color.get(), GuiThemes.get().roundAmount(), true);
                 Renderer2D.COLOR.render(null);
             }
         }

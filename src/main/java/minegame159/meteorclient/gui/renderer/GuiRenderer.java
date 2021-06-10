@@ -206,7 +206,7 @@ public class GuiRenderer {
     }
 
     public void quadRounded(double x, double y, double width, double height, Color color, int round, boolean roundTop) {
-        mb.quadRounded(x, y, width, height, color, round, roundTop);
+        r.quadRounded(x, y, width, height, color, round, roundTop);
     }
     public void quadRounded(double x, double y, double width, double height, Color color, int round) {
         quadRounded(x, y, width, height, color, round, true);
@@ -215,22 +215,22 @@ public class GuiRenderer {
         quadRounded(widget.x, widget.y, widget.width, widget.height, color, round);
     }
     public void quadOutlineRounded(double x, double y, double width, double height, Color color, int round, double s) {
-        mb.quadRoundedOutline(x, y, width, height, color, round, s);
+        r.quadRoundedOutline(x, y, width, height, color, round, s);
     }
     public void quadOutlineRounded(WWidget widget, Color color, int round, double s) {
         quadOutlineRounded(widget.x, widget.y, widget.width, widget.height, color, round, s);
     }
     public void quadRoundedSide(double x, double y, double width, double height, Color color, int r, boolean right) {
-        mb.quadRoundedSide(x, y, width, height, color, r, right);
+        this.r.quadRoundedSide(x, y, width, height, color, r, right);
     }
     public void quadRoundedSide(WWidget widget, Color color, int round, boolean right) {
         quadRoundedSide(widget.x, widget.y, widget.width, widget.height, color, round, right);
     }
     public void circlePart(double x, double y, double r, double startAngle, double angle, Color color) {
-        mb.circlePart(x, y, r, startAngle, angle, color);
+        this.r.circlePart(x, y, r, startAngle, angle, color);
     }
     public void circlePartOutline(double x, double y, double r, double startAngle, double angle, Color color, double outlineWidth) {
-        mb.circlePartOutline(x, y, r, startAngle, angle, color, outlineWidth);
+        this.r.circlePartOutline(x, y, r, startAngle, angle, color, outlineWidth);
     }
 
     public void rotatedQuad(double x, double y, double width, double height, double rotation, GuiTexture texture, Color color) {

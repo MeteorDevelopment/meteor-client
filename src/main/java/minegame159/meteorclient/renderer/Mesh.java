@@ -141,6 +141,15 @@ public class Mesh {
         growIfNeeded();
     }
 
+    public void triangle(int i1, int i2, int i3) {
+        indices.put(i1);
+        indices.put(i2);
+        indices.put(i3);
+
+        indicesCount += 3;
+        growIfNeeded();
+    }
+
     private void growIfNeeded() {
         // Vertices
         if ((vertexI + 1) * primitiveVerticesSize >= vertices.capacity()) {
