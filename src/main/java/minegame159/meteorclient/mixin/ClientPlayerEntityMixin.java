@@ -58,16 +58,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
             if (!event.isCancelled()) networkHandler.sendPacket(new ChatMessageC2SPacket(event.message));
 
             info.cancel();
-            return;
-        }
-
-        if (message.startsWith(Config.get().prefix)) {
-            try {
-                Commands.get().dispatch(message.substring(Config.get().prefix.length()));
-            } catch (CommandSyntaxException e) {
-                ChatUtils.error(e.getMessage());
-            }
-            info.cancel();
         }
     }
 

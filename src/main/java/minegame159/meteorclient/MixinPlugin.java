@@ -6,7 +6,6 @@
 package minegame159.meteorclient;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.ModContainer;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
@@ -16,18 +15,10 @@ import java.util.List;
 import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
-    private boolean isResourceLoaderPresent = false;
     private String gameRenderer, getFovDesc;
 
     @Override
     public void onLoad(String mixinPackage) {
-        for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-            if (mod.getMetadata().getId().startsWith("fabric-resource-loader")) {
-                isResourceLoaderPresent = true;
-                break;
-            }
-        }
-
         gameRenderer = FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", "net.minecraft.class_757");
         getFovDesc = "(L" + FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", "net.minecraft.class_4184").replace('.', '/') + ";FZ)D";
     }
@@ -39,10 +30,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.endsWith("NamespaceResourceManagerMixin") || mixinClassName.endsWith("ReloadableResourceManagerImplMixin")) {
-            return !isResourceLoaderPresent;
-        }
-
         return true;
     }
 

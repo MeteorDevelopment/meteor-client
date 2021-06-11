@@ -6,7 +6,6 @@
 package minegame159.meteorclient.systems.modules.misc.swarm;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.Main;
 import minegame159.meteorclient.events.game.GameJoinedEvent;
 import minegame159.meteorclient.events.game.GameLeftEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -78,9 +77,6 @@ public class Swarm extends Module {
 
         WButton stop = b.add(theme.button("Stop")).expandX().widget();
         stop.action = this::close;
-
-        WButton guide = list.add(theme.button("Guide")).expandX().widget();
-        guide.action = () -> Main.openUrl("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide");
 
         return list;
     }

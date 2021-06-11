@@ -2,6 +2,7 @@
   "required": true,
   "package": "minegame159.meteorclient.mixin",
   "compatibilityLevel": "JAVA_16",
+  "plugin": "minegame159.meteorclient.MixinPlugin",
   "client": [
     "AbstractBlockAccessor",
     "AbstractBlockMixin",
