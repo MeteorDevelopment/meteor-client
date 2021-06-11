@@ -194,7 +194,7 @@ public class SBlock {
         }
         else {
             // Lines
-            if (shapeMode != ShapeMode.Sides) {
+            if (shapeMode.lines()) {
                 // Vertical, BA_LE
                 if (((neighbours & LE) != LE && (neighbours & BA) != BA) || ((neighbours & LE) == LE && (neighbours & BA) == BA && (neighbours & BA_LE) != BA_LE)) {
                     event.renderer.line(x1, y1, z1, x1, y2, z1, lineColor);
@@ -248,14 +248,14 @@ public class SBlock {
             }
 
             // Sides
-            if (shapeMode != ShapeMode.Lines) {
+            if (shapeMode.sides()) {
                 // Bottom
                 if ((neighbours & BO) != BO) {
-                    event.renderer.quadHorizontal(x1, z1, x2, z2, y1, sideColor);
+                    event.renderer.quadHorizontal(x1, y1, z1, x2, z2, sideColor);
                 }
                 // Top
                 if ((neighbours & TO) != TO) {
-                    event.renderer.quadHorizontal(x1, z1, x2, z2, y2, sideColor);
+                    event.renderer.quadHorizontal(x1, y2, z1, x2, z2, sideColor);
                 }
                 // Front
                 if ((neighbours & FO) != FO) {

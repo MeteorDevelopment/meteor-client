@@ -142,7 +142,7 @@ public class SGroup {
         SBlockData blockData = search.getBlockData(block);
 
         if (blockData.tracer) {
-            RenderUtils.drawLine(RenderUtils.getCameraVector(), sumX / blocks.size() + 0.5, sumY / blocks.size() + 0.5, sumZ / blocks.size() + 0.5, blockData.tracerColor, event);
+            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, sumX / blocks.size() + 0.5, sumY / blocks.size() + 0.5, sumZ / blocks.size() + 0.5, blockData.tracerColor);
         }
     }
 }

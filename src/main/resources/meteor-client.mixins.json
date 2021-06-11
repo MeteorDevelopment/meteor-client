@@ -31,7 +31,6 @@
     "CactusBlockMixin",
     "CameraMixin",
     "ChatHudAccessor",
-    "ChatHudLineAccessor",
     "ChatHudMixin",
     "ChatScreenMixin",
     "ChunkOcclusionDataBuilderMixin",
@@ -127,6 +126,8 @@
     "TextVisitFactoryMixin",
     "TridentItemMixin",
     "Vec3dMixin",
+    "WorldAccessor",
+    "WorldChunkAccessor",
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin"

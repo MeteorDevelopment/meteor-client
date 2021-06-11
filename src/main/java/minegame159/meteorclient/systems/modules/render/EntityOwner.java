@@ -9,9 +9,8 @@ import com.google.common.reflect.TypeToken;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.mixin.ProjectileEntityAccessor;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
-import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.renderer.Renderer2D;
+import minegame159.meteorclient.renderer.text.TextRenderer;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.DoubleSetting;
 import minegame159.meteorclient.settings.Setting;
@@ -23,7 +22,6 @@ import minegame159.meteorclient.utils.network.HttpUtils;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.HorseBaseEntity;
 import net.minecraft.entity.passive.TameableEntity;
@@ -37,8 +35,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public class EntityOwner extends Module {
-    private static final MeshBuilder MB = new MeshBuilder(128);
-
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
     private static final Type RESPONSE_TYPE = new TypeToken<List<UuidNameHistoryResponseItem>>() {}.getType();
@@ -104,9 +100,9 @@ public class EntityOwner extends Module {
         double x = -w / 2;
         double y = -text.getHeight();
 
-        MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-        MB.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
-        MB.end();
+        Renderer2D.COLOR.begin();
+        Renderer2D.COLOR.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
+        Renderer2D.COLOR.render(null);
 
         text.render(name, x, y, TEXT);
 

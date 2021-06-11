@@ -18,9 +18,12 @@ import minegame159.meteorclient.systems.modules.render.BetterTooltips;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.render.PeekScreen;
 import minegame159.meteorclient.utils.render.color.Color;
+import minegame159.meteorclient.utils.world.BlockEntityIterator;
+import minegame159.meteorclient.utils.world.WorldChunkIterator;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
@@ -39,6 +42,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.world.chunk.WorldChunk;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -73,6 +77,14 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static Iterable<WorldChunk> chunks() {
+        return WorldChunkIterator::new;
+    }
+
+    public static Iterable<BlockEntity> blockEntities() {
+        return BlockEntityIterator::new;
     }
 
     public static void getEnchantments(ItemStack itemStack, Object2IntMap<Enchantment> enchantments) {

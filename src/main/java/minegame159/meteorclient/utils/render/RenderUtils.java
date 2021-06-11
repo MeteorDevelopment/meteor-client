@@ -6,23 +6,21 @@
 package minegame159.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.render.Render3DEvent;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.render.FreeLook;
-import minegame159.meteorclient.systems.modules.render.Freecam;
-import minegame159.meteorclient.utils.entity.Target;
-import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.block.entity.BlockEntity;
+import minegame159.meteorclient.mixininterface.IMatrix4f;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class RenderUtils {
+    public static Vec3d center;
+
     // Items
     public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
         //RenderSystem.disableDepthTest();
@@ -43,42 +41,39 @@ public class RenderUtils {
         drawItem(itemStack, x, y, 1, overlay);
     }
 
-    // Tracers
-    public static Vec3d getCameraVector() {
-        boolean dist = Modules.get().isActive(Freecam.class) || Modules.get().get(FreeLook.class).playerMode();
-        return new Vec3d(0, 0, dist ? 1 : 75)
-                .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
-                .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
-                .add(mc.gameRenderer.getCamera().getPos());
+    public static void updateScreenCenter() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+
+        Vec3d pos = new Vec3d(0, 0, 1);
+
+        if (mc.options.bobView) {
+            MatrixStack bobViewMatrices = new MatrixStack();
+
+            bobView(bobViewMatrices);
+            bobViewMatrices.peek().getModel().invert();
+
+            pos = ((IMatrix4f) (Object) bobViewMatrices.peek().getModel()).mul(pos);
+        }
+
+        center = new Vec3d(pos.x, -pos.y, pos.z)
+            .rotateX(-(float) Math.toRadians(mc.gameRenderer.getCamera().getPitch()))
+            .rotateY(-(float) Math.toRadians(mc.gameRenderer.getCamera().getYaw()))
+            .add(mc.gameRenderer.getCamera().getPos());
     }
 
-    public static void drawTracerToEntity(Render3DEvent event, Entity entity, Color color, Target target, boolean stem) {
-        double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
-        double z = entity.prevZ + (entity.getZ() - entity.prevZ) * event.tickDelta;
+    private static void bobView(MatrixStack matrices) {
+        Entity cameraEntity = MinecraftClient.getInstance().getCameraEntity();
 
-        double height = entity.getBoundingBox().maxY - entity.getBoundingBox().minY;
-        if (target == Target.Head) y += height;
-        else if (target == Target.Body) y += height / 2;
+        if (cameraEntity instanceof PlayerEntity playerEntity) {
+            float f = MinecraftClient.getInstance().getTickDelta();
+            float g = playerEntity.horizontalSpeed - playerEntity.prevHorizontalSpeed;
+            float h = -(playerEntity.horizontalSpeed + g * f);
+            float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
 
-        drawLine(getCameraVector(), x, y, z, color, event);
-        if (stem) Renderer.LINES.line(x, entity.getY(), z, x, entity.getY() + height, z, color);
-    }
-
-    public static void drawTracerToPos(BlockPos pos, Color color, Render3DEvent event) {
-        drawLine(getCameraVector(), pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5f, color, event);
-    }
-
-    public static void drawLine(Vec3d vec, double x2, double y2, double z2, Color color, Render3DEvent event) {
-        Renderer.LINES.line(
-                vec.x - (mc.gameRenderer.getCamera().getPos().x - event.offsetX),
-                vec.y - (mc.gameRenderer.getCamera().getPos().y - event.offsetY),
-                vec.z - (mc.gameRenderer.getCamera().getPos().z - event.offsetZ),
-                x2, y2, z2, color);
-    }
-
-    public static void drawTracerToBlockEntity(BlockEntity blockEntity, Color color, Render3DEvent event) {
-        drawTracerToPos(blockEntity.getPos(), color, event);
+            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), -(-Math.abs(MathHelper.cos(h * 3.1415927f) * i)), 0);
+            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(MathHelper.sin(h * 3.1415927f) * i * 3));
+            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
+        }
     }
 }
 

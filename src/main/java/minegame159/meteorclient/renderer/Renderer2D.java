@@ -46,8 +46,8 @@ public class Renderer2D {
     }
 
     public void render(MatrixStack matrices) {
-        triangles.render(matrices);
-        lines.render(matrices);
+        triangles.render(matrices, false);
+        lines.render(matrices, false);
     }
 
     // Lines

@@ -3,11 +3,11 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.rendering;
+package minegame159.meteorclient.renderer;
 
 import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.WidgetScreen;
-import minegame159.meteorclient.rendering.text.CustomTextRenderer;
+import minegame159.meteorclient.renderer.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.files.StreamUtils;
 
