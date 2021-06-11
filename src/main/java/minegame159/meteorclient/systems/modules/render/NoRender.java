@@ -22,12 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NoRender extends Module {
-    public enum BannerRenderMode {
-        Everything,
-        Pillar,
-        None
-    }
-
     private final SettingGroup sgOverlay = settings.createGroup("Overlay");
     private final SettingGroup sgHUD = settings.createGroup("HUD");
     private final SettingGroup sgWorld = settings.createGroup("World");
@@ -411,4 +405,9 @@ public class NoRender extends Module {
         return isActive() && noInvisibility.get();
     }
 
+    public enum BannerRenderMode {
+        Everything,
+        Pillar,
+        None
+    }
 }

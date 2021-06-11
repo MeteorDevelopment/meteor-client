@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.rendering.text;
+package minegame159.meteorclient.renderer.text;
 
 import minegame159.meteorclient.renderer.Mesh;
 import minegame159.meteorclient.utils.render.ByteTexture;

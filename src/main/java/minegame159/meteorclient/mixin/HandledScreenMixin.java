@@ -83,7 +83,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Better Tooltips
 
-    // Middleclick open
+    // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
         BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
@@ -146,8 +146,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     }
 
     private void draw(MatrixStack matrices, DefaultedList<ItemStack> itemStacks, int mouseX, int mouseY, Color color) {
-        // TODO: Fix
-        //RenderSystem.disableLighting();
         RenderSystem.disableDepthTest();
         GL11.glClear(GL11.GL_DEPTH_BUFFER_BIT);
 
@@ -155,9 +153,6 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         mouseY -= 12;
 
         drawBackground(matrices, mouseX, mouseY, color);
-
-        //RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        //DiffuseLighting.enable();
 
         int row = 0;
         int i = 0;
@@ -171,21 +166,19 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             }
         }
 
-        //DiffuseLighting.disable();
         RenderSystem.enableDepthTest();
     }
 
     private void drawBackground(MatrixStack matrices, int x, int y, Color color) {
-        //RenderSystem.color4f(color.r / 255F, color.g / 255F, color.b / 255F, color.a / 255F);
-        client.getTextureManager().bindTexture(TEXTURE_CONTAINER_BACKGROUND);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
+        RenderSystem.setShaderTexture(0, TEXTURE_CONTAINER_BACKGROUND);
         DrawableHelper.drawTexture(matrices, x, y, 0, 0, 0, 176, 67, 67, 176);
     }
 
     private void drawMapPreview(MatrixStack matrices, ItemStack stack, int x, int y, int dimensions) {
-        GL11.glEnable(GL11.GL_BLEND);
-        /*RenderSystem.pushMatrix();
-        RenderSystem.disableLighting();
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);*/
+        RenderSystem.enableBlend();
+        RenderSystem.setShaderColor(1, 1, 1, 1);
 
         int y1 = y - 12;
         int y2 = y1 + dimensions;
@@ -193,7 +186,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         int x2 = x1 + dimensions;
         int z = 300;
 
-        client.getTextureManager().bindTexture(TEXTURE_MAP_BACKGROUND);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderTexture(0, TEXTURE_MAP_BACKGROUND);
 
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder buffer = tessellator.getBuffer();
@@ -214,14 +208,15 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
             z = 310;
             double scale = (double) (dimensions - 16) / 128.0D;
 
-            /*RenderSystem.translatef(x1, y1, z);
-            RenderSystem.scaled(scale, scale, 0);*/
-            VertexConsumerProvider.Immediate consumer = client.getBufferBuilders().getEntityVertexConsumers();
-            //client.gameRenderer.getMapRenderer().draw(matrices, consumer, mapState, false, 0xF000F0);
-        }
+            matrices.push();
+            matrices.translate(x1, y1, z);
+            matrices.scale((float) scale, (float) scale, 1);
 
-        /*RenderSystem.enableLighting();
-        RenderSystem.popMatrix();*/
+            VertexConsumerProvider.Immediate consumer = client.getBufferBuilders().getEntityVertexConsumers();
+            client.gameRenderer.getMapRenderer().draw(matrices, consumer, FilledMapItem.getMapId(stack), mapState, false, 0xF000F0);
+
+            matrices.pop();
+        }
     }
 
 
@@ -242,27 +237,21 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         int x2 = x + 16;
         int z = 300;
 
-        mc.getTextureManager().bindTexture(BookScreen.BOOK_TEXTURE);
-        DrawableHelper.drawTexture(
-            matrices,
-            x1, y1, z,
-            0, 0,
-            (int)(192*scale), (int)(192*scale),
-            179, 179);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
+        RenderSystem.setShaderTexture(0, BookScreen.BOOK_TEXTURE);
+        DrawableHelper.drawTexture(matrices, x1, y1, z, 0, 0, (int) (192 * scale), (int) (192 * scale), 179, 179);
 
         matrices.push();
         matrices.scale(scale, scale, 1f);
-        matrices.translate(0, 0, z+5);
+        matrices.translate(0, 0, z + 5);
+
         int offset = 0;
-        for (OrderedText line : mc.textRenderer.wrapLines(page, 192-48-25)) {
-            mc.textRenderer.draw(
-            matrices,
-            line,
-            x2*(1/scale),
-            (y2+offset)*(1/scale),
-            0x000000);
-            offset+=8;
+        for (OrderedText line : mc.textRenderer.wrapLines(page, 192 - 48 - 25)) {
+            mc.textRenderer.draw(matrices, line, x2 * (1 / scale), (y2 + offset) * (1 / scale), 0x000000);
+            offset += 8;
         }
+
         matrices.pop();
     }
 

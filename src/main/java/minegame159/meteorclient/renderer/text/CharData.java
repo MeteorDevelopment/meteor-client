@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.rendering.text;
+package minegame159.meteorclient.renderer.text;
 
 public class CharData {
     public final float x0, y0, x1, y1;

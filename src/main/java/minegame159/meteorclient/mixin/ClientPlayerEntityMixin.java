@@ -26,7 +26,6 @@ import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +39,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity {
     @Shadow @Final public ClientPlayNetworkHandler networkHandler;
 
+    private boolean ignoreChatMessage;
+
+    @Shadow public abstract void sendChatMessage(String string);
+
     public ClientPlayerEntityMixin(ClientWorld world, GameProfile profile) {
         super(world, profile);
     }
@@ -49,13 +52,19 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(getMainHandStack())).isCancelled()) info.setReturnValue(false);
     }
 
-    @Inject(at = @At("HEAD"), method = "sendChatMessage", cancellable = true)
+    @Inject(method = "sendChatMessage", at = @At("HEAD"), cancellable = true)
     private void onSendChatMessage(String message, CallbackInfo info) {
+        if (ignoreChatMessage) return;
+
         // TODO: Baritone
         if (!message.startsWith(Config.get().prefix) && !message.startsWith("/")/* && !message.startsWith(BaritoneAPI.getSettings().prefix.value)*/) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
-            if (!event.isCancelled()) networkHandler.sendPacket(new ChatMessageC2SPacket(event.message));
+            if (!event.isCancelled()) {
+                ignoreChatMessage = true;
+                sendChatMessage(event.message);
+                ignoreChatMessage = false;
+            }
 
             info.cancel();
             return;

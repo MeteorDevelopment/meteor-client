@@ -51,8 +51,6 @@ public class MeteorButtonWidget extends PressableWidget {
         mc.getTextureManager().bindTexture(BUTTON_TEXTURE);
         int j = this.active ? 16777215 : 10526880;
 
-        // TODO: Test
-        //RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
@@ -66,9 +64,7 @@ public class MeteorButtonWidget extends PressableWidget {
     }
 
     @Override
-    public void appendNarrations(NarrationMessageBuilder builder) {
-        // TODO: Idk
-    }
+    public void appendNarrations(NarrationMessageBuilder builder) {}
 
     public interface TooltipSupplier {
         void onTooltip(MeteorButtonWidget button, MatrixStack matrices, int mouseX, int mouseY);

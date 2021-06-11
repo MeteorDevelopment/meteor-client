@@ -6,7 +6,7 @@
 package minegame159.meteorclient.gui.renderer.operations;
 
 import minegame159.meteorclient.gui.renderer.GuiRenderOperation;
-import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.renderer.text.TextRenderer;
 
 public class TextOperation extends GuiRenderOperation<TextOperation> {
     private String text;

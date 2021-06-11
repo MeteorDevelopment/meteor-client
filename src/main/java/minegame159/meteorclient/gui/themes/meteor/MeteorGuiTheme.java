@@ -24,7 +24,7 @@ import minegame159.meteorclient.gui.widgets.input.WDropdown;
 import minegame159.meteorclient.gui.widgets.input.WSlider;
 import minegame159.meteorclient.gui.widgets.input.WTextBox;
 import minegame159.meteorclient.gui.widgets.pressable.*;
-import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.renderer.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.accounts.Account;
 import minegame159.meteorclient.systems.modules.Module;

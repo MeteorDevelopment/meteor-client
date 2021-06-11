@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package minegame159.meteorclient.rendering.text;
+package minegame159.meteorclient.renderer.text;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.rendering.Matrices;

@@ -19,7 +19,7 @@ import minegame159.meteorclient.mixininterface.IBox;
 import minegame159.meteorclient.mixininterface.IRaycastContext;
 import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.renderer.ShapeMode;
-import minegame159.meteorclient.rendering.text.TextRenderer;
+import minegame159.meteorclient.renderer.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;

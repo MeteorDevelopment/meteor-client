@@ -5,6 +5,7 @@
 
 package minegame159.meteorclient.utils.render;
 
+import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.mixininterface.IMatrix4f;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Vec3;
@@ -13,7 +14,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 
 import static minegame159.meteorclient.utils.Utils.mc;
-import static org.lwjgl.opengl.GL11.*;
 
 public class NametagUtils {
     private static final Vec4 vec4 = new Vec4();
@@ -59,13 +59,15 @@ public class NametagUtils {
     }
 
     public static void begin(Vec3 pos) {
-        glPushMatrix();
-        glTranslated(pos.x, pos.y, 0);
-        glScaled(scale, scale, 1);
+        MatrixStack matrices = RenderSystem.getModelViewStack();
+
+        matrices.push();
+        matrices.translate(pos.x, pos.y, 0);
+        matrices.scale((float) scale, (float) scale, 1);
     }
 
     public static void end() {
-        glPopMatrix();
+        RenderSystem.getModelViewStack().pop();
     }
 
     private static double getScale(Vec3 pos) {
