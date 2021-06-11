@@ -508,7 +508,6 @@ public class Modules extends System<Modules> {
         add(new BuildHeight());
         add(new EChestFarmer());
         add(new EndermanLook());
-        add(new EntityLogger());
         add(new Flamethrower());
         add(new InfinityMiner());
         add(new LiquidFiller());
