@@ -26,6 +26,6 @@ public class PostProcessRenderer {
     }
 
     public static void render() {
-        mesh.render(matrices, false);
+        mesh.render(matrices);
     }
 }

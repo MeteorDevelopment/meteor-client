@@ -4,7 +4,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.mixin.BufferRendererAccessor;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.BufferUtils;
@@ -12,6 +11,7 @@ import org.lwjgl.BufferUtils;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
+import static minegame159.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL32C.*;
 
 public class Mesh {
@@ -40,7 +40,8 @@ public class Mesh {
     private IntBuffer indices;
     private int vertexI, indicesCount;
 
-    private boolean building;
+    private boolean building, rendering3D;
+    private double cameraX, cameraZ;
 
     public Mesh(DrawMode drawMode, Attrib... attributes) {
         int stride = 0;
@@ -90,12 +91,24 @@ public class Mesh {
         indicesCount = 0;
 
         building = true;
+        rendering3D = Utils.rendering3D;
+
+        if (rendering3D) {
+            Vec3d camera = mc.gameRenderer.getCamera().getPos();
+
+            cameraX = camera.x;
+            cameraZ = camera.z;
+        }
+        else {
+            cameraX = 0;
+            cameraZ = 0;
+        }
     }
 
     public Mesh vec3(double x, double y, double z) {
-        vertices.put((float) x);
+        vertices.put((float) (x - cameraX));
         vertices.put((float) y);
-        vertices.put((float) z);
+        vertices.put((float) (z - cameraZ));
 
         return this;
     }
@@ -188,7 +201,7 @@ public class Mesh {
         building = false;
     }
 
-    public void render(MatrixStack matrices, boolean rendering3D) {
+    public void render(MatrixStack matrices) {
         if (building) end();
 
         if (indicesCount > 0) {
@@ -205,9 +218,10 @@ public class Mesh {
             if (rendering3D) {
                 matrixStack.push();
 
-                Vec3d cameraPos = MinecraftClient.getInstance().gameRenderer.getCamera().getPos();
                 if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
-                matrixStack.translate(-cameraPos.x, -cameraPos.y, -cameraPos.z);
+
+                Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+                matrixStack.translate(0, -cameraPos.y, 0);
             }
 
             // Render
@@ -232,10 +246,6 @@ public class Mesh {
             glDisable(GL_BLEND);
             if (!depthTest) glEnable(GL_DEPTH_TEST);
         }
-    }
-
-    public void render(MatrixStack matrices) {
-        render(matrices, Utils.rendering3D);
     }
 
     protected void beforeRender() {}
