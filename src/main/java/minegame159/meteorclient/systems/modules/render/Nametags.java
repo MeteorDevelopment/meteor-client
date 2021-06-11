@@ -258,10 +258,10 @@ public class Nametags extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             EntityType<?> type = entity.getType();
-            if (!entities.get().containsKey(type)) return;
+            if (!entities.get().containsKey(type)) continue;
 
             if (type == EntityType.PLAYER) {
-                if ((!yourself.get() || freecamNotActive) && entity == mc.player) return;
+                if ((!yourself.get() || freecamNotActive) && entity == mc.player) continue;
             }
 
             if (!culling.get() || entity.getPos().distanceTo(cameraPos) < maxCullRange.get()) {

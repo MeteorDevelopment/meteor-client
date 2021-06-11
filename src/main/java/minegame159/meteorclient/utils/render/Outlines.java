@@ -21,19 +21,16 @@ import org.lwjgl.opengl.GL32C;
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class Outlines {
-    public static boolean loadingOutlineShader;
     public static boolean renderingOutlines;
 
     public static Framebuffer outlinesFbo;
     public static OutlineVertexConsumerProvider vertexConsumerProvider;
     private static Shader outlinesShader;
 
-    public static void load() {
-        loadingOutlineShader = true;
+    public static void init() {
         outlinesShader = new Shader("outline.vert", "outline.frag");
         outlinesFbo = new SimpleFramebuffer(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false, false);
         vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
-        loadingOutlineShader = false;
     }
 
     public static void beginRender() {
