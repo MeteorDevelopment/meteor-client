@@ -33,11 +33,6 @@ public abstract class WorldRendererMixin {
 
     @Shadow private Framebuffer entityOutlinesFramebuffer;
 
-    @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
-    private void onLoadEntityOutlineShader(CallbackInfo info) {
-        Outlines.load();
-    }
-
     @Inject(method = "checkEmpty", at = @At("HEAD"), cancellable = true)
     private void onCheckEmpty(MatrixStack matrixStack, CallbackInfo info) {
         info.cancel();

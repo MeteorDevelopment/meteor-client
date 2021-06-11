@@ -185,18 +185,20 @@ public class Mesh {
     public void end() {
         if (!building) throw new IllegalStateException("Mesh.end() called while not building.");
 
-        vertices.flip();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        if (indicesCount > 0) {
+            vertices.flip();
+            glBindBuffer(GL_ARRAY_BUFFER, vbo);
+            glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-        indices.flip();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+            indices.flip();
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
+            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-        BufferRendererAccessor.setCurrentVertexBuffer(0);
-        BufferRendererAccessor.setCurrentElementBuffer(0);
+            BufferRendererAccessor.setCurrentVertexBuffer(0);
+            BufferRendererAccessor.setCurrentElementBuffer(0);
+        }
 
         building = false;
     }

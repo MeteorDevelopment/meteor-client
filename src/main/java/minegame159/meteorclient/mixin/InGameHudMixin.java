@@ -36,7 +36,7 @@ public abstract class InGameHudMixin {
 
     @Shadow public abstract void clear();
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerInventory;getArmorStack(I)Lnet/minecraft/item/ItemStack;"))
+    @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
         client.getProfiler().push("meteor-client_render_2d");
 

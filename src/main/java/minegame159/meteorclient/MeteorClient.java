@@ -35,6 +35,7 @@ import minegame159.meteorclient.utils.network.MeteorExecutor;
 import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
+import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.world.BlockIterator;
 import net.fabricmc.api.ClientModInitializer;
@@ -90,6 +91,8 @@ public class MeteorClient implements ClientModInitializer {
 
         Shaders.init();
         Renderer2D.init();
+        Outlines.init();
+        Blur.init();
 
         Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
@@ -102,7 +105,6 @@ public class MeteorClient implements ClientModInitializer {
         MeteorPlayers.init();
         FakeClientPlayer.init();
         PostProcessRenderer.init();
-        Blur.init();
         Tabs.init();
         GuiThemes.init();
         Fonts.init();
