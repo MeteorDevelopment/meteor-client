@@ -7,20 +7,18 @@ package minegame159.meteorclient.gui.tabs.builtin;
 
 import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.gui.GuiTheme;
+import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.gui.screens.HudElementScreen;
 import minegame159.meteorclient.gui.tabs.Tab;
 import minegame159.meteorclient.gui.tabs.TabScreen;
 import minegame159.meteorclient.gui.tabs.WindowTabScreen;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.color.Color;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
 
@@ -77,11 +75,23 @@ public class HudTab extends Tab {
         }
 
         @Override
+        protected void init() {
+            super.init();
+            mc.options.hudHidden = false;
+        }
+
+        @Override
+        public void onClose() {
+            super.onClose();
+            if (theme.hideHUD() && parent instanceof WidgetScreen) mc.options.hudHidden = true;
+        }
+
+        @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (hoveredModule != null) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                     if (!selectedElements.isEmpty()) selectedElements.clear();
-                    MinecraftClient.getInstance().openScreen(new HudElementScreen(theme, hoveredModule));
+                    mc.openScreen(new HudElementScreen(theme, hoveredModule));
                 }
                 else {
                     dragging = true;
@@ -97,7 +107,7 @@ public class HudTab extends Tab {
                 return true;
             }
 
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             selecting = true;
             mouseStartX = mouseX * s;
@@ -136,7 +146,7 @@ public class HudTab extends Tab {
 
         @Override
         public void mouseMoved(double mouseX, double mouseY) {
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             mouseX *= s;
             mouseY *= s;
@@ -261,7 +271,7 @@ public class HudTab extends Tab {
 
         @Override
         public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-            double s = MinecraftClient.getInstance().getWindow().getScaleFactor();
+            double s = mc.getWindow().getScaleFactor();
 
             mouseX *= s;
             mouseY *= s;
@@ -276,7 +286,7 @@ public class HudTab extends Tab {
                 Utils.unscaledProjection();
             }
 
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
+            Renderer2D.COLOR.begin();
 
             for (HudElement element : hud.elements) {
                 if (element.active) continue;
@@ -305,8 +315,10 @@ public class HudTab extends Tab {
                 }
             }
 
-            Renderer.NORMAL.end();
+            Renderer2D.COLOR.render(new MatrixStack());
             Utils.scaledProjection();
+
+            runAfterRenderTasks();
         }
 
         private void renderElement(HudElement module, Color bgColor, Color olColor) {
@@ -314,11 +326,11 @@ public class HudTab extends Tab {
         }
 
         private void renderQuad(double x, double y, double w, double h, Color bgColor, Color olColor) {
-            Renderer.NORMAL.quad(x, y, w, h, bgColor);
-            Renderer.NORMAL.quad(x - 1, y - 1, w + 2, 1, olColor);
-            Renderer.NORMAL.quad(x - 1, y + h - 1, w + 2, 1, olColor);
-            Renderer.NORMAL.quad(x - 1, y, 1, h, olColor);
-            Renderer.NORMAL.quad(x + w, y, 1, h, olColor);
+            Renderer2D.COLOR.quad(x, y, w, h, bgColor);
+            Renderer2D.COLOR.quad(x - 1, y - 1, w + 2, 1, olColor);
+            Renderer2D.COLOR.quad(x - 1, y + h - 1, w + 2, 1, olColor);
+            Renderer2D.COLOR.quad(x - 1, y, 1, h, olColor);
+            Renderer2D.COLOR.quad(x + w, y, 1, h, olColor);
         }
     }
 }

@@ -5,15 +5,15 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.entity.EntityUtils;
 import minegame159.meteorclient.utils.entity.SortPriority;
 import minegame159.meteorclient.utils.entity.TargetUtils;
 import minegame159.meteorclient.utils.player.InvUtils;
@@ -27,57 +27,57 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ArrowItem;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.Vec3d;
 
 public class BowAimbot extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The maximum range the entity can be to aim at it.")
-            .defaultValue(20)
-            .min(0)
-            .max(100)
-            .sliderMax(100)
-            .build()
+        .name("range")
+        .description("The maximum range the entity can be to aim at it.")
+        .defaultValue(20)
+        .min(0)
+        .max(100)
+        .sliderMax(100)
+        .build()
     );
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to attack.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
-            .onlyAttackable()
-            .build()
+        .name("entities")
+        .description("Entities to attack.")
+        .defaultValue(new Object2BooleanOpenHashMap<>(0))
+        .onlyAttackable()
+        .build()
     );
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
-            .description("What type of entities to target.")
-            .defaultValue(SortPriority.LowestHealth)
-            .build()
+        .name("priority")
+        .description("What type of entities to target.")
+        .defaultValue(SortPriority.LowestHealth)
+        .build()
     );
 
     private final Setting<Boolean> babies = sgGeneral.add(new BoolSetting.Builder()
-            .name("babies")
-            .description("Whether or not to attack baby variants of the entity.")
-            .defaultValue(true)
-            .build()
+        .name("babies")
+        .description("Whether or not to attack baby variants of the entity.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> nametagged = sgGeneral.add(new BoolSetting.Builder()
-            .name("nametagged")
-            .description("Whether or not to attack mobs with a name tag.")
-            .defaultValue(false)
-            .build()
+        .name("nametagged")
+        .description("Whether or not to attack mobs with a name tag.")
+        .defaultValue(false)
+        .build()
     );
 
-    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-on-combat")
-            .description("Freezes Baritone temporarily until you released the bow.")
-            .defaultValue(false)
-            .build()
-    );
+    // TODO: Baritone
+//    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
+//        .name("pause-on-combat")
+//        .description("Freezes Baritone temporarily until you released the bow.")
+//        .defaultValue(false)
+//        .build()
+//    );
 
     private boolean wasPathing;
     private Entity target;
@@ -93,9 +93,9 @@ public class BowAimbot extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
-        if (playerIsDead() || !itemInHand()) return;
-        if (InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
+    private void onRender(Render3DEvent event) {
+        if (!PlayerUtils.isAlive() || !itemInHand()) return;
+        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
@@ -112,29 +112,22 @@ public class BowAimbot extends Module {
         }, priority.get());
 
         if (target == null) {
-            if (wasPathing) {
+            // TODO: Baritone
+            /*if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }
+            }*/
             return;
         }
 
         if (mc.options.keyUse.isPressed() && itemInHand()) {
-            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            // TODO: Baritone
+            /*if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
-            }
+            }*/
             aim(event.tickDelta);
         }
-    }
-
-    @Override
-    public String getInfoString() {
-        if (target != null) {
-            if (target instanceof PlayerEntity) return target.getEntityName();
-            return target.getType().getName().getString();
-        }
-        return null;
     }
 
     private boolean itemInHand() {
@@ -164,17 +157,18 @@ public class BowAimbot extends Module {
         double hDistanceSq = hDistance * hDistance;
         float g = 0.006f;
         float velocitySq = velocity * velocity;
-        float pitch = (float)-Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocitySq * velocitySq - g * (g * hDistanceSq + 2 * relativeY * velocitySq))) / (g * hDistance)));
+        float pitch = (float) -Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocitySq * velocitySq - g * (g * hDistanceSq + 2 * relativeY * velocitySq))) / (g * hDistance)));
 
         // Set player rotation
-        if(Float.isNaN(pitch)) {
+        if (Float.isNaN(pitch)) {
             Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
         } else {
             Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
         }
     }
 
-    private boolean playerIsDead() {
-        return mc.player.isDead() || !mc.player.isAlive();
+    @Override
+    public String getInfoString() {
+        return EntityUtils.getName(target);
     }
 }

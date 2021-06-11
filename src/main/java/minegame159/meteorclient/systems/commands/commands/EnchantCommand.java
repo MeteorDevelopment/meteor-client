@@ -13,7 +13,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import minegame159.meteorclient.systems.commands.Command;
 import minegame159.meteorclient.utils.Utils;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.ItemEnchantmentArgumentType;
+import net.minecraft.command.argument.EnchantmentArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralText;
@@ -30,7 +30,7 @@ public class EnchantCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("one").then(argument("enchantment", ItemEnchantmentArgumentType.itemEnchantment()).then(argument("level", IntegerArgumentType.integer()).executes(context -> {
+        builder.then(literal("one").then(argument("enchantment", EnchantmentArgumentType.enchantment()).then(argument("level", IntegerArgumentType.integer()).executes(context -> {
             if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
 
             ItemStack itemStack = getItemStack();

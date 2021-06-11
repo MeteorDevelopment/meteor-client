@@ -60,9 +60,9 @@ public class ConfigTab extends Tab {
     );
 
     public static final Setting<Integer> rotationHoldTicks = sgGeneral.add(new IntSetting.Builder()
-            .name("rotation-hold-ticks")
+            .name("rotation-hold")
             .description("Hold long to hold server side rotation when not sending any packets.")
-            .defaultValue(9)
+            .defaultValue(4)
             .onChanged(integer -> Config.get().rotationHoldTicks = integer)
             .onModuleActivated(integerSetting -> integerSetting.set(Config.get().rotationHoldTicks))
             .build()
@@ -90,9 +90,18 @@ public class ConfigTab extends Tab {
     public static final Setting<Boolean> rainbowPrefix = sgChat.add(new BoolSetting.Builder()
             .name("rainbow-prefix")
             .description("Makes the [Meteor] prefix on chat info rainbow.")
-            .defaultValue(true)
+            .defaultValue(false)
             .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
+            .build()
+    );
+
+    public static final Setting<Boolean> useTeamColor = sgGeneral.add(new BoolSetting.Builder()
+            .name("use-team-color")
+            .description("Uses player's team color for rendering things like esp and tracers.")
+            .defaultValue(true)
+            .onChanged(aBoolean -> Config.get().useTeamColor = aBoolean)
+            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().useTeamColor))
             .build()
     );
 

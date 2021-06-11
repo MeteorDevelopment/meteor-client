@@ -7,14 +7,14 @@ package minegame159.meteorclient.systems.modules.render.search;
 
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 
 public class SBlockDataScreen extends WindowScreen {
     public SBlockDataScreen(GuiTheme theme, SBlockData blockData, Block block, BlockDataSetting<SBlockData> setting) {
-        super(theme, "Configure block");
+        super(theme, "Configure Block");
 
         Settings settings = new Settings();
         SettingGroup sgGeneral = settings.getDefaultGroup();

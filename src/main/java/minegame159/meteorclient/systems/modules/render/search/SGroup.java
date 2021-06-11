@@ -6,7 +6,7 @@
 package minegame159.meteorclient.systems.modules.render.search;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.utils.misc.UnorderedArrayList;
 import minegame159.meteorclient.utils.render.RenderUtils;
@@ -138,7 +138,7 @@ public class SGroup {
         search.removeGroup(group);
     }
 
-    public void render(RenderEvent event) {
+    public void render(Render3DEvent event) {
         SBlockData blockData = search.getBlockData(block);
 
         if (blockData.tracer) {

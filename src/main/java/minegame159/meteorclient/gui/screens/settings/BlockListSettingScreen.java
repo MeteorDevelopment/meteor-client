@@ -23,7 +23,7 @@ public class BlockListSettingScreen extends LeftRightListSettingScreen<Block> {
     private static final Identifier ID = new Identifier("minecraft", "");
 
     public BlockListSettingScreen(GuiTheme theme, Setting<List<Block>> setting) {
-        super(theme, "Select Blocks", setting, Registry.BLOCK);
+        super(theme, "Select Blocks", setting, setting.get(), Registry.BLOCK);
     }
 
     @Override

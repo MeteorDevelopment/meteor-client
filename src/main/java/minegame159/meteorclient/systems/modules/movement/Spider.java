@@ -16,7 +16,7 @@ import net.minecraft.util.math.Vec3d;
 
 public class Spider extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
             .name("climb-speed")
             .description("The speed you go up blocks.")

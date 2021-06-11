@@ -5,24 +5,18 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import minegame159.meteorclient.gui.GuiThemes;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 
 public class InventoryViewerHud extends HudElement {
-
     private static final Identifier TEXTURE = new Identifier("meteor-client", "textures/container.png");
     private static final Identifier TEXTURE_TRANSPARENT = new Identifier("meteor-client", "textures/container-transparent.png");
 
@@ -89,25 +83,26 @@ public class InventoryViewerHud extends HudElement {
 
     private ItemStack getStack(int i) {
         if (isInEditor()) return editorInv[i - 9];
-        return mc.player.inventory.getStack(i);
+        return mc.player.getInventory().getStack(i);
     }
 
     private void drawBackground(int x, int y) {
         int w = (int) box.width;
         int h = (int) box.height;
 
-        switch(background.get()) {
-            case Texture:
-            case Outline:
-                RenderSystem.color4f(color.get().r / 255F, color.get().g / 255F, color.get().b / 255F, color.get().a / 255F);
+        switch (background.get()) {
+            case Texture, Outline -> {
                 mc.getTextureManager().bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
-                DrawableHelper.drawTexture(Matrices.getMatrixStack(), x, y, 0, 0, 0, w, h, h, w);
-                break;
-            case Flat:
-                Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-                Renderer.NORMAL.quadRounded(x, y, w, h, color.get(), GuiThemes.get().roundAmount(), true);
-                Renderer.NORMAL.end();
-                break;
+
+                Renderer2D.TEXTURE.begin();
+                Renderer2D.TEXTURE.texQuad(x, y, box.width, box.height, color.get());
+                Renderer2D.TEXTURE.render(null);
+            }
+            case Flat -> {
+                Renderer2D.COLOR.begin();
+                Renderer2D.COLOR.quadRounded(x, y, w, h, color.get(), GuiThemes.get().roundAmount(), true);
+                Renderer2D.COLOR.render(null);
+            }
         }
     }
 
@@ -117,5 +112,4 @@ public class InventoryViewerHud extends HudElement {
         Outline,
         Flat
     }
-
 }

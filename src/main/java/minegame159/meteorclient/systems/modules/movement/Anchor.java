@@ -87,7 +87,7 @@ public class Anchor extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        cancelJump = foundHole && cancelMove.get() && mc.player.pitch >= minPitch.get();
+        cancelJump = foundHole && cancelMove.get() && mc.player.getPitch() >= minPitch.get();
     }
 
     @EventHandler
@@ -108,7 +108,7 @@ public class Anchor extends Module {
         if (wasInHole && holeX == x && holeZ == z) return;
         else if (wasInHole) wasInHole = false;
 
-        if (mc.player.pitch < minPitch.get()) return;
+        if (mc.player.getPitch() < minPitch.get()) return;
 
         foundHole = false;
         double holeX = 0;

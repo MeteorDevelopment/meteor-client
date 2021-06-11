@@ -10,9 +10,10 @@ import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import minegame159.meteorclient.mixin.MinecraftClientAccessor;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.Session;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public abstract class Account<T extends Account<?>> implements ISerializable<T> {
     protected AccountType type;
@@ -31,7 +32,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchHead();
 
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) MinecraftClient.getInstance().getSessionService();
+        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
         AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/");
         AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/join");
         AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/hasJoined");
@@ -53,13 +54,13 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     protected void setSession(Session session) {
-        ((MinecraftClientAccessor) MinecraftClient.getInstance()).setSession(session);
-        MinecraftClient.getInstance().getSessionProperties().clear();
+        ((MinecraftClientAccessor) mc).setSession(session);
+        mc.getSessionProperties().clear();
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("type", type.name());
         tag.putString("name", name);
@@ -69,7 +70,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     @Override
-    public T fromTag(CompoundTag tag) {
+    public T fromTag(NbtCompound tag) {
         if (!tag.contains("name") || !tag.contains("cache")) throw new NbtException();
 
         name = tag.getString("name");

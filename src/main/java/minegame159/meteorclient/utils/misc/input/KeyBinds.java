@@ -6,7 +6,7 @@
 package minegame159.meteorclient.utils.misc.input;
 
 import minegame159.meteorclient.mixin.KeyBindingAccessor;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 

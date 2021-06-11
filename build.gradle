@@ -1,10 +1,9 @@
 plugins {
-	id 'fabric-loom' version '0.6-SNAPSHOT'
+	id 'fabric-loom' version '0.8-SNAPSHOT'
 	id 'maven-publish'
 }
 
-sourceCompatibility = JavaVersion.VERSION_1_8
-targetCompatibility = JavaVersion.VERSION_1_8
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
@@ -32,17 +31,17 @@ dependencies {
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.api_version}"
 
 	// For XRay compatibility
-	modImplementation "com.github.CaffeineMC:sodium-fabric:1.16.x~stable-SNAPSHOT"
+	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-	include modImplementation("com.github.MeteorDevelopment:baritone:${project.minecraft_version}-SNAPSHOT") {
+	/*include modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
 		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
 		exclude(group: "net.java.jinput", module: "jinput-platform")
 		exclude(group: "net.java.jinput", module: "jinput")
 		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
 		exclude(group: "org.ow2.asm", module: "asm-debug-all")
-	}
+	}*/
 
 	// Other dependencies
 	include modImplementation("com.github.MeteorDevelopment:orbit:${project.orbit_version}")
@@ -51,7 +50,9 @@ dependencies {
 processResources {
 	inputs.property "version", project.version
 
-	from(sourceSets.main.resources.srcDirs) {
+    duplicatesStrategy = DuplicatesStrategy.WARN
+
+    from(sourceSets.main.resources.srcDirs) {
 		include "fabric.mod.json"
 		expand "version": project.version
 	}
@@ -70,22 +71,31 @@ jar {
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
-	classifier = "sources"
+    archiveClassifier.set("sources")
 	from sourceSets.main.allSource
 }
 
-publishing {
-	publications {
-		maven(MavenPublication) {
-			artifact ("${project.buildDir.absolutePath}/libs/${archivesBaseName}-${project.version}.jar") {
-				classifier null
-				builtBy remapJar
-			}
-
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
-		}
-	}
+task javadocJar(type: Jar) {
+    archiveClassifier.set("javadoc")
+    from javadoc
 }
 
+publishing {
+    publications {
+        maven(MavenPublication) {
+            artifact(remapJar) {
+                builtBy remapJar
+            }
+
+            artifact(sourcesJar) {
+                builtBy remapSourcesJar
+            }
+
+            artifact(javadocJar) {
+                builtBy javadocJar
+            }
+        }
+    }
+}
+
+apply from: "scripts/packetutils.gradle"

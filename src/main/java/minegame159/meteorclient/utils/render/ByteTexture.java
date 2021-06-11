@@ -69,16 +69,11 @@ public class ByteTexture extends AbstractTexture {
         RGBA;
 
         public int toOpenGL() {
-            switch (this) {
-                case A:
-                    return GL_ALPHA;
-                case RGB:
-                    return GL_RGB;
-                case RGBA:
-                    return GL_RGBA;
-            }
-
-            return 0;
+            return switch (this) {
+                case A -> GL_RED;
+                case RGB -> GL_RGB;
+                case RGBA -> GL_RGBA;
+            };
         }
     }
 

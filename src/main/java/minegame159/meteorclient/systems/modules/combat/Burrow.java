@@ -15,10 +15,13 @@ import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.world.Timer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.player.Rotations;
+import net.minecraft.block.AnvilBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -31,88 +34,78 @@ import net.minecraft.util.math.Direction;
  * @author seasnail8169
  */
 public class Burrow extends Module {
-
-    public enum Block {
-        EChest,
-        Obsidian
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Block> block = sgGeneral.add(new EnumSetting.Builder<Block>()
-            .name("block-to-use")
-            .description("The block to use for Burrow.")
-            .defaultValue(Block.EChest)
-            .build()
+        .name("block-to-use")
+        .description("The block to use for Burrow.")
+        .defaultValue(Block.EChest)
+        .build()
     );
 
     private final Setting<Boolean> instant = sgGeneral.add(new BoolSetting.Builder()
-            .name("instant")
-            .description("Jumps with packets rather than vanilla jump.")
-            .defaultValue(true)
-            .build()
+        .name("instant")
+        .description("Jumps with packets rather than vanilla jump.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> automatic = sgGeneral.add(new BoolSetting.Builder()
-            .name("automatic")
-            .description("Automatically burrows on activate rather than waiting for jump.")
-            .defaultValue(true)
-            .build()
+        .name("automatic")
+        .description("Automatically burrows on activate rather than waiting for jump.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Double> triggerHeight = sgGeneral.add(new DoubleSetting.Builder()
-            .name("trigger-height")
-            .description("How high you have to jump before a rubberband is triggered.")
-            .defaultValue(1.12)
-            .min(0.01)
-            .sliderMax(1.4)
-            .build()
+        .name("trigger-height")
+        .description("How high you have to jump before a rubberband is triggered.")
+        .defaultValue(1.12)
+        .min(0.01)
+        .sliderMax(1.4)
+        .build()
     );
 
     private final Setting<Double> rubberbandHeight = sgGeneral.add(new DoubleSetting.Builder()
-            .name("rubberband-height")
-            .description("How far to attempt to cause rubberband.")
-            .defaultValue(12)
-            .sliderMin(-30)
-            .sliderMax(30)
-            .build()
+        .name("rubberband-height")
+        .description("How far to attempt to cause rubberband.")
+        .defaultValue(12)
+        .sliderMin(-30)
+        .sliderMax(30)
+        .build()
     );
 
     private final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
-            .name("timer")
-            .description("Timer override.")
-            .defaultValue(1.00)
-            .min(0.01)
-            .sliderMax(10)
-            .build()
+        .name("timer")
+        .description("Timer override.")
+        .defaultValue(1.00)
+        .min(0.01)
+        .sliderMax(10)
+        .build()
     );
 
     private final Setting<Boolean> onlyInHole = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-in-holes")
-            .description("Stops you from burrowing when not in a hole.")
-            .defaultValue(false)
-            .build()
+        .name("only-in-holes")
+        .description("Stops you from burrowing when not in a hole.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> center = sgGeneral.add(new BoolSetting.Builder()
-            .name("center")
-            .description("Centers you to the middle of the block before burrowing.")
-            .defaultValue(true)
-            .build()
+        .name("center")
+        .description("Centers you to the middle of the block before burrowing.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Faces the block you place server-side.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Faces the block you place server-side.")
+        .defaultValue(true)
+        .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
-
-    private int prevSlot;
-    private int slot;
-
     private boolean shouldBurrow;
 
     public Burrow() {
@@ -139,7 +132,9 @@ public class Burrow extends Module {
             return;
         }
 
-        if (!checkInventory()) {
+        FindItemResult result = getItem();
+
+        if (!result.isHotbar() && !result.isOffhand()) {
             error("No burrow block found, disabling.");
             toggle();
             return;
@@ -170,16 +165,26 @@ public class Burrow extends Module {
         if (!shouldBurrow && instant.get()) blockPos.set(mc.player.getBlockPos());
 
         if (shouldBurrow) {
-            if (!checkInventory()) return;
             if (!mc.player.isOnGround()) {
                 toggle();
                 return;
             }
 
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
+            if (rotate.get())
+                Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
             else burrow();
 
             toggle();
+        }
+    }
+
+    @EventHandler
+    private void onKey(KeyEvent event) {
+        if (instant.get() && !shouldBurrow) {
+            if (event.action == KeyAction.Press && mc.options.keyJump.matchesKey(event.key, 0)) {
+                shouldBurrow = true;
+            }
+            blockPos.set(mc.player.getBlockPos());
         }
     }
 
@@ -187,37 +192,40 @@ public class Burrow extends Module {
         if (center.get()) PlayerUtils.centerPlayer();
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
         }
 
-        mc.player.inventory.selectedSlot = slot;
+
+        int prevSlot = mc.player.getInventory().selectedSlot;
+        FindItemResult block = getItem();
+
+        if (!(mc.player.getInventory().getStack(block.getSlot()).getItem() instanceof BlockItem)) return;
+        InvUtils.swap(block.getSlot());
 
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
-        mc.player.inventory.selectedSlot = prevSlot;
+        InvUtils.swap(prevSlot);
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
         } else {
             mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
         }
     }
 
-
-    @EventHandler
-    private void onKey(KeyEvent event) {
-        if (instant.get() && !shouldBurrow) {
-            if (event.action == KeyAction.Press && mc.options.keyJump.matchesKey(event.key, 0))
-            shouldBurrow = true;
-            blockPos.set(mc.player.getBlockPos());
-        }
+    private FindItemResult getItem() {
+        return switch (block.get()) {
+            case EChest -> InvUtils.findInHotbar(Items.ENDER_CHEST);
+            case Anvil -> InvUtils.findInHotbar(itemStack -> net.minecraft.block.Block.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock);
+            case Held -> InvUtils.findInHotbar(itemStack -> true);
+            default -> InvUtils.findInHotbar(Items.OBSIDIAN, Items.CRYING_OBSIDIAN);
+        };
     }
 
-    //Wala man
     private boolean checkHead() {
         BlockState blockState1 = mc.world.getBlockState(blockPos.set(mc.player.getX() + .3, mc.player.getY() + 2.3, mc.player.getZ() + .3));
         BlockState blockState2 = mc.world.getBlockState(blockPos.set(mc.player.getX() + .3, mc.player.getY() + 2.3, mc.player.getZ() - .3));
@@ -230,12 +238,10 @@ public class Burrow extends Module {
         return air1 & air2 & air3 & air4;
     }
 
-    private boolean checkInventory() {
-        prevSlot = mc.player.inventory.selectedSlot;
-        switch (block.get()) {
-            case Obsidian:  slot = InvUtils.findItemInHotbar(Items.OBSIDIAN); break;
-            case EChest:    slot = InvUtils.findItemInHotbar(Items.ENDER_CHEST); break;
-        }
-        return slot != -1;
+    public enum Block {
+        EChest,
+        Obsidian,
+        Anvil,
+        Held
     }
 }

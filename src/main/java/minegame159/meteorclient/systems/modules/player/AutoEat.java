@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.player;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
@@ -19,6 +18,7 @@ import minegame159.meteorclient.systems.modules.combat.BedAura;
 import minegame159.meteorclient.systems.modules.combat.CrystalAura;
 import minegame159.meteorclient.systems.modules.combat.KillAura;
 import minegame159.meteorclient.utils.Utils;
+import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
@@ -92,7 +92,7 @@ public class AutoEat extends Module {
             // If we are eating check if we should still be still eating
             if (shouldEat()) {
                 // Check if the item in current slot is not food
-                if (!mc.player.inventory.getStack(slot).isFood()) {
+                if (!mc.player.getInventory().getStack(slot).isFood()) {
                     // If not try finding a new slot
                     int slot = findSlot();
 
@@ -133,7 +133,7 @@ public class AutoEat extends Module {
     }
 
     private void startEating() {
-        prevSlot = mc.player.inventory.selectedSlot;
+        prevSlot = mc.player.getInventory().selectedSlot;
         eat();
 
         // Pause auras
@@ -151,10 +151,11 @@ public class AutoEat extends Module {
 
         // Pause baritone
         wasBaritone = false;
-        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        // TODO: Baritone
+        /*if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
             wasBaritone = true;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-        }
+        }*/
     }
 
     private void eat() {
@@ -183,9 +184,10 @@ public class AutoEat extends Module {
         }
 
         // Resume baritone
-        if (pauseBaritone.get() && wasBaritone) {
+        // TODO: Baritone
+        /*if (pauseBaritone.get() && wasBaritone) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-        }
+        }*/
     }
 
     private void setPressed(boolean pressed) {
@@ -193,7 +195,7 @@ public class AutoEat extends Module {
     }
 
     private void changeSlot(int slot) {
-        mc.player.inventory.selectedSlot = slot;
+        InvUtils.swap(slot);
         this.slot = slot;
     }
 
@@ -207,7 +209,7 @@ public class AutoEat extends Module {
 
         for (int i = 0; i < 9; i++) {
             // Skip if item isn't food
-            Item item = mc.player.inventory.getStack(i).getItem();
+            Item item = mc.player.getInventory().getStack(i).getItem();
             if (!item.isFood()) continue;
 
             // Check if hunger value is better

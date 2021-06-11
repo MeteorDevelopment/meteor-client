@@ -12,7 +12,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.input.Input;
-import net.minecraft.client.options.Perspective;
+import net.minecraft.client.option.Perspective;
 import org.lwjgl.glfw.GLFW;
 
 public class FreeLook extends Module {
@@ -77,8 +77,8 @@ public class FreeLook extends Module {
 
     @Override
     public void onActivate() {
-        cameraYaw = mc.player.yaw;
-        cameraPitch = mc.player.pitch;
+        cameraYaw = mc.player.getYaw();
+        cameraPitch = mc.player.getPitch();
         prePers = mc.options.getPerspective();
 
         if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerpective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
@@ -102,23 +102,29 @@ public class FreeLook extends Module {
         if (arrows.get()) {
             for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
                 switch (mode.get()) {
-                    case Player:
+                    case Player -> {
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) cameraYaw += 0.5;
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) cameraPitch -= 0.5;
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) cameraPitch += 0.5;
-                        break;
-                    case Camera:
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) mc.player.yaw -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) mc.player.yaw += 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) mc.player.pitch -= 0.5;
-                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) mc.player.pitch += 0.5;
-                        break;
+                    }
+                    case Camera -> {
+                        float yaw = mc.player.getYaw();
+                        float pitch = mc.player.getPitch();
+
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) yaw -= 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_RIGHT)) yaw += 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_UP)) pitch -= 0.5;
+                        if (Input.isKeyPressed(GLFW.GLFW_KEY_DOWN)) pitch += 0.5;
+
+                        mc.player.setYaw(yaw);
+                        mc.player.setPitch(pitch);
+                    }
                 }
             }
         }
 
-        mc.player.pitch = Utils.clamp(mc.player.pitch, -90, 90);
+        mc.player.setPitch(Utils.clamp(mc.player.getPitch(), -90, 90));
         cameraPitch = Utils.clamp(cameraPitch, -90, 90);
     }
 }

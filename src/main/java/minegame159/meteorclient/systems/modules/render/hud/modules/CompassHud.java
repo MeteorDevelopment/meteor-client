@@ -15,7 +15,6 @@ import minegame159.meteorclient.utils.render.color.Color;
 import net.minecraft.util.math.MathHelper;
 
 public class CompassHud extends HudElement {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<CompassHud.Mode>()
@@ -43,13 +42,13 @@ public class CompassHud extends HudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        if (!isInEditor()) pitch = mc.player.pitch;
+        if (!isInEditor()) pitch = mc.player.getPitch();
         else pitch = 90;
 
         pitch = MathHelper.clamp(pitch + 30, -90, 90);
         pitch = Math.toRadians(pitch);
 
-        if (!isInEditor()) yaw = mc.player.yaw;
+        if (!isInEditor()) yaw = mc.player.getYaw();
         else yaw = 180;
 
         yaw = MathHelper.wrapDegrees(yaw);
@@ -102,5 +101,4 @@ public class CompassHud extends HudElement {
     public enum Mode {
         Axis, Pole
     }
-
 }

@@ -6,18 +6,21 @@
 package minegame159.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.widget.AbstractPressableButtonWidget;
+import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
+import net.minecraft.client.gui.widget.PressableWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
-public class MeteorButtonWidget extends AbstractPressableButtonWidget {
+import static minegame159.meteorclient.utils.Utils.mc;
+
+public class MeteorButtonWidget extends PressableWidget {
     public static final Identifier BUTTON_TEXTURE = new Identifier("meteor-client", "textures/button.png");
 
-    public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {};
+    public static final MeteorButtonWidget.TooltipSupplier EMPTY = (button, matrices, mouseX, mouseY) -> {
+    };
     protected final MeteorButtonWidget.PressAction onPress;
     protected final MeteorButtonWidget.TooltipSupplier tooltipSupplier;
 
@@ -44,12 +47,12 @@ public class MeteorButtonWidget extends AbstractPressableButtonWidget {
     }
 
     public void customRender(MatrixStack matrices) {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        TextRenderer textRenderer = minecraftClient.textRenderer;
-        minecraftClient.getTextureManager().bindTexture(BUTTON_TEXTURE);
+        TextRenderer textRenderer = mc.textRenderer;
+        mc.getTextureManager().bindTexture(BUTTON_TEXTURE);
         int j = this.active ? 16777215 : 10526880;
 
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        // TODO: Test
+        //RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
         RenderSystem.enableDepthTest();
@@ -60,6 +63,11 @@ public class MeteorButtonWidget extends AbstractPressableButtonWidget {
 
     public void renderToolTip(MatrixStack matrices, int mouseX, int mouseY) {
         this.tooltipSupplier.onTooltip(this, matrices, mouseX, mouseY);
+    }
+
+    @Override
+    public void appendNarrations(NarrationMessageBuilder builder) {
+        // TODO: Idk
     }
 
     public interface TooltipSupplier {

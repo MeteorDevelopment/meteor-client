@@ -7,9 +7,9 @@ package minegame159.meteorclient.settings;
 
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -45,8 +45,8 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
         tag.putBoolean("sectionExpanded", sectionExpanded);
@@ -56,12 +56,12 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
     }
 
     @Override
-    public SettingGroup fromTag(CompoundTag tag) {
+    public SettingGroup fromTag(NbtCompound tag) {
         sectionExpanded = tag.getBoolean("sectionExpanded");
 
-        ListTag settingsTag = tag.getList("settings", 10);
-        for (Tag t : settingsTag) {
-            CompoundTag settingTag = (CompoundTag) t;
+        NbtList settingsTag = tag.getList("settings", 10);
+        for (NbtElement t : settingsTag) {
+            NbtCompound settingTag = (NbtCompound) t;
 
             Setting<?> setting = get(settingTag.getString("name"));
             if (setting != null) setting.fromTag(settingTag);

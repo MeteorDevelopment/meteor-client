@@ -6,8 +6,7 @@
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.rendering.text.TextRenderer;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.friends.Friends;
@@ -23,7 +22,7 @@ import minegame159.meteorclient.utils.render.RenderUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.render.VertexFormats;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,11 +39,10 @@ import java.util.List;
 import java.util.Map;
 
 public class CombatHud extends HudElement {
-    private static final Color WHITE = new Color(255, 255, 255);
     private static final Color GREEN = new Color(15, 255, 15);
     private static final Color RED = new Color(255, 15, 15);
     private static final Color BLACK = new Color(0, 0, 0, 255);
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
@@ -80,7 +78,7 @@ public class CombatHud extends HudElement {
             .build()
     );
 
-    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchListSetting.Builder()
+    private final Setting<List<Enchantment>> displayedEnchantments = sgGeneral.add(new EnchantmentListSetting.Builder()
             .name("displayed-enchantments")
             .description("The enchantments that are shown on nametags.")
             .defaultValue(getDefaultEnchantments())
@@ -193,17 +191,17 @@ public class CombatHud extends HudElement {
             if (playerEntity == null) return;
 
             // Background
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quadRounded(x, y, box.width, box.height, backgroundColor.get(), renderer.roundAmount(), true);
-            Renderer.NORMAL.end();
+            Renderer2D.COLOR.begin();
+            Renderer2D.COLOR.quadRounded(x, y, box.width, box.height, backgroundColor.get(), renderer.roundAmount(), true);
+            Renderer2D.COLOR.render(null);
 
             // Player Model
             InventoryScreen.drawEntity(
                     (int) (x + (25 * scale.get())),
                     (int) (y + (66 * scale.get())),
                     (int) (30 * scale.get()),
-                    -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.yaw - playerEntity.prevYaw) * mc.getTickDelta()),
-                    -playerEntity.pitch, playerEntity
+                    -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
+                    -playerEntity.getPitch(), playerEntity
             );
 
             // Moving pos to past player model
@@ -244,7 +242,8 @@ public class CombatHud extends HudElement {
             if (Friends.get().isFriend(playerEntity)) {
                 friendText = "Friend";
                 friendColor = Friends.get().color;
-            } else {
+            }
+            else {
                 boolean naked = true;
 
                 for (int position = 3; position >= 0; position--) {
@@ -311,8 +310,10 @@ public class CombatHud extends HudElement {
             int slot = 5;
 
             // Drawing armor
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
+            MatrixStack matrices = RenderSystem.getModelViewStack();
+
+            matrices.push();
+            matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
 
             x /= scale.get();
             y /= scale.get();
@@ -348,14 +349,11 @@ public class CombatHud extends HudElement {
             }
 
             TextRenderer.get().end();
-            RenderSystem.popMatrix();
 
             y = (int) (box.getY() + 75 * scale.get());
             x = box.getX();
 
             // Health bar
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
 
             x /= scale.get();
             y /= scale.get();
@@ -363,9 +361,9 @@ public class CombatHud extends HudElement {
             x += 5;
             y += 5;
 
-            Renderer.LINES.begin(null, DrawMode.Lines, VertexFormats.POSITION_COLOR);
-            Renderer.LINES.boxEdges(x, y, 165, 11, BLACK);
-            Renderer.LINES.end();
+            Renderer2D.COLOR.begin();
+            Renderer2D.COLOR.boxLines(x, y, 165, 11, BLACK);
+            Renderer2D.COLOR.render(null);
 
             x += 2;
             y += 2;
@@ -380,18 +378,18 @@ public class CombatHud extends HudElement {
             float health = playerEntity.getHealth();
             float absorb = playerEntity.getAbsorptionAmount();
 
-            double healthPrecent = health / maxHealth;
-            double absorbPrecent = absorb / maxAbsorb;
+            double healthPercent = health / maxHealth;
+            double absorbPercent = absorb / maxAbsorb;
 
-            int healthWidth = (int) (totalHealthWidth * healthPrecent);
-            int absorbWidth = (int) (totalAbsorbWidth * absorbPrecent);
+            int healthWidth = (int) (totalHealthWidth * healthPercent);
+            int absorbWidth = (int) (totalAbsorbWidth * absorbPercent);
 
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.horizontalGradientQuad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get());
-            Renderer.NORMAL.horizontalGradientQuad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get());
-            Renderer.NORMAL.end();
+            Renderer2D.COLOR.begin();
+            Renderer2D.COLOR.quad(x, y, healthWidth, 7, healthColor1.get(), healthColor2.get(), healthColor2.get(), healthColor1.get());
+            Renderer2D.COLOR.quad(x + healthWidth, y, absorbWidth, 7, healthColor2.get(), healthColor3.get(), healthColor3.get(), healthColor2.get());
+            Renderer2D.COLOR.render(null);
 
-            RenderSystem.popMatrix();
+            matrices.pop();
         });
     }
 
@@ -411,14 +409,12 @@ public class CombatHud extends HudElement {
 
         if (i == 5) return playerEntity.getMainHandStack();
         else if (i == 4) return playerEntity.getOffHandStack();
-        return playerEntity.inventory.getArmorStack(i);
+        return playerEntity.getInventory().getArmorStack(i);
     }
 
     public static List<Enchantment> getDefaultEnchantments() {
         List<Enchantment> ench = new ArrayList<>();
-        for (Enchantment enchantment : Registry.ENCHANTMENT) {
-            ench.add(enchantment);
-        }
+        for (Enchantment enchantment : Registry.ENCHANTMENT) ench.add(enchantment);
         return ench;
     }
 }

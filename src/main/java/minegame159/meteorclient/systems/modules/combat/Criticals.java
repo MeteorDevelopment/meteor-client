@@ -5,22 +5,17 @@
 
 package minegame159.meteorclient.systems.modules.combat;
 
-//Updated by squidoodly 18/07/2020
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.packets.PacketEvent;
 import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.mixininterface.IPlayerMoveC2SPacket;
-import minegame159.meteorclient.mixininterface.IVec3d;
 import minegame159.meteorclient.settings.BoolSetting;
 import minegame159.meteorclient.settings.EnumSetting;
 import minegame159.meteorclient.settings.Setting;
 import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.systems.modules.Modules;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -30,27 +25,26 @@ public class Criticals extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The mode on how Criticals will function.")
-            .defaultValue(Mode.Packet)
-            .build()
+        .name("mode")
+        .description("The mode on how Criticals will function.")
+        .defaultValue(Mode.Packet)
+        .build()
     );
 
     private final Setting<Boolean> ka = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-killaura")
-            .description("Only performs crits when using killaura.")
-            .defaultValue(false)
-            .build()
+        .name("only-killaura")
+        .description("Only performs crits when using killaura.")
+        .defaultValue(false)
+        .build()
     );
-
-    public Criticals() {
-        super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
-    }
 
     private PlayerInteractEntityC2SPacket attackPacket;
     private HandSwingC2SPacket swingPacket;
     private boolean sendPackets;
     private int sendTimer;
+    public Criticals() {
+        super(Categories.Combat, "criticals", "Performs critical attacks when you hit your target.");
+    }
 
     @Override
     public void onActivate() {
@@ -62,7 +56,8 @@ public class Criticals extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
+        // TODO: Fix
+        /*if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
 
             if (skipCrit()) return;
 
@@ -99,7 +94,7 @@ public class Criticals extends Module {
 
                 event.cancel();
             }
-        }
+        }*/
     }
 
     @EventHandler
@@ -125,14 +120,14 @@ public class Criticals extends Module {
         double y = mc.player.getY();
         double z = mc.player.getZ();
 
-        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionOnly(x, y + height, z, false);
+        PlayerMoveC2SPacket packet = new PlayerMoveC2SPacket.PositionAndOnGround(x, y + height, z, false);
         ((IPlayerMoveC2SPacket) packet).setTag(1337);
 
         mc.player.networkHandler.sendPacket(packet);
     }
 
     private boolean skipCrit() {
-        return !mc.player.isOnGround() || mc.player.isSubmergedInWater() || mc.player.isInLava()  || mc.player.isClimbing();
+        return !mc.player.isOnGround() || mc.player.isSubmergedInWater() || mc.player.isInLava() || mc.player.isClimbing();
     }
 
     @Override

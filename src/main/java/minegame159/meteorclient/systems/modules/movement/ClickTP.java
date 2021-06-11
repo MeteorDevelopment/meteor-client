@@ -58,7 +58,7 @@ public class ClickTP extends Module {
 
                 double height = shape.isEmpty() ? 1 : shape.getMax(Direction.Axis.Y);
 
-                mc.player.updatePosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ());
+                mc.player.setPosition(pos.getX() + 0.5 + side.getOffsetX(), pos.getY() + height, pos.getZ() + 0.5 + side.getOffsetZ());
             }
         }
     }

@@ -26,16 +26,18 @@
       "minegame159.meteorclient.MeteorClient"
     ]
   },
+
   "mixins": [
     "meteor-client.mixins.json",
     "meteor-client-sodium.mixins.json",
-    "meteor-client-indigo.mixins.json"
+    "meteor-client-indigo.mixins.json",
+    "meteor-client-baritone.mixins.json"
   ],
 
   "accessWidener": "meteor-client.accesswidener",
 
   "depends": {
-    "fabricloader": ">=0.7.4",
-    "minecraft": "1.16.x"
+    "fabricloader": ">=0.11.0",
+    "minecraft": "1.17.*"
   }
 }

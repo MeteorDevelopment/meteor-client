@@ -32,7 +32,6 @@ import static net.minecraft.client.render.entity.EndCrystalEntityRenderer.getYOf
 
 @Mixin(EndCrystalEntityRenderer.class)
 public abstract class EndCrystalEntityRendererMixin {
-
     @Mutable @Shadow @Final private static RenderLayer END_CRYSTAL;
 
     @Shadow @Final private static Identifier TEXTURE;
@@ -71,7 +70,7 @@ public abstract class EndCrystalEntityRendererMixin {
     }
 
     // Rotation speed
-    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/Vector3f;getDegreesQuaternion(F)Lnet/minecraft/util/math/Quaternion;"))
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/Vec3f;getDegreesQuaternion(F)Lnet/minecraft/util/math/Quaternion;"))
     private void modifySpeed(Args args) {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.crystals.get()) return;

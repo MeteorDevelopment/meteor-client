@@ -7,7 +7,7 @@ package minegame159.meteorclient.rendering;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.gui.renderer.packer.TextureRegion;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dir;
@@ -17,6 +17,7 @@ import net.minecraft.client.render.VertexFormat;
 
 import static org.lwjgl.opengl.GL11.*;
 
+@Deprecated
 public class MeshBuilder {
     private final BufferBuilder buffer;
     private double offsetX, offsetY, offsetZ;
@@ -36,7 +37,7 @@ public class MeshBuilder {
         buffer = new BufferBuilder(2097152);
     }
 
-    public void begin(RenderEvent event, DrawMode drawMode, VertexFormat format) {
+    public void begin(Render3DEvent event, DrawMode drawMode, VertexFormat format) {
         if (event != null) {
             offsetX = -event.offsetX;
             offsetY = -event.offsetY;
@@ -47,7 +48,7 @@ public class MeshBuilder {
             offsetZ = 0;
         }
 
-        buffer.begin(drawMode.toOpenGl(), format);
+        buffer.begin(drawMode.getDrawMode(), format);
         count = 0;
     }
 
@@ -56,25 +57,25 @@ public class MeshBuilder {
 
         //if (count > 0) {
             glPushMatrix();
-            RenderSystem.multMatrix(Matrices.getTop());
+            //RenderSystem.multMatrix(Matrices.getTop());
 
             RenderSystem.enableBlend();
             RenderSystem.blendFunc(GlStateManager.SrcFactor.SRC_ALPHA, GlStateManager.DstFactor.ONE_MINUS_SRC_ALPHA);
             if (depthTest) RenderSystem.enableDepthTest();
             else RenderSystem.disableDepthTest();
-            RenderSystem.disableAlphaTest();
+            //RenderSystem.disableAlphaTest();
             if (texture) RenderSystem.enableTexture();
             else RenderSystem.disableTexture();
-            RenderSystem.disableLighting();
+            //RenderSystem.disableLighting();
             RenderSystem.disableCull();
             glEnable(GL_LINE_SMOOTH);
             RenderSystem.lineWidth(1);
-            RenderSystem.color4f(1, 1, 1, 1);
-            GlStateManager.shadeModel(GL_SMOOTH);
+            //RenderSystem.color4f(1, 1, 1, 1);
+            //GlStateManager.shadeModel(GL_SMOOTH);
 
             BufferRenderer.draw(buffer);
 
-            RenderSystem.enableAlphaTest();
+            //RenderSystem.enableAlphaTest();
             RenderSystem.enableDepthTest();
             RenderSystem.enableTexture();
             glDisable(GL_LINE_SMOOTH);
@@ -169,143 +170,14 @@ public class MeshBuilder {
     }
 
     public void boxSides(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        if (Dir.is(excludeDir, Dir.DOWN)) quad(x1, y1, z1, x1, y1, z2, x2, y1, z2, x2, y1, z1, color); // Bottom
-        if (Dir.is(excludeDir, Dir.UP)) quad(x1, y2, z1, x1, y2, z2, x2, y2, z2, x2, y2, z1, color); // Top
+        if (Dir.isNot(excludeDir, Dir.DOWN)) quad(x1, y1, z1, x1, y1, z2, x2, y1, z2, x2, y1, z1, color); // Bottom
+        if (Dir.isNot(excludeDir, Dir.UP)) quad(x1, y2, z1, x1, y2, z2, x2, y2, z2, x2, y2, z1, color); // Top
 
-        if (Dir.is(excludeDir, Dir.NORTH)) quad(x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, color); // Front
-        if (Dir.is(excludeDir, Dir.SOUTH)) quad(x1, y1, z2, x1, y2, z2, x2, y2, z2, x2, y1, z2, color); // Back
+        if (Dir.isNot(excludeDir, Dir.NORTH)) quad(x1, y1, z1, x1, y2, z1, x2, y2, z1, x2, y1, z1, color); // Front
+        if (Dir.isNot(excludeDir, Dir.SOUTH)) quad(x1, y1, z2, x1, y2, z2, x2, y2, z2, x2, y1, z2, color); // Back
 
-        if (Dir.is(excludeDir, Dir.WEST)) quad(x1, y1, z1, x1, y2, z1, x1, y2, z2, x1, y1, z2, color); // Left
-        if (Dir.is(excludeDir, Dir.EAST)) quad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, color); // Right
-    }
-
-    // Rounded quad
-    
-    private final double circleNone = 0;
-    private final double circleQuarter = Math.PI / 2;
-    private final double circleHalf = circleQuarter * 2;
-    private final double circleThreeQuarter = circleQuarter * 3;
-
-    public void quadRoundedOutline(double x, double y, double width, double height, Color color, int r, double s) {
-        r = getR(r, width, height);
-        if (r == 0) {
-            quad(x, y, width, s, color);
-            quad(x, y + height - s, width, s, color);
-            quad(x, y + s, s, height - s * 2, color);
-            quad(x + width - s, y + s, s, height - s * 2, color);
-        }
-        else {
-            //top
-            circlePartOutline(x + r, y + r, r, circleThreeQuarter, circleQuarter, color, s);
-            quad(x + r, y, width - r * 2, s, color);
-            circlePartOutline(x + width - r, y + r, r, circleNone, circleQuarter, color, s);
-            //middle
-            quad(x, y + r, s, height - r * 2, color);
-            quad(x + width - s, y + r, s, height - r * 2, color);
-            //bottom
-            circlePartOutline(x + width - r, y + height - r, r, circleQuarter, circleQuarter, color, s);
-            quad(x + r, y + height - s, width - r * 2, s, color);
-            circlePartOutline(x + r, y + height - r, r, circleHalf, circleQuarter, color, s);
-        }
-    }
-
-    public void quadRounded(double x, double y, double width, double height, Color color, int r, boolean roundTop) {
-        r = getR(r, width, height);
-        if (r == 0)
-            quad(x, y, width, height, color);
-        else {
-            if (roundTop) {
-                //top
-                circlePart(x + r, y + r, r, circleThreeQuarter, circleQuarter, color);
-                quad(x + r, y, width - 2 * r, r, color);
-                circlePart(x + width - r, y + r, r, circleNone, circleQuarter, color);
-                //middle
-                quad(x, y + r, width, height - 2 * r, color);
-            }
-            else {
-                //middle
-                quad(x, y, width, height - r, color);
-            }
-            //bottom
-            circlePart(x + width - r, y + height - r, r, circleQuarter, circleQuarter, color);
-            quad(x + r, y + height - r, width - 2 * r, r, color);
-            circlePart(x + r, y + height - r, r, circleHalf, circleQuarter, color);
-        }
-    }
-
-    public void quadRoundedSide(double x, double y, double width, double height, Color color, int r, boolean right) {
-        r = getR(r, width, height);
-        if (r == 0)
-            quad(x, y, width, height, color);
-        else {
-            if (right) {
-                circlePart(x + width - r, y + r, r, circleNone, circleQuarter, color);
-                circlePart(x + width - r, y + height - r, r, circleQuarter, circleQuarter, color);
-                quad(x, y, width - r, height, color);
-                quad(x + width - r, y + r, r, height - r * 2, color);
-            }
-            else {
-                circlePart(x + r, y + r, r, circleThreeQuarter, circleQuarter, color);
-                circlePart(x + r, y + height - r, r, circleHalf, circleQuarter, color);
-                quad(x + r, y, width - r, height, color);
-                quad(x, y + r, r, height - r * 2, color);
-            }
-        }
-    }
-
-    private int getR(int r, double w, double h) {
-        if (r * 2 > h) {
-            r = (int)h / 2;
-        }
-        if (r * 2 > w) {
-            r = (int)w / 2;
-        }
-        return r;
-    }
-
-    private int getCirDepth(double r, double angle) {
-        return Math.max(1, (int)(angle * r / circleQuarter));
-    }
-
-    public void circlePart(double x, double y, double r, double startAngle, double angle, Color color) {
-        int cirDepth = getCirDepth(r, angle);
-        double cirPart = angle / cirDepth;
-        vert2(x + Math.sin(startAngle) * r, y - Math.cos(startAngle) * r, color);
-        for (int i = 1; i < cirDepth + 1; i++) {
-            vert2(x, y, color);
-            double xV = x + Math.sin(startAngle + cirPart * i) * r;
-            double yV = y - Math.cos(startAngle + cirPart * i) * r;
-            vert2(xV, yV, color);
-            if (i != cirDepth)
-                vert2(xV, yV, color);
-        }
-    }
-
-    public void circlePartOutline(double x, double y, double r, double startAngle, double angle, Color color, double outlineWidth) {
-        int cirDepth = getCirDepth(r, angle);
-        double cirPart = angle / cirDepth;
-        for (int i = 0; i < cirDepth; i++) {
-            double xOC = x + Math.sin(startAngle + cirPart * i) * r;
-            double yOC = y - Math.cos(startAngle + cirPart * i) * r;
-            double xIC = x + Math.sin(startAngle + cirPart * i) * (r - outlineWidth);
-            double yIC = y - Math.cos(startAngle + cirPart * i) * (r - outlineWidth);
-            double xON = x + Math.sin(startAngle + cirPart * (i + 1)) * r;
-            double yON = y - Math.cos(startAngle + cirPart * (i + 1)) * r;
-            double xIN = x + Math.sin(startAngle + cirPart * (i + 1)) * (r - outlineWidth);
-            double yIN = y - Math.cos(startAngle + cirPart * (i + 1)) * (r - outlineWidth);
-            //
-            vert2(xOC, yOC, color);
-            vert2(xON, yON, color);
-            vert2(xIC, yIC, color);
-            //
-            vert2(xIC, yIC, color);
-            vert2(xON, yON, color);
-            vert2(xIN, yIN, color);
-        }
-    }
-
-    public void vert2(double x, double y, Color c) {
-        pos(x, y, 0).color(c).endVertex();
+        if (Dir.isNot(excludeDir, Dir.WEST)) quad(x1, y1, z1, x1, y2, z1, x1, y2, z2, x1, y1, z2, color); // Left
+        if (Dir.isNot(excludeDir, Dir.EAST)) quad(x2, y1, z1, x2, y2, z1, x2, y2, z2, x2, y1, z2, color); // Right
     }
 
     // LINES
@@ -328,20 +200,20 @@ public class MeshBuilder {
     }
 
     public void boxEdges(double x1, double y1, double z1, double x2, double y2, double z2, Color color, int excludeDir) {
-        if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.NORTH)) line(x1, y1, z1, x1, y2, z1, color);
-        if (Dir.is(excludeDir, Dir.WEST) && Dir.is(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x1, y2, z2, color);
-        if (Dir.is(excludeDir, Dir.EAST) && Dir.is(excludeDir, Dir.NORTH)) line(x2, y1, z1, x2, y2, z1, color);
-        if (Dir.is(excludeDir, Dir.EAST) && Dir.is(excludeDir, Dir.SOUTH)) line(x2, y1, z2, x2, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.NORTH)) line(x1, y1, z1, x1, y2, z1, color);
+        if (Dir.isNot(excludeDir, Dir.WEST) && Dir.isNot(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x1, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.NORTH)) line(x2, y1, z1, x2, y2, z1, color);
+        if (Dir.isNot(excludeDir, Dir.EAST) && Dir.isNot(excludeDir, Dir.SOUTH)) line(x2, y1, z2, x2, y2, z2, color);
 
-        if (Dir.is(excludeDir, Dir.NORTH)) line(x1, y1, z1, x2, y1, z1, color);
-        if (Dir.is(excludeDir, Dir.NORTH)) line(x1, y2, z1, x2, y2, z1, color);
-        if (Dir.is(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x2, y1, z2, color);
-        if (Dir.is(excludeDir, Dir.SOUTH)) line(x1, y2, z2, x2, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.NORTH)) line(x1, y1, z1, x2, y1, z1, color);
+        if (Dir.isNot(excludeDir, Dir.NORTH)) line(x1, y2, z1, x2, y2, z1, color);
+        if (Dir.isNot(excludeDir, Dir.SOUTH)) line(x1, y1, z2, x2, y1, z2, color);
+        if (Dir.isNot(excludeDir, Dir.SOUTH)) line(x1, y2, z2, x2, y2, z2, color);
 
-        if (Dir.is(excludeDir, Dir.WEST)) line(x1, y1, z1, x1, y1, z2, color);
-        if (Dir.is(excludeDir, Dir.WEST)) line(x1, y2, z1, x1, y2, z2, color);
-        if (Dir.is(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
-        if (Dir.is(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.WEST)) line(x1, y1, z1, x1, y1, z2, color);
+        if (Dir.isNot(excludeDir, Dir.WEST)) line(x1, y2, z1, x1, y2, z2, color);
+        if (Dir.isNot(excludeDir, Dir.EAST)) line(x2, y1, z1, x2, y1, z2, color);
+        if (Dir.isNot(excludeDir, Dir.EAST)) line(x2, y2, z1, x2, y2, z2, color);
     }
 
     public void boxEdges(double x, double y, double width, double height, Color color) {

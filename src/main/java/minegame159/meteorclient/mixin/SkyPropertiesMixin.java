@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.systems.modules.Modules;
@@ -10,7 +15,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(SkyProperties.class)
 public class SkyPropertiesMixin {
-
     @Inject(method = "shouldBrightenLighting", at = @At(value = "HEAD"), cancellable = true)
     private void onShouldBrightenLighting(CallbackInfoReturnable<Boolean> cir) {
         Fullbright fullbright = Modules.get().get(Fullbright.class);

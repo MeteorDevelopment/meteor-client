@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -16,7 +15,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.input.Input;
 import minegame159.meteorclient.utils.world.GoalDirection;
-import net.minecraft.client.options.KeyBinding;
+import net.minecraft.client.option.KeyBinding;
 
 public class AutoWalk extends Module {
     public enum Mode {
@@ -30,7 +29,7 @@ public class AutoWalk extends Module {
         Left,
         Right
     }
-    
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -40,7 +39,8 @@ public class AutoWalk extends Module {
             .onChanged(mode1 -> {
                 if (isActive()) {
                     if (mode1 == Mode.Simple) {
-                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                        // TODO: Baritone
+                        //BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                         goal = null;
                     } else {
                         timer = 0;
@@ -79,7 +79,8 @@ public class AutoWalk extends Module {
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Simple) unpress();
-        else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        // TODO: Baritone
+        //else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         goal = null;
     }
@@ -125,7 +126,8 @@ public class AutoWalk extends Module {
 
     private void createGoal() {
         timer = 0;
-        goal = new GoalDirection(mc.player.getPos(), mc.player.yaw);
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
+        goal = new GoalDirection(mc.player.getPos(), mc.player.getYaw());
+        // TODO: Baritone
+        //BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
     }
 }

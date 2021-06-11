@@ -5,10 +5,10 @@
 
 package minegame159.meteorclient.settings;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -21,7 +21,8 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     public SoundEventListSetting(String name, String description, List<SoundEvent> defaultValue, Consumer<List<SoundEvent>> onChanged, Consumer<Setting<List<SoundEvent>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
-        value = new ArrayList<>(defaultValue); }
+        value = new ArrayList<>(defaultValue);
+    }
 
     @Override
     public void reset(boolean callbacks) {
@@ -55,12 +56,12 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        ListTag valueTag = new ListTag();
+        NbtList valueTag = new NbtList();
         for (SoundEvent sound : get()) {
-            valueTag.add(StringTag.of(Registry.SOUND_EVENT.getId(sound).toString()));
+            valueTag.add(NbtString.of(Registry.SOUND_EVENT.getId(sound).toString()));
         }
         tag.put("value", valueTag);
 
@@ -68,11 +69,11 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    public List<SoundEvent> fromTag(CompoundTag tag) {
+    public List<SoundEvent> fromTag(NbtCompound tag) {
         get().clear();
 
-        ListTag valueTag = tag.getList("value", 8);
-        for (Tag tagI : valueTag) {
+        NbtList valueTag = tag.getList("value", 8);
+        for (NbtElement tagI : valueTag) {
             get().add(Registry.SOUND_EVENT.get(new Identifier(tagI.asString())));
         }
 

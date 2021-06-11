@@ -5,24 +5,20 @@
 
 package minegame159.meteorclient.utils.player;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.utils.Rotation;
 import minegame159.meteorclient.mixininterface.IVec3d;
+import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.movement.NoFall;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import minegame159.meteorclient.utils.misc.BaritoneUtils;
 import minegame159.meteorclient.utils.misc.text.TextUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.entity.BedBlockEntity;
-import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
+import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -38,10 +34,9 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
 import static minegame159.meteorclient.utils.Utils.WHITE;
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class PlayerUtils {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final double diagonal = 1 / Math.sqrt(2);
     private static final Vec3d horizontalVelocity = new Vec3d(0, 0, 0);
 
@@ -49,17 +44,18 @@ public class PlayerUtils {
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
         if (Friends.get().isFriend(entity)) return color.set(Friends.get().color).a(defaultColor.a);
-        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE)) return color.set(color).a(defaultColor.a);
+        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor) return color.set(color).a(defaultColor.a);
         return defaultColor;
     }
 
     public static Vec3d getHorizontalVelocity(double bps) {
-        float yaw = mc.player.yaw;
+        float yaw = mc.player.getYaw();
 
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        // TODO: Baritone
+        /*if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
             Rotation target = BaritoneUtils.getTarget();
             if (target != null) yaw = target.getYaw();
-        }
+        }*/
 
         Vec3d forward = Vec3d.fromPolar(0, yaw);
         Vec3d right = Vec3d.fromPolar(0, yaw + 90);
@@ -102,8 +98,8 @@ public class PlayerUtils {
     public static void centerPlayer() {
         double x = MathHelper.floor(mc.player.getX()) + 0.5;
         double z = MathHelper.floor(mc.player.getZ()) + 0.5;
-        mc.player.updatePosition(x, mc.player.getY(), z);
-        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionOnly(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
+        mc.player.setPosition(x, mc.player.getY(), z);
+        mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
     }
 
     public static boolean canSeeEntity(Entity entity) {
@@ -127,7 +123,7 @@ public class PlayerUtils {
         double dY = (target.y - eyesPos.y) * -1.0D;
         double dZ = target.z - eyesPos.z;
 
-        double dist = MathHelper.sqrt(dX * dX + dZ * dZ);
+        double dist = Math.sqrt(dX * dX + dZ * dZ);
 
         return new float[]{(float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dZ, dX)) - 90.0D), (float) MathHelper.wrapDegrees(Math.toDegrees(Math.atan2(dY, dist)))};
     }
@@ -201,7 +197,8 @@ public class PlayerUtils {
             }
 
             // Check for beds if in nether
-            if (PlayerUtils.getDimension() != Dimension.Overworld) {
+            // TODO: Fix
+            /*if (PlayerUtils.getDimension() != Dimension.Overworld) {
                 for (BlockEntity blockEntity : mc.world.blockEntities) {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
@@ -210,7 +207,7 @@ public class PlayerUtils {
                         damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
                     }
                 }
-            }
+            }*/
         }
 
         // Check for fall distance with water check
@@ -246,22 +243,38 @@ public class PlayerUtils {
         return MathHelper.sqrt(f * f + g * g + h * h);
     }
 
+    public static double distanceToCamera(double x, double y, double z) {
+        Camera camera = mc.gameRenderer.getCamera();
+        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
+    }
+
+    public static double distanceToCamera(Entity entity) {
+        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
+    }
+
     public static Dimension getDimension() {
-        switch (MinecraftClient.getInstance().world.getRegistryKey().getValue().getPath()) {
-            case "the_nether": return Dimension.Nether;
-            case "the_end":    return Dimension.End;
-            default:           return Dimension.Overworld;
+        switch (mc.world.getRegistryKey().getValue().getPath()) {
+            case "the_nether":
+                return Dimension.Nether;
+            case "the_end":
+                return Dimension.End;
+            default:
+                return Dimension.Overworld;
         }
     }
 
     public static GameMode getGameMode() {
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
-        if (playerListEntry == null) return GameMode.NOT_SET;
+        if (playerListEntry == null) return GameMode.SPECTATOR;
         return playerListEntry.getGameMode();
     }
 
     public static double getTotalHealth() {
         return mc.player.getHealth() + mc.player.getAbsorptionAmount();
+    }
+
+    public static boolean isAlive() {
+        return mc.player.isAlive() && !mc.player.isDead();
     }
 
     public static int getPing() {

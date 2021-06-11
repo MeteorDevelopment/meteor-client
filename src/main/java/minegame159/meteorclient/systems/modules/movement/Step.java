@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -27,7 +26,7 @@ public class Step extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     public final Setting<Double> height = sgGeneral.add(new DoubleSetting.Builder()
             .name("height")
             .description("Step height.")
@@ -72,8 +71,8 @@ public class Step extends Module {
         assert mc.player != null;
         prevStepHeight = mc.player.stepHeight;
 
-        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
-        BaritoneAPI.getSettings().assumeStep.value = true;
+        // TODO: Baritone
+        //BaritoneAPI.getSettings().assumeStep.value = true;
     }
 
     @EventHandler
@@ -92,7 +91,8 @@ public class Step extends Module {
     public void onDeactivate() {
         if (mc.player != null) mc.player.stepHeight = prevStepHeight;
 
-        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+        // TODO: Baritone
+        //BaritoneAPI.getSettings().assumeStep.value = false;
     }
 
     private float getHealth(){

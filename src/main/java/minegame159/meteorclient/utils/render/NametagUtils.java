@@ -9,15 +9,13 @@ import minegame159.meteorclient.mixininterface.IMatrix4f;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.misc.Vec4;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 
+import static minegame159.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL11.*;
 
 public class NametagUtils {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
-
     private static final Vec4 vec4 = new Vec4();
     private static final Vec4 mmMat4 = new Vec4();
     private static final Vec4 pmMat4 = new Vec4();

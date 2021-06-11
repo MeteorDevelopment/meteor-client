@@ -8,10 +8,9 @@ package minegame159.meteorclient.systems.modules.world;
 import com.google.common.collect.Sets;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.StartBreakingBlockEvent;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
@@ -20,6 +19,8 @@ import minegame159.meteorclient.utils.misc.Pool;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -28,6 +29,7 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -36,20 +38,27 @@ public class VeinMiner extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Set<Vec3i> blockNeighbours = Sets.newHashSet(
-        new Vec3i(1,-1,1),new Vec3i(0,-1,1),new Vec3i(-1,-1,1),
-        new Vec3i(1,-1,0),new Vec3i(0,-1,0),new Vec3i(-1,-1,0),
-        new Vec3i(1,-1,-1),new Vec3i(0,-1,-1),new Vec3i(-1,-1,-1),
+        new Vec3i(1, -1, 1), new Vec3i(0, -1, 1), new Vec3i(-1, -1, 1),
+        new Vec3i(1, -1, 0), new Vec3i(0, -1, 0), new Vec3i(-1, -1, 0),
+        new Vec3i(1, -1, -1), new Vec3i(0, -1, -1), new Vec3i(-1, -1, -1),
 
-        new Vec3i(1,0,1),new Vec3i(0,0,1),new Vec3i(-1,0,1),
-        new Vec3i(1,0,0),/*new Vec3i(0,0,0),*/new Vec3i(-1,0,0),
-        new Vec3i(1,0,-1),new Vec3i(0,0,-1),new Vec3i(-1,0,-1),
+        new Vec3i(1, 0, 1), new Vec3i(0, 0, 1), new Vec3i(-1, 0, 1),
+        new Vec3i(1, 0, 0), new Vec3i(-1, 0, 0),
+        new Vec3i(1, 0, -1), new Vec3i(0, 0, -1), new Vec3i(-1, 0, -1),
 
-        new Vec3i(1,1,1),new Vec3i(0,1,1),new Vec3i(-1,1,1),
-        new Vec3i(1,1,0),new Vec3i(0,1,0),new Vec3i(-1,1,0),
-        new Vec3i(1,1,-1),new Vec3i(0,1,-1),new Vec3i(-1,1,-1)
+        new Vec3i(1, 1, 1), new Vec3i(0, 1, 1), new Vec3i(-1, 1, 1),
+        new Vec3i(1, 1, 0), new Vec3i(0, 1, 0), new Vec3i(-1, 1, 0),
+        new Vec3i(1, 1, -1), new Vec3i(0, 1, -1), new Vec3i(-1, 1, -1)
     );
 
     // General
+
+    private final Setting<List<Block>> blacklist = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blacklist")
+        .description("Which blocks to ignore.")
+        .defaultValue(Arrays.asList(Blocks.STONE, Blocks.DIRT, Blocks.GRASS))
+        .build()
+    );
 
     private final Setting<Integer> depth = sgGeneral.add(new IntSetting.Builder()
             .name("depth")
@@ -122,8 +131,8 @@ public class VeinMiner extends Module {
 
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
-
-        if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
+        BlockState state = mc.world.getBlockState(event.blockPos);
+        if (state.getHardness(mc.world, event.blockPos) < 0 || blacklist.get().contains(state.getBlock())) return;
 
         foundBlockPositions.clear();
 
@@ -143,9 +152,9 @@ public class VeinMiner extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (render.get()) {
-            for (MyBlock block : blocks) block.render();
+            for (MyBlock block : blocks) block.render(event);
         }
     }
 
@@ -193,7 +202,7 @@ public class VeinMiner extends Module {
             mc.interactionManager.updateBlockBreakingProgress(blockPos, direction);
         }
 
-        public void render() {
+        public void render(Render3DEvent event) {
             VoxelShape shape = mc.world.getBlockState(blockPos).getOutlineShape(mc.world, blockPos);
 
             double x1 = blockPos.getX();
@@ -212,7 +221,7 @@ public class VeinMiner extends Module {
                 z2 = blockPos.getZ() + shape.getMax(Direction.Axis.Z);
             }
 
-            Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 

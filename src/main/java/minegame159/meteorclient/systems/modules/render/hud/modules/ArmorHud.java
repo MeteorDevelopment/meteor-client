@@ -10,6 +10,7 @@ import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.render.RenderUtils;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -66,11 +67,8 @@ public class ArmorHud extends HudElement {
     @Override
     public void update(HudRenderer renderer) {
         switch (orientation.get()) {
-            case Horizontal:
-                box.setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
-                break;
-            case Vertical:
-                box.setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
+            case Horizontal -> box.setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
+            case Vertical   -> box.setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
         }
     }
 
@@ -81,12 +79,14 @@ public class ArmorHud extends HudElement {
         double armorX;
         double armorY;
 
+        MatrixStack matrices = RenderSystem.getModelViewStack();
+
+        matrices.push();
+        matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
+
         int slot = flipOrder.get() ? 3 : 0;
         for (int position = 0; position < 4; position++) {
             ItemStack itemStack = getItem(slot);
-
-            RenderSystem.pushMatrix();
-            RenderSystem.scaled(scale.get(), scale.get(), 1);
 
             if (orientation.get() == Orientation.Vertical) {
                 armorX = x / scale.get();
@@ -99,16 +99,11 @@ public class ArmorHud extends HudElement {
             RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, (itemStack.isDamageable() && durability.get() == Durability.Default));
 
             if (itemStack.isDamageable() && !isInEditor() && durability.get() != Durability.Default && durability.get() != Durability.None) {
-                String message = "err";
-
-                switch (durability.get()) {
-                    case Numbers:
-                        message = Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
-                        break;
-                    case Percentage:
-                        message = Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                        break;
-                }
+                String message = switch (durability.get()) {
+                    case Numbers    -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                    case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
+                    default         -> "err";
+                };
 
                 double messageWidth = renderer.textWidth(message);
 
@@ -123,23 +118,23 @@ public class ArmorHud extends HudElement {
                 renderer.text(message, armorX, armorY, hud.primaryColor.get());
             }
 
-            RenderSystem.popMatrix();
-
             if (flipOrder.get()) slot--;
             else slot++;
         }
+
+        matrices.pop();
     }
 
     private ItemStack getItem(int i) {
         if (isInEditor()) {
-            switch (i) {
-                default: return Items.NETHERITE_BOOTS.getDefaultStack();
-                case 1:  return Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2:  return Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 3:  return Items.NETHERITE_HELMET.getDefaultStack();
-            }
+            return switch (i) {
+                default -> Items.NETHERITE_BOOTS.getDefaultStack();
+                case 1  -> Items.NETHERITE_LEGGINGS.getDefaultStack();
+                case 2  -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 3  -> Items.NETHERITE_HELMET.getDefaultStack();
+            };
         }
 
-        return mc.player.inventory.getArmorStack(i);
+        return mc.player.getInventory().getArmorStack(i);
     }
 }

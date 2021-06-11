@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems.proxies;
 import minegame159.meteorclient.systems.System;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -69,8 +69,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.put("proxies", NbtUtils.listToTag(proxies));
 
@@ -78,8 +78,8 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     @Override
-    public Proxies fromTag(CompoundTag tag) {
-        proxies = NbtUtils.listFromTag(tag.getList("proxies", 10), tag1 -> new Proxy().fromTag((CompoundTag) tag1));
+    public Proxies fromTag(NbtCompound tag) {
+        proxies = NbtUtils.listFromTag(tag.getList("proxies", 10), tag1 -> new Proxy().fromTag((NbtCompound) tag1));
 
         return this;
     }

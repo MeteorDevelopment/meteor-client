@@ -10,7 +10,7 @@ import minegame159.meteorclient.utils.misc.ICopyable;
 import minegame159.meteorclient.utils.misc.IGetter;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.block.Block;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
@@ -44,10 +44,10 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = saveGeneral();
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
 
-        CompoundTag valueTag = new CompoundTag();
+        NbtCompound valueTag = new NbtCompound();
         for (Block block : get().keySet()) {
             valueTag.put(Registry.BLOCK.getId(block).toString(), get().get(block).toTag());
         }
@@ -57,10 +57,10 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public Map<Block, T> fromTag(CompoundTag tag) {
+    public Map<Block, T> fromTag(NbtCompound tag) {
         get().clear();
 
-        CompoundTag valueTag = tag.getCompound("value");
+        NbtCompound valueTag = tag.getCompound("value");
         for (String key : valueTag.getKeys()) {
             get().put(Registry.BLOCK.get(new Identifier(key)), defaultData.get().copy().fromTag(valueTag.getCompound(key)));
         }

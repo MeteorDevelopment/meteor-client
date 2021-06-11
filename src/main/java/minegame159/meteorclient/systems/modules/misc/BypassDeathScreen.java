@@ -11,15 +11,7 @@ import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 
 public class BypassDeathScreen extends Module {
-    public boolean shouldBypass = false;
-
-    public BypassDeathScreen(){
+    public BypassDeathScreen() {
         super(Categories.Misc, "bypass-death-screen", "Lets you spy on people after death.");
-    }
-
-    @Override
-    public void onDeactivate() {
-        shouldBypass = false;
-        super.onDeactivate();
     }
 }

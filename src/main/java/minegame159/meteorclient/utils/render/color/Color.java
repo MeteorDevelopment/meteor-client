@@ -7,7 +7,7 @@ package minegame159.meteorclient.utils.render.color;
 
 import minegame159.meteorclient.utils.misc.ICopyable;
 import minegame159.meteorclient.utils.misc.ISerializable;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.Vec3d;
 
 public class Color implements ICopyable<Color>, ISerializable<Color> {
@@ -217,8 +217,8 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putInt("r", r);
         tag.putInt("g", g);
@@ -229,7 +229,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     @Override
-    public Color fromTag(CompoundTag tag) {
+    public Color fromTag(NbtCompound tag) {
         r = tag.getInt("r");
         g = tag.getInt("g");
         b = tag.getInt("b");

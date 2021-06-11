@@ -19,6 +19,7 @@ import minegame159.meteorclient.settings.SettingGroup;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.utils.misc.input.KeyAction;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
@@ -64,17 +65,17 @@ public class MiddleClickExtra extends Module {
     );
 
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
-            .name("notify")
-            .description("Notifies you when you do not have the specified item in your hotbar.")
-            .defaultValue(true)
-            .build()
+        .name("notify")
+        .description("Notifies you when you do not have the specified item in your hotbar.")
+        .defaultValue(true)
+        .build()
     );
 
     private boolean isUsing;
     private int preSlot;
 
-    public MiddleClickExtra(){
-        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click. Works the same as Middle Click Friend.");
+    public MiddleClickExtra() {
+        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click.");
     }
 
     @Override
@@ -86,31 +87,26 @@ public class MiddleClickExtra extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE) return;
 
-        InvUtils.FindItemResult result = InvUtils.findItemWithCount(mode.get().item);
+        FindItemResult result = InvUtils.findInHotbar(mode.get().item);
 
-        if (result.slot == -1 || result.slot > 8) {
+        if (!result.found()) {
             if (notify.get()) warning("Unable to find specified item.");
             return;
         }
 
-        preSlot = mc.player.inventory.selectedSlot;
-        mc.player.inventory.selectedSlot = result.slot;
+        preSlot = mc.player.getInventory().selectedSlot;
+        InvUtils.swap(result.getSlot());
 
         switch (mode.get().type) {
-            case Immediate:
+            case Immediate -> {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                mc.player.inventory.selectedSlot = preSlot;
-
-                break;
-            case LongerSingleClick:
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-
-                break;
-            case Longer:
+                InvUtils.swap(preSlot);
+            }
+            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+            case Longer -> {
                 mc.options.keyUse.setPressed(true);
                 isUsing = true;
-
-                break;
+            }
         }
     }
 
@@ -140,7 +136,7 @@ public class MiddleClickExtra extends Module {
     private void stopIfUsing() {
         if (isUsing) {
             mc.options.keyUse.setPressed(false);
-            mc.player.inventory.selectedSlot = preSlot;
+            InvUtils.swap(preSlot);
             isUsing = false;
         }
     }

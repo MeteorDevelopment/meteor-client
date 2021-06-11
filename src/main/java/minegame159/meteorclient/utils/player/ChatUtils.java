@@ -9,15 +9,14 @@ import minegame159.meteorclient.mixin.ChatHudAccessor;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.render.color.RainbowColor;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
 
-public class ChatUtils {
-    private static final MinecraftClient mc = MinecraftClient.getInstance();
+import static minegame159.meteorclient.utils.Utils.mc;
 
+public class ChatUtils {
     private static final RainbowColor RAINBOW = new RainbowColor();
 
     // Default
@@ -142,7 +141,7 @@ public class ChatUtils {
         coordsString = formatMsg(coordsString, Formatting.GRAY);
         BaseText coordsText = new LiteralText(coordsString);
         coordsText.setStyle(coordsText.getStyle()
-                .withFormatting(Formatting.UNDERLINE)
+                .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
                         String.format("/b goto %d %d %d", (int) pos.x, (int) pos.y, (int) pos.z)

@@ -114,7 +114,7 @@ public class ElytraFly extends Module {
     public final Setting<Boolean> noCrash = sgGeneral.add(new BoolSetting.Builder()
             .name("no-crash")
             .description("Stops you from going into walls.")
-            .defaultValue(true)
+            .defaultValue(false)
             .build()
     );
 
@@ -147,13 +147,6 @@ public class ElytraFly extends Module {
 
     // Autopilot
 
-    private final Setting<Boolean> enableAutopilot = sgAutopilot.add(new BoolSetting.Builder()
-            .name("enable-autopilot")
-            .description("Use autopilot.")
-            .defaultValue(false)
-            .build()
-    );
-
     public final Setting<Boolean> useFireworks = sgAutopilot.add(new BoolSetting.Builder()
             .name("use-fireworks")
             .description("Uses firework rockets every second of your choice.")
@@ -165,7 +158,7 @@ public class ElytraFly extends Module {
             .name("firework-delay")
             .description("The delay in seconds in between using fireworks if \"Use Fireworks\" is enabled.")
             .min(1)
-            .defaultValue(10)
+            .defaultValue(8)
             .sliderMax(20)
             .visible(useFireworks::get)
             .build()
@@ -230,8 +223,8 @@ public class ElytraFly extends Module {
             currentMode.velX = 0;
             currentMode.velY = event.movement.y;
             currentMode.velZ = 0;
-            currentMode.forward = Vec3d.fromPolar(0, mc.player.yaw).multiply(0.1);
-            currentMode.right = Vec3d.fromPolar(0, mc.player.yaw + 90).multiply(0.1);
+            currentMode.forward = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(0.1);
+            currentMode.right = Vec3d.fromPolar(0, mc.player.getYaw() + 90).multiply(0.1);
 
             // Handle stopInWater
             if (mc.player.isTouchingWater() && stopInWater.get()) {
@@ -240,9 +233,8 @@ public class ElytraFly extends Module {
             }
 
             currentMode.handleFallMultiplier();
-            if (enableAutopilot.get()) {
-                currentMode.handleAutopilot();
-            }
+            currentMode.handleAutopilot();
+
             currentMode.handleHorizontalSpeed();
             currentMode.handleVerticalSpeed();
 
@@ -320,7 +312,7 @@ public class ElytraFly extends Module {
         private void onInstadropTick(TickEvent.Post event) {
             if (mc.player != null && mc.player.isFallFlying()) {
                 mc.player.setVelocity(0, 0, 0);
-                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket(true));
+                mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
             } else {
                 disableInstaDropListener();
             }

@@ -24,8 +24,8 @@ import net.minecraft.item.FoodComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtList;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -68,7 +68,7 @@ public class BetterTooltips extends Module {
             .build()
     );
 
-    public final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
             .name("middle-click-open")
             .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
             .defaultValue(true)
@@ -107,12 +107,29 @@ public class BetterTooltips extends Module {
     );
 
     public final Setting<Double> mapsScale = sgPreviews.add(new DoubleSetting.Builder()
-            .name("scale")
+            .name("map-scale")
             .description("The scale of the map preview.")
             .defaultValue(1)
             .min(1)
             .sliderMax(5)
             .visible(maps::get)
+            .build()
+    );
+
+    private final Setting<Boolean> books = sgPreviews.add(new BoolSetting.Builder()
+            .name("books")
+            .description("Shows contents of a book when hovering over it in an inventory.")
+            .defaultValue(true)
+            .build()
+    );
+
+    public final Setting<Double> booksScale = sgPreviews.add(new DoubleSetting.Builder()
+            .name("book-scale")
+            .description("The scale of the book preview.")
+            .defaultValue(1)
+            .min(1)
+            .sliderMax(5)
+            .visible(books::get)
             .build()
     );
 
@@ -161,6 +178,10 @@ public class BetterTooltips extends Module {
         return isActive() && isPressed() && maps.get();
     }
 
+    public boolean previewBooks() {
+        return isActive() && isPressed() && books.get();
+    }
+
     private boolean isPressed() {
         return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
     }
@@ -170,7 +191,7 @@ public class BetterTooltips extends Module {
         // Item size tooltip
         if (byteSize.get()) {
             try {
-                event.itemStack.toTag(new CompoundTag()).write(ByteCountDataOutput.INSTANCE);
+                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
 
                 int byteCount = ByteCountDataOutput.INSTANCE.getCount();
                 String count;
@@ -189,12 +210,12 @@ public class BetterTooltips extends Module {
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
-                CompoundTag tag = event.itemStack.getTag();
+                NbtCompound tag = event.itemStack.getTag();
                 if (tag != null) {
-                    ListTag effects = tag.getList("Effects", 10);
+                    NbtList effects = tag.getList("Effects", 10);
                     if (effects != null) {
                         for (int i = 0; i < effects.size(); i++) {
-                            CompoundTag effectTag = effects.getCompound(i);
+                            NbtCompound effectTag = effects.getCompound(i);
                             byte effectId = effectTag.getByte("EffectId");
                             int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
                             StatusEffectInstance effect = new StatusEffectInstance(StatusEffect.byRawId(effectId), effectDuration, 0);
@@ -217,17 +238,17 @@ public class BetterTooltips extends Module {
         //Beehive
         if (beehive.get()) {
             if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
-                CompoundTag tag = event.itemStack.getTag();
+                NbtCompound tag = event.itemStack.getTag();
                 if (tag != null) {
-                    CompoundTag blockStateTag = tag.getCompound("BlockStateTag");
+                    NbtCompound blockStateTag = tag.getCompound("BlockStateTag");
                     if (blockStateTag != null) {
                         int level = blockStateTag.getInt("honey_level");
                         event.list.add(1, new LiteralText(String.format("%sHoney level: %s%d%s.", 
                             Formatting.GRAY, Formatting.YELLOW, level, Formatting.GRAY)));
                     }
-                    CompoundTag blockEntityTag = tag.getCompound("BlockEntityTag");
+                    NbtCompound blockEntityTag = tag.getCompound("BlockEntityTag");
                     if (blockEntityTag != null) {
-                        ListTag beesTag = blockEntityTag.getList("Bees", 10);
+                        NbtList beesTag = blockEntityTag.getList("Bees", 10);
                         event.list.add(1, new LiteralText(String.format("%sBees: %s%d%s.", 
                             Formatting.GRAY, Formatting.YELLOW, beesTag.size(), Formatting.GRAY)));
                     }
@@ -237,9 +258,11 @@ public class BetterTooltips extends Module {
         }
 
         // Hold to preview tooltip
-        if (Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers()
+        if ((Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers())
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
-            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())) {
+            || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
+            || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
+            || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())) {
             event.list.add(new LiteralText(""));
             event.list.add(new LiteralText("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
@@ -247,14 +270,16 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void modifyTooltip(GetTooltipEvent.Modify event) {
-        if (Utils.hasItems(event.itemStack) && shulkers.get() && previewShulkers() || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest()) && showVanilla.get()) {
+        if ((Utils.hasItems(event.itemStack) && shulkers.get() && previewShulkers())
+            || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())
+            || (willRenderBookPreview(event.itemStack) && books.get() && previewBooks())) {
             event.y -= 10 * event.list.size();
             event.y -= 4;
         }
     }
 
     public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
-        CompoundTag tag = stack.getSubTag("BlockEntityTag");
+        NbtCompound tag = stack.getSubTag("BlockEntityTag");
         if (tag != null) {
             if (tag.contains("LootTable", 8)) {
                 tooltip.add(new LiteralText("???????"));
@@ -262,7 +287,7 @@ public class BetterTooltips extends Module {
 
             if (tag.contains("Items", 9)) {
                 DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
-                Inventories.fromTag(tag, items);
+                Inventories.readNbt(tag, items);
 
                 Object2IntMap<Item> counts = new Object2IntOpenHashMap<>();
 
@@ -298,6 +323,18 @@ public class BetterTooltips extends Module {
         } else {
             return text.formatted(Formatting.RED);
         }
+    }
+
+    public static boolean willRenderBookPreview(ItemStack stack) {
+        if (stack.getItem() != Items.WRITABLE_BOOK && stack.getItem() != Items.WRITTEN_BOOK) return false;
+        NbtCompound tag = stack.getTag();
+        if (tag == null) return false;
+        NbtList ltag = tag.getList("pages", 8);
+        return ltag.size() >= 1;
+    }
+
+    public boolean middleClickOpen() {
+        return isActive() && middleClickOpen.get();
     }
 
     public enum DisplayWhen {

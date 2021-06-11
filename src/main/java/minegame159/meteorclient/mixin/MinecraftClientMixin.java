@@ -27,7 +27,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = MinecraftClient.class, priority = 1001)
@@ -40,7 +39,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Shadow @Final private Window window;
 
-    @Shadow @Nullable public Screen currentScreen;
+    @Shadow public Screen currentScreen;
 
     @Shadow public abstract Profiler getProfiler();
 
@@ -98,7 +97,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         return MeteorClient.EVENT_BUS.post(ItemUseCrosshairTargetEvent.get(client.crosshairTarget)).target;
     }
 
-    @ModifyVariable(method = "reloadResources", at = @At("STORE"), ordinal = 0)
+    @ModifyVariable(method = "reloadResources(Z)Ljava/util/concurrent/CompletableFuture;", at = @At("STORE"), ordinal = 0)
     private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
         completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
         return completableFuture;

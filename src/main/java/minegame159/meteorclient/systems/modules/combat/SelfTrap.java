@@ -6,20 +6,20 @@
 package minegame159.meteorclient.systems.modules.combat;
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.render.RenderEvent;
+import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.rendering.Renderer;
-import minegame159.meteorclient.rendering.ShapeMode;
+import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.util.Hand;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -136,14 +136,14 @@ public class SelfTrap extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        int slot = InvUtils.findItemInHotbar(Blocks.OBSIDIAN.asItem());
+        FindItemResult obsidian = InvUtils.findInHotbar(Items.OBSIDIAN);
 
-        if (turnOff.get() && ((placed && placePositions.isEmpty()) || slot == -1)) {
+        if (turnOff.get() && ((placed && placePositions.isEmpty()) || !obsidian.found())) {
             toggle();
             return;
         }
 
-        if (slot == -1) {
+        if (!obsidian.found()) {
             placePositions.clear();
             return;
         }
@@ -153,7 +153,7 @@ public class SelfTrap extends Module {
         if (delay >= delaySetting.get() && placePositions.size() > 0) {
             BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-            if (BlockUtils.place(blockPos, Hand.MAIN_HAND, slot, rotate.get(), 50, true)) {
+            if (BlockUtils.place(blockPos, obsidian, rotate.get(), 50)) {
                 placePositions.remove(blockPos);
                 placed = true;
             }
@@ -164,9 +164,9 @@ public class SelfTrap extends Module {
     }
 
     @EventHandler
-    private void onRender(RenderEvent event) {
+    private void onRender(Render3DEvent event) {
         if (!render.get() || placePositions.isEmpty()) return;
-        for (BlockPos pos : placePositions) Renderer.boxWithLines(Renderer.NORMAL, Renderer.LINES, pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        for (BlockPos pos : placePositions) event.renderer.box(pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
     private void findPlacePos() {

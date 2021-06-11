@@ -16,6 +16,7 @@ import minegame159.meteorclient.gui.widgets.pressable.WCheckbox;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.modules.HudElement;
+import minegame159.meteorclient.utils.Utils;
 
 import static minegame159.meteorclient.utils.Utils.getWindowWidth;
 
@@ -65,6 +66,6 @@ public class HudElementScreen extends WindowScreen {
 
     @Override
     protected void onRenderBefore(float delta) {
-        Modules.get().get(HUD.class).onRender(Render2DEvent.get(0, 0, delta));
+        if (!Utils.canUpdate()) Modules.get().get(HUD.class).onRender(Render2DEvent.get(0, 0, delta));
     }
 }

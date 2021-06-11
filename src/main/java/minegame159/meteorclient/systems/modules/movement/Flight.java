@@ -93,19 +93,19 @@ public class Flight extends Module {
     @Override
     public void onActivate() {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            mc.player.abilities.flying = true;
-            if (mc.player.abilities.creativeMode) return;
-            mc.player.abilities.allowFlying = true;
+            mc.player.getAbilities().flying = true;
+            if (mc.player.getAbilities().creativeMode) return;
+            mc.player.getAbilities().allowFlying = true;
         }
     }
 
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            mc.player.abilities.flying = false;
-            mc.player.abilities.setFlySpeed(0.05f);
-            if (mc.player.abilities.creativeMode) return;
-            mc.player.abilities.allowFlying = false;
+            mc.player.getAbilities().flying = false;
+            mc.player.getAbilities().setFlySpeed(0.05f);
+            if (mc.player.getAbilities().creativeMode) return;
+            mc.player.getAbilities().allowFlying = false;
         }
     }
 
@@ -114,9 +114,9 @@ public class Flight extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        float currentYaw = mc.player.yaw;
+        float currentYaw = mc.player.getYaw();
         if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
-            mc.player.yaw += flip ? 1 : -1;
+            mc.player.setYaw(flip ? 1 : -1);
             flip = !flip;
         }
         lastYaw = currentYaw;
@@ -130,10 +130,10 @@ public class Flight extends Module {
             offLeft --;
 
             if (mode.get() == Mode.Abilities) {
-                mc.player.abilities.flying = false;
-                mc.player.abilities.setFlySpeed(0.05f);
-                if (mc.player.abilities.creativeMode) return;
-                mc.player.abilities.allowFlying = false;
+                mc.player.getAbilities().flying = false;
+                mc.player.getAbilities().setFlySpeed(0.05f);
+                if (mc.player.getAbilities().creativeMode) return;
+                mc.player.getAbilities().allowFlying = false;
             }
 
             return;
@@ -144,7 +144,7 @@ public class Flight extends Module {
             offLeft = offTime.get();
         }
 
-        if (mc.player.yaw != lastYaw) mc.player.yaw = lastYaw;
+        if (mc.player.getYaw() != lastYaw) mc.player.setYaw(lastYaw);
 
         switch (mode.get()) {
             case Velocity:
@@ -153,7 +153,7 @@ public class Flight extends Module {
                 also, all of the multiplication below is to get the speed to roughly match the speed
                 you get when using vanilla fly*/
 
-                mc.player.abilities.flying = false;
+                mc.player.getAbilities().flying = false;
                 mc.player.flyingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
 
                 mc.player.setVelocity(0, 0, 0);
@@ -164,10 +164,10 @@ public class Flight extends Module {
                 break;
             case Abilities:
                 if (mc.player.isSpectator()) return;
-                mc.player.abilities.setFlySpeed(speed.get().floatValue());
-                mc.player.abilities.flying = true;
-                if (mc.player.abilities.creativeMode) return;
-                mc.player.abilities.allowFlying = true;
+                mc.player.getAbilities().setFlySpeed(speed.get().floatValue());
+                mc.player.getAbilities().flying = true;
+                if (mc.player.getAbilities().creativeMode) return;
+                mc.player.getAbilities().allowFlying = true;
                 break;
         }
     }

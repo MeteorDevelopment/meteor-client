@@ -14,7 +14,7 @@ import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public abstract class HudElement implements ISerializable<HudElement> {
     public final String name, title;
@@ -61,8 +61,8 @@ public abstract class HudElement implements ISerializable<HudElement> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
         tag.putBoolean("active", active);
@@ -73,7 +73,7 @@ public abstract class HudElement implements ISerializable<HudElement> {
     }
 
     @Override
-    public HudElement fromTag(CompoundTag tag) {
+    public HudElement fromTag(NbtCompound tag) {
         active = tag.contains("active") ? tag.getBoolean("active") : defaultActive;
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
         box.fromTag(tag.getCompound("box"));

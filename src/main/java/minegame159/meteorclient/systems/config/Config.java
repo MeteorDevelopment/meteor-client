@@ -12,7 +12,7 @@ import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 
 public class Config extends System<Config> {
     public String versionString;
@@ -24,6 +24,8 @@ public class Config extends System<Config> {
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
     public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
+
+    public boolean useTeamColor = ConfigTab.useTeamColor.get();
 
     public Config() {
         super("config");
@@ -39,8 +41,8 @@ public class Config extends System<Config> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
         tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
         tag.putDouble("rainbowSpeed", RainbowColors.GLOBAL.getSpeed());
@@ -50,11 +52,14 @@ public class Config extends System<Config> {
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
         tag.putBoolean("rainbowPrefix", rainbowPrefix);
 
+
+        tag.putBoolean("useTeamColor", useTeamColor);
+
         return tag;
     }
 
     @Override
-    public Config fromTag(CompoundTag tag) {
+    public Config fromTag(NbtCompound tag) {
         font = getString(tag, "font", ConfigTab.font);
         customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
         RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
@@ -64,22 +69,24 @@ public class Config extends System<Config> {
         deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
         rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
 
+        useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
+
         return this;
     }
 
-    private boolean getBoolean(CompoundTag tag, String key, Setting<Boolean> setting) {
+    private boolean getBoolean(NbtCompound tag, String key, Setting<Boolean> setting) {
         return tag.contains(key) ? tag.getBoolean(key) : setting.get();
     }
 
-    private String getString(CompoundTag tag, String key, Setting<String> setting) {
+    private String getString(NbtCompound tag, String key, Setting<String> setting) {
         return tag.contains(key) ? tag.getString(key) : setting.get();
     }
 
-    private double getDouble(CompoundTag tag, String key, Setting<Double> setting) {
+    private double getDouble(NbtCompound tag, String key, Setting<Double> setting) {
         return tag.contains(key) ? tag.getDouble(key) : setting.get();
     }
 
-    private int getInt(CompoundTag tag, String key, Setting<Integer> setting) {
+    private int getInt(NbtCompound tag, String key, Setting<Integer> setting) {
         return tag.contains(key) ? tag.getInt(key) : setting.get();
     }
 }

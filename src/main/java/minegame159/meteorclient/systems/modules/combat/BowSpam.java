@@ -21,21 +21,21 @@ public class BowSpam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> charge = sgGeneral.add(new IntSetting.Builder()
-            .name("charge")
-            .description("How long to charge the bow before releasing in ticks.")
-            .defaultValue(5)
-            .min(5)
-            .max(20)
-            .sliderMin(5)
-            .sliderMax(20)
-            .build()
+        .name("charge")
+        .description("How long to charge the bow before releasing in ticks.")
+        .defaultValue(5)
+        .min(5)
+        .max(20)
+        .sliderMin(5)
+        .sliderMax(20)
+        .build()
     );
 
     private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
-            .name("when-holding-right-click")
-            .description("Works only when holding right click.")
-            .defaultValue(false)
-            .build()
+        .name("when-holding-right-click")
+        .description("Works only when holding right click.")
+        .defaultValue(false)
+        .build()
     );
 
     private boolean wasBow = false;
@@ -58,7 +58,8 @@ public class BowSpam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.abilities.creativeMode && InvUtils.findItemInWhole(itemStack -> itemStack.getItem() instanceof ArrowItem) == -1) return;
+        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found())
+            return;
 
         if (!onlyWhenHoldingRightClick.get() || mc.options.keyUse.isPressed()) {
             boolean isBow = mc.player.getMainHandStack().getItem() == Items.BOW;

@@ -80,6 +80,16 @@ public class MeteorGuiTheme extends GuiTheme {
             .build()
     );
 
+    public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
+            .name("hide-HUD")
+            .description("Hide HUD when in GUI.")
+            .defaultValue(false)
+            .onChanged(v -> {
+                if (mc.currentScreen instanceof WidgetScreen) mc.options.hudHidden = v;
+            })
+            .build()
+    );
+
     public final Setting<Integer> round = sgGeneral.add(new IntSetting.Builder()
             .name("round")
             .description("How much windows should be rounded")
@@ -303,6 +313,11 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean blur() {
         return blur.get();
+    }
+
+    @Override
+    public boolean hideHUD() {
+        return hideHUD.get();
     }
 
     @Override

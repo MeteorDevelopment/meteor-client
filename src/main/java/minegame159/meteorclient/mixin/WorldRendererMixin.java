@@ -5,13 +5,12 @@
 
 package minegame159.meteorclient.mixin;
 
-import minegame159.meteorclient.rendering.Blur;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.render.*;
 import minegame159.meteorclient.systems.modules.world.Ambience;
+import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.render.Outlines;
 import minegame159.meteorclient.utils.render.color.Color;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.render.*;
@@ -28,13 +27,11 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
-
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
     @Shadow protected abstract void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers);
 
-    @Shadow @Nullable private Framebuffer entityOutlinesFramebuffer;
+    @Shadow private Framebuffer entityOutlinesFramebuffer;
 
     @Inject(method = "loadEntityOutlineShader", at = @At("TAIL"))
     private void onLoadEntityOutlineShader(CallbackInfo info) {
@@ -61,11 +58,6 @@ public abstract class WorldRendererMixin {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void onRenderTail(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
-        Blur.render();
-    }
-
     // Outlines
 
     @Inject(method = "render", at = @At("HEAD"))
@@ -84,53 +76,25 @@ public abstract class WorldRendererMixin {
         if (esp.shouldDrawOutline(entity)) {
             Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
+            Utils.renderingEntityOutline = true;
 
-            Outlines.setUniform("width", esp.outlineWidth.get());
-            Outlines.setUniform("fillOpacity", esp.fillOpacity.get().floatValue() / 255f);
-            Outlines.setUniform("shapeMode", (float) esp.shapeMode.get().ordinal());
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
-
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
 
+            Utils.renderingEntityOutline = false;
             this.entityOutlinesFramebuffer = prevBuffer;
         }
     }
-    
+
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
-        Outlines.endRender(tickDelta);
-    }
-
-    @Inject(method = "drawEntityOutlinesFramebuffer", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gl/Framebuffer;draw(IIZ)V"))
-    private void onDrawEntityOutlinesFramebuffer(CallbackInfo info) {
-        Outlines.renderFbo();
+        Outlines.endRender();
     }
 
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int i, int j, CallbackInfo info) {
         Outlines.onResized(i, j);
     }
-
-    // Break Indicators start
-
-    @Inject(method = "setBlockBreakingInfo", at = @At("HEAD"), cancellable = true)
-    private void onBlockBreakingInfo(int entityId, BlockPos pos, int stage, CallbackInfo ci) {
-        if (0 <= stage && stage <= 8) {
-            BlockBreakingInfo info = new BlockBreakingInfo(entityId, pos);
-            info.setStage(stage);
-            BlockUtils.breakingBlocks.put(entityId, info);
-
-            if (Modules.get().isActive(BreakIndicators.class)) ci.cancel();
-        } else {
-            BlockUtils.breakingBlocks.remove(entityId);
-        }
-    }
-    @Inject(method = "removeBlockBreakingInfo", at = @At("TAIL"))
-    private void onBlockBreakingInfoRemoval(BlockBreakingInfo info, CallbackInfo ci) {
-        BlockUtils.breakingBlocks.values().removeIf(info::equals);
-    }
-
-    // Break Indicators end
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
     private <E extends Entity> boolean shouldRenderRedirect(EntityRenderDispatcher entityRenderDispatcher, E entity, Frustum frustum, double x, double y, double z) {

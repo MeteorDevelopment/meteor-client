@@ -16,10 +16,12 @@ import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.gui.GuiThemes;
 import minegame159.meteorclient.gui.renderer.GuiRenderer;
 import minegame159.meteorclient.gui.tabs.Tabs;
-import minegame159.meteorclient.rendering.Blur;
+import minegame159.meteorclient.renderer.Blur;
+import minegame159.meteorclient.renderer.PostProcessRenderer;
+import minegame159.meteorclient.renderer.Renderer2D;
+import minegame159.meteorclient.renderer.Shaders;
 import minegame159.meteorclient.rendering.Fonts;
 import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.gl.PostProcessRenderer;
 import minegame159.meteorclient.rendering.text.CustomTextRenderer;
 import minegame159.meteorclient.systems.Systems;
 import minegame159.meteorclient.systems.config.Config;
@@ -36,7 +38,6 @@ import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import minegame159.meteorclient.utils.world.BlockIterator;
-import minegame159.meteorclient.utils.world.BlockUtils;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
@@ -48,8 +49,11 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
+
+import static minegame159.meteorclient.utils.Utils.mc;
 
 public class MeteorClient implements ClientModInitializer {
     public static MeteorClient INSTANCE;
@@ -58,8 +62,6 @@ public class MeteorClient implements ClientModInitializer {
     public static final Logger LOG = LogManager.getLogger();
 
     public static CustomTextRenderer FONT;
-
-    private MinecraftClient mc;
 
     public Screen screenToOpen;
 
@@ -72,13 +74,16 @@ public class MeteorClient implements ClientModInitializer {
 
         LOG.info("Initializing Meteor Client");
 
+        Utils.mc = MinecraftClient.getInstance();
+        EVENT_BUS.registerLambdaFactory("minegame159.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+
         List<MeteorAddon> addons = new ArrayList<>();
         for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
             addons.add(entrypoint.getEntrypoint());
         }
 
-        mc = MinecraftClient.getInstance();
-        Utils.mc = mc;
+        Shaders.init();
+        Renderer2D.init();
 
         Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
@@ -93,7 +98,6 @@ public class MeteorClient implements ClientModInitializer {
         Blur.init();
         Tabs.init();
         GuiThemes.init();
-        BlockUtils.init();
         Fonts.init();
 
         // Register categories

@@ -99,7 +99,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     private void modifyScale(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
-        if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return;
+        if (module.ignoreSelf.get() && livingEntity == mc.player) return;
 
         args.set(0, -module.playersScale.get().floatValue());
         args.set(1, -module.playersScale.get().floatValue());
@@ -111,7 +111,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     private void modifyColor(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
-        if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return;
+        if (module.ignoreSelf.get() && livingEntity == mc.player) return;
 
         Color color = PlayerUtils.getPlayerColor(((PlayerEntity) livingEntity), module.playersColor.get());
         args.set(4, color.r / 255f);
@@ -123,8 +123,10 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getRenderLayer(Lnet/minecraft/entity/LivingEntity;ZZZ)Lnet/minecraft/client/render/RenderLayer;"))
     private RenderLayer getRenderLayer(LivingEntityRenderer<T, M> livingEntityRenderer, T livingEntity, boolean showBody, boolean translucent, boolean showOutline) {
         Chams module = Modules.get().get(Chams.class);
-        if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity) || module.playersTexture.get()) return getRenderLayer(livingEntity, showBody, translucent, showOutline);
-        if (module.ignoreSelf.get() && livingEntity == MinecraftClient.getInstance().player) return getRenderLayer(livingEntity, showBody, translucent, showOutline);
+        if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity) || module.playersTexture.get())
+            return getRenderLayer(livingEntity, showBody, translucent, showOutline);
+        if (module.ignoreSelf.get() && livingEntity == mc.player)
+            return getRenderLayer(livingEntity, showBody, translucent, showOutline);
 
         return RenderLayer.getItemEntityTranslucentCull(Chams.BLANK);
     }

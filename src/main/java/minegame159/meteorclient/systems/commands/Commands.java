@@ -19,6 +19,8 @@ import net.fabricmc.fabric.impl.command.client.ClientCommandInternals;
 
 import java.util.*;
 
+import static minegame159.meteorclient.utils.Utils.mc;
+
 public class Commands extends System<Commands> {
     private final List<Command> commands = new ArrayList<>();
     private final Map<Class<? extends Command>, Command> commandInstances = new HashMap<>();
@@ -58,6 +60,7 @@ public class Commands extends System<Commands> {
         add(new SwarmCommand());
         add(new ToggleCommand());
         add(new SettingCommand());
+        add(new SpectateCommand());
         add(new GamemodeCommand());
         add(new SaveMapCommand());
         add(new ModulesCommand());
@@ -69,7 +72,7 @@ public class Commands extends System<Commands> {
     }
 
     public void dispatch(String message) throws CommandSyntaxException {
-        dispatch(message, new ChatCommandSource(MinecraftClient.getInstance()));
+        dispatch(message, new ChatCommandSource(mc));
     }
 
     public void dispatch(String message, CommandSource source) throws CommandSyntaxException {

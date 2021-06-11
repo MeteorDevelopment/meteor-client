@@ -5,15 +5,13 @@
 
 package minegame159.meteorclient.systems.modules.render.hud.modules;
 
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Renderer;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.render.hud.HUD;
 import minegame159.meteorclient.systems.modules.render.hud.HudRenderer;
 import minegame159.meteorclient.utils.misc.FakeClientPlayer;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -98,16 +96,16 @@ public class PlayerModelHud extends HudElement {
         double y = box.getY();
 
         if (background.get()) {
-            Renderer.NORMAL.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            Renderer.NORMAL.quadRounded(x, y, box.width, box.height, backgroundColor.get(), renderer.roundAmount(), true);
-            Renderer.NORMAL.end();
+            Renderer2D.COLOR.begin();
+            Renderer2D.COLOR.quadRounded(x, y, box.width, box.height, backgroundColor.get(), renderer.roundAmount(), true);
+            Renderer2D.COLOR.render(null);
         }
 
         PlayerEntity player = mc.player;
         if (isInEditor()) player = FakeClientPlayer.getPlayer();
 
-        float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.yaw - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
-        float pitch = copyPitch.get() ? player.pitch : (float) customPitch.get();
+        float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
+        float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
         InventoryScreen.drawEntity((int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
     }

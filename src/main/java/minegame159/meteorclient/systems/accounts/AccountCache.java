@@ -6,25 +6,25 @@
 package minegame159.meteorclient.systems.accounts;
 
 import minegame159.meteorclient.MeteorClient;
+import minegame159.meteorclient.renderer.Texture;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.misc.NbtException;
-import minegame159.meteorclient.utils.render.ByteTexture;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.URL;
 
-public class AccountCache implements ISerializable<AccountCache> {
+import static minegame159.meteorclient.utils.Utils.mc;
 
+public class AccountCache implements ISerializable<AccountCache> {
     public String username = "";
     public String uuid = "";
 
-    private ByteTexture headTexture;
+    private Texture headTexture;
 
-    public ByteTexture getHeadTexture() {
+    public Texture getHeadTexture() {
         return headTexture;
     }
 
@@ -35,7 +35,7 @@ public class AccountCache implements ISerializable<AccountCache> {
             int[] pixel = new int[4];
 
             if (skinUrl.equals("steve"))
-                skin = ImageIO.read(MinecraftClient.getInstance().getResourceManager().getResource(new Identifier("meteor-client", "textures/steve.png")).getInputStream());
+                skin = ImageIO.read(mc.getResourceManager().getResource(new Identifier("meteor-client", "textures/steve.png")).getInputStream());
             else skin = ImageIO.read(new URL(skinUrl));
 
             // Whole picture
@@ -52,7 +52,7 @@ public class AccountCache implements ISerializable<AccountCache> {
                 }
             }
 
-            headTexture = new ByteTexture(8, 8, head, ByteTexture.Format.RGB, ByteTexture.Filter.Nearest, ByteTexture.Filter.Nearest);
+            headTexture = new Texture(8, 8, head, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest);
             return true;
         } catch (Exception e) {
             MeteorClient.LOG.error("Failed to read skin url. (" + skinUrl + ")");
@@ -61,8 +61,8 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     @Override
-    public CompoundTag toTag() {
-        CompoundTag tag = new CompoundTag();
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
 
         tag.putString("username", username);
         tag.putString("uuid", uuid);
@@ -71,7 +71,7 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     @Override
-    public AccountCache fromTag(CompoundTag tag) {
+    public AccountCache fromTag(NbtCompound tag) {
         if (!tag.contains("username") || !tag.contains("uuid")) throw new NbtException();
 
         username = tag.getString("username");
