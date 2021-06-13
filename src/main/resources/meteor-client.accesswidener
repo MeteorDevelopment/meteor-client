@@ -4,3 +4,13 @@ Accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
 Accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
 Accessible   class   net/minecraft/client/world/ClientWorld$BlockParticle
 Accessible   method  net/minecraft/text/TextColor <init> (I)V
+
+# GlStateManager
+Accessible   class   com/mojang/blaze3d/platform/GlStateManager$BlendFuncState
+Accessible   field   com/mojang/blaze3d/platform/GlStateManager BLEND Lcom/mojang/blaze3d/platform/GlStateManager$BlendFuncState;
+Accessible   class   com/mojang/blaze3d/platform/GlStateManager$DepthTestState
+Accessible   field   com/mojang/blaze3d/platform/GlStateManager DEPTH Lcom/mojang/blaze3d/platform/GlStateManager$DepthTestState;
+Accessible   class   com/mojang/blaze3d/platform/GlStateManager$CullFaceState
+Accessible   field   com/mojang/blaze3d/platform/GlStateManager CULL Lcom/mojang/blaze3d/platform/GlStateManager$CullFaceState;
+Accessible   class   com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker
+Accessible   field   com/mojang/blaze3d/platform/GlStateManager$CapabilityTracker state Z
