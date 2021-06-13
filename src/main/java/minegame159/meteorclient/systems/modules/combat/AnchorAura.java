@@ -104,7 +104,7 @@ public class AnchorAura extends Module {
     private final Setting<Double> placeRange = sgPlace.add(new DoubleSetting.Builder()
         .name("place-range")
         .description("The radius in which anchors are placed in.")
-        .defaultValue(3)
+        .defaultValue(5)
         .min(0)
         .sliderMax(5)
         .visible(place::get)
@@ -140,7 +140,7 @@ public class AnchorAura extends Module {
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
         .name("break-range")
         .description("The radius in which anchors are broken in.")
-        .defaultValue(3)
+        .defaultValue(5)
         .min(0)
         .sliderMax(5)
         .build()
@@ -266,9 +266,7 @@ public class AnchorAura extends Module {
 
                 if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) {
                     Rotations.rotate(Rotations.getYaw(breakPos), Rotations.getPitch(breakPos), 50, () -> breakAnchor(breakPos, anchor, glowStone));
-                } else {
-                    breakAnchor(breakPos, anchor, glowStone);
-                }
+                } else breakAnchor(breakPos, anchor, glowStone);
             }
         }
 
