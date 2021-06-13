@@ -5,25 +5,16 @@
 
 package minegame159.meteorclient.systems.waypoints;
 
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.MeshBuilder;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.utils.misc.ISerializable;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.Map;
 
 public class Waypoint implements ISerializable<Waypoint> {
-    private static final MeshBuilder MB;
-
-    static {
-        MB = new MeshBuilder(128);
-        MB.texture = true;
-    }
-
     public String name = "Meteor on Crack!";
     public String icon = "Square";
     public SettingColor color = new SettingColor(225, 25, 25);
@@ -47,27 +38,19 @@ public class Waypoint implements ISerializable<Waypoint> {
         }
     }
 
-    public void renderIcon(double x, double y, double z, double a, double size) {
+    public void renderIcon(double x, double y, double a, double size) {
         validateIcon();
 
         AbstractTexture texture = Waypoints.get().icons.get(icon);
         if (texture == null) return;
 
-        MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_TEXTURE_COLOR);
-
         int preA = color.a;
         color.a *= a;
 
-        MB.pos(x, y, z).texture(0, 0).color(color).endVertex();
-        MB.pos(x + size, y, z).texture(1, 0).color(color).endVertex();
-        MB.pos(x + size, y + size, z).texture(1, 1).color(color).endVertex();
-
-        MB.pos(x, y, z).texture(0, 0).color(color).endVertex();
-        MB.pos(x + size, y + size, z).texture(1, 1).color(color).endVertex();
-        MB.pos(x, y + size, z).texture(0, 1).color(color).endVertex();
-
         texture.bindTexture();
-        MB.end();
+        Renderer2D.TEXTURE.begin();
+        Renderer2D.TEXTURE.texQuad(x, y, size, size, color);
+        Renderer2D.TEXTURE.render(null);
 
         color.a = preA;
     }
