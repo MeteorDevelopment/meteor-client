@@ -369,7 +369,7 @@ public class WaypointsModule extends Module {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            renderer.post(() -> waypoint.renderIcon(x, y, 0, 1, width));
+            renderer.post(() -> waypoint.renderIcon(x, y, 1, width));
         }
     }
 }
