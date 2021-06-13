@@ -5,26 +5,24 @@
 
 package minegame159.meteorclient.systems.modules.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.EntityAddedEvent;
+import minegame159.meteorclient.events.render.Render2DEvent;
 import minegame159.meteorclient.events.render.Render3DEvent;
 import minegame159.meteorclient.events.world.TickEvent;
+import minegame159.meteorclient.renderer.Renderer2D;
 import minegame159.meteorclient.renderer.ShapeMode;
 import minegame159.meteorclient.renderer.text.TextRenderer;
-import minegame159.meteorclient.rendering.DrawMode;
-import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.rendering.MeshBuilder;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
+import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.PlayerUtils;
+import minegame159.meteorclient.utils.render.NametagUtils;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import minegame159.meteorclient.utils.world.Dimension;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.render.Camera;
-import net.minecraft.client.render.VertexFormats;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -33,8 +31,6 @@ import java.util.List;
 import java.util.UUID;
 
 public class LogoutSpots extends Module {
-    private static final MeshBuilder MB = new MeshBuilder(64);
-
     private static final Color GREEN = new Color(25, 225, 25);
     private static final Color ORANGE = new Color(225, 105, 25);
     private static final Color RED = new Color(225, 25, 25);
@@ -185,14 +181,13 @@ public class LogoutSpots extends Module {
     }
 
     @EventHandler
-    private void onRender(Render3DEvent event) {
-        for (Entry player : players) player.render(event);
+    private void onRender3D(Render3DEvent event) {
+        for (Entry player : players) player.render3D(event);
+    }
 
-        RenderSystem.disableDepthTest();
-        RenderSystem.disableTexture();
-        // TODO: Test
-        //DiffuseLighting.disable();
-        RenderSystem.enableBlend();
+    @EventHandler
+    private void onRender2D(Render2DEvent event) {
+        for (Entry player : players) player.render2D();
     }
 
     @Override
@@ -200,9 +195,11 @@ public class LogoutSpots extends Module {
         return Integer.toString(players.size());
     }
 
+    private static final Vec3 pos = new Vec3();
+
     private class Entry {
         public final double x, y, z;
-        public final double xWidth, zWidth, height;
+        public final double xWidth, zWidth, halfWidth, height;
 
         public final UUID uuid;
         public final String name;
@@ -210,9 +207,10 @@ public class LogoutSpots extends Module {
         public final String healthText;
 
         public Entry(PlayerEntity entity) {
-            x = entity.getX();
+            halfWidth = entity.getWidth() / 2;
+            x = entity.getX() - halfWidth;
             y = entity.getY();
-            z = entity.getZ();
+            z = entity.getZ() - halfWidth;
 
             xWidth = entity.getBoundingBox().getXLength();
             zWidth = entity.getBoundingBox().getZLength();
@@ -226,22 +224,24 @@ public class LogoutSpots extends Module {
             healthText = " " + health;
         }
 
-        public void render(Render3DEvent event) {
-            Camera camera = mc.gameRenderer.getCamera();
+        public void render3D(Render3DEvent event) {
+            if (fullHeight.get()) event.renderer.box(x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            else event.renderer.sideHorizontal(x, y, z, x + xWidth, z, sideColor.get(), lineColor.get(), shapeMode.get());
+        }
 
-            // Compute scale
-            double scale = 0.025;
-            double dist = PlayerUtils.distanceToCamera(x, y, z);
-            if (dist > 8) scale *= dist / 8 * LogoutSpots.this.scale.get();
+        public void render2D() {
+            if (PlayerUtils.distanceToCamera(x, y, z) > mc.options.viewDistance * 16) return;
 
-            if (dist > mc.options.viewDistance * 16) return;
+            TextRenderer text = TextRenderer.get();
+            double scale = LogoutSpots.this.scale.get();
+            pos.set(x + halfWidth, y + height + 0.5, z + halfWidth);
+
+            if (!NametagUtils.to2D(pos, scale)) return;
+
+            NametagUtils.begin(pos);
 
             // Compute health things
             double healthPercentage = (double) health / maxHealth;
-
-            // Render quad
-            if (fullHeight.get()) event.renderer.box(x, y, z, x + xWidth, y + height, z + zWidth, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            else event.renderer.sideHorizontal(x, y, z, x + xWidth, z, sideColor.get(), lineColor.get(), shapeMode.get());
 
             // Get health color
             Color healthColor;
@@ -249,26 +249,19 @@ public class LogoutSpots extends Module {
             else if (healthPercentage <= 0.666) healthColor = ORANGE;
             else healthColor = GREEN;
 
-            // Setup the rotation
-            Matrices.push();
-            Matrices.translate(x + xWidth / 2 - event.offsetX, y + (fullHeight.get() ? (height + 0.5) : 0.5)  - event.offsetY, z + zWidth / 2 - event.offsetZ);
-            Matrices.rotate(-camera.getYaw(), 0, 1, 0);
-            Matrices.rotate(camera.getPitch(), 1, 0, 0);
-            Matrices.scale(-scale, -scale, scale);
-
             // Render background
-            double i = TextRenderer.get().getWidth(name) / 2.0 + TextRenderer.get().getWidth(healthText) / 2.0;
-            MB.begin(null, DrawMode.Triangles, VertexFormats.POSITION_COLOR);
-            MB.quad(-i - 1, -1, 0, -i - 1, 8, 0, i + 1, 8, 0, i + 1, -1, 0, nameBackgroundColor.get());
-            MB.end();
+            double i = text.getWidth(name) / 2.0 + text.getWidth(healthText) / 2.0;
+            Renderer2D.COLOR.begin();
+            Renderer2D.COLOR.quad(-i, 0, i * 2, text.getHeight(), nameBackgroundColor.get());
+            Renderer2D.COLOR.render(null);
 
             // Render name and health texts
-            TextRenderer.get().begin(1, false, true);
-            double hX = TextRenderer.get().render(name, -i, 0, nameColor.get());
-            TextRenderer.get().render(healthText, hX, 0, healthColor);
-            TextRenderer.get().end();
+            text.beginBig();
+            double hX = text.render(name, -i, 0, nameColor.get());
+            text.render(healthText, hX, 0, healthColor);
+            text.end();
 
-            Matrices.pop();
+            NametagUtils.end();
         }
     }
 }
