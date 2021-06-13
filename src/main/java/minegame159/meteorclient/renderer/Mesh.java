@@ -208,12 +208,13 @@ public class Mesh {
 
         if (indicesCount > 0) {
             // Setup opengl state and matrix stack
-            if (!depthTest) glDisable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_LINE_SMOOTH);
-            glLineWidth(1);
+            GL.saveState();
+
+            if (depthTest) GL.enableDepth();
+            else GL.disableDepth();
+            GL.enableBlend();
+            GL.disableCull();
+            GL.enableLineSmooth();
 
             MatrixStack matrixStack = RenderSystem.getModelViewStack();
 
@@ -228,6 +229,7 @@ public class Mesh {
 
             // Render
             beforeRender();
+
             Shader.BOUND.setDefaults();
 
             glBindVertexArray(vao);
@@ -243,10 +245,7 @@ public class Mesh {
 
             if (rendering3D) matrixStack.pop();
 
-            glDisable(GL_LINE_SMOOTH);
-            glEnable(GL_CULL_FACE);
-            glDisable(GL_BLEND);
-            if (!depthTest) glEnable(GL_DEPTH_TEST);
+            GL.restoreState();
         }
     }
 
