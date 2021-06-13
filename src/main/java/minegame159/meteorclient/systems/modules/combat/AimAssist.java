@@ -114,7 +114,12 @@ public class AimAssist extends Module {
     }
 
     private void aim(Entity target, double delta, boolean instant) {
-        setVec3dToTargetPoint(vec3d1, target, delta);
+        vec3d1.set(target, delta);
+
+        switch (bodyTarget.get()) {
+            case Head -> vec3d1.add(0, target.getEyeHeight(target.getPose()), 0);
+            case Body -> vec3d1.add(0, target.getEyeHeight(target.getPose()) / 2, 0);
+        }
 
         double deltaX = vec3d1.x - mc.player.getX();
         double deltaZ = vec3d1.z - mc.player.getZ();
@@ -131,7 +136,7 @@ public class AimAssist extends Module {
             deltaAngle = MathHelper.wrapDegrees(angle - mc.player.getYaw());
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
             if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-            mc.player.setYaw((float) toRotate);
+            mc.player.setYaw(mc.player.getYaw() + (float) toRotate);
         }
 
         // Pitch
@@ -144,16 +149,7 @@ public class AimAssist extends Module {
             deltaAngle = MathHelper.wrapDegrees(angle - mc.player.getPitch());
             toRotate = speed.get() * (deltaAngle >= 0 ? 1 : -1) * delta;
             if ((toRotate >= 0 && toRotate > deltaAngle) || (toRotate < 0 && toRotate < deltaAngle)) toRotate = deltaAngle;
-            mc.player.setPitch((float) toRotate);
-        }
-    }
-
-    private void setVec3dToTargetPoint(Vec3 vec, Entity entity, double tickDelta) {
-        vec.set(entity, tickDelta);
-
-        switch (bodyTarget.get()) {
-            case Head -> vec.add(0, entity.getEyeHeight(entity.getPose()), 0);
-            case Body -> vec.add(0, entity.getEyeHeight(entity.getPose()) / 2, 0);
+            mc.player.setPitch(mc.player.getPitch() + (float) toRotate);
         }
     }
 
