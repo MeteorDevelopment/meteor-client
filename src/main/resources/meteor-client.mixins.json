@@ -30,6 +30,7 @@
     "BufferRendererAccessor",
     "CactusBlockMixin",
     "CameraMixin",
+    "CapabilityTrackerMixin",
     "ChatHudAccessor",
     "ChatHudMixin",
     "ChatScreenMixin",
