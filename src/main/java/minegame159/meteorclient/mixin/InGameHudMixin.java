@@ -23,9 +23,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static org.lwjgl.opengl.GL11C.GL_BLEND;
-import static org.lwjgl.opengl.GL11C.glEnable;
-
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
     @Shadow private int scaledWidth;
@@ -46,7 +43,6 @@ public abstract class InGameHudMixin {
 
         Utils.scaledProjection();
         RenderSystem.applyModelViewMatrix();
-        glEnable(GL_BLEND);
 
         client.getProfiler().pop();
     }
