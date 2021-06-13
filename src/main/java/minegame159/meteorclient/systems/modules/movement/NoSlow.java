@@ -7,11 +7,13 @@ package minegame159.meteorclient.systems.modules.movement;
 
 import meteordevelopment.orbit.EventHandler;
 import minegame159.meteorclient.events.entity.player.CobwebEntityCollisionEvent;
+import minegame159.meteorclient.events.world.TickEvent;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
 import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.world.Timer;
+import net.minecraft.block.Blocks;
 
 public class NoSlow extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -68,6 +70,8 @@ public class NoSlow extends Module {
         .build()
     );
 
+    private boolean usedTimer;
+
     public NoSlow() {
         super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
     }
@@ -98,10 +102,25 @@ public class NoSlow extends Module {
             switch (web.get()) {
                 case Vanilla -> event.cancel();
                 case Timer -> {
-                    if (!mc.player.isOnGround()) Modules.get().get(Timer.class).setOverride(webTimer.get());
-                    else Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                    if (!mc.player.isOnGround()) {
+                        if (event.state.getBlock() == Blocks.COBWEB) {
+                            Modules.get().get(Timer.class).setOverride(webTimer.get());
+                            usedTimer = true;
+                        }
+                    } else {
+                        Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                        usedTimer = false;
+                    }
                 }
             }
+        }
+    }
+
+    @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        if (usedTimer && mc.world.getBlockState(mc.player.getBlockPos()).getBlock() != Blocks.COBWEB) {
+            Modules.get().get(Timer.class).setOverride(Timer.OFF);
+            usedTimer = false;
         }
     }
 
