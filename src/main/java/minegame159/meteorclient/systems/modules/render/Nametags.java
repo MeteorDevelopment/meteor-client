@@ -22,7 +22,6 @@ import minegame159.meteorclient.systems.modules.Modules;
 import minegame159.meteorclient.systems.modules.misc.NameProtect;
 import minegame159.meteorclient.utils.Utils;
 import minegame159.meteorclient.utils.entity.EntityUtils;
-import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.misc.Vec3;
 import minegame159.meteorclient.utils.player.PlayerUtils;
 import minegame159.meteorclient.utils.render.NametagUtils;
@@ -37,17 +36,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameMode;
 
 import java.util.*;
 
 public class Nametags extends Module {
-    public enum Position {
-        Above,
-        OnTop
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("Players");
     private final SettingGroup sgItems = settings.createGroup("Items");
@@ -55,183 +48,168 @@ public class Nametags extends Module {
     // General
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Select entities to draw nametags on.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER, EntityType.ITEM))
-            .build()
+        .name("entities")
+        .description("Select entities to draw nametags on.")
+        .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER, EntityType.ITEM))
+        .build()
     );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("The scale of the nametag.")
-            .defaultValue(1.5)
-            .min(0.1)
-            .build()
+        .name("scale")
+        .description("The scale of the nametag.")
+        .defaultValue(1.5)
+        .min(0.1)
+        .build()
     );
 
     private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
-            .name("self-nametag")
-            .description("Displays a nametag on your player if you're in Freecam.")
-            .defaultValue(true)
-            .build()
+        .name("self")
+        .description("Displays a nametag on your player if you're in Freecam.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<SettingColor> background = sgGeneral.add(new ColorSetting.Builder()
-            .name("background")
-            .description("The color of the nametag background.")
-            .defaultValue(new SettingColor(0, 0, 0, 75))
-            .build()
+        .name("background-color")
+        .description("The color of the nametag background.")
+        .defaultValue(new SettingColor(0, 0, 0, 75))
+        .build()
     );
 
     private final Setting<SettingColor> names = sgGeneral.add(new ColorSetting.Builder()
-            .name("names")
-            .description("The color of the nametag names.")
-            .defaultValue(new SettingColor())
-            .build()
+        .name("primary-color")
+        .description("The color of the nametag names.")
+        .defaultValue(new SettingColor())
+        .build()
     );
 
     private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
-            .name("culling")
-            .description("Only render a certain number of nametags at a certain distance.")
-            .defaultValue(false)
-            .build()
+        .name("culling")
+        .description("Only render a certain number of nametags at a certain distance.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Double> maxCullRange = sgGeneral.add(new DoubleSetting.Builder()
-            .name("cull-range")
-            .description("Only render nametags within this distance of your player.")
-            .defaultValue(20.0D)
-            .min(0.0D)
-            .sliderMax(200.0D)
-            .visible(culling::get)
-            .build()
+        .name("culling-range")
+        .description("Only render nametags within this distance of your player.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(200)
+        .visible(culling::get)
+        .build()
     );
 
     private final Setting<Integer> maxCullCount = sgGeneral.add(new IntSetting.Builder()
-            .name("cull-count")
-            .description("Only render this many nametags.")
-            .defaultValue(50)
-            .min(1)
-            .sliderMin(1)
-            .sliderMax(100)
-            .visible(culling::get)
-            .build()
+        .name("culling-count")
+        .description("Only render this many nametags.")
+        .defaultValue(50)
+        .min(1)
+        .sliderMin(1).sliderMax(100)
+        .visible(culling::get)
+        .build()
     );
 
     //Players
 
     private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
-            .name("display-items")
-            .description("Displays armor and hand items above the name tags.")
-            .defaultValue(true)
-            .build()
+        .name("display-items")
+        .description("Displays armor and hand items above the name tags.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Double> itemSpacing = sgPlayers.add(new DoubleSetting.Builder()
-            .name("item-spacing")
-            .description("The spacing between items.")
-            .defaultValue(2)
-            .min(0).max(10)
-            .sliderMax(5)
-            .visible(displayItems::get)
-            .build()
+        .name("item-spacing")
+        .description("The spacing between items.")
+        .defaultValue(2)
+        .min(0).max(10)
+        .sliderMax(5)
+        .visible(displayItems::get)
+        .build()
     );
 
     private final Setting<Boolean> ignoreEmpty = sgPlayers.add(new BoolSetting.Builder()
-            .name("ignore-empty")
-            .description("Doesn't add spacing where an empty item stack would be.")
-            .defaultValue(true)
-            .visible(displayItems::get)
-            .build()
+        .name("ignore-empty-slots")
+        .description("Doesn't add spacing where an empty item stack would be.")
+        .defaultValue(true)
+        .visible(displayItems::get)
+        .build()
     );
 
     private final Setting<Boolean> displayItemEnchants = sgPlayers.add(new BoolSetting.Builder()
-            .name("display-enchants")
-            .description("Displays item enchantments on the items.")
-            .defaultValue(true)
-            .visible(displayItems::get)
-            .build()
+        .name("display-enchants")
+        .description("Displays item enchantments on the items.")
+        .defaultValue(true)
+        .visible(displayItems::get)
+        .build()
     );
 
     private final Setting<Position> enchantPos = sgPlayers.add(new EnumSetting.Builder<Position>()
-            .name("enchantment-position")
-            .description("Where the enchantments are rendered.")
-            .defaultValue(Position.Above)
-            .visible(displayItemEnchants::get)
-            .build()
+        .name("enchantment-position")
+        .description("Where the enchantments are rendered.")
+        .defaultValue(Position.Above)
+        .visible(displayItemEnchants::get)
+        .build()
     );
 
     private final Setting<Integer> enchantLength = sgPlayers.add(new IntSetting.Builder()
-            .name("enchant-name-length")
-            .description("The length enchantment names are trimmed to.")
-            .defaultValue(3)
-            .min(1)
-            .max(5)
-            .sliderMax(5)
-            .visible(displayItemEnchants::get)
-            .build()
+        .name("enchant-name-length")
+        .description("The length enchantment names are trimmed to.")
+        .defaultValue(3)
+        .min(1).max(5)
+        .sliderMin(0).sliderMax(5)
+        .visible(displayItemEnchants::get)
+        .build()
     );
 
-    private final Setting<List<Enchantment>> displayedEnchantments = sgPlayers.add(new EnchantmentListSetting.Builder()
-            .name("displayed-enchantments")
-            .description("The enchantments that are shown on nametags.")
-            .defaultValue(setDefaultList())
-            .visible(displayItemEnchants::get)
-            .build()
+    private final Setting<List<Enchantment>> ignoredEnchantments = sgPlayers.add(new EnchantmentListSetting.Builder()
+        .name("ignored-enchantments")
+        .description("The enchantments that aren't shown on nametags.")
+        .defaultValue(new ArrayList<>())
+        .visible(displayItemEnchants::get)
+        .build()
     );
 
     private final Setting<Double> enchantTextScale = sgPlayers.add(new DoubleSetting.Builder()
-            .name("enchant-text-scale")
-            .description("The scale of the enchantment text.")
-            .defaultValue(1)
-            .min(0.1)
-            .max(2)
-            .sliderMin(0.1)
-            .sliderMax(2)
-            .visible(displayItemEnchants::get)
-            .build()
-    );
-
-    private final Setting<Boolean> displayMeteor = sgPlayers.add(new BoolSetting.Builder()
-            .name("meteor")
-            .description("Shows if the player is using Meteor.")
-            .defaultValue(true)
-            .build()
+        .name("enchant-text-scale")
+        .description("The scale of the enchantment text.")
+        .defaultValue(1)
+        .min(0.1).max(2)
+        .sliderMin(0.1).sliderMax(2)
+        .visible(displayItemEnchants::get)
+        .build()
     );
 
     private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
-            .name("gamemode")
-            .description("Shows the player's GameMode.")
-            .defaultValue(true)
-            .build()
+        .name("gamemode")
+        .description("Shows the player's GameMode.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> displayPing = sgPlayers.add(new BoolSetting.Builder()
-            .name("ping")
-            .description("Shows the player's ping.")
-            .defaultValue(true)
-            .build()
+        .name("ping")
+        .description("Shows the player's ping.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> displayDistance = sgPlayers.add(new BoolSetting.Builder()
-            .name("distance")
-            .description("Shows the distance between you and the player.")
-            .defaultValue(true)
-            .build()
+        .name("distance")
+        .description("Shows the distance between you and the player.")
+        .defaultValue(true)
+        .build()
     );
 
     //Items
 
     private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
-            .name("count")
-            .description("Displays the number of items in the stack.")
-            .defaultValue(true)
-            .build()
+        .name("show-count")
+        .description("Displays the number of items in the stack.")
+        .defaultValue(true)
+        .build()
     );
-
-    private final Vec3 pos = new Vec3();
-
-    private final double[] itemWidths = new double[6];
 
     private final Color WHITE = new Color(255, 255, 255);
     private final Color RED = new Color(255, 25, 25);
@@ -239,14 +217,30 @@ public class Nametags extends Module {
     private final Color GREEN = new Color(25, 252, 25);
     private final Color GOLD = new Color(232, 185, 35);
     private final Color GREY = new Color(150, 150, 150);
-    private final Color METEOR = new Color(135, 0, 255);
     private final Color BLUE = new Color(20, 170, 170);
+
+    private final Vec3 pos = new Vec3();
+    private final double[] itemWidths = new double[6];
 
     private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
     private final List<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
         super(Categories.Render, "nametags", "Displays customizable nametags above players.");
+    }
+
+    private static String ticksToTime(int ticks) {
+        if (ticks > 20 * 3600) {
+            int h = ticks / 20 / 3600;
+            return h + " h";
+        } else if (ticks > 20 * 60) {
+            int m = ticks / 20 / 60;
+            return m + " m";
+        } else {
+            int s = ticks / 20;
+            int ms = (ticks % 20) / 2;
+            return s + "." + ms + " s";
+        }
     }
 
     @EventHandler
@@ -287,7 +281,8 @@ public class Nametags extends Module {
             if (NametagUtils.to2D(pos, scale.get())) {
                 if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack());
-                else if (type == EntityType.ITEM_FRAME) renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack());
+                else if (type == EntityType.ITEM_FRAME)
+                    renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack());
                 else if (type == EntityType.TNT) renderTntNametag((TntEntity) entity);
                 else if (entity instanceof LivingEntity) renderGenericNametag((LivingEntity) entity);
             }
@@ -319,18 +314,14 @@ public class Nametags extends Module {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
-        // Using Meteor
-        String usingMeteor = "";
-        if (displayMeteor.get() && MeteorPlayers.get(player)) usingMeteor = "M ";
-
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);
         String gmText = "BOT";
         if (gm != null) {
             gmText = switch (gm) {
                 case SPECTATOR -> "Sp";
-                case SURVIVAL  -> "S";
-                case CREATIVE  -> "C";
+                case SURVIVAL -> "S";
+                case CREATIVE -> "C";
                 case ADVENTURE -> "A";
             };
         }
@@ -367,7 +358,6 @@ public class Nametags extends Module {
         String distText = " " + dist + "m";
 
         // Calc widths
-        double usingMeteorWidth = text.getWidth(usingMeteor);
         double gmWidth = text.getWidth(gmText);
         double nameWidth = text.getWidth(name);
         double healthWidth = text.getWidth(healthText);
@@ -375,7 +365,6 @@ public class Nametags extends Module {
         double distWidth = text.getWidth(distText);
         double width = nameWidth + healthWidth;
 
-        if (displayMeteor.get()) width += usingMeteorWidth;
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
         if (displayDistance.get()) width += distWidth;
@@ -389,8 +378,6 @@ public class Nametags extends Module {
         text.beginBig();
         double hX = -widthHalf;
         double hY = -heightDown;
-
-        if (displayMeteor.get()) hX = text.render(usingMeteor, hX, hY, METEOR);
 
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, GOLD);
         hX = text.render(name, hX, hY, nameColor);
@@ -410,7 +397,8 @@ public class Nametags extends Module {
                 ItemStack itemStack = getItem(player, i);
 
                 // Setting up widths
-                if (itemWidths[i] == 0 && (!ignoreEmpty.get() || !itemStack.isEmpty())) itemWidths[i] = 32 + itemSpacing.get();
+                if (itemWidths[i] == 0 && (!ignoreEmpty.get() || !itemStack.isEmpty()))
+                    itemWidths[i] = 32 + itemSpacing.get();
 
                 if (!itemStack.isEmpty()) hasItems = true;
 
@@ -418,7 +406,7 @@ public class Nametags extends Module {
                     Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                     enchantmentsToShowScale.clear();
 
-                    for (Enchantment enchantment : displayedEnchantments.get()) {
+                    for (Enchantment enchantment : ignoredEnchantments.get()) {
                         if (enchantments.containsKey(enchantment)) {
                             enchantmentsToShowScale.put(enchantment, enchantments.get(enchantment));
                         }
@@ -452,7 +440,7 @@ public class Nametags extends Module {
 
                     Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
                     Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
-                    for (Enchantment enchantment : displayedEnchantments.get()) {
+                    for (Enchantment enchantment : ignoredEnchantments.get()) {
                         if (enchantments.containsKey(enchantment)) {
                             enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
                         }
@@ -515,7 +503,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        hX = text.render(name, hX, hY, WHITE);
+        hX = text.render(name, hX, hY, names.get());
         if (itemCount.get()) text.render(count, hX, hY, GOLD);
         text.end();
 
@@ -585,22 +573,14 @@ public class Nametags extends Module {
         NametagUtils.end();
     }
 
-    private List<Enchantment> setDefaultList(){
-        List<Enchantment> ench = new ArrayList<>();
-        for (Enchantment enchantment : Registry.ENCHANTMENT) {
-            ench.add(enchantment);
-        }
-        return ench;
-    }
-
     private ItemStack getItem(PlayerEntity entity, int index) {
         return switch (index) {
-            case 0  -> entity.getMainHandStack();
-            case 1  -> entity.getInventory().armor.get(3);
-            case 2  -> entity.getInventory().armor.get(2);
-            case 3  -> entity.getInventory().armor.get(1);
-            case 4  -> entity.getInventory().armor.get(0);
-            case 5  -> entity.getOffHandStack();
+            case 0 -> entity.getMainHandStack();
+            case 1 -> entity.getInventory().armor.get(3);
+            case 2 -> entity.getInventory().armor.get(2);
+            case 3 -> entity.getInventory().armor.get(1);
+            case 4 -> entity.getInventory().armor.get(0);
+            case 5 -> entity.getOffHandStack();
             default -> ItemStack.EMPTY;
         };
     }
@@ -611,19 +591,8 @@ public class Nametags extends Module {
         Renderer2D.COLOR.render(null);
     }
 
-    private static String ticksToTime(int ticks){
-        if (ticks > 20 * 3600) {
-            int h = ticks / 20 / 3600;
-            return h + " h";
-        }
-        else if (ticks > 20 * 60) {
-            int m = ticks / 20 / 60;
-            return m + " m";
-        }
-        else {
-            int s = ticks / 20;
-            int ms = (ticks % 20) / 2;
-            return s + "."  +ms + " s";
-        }
+    public enum Position {
+        Above,
+        OnTop
     }
 }

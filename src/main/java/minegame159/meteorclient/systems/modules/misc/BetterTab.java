@@ -10,7 +10,6 @@ import minegame159.meteorclient.systems.friends.Friend;
 import minegame159.meteorclient.systems.friends.Friends;
 import minegame159.meteorclient.systems.modules.Categories;
 import minegame159.meteorclient.systems.modules.Module;
-import minegame159.meteorclient.utils.misc.MeteorPlayers;
 import minegame159.meteorclient.utils.render.color.Color;
 import minegame159.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
@@ -55,21 +54,6 @@ public class BetterTab extends Module {
             .build()
     );
 
-    private final Setting<Boolean> meteor = sgGeneral.add(new BoolSetting.Builder()
-            .name("meteor-users")
-            .description("Shows if the player is using Meteor.")
-            .defaultValue(true)
-            .build()
-    );
-
-    private final Setting<SettingColor> meteorColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("meteor-color")
-            .description("The color to highlight meteor users with.")
-            .defaultValue(new SettingColor(135, 0, 255))
-            .visible(meteor::get)
-            .build()
-    );
-
 
     public BetterTab() {
         super(Categories.Misc, "better-tab", "Various improvements to the tab list.");
@@ -88,9 +72,6 @@ public class BetterTab extends Module {
         else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getName()) != null) {
             Friend friend = Friends.get().get(playerListEntry.getProfile().getName());
             if (friend != null) color = Friends.get().color;
-        }
-        else if (meteor.get() && MeteorPlayers.get(playerListEntry.getProfile().getId())) {
-            color = meteorColor.get();
         }
 
         if (color != null) {

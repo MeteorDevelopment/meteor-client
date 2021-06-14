@@ -21,7 +21,6 @@ public class Config extends System<Config> {
 
     public String font = ConfigTab.font.get();
     public boolean customFont = ConfigTab.customFont.get();
-    public boolean sendDataToApi = ConfigTab.sendDataToApi.get();
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
 
     public String prefix = ConfigTab.prefix.get();
@@ -61,7 +60,6 @@ public class Config extends System<Config> {
         tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
         tag.putDouble("rainbowSpeed", RainbowColors.GLOBAL.getSpeed());
-        tag.putBoolean("sendDataToApi", sendDataToApi);
         tag.putInt("rotationHoldTicks", rotationHoldTicks);
 
         tag.putString("prefix", prefix);
@@ -85,7 +83,6 @@ public class Config extends System<Config> {
         font = getString(tag, "font", ConfigTab.font);
         customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
         RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
-        sendDataToApi = getBoolean(tag, "sendDataToApi", ConfigTab.sendDataToApi);
         rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.rotationHoldTicks);
 
         prefix = getString(tag, "prefix", ConfigTab.prefix);

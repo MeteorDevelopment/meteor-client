@@ -12,7 +12,6 @@ import minegame159.meteorclient.gui.tabs.WindowTabScreen;
 import minegame159.meteorclient.renderer.Fonts;
 import minegame159.meteorclient.settings.*;
 import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
 
@@ -58,18 +57,6 @@ public class ConfigTab extends Tab {
             .decimalPlaces(2)
             .onChanged(value -> RainbowColors.GLOBAL.setSpeed(value / 100))
             .onModuleActivated(setting -> setting.set(RainbowColors.GLOBAL.getSpeed() * 100))
-            .build()
-    );
-
-    public static final Setting<Boolean> sendDataToApi = sgGeneral.add(new BoolSetting.Builder()
-            .name("send-data-to-api")
-            .description("If checked, your UUID will be send to Meteor's servers.")
-            .defaultValue(true)
-            .onChanged(aBoolean -> {
-                Config.get().sendDataToApi = aBoolean;
-                OnlinePlayers.forcePing();
-            })
-            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().sendDataToApi))
             .build()
     );
 
