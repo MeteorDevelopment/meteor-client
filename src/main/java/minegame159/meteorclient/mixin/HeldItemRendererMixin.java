@@ -37,18 +37,12 @@ public abstract class HeldItemRendererMixin {
                 return swingProgress + module.mainSwing.get().floatValue();
             }
         }
+
         return swingProgress;
     }
 
-    @Inject(method = "renderFirstPersonItem", at = @At(value = "TAIL", target = "Lnet/minecraft/client/render/item/HeldItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"))
+    @Inject(method = "renderFirstPersonItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/item/HeldItemRenderer;renderItem(Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/item/ItemStack;Lnet/minecraft/client/render/model/json/ModelTransformation$Mode;ZLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V"))
     private void sex(AbstractClientPlayerEntity player, float tickDelta, float pitch, Hand hand, float swingProgress, ItemStack item, float equipProgress, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo ci) {
-        HandView module = Modules.get().get(HandView.class);
-        if (!module.isActive()) return;
-        // TODO: Fix
-        /*GlStateManager.scaled(module.scaleX.get(), module.scaleY.get(), module.scaleZ.get());
-        GlStateManager.translated(module.posX.get(), module.posY.get(), module.posZ.get());
-        GlStateManager.rotatef((module.rotationY.get().floatValue() * 360.0f), 1.0f, 0.0f, 0.0f);
-        GlStateManager.rotatef(-(module.rotationX.get().floatValue() * 360.0f), 0.0f, 1.0f, 0.0f);
-        GlStateManager.rotatef((module.rotationZ.get().floatValue() * 360.0f), 0.0f, 0.0f, 1.0f);*/
+        Modules.get().get(HandView.class).transform(matrices);
     }
 }
