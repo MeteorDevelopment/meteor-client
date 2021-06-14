@@ -1,7 +1,4 @@
+
 <component name="CopyrightManager">
-  <settings default="meteor">
-    <module2copyright>
-      <element module="Project Files" copyright="meteor" />
-    </module2copyright>
-  </settings>
+    <settings default="Meteor" />
 </component>
