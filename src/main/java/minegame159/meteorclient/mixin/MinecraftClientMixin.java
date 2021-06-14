@@ -15,7 +15,6 @@ import minegame159.meteorclient.gui.WidgetScreen;
 import minegame159.meteorclient.mixininterface.IMinecraftClient;
 import minegame159.meteorclient.systems.config.Config;
 import minegame159.meteorclient.utils.misc.Placeholders;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
@@ -56,8 +55,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(at = @At("HEAD"), method = "tick")
     private void onPreTick(CallbackInfo info) {
-        OnlinePlayers.update();
-
         doItemUseCalled = false;
 
         getProfiler().push("meteor-client_pre_update");
