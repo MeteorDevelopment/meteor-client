@@ -406,8 +406,8 @@ public class Nametags extends Module {
                     Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
                     enchantmentsToShowScale.clear();
 
-                    for (Enchantment enchantment : ignoredEnchantments.get()) {
-                        if (enchantments.containsKey(enchantment)) {
+                    for (Enchantment enchantment : enchantments.keySet()) {
+                        if (!ignoredEnchantments.get().contains(enchantment)) {
                             enchantmentsToShowScale.put(enchantment, enchantments.get(enchantment));
                         }
                     }
@@ -440,8 +440,9 @@ public class Nametags extends Module {
 
                     Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(stack);
                     Map<Enchantment, Integer> enchantmentsToShow = new HashMap<>();
-                    for (Enchantment enchantment : ignoredEnchantments.get()) {
-                        if (enchantments.containsKey(enchantment)) {
+
+                    for (Enchantment enchantment : enchantments.keySet()) {
+                        if (!ignoredEnchantments.get().contains(enchantment)) {
                             enchantmentsToShow.put(enchantment, enchantments.get(enchantment));
                         }
                     }
