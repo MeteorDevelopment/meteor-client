@@ -57,7 +57,7 @@ public class InvUtils {
         return find(isGood, 0, mc.player.getInventory().size());
     }
 
-    private static FindItemResult find(Predicate<ItemStack> isGood, int start, int end) {
+    public static FindItemResult find(Predicate<ItemStack> isGood, int start, int end) {
         int slot = -1, count = 0;
 
         for (int i = start; i <= end; i++) {

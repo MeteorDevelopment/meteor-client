@@ -8,7 +8,7 @@ package minegame159.meteorclient.systems.modules.player;
 //Created by squidoodly 06/07/2020
 
 import meteordevelopment.orbit.EventHandler;
-import minegame159.meteorclient.events.entity.player.FinishUsingItem;
+import minegame159.meteorclient.events.entity.player.FinishUsingItemEvent;
 import minegame159.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import minegame159.meteorclient.events.meteor.MouseButtonEvent;
 import minegame159.meteorclient.events.world.TickEvent;
@@ -124,7 +124,7 @@ public class MiddleClickExtra extends Module {
     }
 
     @EventHandler
-    private void onFinishUsingItem(FinishUsingItem event) {
+    private void onFinishUsingItem(FinishUsingItemEvent event) {
         stopIfUsing();
     }
 
