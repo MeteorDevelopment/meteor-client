@@ -19,6 +19,7 @@ import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.player.FindItemResult;
 import minegame159.meteorclient.utils.player.InvUtils;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 
@@ -90,10 +91,10 @@ public class Offhand extends Module {
 
         // Checking offhand item
         if (mc.player.getOffHandStack().getItem() != currentItem.item) {
-            FindItemResult item = InvUtils.find(currentItem.item);
+            FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, hotbar.get() ? 0 : 9, 35);
 
             // No offhand item
-            if (hotbar.get() ? !item.found() : !item.isMain()) {
+            if (!item.found()) {
                 if (!sentMessage) {
                     warning("Chosen item not found.");
                     sentMessage = true;
@@ -108,13 +109,15 @@ public class Offhand extends Module {
         }
 
         // If not clicking, set to totem if auto totem is on
-        else if ((!isClicking && rightClick.get())) {
+        else if (!isClicking && rightClick.get()) {
             if (autoTotem.isActive()) {
-                FindItemResult totem = InvUtils.find(Items.TOTEM_OF_UNDYING);
-                if ((hotbar.get() ? totem.found() : totem.isMain()) && !totem.isOffhand())
+                FindItemResult totem = InvUtils.find(itemStack -> itemStack.getItem() == Items.TOTEM_OF_UNDYING, hotbar.get() ? 0 : 9, 35);
+
+                if (totem.found() && !totem.isOffhand()) {
                     InvUtils.move().from(totem.getSlot()).toOffhand();
+                }
             } else {
-                FindItemResult empty = InvUtils.findEmpty();
+                FindItemResult empty = InvUtils.find(ItemStack::isEmpty, hotbar.get() ? 0 : 9, 35);
                 if (empty.found()) InvUtils.move().fromOffhand().to(empty.getSlot());
             }
         }

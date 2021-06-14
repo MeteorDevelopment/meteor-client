@@ -6,7 +6,7 @@
 package minegame159.meteorclient.mixin;
 
 import minegame159.meteorclient.MeteorClient;
-import minegame159.meteorclient.events.entity.player.FinishUsingItem;
+import minegame159.meteorclient.events.entity.player.FinishUsingItemEvent;
 import minegame159.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import minegame159.meteorclient.events.game.GetTooltipEvent;
 import minegame159.meteorclient.utils.Utils;
@@ -39,7 +39,7 @@ public abstract class ItemStackMixin {
     @Inject(method = "finishUsing", at = @At("HEAD"))
     private void onFinishUsing(World world, LivingEntity user, CallbackInfoReturnable<ItemStack> info) {
         if (user == mc.player) {
-            MeteorClient.EVENT_BUS.post(FinishUsingItem.get((ItemStack) (Object) this));
+            MeteorClient.EVENT_BUS.post(FinishUsingItemEvent.get((ItemStack) (Object) this));
         }
     }
 
