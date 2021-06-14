@@ -185,11 +185,11 @@ public class ESP extends Module {
         if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
 
         return switch (entity.getType().getSpawnGroup()) {
-            case CREATURE                      -> animalsColor.get();
-            case WATER_AMBIENT, WATER_CREATURE -> waterAnimalsColor.get();
-            case MONSTER                       -> monstersColor.get();
-            case AMBIENT                       -> ambientColor.get();
-            default                            -> miscColor.get();
+            case CREATURE                                                  -> animalsColor.get();
+            case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> waterAnimalsColor.get();
+            case MONSTER                                                   -> monstersColor.get();
+            case AMBIENT                                                   -> ambientColor.get();
+            default                                                        -> miscColor.get();
         };
     }
 
