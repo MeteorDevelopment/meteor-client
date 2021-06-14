@@ -23,7 +23,7 @@ public interface MinecraftClientAccessor {
     @Accessor("session")
     void setSession(Session session);
 
-    @Accessor("netProxy")
+    @Accessor("networkProxy")
     Proxy getProxy();
 
     @Accessor("itemUseCooldown")
