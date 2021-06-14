@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.gui.themes.meteor.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.WQuad;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
