@@ -20,7 +20,7 @@
   "environment": "client",
   "entrypoints": {
     "client": [
-      "minegame159.meteorclient.MeteorClient"
+      "meteordevelopment.meteorclient.MeteorClient"
     ]
   },
   "mixins": [
