@@ -31,7 +31,6 @@ import minegame159.meteorclient.utils.misc.input.KeyAction;
 import minegame159.meteorclient.utils.misc.input.KeyBinds;
 import minegame159.meteorclient.utils.network.Capes;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.player.EChestMemory;
 import minegame159.meteorclient.utils.player.Rotations;
 import minegame159.meteorclient.utils.render.Outlines;
@@ -117,7 +116,6 @@ public class MeteorClient implements ClientModInitializer {
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             Systems.save();
-            OnlinePlayers.leave();
             GuiThemes.save();
         }));
 

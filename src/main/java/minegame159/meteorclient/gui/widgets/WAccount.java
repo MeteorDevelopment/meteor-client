@@ -12,7 +12,6 @@ import minegame159.meteorclient.gui.widgets.pressable.WMinus;
 import minegame159.meteorclient.systems.accounts.Account;
 import minegame159.meteorclient.systems.accounts.Accounts;
 import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
 import minegame159.meteorclient.utils.render.color.Color;
 
 import static minegame159.meteorclient.utils.Utils.mc;
@@ -57,7 +56,6 @@ public abstract class WAccount extends WHorizontalList {
                     name.set(account.getUsername());
 
                     Accounts.get().save();
-                    OnlinePlayers.forcePing();
 
                     screen.taskAfterRender = refreshScreenAction;
                 }
