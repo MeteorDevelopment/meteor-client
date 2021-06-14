@@ -31,7 +31,7 @@
 Follow guide on the [wiki](https://github.com/MeteorDevelopment/meteor-client/wiki/Installation).
 
 ## Contributions
-See CONTRIBUTING.md
+See [CONTRIBUTING.md](https://github.com/MeteorDevelopment/meteor-client/blob/master/CONTRIBUTING.md)
 
 ## Bugs and Suggestions
 Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided. Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
