@@ -148,11 +148,11 @@ public class Tracers extends Module {
             }
             else {
                 color = switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE                      -> animalsColor.get();
-                    case WATER_AMBIENT, WATER_CREATURE -> waterAnimalsColor.get();
-                    case MONSTER                       -> monstersColor.get();
-                    case AMBIENT                       -> ambientColor.get();
-                    default                            -> miscColor.get();
+                    case CREATURE                                                  -> animalsColor.get();
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> waterAnimalsColor.get();
+                    case MONSTER                                                   -> monstersColor.get();
+                    case AMBIENT                                                   -> ambientColor.get();
+                    default                                                        -> miscColor.get();
                 };
             }
 
