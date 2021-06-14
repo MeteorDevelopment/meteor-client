@@ -1,6 +1,6 @@
 {
   "required": false,
-  "package": "minegame159.meteorclient.mixin.indigo",
+  "package": "meteordevelopment.meteorclient.mixin.indigo",
   "compatibilityLevel": "JAVA_16",
   "client": [
     "AbstractQuadRendererMixin",
