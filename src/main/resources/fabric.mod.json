@@ -35,6 +35,6 @@
   },
   "depends": {
     "java": "16",
-    "minecraft": "<=1.17"
+    "minecraft": ">=1.17"
   }
 }
