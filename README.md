@@ -5,7 +5,7 @@
 
 <h1 align="center">Meteor Client</h1>
 
-<p align="center">Minecraft Fabric Utility Mod for the latest Minecraft release</p>
+<p align="center">A Minecraft Fabric Utility Mod for the latest Minecraft release.</p>
 
 <div align="center">
     <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
@@ -31,7 +31,7 @@
 Follow guide on the [wiki](https://github.com/MeteorDevelopment/meteor-client/wiki/Installation).
 
 ## Contributions
-We will review all reasonable pull requests, but we request that you maintain our code style as well as you can as well as adding the license header to all files you contribute.
+See CONTRIBUTING.md
 
 ## Bugs and Suggestions
 Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided. Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
