@@ -5,7 +5,6 @@
 
 package minegame159.meteorclient.gui.screens.settings;
 
-import minegame159.meteorclient.MeteorClient;
 import minegame159.meteorclient.gui.GuiTheme;
 import minegame159.meteorclient.gui.WindowScreen;
 import minegame159.meteorclient.gui.utils.Cell;
