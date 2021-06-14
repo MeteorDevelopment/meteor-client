@@ -4,3 +4,4 @@ Accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
 Accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
 Accessible   class   net/minecraft/client/world/ClientWorld$BlockParticle
 Accessible   method  net/minecraft/text/TextColor <init> (I)V
+Accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity cachedScoreboardEntry Lnet/minecraft/client/network/PlayerListEntry;

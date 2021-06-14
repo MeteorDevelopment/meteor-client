@@ -7,13 +7,17 @@ package minegame159.meteorclient.utils.entity.fakeplayer;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.network.OtherClientPlayerEntity;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 import static minegame159.meteorclient.utils.Utils.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
     public FakePlayerEntity(String name, float health, boolean copyInv) {
-        super(mc.world, new GameProfile(mc.player.getUuid(), name));
+        super(mc.world, new GameProfile(UUID.randomUUID(), name));
 
         copyPositionAndRotation(mc.player);
 
@@ -48,5 +52,15 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     public void despawn() {
         mc.world.removeEntity(getId(), RemovalReason.DISCARDED);
         setRemoved(RemovalReason.DISCARDED);
+    }
+
+    @Nullable
+    @Override
+    protected PlayerListEntry getPlayerListEntry() {
+        if (cachedScoreboardEntry == null) {
+            cachedScoreboardEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        }
+
+        return cachedScoreboardEntry;
     }
 }
