@@ -1,3 +1,10 @@
+jdk:
+  - openjdk16
+
 before_install:
-  - sdk install java 16.0.1-adpt
-  - sdk use java 16.0.1-adpt
+  - ./ensure-jitpack-java-16 install
+
+install:
+  - if ! ./ensure-java-16 use; then source ~/.sdkman/bin/sdkman-init.sh; fi
+  - java -version
+  - ./gradlew publishToMavenLocal
