@@ -8,14 +8,19 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IPlayerInteractEntityC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -56,26 +61,24 @@ public class Criticals extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        // TODO: Fix
-        /*if (event.packet instanceof PlayerInteractEntityC2SPacket && ((PlayerInteractEntityC2SPacket) event.packet).getType() == PlayerInteractEntityC2SPacket.InteractionType.ATTACK) {
-
+        if (event.packet instanceof IPlayerInteractEntityC2SPacket packet && packet.getType() == PlayerInteractEntityC2SPacket.InteractType.ATTACK) {
             if (skipCrit()) return;
 
-            Entity entity =  ((PlayerInteractEntityC2SPacket) event.packet).getEntity(mc.world);
+            Entity entity =  packet.getEntity();
 
             if (!(entity instanceof LivingEntity) || (entity != Modules.get().get(KillAura.class).getTarget() && ka.get())) return;
 
             switch (mode.get()) {
-                case Packet:
+                case Packet -> {
                     sendPacket(0.0625);
                     sendPacket(0);
-                    break;
-                case Bypass:
+                }
+                case Bypass -> {
                     sendPacket(0.11);
                     sendPacket(0.1100013579);
                     sendPacket(0.0000013579);
-                    break;
-                default:
+                }
+                default -> {
                     if (!sendPackets) {
                         sendPackets = true;
                         sendTimer = mode.get() == Mode.Jump ? 6 : 4;
@@ -85,8 +88,10 @@ public class Criticals extends Module {
                         else ((IVec3d) mc.player.getVelocity()).setY(0.25);
                         event.cancel();
                     }
+                }
             }
-        } else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
+        }
+        else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
             if (skipCrit()) return;
 
             if (sendPackets && swingPacket == null) {
@@ -94,7 +99,7 @@ public class Criticals extends Module {
 
                 event.cancel();
             }
-        }*/
+        }
     }
 
     @EventHandler
