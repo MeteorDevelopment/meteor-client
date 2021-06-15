@@ -21,7 +21,7 @@ public class MountBypass extends Module {
     }
 
     @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
+    public void onSendPacket(PacketEvent.Send event) {
         if (dontCancel) {
             dontCancel = false;
             return;
