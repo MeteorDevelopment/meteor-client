@@ -14,8 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -246,8 +244,19 @@ public class PacketMine extends Module {
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 50, this::sendMinePackets);
             else sendMinePackets();
 
-            FindItemResult tool = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), blockState));
-            progress += getBreakDelta(tool.isHotbar() ? tool.getSlot() : mc.player.getInventory().selectedSlot, blockState);
+            double bestScore = -1;
+            int bestSlot = -1;
+
+            for (int i = 0; i < 9; i++) {
+                double score = mc.player.getInventory().getStack(i).getMiningSpeedMultiplier(blockState);
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestSlot = i;
+                }
+            }
+
+            progress += getBreakDelta(bestSlot != -1 ? bestSlot : mc.player.getInventory().selectedSlot, blockState);
         }
 
         private void sendMinePackets() {

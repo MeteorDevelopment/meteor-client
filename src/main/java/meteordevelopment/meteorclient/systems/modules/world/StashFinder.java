@@ -135,8 +135,6 @@ public class StashFinder extends Module {
                             else timer += currentTime - lastTime;
 
                             manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
-                            // TODO: Test
-                            //RenderSystem.color4f(1.0F, 1.0F, 1.0F, 255.0F);
                             manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
                             manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
