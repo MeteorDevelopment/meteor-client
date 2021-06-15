@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.AutoTool;
 import meteordevelopment.meteorclient.systems.modules.player.PacketMine;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -25,6 +24,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -144,11 +144,24 @@ public class EChestFarmer extends Module {
 
         // Break existing echest at target pos
         if (mc.world.getBlockState(target).getBlock() == Blocks.ENDER_CHEST) {
-            FindItemResult pick = InvUtils.findInHotbar(itemStack -> AutoTool.isEffectiveOn(itemStack.getItem(), Blocks.ENDER_CHEST.getDefaultState())
-                && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0);
-            if (!pick.found()) return;
+            double bestScore = -1;
+            int bestSlot = -1;
 
-            InvUtils.swap(pick.getSlot());
+            for (int i = 0; i < 9; i++) {
+                ItemStack itemStack = mc.player.getInventory().getStack(i);
+                if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+
+                double score = itemStack.getMiningSpeedMultiplier(Blocks.ENDER_CHEST.getDefaultState());
+
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestSlot = i;
+                }
+            }
+
+            if (bestSlot == -1) return;
+
+            InvUtils.swap(bestSlot);
             mc.interactionManager.updateBlockBreakingProgress(target, Direction.UP);
         }
 
