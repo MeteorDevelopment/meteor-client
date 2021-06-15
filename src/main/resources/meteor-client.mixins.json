@@ -105,6 +105,7 @@
     "ParticleManagerMixin",
     "PlayerEntityMixin",
     "PlayerEntityRendererMixin",
+    "PlayerInteractEntityC2SPacketMixin",
     "PlayerListHudMixin",
     "PlayerMoveC2SPacketAccessor",
     "PlayerMoveC2SPacketMixin",
