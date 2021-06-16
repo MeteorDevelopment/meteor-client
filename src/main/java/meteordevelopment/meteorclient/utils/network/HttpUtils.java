@@ -12,38 +12,31 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
-import java.net.HttpURLConnection;
-import java.net.SocketTimeoutException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.function.Consumer;
 
 public class HttpUtils {
+    private static final HttpClient CLIENT = HttpClient.newHttpClient();
     private static final Gson GSON = new Gson();
 
     private static InputStream request(String method, String url, String body) {
         try {
-            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
-            conn.setRequestMethod(method);
-            conn.setConnectTimeout(2500);
-            conn.setReadTimeout(2500);
-            conn.setRequestProperty("User-Agent", "Meteor Client");
-
-            if (body != null) {
-                byte[] bytes = body.getBytes(StandardCharsets.UTF_8);
-                conn.setRequestProperty("Content-Length", Integer.toString(bytes.length));
-                conn.setDoOutput(true);
-                conn.getOutputStream().write(bytes);
-            }
-
-            return conn.getInputStream();
-        } catch (SocketTimeoutException ignored) {
-            return null;
-        } catch (IOException e) {
+            return CLIENT.send(
+                HttpRequest.newBuilder()
+                    .uri(new URI(url))
+                    .method(method, body != null ? HttpRequest.BodyPublishers.ofString(body) : HttpRequest.BodyPublishers.noBody())
+                    .header("User-Agent", "Meteor Client")
+                    .build(),
+                HttpResponse.BodyHandlers.ofInputStream()
+            ).body();
+        } catch (IOException | InterruptedException | URISyntaxException e) {
             e.printStackTrace();
+            return null;
         }
-
-        return null;
     }
 
     public static InputStream get(String url) {
