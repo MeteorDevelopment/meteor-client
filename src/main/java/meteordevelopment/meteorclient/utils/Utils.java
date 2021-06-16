@@ -150,7 +150,7 @@ public class Utils {
     public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
-            if (pause) MeteorClient.INSTANCE.screenToOpen = new PeekScreen(itemStack, contents);
+            if (pause) MeteorClient.screenToOpen = new PeekScreen(itemStack, contents);
             else mc.openScreen(new PeekScreen(itemStack, contents));
             return true;
         }

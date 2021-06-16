@@ -5,14 +5,14 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
-import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 
 public interface TextRenderer {
     static TextRenderer get() {
-        return Config.get().customFont ? MeteorClient.FONT : VanillaTextRenderer.INSTANCE;
+        return Config.get().customFont ? Fonts.CUSTOM_FONT : VanillaTextRenderer.INSTANCE;
     }
 
     void setAlpha(double a);

@@ -20,11 +20,11 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 public class Fonts {
     private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf" };
     public static final String DEFAULT_FONT = "JetBrains Mono";
-
     private static final File FOLDER = new File(MeteorClient.FOLDER, "fonts");
 
+    public static CustomTextRenderer CUSTOM_FONT;
+
     private static String lastFont = "";
-    private static CustomTextRenderer a;
 
     public static void init() {
         FOLDER.mkdirs();
@@ -38,7 +38,7 @@ public class Fonts {
         }
 
         // Load default font
-        MeteorClient.FONT = new CustomTextRenderer(new File(FOLDER, DEFAULT_FONT + ".ttf"));
+        CUSTOM_FONT = new CustomTextRenderer(new File(FOLDER, DEFAULT_FONT + ".ttf"));
         lastFont = DEFAULT_FONT;
     }
 
@@ -52,12 +52,12 @@ public class Fonts {
         }
 
         try {
-            MeteorClient.FONT = new CustomTextRenderer(file);
+            CUSTOM_FONT = new CustomTextRenderer(file);
         } catch (Exception ignored) {
             Config.get().font = DEFAULT_FONT;
             file = new File(FOLDER, Config.get().font + ".ttf");
 
-            MeteorClient.FONT = new CustomTextRenderer(file);
+            CUSTOM_FONT = new CustomTextRenderer(file);
         }
 
         if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont) {

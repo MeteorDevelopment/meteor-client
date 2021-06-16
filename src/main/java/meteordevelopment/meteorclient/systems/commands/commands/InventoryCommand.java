@@ -22,7 +22,7 @@ public class InventoryCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
-            MeteorClient.INSTANCE.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
+            MeteorClient.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
             return SINGLE_SUCCESS;
         }));
 

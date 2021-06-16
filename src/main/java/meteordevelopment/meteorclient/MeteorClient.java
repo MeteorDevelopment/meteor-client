@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.renderer.*;
-import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.rendering.Matrices;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -60,9 +59,7 @@ public class MeteorClient implements ClientModInitializer {
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
 
-    public static CustomTextRenderer FONT;
-
-    public Screen screenToOpen;
+    public static Screen screenToOpen;
 
     @Override
     public void onInitializeClient() {
