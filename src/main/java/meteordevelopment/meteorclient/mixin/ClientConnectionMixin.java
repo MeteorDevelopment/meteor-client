@@ -27,9 +27,7 @@ import java.net.InetSocketAddress;
 public class ClientConnectionMixin {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
-        PacketEvent.Receive event = MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet));
-
-        if (event.isCancelled()) info.cancel();
+        if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "connect", at = @At("HEAD"))
@@ -44,9 +42,7 @@ public class ClientConnectionMixin {
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/Packet;)V", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        PacketEvent.Send event = MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet));
-
-        if (event.isCancelled()) info.cancel();
+        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "send(Lnet/minecraft/network/Packet;)V", at = @At("TAIL"))

@@ -101,7 +101,6 @@
     "MouseMixin",
     "MultiplayerScreenMixin",
     "NamespaceResourceManagerMixin",
-    "PacketInflaterMixin",
     "ParticleManagerMixin",
     "PlayerEntityMixin",
     "PlayerEntityRendererMixin",
