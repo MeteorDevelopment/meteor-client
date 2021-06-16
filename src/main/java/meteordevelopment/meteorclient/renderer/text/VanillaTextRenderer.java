@@ -6,16 +6,20 @@
 package meteordevelopment.meteorclient.renderer.text;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.rendering.Matrices;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.render.Tessellator;
+import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.Matrix4f;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class VanillaTextRenderer implements TextRenderer {
     public static final TextRenderer INSTANCE = new VanillaTextRenderer();
+
+    private final BufferBuilder buffer = new BufferBuilder(2048);
+    private final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(buffer);
+    private final Matrix4f emptyMatrix = new Matrix4f();
 
     // Vanilla font is almost twice as small as our custom font (vanilla = 9, custom = 18)
     private double scale = 1.74;
@@ -24,6 +28,8 @@ public class VanillaTextRenderer implements TextRenderer {
 
     private VanillaTextRenderer() {
         // Use INSTANCE
+
+        emptyMatrix.loadIdentity();
     }
 
     @Override
@@ -32,20 +38,20 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double getWidth(String text, int length) {
+    public double getWidth(String text, int length, boolean shadow) {
         String string = text;
         if (length != string.length()) string = string.substring(0, length);
-        return mc.textRenderer.getWidth(string) * scale;
+        return (mc.textRenderer.getWidth(string) + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
-    public double getHeight() {
+    public double getHeight(boolean shadow) {
         return mc.textRenderer.fontHeight * scale;
     }
 
     @Override
     public void begin(double scale, boolean scaleOnly, boolean big) {
-        // Vanilla renderer doesn't support batching
+        if (building) throw new RuntimeException("VanillaTextRenderer.begin() called twice");
 
         // Vanilla font is twice as small as our custom font (vanilla = 9, custom = 18)
         this.scale = scale * 1.74;
@@ -54,8 +60,8 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public double render(String text, double x, double y, Color color, boolean shadow) {
-        Matrices.push();
-        Matrices.scale(scale, scale, 1);
+        boolean wasBuilding = building;
+        if (!wasBuilding) begin();
 
         x += 0.5 * scale;
         y += 0.5 * scale;
@@ -63,16 +69,12 @@ public class VanillaTextRenderer implements TextRenderer {
         int preA = color.a;
         color.a = (int) ((color.a / 255 * alpha) * 255);
 
-        RenderSystem.disableDepthTest();
-        VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(Tessellator.getInstance().getBuffer());
-        double r = mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, Matrices.getTop(), immediate, true, 0, 15728880);
-        immediate.draw();
-        RenderSystem.enableDepthTest();
+        double width = mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, emptyMatrix, immediate, true, 0, 15728880);
 
         color.a = preA;
 
-        Matrices.pop();
-        return r * scale;
+        if (!wasBuilding) end();
+        return width * scale;
     }
 
     @Override
@@ -82,7 +84,21 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public void end(MatrixStack matrices) {
-        // Vanilla renderer doesn't support batching
+        if (!building) throw new RuntimeException("VanillaTextRenderer.end() called without calling begin()");
+
+        MatrixStack matrixStack = RenderSystem.getModelViewStack();
+
+        RenderSystem.disableDepthTest();
+        matrixStack.push();
+        if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
+        matrixStack.scale((float) scale, (float) scale, 1);
+        RenderSystem.applyModelViewMatrix();
+
+        immediate.draw();
+
+        matrixStack.pop();
+        RenderSystem.enableDepthTest();
+        RenderSystem.applyModelViewMatrix();
 
         // Vanilla font is twice as small as our custom font (vanilla = 9, custom = 18)
         this.scale = 1.74;
