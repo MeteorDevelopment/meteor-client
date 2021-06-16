@@ -76,15 +76,15 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double getWidth(String text, int length) {
+    public double getWidth(String text, int length, boolean shadow) {
         Font font = building ? this.font : fonts[0];
-        return font.getWidth(text, length) * scale;
+        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
-    public double getHeight() {
+    public double getHeight(boolean shadow) {
         Font font = building ? this.font : fonts[0];
-        return font.getHeight() * scale;
+        return (font.getHeight() + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
@@ -92,15 +92,17 @@ public class CustomTextRenderer implements TextRenderer {
         boolean wasBuilding = building;
         if (!wasBuilding) begin();
 
-        double r;
+        double width;
         if (shadow) {
-            r = font.render(mesh, text, x + 1, y + 1, SHADOW_COLOR, scale);
+            width = font.render(mesh, text, x + 1, y + 1, SHADOW_COLOR, scale);
             font.render(mesh, text, x, y, color, scale);
         }
-        else r = font.render(mesh, text, x, y, color, scale);
+        else {
+            width = font.render(mesh, text, x, y, color, scale);
+        }
 
         if (!wasBuilding) end();
-        return r;
+        return width;
     }
 
     @Override

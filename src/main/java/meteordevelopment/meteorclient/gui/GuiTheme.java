@@ -217,7 +217,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract boolean hideHUD();
 
     public double textWidth(String text, int length, boolean title) {
-        return scale(textRenderer().getWidth(text, length) * (title ? TITLE_TEXT_SCALE : 1));
+        return scale(textRenderer().getWidth(text, length, false) * (title ? TITLE_TEXT_SCALE : 1));
     }
     public double textWidth(String text) {
         return textWidth(text, text.length(), false);
