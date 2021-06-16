@@ -18,8 +18,12 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Vanil
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.FluidBlock;
 import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
+import net.minecraft.util.math.BlockPos;
 
 public class Speed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -97,6 +101,13 @@ public class Speed extends Module {
             .build()
     );
 
+    public final Setting<Boolean> swapToTunnel = sgGeneral.add(new BoolSetting.Builder()
+            .name("swap-to-tunnel")
+            .description("Automatically switches your speed mode to 'tunnel' if you are in a 1x2 tunnel.")
+            .defaultValue(true)
+            .build()
+    );
+
     public final Setting<Boolean> vanillaOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
             .description("Uses speed only when standing on a block.")
@@ -106,6 +117,7 @@ public class Speed extends Module {
     );
 
     private SpeedMode currentMode;
+    SpeedModes preSpeedMode;
 
     public Speed() {
         super(Categories.Movement, "speed", "Modifies your movement speed when moving on the ground.");
@@ -115,6 +127,7 @@ public class Speed extends Module {
 
     @Override
     public void onActivate() {
+        preSpeedMode = speedMode.get();
         currentMode.onActivate();
     }
 
@@ -143,6 +156,16 @@ public class Speed extends Module {
         if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return;
         if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
 
+
+        Block blockAbove = mc.world.getBlockState(new BlockPos(mc.player.getX(), mc.player.getY() + 2, mc.player.getZ())).getBlock();
+        Block blockBelow = mc.world.getBlockState(new BlockPos(mc.player.getX(), mc.player.getY() - 1, mc.player.getZ())).getBlock();
+
+        if (swapToTunnel.get() && (isAboveValid(blockAbove) && isBelowValid(blockBelow))) {
+            speedMode.set(SpeedModes.Tunnel);
+        } else if (swapToTunnel.get() && !isAboveValid(blockAbove) || !isBelowValid(blockBelow)) {
+            speedMode.set(preSpeedMode);
+        }
+
         currentMode.onTick();
     }
 
@@ -157,10 +180,19 @@ public class Speed extends Module {
             case Strafe:    currentMode = new Strafe(); break;
             case Tunnel:    currentMode = new Tunnel(); break;
         }
+        if (mode != SpeedModes.Tunnel) preSpeedMode = mode;
     }
 
     @Override
     public String getInfoString() {
         return currentMode.getHudString();
+    }
+
+    public static boolean isAboveValid(Block block) {
+        return block != Blocks.AIR && block != Blocks.NETHER_PORTAL && block != Blocks.END_PORTAL && !(block instanceof FluidBlock);
+    }
+
+    public static boolean isBelowValid(Block block) {
+        return block != Blocks.AIR && block != Blocks.ICE && block != Blocks.BLUE_ICE && block != Blocks.FROSTED_ICE && block != Blocks.PACKED_ICE;
     }
 }
