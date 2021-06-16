@@ -178,7 +178,7 @@ public class PacketMine extends Module {
         if (!swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
             for (MyBlock block : blocks) {
                 if (block.isReady()) {
-                    FindItemResult slot = InvUtils.findBestTool(block.blockState);
+                    FindItemResult slot = InvUtils.findFastestTool(block.blockState);
                     if (!slot.found() || mc.player.getInventory().selectedSlot == slot.getSlot()) continue;
                     mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.getSlot()));
                     swapped = true;
