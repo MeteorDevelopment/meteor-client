@@ -46,7 +46,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public double getHeight(boolean shadow) {
-        return mc.textRenderer.fontHeight * scale;
+        return (mc.textRenderer.fontHeight + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
