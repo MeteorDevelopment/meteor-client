@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Strafe;
+import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Tunnel;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -52,6 +53,16 @@ public class Speed extends Module {
             .build()
     );
 
+    public final Setting<Double> tunnelSpeed = sgGeneral.add(new DoubleSetting.Builder()
+        .name("tunnel-speed")
+        .description("The speed.")
+        .visible(() -> speedMode.get() == SpeedModes.Tunnel)
+        .defaultValue(0.15)
+        .min(0.01)
+        .sliderMax(1)
+        .build()
+    );
+
     public final Setting<Boolean> ncpSpeedLimit = sgGeneral.add(new BoolSetting.Builder()
             .name("speed-limit")
             .description("Limits your speed on servers with very strict anticheats.")
@@ -73,6 +84,7 @@ public class Speed extends Module {
     public final Setting<Boolean> inLiquids = sgGeneral.add(new BoolSetting.Builder()
             .name("in-liquids")
             .description("Uses speed when in lava or water.")
+            .visible(() -> speedMode.get() != SpeedModes.Tunnel)
             .defaultValue(false)
             .build()
     );
@@ -80,6 +92,7 @@ public class Speed extends Module {
     public final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Uses speed when sneaking.")
+            .visible(() -> speedMode.get() != SpeedModes.Tunnel)
             .defaultValue(false)
             .build()
     );
@@ -142,6 +155,7 @@ public class Speed extends Module {
         switch (mode) {
             case Vanilla:   currentMode = new Vanilla(); break;
             case Strafe:    currentMode = new Strafe(); break;
+            case Tunnel:    currentMode = new Tunnel(); break;
         }
     }
 
