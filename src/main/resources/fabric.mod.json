@@ -34,7 +34,7 @@
     "meteor-client:devbuild": "@devbuild@"
   },
   "depends": {
-    "java": "16",
+    "java": ">=16",
     "minecraft": ">=1.17"
   }
 }
