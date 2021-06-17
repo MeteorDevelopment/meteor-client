@@ -33,10 +33,10 @@ public class Spam extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between specified messages in seconds.")
-            .defaultValue(2)
+            .description("The delay between specified messages in ticks.")
+            .defaultValue(40)
             .min(0)
-            .sliderMax(20)
+            .sliderMax(400)
             .build()
     );
 
@@ -57,7 +57,7 @@ public class Spam extends Module {
 
     @Override
     public void onActivate() {
-        timer = delay.get() * 20;
+        timer = delay.get();
         messageI = 0;
     }
 
