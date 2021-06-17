@@ -33,23 +33,23 @@ public class Spam extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
-            .description("The delay between specified messages in seconds.")
-            .defaultValue(2)
+            .description("The delay between specified messages in ticks.")
+            .defaultValue(20)
             .min(0)
-            .sliderMax(20)
+            .sliderMax(200)
             .build()
     );
 
     private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
-            .name("random")
+            .name("randomise")
             .description("Selects a random message from your spam message list.")
             .defaultValue(false)
             .build()
     );
 
     private final List<String> messages = new ArrayList<>();
-    private int timer;
-    private int messageI;
+    private int messageI, timer;
+    private String newText = "";
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
@@ -57,7 +57,7 @@ public class Spam extends Module {
 
     @Override
     public void onActivate() {
-        timer = delay.get() * 20;
+        timer = delay.get();
         messageI = 0;
     }
 
@@ -76,7 +76,7 @@ public class Spam extends Module {
 
             mc.player.sendChatMessage(messages.get(i));
 
-            timer = delay.get() * 20;
+            timer = delay.get();
         } else {
             timer--;
         }
@@ -84,8 +84,6 @@ public class Spam extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        messages.removeIf(String::isEmpty);
-
         WTable table = theme.table();
         fillTable(theme, table);
 
@@ -97,11 +95,13 @@ public class Spam extends Module {
         table.row();
 
         // Messages
+        messages.removeIf(String::isEmpty);
+
         for (int i = 0; i < messages.size(); i++) {
             int msgI = i;
             String message = messages.get(i);
 
-            WTextBox textBox = table.add(theme.textBox(message)).minWidth(100).expandX().widget();
+            WTextBox textBox = table.add(theme.textBox(message)).expandX().widget();
             textBox.action = () -> messages.set(msgI, textBox.get());
 
             WMinus delete = table.add(theme.minus()).widget();
@@ -115,10 +115,19 @@ public class Spam extends Module {
             table.row();
         }
 
+        if (!messages.isEmpty()) {
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
+        }
+
         // New Message
-        WPlus add = table.add(theme.plus()).expandCellX().right().widget();
+        WTextBox textBox = table.add(theme.textBox(newText)).minWidth(100).expandX().widget();
+        textBox.action = () -> newText = textBox.get();
+
+        WPlus add = table.add(theme.plus()).widget();
         add.action = () -> {
-            messages.add("");
+            messages.add(newText);
+            newText = "";
 
             table.clear();
             fillTable(theme, table);
