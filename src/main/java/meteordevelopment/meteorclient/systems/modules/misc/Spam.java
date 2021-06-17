@@ -75,7 +75,6 @@ public class Spam extends Module {
             }
 
             mc.player.sendChatMessage(messages.get(i));
-
             timer = delay.get();
         } else {
             timer--;
