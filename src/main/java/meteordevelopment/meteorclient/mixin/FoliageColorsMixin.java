@@ -18,7 +18,7 @@ public class FoliageColorsMixin {
     @Inject(method = "getBirchColor", at = @At("HEAD"), cancellable = true)
     private static void onGetBirchColor(CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
-        if(ambience.isActive() && ambience.changeFoliageColor.get()) {
+        if(ambience.isActive() && ambience.customFoliageColor.get()) {
             cir.setReturnValue(ambience.foliageColor.get().getPacked());
             cir.cancel();
         }
@@ -27,7 +27,7 @@ public class FoliageColorsMixin {
     @Inject(method = "getSpruceColor", at = @At("HEAD"), cancellable = true)
     private static void onGetSpruceColor(CallbackInfoReturnable<Integer> cir) {
         Ambience ambience = Modules.get().get(Ambience.class);
-        if(ambience.isActive() && ambience.changeFoliageColor.get()) {
+        if(ambience.isActive() && ambience.customFoliageColor.get()) {
             cir.setReturnValue(ambience.foliageColor.get().getPacked());
             cir.cancel();
         }
