@@ -514,6 +514,7 @@ public class Modules extends System<Modules> {
         add(new MountBypass());
         add(new Nuker());
         add(new StashFinder());
+        add(new SpawnProofer());
         add(new Timer());
         add(new VeinMiner());
     }
