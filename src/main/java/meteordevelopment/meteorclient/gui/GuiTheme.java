@@ -212,7 +212,7 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public abstract boolean categoryIcons();
 
-    public abstract boolean blur();
+    public abstract int blur();
 
     public abstract boolean hideHUD();
 

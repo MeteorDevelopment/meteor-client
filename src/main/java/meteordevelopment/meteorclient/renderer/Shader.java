@@ -111,6 +111,10 @@ public class Shader {
         return location;
     }
 
+    public void set(String name, boolean v) {
+        glUniform1i(getLocation(name), v ? GL_TRUE : GL_FALSE);
+    }
+
     public void set(String name, int v) {
         glUniform1i(getLocation(name), v);
     }

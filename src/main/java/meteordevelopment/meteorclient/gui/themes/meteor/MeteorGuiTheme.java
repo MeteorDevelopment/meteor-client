@@ -72,11 +72,13 @@ public class MeteorGuiTheme extends GuiTheme {
             .build()
     );
 
-    public final Setting<Boolean> blur = sgGeneral.add(new BoolSetting.Builder()
-            .name("blur")
-            .description("Apply blur behind the GUI.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Integer> blur = sgGeneral.add(new IntSetting.Builder()
+        .name("blur")
+        .description("How much blur to apply behind the GUI.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
@@ -299,7 +301,7 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public boolean blur() {
+    public int blur() {
         return blur.get();
     }
 

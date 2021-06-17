@@ -47,6 +47,7 @@ public class Mesh {
 
     private boolean building, rendering3D;
     private double cameraX, cameraZ;
+    private boolean beganRendering;
 
     public Mesh(DrawMode drawMode, Attrib... attributes) {
         int stride = 0;
@@ -208,29 +209,35 @@ public class Mesh {
         building = false;
     }
 
+    public void beginRender(MatrixStack matrices) {
+        GL.saveState();
+
+        if (depthTest) GL.enableDepth();
+        else GL.disableDepth();
+        GL.enableBlend();
+        GL.disableCull();
+        GL.enableLineSmooth();
+
+        if (rendering3D) {
+            MatrixStack matrixStack = RenderSystem.getModelViewStack();
+            matrixStack.push();
+
+            if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
+
+            Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+            matrixStack.translate(0, -cameraPos.y, 0);
+        }
+
+        beganRendering = true;
+    }
+
     public void render(MatrixStack matrices) {
         if (building) end();
 
         if (indicesCount > 0) {
             // Setup opengl state and matrix stack
-            GL.saveState();
-
-            if (depthTest) GL.enableDepth();
-            else GL.disableDepth();
-            GL.enableBlend();
-            GL.disableCull();
-            GL.enableLineSmooth();
-
-            MatrixStack matrixStack = RenderSystem.getModelViewStack();
-
-            if (rendering3D) {
-                matrixStack.push();
-
-                if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
-
-                Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
-                matrixStack.translate(0, -cameraPos.y, 0);
-            }
+            boolean wasBeganRendering = beganRendering;
+            if (!wasBeganRendering) beginRender(matrices);
 
             // Render
             beforeRender();
@@ -248,10 +255,16 @@ public class Mesh {
             BufferRendererAccessor.setCurrentElementBuffer(0);
             BufferRendererAccessor.setCurrentVertexArray(0);
 
-            if (rendering3D) matrixStack.pop();
-
-            GL.restoreState();
+            if (!wasBeganRendering) endRender();
         }
+    }
+
+    public void endRender() {
+        if (rendering3D) RenderSystem.getModelViewStack().pop();
+
+        GL.restoreState();
+
+        beganRendering = false;
     }
 
     protected void beforeRender() {}
