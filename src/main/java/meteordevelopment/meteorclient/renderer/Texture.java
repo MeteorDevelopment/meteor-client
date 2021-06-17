@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import org.lwjgl.BufferUtils;
 
@@ -70,7 +69,7 @@ public class Texture {
     }
 
     public void bind() {
-        GlStateManager._bindTexture(id);
+        GL.bindTexture(id);
     }
 
     public enum Format {

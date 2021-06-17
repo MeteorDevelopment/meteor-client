@@ -11,7 +11,7 @@ import net.fabricmc.loader.api.FabricLoader;
 
 import java.lang.reflect.Field;
 
-import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL32C.*;
 
 public class GL {
     private static final ICapabilityTracker DEPTH = getTracker("DEPTH");
@@ -62,6 +62,11 @@ public class GL {
     }
     public static void disableLineSmooth() {
         glDisable(GL_LINE_SMOOTH);
+    }
+
+    public static void bindTexture(int i) {
+        GlStateManager._activeTexture(GL_TEXTURE0);
+        GlStateManager._bindTexture(i);
     }
 
     private static ICapabilityTracker getTracker(String fieldName) {

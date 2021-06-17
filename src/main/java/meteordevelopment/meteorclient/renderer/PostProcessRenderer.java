@@ -25,7 +25,15 @@ public class PostProcessRenderer {
         mesh.end();
     }
 
+    public static void beginRender() {
+        mesh.beginRender(matrices);
+    }
+
     public static void render() {
         mesh.render(matrices);
+    }
+
+    public static void endRender() {
+        mesh.endRender();
     }
 }
