@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import meteordevelopment.meteorclient.rendering.Matrices;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
@@ -232,7 +231,6 @@ public abstract class WidgetScreen extends Screen {
 
         // Apply projection without scaling
         Utils.unscaledProjection();
-        Matrices.begin(new MatrixStack());
 
         onRenderBefore(delta);
 
