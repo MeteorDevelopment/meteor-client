@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
+import net.minecraft.entity.Entity;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -25,6 +26,10 @@ public class VClipCommand extends Command {
             assert player != null;
 
             double blocks = context.getArgument("blocks", Double.class);
+            if (player.hasVehicle()) {
+                Entity vehicle = player.getVehicle();
+                vehicle.setPosition(vehicle.getX(), vehicle.getY() + blocks, vehicle.getZ());
+            }
             player.setPosition(player.getX(), player.getY() + blocks, player.getZ());
 
             return SINGLE_SUCCESS;

@@ -11,13 +11,11 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.Blur;
 import meteordevelopment.meteorclient.renderer.Renderer3D;
-import meteordevelopment.meteorclient.rendering.Matrices;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
 import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.systems.modules.render.UnfocusedCPU;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -49,25 +47,7 @@ public abstract class GameRendererMixin {
 
     @Shadow public abstract void reset();
 
-    @Unique private boolean a = false;
     @Unique private Renderer3D renderer;
-
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
-    private void onRenderHead(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
-        if (Modules.get().isActive(UnfocusedCPU.class) && !client.isWindowFocused()) info.cancel();
-
-        a = false;
-    }
-
-    @Inject(method = "renderWorld", at = @At("HEAD"))
-    private void onRenderWorldHead(float tickDelta, long limitTime, MatrixStack matrix, CallbackInfo info) {
-        Matrices.begin(matrix);
-        Matrices.push();
-        // TODO: Fix
-        //RenderSystem.pushMatrix();
-
-        a = true;
-    }
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack, double d, Matrix4f matrix4f) {
@@ -99,14 +79,6 @@ public abstract class GameRendererMixin {
         if (Modules.get().get(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             client.getProfiler().pop();
             info.cancel();
-        }
-    }
-
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;clear(IZ)V", ordinal = 0))
-    private void onRenderBeforeGuiRender(float tickDelta, long startTime, boolean tick, CallbackInfo info) {
-        if (a) {
-            Matrices.pop();
-            //RenderSystem.popMatrix();
         }
     }
 

@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
+import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
 import meteordevelopment.meteorclient.renderer.Shader;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -16,7 +16,6 @@ import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.OutlineVertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
-import org.lwjgl.opengl.GL32C;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
@@ -51,8 +50,7 @@ public class Outlines {
 
         mc.getFramebuffer().beginWrite(false);
 
-        GlStateManager._activeTexture(GL32C.GL_TEXTURE0);
-        GlStateManager._bindTexture(outlinesFbo.getColorAttachment());
+        GL.bindTexture(outlinesFbo.getColorAttachment());
 
         outlinesShader.bind();
         outlinesShader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
@@ -61,8 +59,6 @@ public class Outlines {
         outlinesShader.set("u_FillOpacity", esp.fillOpacity.get().floatValue() / 255.0);
         outlinesShader.set("u_ShapeMode", (double) esp.shapeMode.get().ordinal());
         PostProcessRenderer.render();
-
-        GlStateManager._bindTexture(0);
     }
 
     public static void onResized(int width, int height) {

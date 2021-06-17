@@ -14,8 +14,6 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.renderer.*;
-import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
-import meteordevelopment.meteorclient.rendering.Matrices;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -28,6 +26,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.Capes;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.Outlines;
@@ -42,7 +41,6 @@ import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -59,9 +57,7 @@ public class MeteorClient implements ClientModInitializer {
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
 
-    public static CustomTextRenderer FONT;
-
-    public Screen screenToOpen;
+    public static Screen screenToOpen;
 
     @Override
     public void onInitializeClient() {
@@ -92,7 +88,6 @@ public class MeteorClient implements ClientModInitializer {
         Outlines.init();
         Blur.init();
 
-        Matrices.begin(new MatrixStack());
         MeteorExecutor.init();
         Capes.init();
         RainbowColors.init();
@@ -115,6 +110,7 @@ public class MeteorClient implements ClientModInitializer {
         Systems.init();
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            OnlinePlayers.leave();
             Systems.save();
             GuiThemes.save();
         }));

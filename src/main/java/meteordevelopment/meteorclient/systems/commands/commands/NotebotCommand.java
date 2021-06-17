@@ -44,7 +44,7 @@ public class NotebotCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("help").executes(ctx -> {
-            MeteorClient.INSTANCE.screenToOpen = new NotebotHelpScreen(GuiThemes.get());
+            MeteorClient.screenToOpen = new NotebotHelpScreen(GuiThemes.get());
             return SINGLE_SUCCESS;
         }));
         builder.then(literal("status").executes(ctx -> {

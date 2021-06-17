@@ -5,58 +5,52 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import net.minecraft.client.gl.Framebuffer;
-import org.lwjgl.opengl.GL32C;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class Blur {
-    private static final int ITERATIONS = 4;
-    private static final int OFFSET = 4;
-
-    private static Shader shaderDown, shaderUp;
+    private static Shader shader;
+    private static Framebuffer fbo;
 
     public static void init() {
-        shaderDown = new Shader("simple.vert", "kawase_down.frag");
-        shaderUp = new Shader("simple.vert", "kawase_up.frag");
+        shader = new Shader("blur.vert", "blur.frag");
+        fbo = new Framebuffer();
     }
 
     public static void render() {
-        if (!GuiThemes.get().blur() || !(mc.currentScreen instanceof WidgetScreen)) return;
+        if (GuiThemes.get().blur() == 0 || !(mc.currentScreen instanceof WidgetScreen)) return;
 
-        Framebuffer fbo = mc.getFramebuffer();
+        int sourceTexture = mc.getFramebuffer().getColorAttachment();
+        boolean horizontal = true;
 
-        // Bind framebuffer texture and begin post process quad rendering
-        GlStateManager._activeTexture(GL32C.GL_TEXTURE0);
-        GlStateManager._bindTexture(fbo.getColorAttachment());
+        shader.bind();
+        shader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
+        shader.set("u_Texture", 0);
 
-        // Apply kawase down
-        shaderDown.bind();
-        shaderDown.set("u_Texture", 0);
-        shaderDown.set("u_Size", fbo.textureWidth, fbo.textureHeight);
-        shaderDown.set("u_Offset", OFFSET, OFFSET);
-        shaderDown.set("u_HalfPixel", 0.5 / fbo.textureWidth, 0.5 / fbo.textureHeight);
+        PostProcessRenderer.beginRender();
 
-        for (int i = 0; i < ITERATIONS; i++) PostProcessRenderer.render();
+        for (int i = 0; i < GuiThemes.get().blur() * 2; i++) {
+            if (horizontal) {
+                fbo.bind();
+                GL.bindTexture(sourceTexture);
+            }
+            else {
+                fbo.unbind();
+                GL.bindTexture(fbo.texture);
+            }
 
-        // Apply kawase up
-        shaderUp.bind();
-        shaderUp.set("u_Texture", 0);
-        shaderUp.set("u_Size", fbo.textureWidth, fbo.textureHeight);
-        shaderUp.set("u_Offset", OFFSET, OFFSET);
-        shaderUp.set("u_HalfPixel", 0.5 / fbo.textureWidth, 0.5 / fbo.textureHeight);
-        shaderUp.set("u_Alpha", 1f);
-
-        for (int i = 0; i < ITERATIONS; i++) {
-            if (i == ITERATIONS - 1) shaderUp.set("u_Alpha", (float) ((WidgetScreen) mc.currentScreen).animProgress);
-
+            shader.set("u_Horizontal", horizontal);
             PostProcessRenderer.render();
+
+            horizontal = !horizontal;
         }
 
-        // Unbind framebuffer texture and end post process quad rendering
-        GlStateManager._bindTexture(0);
+        PostProcessRenderer.endRender();
+    }
+
+    public static void onResized() {
+        if (fbo != null) fbo.resize();
     }
 }
