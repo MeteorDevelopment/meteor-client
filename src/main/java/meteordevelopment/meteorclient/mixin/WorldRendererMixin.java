@@ -105,8 +105,8 @@ public abstract class WorldRendererMixin {
     private void onRenderEndSkyDraw(MatrixStack matrices, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.enderCustomSkyColor.get()) {
-            Color customEndSkyColor = ambience.endSkyColor.get();
+        if (ambience.endSky.get() && ambience.customSkyColor.get()) {
+            Color customEndSkyColor = ambience.skyColor.get();
 
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferBuilder = tessellator.getBuffer();
