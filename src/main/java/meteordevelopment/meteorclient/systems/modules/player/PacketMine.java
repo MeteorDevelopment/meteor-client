@@ -14,6 +14,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -26,6 +28,7 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -42,35 +45,50 @@ public class PacketMine extends Module {
     // General
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between mining blocks in ticks.")
-            .defaultValue(1)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("delay")
+        .description("Delay between mining blocks in ticks.")
+        .defaultValue(1)
+        .min(0)
+        .sliderMax(10)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Sends rotation packets to the server when mining.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Sends rotation packets to the server when mining.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-switch")
+        .description("Automatically switches to the best tool when the block is ready to be mined instantly.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> notOnUse = sgGeneral.add(new BoolSetting.Builder()
+        .name("not-on-use")
+        .description("Won't auto switch if you're using an item.")
+        .defaultValue(true)
+        .visible(autoSwitch::get)
+        .build()
     );
 
     // Render
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-            .name("render")
-            .description("Whether or not to render the block being mined.")
-            .defaultValue(true)
-            .build()
+        .name("render")
+        .description("Whether or not to render the block being mined.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> readySideColor = sgRender.add(new ColorSetting.Builder()
@@ -88,30 +106,41 @@ public class PacketMine extends Module {
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The color of the sides of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 10))
-            .build()
+        .name("side-color")
+        .description("The color of the sides of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 10))
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The color of the lines of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 255))
-            .build()
+        .name("line-color")
+        .description("The color of the lines of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 255))
+        .build()
     );
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
     private final List<MyBlock> blocks = new ArrayList<>();
+
+    private boolean swapped, shouldUpdateSlot;
 
     public PacketMine() {
         super(Categories.World, "packet-mine", "Sends packets to mine blocks without the mining animation.");
     }
 
     @Override
+    public void onActivate() {
+        swapped = false;
+    }
+
+    @Override
     public void onDeactivate() {
         for (MyBlock block : blocks) blockPool.free(block);
         blocks.clear();
+        if (shouldUpdateSlot) {
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+            shouldUpdateSlot = false;
+        }
     }
 
     @EventHandler
@@ -119,6 +148,8 @@ public class PacketMine extends Module {
         if (mc.world.getBlockState(event.blockPos).getHardness(mc.world, event.blockPos) < 0) return;
 
         event.cancel();
+
+        swapped = false;
 
         if (!isMiningBlock(event.blockPos)) {
             blocks.add(blockPool.get().set(event));
@@ -137,7 +168,25 @@ public class PacketMine extends Module {
     private void onTick(TickEvent.Pre event) {
         blocks.removeIf(MyBlock::shouldRemove);
 
+        if (shouldUpdateSlot) {
+            mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
+            shouldUpdateSlot = false;
+        }
+
         if (!blocks.isEmpty()) blocks.get(0).mine();
+
+        if (!swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
+            for (MyBlock block : blocks) {
+                if (block.isReady()) {
+                    FindItemResult slot = InvUtils.findFastestTool(block.blockState);
+                    if (!slot.found() || mc.player.getInventory().selectedSlot == slot.getSlot()) continue;
+                    mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.getSlot()));
+                    swapped = true;
+                    shouldUpdateSlot = true;
+                    break;
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -151,8 +200,7 @@ public class PacketMine extends Module {
         float hardness = state.getHardness(null, null);
         if (hardness == -1) return 0;
         else {
-            // TODO: fix
-            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || /*mc.player.getInventory().main.get(slot).isEffectiveOn(state)*/ false ? 30 : 100);
+            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
         }
     }
 
