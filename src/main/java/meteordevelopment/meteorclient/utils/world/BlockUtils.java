@@ -11,6 +11,8 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.block.*;
+import net.minecraft.block.enums.BlockHalf;
+import net.minecraft.block.enums.SlabType;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -18,6 +20,8 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
 public class BlockUtils {
@@ -154,5 +158,31 @@ public class BlockUtils {
             || block instanceof DoorBlock
             || block instanceof NoteBlock
             || block instanceof TrapdoorBlock;
+    }
+
+    public static MobSpawn isValidMobSpawn(BlockPos blockPos, BlockState blockState) {
+        if (blockPos.getY() == 0) return MobSpawn.Never;
+        if (!(blockState.getBlock() instanceof AirBlock)) return MobSpawn.Never;
+
+        if (!topSurface(Utils.mc.world.getBlockState(blockPos.down()))) {
+            if (Utils.mc.world.getBlockState(blockPos.down()).getCollisionShape(Utils.mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
+            if (Utils.mc.world.getBlockState(blockPos.down()).isTranslucent(Utils.mc.world, blockPos.down())) return MobSpawn.Never;
+        }
+
+        if (Utils.mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawn.Potential;
+        else if (Utils.mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawn.Always;
+
+        return MobSpawn.Never;
+    }
+
+    public static boolean topSurface(BlockState blockState) {
+        if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
+        else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
+    }
+
+    public enum MobSpawn {
+        Never,
+        Potential,
+        Always
     }
 }
