@@ -100,9 +100,12 @@ public class AutoTool extends Module {
         if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && prevSlot != -1) {
             InvUtils.swap(prevSlot);
             prevSlot = -1;
+            wasPressed = mc.options.keyAttack.isPressed();
+            return;
         }
 
         wasPressed = mc.options.keyAttack.isPressed();
+
 
         // Decrease ticks
         if (ticks > 0) ticks--;
@@ -139,6 +142,8 @@ public class AutoTool extends Module {
 
         if ((bestSlot != -1 && bestScore > getScore(currentStack, blockState)) || shouldStopUsing(currentStack) || !(currentStack.getItem() instanceof ToolItem)) {
             ticks = switchDelay.get();
+
+            prevSlot = mc.player.getInventory().selectedSlot;
 
             if (ticks == 0) InvUtils.swap(bestSlot);
             else shouldSwitch = true;
