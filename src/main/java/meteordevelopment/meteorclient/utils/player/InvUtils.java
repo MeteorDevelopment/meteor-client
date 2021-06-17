@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
+import net.minecraft.block.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
@@ -70,6 +71,21 @@ public class InvUtils {
         }
 
         return new FindItemResult(slot, count);
+    }
+
+    public static FindItemResult findFastestTool(BlockState state) {
+        float bestScore = -1;
+        int slot = -1;
+
+        for (int i = 0; i < 9; i++) {
+            float score = mc.player.getInventory().getStack(i).getMiningSpeedMultiplier(state);
+            if (score > bestScore) {
+                bestScore = score;
+                slot = i;
+            }
+        }
+
+        return new FindItemResult(slot, 1);
     }
 
     // Interactions
