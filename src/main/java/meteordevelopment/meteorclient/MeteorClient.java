@@ -5,50 +5,45 @@
 
 package meteordevelopment.meteorclient;
 
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.meteor.ClientInitialisedEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.renderer.*;
+import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.modules.Categories;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
+import meteordevelopment.meteorclient.utils.misc.Names;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import meteordevelopment.meteorclient.utils.player.EChestMemory;
+import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.render.Outlines;
+import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
+import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
-import minegame159.meteorclient.events.game.GameLeftEvent;
-import minegame159.meteorclient.events.meteor.CharTypedEvent;
-import minegame159.meteorclient.events.meteor.ClientInitialisedEvent;
-import minegame159.meteorclient.events.meteor.KeyEvent;
-import minegame159.meteorclient.events.world.TickEvent;
-import minegame159.meteorclient.gui.GuiThemes;
-import minegame159.meteorclient.gui.renderer.GuiRenderer;
-import minegame159.meteorclient.gui.tabs.Tabs;
-import minegame159.meteorclient.renderer.*;
-import minegame159.meteorclient.renderer.text.CustomTextRenderer;
-import minegame159.meteorclient.rendering.Matrices;
-import minegame159.meteorclient.systems.Systems;
-import minegame159.meteorclient.systems.config.Config;
-import minegame159.meteorclient.systems.modules.Categories;
-import minegame159.meteorclient.systems.modules.Modules;
-import minegame159.meteorclient.systems.modules.misc.DiscordPresence;
-import minegame159.meteorclient.utils.Utils;
-import minegame159.meteorclient.utils.misc.FakeClientPlayer;
-import minegame159.meteorclient.utils.misc.MeteorPlayers;
-import minegame159.meteorclient.utils.misc.Names;
-import minegame159.meteorclient.utils.misc.input.KeyAction;
-import minegame159.meteorclient.utils.misc.input.KeyBinds;
-import minegame159.meteorclient.utils.network.Capes;
-import minegame159.meteorclient.utils.network.MeteorExecutor;
-import minegame159.meteorclient.utils.network.OnlinePlayers;
-import minegame159.meteorclient.utils.player.EChestMemory;
-import minegame159.meteorclient.utils.player.Rotations;
-import minegame159.meteorclient.utils.render.color.RainbowColors;
-import minegame159.meteorclient.utils.world.BlockIterator;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.lang.invoke.MethodHandles;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -149,6 +144,24 @@ public class MeteorClient implements ClientModInitializer {
         // Click GUI
         if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
             if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
+        }
+    }
+
+    public static void openUrl(String url) {
+        String os = System.getProperty("os.name").toLowerCase();
+
+        try {
+            if (os.contains("win")) {
+                if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    Desktop.getDesktop().browse(new URI(url));
+                }
+            } else if (os.contains("mac")) {
+                Runtime.getRuntime().exec("open " + url);
+            } else if (os.contains("nix") || os.contains("nux")) {
+                Runtime.getRuntime().exec("xdg-open " + url);
+            }
+        } catch (URISyntaxException | IOException e) {
+            e.printStackTrace();
         }
     }
 }
