@@ -11,13 +11,16 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.SortPriority;
+import meteordevelopment.meteorclient.utils.entity.TargetUtils;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.NameTagItem;
+import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
 public class AutoNametag extends Module {
@@ -30,11 +33,19 @@ public class AutoNametag extends Module {
             .build()
     );
 
-    private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("distance")
-            .description("The maximum distance a nametagged entity can be to be nametagged.")
-            .min(0.0)
-            .defaultValue(5.0)
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+            .name("range")
+            .description("The maximum range an entity can be to be nametagged.")
+            .defaultValue(5)
+            .min(0)
+            .sliderMax(6)
+            .build()
+    );
+
+    private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
+            .name("priority")
+            .description("Priority sort")
+            .defaultValue(SortPriority.LowestDistance)
             .build()
     );
 
@@ -45,7 +56,8 @@ public class AutoNametag extends Module {
             .build()
     );
 
-    private Entity entity;
+
+    private Entity target;
     private boolean offHand;
     private int preSlot;
 
@@ -53,53 +65,42 @@ public class AutoNametag extends Module {
         super(Categories.World, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
     }
 
-    @Override
-    public void onDeactivate() {
-        entity = null;
-    }
-
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        entity = null;
+        // Nametag in hobar
+        FindItemResult findNametag = InvUtils.findInHotbar(Items.NAME_TAG);
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().getBoolean(entity.getType()) || entity.hasCustomName() || mc.player.distanceTo(entity) > distance.get()) continue;
-
-            boolean findNametag = true;
-            if (mc.player.getInventory().getMainHandStack().getItem() instanceof NameTagItem) {
-                findNametag = false;
-            }
-            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof NameTagItem) {
-                findNametag = false;
-                offHand = true;
-            }
-
-            boolean foundNametag = !findNametag;
-            if (findNametag) {
-                for (int i = 0; i < 9; i++) {
-                    ItemStack itemStack = mc.player.getInventory().getStack(i);
-                    if (itemStack.getItem() instanceof NameTagItem) {
-                        preSlot = mc.player.getInventory().selectedSlot;
-                        InvUtils.swap(i);
-                        foundNametag = true;
-                        break;
-                    }
-                }
-            }
-
-            if (foundNametag) {
-                this.entity = entity;
-
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
-                else interact();
-
-                return;
-            }
+        if (!findNametag.found()) {
+            error("No Nametag in Hotbar");
+            toggle();
+            return;
         }
+
+
+        // Target
+        target = TargetUtils.get(entity -> {
+            if (entity.hasCustomName()) return false;
+            if (PlayerUtils.distanceTo(entity) > range.get()) return false;
+            return entities.get().getBoolean(entity.getType());
+        }, priority.get());
+
+        if (target == null) return;
+
+
+        // Swapping slots
+        preSlot = mc.player.getInventory().selectedSlot;
+        InvUtils.swap(findNametag.getSlot());
+
+        offHand = findNametag.isOffhand();
+
+
+        // Interaction
+        if (rotate.get()) Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target), -100, this::interact);
+        else interact();
     }
 
     private void interact() {
-        mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+        mc.interactionManager.interactEntity(mc.player, target, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
         InvUtils.swap(preSlot);
     }
 }
