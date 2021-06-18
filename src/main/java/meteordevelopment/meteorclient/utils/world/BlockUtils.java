@@ -160,9 +160,9 @@ public class BlockUtils {
             || block instanceof TrapdoorBlock;
     }
 
-    public static MobSpawn isValidMobSpawn(BlockPos blockPos, BlockState blockState) {
+    public static MobSpawn isValidMobSpawn(BlockPos blockPos) {
         if (blockPos.getY() == 0) return MobSpawn.Never;
-        if (!(blockState.getBlock() instanceof AirBlock)) return MobSpawn.Never;
+        if (!(Utils.mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock)) return MobSpawn.Never;
 
         if (!topSurface(Utils.mc.world.getBlockState(blockPos.down()))) {
             if (Utils.mc.world.getBlockState(blockPos.down()).getCollisionShape(Utils.mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
