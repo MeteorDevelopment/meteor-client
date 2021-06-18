@@ -182,15 +182,15 @@ public class SlotUtils {
 
     // Utils
 
-    private static boolean isHotbar(int i) {
+    public static boolean isHotbar(int i) {
         return i >= HOTBAR_START && i <= HOTBAR_END;
     }
 
-    private static boolean isMain(int i) {
+    public static boolean isMain(int i) {
         return i >= MAIN_START && i <= MAIN_END;
     }
 
-    private static boolean isArmor(int i) {
+    public static boolean isArmor(int i) {
         return i >= ARMOR_START && i <= ARMOR_END;
     }
 }

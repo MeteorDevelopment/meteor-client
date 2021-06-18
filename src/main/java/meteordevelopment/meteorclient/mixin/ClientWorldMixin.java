@@ -28,14 +28,10 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(ClientWorld.class)
 public abstract class ClientWorldMixin {
-    @Shadow
-    @Nullable
-    public abstract Entity getEntityById(int id);
+    @Unique private final SkyProperties endSky = new SkyProperties.End();
+    @Unique private final SkyProperties customSky = new Ambience.Custom();
 
-    @Unique
-    private final SkyProperties endSky = new SkyProperties.End();
-    @Unique
-    private final SkyProperties customSky = new Ambience.Custom();
+    @Shadow @Nullable public abstract Entity getEntityById(int id);
 
     @Inject(method = "addEntityPrivate", at = @At("TAIL"))
     private void onAddEntityPrivate(int id, Entity entity, CallbackInfo info) {
@@ -50,24 +46,24 @@ public abstract class ClientWorldMixin {
     /**
      * @author Walaryne
      */
-    @Inject(method = "method_23777", at = @At("HEAD"), cancellable = true)
-    private void onGetSkyColor(Vec3d vec3d, float f, CallbackInfoReturnable<Vec3d> info) {
+    @Inject(method = "getSkyProperties", at = @At("HEAD"), cancellable = true)
+    private void onGetSkyProperties(CallbackInfoReturnable<SkyProperties> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.changeSkyColor.get()) {
-            info.setReturnValue(ambience.skyColor.get().getVec3d());
+        if (ambience.isActive() && ambience.endSky.get()) {
+            info.setReturnValue(ambience.customSkyColor.get() ? customSky : endSky);
         }
     }
 
     /**
      * @author Walaryne
      */
-    @Inject(method = "getSkyProperties", at = @At("HEAD"), cancellable = true)
-    private void onGetSkyProperties(CallbackInfoReturnable<SkyProperties> info) {
+    @Inject(method = "method_23777", at = @At("HEAD"), cancellable = true)
+    private void onGetSkyColor(Vec3d vec3d, float f, CallbackInfoReturnable<Vec3d> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.enderMode.get()) {
-            info.setReturnValue(ambience.enderCustomSkyColor.get() ? customSky : endSky);
+        if (ambience.isActive() && ambience.customSkyColor.get()) {
+            info.setReturnValue(ambience.skyColor.get().getVec3d());
         }
     }
 
@@ -78,7 +74,7 @@ public abstract class ClientWorldMixin {
     private void onGetCloudsColor(float tickDelta, CallbackInfoReturnable<Vec3d> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.changeCloudColor.get()) {
+        if (ambience.isActive() && ambience.customCloudColor.get()) {
             info.setReturnValue(ambience.cloudColor.get().getVec3d());
         }
     }

@@ -59,6 +59,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         return this.value == value;
     }
 
+    public boolean isKey() {
+        return isKey;
+    }
+
     public boolean isPressed() {
         return isKey ? Input.isKeyPressed(value) : Input.isButtonPressed(value);
     }

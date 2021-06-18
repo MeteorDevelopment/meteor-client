@@ -17,10 +17,10 @@ public class WKeybind extends WHorizontalList {
     private WLabel label;
 
     private final Keybind keybind;
-    private final int defaultValue;
+    private final Keybind defaultValue;
     private boolean listening;
 
-    public WKeybind(Keybind keybind, int defaultValue) {
+    public WKeybind(Keybind keybind, Keybind defaultValue) {
         this.keybind = keybind;
         this.defaultValue = defaultValue;
     }
@@ -56,7 +56,7 @@ public class WKeybind extends WHorizontalList {
     }
 
     public void resetBind() {
-        keybind.set(true, defaultValue);
+        keybind.set(defaultValue);
         reset();
     }
 
