@@ -146,22 +146,4 @@ public class MeteorClient implements ClientModInitializer {
             if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
         }
     }
-
-    public static void openUrl(String url) {
-        String os = System.getProperty("os.name").toLowerCase();
-
-        try {
-            if (os.contains("win")) {
-                if (Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                    Desktop.getDesktop().browse(new URI(url));
-                }
-            } else if (os.contains("mac")) {
-                Runtime.getRuntime().exec("open " + url);
-            } else if (os.contains("nix") || os.contains("nux")) {
-                Runtime.getRuntime().exec("xdg-open " + url);
-            }
-        } catch (URISyntaxException | IOException e) {
-            e.printStackTrace();
-        }
-    }
 }
