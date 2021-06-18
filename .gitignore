@@ -13,5 +13,4 @@ logs
 *.ipr
 *.iml
 .idea/*
-!.idea/scopes/*
 !.idea/copyright/*
