@@ -16,12 +16,8 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
-import net.minecraft.block.enums.BlockHalf;
-import net.minecraft.block.enums.SlabType;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.util.shape.VoxelShapes;
-import net.minecraft.world.LightType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,11 +95,13 @@ public class SpawnProofer extends Module {
             return;
         }
 
-
+        // Find spawn locations
         for (Spawn spawn : spawns) spawnPool.free(spawn);
         spawns.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
-            if (validSpawn(blockPos)) spawns.add(spawnPool.get().set(blockPos));
+            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos);
+            if ((spawn == BlockUtils.MobSpawn.Always && alwaysSpawns.get()) ||
+                    spawn == BlockUtils.MobSpawn.Potential && potentialSpawns.get()) spawns.add(spawnPool.get().set(blockPos));
         });
     }
 
@@ -150,28 +148,6 @@ public class SpawnProofer extends Module {
         }
 
         ticksWaited = 0;
-    }
-
-    private boolean validSpawn(BlockPos blockPos) { // Copied from Light Overlay and modified slightly
-        BlockState blockState = mc.world.getBlockState(blockPos);
-
-        if (blockPos.getY() == 0) return false;
-        if (!(blockState.getBlock() instanceof AirBlock)) return false;
-
-        if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
-            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return false;
-            if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return false;
-        }
-
-        if (mc.world.getLightLevel(blockPos, 0) <= 7) return potentialSpawns.get();
-        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return alwaysSpawns.get();
-
-        return false;
-    }
-
-    private boolean topSurface(BlockState blockState) { // Copied from Light Overlay
-        if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
-        else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
     }
 
     private List<Block> getDefaultBlocks() {

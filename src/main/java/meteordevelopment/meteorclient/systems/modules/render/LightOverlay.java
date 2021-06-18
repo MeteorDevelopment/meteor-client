@@ -93,7 +93,7 @@ public class LightOverlay extends Module {
         crosses.clear();
 
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-            switch (BlockUtils.isValidMobSpawn(blockPos, blockState)) {
+            switch (BlockUtils.isValidMobSpawn(blockPos)) {
                 case Never:
                     break;
                 case Potential:
