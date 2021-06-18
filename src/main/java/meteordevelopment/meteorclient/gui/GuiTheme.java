@@ -163,10 +163,10 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     }
 
     public WKeybind keybind(Keybind keybind) {
-        return keybind(keybind, -1);
+        return keybind(keybind, Keybind.fromKey(-1));
     }
 
-    public WKeybind keybind(Keybind keybind, int defaultValue) {
+    public WKeybind keybind(Keybind keybind, Keybind defaultValue) {
         return w(new WKeybind(keybind, defaultValue));
     }
 
