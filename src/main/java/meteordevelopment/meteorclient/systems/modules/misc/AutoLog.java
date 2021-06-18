@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.player.DamageCalcUtils;
+import meteordevelopment.meteorclient.utils.player.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -120,7 +120,7 @@ public class AutoLog extends Module {
                         if (toggleOff.get()) this.toggle();
                         break;
                 }
-                if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)
+                if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
                         > mc.player.getHealth() + mc.player.getAbsorptionAmount()) {
                     mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Anti-32k measures.")));
                     if (toggleOff.get()) this.toggle();
