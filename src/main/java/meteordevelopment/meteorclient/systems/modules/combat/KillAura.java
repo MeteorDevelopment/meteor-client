@@ -144,7 +144,7 @@ public class KillAura extends Module {
         .name("max-targets")
         .description("How many entities to target at once.")
         .defaultValue(1)
-        .min(1).max(10)
+        .min(1)
         .sliderMin(1).sliderMax(5)
         .build()
     );
