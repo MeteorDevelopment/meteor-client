@@ -49,6 +49,13 @@ public class AutoNametag extends Module {
             .build()
     );
 
+    private final Setting<Boolean> renametag = sgGeneral.add(new BoolSetting.Builder()
+            .name("renametag")
+            .description("Allows already nametagged entities to be renamed.")
+            .defaultValue(true)
+            .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Automatically faces towards the mob being nametagged.")
@@ -79,9 +86,12 @@ public class AutoNametag extends Module {
 
         // Target
         target = TargetUtils.get(entity -> {
-            if (entity.hasCustomName()) return false;
             if (PlayerUtils.distanceTo(entity) > range.get()) return false;
-            return entities.get().getBoolean(entity.getType());
+            if (!entities.get().getBoolean(entity.getType())) return false;
+            if (entity.hasCustomName()) {
+                return renametag.get() && entity.getCustomName() != mc.player.getInventory().getStack(findNametag.getSlot()).getName();
+            }
+            return false;
         }, priority.get());
 
         if (target == null) return;
