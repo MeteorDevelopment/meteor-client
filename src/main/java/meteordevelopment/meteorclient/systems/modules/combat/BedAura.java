@@ -257,12 +257,12 @@ public class BedAura extends Module {
 
                 BlockPos centerPos = target.getBlockPos().up(i);
 
-                double headSelfDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
-                double offsetSelfDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir)));
+                double headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
+                double offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir)));
 
                 if (mc.world.getBlockState(centerPos).getMaterial().isReplaceable()
                     && BlockUtils.canPlace(centerPos.offset(dir))
-                    && DamageCalcUtils.bedDamage(target, Utils.vec3d(centerPos)) >= minDamage.get()
+                    && DamageUtils.bedDamage(target, Utils.vec3d(centerPos)) >= minDamage.get()
                     && offsetSelfDamage < maxSelfDamage.get()
                     && headSelfDamage < maxSelfDamage.get()
                     && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - headSelfDamage > 0)
@@ -316,12 +316,12 @@ public class BedAura extends Module {
 
                 BlockPos centerPos = target.getBlockPos().up(i);
 
-                double headSelfDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
-                double offsetSelfDamage = DamageCalcUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir)));
+                double headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
+                double offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir)));
 
                 if (mc.world.getBlockState(centerPos).getBlock() instanceof BedBlock
                     && mc.world.getBlockState(centerPos.offset(dir)).getBlock() instanceof BedBlock
-                    && DamageCalcUtils.bedDamage(target, Utils.vec3d(centerPos)) >= minDamage.get()
+                    && DamageUtils.bedDamage(target, Utils.vec3d(centerPos)) >= minDamage.get()
                     && offsetSelfDamage < maxSelfDamage.get()
                     && headSelfDamage < maxSelfDamage.get()
                     && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - headSelfDamage > 0)

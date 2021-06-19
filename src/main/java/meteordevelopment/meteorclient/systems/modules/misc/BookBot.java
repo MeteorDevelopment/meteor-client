@@ -5,10 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-//Created by squidoodly 06/07/2020 AT FUCKING 12:00AM KILL ME
-
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.mixin.TextHandlerAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -16,12 +17,16 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Util;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -29,250 +34,254 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.PrimitiveIterator;
 import java.util.Random;
-import java.util.stream.IntStream;
-
-// FUCK YOU GHOST TYPES
-// agreed fuck that guy.
 
 public class BookBot extends Module {
-    private static final int LINE_WIDTH = 113;
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    public enum Mode{ // Edna Mode
-        File,
-        Random,
-        Ascii
-    }
-
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();//Obligatory comment.
-
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>() //WEEEEEEEEEEEEEEEEEEEE (Wanted to add a comment on everything but nothing to say so fuck you.)
-            .name("mode")
-            .description("The mode of the book bot.")
-            .defaultValue(Mode.Ascii)
-            .build()
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("mode")
+        .description("What kind of text to write.")
+        .defaultValue(Mode.Random)
+        .build()
     );
-    //Idk how to add the name into the book so you're gonna have to do it or tell me.
+
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
-            .name("name")
-            .description("The name you want to give your books.")
-            .defaultValue("Meteor on Crack!") //METEOR ON CRACK!!! / based.
-            .build()
+        .name("name")
+        .description("The name you want to give your books.")
+        .defaultValue("Meteor on Crack!")
+        .build()
     );
 
-    private final Setting<String> fileName = sgGeneral.add(new StringSetting.Builder()
-            .name("file-name")
-            .description("The name of the text file (.txt NEEDED)") //Some retard will do it without and complain like a tard.
-            .defaultValue("book.txt")
-            .build()
+    private final Setting<Integer> pages = sgGeneral.add(new IntSetting.Builder()
+        .name("pages")
+        .description("The number of pages to write per book.")
+        .defaultValue(50)
+        .min(1).max(100)
+        .sliderMax(100)
+        .visible(() -> mode.get() != Mode.File)
+        .build()
     );
 
-    private final Setting<Integer> noOfPages = sgGeneral.add(new IntSetting.Builder()
-            .name("no-of-pages")
-            .description("The number of pages to write per book.") //Fuck making it individual per book.
-            .defaultValue(100)
-            .min(1)
-            .max(100)
-            .sliderMax(100) // Max number of pages possible.
-            .build()
+    private final Setting<Boolean> onlyAscii = sgGeneral.add(new BoolSetting.Builder()
+        .name("ascii-only")
+        .description("Only uses the characters in the ASCII charset.")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Random)
+        .build()
     );
 
-    private final Setting<Integer> noOfBooks = sgGeneral.add(new IntSetting.Builder()
-            .name("no-of-books")
-            .description("The number of books to make (or until the file runs out).")
-            .defaultValue(1)
-            .build()
+    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
+        .name("append-count")
+        .description("Whether to append the number of the book to the title.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The amount of delay between writing books in milliseconds.")
-            .defaultValue(300)
-            .min(75)
-            .sliderMin(75)
-            .sliderMax(600)
-            .build()
+        .name("delay")
+        .description("The amount of delay between writing books.")
+        .defaultValue(20)
+        .min(1)
+        .sliderMin(1).sliderMax(200)
+        .build()
     );
 
-    //Please don't ask my why they are global. I have no answer for you.
-    private static final Random RANDOM = new Random();
-    private NbtList pages = new NbtList();
-    private int booksLeft;
-    private int ticksLeft = 0;
-    private boolean firstTime;
+    private final File file = new File(MeteorClient.FOLDER, "bookbot.txt");
+    private final MutableText editFileText = new LiteralText("Click here to edit it.")
+        .setStyle(Style.EMPTY
+            .withFormatting(Formatting.UNDERLINE, Formatting.RED)
+            .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()))
+        );
 
-    private PrimitiveIterator.OfInt stream;
-    private boolean firstChar;
-    private int nextChar;
-    private final StringBuilder pageSb = new StringBuilder();
-    private final StringBuilder lineSb = new StringBuilder();
-    private String fileString;
+    private int delayTimer, bookCount;
+    private Random random;
 
     public BookBot() {
-        super(Categories.Misc, "book-bot", "Writes an amount of books full of characters or from a file."); //Grammar who? / too ez.
+        super(Categories.Misc, "book-bot", "Automatically writes in books.");
     }
 
     @Override
-    public void onActivate() { //WHY THE FUCK DOES OnActivate NOT CORRECT TO onActivate? Fucking retard.
-        //We need to enter the loop somehow. ;)
-        booksLeft = noOfBooks.get();
-        firstTime = true;
+    public WWidget getWidget(GuiTheme theme) {
+        WButton edit = theme.button("Edit File");
+        edit.action = () -> {
+            if (!file.exists()) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            Util.getOperatingSystem().open(file.toURI());
+        };
+
+        return edit;
     }
 
     @Override
-    public void onDeactivate() {
-        // Reset everything for next time. Don't know if it's needed but we're gonna do it anyway.
-        booksLeft = 0;
-        pages = new NbtList();
-    }
+    public void onActivate() {
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        // Make sure we aren't in the inventory.
-        if (mc.currentScreen instanceof HandledScreen) return;
-        // If there are no books left to write we are done.
-        if (booksLeft <= 0) {
+            MutableText message = new LiteralText("");
+            message.append(new LiteralText("Couldn't find bookbot.txt in your Meteor folder, it has been automatically created for you. ").formatted(Formatting.RED));
+            message.append(editFileText);
+            info(message);
             toggle();
             return;
         }
 
-        FindItemResult itemResult = InvUtils.find(Items.WRITABLE_BOOK);
+        random = new Random();
+        delayTimer = delay.get();
+        bookCount = 0;
+    }
 
-        if (!itemResult.isHotbar() && !itemResult.isOffhand()) {
-            FindItemResult result = InvUtils.findEmpty();
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        FindItemResult writableBook = InvUtils.find(Items.WRITABLE_BOOK);
 
-            if (result.isHotbar())
-                InvUtils.move().from(itemResult.getSlot()).toHotbar(result.getSlot());
-        }
-
-        itemResult = InvUtils.findInHotbar(Items.WRITABLE_BOOK);
-
-        if (!itemResult.found()) return;
-        InvUtils.swap(itemResult.getSlot());
-
-        if (InvUtils.findInHotbar(Items.WRITABLE_BOOK).getHand() == null) return;
-
-        if (ticksLeft <= 0) {
-            ticksLeft = delay.get();
-        } else {
-            ticksLeft -= 50;
+        // Check if there is a book to write
+        if (!writableBook.found()) {
+            toggle();
             return;
         }
+
+        // Move the book into hand
+        if (!writableBook.isMainHand()) {
+            InvUtils.move().from(writableBook.getSlot()).toHotbar(mc.player.getInventory().selectedSlot);
+            return;
+        }
+
+        // If somehow it failed, just dont do anything until it tries again
+        FindItemResult finalBook = InvUtils.findInHotbar(Items.WRITABLE_BOOK);
+        if (!finalBook.isMainHand()) return;
+
+        // Check delay
+        if (delayTimer > 0) {
+            delayTimer--;
+            return;
+        }
+
+        // Reset delay
+        delayTimer = delay.get();
+
+        // Write book
+
         if (mode.get() == Mode.Random) {
-            // Generates a random stream of integers??
-            IntStream charGenerator = RANDOM.ints(0x80, 0x10ffff - 0x800).map(i -> i < 0xd800 ? i : i + 0x800);
-            stream = charGenerator.limit(23000).iterator();
-            firstChar = true;
-            writeBook();
-        } else if (mode.get() == Mode.Ascii) {
-            // Generates a random stream of integers??
-            IntStream charGenerator = RANDOM.ints(0x20, 0x7f);
-            stream = charGenerator.limit(35000).iterator();
-            firstChar = true;
-            writeBook();
+            writeBook(
+                // Generate a random load of ints to use as random characters
+                random.ints(0x0, onlyAscii.get() ? 0x7F : 0x10FFFF)
+                    .filter(i -> !Character.isWhitespace(i) && i != '\r' && i != '\n')
+                    .iterator()
+            );
         } else if (mode.get() == Mode.File) {
-            if (firstTime) {
-                //Fetch the file and initialise the IntList
-                File file = new File(MeteorClient.FOLDER, fileName.get());
-
-                // Check to see if the file exists.
-                if (!file.exists()) {
-                    error("The file you specified doesn't exist in the meteor folder.");
-                    return;
-                }
-
-                // ry to read the file.
+            // Ignore if somehow the file got deleted
+            if (!file.exists()) {
                 try {
-                    //Create the reader
-                    BufferedReader reader = new BufferedReader(new FileReader(file));
-
-                    // Read all the text into a string.
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) sb.append(line).append('\n');
-
-                    // Write it to the book.
-                    reader.close();
-                    firstTime = false;
-                    fileString = sb.toString();
-                    stream = fileString.chars().iterator();
-                    firstChar = true;
-                    writeBook();
-                } catch (IOException ignored) { //EZ ignore. > 1 blocked message.
-                    // If it fails then send a message.
-                    error("Failed to read the file.");
-                    //When you try your best but you don't succeed.
+                    file.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-            } else {
-                if (stream != null) {
-                    writeBook();
-                } else if (booksLeft > 0) {
-                    stream = fileString.chars().iterator();
-                    writeBook();
+
+                MutableText message = new LiteralText("");
+                message.append(new LiteralText("Couldn't find bookbot.txt in your Meteor folder, it has been automatically created for you. ").formatted(Formatting.RED));
+                message.append(editFileText);
+                info(message);
+                toggle();
+                return;
+            }
+
+            // Handle the file being empty
+            if (file.length() == 0) {
+                MutableText message = new LiteralText("");
+                message.append(new LiteralText("The bookbot file is empty! ").formatted(Formatting.RED));
+                message.append(editFileText);
+                info(message);
+                toggle();
+                return;
+            }
+
+            // Read each line of the file and construct a string with the needed line breaks
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                StringBuilder file = new StringBuilder();
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    file.append(line).append('\n');
                 }
+
+                reader.close();
+
+                // Write the file string to a book
+                writeBook(file.toString().chars().iterator());
+            } catch (IOException ignored) {
+                error("Failed to read the file.");
             }
         }
     }
 
-    private void writeBook() {
-        pages.clear();
+    private void writeBook(PrimitiveIterator.OfInt chars) {
+        NbtList pageList = new NbtList();
 
-        if (firstChar) {
-            readChar();
-            firstChar = false;
-        }
+        for (int pageI = 0; pageI < (mode.get() == Mode.File ? 100 : pages.get()); pageI++) {
+            // Check if the stream is empty before creating a new page
+            if (!chars.hasNext()) break;
 
-        for (int pageI = 0; pageI < noOfPages.get(); pageI++) {
-            pageSb.setLength(0);
-            boolean endOfStream = false;
+            StringBuilder page = new StringBuilder();
 
             for (int lineI = 0; lineI < 13; lineI++) {
-                lineSb.setLength(0);
-                float width = 0;
-                boolean endOfStream2 = false;
+                // Check if the stream is empty before creating a new line
+                if (!chars.hasNext()) break;
+
+                double lineWidth = 0;
+                StringBuilder line = new StringBuilder();
 
                 while (true) {
-                    float charWidth = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
-                    if (nextChar == '\n') {
-                        if (!readChar()) endOfStream2 = true;
-                        break;
-                    }
-                    if (width + charWidth < LINE_WIDTH) {
-                        lineSb.appendCodePoint(nextChar);
-                        width += charWidth;
+                    // Check if the stream is empty
+                    if (!chars.hasNext()) break;
 
-                        if (!readChar()) {
-                            endOfStream2 = true;
-                            break;
-                        }
-                    } else break;
+                    // Get the next character
+                    int nextChar = chars.nextInt();
+
+                    // Ingore newline chars when writing lines, should already be organised
+                    if (nextChar == '\r' || nextChar == '\n') break;
+
+                    // Make sure the character will fit on the line
+                    double charWidth = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
+                    if (lineWidth + charWidth > 114) break;
+
+                    // Append it to the line
+                    line.appendCodePoint(nextChar);
+                    lineWidth += charWidth;
                 }
 
-                pageSb.append(lineSb).append('\n');
-                if (endOfStream2) {
-                    endOfStream = true;
-                    break;
-                }
+                // Append the line to the page
+                page.append(line).append('\n');
             }
 
-            pages.add(NbtString.of(pageSb.toString()));
-            if (endOfStream) break;
+            // Add the page to the pages nbt tag
+            pageList.addElement(pageI, NbtString.of(page.toString()));
         }
 
-        mc.player.getMainHandStack().putSubTag("pages", pages);
-        mc.player.getMainHandStack().putSubTag("author", NbtString.of("squidoodly"));
-        mc.player.getMainHandStack().putSubTag("title", NbtString.of(name.get()));
+        // Get the title with count
+        String title = name.get();
+        if (count.get() && bookCount != 0) title += " #" + bookCount;
+
+        // Write the pages to the book and sign it
+        mc.player.getMainHandStack().putSubTag("title", NbtString.of(title));
+        mc.player.getMainHandStack().putSubTag("author", NbtString.of(mc.player.getGameProfile().getName()));
+        mc.player.getMainHandStack().putSubTag("pages", pageList);
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getMainHandStack(), true, mc.player.getInventory().selectedSlot));
-        booksLeft--;
+
+        bookCount++;
     }
 
-    private boolean readChar() {
-        if (!stream.hasNext()) {
-            stream = null;
-            return false;
-        }
-
-        nextChar = stream.nextInt();
-        return true;
+    public enum Mode {
+        File,
+        Random
     }
-} //IT TOOK ME 30 FUCKING MINUTES TO COMMENT THIS. I WANT TO DIE. SEND HELP. CODING METEOR IS BECOMING AN ADDICTION. PLEASE. CAN SOMEONE HEAR ME? ANYONE?
-// this is a r/squidoodly moment.
+}

@@ -24,7 +24,7 @@ public class BiomeColorsMixin {
     private static void onGetWaterColor(BlockRenderView world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.changeWaterColor.get()) {
+        if (ambience.isActive() && ambience.customWaterColor.get()) {
             info.setReturnValue(ambience.waterColor.get().getPacked());
         }
     }
@@ -36,7 +36,7 @@ public class BiomeColorsMixin {
     private static void onGetFoliageColor(BlockRenderView world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.changeFoliageColor.get()) {
+        if (ambience.isActive() && ambience.customFoliageColor.get()) {
             info.setReturnValue(ambience.foliageColor.get().getPacked());
         }
     }
@@ -48,7 +48,7 @@ public class BiomeColorsMixin {
     private static void onGetGrassColor(BlockRenderView world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.changeGrassColor.get()) {
+        if (ambience.isActive() && ambience.customGrassColor.get()) {
             info.setReturnValue(ambience.grassColor.get().getPacked());
         }
     }

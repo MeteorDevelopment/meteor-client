@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import meteordevelopment.meteorclient.renderer.Blur;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
@@ -90,7 +89,6 @@ public abstract class WorldRendererMixin {
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int i, int j, CallbackInfo info) {
         Outlines.onResized(i, j);
-        Blur.onResized();
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
@@ -105,8 +103,8 @@ public abstract class WorldRendererMixin {
     private void onRenderEndSkyDraw(MatrixStack matrices, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.enderCustomSkyColor.get()) {
-            Color customEndSkyColor = ambience.endSkyColor.get();
+        if (ambience.endSky.get() && ambience.customSkyColor.get()) {
+            Color customEndSkyColor = ambience.skyColor.get();
 
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferBuilder = tessellator.getBuffer();

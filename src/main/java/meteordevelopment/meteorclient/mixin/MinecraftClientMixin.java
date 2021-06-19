@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTarge
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
+import meteordevelopment.meteorclient.events.game.WindowResizedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
@@ -112,6 +113,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (Config.get() == null || !Config.get().customWindowTitle) return original;
 
         return Placeholders.apply(Config.get().customWindowTitleText);
+    }
+
+    @Inject(method = "onResolutionChanged", at = @At("TAIL"))
+    private void onResolutionChanged(CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(WindowResizedEvent.get());
     }
 
     // Interface
