@@ -12,11 +12,9 @@ uniform vec2 u_Direction;
 void main() {
     vec3 final = vec3(0.0);
 
-    for (float i = -u_Radius; i <= u_Radius; i += 1.0) {
-        vec3 pixel = texture(u_Texture, v_TexCoord + v_OneTexel * i * u_Direction).rgb;
-
-        final = final + pixel;
+    for (float i = -u_Radius; i <= u_Radius; i += 2.0) {
+        final += texture(u_Texture, v_TexCoord + v_OneTexel * (i + 0.5) * u_Direction).rgb;
     }
 
-    color = vec4(final / (u_Radius * 2.0 + 1.0), 1.0);
+    color = vec4(final / (u_Radius + 1.0), 1.0);
 }
