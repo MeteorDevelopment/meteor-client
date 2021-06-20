@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.events.world.FluidCollisionShapeEvent;
+import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
@@ -202,7 +202,8 @@ public class Jesus extends Module {
     }
 
     @EventHandler
-    private void onFluidCollisionShape(FluidCollisionShapeEvent event) {
+    private void onFluidCollisionShape(CollisionShapeEvent event) {
+        if (event.type != CollisionShapeEvent.CollisionType.FLUID) return;
         if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
         }
