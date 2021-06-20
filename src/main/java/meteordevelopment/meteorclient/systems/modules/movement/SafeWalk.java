@@ -68,6 +68,6 @@ public class SafeWalk extends Module {
         if (block == Blocks.AIR || block == Blocks.CAVE_AIR) return false;
         if (block instanceof FluidBlock) return false;
         if (mc.world == null) return true;
-        return (block.getDefaultState().getCollisionShape(mc.world, new BlockPos(0,0,0)) != VoxelShapes.fullCube());
+        return (block.getDefaultState().getCollisionShape(mc.world, BlockPos.ORIGIN) != VoxelShapes.fullCube());
     }
 }
