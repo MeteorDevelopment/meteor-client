@@ -6,7 +6,9 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.EntityVelocityUpdateS2CPacketAccessor;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -117,6 +119,13 @@ public class Velocity extends Module {
             .build()
     );
 
+    public final Setting<Boolean> sinking = sgGeneral.add(new BoolSetting.Builder()
+        .name("sinking")
+        .description("Prevents you from sinking in liquids.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Velocity() {
         super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
@@ -141,4 +150,13 @@ public class Velocity extends Module {
         return isActive() ? setting.get() : 1;
     }
 
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (!sinking.get()) return;
+        if (mc.options.keyJump.isPressed() || mc.options.keySneak.isPressed()) return;
+
+        if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
+            ((IVec3d) mc.player.getVelocity()).setY(0);
+        }
+    }
 }
