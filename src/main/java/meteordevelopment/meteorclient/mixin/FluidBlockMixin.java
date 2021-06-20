@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.world.FluidCollisionShapeEvent;
+import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
@@ -24,7 +24,7 @@ public abstract class FluidBlockMixin extends Block implements FluidDrainable {
 
     @Inject(method = "getCollisionShape", at = @At("HEAD"), cancellable = true)
     private void onGetCollisionShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info) {
-        FluidCollisionShapeEvent event = MeteorClient.EVENT_BUS.post(FluidCollisionShapeEvent.get(state));
+        CollisionShapeEvent event = MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state, pos, CollisionShapeEvent.CollisionType.FLUID));
 
         if (event.shape != null) info.setReturnValue(event.shape);
     }

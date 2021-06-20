@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
-import meteordevelopment.meteorclient.events.world.FluidCollisionShapeEvent;
+import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ShapeContext;
@@ -31,7 +31,11 @@ public class AbstractBlockMixin {
     @Inject(method = "getCollisionShape", at = @At("HEAD"), cancellable = true)
     private void onGetCollisionShape(BlockState state, BlockView view, BlockPos pos, ShapeContext context, CallbackInfoReturnable<VoxelShape> info) {
         if (!(state.getFluidState().isEmpty())) {
-            FluidCollisionShapeEvent event = MeteorClient.EVENT_BUS.post(FluidCollisionShapeEvent.get(state.getFluidState().getBlockState()));
+            CollisionShapeEvent event = MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state.getFluidState().getBlockState(), pos, CollisionShapeEvent.CollisionType.FLUID));
+
+            if (event.shape != null) info.setReturnValue(event.shape);
+        } else {
+            CollisionShapeEvent event = MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state, pos, CollisionShapeEvent.CollisionType.BLOCK));
 
             if (event.shape != null) info.setReturnValue(event.shape);
         }
