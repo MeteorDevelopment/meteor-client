@@ -29,9 +29,8 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Scaffold extends Module {
-    private final SettingGroup sgRender = settings.createGroup("Render");
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgRender = settings.createGroup("Render");
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
@@ -68,6 +67,13 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Rotates towards the blocks being placed.")
+        .defaultValue(true)
+        .build()
+    );
+
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
@@ -77,25 +83,20 @@ public class Scaffold extends Module {
         .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-        .name("rotate")
-        .description("Rotates towards the blocks being placed.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232, 10))
         .build()
     );
+
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232))
         .build()
     );
+
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
 
