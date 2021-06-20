@@ -9,11 +9,9 @@ import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.FluidCollisionShapeEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -24,10 +22,10 @@ import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.GameMode;
@@ -42,93 +40,92 @@ public class Jesus extends Module {
 
     // Water
 
-    private final Setting<Boolean> walkOnWater = sgWater.add(new BoolSetting.Builder()
-            .name("walk-on-water")
-            .description("Lets you walk on water.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Mode> waterMode = sgWater.add(new EnumSetting.Builder<Mode>()
+        .name("mode")
+        .description("How to treat the water.")
+        .defaultValue(Mode.Solid)
+        .build()
     );
 
-    private final Setting<Boolean> disableOnSneakForWater = sgWater.add(new BoolSetting.Builder()
-            .name("disable-on-sneak-for-water")
-            .description("Lets you go under the water when your sneak key is held.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> dipIfBurning = sgWater.add(new BoolSetting.Builder()
+        .name("dip-if-burning")
+        .description("Lets you go into the water when you are burning.")
+        .defaultValue(true)
+        .visible(() -> waterMode.get() == Mode.Solid)
+        .build()
     );
 
-    private final Setting<Boolean> dipIntoWater = sgWater.add(new BoolSetting.Builder()
-            .name("dip-into-water")
-            .description("Lets you go under the water when you fall over a certain height.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> dipOnSneakWater = sgWater.add(new BoolSetting.Builder()
+        .name("dip-on-sneak")
+        .description("Lets you go into the water when your sneak key is held.")
+        .defaultValue(true)
+        .visible(() -> waterMode.get() == Mode.Solid)
+        .build()
     );
 
-    private final Setting<Integer> dipIntoWaterHeight = sgWater.add(new IntSetting.Builder()
-            .name("dip-into-water-height")
-            .description("Maximum safe height.")
-            .defaultValue(4)
-            .min(1)
-            .max(255)
-            .sliderMin(3)
-            .sliderMax(21)
-            .build()
+    private final Setting<Boolean> dipOnFallWater = sgWater.add(new BoolSetting.Builder()
+        .name("dip-on-fall")
+        .description("Lets you go into the water when you fall over a certain height.")
+        .defaultValue(true)
+        .visible(() -> waterMode.get() == Mode.Solid)
+        .build()
     );
 
-    private final Setting<Boolean> dipIntoWaterIfBurning = sgWater.add(new BoolSetting.Builder()
-            .name("dip-into-water-if-burning")
-            .description("Lets you go under the water when you are burning.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Integer> dipFallHeightWater = sgWater.add(new IntSetting.Builder()
+        .name("dip-fall-height")
+        .description("The fall height at which you will go into the water.")
+        .defaultValue(4)
+        .min(1).max(255)
+        .sliderMin(3).sliderMax(20)
+        .visible(() -> waterMode.get() == Mode.Solid && dipOnFallWater.get())
+        .build()
     );
 
     // Lava
 
-    private final Setting<Boolean> walkOnLava = sgLava.add(new BoolSetting.Builder()
-            .name("walk-on-lava")
-            .description("Lets you walk on lava.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Mode> lavaMode = sgLava.add(new EnumSetting.Builder<Mode>()
+        .name("mode")
+        .description("How to treat the lava.")
+        .defaultValue(Mode.Solid)
+        .build()
     );
 
-    private final Setting<Boolean> disableOnSneakForLava = sgLava.add(new BoolSetting.Builder()
-            .name("disable-on-sneak-for-lava")
-            .description("Lets you go under the lava when your sneak key is held.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Boolean> dipIfFireResistant = sgLava.add(new BoolSetting.Builder()
+        .name("dip-if-resistant")
+        .description("Lets you go into the lava if you have Fire Resistance effect.")
+        .defaultValue(true)
+        .visible(() -> lavaMode.get() == Mode.Solid)
+        .build()
     );
 
-    private final Setting<Boolean> dipIntoLava = sgLava.add(new BoolSetting.Builder()
-            .name("dip-into-lava")
-            .description("Lets you go under the lava when you fall over than certain height.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Boolean> dipOnSneakLava = sgLava.add(new BoolSetting.Builder()
+        .name("dip-on-sneak")
+        .description("Lets you go into the lava when your sneak key is held.")
+        .defaultValue(true)
+        .visible(() -> lavaMode.get() == Mode.Solid)
+        .build()
     );
 
-    private final Setting<Integer> dipIntoLavaHeight = sgLava.add(new IntSetting.Builder()
-            .name("dip-into-lava-height")
-            .description("Maximum safe height.")
-            .defaultValue(15)
-            .min(1)
-            .max(255)
-            .sliderMin(3)
-            .sliderMax(21)
-            .build()
+    private final Setting<Boolean> dipOnFallLava = sgLava.add(new BoolSetting.Builder()
+        .name("dip-on-fall")
+        .description("Lets you go into the lava when you fall over a certain height.")
+        .defaultValue(true)
+        .visible(() -> lavaMode.get() == Mode.Solid)
+        .build()
     );
 
-    private final Setting<Boolean> dipIntoLavaIfFireResistance = sgLava.add(new BoolSetting.Builder()
-            .name("dip-if-fire-resistance")
-            .description("Lets you go under the lava if you have Fire Resistance effect.") // rofl some retard put "fall damage" here
-            .defaultValue(true)
-            .build()
+    private final Setting<Integer> dipFallHeightLava = sgLava.add(new IntSetting.Builder()
+        .name("dip-fall-height")
+        .description("The fall height at which you will go into the lava.")
+        .defaultValue(4)
+        .min(1).max(255)
+        .sliderMin(3).sliderMax(20)
+        .visible(() -> lavaMode.get() == Mode.Solid && dipOnFallLava.get())
+        .build()
     );
 
-    private final Setting<Boolean> fireResistanceSafeMode = sgLava.add(new BoolSetting.Builder()
-            .name("fire-resistance-safe-mode")
-            .description("Prevents being in lava when the Fire Resistance effect is nearly over.")
-            .defaultValue(true)
-            .build()
-    );
-// make it so that you can customize the amount of time the effect has left for this to work if that makes sense.
+    // Other
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private int tickTimer = 10;
@@ -160,52 +157,65 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if ((waterMode.get() == Mode.Bob && mc.player.isTouchingWater()) || (lavaMode.get() == Mode.Bob && mc.player.isInLava())) {
+            double fluidHeight;
+            if (mc.player.isInLava()) fluidHeight = mc.player.getFluidHeight(FluidTags.LAVA);
+            else fluidHeight = mc.player.getFluidHeight(FluidTags.WATER);
+
+            double swimHeight = mc.player.getSwimHeight();
+
+            if (mc.player.isTouchingWater() && fluidHeight > swimHeight) {
+                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.WATER);
+            } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).getJumpCooldown() == 0) {
+                mc.player.jump();
+                ((LivingEntityAccessor) mc.player).setJumpCooldown(10);
+            } else {
+                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.LAVA);
+            }
+        }
+
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
 
-        // Move up in water
+        // Move up
         if (mc.player.isTouchingWater() || mc.player.isInLava()) {
-            Vec3d velocity = mc.player.getVelocity();
-            ((IVec3d) velocity).set(velocity.x, 0.11, velocity.z);
+            ((IVec3d) mc.player.getVelocity()).setY(0.11);
             tickTimer = 0;
             return;
         }
 
         // Simulate jumping out of water
-        Vec3d velocity = mc.player.getVelocity();
-        if (tickTimer == 0)
-            ((IVec3d) velocity).set(velocity.x, 0.30, velocity.z);
-        else if (tickTimer == 1)
-            ((IVec3d) velocity).set(velocity.x, 0, velocity.z);
+        if (tickTimer == 0) ((IVec3d) mc.player.getVelocity()).setY(0.30);
+        else if (tickTimer == 1) ((IVec3d) mc.player.getVelocity()).setY(0);
 
         tickTimer++;
     }
 
     @EventHandler
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
-        if (event.entity != mc.player) return;
-
-        if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && waterShouldBeSolid())
+        if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
-        else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && lavaShouldBeSolid())
+        }
+        else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && lavaShouldBeSolid()) {
             event.walkOnFluid = true;
+        }
     }
 
     @EventHandler
     private void onFluidCollisionShape(FluidCollisionShapeEvent event) {
-        if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid())
+        if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
-        else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && lavaShouldBeSolid())
+        }
+        else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && lavaShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
+        }
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket)) return;
+        if (!(event.packet instanceof PlayerMoveC2SPacket packet)) return;
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
-
-        PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
 
         // Check if packet contains a position
         if (!(packet instanceof PlayerMoveC2SPacket.PositionAndOnGround || packet instanceof PlayerMoveC2SPacket.Full)) return;
@@ -233,38 +243,42 @@ public class Jesus extends Module {
 
         // Create new packet
         Packet<?> newPacket;
-        if (packet instanceof PlayerMoveC2SPacket.PositionAndOnGround)
+        if (packet instanceof PlayerMoveC2SPacket.PositionAndOnGround) {
             newPacket = new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true);
-        else
+        }
+        else {
             newPacket = new PlayerMoveC2SPacket.Full(x, y, z, packet.getYaw(0), packet.getPitch(0), true);
+        }
 
         // Send new packet
         mc.getNetworkHandler().getConnection().send(newPacket);
     }
 
     private boolean waterShouldBeSolid() {
-        return walkOnWater.get() &&
-                !(disableOnSneakForWater.get() && mc.options.keySneak.isPressed()) &&
-                !(dipIntoWater.get() && mc.player.fallDistance > dipIntoWaterHeight.get()) &&
-                !(dipIntoWaterIfBurning.get() && mc.player.isOnFire()) &&
-                !(EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) &&
-                !(mc.player.getAbilities().flying);
-    }
+        if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
 
-    private boolean lavaIsSafe() {
-        if (!dipIntoLavaIfFireResistance.get()) return false;
+        if (dipIfBurning.get() && mc.player.isOnFire()) return false;
 
-        return mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) &&
-                (!fireResistanceSafeMode.get() || mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > ProtectionEnchantment.transformFireDuration(mc.player, 15 * 20));
+        if (dipOnSneakWater.get() && mc.options.keySneak.isPressed()) return false;
+        if (dipOnFallWater.get() && mc.player.fallDistance > dipFallHeightWater.get()) return false;
+
+        return waterMode.get() == Mode.Solid;
     }
 
     private boolean lavaShouldBeSolid() {
-        return walkOnLava.get() &&
-                !((disableOnSneakForLava.get() || lavaIsSafe()) && mc.options.keySneak.isPressed()) &&
-                !(dipIntoLava.get() && mc.player.fallDistance > dipIntoLavaHeight.get()) &&
-                !(lavaIsSafe() && mc.player.fallDistance > 3) &&
-                !(EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR) &&
-                !(mc.player.getAbilities().flying);
+        if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
+
+        if (!lavaIsSafe() && lavaMode.get() == Mode.Solid) return true;
+
+        if (dipOnSneakLava.get() && mc.options.keySneak.isPressed()) return false;
+        if (dipOnFallLava.get() && mc.player.fallDistance > dipFallHeightLava.get()) return false;
+
+        return lavaMode.get() == Mode.Solid;
+    }
+
+    private boolean lavaIsSafe() {
+        if (!dipIfFireResistant.get()) return false;
+        return mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE) && (mc.player.getStatusEffect(StatusEffects.FIRE_RESISTANCE).getDuration() > ProtectionEnchantment.transformFireDuration(mc.player, 15 * 20));
     }
 
     private boolean isOverLiquid() {
@@ -272,20 +286,24 @@ public class Jesus extends Module {
         boolean foundSolid = false;
 
         List<Box> blockCollisions = mc.world
-                .getBlockCollisions(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
-                .map(VoxelShape::getBoundingBox)
-                .collect(Collectors.toCollection(ArrayList::new));
+            .getBlockCollisions(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
+            .map(VoxelShape::getBoundingBox)
+            .collect(Collectors.toCollection(ArrayList::new));
 
         for (Box bb : blockCollisions) {
             blockPos.set(MathHelper.lerp(0.5D, bb.minX, bb.maxX), MathHelper.lerp(0.5D, bb.minY, bb.maxY), MathHelper.lerp(0.5D, bb.minZ, bb.maxZ));
             Material material = mc.world.getBlockState(blockPos).getMaterial();
 
-            if (material == Material.WATER || material == Material.LAVA)
-                foundLiquid = true;
-            else if (material != Material.AIR)
-                foundSolid = true;
+            if (material == Material.WATER || material == Material.LAVA) foundLiquid = true;
+            else if (material != Material.AIR) foundSolid = true;
         }
 
         return foundLiquid && !foundSolid;
+    }
+
+    public enum Mode {
+        Solid,
+        Bob,
+        Ignore
     }
 }
