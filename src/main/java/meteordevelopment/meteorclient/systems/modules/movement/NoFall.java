@@ -10,7 +10,10 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -32,27 +35,6 @@ import net.minecraft.world.RaycastContext;
 import java.util.function.Predicate;
 
 public class NoFall extends Module {
-    public enum Mode {
-        Packet,
-        AirPlace,
-        Bucket
-    }
-
-    public enum PlaceMode {
-        BeforeDamage(height -> height > 2),
-        BeforeDeath(height -> height > Math.max(PlayerUtils.getTotalHealth(), 2));
-
-        private final Predicate<Float> fallHeight;
-
-        PlaceMode(Predicate<Float> fallHeight) {
-            this.fallHeight = fallHeight;
-        }
-
-        public boolean test(float fallheight) {
-            return fallHeight.test(fallheight);
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -75,15 +57,6 @@ public class NoFall extends Module {
         .description("Centers the player and reduces movement when using bucket or air place mode.")
         .defaultValue(true)
         .visible(() -> mode.get() != Mode.Packet)
-        .build()
-    );
-
-    private final Setting<Double> elytraStopHeight = sgGeneral.add(new DoubleSetting.Builder()
-        .name("elytra-stop-height")
-        .description("The height at which you will stop elytra flying.")
-        .defaultValue(0.5)
-        .min(0)
-        .sliderMax(10)
         .build()
     );
 
@@ -110,24 +83,15 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player.getAbilities().creativeMode) return;
+        if (mc.player.getAbilities().creativeMode || mc.player.isOnGround()) return;
 
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            // Elytra compat
-            if (mc.player.isFallFlying()) {
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, elytraStopHeight.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+        if (event.packet instanceof PlayerMoveC2SPacket && ((IPlayerMoveC2SPacket) event.packet).getTag() != 1337 && mode.get() == Mode.Packet) {
+            // Check if there is a block within 3 blocks
+            BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 3, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
-                if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                    return;
-                }
-            }
-
-            // Packet mode
-            else if (mode.get() == Mode.Packet) {
-                if (((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
-                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                }
+            // Set on ground
+            if (result != null && result.getType() != HitResult.Type.BLOCK) {
+                ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
             }
         }
     }
@@ -187,8 +151,7 @@ public class NoFall extends Module {
         Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
             if (bucket.isOffhand()) {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
-            }
-            else {
+            } else {
                 int preSlot = mc.player.getInventory().selectedSlot;
                 InvUtils.swap(bucket.getSlot());
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
@@ -202,5 +165,26 @@ public class NoFall extends Module {
     @Override
     public String getInfoString() {
         return mode.get().toString();
+    }
+
+    public enum Mode {
+        Packet,
+        AirPlace,
+        Bucket
+    }
+
+    public enum PlaceMode {
+        BeforeDamage(height -> height > 2),
+        BeforeDeath(height -> height > Math.max(PlayerUtils.getTotalHealth(), 2));
+
+        private final Predicate<Float> fallHeight;
+
+        PlaceMode(Predicate<Float> fallHeight) {
+            this.fallHeight = fallHeight;
+        }
+
+        public boolean test(float fallheight) {
+            return fallHeight.test(fallheight);
+        }
     }
 }
