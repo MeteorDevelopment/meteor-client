@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -151,11 +150,12 @@ public class SpawnProofer extends Module {
     }
 
     private List<Block> getDefaultBlocks() {
-
         ArrayList<Block> defaultBlocks = new ArrayList<>();
-        for (Block block : Registry.BLOCK) {
-            if (filterBlocks(block)) defaultBlocks.add(block);
-        }
+
+        defaultBlocks.add(Blocks.TORCH);
+        defaultBlocks.add(Blocks.STONE_BUTTON);
+        defaultBlocks.add(Blocks.STONE_SLAB);
+
         return defaultBlocks;
     }
 
