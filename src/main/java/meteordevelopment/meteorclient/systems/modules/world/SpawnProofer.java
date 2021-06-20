@@ -72,8 +72,8 @@ public class SpawnProofer extends Module {
     );
 
 
-    private final Pool<Spawn> spawnPool = new Pool<Spawn>(Spawn::new);
-    private final List<Spawn> spawns = new ArrayList<>();
+    private final Pool<BlockPos.Mutable> spawnPool = new Pool<>(BlockPos.Mutable::new);
+    private final List<BlockPos.Mutable> spawns = new ArrayList<>();
     private int ticksWaited;
 
     public SpawnProofer() {
@@ -96,7 +96,7 @@ public class SpawnProofer extends Module {
         }
 
         // Find spawn locations
-        for (Spawn spawn : spawns) spawnPool.free(spawn);
+        for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
         spawns.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
             BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos);
@@ -120,7 +120,7 @@ public class SpawnProofer extends Module {
 
         // Place blocks
         if (delay.get() == 0) {
-            for (Spawn spawn : spawns) BlockUtils.place(spawn.blockPos, block, rotate.get(), -50, false);
+            for (BlockPos blockPos : spawns) BlockUtils.place(blockPos, block, rotate.get(), -50, false);
         } else {
 
             // Check if light source
@@ -128,20 +128,20 @@ public class SpawnProofer extends Module {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
-                Spawn selectedSpawn = spawns.get(0);
-                for (Spawn spawn : spawns) {
-                    int lightLevel = mc.world.getLightLevel(spawn.blockPos);
+                BlockPos.Mutable selectedBlockPos = spawns.get(0);
+                for (BlockPos blockPos : spawns) {
+                    int lightLevel = mc.world.getLightLevel(blockPos);
                     if (lightLevel < lowestLightLevel) {
                         lowestLightLevel = lightLevel;
-                        selectedSpawn = spawn;
+                        selectedBlockPos.set(blockPos);
                     }
                 }
 
-                BlockUtils.place(selectedSpawn.blockPos, block, rotate.get(), -50, false);
+                BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
 
             } else {
 
-                BlockUtils.place(spawns.get(0).blockPos, block, rotate.get(), -50, false);
+                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
 
             }
 
@@ -173,15 +173,5 @@ public class SpawnProofer extends Module {
 
     private boolean isLightSource(Block block) {
         return block.getDefaultState().getLuminance() > 0;
-    }
-
-    private static class Spawn {
-        public BlockPos.Mutable blockPos = new BlockPos.Mutable();
-
-        public Spawn set(BlockPos blockPos) {
-            this.blockPos.set(blockPos);
-
-            return this;
-        }
     }
 }
