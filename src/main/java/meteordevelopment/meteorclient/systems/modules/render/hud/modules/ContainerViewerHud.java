@@ -14,9 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
-import net.minecraft.block.AbstractChestBlock;
-import net.minecraft.block.ShulkerBoxBlock;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
@@ -60,7 +57,6 @@ public class ContainerViewerHud extends HudElement {
         double y = box.getY();
 
         ItemStack container = getContainer();
-
         if (container == null) return;
 
         drawBackground((int) x, (int) y, container);
@@ -80,14 +76,13 @@ public class ContainerViewerHud extends HudElement {
     private ItemStack getContainer() {
         if (isInEditor()) return Items.ENDER_CHEST.getDefaultStack();
 
-        ItemStack item = mc.player.getInventory().getMainHandStack();
-        if (!(item.getItem() instanceof BlockItem)) item = mc.player.getOffHandStack();
-        if (item.getItem() == Items.ENDER_CHEST) return item;
-        if (!(item.getItem() instanceof BlockItem)) return echestNoItem.get()?Items.ENDER_CHEST.getDefaultStack():null;
+        ItemStack stack = mc.player.getOffHandStack();
+        if (Utils.hasItems(stack)) return stack;
 
-        if (((BlockItem)item.getItem()).getBlock() instanceof ShulkerBoxBlock) return item;
-        if (((BlockItem)item.getItem()).getBlock() instanceof AbstractChestBlock) return item;
-        return echestNoItem.get()?Items.ENDER_CHEST.getDefaultStack():null;
+        stack = mc.player.getMainHandStack();
+        if (Utils.hasItems(stack)) return stack;
+
+        return echestNoItem.get() ? Items.ENDER_CHEST.getDefaultStack() : null;
     }
 
     private void drawBackground(int x, int y, ItemStack container) {
