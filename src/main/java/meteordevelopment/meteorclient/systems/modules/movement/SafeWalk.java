@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.Arrays;
@@ -65,9 +64,18 @@ public class SafeWalk extends Module {
     }
 
     private boolean blockFilter(Block block) {
-        if (block == Blocks.AIR || block == Blocks.CAVE_AIR) return false;
-        if (block instanceof FluidBlock) return false;
-        if (mc.world == null) return true;
-        return (block.getDefaultState().getCollisionShape(mc.world, BlockPos.ORIGIN) != VoxelShapes.fullCube());
+        if (block instanceof AbstractFireBlock) return true;
+        if (block instanceof AbstractPressurePlateBlock) return true;
+        if (block instanceof TripwireBlock) return true;
+        if (block instanceof TripwireHookBlock) return true;
+        if (block instanceof CobwebBlock) return true;
+        if (block instanceof CampfireBlock) return true;
+        if (block instanceof SweetBerryBushBlock) return true;
+        if (block instanceof CactusBlock) return true;
+        if (block instanceof AbstractRailBlock) return true;
+        if (block instanceof TrapdoorBlock) return true;
+        if (block instanceof PowderSnowBlock) return true;
+        if (block instanceof AbstractCauldronBlock) return true;
+        return false;
     }
 }
