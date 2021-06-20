@@ -20,17 +20,17 @@ public class CompassHud extends HudElement {
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("type")
             .description("Which type of axis to show.")
-            .defaultValue(CompassHud.Mode.Pole)
+            .defaultValue(Mode.Pole)
             .build()
     );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("The scale of compass.")
-            .defaultValue(2)
-            .sliderMin(1)
-            .sliderMax(5)
-            .build()
+        .name("scale")
+        .description("The scale.")
+        .defaultValue(1)
+        .min(1)
+        .sliderMin(1).sliderMax(5)
+        .build()
     );
 
     private final Color NORTH = new Color(225, 45, 45);
