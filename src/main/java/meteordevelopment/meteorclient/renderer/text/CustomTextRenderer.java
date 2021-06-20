@@ -5,10 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
-import meteordevelopment.meteorclient.renderer.DrawMode;
-import meteordevelopment.meteorclient.renderer.Mesh;
-import meteordevelopment.meteorclient.renderer.ShaderMesh;
-import meteordevelopment.meteorclient.renderer.Shaders;
+import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
@@ -117,7 +114,7 @@ public class CustomTextRenderer implements TextRenderer {
         if (!scaleOnly) {
             mesh.end();
 
-            font.texture.bindTexture();
+            GL.bindTexture(font.texture.getGlId());
             mesh.render(matrices);
         }
 

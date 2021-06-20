@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.waypoints;
 
+import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -47,7 +48,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         int preA = color.a;
         color.a *= a;
 
-        texture.bindTexture();
+        GL.bindTexture(texture.getGlId());
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, size, size, color);
         Renderer2D.TEXTURE.render(null);
