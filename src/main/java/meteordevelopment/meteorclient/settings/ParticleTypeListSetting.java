@@ -9,6 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -18,8 +19,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
-    private static List<Identifier> suggestions;
-
     public ParticleTypeListSetting(String name, String description, List<ParticleType<?>> defaultValue, Consumer<List<ParticleType<?>>> onChanged, Consumer<Setting<List<ParticleType<?>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
@@ -40,7 +39,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
         try {
             for (String value : values) {
                 ParticleType<?> particleType = parseId(Registry.PARTICLE_TYPE, value);
-                if (particleType != null) particleTypes.add(particleType);
+                if (particleType instanceof ParticleEffect) particleTypes.add(particleType);
             }
         } catch (Exception ignored) {}
 
@@ -63,7 +62,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         NbtList valueTag = new NbtList();
         for (ParticleType<?> particleType : get()) {
-            valueTag.add(NbtString.of(Registry.PARTICLE_TYPE.getId((ParticleType<?>) particleType).toString()));
+            valueTag.add(NbtString.of(Registry.PARTICLE_TYPE.getId(particleType).toString()));
         }
         tag.put("value", valueTag);
 
