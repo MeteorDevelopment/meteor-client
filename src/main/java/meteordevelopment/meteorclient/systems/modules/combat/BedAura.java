@@ -21,12 +21,15 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.CardinalDirection;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BedBlock;
+import net.minecraft.block.entity.BedBlockEntity;
+import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BedItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 
 public class BedAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -213,15 +216,7 @@ public class BedAura extends Module {
         target = TargetUtils.getPlayerTarget(targetRange.get(), priority.get());
         if (target == null) {
             placePos = null;
-            return;
-        }
-
-        // Break the
-        breakBed(breakPos);
-
-        // Ignore if we dont have any beds
-        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem).found()) {
-            placePos = null;
+            breakPos = null;
             return;
         }
 
@@ -234,26 +229,25 @@ public class BedAura extends Module {
             }
         }
 
-        // Calc best place pos, even if delay isn't ready
-        placePos = getPlacePos(target);
+        if (breakPos == null) {
+            placePos = findPlace(target);
+        }
 
         // Place bed
-        if (timer <= 0) {
-            if (placeBed(placePos)) {
-                timer = delay.get();
-            }
-
-            // Try to break the bed we placed cause why not lol
-            breakBed(breakPos);
+        if (timer <= 0 && placeBed(placePos)) {
+            timer = delay.get();
         }
         else {
             timer--;
         }
+
+        if (breakPos == null) breakPos = findBreak();
+        breakBed(breakPos);
     }
 
-    // Place
+    private BlockPos findPlace(PlayerEntity target) {
+        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem).found()) return null;
 
-    private BlockPos getPlacePos(PlayerEntity target) {
         for (int index = 0; index < 3; index++) {
             int i = index == 0 ? 1 : index == 1 ? 0 : 2;
 
@@ -282,6 +276,24 @@ public class BedAura extends Module {
         return null;
     }
 
+    private BlockPos findBreak() {
+        for (BlockEntity blockEntity : Utils.blockEntities()) {
+            if (!(blockEntity instanceof BedBlockEntity)) continue;
+
+            BlockPos bedPos = blockEntity.getPos();
+            Vec3d bedVec = Utils.vec3d(bedPos);
+
+            if (PlayerUtils.distanceTo(bedVec) <= mc.interactionManager.getReachDistance()
+                && DamageUtils.bedDamage(target, bedVec) >= minDamage.get()
+                && DamageUtils.bedDamage(mc.player, bedVec) < maxSelfDamage.get()
+                && (!antiSuicide.get() || PlayerUtils.getTotalHealth() - DamageUtils.bedDamage(mc.player, bedVec) > 0)) {
+                return bedPos;
+            }
+        }
+
+        return null;
+    }
+
     private boolean placeBed(BlockPos pos) {
         if (pos == null) return false;
 
@@ -304,7 +316,10 @@ public class BedAura extends Module {
     }
 
     private void breakBed(BlockPos pos) {
-        if (pos == null || !(mc.world.getBlockState(breakPos).getBlock() instanceof BedBlock)) return;
+        if (pos == null) return;
+        breakPos = null;
+
+        if (!(mc.world.getBlockState(pos).getBlock() instanceof BedBlock)) return;
 
         boolean wasSneaking = mc.player.isSneaking();
         if (wasSneaking) mc.player.setSneaking(false);
@@ -312,8 +327,6 @@ public class BedAura extends Module {
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, pos, false));
 
         mc.player.setSneaking(wasSneaking);
-
-        breakPos = null;
     }
 
     @EventHandler
