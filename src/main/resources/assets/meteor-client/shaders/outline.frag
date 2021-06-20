@@ -3,9 +3,9 @@
 out vec4 color;
 
 uniform sampler2D u_Texture;
-uniform float u_Width;
-uniform float u_ShapeMode;
+uniform int u_Width;
 uniform float u_FillOpacity;
+uniform int u_ShapeMode;
 
 in vec2 v_TexCoord;
 in vec2 v_OneTexel;
@@ -13,23 +13,19 @@ in vec2 v_OneTexel;
 void main() {
     vec4 center = texture(u_Texture, v_TexCoord);
 
-    int widthInt = int(u_Width);
-    int shapeModeInt = int(u_ShapeMode);
-    float minDist = u_Width * u_Width;
-
     if (center.a != 0.0) {
-        if (shapeModeInt == 0) discard;
+        if (u_ShapeMode == 0) discard;
 
         center = vec4(center.rgb, center.a * u_FillOpacity);
     }
     else {
-        if (shapeModeInt == 1) discard;
+        if (u_ShapeMode == 1) discard;
 
         float dist = u_Width * u_Width * 4.0;
 
-        for (int x = -widthInt; x <= widthInt; x++) {
-            for (int y = -widthInt; y <= widthInt; y++) {
-                vec4 offset = texture(u_Texture, v_TexCoord + vec2(x, y) * v_OneTexel);
+        for (int x = -u_Width; x <= u_Width; x++) {
+            for (int y = -u_Width; y <= u_Width; y++) {
+                vec4 offset = texture(u_Texture, v_TexCoord + v_OneTexel * vec2(x, y));
 
                 if (offset.a != 0) {
                     float ndist = x * x + y * y - 1.0;
@@ -38,6 +34,8 @@ void main() {
                 }
             }
         }
+
+        float minDist = u_Width * u_Width;
 
         if (dist > minDist) center.a = 0.0;
         else center.a = min((1.0 - (dist / minDist)) * 3.5, 1.0);
