@@ -25,11 +25,10 @@ public class ContainerViewerHud extends HudElement {
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
-        .description("Scale of container viewer.")
-        .defaultValue(3)
-        .min(0.1)
-        .sliderMin(0.1)
-        .max(10)
+        .description("The scale.")
+        .defaultValue(2)
+        .min(1)
+        .sliderMin(1).sliderMax(5)
         .build()
     );
 

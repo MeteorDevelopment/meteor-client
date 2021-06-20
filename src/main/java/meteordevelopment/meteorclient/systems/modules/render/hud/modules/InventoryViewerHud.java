@@ -22,13 +22,12 @@ public class InventoryViewerHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("Scale of inventory viewer.")
-            .defaultValue(3)
-            .min(0.1)
-            .sliderMin(0.1)
-            .max(10)
-            .build()
+        .name("scale")
+        .description("The scale.")
+        .defaultValue(2)
+        .min(1)
+        .sliderMin(1).sliderMax(5)
+        .build()
     );
 
     private final Setting<Background> background = sgGeneral.add(new EnumSetting.Builder<Background>()
@@ -60,7 +59,7 @@ public class InventoryViewerHud extends HudElement {
 
     @Override
     public void update(HudRenderer renderer) {
-        box.setSize(176 * scale.get(), 67 * scale.get());
+        box.setSize(background.get().width * scale.get(), background.get().height * scale.get());
     }
 
     @Override
@@ -68,14 +67,19 @@ public class InventoryViewerHud extends HudElement {
         double x = box.getX();
         double y = box.getY();
 
-        if (background.get() != Background.None) drawBackground((int) x, (int) y);
+        if (background.get() != Background.None) {
+            drawBackground((int) x, (int) y);
+        }
 
         for (int row = 0; row < 3; row++) {
             for (int i = 0; i < 9; i++) {
                 ItemStack stack = getStack(9 + row * 9 + i);
                 if (stack == null) continue;
 
-                RenderUtils.drawItem(stack, (int) (x + (8 + i * 18) * scale.get()), (int) (y + (7 + row * 18) * scale.get()), scale.get(), true);
+                int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * scale.get()) : (int) (x + (1 + i * 18) * scale.get());
+                int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * scale.get()) : (int) (y + (1 + row * 18) * scale.get());
+
+                RenderUtils.drawItem(stack, itemX, itemY, scale.get(), true);
             }
         }
     }
@@ -94,7 +98,7 @@ public class InventoryViewerHud extends HudElement {
                 mc.getTextureManager().bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
 
                 Renderer2D.TEXTURE.begin();
-                Renderer2D.TEXTURE.texQuad(x, y, box.width, box.height, color.get());
+                Renderer2D.TEXTURE.texQuad(x, y, w, h, color.get());
                 Renderer2D.TEXTURE.render(null);
             }
             case Flat -> {
@@ -106,9 +110,16 @@ public class InventoryViewerHud extends HudElement {
     }
 
     public enum Background {
-        None,
-        Texture,
-        Outline,
-        Flat
+        None(162, 54),
+        Texture(176, 67),
+        Outline(162, 54),
+        Flat(162, 54);
+
+        public int width, height;
+
+        Background(int width, int height) {
+            this.width = width;
+            this.height = height;
+        }
     }
 }
