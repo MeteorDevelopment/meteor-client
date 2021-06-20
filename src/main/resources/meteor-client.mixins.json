@@ -92,6 +92,7 @@
     "KeyboardMixin",
     "LightmapTextureManagerMixin",
     "LightningEntityRendererMixin",
+    "LivingEntityAccessor",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "MapRendererMixin",
