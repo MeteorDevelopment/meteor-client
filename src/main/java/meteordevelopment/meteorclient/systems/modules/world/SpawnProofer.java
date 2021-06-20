@@ -56,17 +56,10 @@ public class SpawnProofer extends Module {
         .build()
     );
 
-    private final Setting<Boolean> alwaysSpawns = sgGeneral.add(new BoolSetting.Builder()
-        .name("always-spawns")
-        .description("Spawn Proofs spots that will spawn mobs")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> potentialSpawns = sgGeneral.add(new BoolSetting.Builder()
-        .name("potential-spawns")
-        .description("Spawn Proofs spots that will potentially spawn mobs (eg at night)")
-        .defaultValue(true)
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("mode")
+        .description("Which spawn types should be spawn proofed.")
+        .defaultValue(Mode.Both)
         .build()
     );
 
@@ -99,8 +92,12 @@ public class SpawnProofer extends Module {
         spawns.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
             BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos);
-            if ((spawn == BlockUtils.MobSpawn.Always && alwaysSpawns.get()) ||
-                    spawn == BlockUtils.MobSpawn.Potential && potentialSpawns.get()) spawns.add(spawnPool.get().set(blockPos));
+            
+            if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
+                    spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
+
+                spawns.add(spawnPool.get().set(blockPos));
+            }
         });
     }
 
@@ -173,5 +170,12 @@ public class SpawnProofer extends Module {
 
     private boolean isLightSource(Block block) {
         return block.getDefaultState().getLuminance() > 0;
+    }
+
+    public enum Mode {
+        Always,
+        Potential,
+        Both,
+        None
     }
 }
