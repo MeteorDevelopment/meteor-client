@@ -258,7 +258,9 @@ public class BedAura extends Module {
             int i = index == 0 ? 1 : index == 1 ? 0 : 2;
 
             for (CardinalDirection dir : CardinalDirection.values()) {
-                if (strictDirection.get() && dir.toDirection() != mc.player.getHorizontalFacing()) continue;
+                if (strictDirection.get()
+                    && dir.toDirection() != mc.player.getHorizontalFacing()
+                    && dir.toDirection().getOpposite() != mc.player.getHorizontalFacing()) continue;
 
                 BlockPos centerPos = target.getBlockPos().up(i);
 
