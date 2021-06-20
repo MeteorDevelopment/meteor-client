@@ -49,7 +49,7 @@ public class BedAura extends Module {
     private final Setting<Boolean> strictDirection = sgGeneral.add(new BoolSetting.Builder()
         .name("strict-direction")
         .description("Only places beds in the direction you are facing.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
