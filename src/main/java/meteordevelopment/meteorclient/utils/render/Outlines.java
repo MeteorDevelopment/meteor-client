@@ -55,9 +55,9 @@ public class Outlines {
         outlinesShader.bind();
         outlinesShader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
         outlinesShader.set("u_Texture", 0);
-        outlinesShader.set("u_Width", (double) esp.outlineWidth.get());
+        outlinesShader.set("u_Width", esp.outlineWidth.get());
         outlinesShader.set("u_FillOpacity", esp.fillOpacity.get().floatValue() / 255.0);
-        outlinesShader.set("u_ShapeMode", (double) esp.shapeMode.get().ordinal());
+        outlinesShader.set("u_ShapeMode", esp.shapeMode.get().ordinal());
         PostProcessRenderer.render();
     }
 
