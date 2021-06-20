@@ -36,5 +36,8 @@
   "depends": {
     "java": ">=16",
     "minecraft": ">=1.17"
+  },
+  "breaks": {
+    "optifabric": "*"
   }
 }
