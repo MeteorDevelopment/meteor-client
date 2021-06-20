@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render.hud.modules;
 
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -22,6 +23,16 @@ import java.util.List;
 
 public class TextRadarHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Integer> limit = sgGeneral.add(new IntSetting.Builder()
+        .name("limit")
+        .description("The max number of players to show.")
+        .defaultValue(10)
+        .min(1)
+        .sliderMin(1).sliderMax(20)
+        .build()
+    );
+
 
     private final Setting<Boolean> distance = sgGeneral.add(new BoolSetting.Builder()
             .name("distance")
@@ -102,6 +113,7 @@ public class TextRadarHud extends HudElement {
     private List<AbstractClientPlayerEntity> getPlayers() {
         players.clear();
         players.addAll(mc.world.getPlayers());
+        if (players.size() > limit.get()) players.subList(limit.get() - 1, players.size() - 1).clear();
         players.sort(Comparator.comparingDouble(e -> e.distanceTo(mc.getCameraEntity())));
 
         return players;
