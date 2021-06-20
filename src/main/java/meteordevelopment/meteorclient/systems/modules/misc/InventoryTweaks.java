@@ -16,21 +16,27 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.InventorySorter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
+import net.minecraft.screen.GenericContainerScreenHandler;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
+    private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
 
     // General
 
@@ -46,6 +52,13 @@ public class InventoryTweaks extends Module {
             .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
             .defaultValue(new ArrayList<>(0))
             .build()
+    );
+
+    private final Setting<Boolean> buttons = sgGeneral.add(new BoolSetting.Builder()
+        .name("inventory-buttons")
+        .description("Shows steal and dump buttons in container guis.")
+        .defaultValue(true)
+        .build()
     );
 
     // Sorting
@@ -89,6 +102,42 @@ public class InventoryTweaks extends Module {
             .defaultValue(false)
             .build()
     );
+
+    // Auto steal
+
+    private final Setting<Boolean> autoSteal = sgAutoSteal.add(new BoolSetting.Builder()
+        .name("auto-steal")
+        .description("Automatically removes all possible items when you open a container.")
+        .defaultValue(false)
+        .onChanged(val -> checkAutoStealSetttings())
+        .build()
+    );
+
+    private final Setting<Boolean> autoDump = sgAutoSteal.add(new BoolSetting.Builder()
+        .name("auto-dump")
+        .description("Automatically dumps all possible items when you open a container.")
+        .defaultValue(false)
+        .onChanged(val -> checkAutoStealSetttings())
+        .build()
+    );
+
+    private final Setting<Integer> autoStealDelay = sgAutoSteal.add(new IntSetting.Builder()
+        .name("delay")
+        .description("The minimum delay between stealing the next stack in milliseconds.")
+        .defaultValue(20)
+        .sliderMax(1000)
+        .build()
+    );
+
+    private final Setting<Integer> autoStealRandomDelay = sgAutoSteal.add(new IntSetting.Builder()
+        .name("random")
+        .description("Randomly adds a delay of up to the specified time in milliseconds.")
+        .min(0)
+        .sliderMax(1000)
+        .defaultValue(50)
+        .build()
+    );
+
 
     private InventorySorter sorter;
 
@@ -151,9 +200,65 @@ public class InventoryTweaks extends Module {
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
     }
 
-    // Mouse drag item move
-
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
+    }
+
+    // Auto Steal
+
+    private void checkAutoStealSetttings() {
+        if (autoSteal.get() && autoDump.get()) {
+            ChatUtils.error("You can't enable Auto Steal and Auto Dump at the same time!");
+            autoDump.set(false);
+        }
+    }
+
+    private int getSleepTime() {
+        return autoStealDelay.get() + (autoStealRandomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, autoStealRandomDelay.get()) : 0);
+    }
+
+    private int getRows(ScreenHandler handler) {
+        return (handler instanceof GenericContainerScreenHandler ? ((GenericContainerScreenHandler) handler).getRows() : 3);
+    }
+
+    private void moveSlots(ScreenHandler handler, int start, int end) {
+        for (int i = start; i < end; i++) {
+            if (!handler.getSlot(i).hasStack()) continue;
+
+            int sleep = getSleepTime();
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            // Exit if user closes screen
+            if (mc.currentScreen == null) break;
+
+            InvUtils.quickMove().slotId(i);
+        }
+    }
+
+    public void steal(ScreenHandler handler) {
+        MeteorExecutor.execute(() -> moveSlots(handler, 0, getRows(handler) * 9));
+    }
+
+    public void dump(ScreenHandler handler) {
+        int playerInvOffset = getRows(handler) * 9;
+        MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9));
+    }
+
+    public boolean showButtons() {
+        return isActive() && buttons.get();
+    }
+
+    public boolean autoSteal() {
+        return isActive() && autoSteal.get();
+    }
+
+    public boolean autoDump() {
+        return isActive() && autoDump.get();
     }
 }
