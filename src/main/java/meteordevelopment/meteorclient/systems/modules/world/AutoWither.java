@@ -42,7 +42,7 @@ public class AutoWither extends Module {
     );
 
 
-    private BlockPos.Mutable bp = new BlockPos.Mutable();
+    private final BlockPos.Mutable bp = new BlockPos.Mutable();
     private boolean return_;
 
 
@@ -107,11 +107,6 @@ public class AutoWither extends Module {
         }
     }
 
-    private boolean hasEnoughMaterials() {
-        return (InvUtils.find(Items.SOUL_SAND).getCount() >= 4 || InvUtils.findInHotbar(Items.SOUL_SOIL).getCount() >= 4) &&
-            InvUtils.find(Items.WITHER_SKELETON_SKULL).getCount() >= 3;
-    }
-
     private boolean isValidSpawn(BlockPos blockPos, Direction direction) {
 
         // Withers are 3x3x1
@@ -128,7 +123,7 @@ public class AutoWither extends Module {
         if (direction == Direction.NORTH || direction == Direction.SOUTH) widthX = 1;
 
 
-        // Check for non air blocks
+        // Check for non air blocks and entities
         for (int x = blockPos.getX() - widthX; x <= blockPos.getX() + widthX; x++) {
             for (int z = blockPos.getZ() - widthZ; z <= blockPos.getZ(); z++) {
                 for (int y = blockPos.getY(); y <= blockPos.getY() + 2; y++) {
