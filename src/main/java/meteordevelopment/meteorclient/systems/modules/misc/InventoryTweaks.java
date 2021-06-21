@@ -229,8 +229,7 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!xCarry.get()) return;
-        if (!(event.packet instanceof CloseHandledScreenC2SPacket)) return;
+        if (!xCarry.get() || !(event.packet instanceof CloseHandledScreenC2SPacket)) return;
 
         if (((CloseHandledScreenC2SPacketAccessor) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
             invOpened = true;
