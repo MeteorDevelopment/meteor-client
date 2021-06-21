@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
@@ -156,7 +155,7 @@ public class InventoryTweaks extends Module {
 
 
     private InventorySorter sorter;
-    private boolean invOpened = false;
+    private boolean invOpened;
 
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
@@ -169,8 +168,8 @@ public class InventoryTweaks extends Module {
 
     @Override
     public void onDeactivate() {
-        // XCarry
         sorter = null;
+        
         if (invOpened) {
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
         }
@@ -225,21 +224,8 @@ public class InventoryTweaks extends Module {
     private void onDropItems(DropItemsEvent event) {
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
     }
-
-    public boolean mouseDragItemMove() {
-        return isActive() && mouseDragItemMove.get();
-    }
-
-    // Auto Steal
-
-    private void checkAutoStealSetttings() {
-        if (autoSteal.get() && autoDump.get()) {
-            ChatUtils.error("You can't enable Auto Steal and Auto Dump at the same time!");
-            autoDump.set(false);
-        }
-    }
-
-    //XCarry
+    
+    // XCarry
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
@@ -249,6 +235,15 @@ public class InventoryTweaks extends Module {
         if (((CloseHandledScreenC2SPacketAccessor) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
             invOpened = true;
             event.cancel();
+        }
+    }
+
+    // Auto Steal
+
+    private void checkAutoStealSetttings() {
+        if (autoSteal.get() && autoDump.get()) {
+            ChatUtils.error("You can't enable Auto Steal and Auto Dump at the same time!");
+            autoDump.set(false);
         }
     }
 
@@ -299,5 +294,9 @@ public class InventoryTweaks extends Module {
 
     public boolean autoDump() {
         return isActive() && autoDump.get();
+    }
+    
+    public boolean mouseDragItemMove() {
+        return isActive() && mouseDragItemMove.get();
     }
 }
