@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -77,6 +78,13 @@ public class VeinMiner extends Module {
     );
 
     // Render
+
+    private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
+        .name("swing-hand")
+        .description("Swing hand client side.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
@@ -179,14 +187,7 @@ public class VeinMiner extends Module {
         }
 
         public boolean shouldRemove() {
-            boolean remove = mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
-
-            if (remove) {
-                mc.interactionManager.cancelBlockBreaking();
-                mc.player.swingHand(Hand.MAIN_HAND);
-            }
-
-            return remove;
+            return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
         }
 
         public void mine() {
@@ -199,7 +200,7 @@ public class VeinMiner extends Module {
         }
 
         private void updateBlockBreakingProgress() {
-            mc.interactionManager.updateBlockBreakingProgress(blockPos, direction);
+            BlockUtils.breakBlock(blockPos, swingHand.get());
         }
 
         public void render(Render3DEvent event) {
