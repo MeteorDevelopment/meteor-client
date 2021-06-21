@@ -27,6 +27,8 @@ public abstract class WTextBox extends WWidget {
 
     protected int cursor;
     protected double textStart;
+    protected boolean selecting;
+    protected int selectionStart;
 
     public WTextBox(String text, CharFilter filter) {
         this.text = text;
@@ -139,6 +141,12 @@ public abstract class WTextBox extends WWidget {
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
+        }
+        else if (key == GLFW_KEY_LEFT && controlPressed) {
+            cursor = 0;
+        }
+        else if (key == GLFW_KEY_RIGHT && controlPressed) {
+            cursor = text.length();
         }
 
         return onKeyRepeated(key, mods);
