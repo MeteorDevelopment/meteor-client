@@ -42,24 +42,17 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
-    @Shadow
-    public World world;
+    @Shadow public World world;
 
-    @Shadow
-    public abstract BlockPos getBlockPos();
-
-    @Shadow
-    protected abstract BlockPos getVelocityAffectingPos();
-
-    @Shadow
-    public abstract void setVelocity(double x, double y, double z);
+    @Shadow public abstract BlockPos getBlockPos();
+    @Shadow protected abstract BlockPos getVelocityAffectingPos();
 
     @Redirect(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
     private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
         Vec3d vec = state.getVelocity(world, pos);
 
         Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.liquids.get()) {
+        if ((Object) this == mc.player && velocity.isActive() && velocity.liquids.get()) {
             vec = vec.multiply(velocity.getHorizontal(velocity.liquidsHorizontal), velocity.getVertical(velocity.liquidsVertical), velocity.getHorizontal(velocity.liquidsHorizontal));
         }
 
@@ -69,7 +62,7 @@ public abstract class EntityMixin {
     @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     private void onPushAwayFrom(Args args) {
         Velocity velocity = Modules.get().get(Velocity.class);
-        if (velocity.isActive() && velocity.entityPush.get() && mc.player == (Object) this) {
+        if ((Object) this == mc.player && velocity.isActive() && velocity.entityPush.get()) {
             double multiplier = velocity.entityPushAmount.get();
             args.set(0, (double) args.get(0) * multiplier);
             args.set(2, (double) args.get(2) * multiplier);
@@ -106,13 +99,15 @@ public abstract class EntityMixin {
 
     @Redirect(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
     private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
+        if ((Object) this != mc.player) return blockState.getBlock();
         if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
         return blockState.getBlock();
     }
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (player == null || Modules.get().get(NoRender.class).noInvisibility()) info.setReturnValue(false);
+        if (Modules.get().get(NoRender.class).noInvisibility()
+            || Modules.get().get(ESP.class).shouldDrawOutline((Entity) (Object) this)) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
