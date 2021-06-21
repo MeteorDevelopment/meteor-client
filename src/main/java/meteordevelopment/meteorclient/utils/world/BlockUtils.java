@@ -5,11 +5,15 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
@@ -24,8 +28,19 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
+import static meteordevelopment.meteorclient.utils.Utils.mc;
+
 public class BlockUtils {
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
+
+    public static boolean breaking;
+    private static boolean breakingThisTick;
+
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);
+    }
+
+    // Placing
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, int rotationPriority) {
         return place(blockPos, findItemResult, rotationPriority, true);
@@ -146,6 +161,38 @@ public class BlockUtils {
 
         return null;
     }
+
+    // Breaking
+
+    @EventHandler(priority = EventPriority.HIGHEST + 100)
+    private static void onTickPre(TickEvent.Pre event) {
+        breakingThisTick = false;
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST - 100)
+    private static void onTickPost(TickEvent.Post event) {
+        if (!breakingThisTick && breaking) {
+            breaking = false;
+            mc.interactionManager.cancelBlockBreaking();
+        }
+    }
+
+    /** Needs to be used in {@link TickEvent.Pre} */
+    public static void breakBlock(BlockPos blockPos, boolean swing) {
+        // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
+        BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
+
+        if (mc.interactionManager.isBreakingBlock()) mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+        else mc.interactionManager.attackBlock(pos, Direction.UP);
+
+        if (swing) mc.player.swingHand(Hand.MAIN_HAND);
+        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
+
+        breaking = true;
+        breakingThisTick = true;
+    }
+
+    // Other
 
     public static boolean isClickable(Block block) {
         return block instanceof CraftingTableBlock

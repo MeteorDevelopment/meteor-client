@@ -36,6 +36,7 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.Outlines;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
@@ -104,6 +105,7 @@ public class MeteorClient implements ClientModInitializer {
         GuiThemes.init();
         Fonts.init();
         DamageUtils.init();
+        BlockUtils.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
