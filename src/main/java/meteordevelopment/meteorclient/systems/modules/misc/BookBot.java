@@ -172,7 +172,7 @@ public class BookBot extends Module {
         // Write book
 
         if (mode.get() == Mode.Random) {
-            int origin = onlyAscii.get() ? 0x21 : 0x00;
+            int origin = onlyAscii.get() ? 0x21 : 0x0800;
             int bound = onlyAscii.get() ? 0x7E : 0x10FFFF;
             
             writeBook(
