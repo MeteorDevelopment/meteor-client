@@ -131,9 +131,19 @@ public class Velocity extends Module {
     }
 
     @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (!sinking.get()) return;
+        if (mc.options.keyJump.isPressed() || mc.options.keySneak.isPressed()) return;
+
+        if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
+            ((IVec3d) mc.player.getVelocity()).setY(0);
+        }
+    }
+
+    @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket && ((EntityVelocityUpdateS2CPacket) event.packet).getId() == mc.player.getId()) {
-            EntityVelocityUpdateS2CPacket packet = (EntityVelocityUpdateS2CPacket) event.packet;
+        if (knockback.get() && event.packet instanceof EntityVelocityUpdateS2CPacket packet
+            && ((EntityVelocityUpdateS2CPacket) event.packet).getId() == mc.player.getId()) {
             double velX = (packet.getVelocityX() / 8000d - mc.player.getVelocity().x) * knockbackHorizontal.get();
             double velY = (packet.getVelocityY() / 8000d - mc.player.getVelocity().y) * knockbackVertical.get();
             double velZ = (packet.getVelocityZ() / 8000d - mc.player.getVelocity().z) * knockbackHorizontal.get();
@@ -146,17 +156,8 @@ public class Velocity extends Module {
     public double getHorizontal(Setting<Double> setting) {
         return isActive() ? setting.get() : 1;
     }
+
     public double getVertical(Setting<Double> setting) {
         return isActive() ? setting.get() : 1;
-    }
-
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (!sinking.get()) return;
-        if (mc.options.keyJump.isPressed() || mc.options.keySneak.isPressed()) return;
-
-        if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
-            ((IVec3d) mc.player.getVelocity()).setY(0);
-        }
     }
 }
