@@ -172,9 +172,12 @@ public class BookBot extends Module {
         // Write book
 
         if (mode.get() == Mode.Random) {
+            int origin = onlyAscii.get() ? 0x21 : 0x00;
+            int bound = onlyAscii.get() ? 0x7E : 0x10FFFF;
+            
             writeBook(
                 // Generate a random load of ints to use as random characters
-                random.ints(0x0, onlyAscii.get() ? 0x7F : 0x10FFFF)
+                random.ints(origin, bound)
                     .filter(i -> !Character.isWhitespace(i) && i != '\r' && i != '\n')
                     .iterator()
             );
