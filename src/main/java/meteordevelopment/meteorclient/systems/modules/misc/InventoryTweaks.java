@@ -9,7 +9,9 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.CloseHandledScreenC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixin.HandledScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -23,6 +25,7 @@ import meteordevelopment.meteorclient.utils.player.InventorySorter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
@@ -58,6 +61,18 @@ public class InventoryTweaks extends Module {
         .name("inventory-buttons")
         .description("Shows steal and dump buttons in container guis.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> xCarry = sgGeneral.add(new BoolSetting.Builder()
+        .name("xcarry")
+        .description("Allows you to store four extra items in your crafting grid.")
+        .defaultValue(true)
+        .onChanged(v -> {
+            if (v) return;
+            mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
+            invOpened = false;
+        })
         .build()
     );
 
@@ -140,14 +155,24 @@ public class InventoryTweaks extends Module {
 
 
     private InventorySorter sorter;
+    private boolean invOpened;
 
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
     }
 
     @Override
+    public void onActivate() {
+        invOpened = false;
+    }
+
+    @Override
     public void onDeactivate() {
         sorter = null;
+        
+        if (invOpened) {
+            mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
+        }
     }
 
     // Sorting
@@ -199,9 +224,17 @@ public class InventoryTweaks extends Module {
     private void onDropItems(DropItemsEvent event) {
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
     }
+    
+    // XCarry
 
-    public boolean mouseDragItemMove() {
-        return isActive() && mouseDragItemMove.get();
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (!xCarry.get() || !(event.packet instanceof CloseHandledScreenC2SPacket)) return;
+
+        if (((CloseHandledScreenC2SPacketAccessor) event.packet).getSyncId() == mc.player.playerScreenHandler.syncId) {
+            invOpened = true;
+            event.cancel();
+        }
     }
 
     // Auto Steal
@@ -260,5 +293,9 @@ public class InventoryTweaks extends Module {
 
     public boolean autoDump() {
         return isActive() && autoDump.get();
+    }
+    
+    public boolean mouseDragItemMove() {
+        return isActive() && mouseDragItemMove.get();
     }
 }
