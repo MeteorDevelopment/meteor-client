@@ -10,9 +10,13 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -57,15 +61,6 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Double> elytraStopHeight = sgGeneral.add(new DoubleSetting.Builder()
-        .name("elytra-stop-height")
-        .description("The height at which you will stop elytra flying.")
-        .defaultValue(0.5)
-        .min(0)
-        .sliderMax(10)
-        .build()
-    );
-
     private boolean placedWater;
     private int preBaritoneFallHeight;
 
@@ -89,30 +84,33 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!PlayerUtils.getGameMode().isSurvivalLike()) return;
+        if (mc.player.getAbilities().creativeMode
+            || !(event.packet instanceof PlayerMoveC2SPacket)
+            || mode.get() != Mode.Packet
+            || ((IPlayerMoveC2SPacket) event.packet).getTag() == 1337) return;
 
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            // Elytra compat
-            if (mc.player.isFallFlying()) {
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, elytraStopHeight.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
-                if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                }
+        if ((mc.player.isFallFlying() || Modules.get().isActive(Flight.class)) && mc.player.getVelocity().y < 1) {
+            BlockHitResult result = mc.world.raycast(new RaycastContext(
+                mc.player.getPos(),
+                mc.player.getPos().subtract(0, 0.5, 0),
+                RaycastContext.ShapeType.OUTLINE,
+                RaycastContext.FluidHandling.NONE,
+                mc.player)
+            );
+
+            if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
             }
-
-            // Packet mode
-            else if (mode.get() == Mode.Packet) {
-                if (((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
-                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                }
-            }
+        }
+        else {
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!PlayerUtils.getGameMode().isSurvivalLike()) return;
+        if (mc.player.getAbilities().creativeMode) return;
 
         // Airplace mode
         if (mode.get() == Mode.AirPlace) {
