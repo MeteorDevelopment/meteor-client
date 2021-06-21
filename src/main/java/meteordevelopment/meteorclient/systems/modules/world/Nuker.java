@@ -11,14 +11,11 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
-import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.world.BlockIterator;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.ArrayList;
@@ -39,205 +36,153 @@ public class Nuker extends Module {
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
+
+    // General
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The way the blocks are broken.")
-            .defaultValue(Mode.All)
-            .build()
-    );
-
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between mining blocks in ticks.")
-            .defaultValue(0)
-            .min(0)
-            .build()
-    );
-
-    private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
-            .name("selected-blocks")
-            .description("The certain type of blocks you want to mine.")
-            .defaultValue(new ArrayList<>(0))
-            .build()
-    );
-
-    private final Setting<Boolean> onlySelected = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-selected")
-            .description("Only mines your selected blocks.")
-            .defaultValue(false)
-            .build()
+        .name("mode")
+        .description("The way the blocks are broken.")
+        .defaultValue(Mode.Flatten)
+        .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The break range.")
-            .defaultValue(5)
-            .min(0)
-            .build()
+        .name("range")
+        .description("The break range.")
+        .defaultValue(5)
+        .min(0)
+        .build()
+    );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+        .name("delay")
+        .description("Delay in ticks between breaking blocks.")
+        .defaultValue(0)
+        .build()
     );
 
     private final Setting<SortMode> sortMode = sgGeneral.add(new EnumSetting.Builder<SortMode>()
-            .name("sort-mode")
-            .description("The blocks you want to mine first.")
-            .defaultValue(SortMode.Closest)
-            .build()
+        .name("sort-mode")
+        .description("The blocks you want to mine first.")
+        .defaultValue(SortMode.Closest)
+        .build()
     );
 
-    private final Setting<Boolean> noParticles = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-particles")
-            .description("Disables all block breaking particles.")
-            .defaultValue(false)
-            .build()
+    private final Setting<Boolean> swingHand = sgGeneral.add(new BoolSetting.Builder()
+        .name("swing-hand")
+        .description("Swing hand client side.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically faces the blocks being mined.")
-            .defaultValue(true)
-            .build()
+    // Whitelist
+
+    private final Setting<Boolean> whitelistEnabled = sgWhitelist.add(new BoolSetting.Builder()
+        .name("whitelist-enabled")
+        .description("Only mines selected blocks.")
+        .defaultValue(false)
+        .build()
     );
 
-    private final Pool<BlockPos.Mutable> blockPool = new Pool<>(BlockPos.Mutable::new);
+    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+        .name("whitelist")
+        .description("The blocks you want to mine.")
+        .visible(whitelistEnabled::get)
+        .defaultValue(new ArrayList<>(0))
+        .build()
+    );
+
+    private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
     private final List<BlockPos.Mutable> blocks = new ArrayList<>();
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+
+    private boolean firstBlock;
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
-    private boolean hasLastBlockPos;
+
     private int timer;
+    private int noBlockTimer;
 
     public Nuker() {
-        super(Categories.World, "nuker", "Breaks a large amount of specified blocks around you.");
+        super(Categories.World, "nuker", "Breaks blocks around you.");
     }
 
     @Override
     public void onActivate() {
-        timer = 0;
-    }
+        firstBlock = true;
 
-    @Override
-    public void onDeactivate() {
-        mc.interactionManager.cancelBlockBreaking();
-        hasLastBlockPos = false;
+        timer = 0;
+        noBlockTimer = 0;
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        // Mine last block if not null
-        if (hasLastBlockPos && mc.world.getBlockState(lastBlockPos).getBlock() != Blocks.AIR) {
-            mc.interactionManager.updateBlockBreakingProgress(lastBlockPos, Direction.UP);
+    private void onTickPre(TickEvent.Pre event) {
+        // Update timer
+        if (timer > 0) {
+            timer--;
             return;
         }
 
-        hasLastBlockPos = false;
-
-        // Update timer according to delay
-        if (timer < delay.get()) {
-            timer++;
-            return;
-        }
-        else {
-            timer = 0;
-        }
-
-        // Calculate stuff
-        double pX = mc.player.getX() - 0.5;
+        // Calculate some stuff
+        double pX = mc.player.getX();
         double pY = mc.player.getY();
-        double pZ = mc.player.getZ() - 0.5;
-
-        int minX = (int) Math.floor(pX - range.get());
-        int minY = (int) Math.floor(pY - range.get());
-        int minZ = (int) Math.floor(pZ - range.get());
-
-        int maxX = (int) Math.floor(pX + range.get());
-        int maxY = (int) Math.floor(pY + range.get());
-        int maxZ = (int) Math.floor(pZ + range.get());
+        double pZ = mc.player.getZ();
 
         double rangeSq = Math.pow(range.get(), 2);
 
         // Find blocks to break
-        for (int y = minY; y <= maxY; y++) {
-            boolean skipThisYLevel = false;
+        BlockIterator.register((int) Math.ceil(range.get()), (int) Math.ceil(range.get()), (blockPos, blockState) -> {
+            // Check for air, unbreakable blocks and distance
+            if (blockState.getHardness(mc.world, blockPos) < 0 || Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq || blockState.getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) return;
 
-            for (int x = minX; x <= maxX; x++) {
-                for (int z = minZ; z <= maxZ; z++) {
-                    if (Utils.squaredDistance(pX, pY, pZ, x, y, z) > rangeSq) continue;
-                    blockPos.set(x, y, z);
-                    BlockState state = mc.world.getBlockState(blockPos);
-                    if (state.getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) continue;
+            // Flatten
+            if (mode.get() == Mode.Flatten && blockPos.getY() < mc.player.getY()) return;
 
-                    // Flatten
-                    if (mode.get() == Mode.Flatten && y < mc.player.getY()) {
-                        skipThisYLevel = true;
-                        break;
-                    }
+            // Smash
+            if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
 
-                    // Smash
-                    if (mode.get() == Mode.Smash && state.getHardness(mc.world, blockPos) != 0) continue;
+            // Check for selected
+            if (whitelistEnabled.get() && !whitelist.get().contains(blockState.getBlock())) return;
 
-                    // Only selected
-                    if (onlySelected.get() && !selectedBlocks.get().contains(state.getBlock())) continue;
+            // Add block
+            blocks.add(blockPosPool.get().set(blockPos));
+        });
 
-                    BlockPos.Mutable pos = blockPool.get();
-                    pos.set(x, y, z);
-                    blocks.add(pos);
-                }
-
-                if (skipThisYLevel) break;
-            }
-        }
-
-        // Sort blocks
-        if (sortMode.get() != SortMode.None) {
-            blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX(), value.getY(), value.getZ()) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
-        }
-
-        // Break blocks
-        boolean breaking = false;
-
-        for (BlockPos.Mutable pos : blocks) {
-            // Check last block
-            if (!lastBlockPos.equals(pos)) {
-                // Im not proud of this but it works so shut the fuck up
-                try {
-                    if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> cancelMine(pos));
-                    else cancelMine(pos);
-                } catch (Exception ignored) {}
+        // Break block if found
+        BlockIterator.after(() -> {
+            // Sort blocks
+            if (sortMode.get() != SortMode.None) {
+                blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
             }
 
-            // Break block
-            lastBlockPos.set(pos);
-            if (rotate.get()) Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), -50, () -> mine(pos));
-            else mine(pos);
+            // Check if some block was found
+            if (blocks.isEmpty()) {
+                // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
+                if (noBlockTimer++ >= delay.get()) firstBlock = true;
+                return;
+            }
+            else {
+                noBlockTimer = 0;
+            }
 
-            breaking = true;
-            hasLastBlockPos = true;
-            break;
-        }
+            // Update timer
+            if (!firstBlock && !lastBlockPos.equals(blocks.get(0))) {
+                timer = delay.get();
 
-        if (!breaking) mc.interactionManager.cancelBlockBreaking();
+                firstBlock = false;
+                lastBlockPos.set(blocks.get(0));
 
-        // Empty blocks list
-        for (BlockPos.Mutable pos : blocks) blockPool.free(pos);
-        blocks.clear();
-    }
+                if (timer > 0) return;
+            }
 
-    private void mine(BlockPos pos) {
-        if (mc.interactionManager != null && mc.player != null) {
-            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
-            mc.player.swingHand(Hand.MAIN_HAND);
-        }
-    }
+            // Break
+            BlockUtils.breakBlock(blocks.get(0), swingHand.get());
 
-    private void cancelMine(BlockPos pos) {
-        mc.interactionManager.cancelBlockBreaking();
+            firstBlock = false;
+            lastBlockPos.set(blocks.get(0));
 
-        if (pos != null) {
-            mc.interactionManager.attackBlock(pos, Direction.UP);
-            mc.player.swingHand(Hand.MAIN_HAND);
-        }
-    }
-
-    public boolean noParticles() {
-        return isActive() && noParticles.get();
+            // Clear current block positions
+            for (BlockPos.Mutable blockPos : blocks) blockPosPool.free(blockPos);
+            blocks.clear();
+        });
     }
 }
