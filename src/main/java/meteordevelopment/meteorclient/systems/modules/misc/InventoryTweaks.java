@@ -36,7 +36,6 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
-    private boolean invOpened = false;
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
@@ -72,7 +71,6 @@ public class InventoryTweaks extends Module {
         .defaultValue(true)
         .onChanged(v -> {
             if (v) return;
-            if (!invOpened) return;
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
             invOpened = false;
         })
@@ -158,6 +156,7 @@ public class InventoryTweaks extends Module {
 
 
     private InventorySorter sorter;
+    private boolean invOpened = false;
 
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
