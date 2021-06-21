@@ -119,7 +119,7 @@ public class AutoWither extends Module {
 
             // Register
             BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-                Direction dir = Direction.fromRotation(Rotations.getYaw(blockPos));
+                Direction dir = Direction.fromRotation(Rotations.getYaw(blockPos)).getOpposite();
                 if (isValidSpawn(blockPos, dir)) withers.add(witherPool.get().set(blockPos, dir));
             });
         }
