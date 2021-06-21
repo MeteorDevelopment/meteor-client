@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -83,16 +84,27 @@ public class NoFall extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player.getAbilities().creativeMode || mc.player.isOnGround()) return;
+        if (mc.player.getAbilities().creativeMode
+            || !(event.packet instanceof PlayerMoveC2SPacket)
+            || mode.get() != Mode.Packet
+            || ((IPlayerMoveC2SPacket) event.packet).getTag() == 1337) return;
 
-        if (event.packet instanceof PlayerMoveC2SPacket && ((IPlayerMoveC2SPacket) event.packet).getTag() != 1337 && mode.get() == Mode.Packet) {
-            // Check if there is a block within 3 blocks
-            BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 3, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
-            // Set on ground
-            if (result != null && result.getType() != HitResult.Type.BLOCK) {
+        if ((mc.player.isFallFlying() || Modules.get().isActive(Flight.class)) && mc.player.getVelocity().y < 1) {
+            BlockHitResult result = mc.world.raycast(new RaycastContext(
+                mc.player.getPos(),
+                mc.player.getPos().subtract(0, 0.5, 0),
+                RaycastContext.ShapeType.OUTLINE,
+                RaycastContext.FluidHandling.NONE,
+                mc.player)
+            );
+
+            if (result != null && result.getType() == HitResult.Type.BLOCK) {
                 ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
             }
+        }
+        else {
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         }
     }
 
