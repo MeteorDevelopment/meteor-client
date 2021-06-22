@@ -33,7 +33,6 @@ import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
@@ -206,20 +205,18 @@ public class Modules extends System<Modules> {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
-        if (onBinding(true, event.key)) event.cancel();
+        if (event.action == KeyAction.Press && onBinding(true, event.key)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onButtonBinding(MouseButtonEvent event) {
-        if (onBinding(false, event.button)) event.cancel();
+        if (event.action == KeyAction.Press && onBinding(false, event.button)) event.cancel();
     }
 
     private boolean onBinding(boolean isKey, int value) {
         if (moduleToBind != null && moduleToBind.keybind.canBindTo(isKey, value)) {
-            if (value != GLFW.GLFW_KEY_ESCAPE) {
-                moduleToBind.keybind.set(isKey, value);
-                ChatUtils.info("KeyBinds", "Module (highlight)%s (default)bound to (highlight)%s(default).", moduleToBind.title, moduleToBind.keybind);
-            }
+            moduleToBind.keybind.set(isKey, value);
+            moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
 
             MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
             moduleToBind = null;
