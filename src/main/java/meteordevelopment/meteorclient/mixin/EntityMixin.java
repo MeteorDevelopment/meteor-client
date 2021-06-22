@@ -115,4 +115,9 @@ public abstract class EntityMixin {
         double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
         if (v != 0) info.setReturnValue((float) v);
     }
+
+    @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
+    private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
+        if (player == null) info.setReturnValue(false);
+    }
 }
