@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.render.GetFovEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(GameRenderer.class)
@@ -47,6 +49,8 @@ public abstract class GameRendererMixin {
 
     @Shadow public abstract void reset();
 
+    @Shadow
+    private boolean renderingPanorama;
     @Unique private Renderer3D renderer;
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
@@ -109,6 +113,12 @@ public abstract class GameRendererMixin {
     private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
         if (Modules.get().get(NoRender.class).noNausea()) return 0;
         return MathHelper.lerp(delta, first, second);
+    }
+
+    @Inject(method = "getFov", at = @At("TAIL"), cancellable = true)
+    void onGetFov(CallbackInfoReturnable<Double> ci) {
+        if (!renderingPanorama)
+            ci.setReturnValue(MeteorClient.EVENT_BUS.post(GetFovEvent.get(ci.getReturnValue())).fov);
     }
 
     // Freecam
