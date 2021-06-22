@@ -61,6 +61,15 @@ public class AutoWither extends Module {
         .build()
     );
 
+    private final Setting<Integer> witherDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("delay")
+        .description("Delay in ticks between wither placements")
+        .defaultValue(1)
+        .min(0)
+        .sliderMax(10)
+        .build()
+    );
+
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
             .name("rotate")
             .description("Whether or not to rotate while building")
@@ -101,6 +110,8 @@ public class AutoWither extends Module {
     private final ArrayList<Wither> withers = new ArrayList<>();
     private Wither wither;
 
+    private int ticks;
+
     public AutoWither() {
         super(Categories.World, "auto-wither", "Automatically builds withers.");
     }
@@ -113,6 +124,11 @@ public class AutoWither extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (wither == null) {
+            // Delay
+            if (witherDelay.get() != 0 && ticks < witherDelay.get() - 1) {
+                return;
+            }
+
             // Clear pool and list
             for (Wither wither : withers) witherPool.free(wither);
             withers.clear();
@@ -128,6 +144,13 @@ public class AutoWither extends Module {
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
         if (wither == null) {
+            // Delay
+            if (witherDelay.get() != 0 && ticks < witherDelay.get() - 1) {
+                ticks++;
+                return;
+            }
+
+
             if (withers.isEmpty()) return;
 
             // Sorting
@@ -191,6 +214,9 @@ public class AutoWither extends Module {
                 }
                 break;
         }
+
+
+        ticks = 0;
     }
 
     @EventHandler
