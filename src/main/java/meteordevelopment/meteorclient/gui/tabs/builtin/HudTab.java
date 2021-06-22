@@ -284,6 +284,7 @@ public class HudTab extends Tab {
             }
             else {
                 Utils.unscaledProjection();
+                if (!hud.isActive()) hud.onRender(Render2DEvent.get(0, 0, delta));
             }
 
             Renderer2D.COLOR.begin();
