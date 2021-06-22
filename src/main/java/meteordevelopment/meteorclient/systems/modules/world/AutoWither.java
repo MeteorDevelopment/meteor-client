@@ -62,8 +62,17 @@ public class AutoWither extends Module {
     );
 
     private final Setting<Integer> witherDelay = sgGeneral.add(new IntSetting.Builder()
-        .name("delay")
+        .name("wither-delay")
         .description("Delay in ticks between wither placements")
+        .defaultValue(1)
+        .min(1)
+        .sliderMax(10)
+        .build()
+    );
+
+    private final Setting<Integer> blockDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("block-delay")
+        .description("Delay in ticks between block placements")
         .defaultValue(1)
         .min(0)
         .sliderMax(10)
@@ -110,7 +119,7 @@ public class AutoWither extends Module {
     private final ArrayList<Wither> withers = new ArrayList<>();
     private Wither wither;
 
-    private int ticks;
+    private int witherTicksWaited, blockTicksWaited;
 
     public AutoWither() {
         super(Categories.World, "auto-wither", "Automatically builds withers.");
@@ -125,7 +134,7 @@ public class AutoWither extends Module {
     private void onTick(TickEvent.Pre event) {
         if (wither == null) {
             // Delay
-            if (witherDelay.get() != 0 && ticks < witherDelay.get() - 1) {
+            if (witherTicksWaited < witherDelay.get() - 1) {
                 return;
             }
 
@@ -145,8 +154,8 @@ public class AutoWither extends Module {
     private void onPostTick(TickEvent.Post event) {
         if (wither == null) {
             // Delay
-            if (witherDelay.get() != 0 && ticks < witherDelay.get() - 1) {
-                ticks++;
+            if (witherTicksWaited < witherDelay.get() - 1) {
+                witherTicksWaited++;
                 return;
             }
 
@@ -184,39 +193,68 @@ public class AutoWither extends Module {
 
 
         // Build
-        switch (wither.stage) {
-            case 0:
-                if (BlockUtils.place(wither.foot, findSoulSand, rotate.get(), -50)) wither.stage++;
-                break;
-            case 1:
-                if (BlockUtils.place(wither.foot.up(), findSoulSand, rotate.get(), -50)) wither.stage++;
-                break;
-            case 2:
-                if (BlockUtils.place(wither.foot.up().offset(wither.axis, -1), findSoulSand, rotate.get(), -50)) wither.stage++;
-                break;
-            case 3:
-                if (BlockUtils.place(wither.foot.up().offset(wither.axis, 1), findSoulSand, rotate.get(), -50)) wither.stage++;
-                break;
-            case 4:
-                if (BlockUtils.place(wither.foot.up().up(), findWitherSkull, rotate.get(), -50)) wither.stage++;
-                break;
-            case 5:
-                if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, -1), findWitherSkull, rotate.get(), -50)) wither.stage++;
-                break;
-            case 6:
-                if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, 1), findWitherSkull, rotate.get(), -50)) wither.stage++;
-                break;
-            case 7:
-                // Auto turnoff
-                if (turnOff.get()) {
-                    wither = null;
-                    toggle();
-                }
-                break;
+        if (blockDelay.get() == 0) {
+            // All in 1 tick
+
+            // Body
+            BlockUtils.place(wither.foot, findSoulSand, rotate.get(), -50);
+            BlockUtils.place(wither.foot.up(), findSoulSand, rotate.get(), -50);
+            BlockUtils.place(wither.foot.up().offset(wither.axis, -1), findSoulSand, rotate.get(), -50);
+            BlockUtils.place(wither.foot.up().offset(wither.axis, 1), findSoulSand, rotate.get(), -50);
+
+            // Head
+            BlockUtils.place(wither.foot.up().up(), findWitherSkull, rotate.get(), -50);
+            BlockUtils.place(wither.foot.up().up().offset(wither.axis, -1), findWitherSkull, rotate.get(), -50);
+            BlockUtils.place(wither.foot.up().up().offset(wither.axis, 1), findWitherSkull, rotate.get(), -50);
+
+
+            // Auto turnoff
+            if (turnOff.get()) {
+                wither = null;
+                toggle();
+            }
+
+        } else {
+            // Delay
+            if (blockTicksWaited < blockDelay.get() - 1) {
+                blockTicksWaited++;
+                return;
+            }
+
+            switch (wither.stage) {
+                case 0:
+                    if (BlockUtils.place(wither.foot, findSoulSand, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 1:
+                    if (BlockUtils.place(wither.foot.up(), findSoulSand, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 2:
+                    if (BlockUtils.place(wither.foot.up().offset(wither.axis, -1), findSoulSand, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 3:
+                    if (BlockUtils.place(wither.foot.up().offset(wither.axis, 1), findSoulSand, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 4:
+                    if (BlockUtils.place(wither.foot.up().up(), findWitherSkull, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 5:
+                    if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, -1), findWitherSkull, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 6:
+                    if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, 1), findWitherSkull, rotate.get(), -50)) wither.stage++;
+                    break;
+                case 7:
+                    // Auto turnoff
+                    if (turnOff.get()) {
+                        wither = null;
+                        toggle();
+                    }
+                    break;
+            }
         }
 
 
-        ticks = 0;
+        witherTicksWaited = 0;
     }
 
     @EventHandler
