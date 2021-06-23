@@ -36,8 +36,15 @@ public class AutoWither extends Module {
 
     // General
 
-    private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
-        .name("horizontal-radius")
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("mode")
+        .description("Which mode to use for placing withers.")
+        .defaultValue(Mode.Linear)
+        .build()
+    );
+
+    private final Setting<Integer> horizontalRange = sgGeneral.add(new IntSetting.Builder()
+        .name("horizontal-range")
         .description("Horizontal radius for placement")
         .defaultValue(4)
         .min(0)
@@ -45,17 +52,18 @@ public class AutoWither extends Module {
         .build()
     );
 
-    private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
-        .name("vertical-radius")
+    private final Setting<Integer> verticalRange = sgGeneral.add(new IntSetting.Builder()
+        .name("vertical-range")
         .description("Vertical radius for placement")
         .defaultValue(3)
         .min(0)
         .sliderMax(6)
+        .visible(() -> mode.get() == Mode.Area)
         .build()
     );
 
-    private final Setting<Integer> minimumHorizontalDistance = sgGeneral.add(new IntSetting.Builder()
-        .name("minimum-horizontal-distance")
+    private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
+        .name("minimum-distance")
         .description("Minimum distance from the player to build the wither")
         .defaultValue(1)
         .min(1)
@@ -127,12 +135,21 @@ public class AutoWither extends Module {
     private final Pool<Wither> witherPool = new Pool<>(Wither::new);
     private final ArrayList<Wither> withers = new ArrayList<>();
     private Wither wither;
-    BlockPos.Mutable bp = new BlockPos.Mutable();
+    private final BlockPos.Mutable bp = new BlockPos.Mutable();
+
+    private Direction playerFacing;
 
     private int witherTicksWaited, blockTicksWaited;
 
     public AutoWither() {
         super(Categories.World, "auto-wither", "Automatically builds withers.");
+    }
+
+    @Override
+    public void onActivate() {
+        if (mode.get() == Mode.Linear) {
+            playerFacing = mc.player.getHorizontalFacing();
+        }
     }
 
     @Override
@@ -153,21 +170,37 @@ public class AutoWither extends Module {
             withers.clear();
 
             // Register
-            BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-                // Dont spawn too near
-                if (PlayerUtils.distanceTo(blockPos) < minimumHorizontalDistance.get()) return;
+            if (mode.get() == Mode.Area) {
+                // Area
+                BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
+                    if (PlayerUtils.distanceTo(blockPos) < minimumDistance.get()) return;
 
-                // Valid spawn check
-                Direction.Axis axis = Direction.fromRotation(Rotations.getYaw(blockPos)).getAxis();
-                axis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X; // Invert axis
+                    // Invert axis
+                    Direction.Axis axis = Direction.fromRotation(Rotations.getYaw(blockPos)).getAxis();
+                    axis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
 
-                if (isValidSpawn(blockPos, axis)) withers.add(witherPool.get().set(blockPos, axis));
-            });
+                    // Valid spawn check
+                    if (isValidSpawn(blockPos, axis)) withers.add(witherPool.get().set(blockPos, axis));
+                });
+            } else {
+                // Linear
+                while (PlayerUtils.distanceTo(bp) < horizontalRange.get()) {
+                    // Invert axis
+                    Direction.Axis axis = playerFacing.getAxis();
+                    axis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+
+                    // Valid spawn check
+                    if (minimumDistance.get() < PlayerUtils.distanceTo(bp) && isValidSpawn(bp, axis)) withers.add(witherPool.get().set(bp, axis));
+
+                    bp.move(playerFacing);
+                }
+            }
         }
     }
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
+        // Get next wither
         if (wither == null) {
             // Delay
             if (witherTicksWaited < witherDelay.get() - 1) {
@@ -194,6 +227,7 @@ public class AutoWither extends Module {
 
             wither = withers.get(0);
         }
+
 
         // Soul sand/soil and skull slot
         FindItemResult findSoulSand = InvUtils.findInHotbar(Items.SOUL_SAND);
@@ -226,9 +260,11 @@ public class AutoWither extends Module {
 
             // Auto turnoff
             if (turnOff.get()) {
-                wither = null;
                 toggle();
             }
+
+            // Reset wither
+            wither = null;
 
         } else {
             // Delay
@@ -238,6 +274,7 @@ public class AutoWither extends Module {
             }
 
             switch (wither.stage) {
+                // Body
                 case 0:
                     if (BlockUtils.place(wither.foot, findSoulSand, rotate.get(), -50)) wither.stage++;
                     break;
@@ -250,6 +287,8 @@ public class AutoWither extends Module {
                 case 3:
                     if (BlockUtils.place(wither.foot.up().offset(wither.axis, -1), findSoulSand, rotate.get(), -50)) wither.stage++;
                     break;
+
+                // Heads
                 case 4:
                     if (BlockUtils.place(wither.foot.up().up(), findWitherSkull, rotate.get(), -50)) wither.stage++;
                     break;
@@ -263,6 +302,8 @@ public class AutoWither extends Module {
                         if (turnOff.get()) {
                             toggle();
                         }
+
+                        // Reset wither
                         wither = null;
                     }
                     break;
@@ -350,12 +391,6 @@ public class AutoWither extends Module {
         return true;
     }
 
-    public enum Priority {
-        Closest,
-        Furthest,
-        Random
-    }
-
     private static class Wither {
         public int stage;
         // 0 = foot
@@ -375,5 +410,16 @@ public class AutoWither extends Module {
 
             return this;
         }
+    }
+
+    public enum Priority {
+        Closest,
+        Furthest,
+        Random
+    }
+
+    public enum Mode {
+        Linear,
+        Area
     }
 }
