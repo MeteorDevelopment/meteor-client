@@ -49,7 +49,7 @@ public class Nuker extends Module {
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
         .name("range")
         .description("The break range.")
-        .defaultValue(5)
+        .defaultValue(4)
         .min(0)
         .build()
     );
@@ -65,7 +65,7 @@ public class Nuker extends Module {
         .name("max-blocks-per-tick")
         .description("Maximum blocks to try to break per tick. Useful when insta mining.")
         .defaultValue(1)
-        .min(0)
+        .min(1)
         .sliderMax(6)
         .build()
     );
