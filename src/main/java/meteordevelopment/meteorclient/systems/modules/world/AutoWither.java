@@ -54,6 +54,15 @@ public class AutoWither extends Module {
         .build()
     );
 
+    private final Setting<Integer> minimumHorizontalDistance = sgGeneral.add(new IntSetting.Builder()
+        .name("minimum-horizontal-distance")
+        .description("Minimum distance from the player to build the wither")
+        .defaultValue(1)
+        .min(1)
+        .sliderMax(3)
+        .build()
+    );
+
     private final Setting<Priority> priority = sgGeneral.add(new EnumSetting.Builder<Priority>()
         .name("priority")
         .description("Priority")
@@ -104,20 +113,21 @@ public class AutoWither extends Module {
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
-        .description("The side color of the target block rendering.")
-        .defaultValue(new SettingColor(197, 137, 232, 10))
+        .description("The side color wither rendering.")
+        .defaultValue(new SettingColor(127, 0, 255, 10))
         .build()
     );
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
-        .description("The line color of the target block rendering.")
-        .defaultValue(new SettingColor(197, 137, 232))
+        .description("The line color wither rendering.")
+        .defaultValue(new SettingColor(127, 0, 255))
         .build()
     );
 
     private final Pool<Wither> witherPool = new Pool<>(Wither::new);
     private final ArrayList<Wither> withers = new ArrayList<>();
     private Wither wither;
+    BlockPos.Mutable bp = new BlockPos.Mutable();
 
     private int witherTicksWaited, blockTicksWaited;
 
@@ -144,8 +154,14 @@ public class AutoWither extends Module {
 
             // Register
             BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-                Direction dir = Direction.fromRotation(Rotations.getYaw(blockPos)).getOpposite();
-                if (isValidSpawn(blockPos, dir)) withers.add(witherPool.get().set(blockPos, dir));
+                // Dont spawn too near
+                if (PlayerUtils.distanceTo(blockPos) < minimumHorizontalDistance.get()) return;
+
+                // Valid spawn check
+                Direction.Axis axis = Direction.fromRotation(Rotations.getYaw(blockPos)).getAxis();
+                axis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X; // Invert axis
+
+                if (isValidSpawn(blockPos, axis)) withers.add(witherPool.get().set(blockPos, axis));
             });
         }
     }
@@ -229,25 +245,25 @@ public class AutoWither extends Module {
                     if (BlockUtils.place(wither.foot.up(), findSoulSand, rotate.get(), -50)) wither.stage++;
                     break;
                 case 2:
-                    if (BlockUtils.place(wither.foot.up().offset(wither.axis, -1), findSoulSand, rotate.get(), -50)) wither.stage++;
+                    if (BlockUtils.place(wither.foot.up().offset(wither.axis, 1), findSoulSand, rotate.get(), -50)) wither.stage++;
                     break;
                 case 3:
-                    if (BlockUtils.place(wither.foot.up().offset(wither.axis, 1), findSoulSand, rotate.get(), -50)) wither.stage++;
+                    if (BlockUtils.place(wither.foot.up().offset(wither.axis, -1), findSoulSand, rotate.get(), -50)) wither.stage++;
                     break;
                 case 4:
                     if (BlockUtils.place(wither.foot.up().up(), findWitherSkull, rotate.get(), -50)) wither.stage++;
                     break;
                 case 5:
-                    if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, -1), findWitherSkull, rotate.get(), -50)) wither.stage++;
-                    break;
-                case 6:
                     if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, 1), findWitherSkull, rotate.get(), -50)) wither.stage++;
                     break;
-                case 7:
-                    // Auto turnoff
-                    if (turnOff.get()) {
+                case 6:
+                    if (BlockUtils.place(wither.foot.up().up().offset(wither.axis, -1), findWitherSkull, rotate.get(), -50)) {
+
+                        // Auto turnoff
+                        if (turnOff.get()) {
+                            toggle();
+                        }
                         wither = null;
-                        toggle();
                     }
                     break;
             }
@@ -262,46 +278,65 @@ public class AutoWither extends Module {
         if (wither == null) return;
 
         // Body
-        event.renderer.box(wither.foot, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        event.renderer.box(wither.foot.up(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        event.renderer.box(wither.foot.up().offset(wither.axis, -1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        event.renderer.box(wither.foot.up().offset(wither.axis, 1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (wither.stage <= 0) event.renderer.box(wither.foot, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (wither.stage <= 1) event.renderer.box(wither.foot.up(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (wither.stage <= 2) event.renderer.box(wither.foot.up().offset(wither.axis, -1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (wither.stage <= 3) event.renderer.box(wither.foot.up().offset(wither.axis, 1), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
 
-        // Head
-        BlockPos midHead = wither.foot.up().up();
-        BlockPos leftHead = wither.foot.up().up().offset(wither.axis, -1);
-        BlockPos rightHead = wither.foot.up().up().offset(wither.axis, 1);
+        // Heads
+        if (wither.stage <= 4) {
+            BlockPos midHead = wither.foot.up().up();
+            event.renderer.box((double) midHead.getX() + 0.2, midHead.getY(), (double) midHead.getZ() + 0.2,
+                                (double) midHead.getX() + 0.8, (double) midHead.getY() + 0.6, (double) midHead.getZ() + 0.8,
+                    sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
 
-        event.renderer.box((double) midHead.getX() + 0.2, (double) midHead.getX(), (double) midHead.getX() + 0.2,
-                            (double) midHead.getX() + 0.8, (double) midHead.getX() + 0.7, (double) midHead.getX() + 0.8,
-            sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (wither.stage <= 5) {
+            BlockPos leftHead = wither.foot.up().up().offset(wither.axis, 1);
+            event.renderer.box((double) leftHead.getX() + 0.2, leftHead.getY(), (double) leftHead.getZ() + 0.2,
+                                (double) leftHead.getX() + 0.8, (double) leftHead.getY() + 0.6, (double) leftHead.getZ() + 0.8,
+                    sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
 
-        event.renderer.box((double) leftHead.getX() + 0.2, (double) leftHead.getX(), (double) leftHead.getX() + 0.2,
-                            (double) leftHead.getX() + 0.8, (double) leftHead.getX() + 0.7, (double) leftHead.getX() + 0.8,
-            sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-
-        event.renderer.box((double) rightHead.getX() + 0.2, (double) rightHead.getX(), (double) rightHead.getX() + 0.2,
-                            (double) rightHead.getX() + 0.8, (double) rightHead.getX() + 0.7, (double) rightHead.getX() + 0.8,
-            sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        if (wither.stage <= 6) {
+            BlockPos rightHead = wither.foot.up().up().offset(wither.axis, -1);
+            event.renderer.box((double) rightHead.getX() + 0.2, rightHead.getY(), (double) rightHead.getZ() + 0.2,
+                                (double) rightHead.getX() + 0.8, (double) rightHead.getY() + 0.6, (double) rightHead.getZ() + 0.8,
+                    sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        }
     }
 
-    private boolean isValidSpawn(BlockPos blockPos, Direction direction) {
+    private boolean isValidSpawn(BlockPos blockPos, Direction.Axis axis) {
         // Withers are 3x3x1
 
         // Check if y > (255 - 3)
         // Because withers are 3 blocks tall
         if (blockPos.getY() > 252) return false;
 
-        // Determine width from direction
+
+        // Determine width from axis
         int widthX = 0;
         int widthZ = 0;
 
-        if (direction == Direction.EAST || direction == Direction.WEST) widthZ = 1;
-        if (direction == Direction.NORTH || direction == Direction.SOUTH) widthX = 1;
+        if (axis == Direction.Axis.X) {
+            widthX = 1;
 
+            // Air place check
+            if (mc.world.getBlockState(blockPos.south()).getMaterial().isReplaceable() &&
+                mc.world.getBlockState(blockPos.north()).getMaterial().isReplaceable() &&
+                mc.world.getBlockState(blockPos.down()).getMaterial().isReplaceable()) return false;
 
-        // Check for non air blocks and entities
-        BlockPos.Mutable bp = new BlockPos.Mutable();
+        }
+        if (axis == Direction.Axis.Z) {
+            widthZ = 1;
+
+            // Air place check
+            if (mc.world.getBlockState(blockPos.east()).getMaterial().isReplaceable() &&
+                mc.world.getBlockState(blockPos.west()).getMaterial().isReplaceable() &&
+                mc.world.getBlockState(blockPos.down()).getMaterial().isReplaceable()) return false;
+        }
+
+        // Check for obstruction
         for (int x = blockPos.getX() - widthX; x <= blockPos.getX() + widthX; x++) {
             for (int z = blockPos.getZ() - widthZ; z <= blockPos.getZ(); z++) {
                 for (int y = blockPos.getY(); y <= blockPos.getY() + 2; y++) {
@@ -330,16 +365,13 @@ public class AutoWither extends Module {
         // 4 = mid head
         // 5 = left head
         // 6 = right head
-        // 7 = end
         public BlockPos.Mutable foot = new BlockPos.Mutable();
-        public Direction facing;
         public Direction.Axis axis;
 
-        public Wither set(BlockPos pos, Direction dir) {
+        public Wither set(BlockPos pos, Direction.Axis axis) {
             this.stage = 0;
             this.foot.set(pos);
-            this.facing = dir;
-            this.axis = dir.getAxis();
+            this.axis = axis;
 
             return this;
         }
