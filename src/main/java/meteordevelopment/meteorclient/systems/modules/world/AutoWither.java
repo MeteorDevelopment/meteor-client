@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -147,9 +146,7 @@ public class AutoWither extends Module {
 
     @Override
     public void onActivate() {
-        if (mode.get() == Mode.Linear) {
-            playerFacing = mc.player.getHorizontalFacing();
-        }
+        playerFacing = mc.player.getHorizontalFacing();
     }
 
     @Override
@@ -188,12 +185,12 @@ public class AutoWither extends Module {
                 BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
                     if (PlayerUtils.distanceTo(blockPos) < minimumDistance.get()) return;
 
-                    // Invert axis
-                    Direction.Axis axis = Direction.fromRotation(Rotations.getYaw(blockPos)).getAxis();
-                    axis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
-
                     // Valid spawn check
+                    Direction.Axis axis = playerFacing.getAxis();
+                    Direction.Axis invertedAxis = axis == Direction.Axis.X ? Direction.Axis.Z : Direction.Axis.X;
+
                     if (isValidSpawn(blockPos, axis)) withers.add(witherPool.get().set(blockPos, axis));
+                    else if (isValidSpawn(blockPos, invertedAxis)) withers.add(witherPool.get().set(blockPos, invertedAxis));
                 });
             } else {
                 // Linear
