@@ -39,28 +39,36 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
         }
 
         renderBackground(renderer, this, false, false);
-        renderTextAndCursor(renderer, delta);
-    }
 
-    private void renderTextAndCursor(GuiRenderer renderer, double delta) {
         MeteorGuiTheme theme = theme();
         double pad = pad();
-
         double overflowWidth = getOverflowWidthForRender();
 
+        renderer.scissorStart(x + pad, y + pad, width - pad * 2, height - pad * 2);
+
+        // Text content
         if (!text.isEmpty()) {
-            renderer.scissorStart(x + pad, y + pad, width - pad * 2, height - pad * 2);
             renderer.text(text, x + pad - overflowWidth, y + pad, theme.textColor.get(), false);
-            renderer.scissorEnd();
         }
 
+        // Text highlighting
+        if (focused && (cursor != selectionStart || cursor != selectionEnd)) {
+            double selStart = x + pad + getTextWidth(selectionStart) - overflowWidth;
+            double selEnd = x + pad + getTextWidth(selectionEnd) - overflowWidth;
+
+            renderer.quad(selStart, y + pad, selEnd - selStart, theme.textHeight(), theme.textHighlightColor.get());
+        }
+
+        // Cursor
         animProgress += delta * 10 * (focused && cursorVisible ? 1 : -1);
         animProgress = Utils.clamp(animProgress, 0, 1);
 
         if ((focused && cursorVisible) || animProgress > 0) {
             renderer.setAlpha(animProgress);
-            renderer.quad(x + pad + getCursorTextWidth() - overflowWidth, y + pad, theme.scale(1), theme.textHeight(), theme.textColor.get());
+            renderer.quad(x + pad + getTextWidth(cursor) - overflowWidth, y + pad, theme.scale(1), theme.textHeight(), theme.textColor.get());
             renderer.setAlpha(1);
         }
+
+        renderer.scissorEnd();
     }
 }
