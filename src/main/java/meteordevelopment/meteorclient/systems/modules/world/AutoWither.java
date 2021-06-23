@@ -165,6 +165,19 @@ public class AutoWither extends Module {
                 return;
             }
 
+
+            // Check for enough resources
+            FindItemResult findSoulSand = InvUtils.findInHotbar(Items.SOUL_SAND);
+            if (!findSoulSand.found()) InvUtils.findInHotbar(Items.SOUL_SOIL);
+            FindItemResult findWitherSkull = InvUtils.findInHotbar(Items.WITHER_SKELETON_SKULL);
+
+            if (findSoulSand.getCount() < 4 || findWitherSkull.getCount() < 3) {
+                error("Not enough resources in hotbar");
+                toggle();
+                return;
+            }
+
+
             // Clear pool and list
             for (Wither wither : withers) witherPool.free(wither);
             withers.clear();
@@ -195,6 +208,8 @@ public class AutoWither extends Module {
                     bp.move(playerFacing);
                 }
             }
+
+
         }
     }
 
