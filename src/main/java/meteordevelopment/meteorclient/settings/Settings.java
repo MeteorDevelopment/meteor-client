@@ -98,9 +98,6 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
                 if (visible != setting.lastWasVisible) {
                     settings.clear();
                     settings.add(theme.settings(this)).expandX();
-
-                    setting.lastWasVisible = visible;
-                    return;
                 }
 
                 setting.lastWasVisible = visible;

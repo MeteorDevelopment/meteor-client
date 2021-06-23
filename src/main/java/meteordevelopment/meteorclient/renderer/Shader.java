@@ -42,8 +42,8 @@ public class Shader {
         int[] a = new int[1];
         glGetShaderiv(vert, GL_COMPILE_STATUS, a);
         if (a[0] == GL_FALSE) {
-            MeteorClient.LOG.error("Failed to compile vertex shader: " + glGetShaderInfoLog(vert));
-            throw new RuntimeException("Failed to compile vertex shader: " + glGetShaderInfoLog(vert));
+            MeteorClient.LOG.error("Failed to compile vertex shader (" + vertPath + "): " + glGetShaderInfoLog(vert));
+            throw new RuntimeException("Failed to compile vertex shader (" + vertPath + "): " + glGetShaderInfoLog(vert));
         }
 
         int frag = glCreateShader(GL_FRAGMENT_SHADER);
@@ -52,8 +52,8 @@ public class Shader {
 
         glGetShaderiv(frag, GL_COMPILE_STATUS, a);
         if (a[0] == GL_FALSE) {
-            MeteorClient.LOG.error("Failed to compile fragment shader: " + glGetShaderInfoLog(frag));
-            throw new RuntimeException("Failed to compile fragment shader: " + glGetShaderInfoLog(frag));
+            MeteorClient.LOG.error("Failed to compile fragment shader (" + fragPath + "): " + glGetShaderInfoLog(frag));
+            throw new RuntimeException("Failed to compile fragment shader (" + fragPath + "): " + glGetShaderInfoLog(frag));
         }
 
         id = glCreateProgram();

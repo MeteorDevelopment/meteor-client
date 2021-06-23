@@ -5,14 +5,18 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosion;
 import meteordevelopment.meteorclient.mixininterface.IRaycastContext;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -20,6 +24,7 @@ import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Items;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -30,13 +35,28 @@ import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.explosion.Explosion;
 
+import java.util.Objects;
+
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class DamageUtils {
     private static final Vec3d vec3d = new Vec3d(0, 0, 0);
-    private static final Explosion explosion = new Explosion(null, null, 0, 0, 0, 6, false, Explosion.DestructionType.DESTROY);
+    private static Explosion explosion;
+    private static RaycastContext raycastContext;
 
-    public static double crystalDamage(PlayerEntity player, Vec3d crystal, boolean predictMovement, RaycastContext raycastContext, BlockPos obsidianPos, boolean ignoreTerrain) {
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(DamageUtils.class);
+    }
+
+    @EventHandler
+    private static void onGameJoined(GameJoinedEvent event) {
+        explosion = new Explosion(mc.world, null, 0, 0, 0, 6, false, Explosion.DestructionType.DESTROY);
+        raycastContext = new RaycastContext(null, null, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.ANY, mc.player);
+    }
+
+    // Crystal damage
+
+    public static double crystalDamage(PlayerEntity player, Vec3d crystal, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
         if (player == null) return 0;
         if (EntityUtils.getGameMode(player) == GameMode.CREATIVE && !(player instanceof FakePlayerEntity)) return 0;
 
@@ -50,7 +70,7 @@ public class DamageUtils {
         double impact = (1 - (modDistance / 12)) * exposure;
         double damage = ((impact * impact + impact) / 2 * 7 * (6 * 2) + 1);
 
-        damage = getDamageMultiplied(damage);
+        damage = getDamageForDifficulty(damage);
         damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
         damage = resistanceReduction(player, damage);
 
@@ -60,13 +80,109 @@ public class DamageUtils {
         return damage < 0 ? 0 : damage;
     }
 
-    private static double getDamageMultiplied(double damage) {
-        switch (mc.world.getDifficulty()) {
-            case PEACEFUL: return 0;
-            case EASY:     return Math.min(damage / 2 + 1, damage);
-            case HARD:     return damage * 3 / 2;
-            default:       return damage;
+    public static double crystalDamage(PlayerEntity player, Vec3d crystal) {
+        return crystalDamage(player, crystal, false, null, false);
+    }
+
+    // Sword damage
+
+    public static double getSwordDamage(PlayerEntity entity, boolean charged) {
+        // Get sword damage
+        double damage = 0;
+        if (charged) {
+            if (entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
+                damage += 7;
+            } else if (entity.getActiveItem().getItem() == Items.GOLDEN_SWORD) {
+                damage += 4;
+            } else if (entity.getActiveItem().getItem() == Items.IRON_SWORD) {
+                damage += 6;
+            } else if (entity.getActiveItem().getItem() == Items.STONE_SWORD) {
+                damage += 5;
+            } else if (entity.getActiveItem().getItem() == Items.WOODEN_SWORD) {
+                damage += 4;
+            }
+            damage *= 1.5;
         }
+
+        if (entity.getActiveItem().getEnchantments() != null) {
+            if (EnchantmentHelper.get(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)) {
+                int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
+                damage += (0.5 * level) + 0.5;
+            }
+        }
+
+        if (entity.getActiveStatusEffects().containsKey(StatusEffects.STRENGTH)) {
+            int strength = Objects.requireNonNull(entity.getStatusEffect(StatusEffects.STRENGTH)).getAmplifier() + 1;
+            damage += 3 * strength;
+        }
+
+        // Reduce by resistance
+        damage = resistanceReduction(entity, damage);
+
+        // Reduce by armour
+        damage = DamageUtil.getDamageLeft((float) damage, (float) entity.getArmor(), (float) entity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+
+        // Reduce by enchants
+        damage = normalProtReduction(entity, damage);
+
+        return damage < 0 ? 0 : damage;
+    }
+
+    // Bed damage
+
+    public static double bedDamage(LivingEntity player, Vec3d bed) {
+        if (player instanceof PlayerEntity && ((PlayerEntity) player).getAbilities().creativeMode) return 0;
+
+        double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
+        if (modDistance > 10) return 0;
+
+        double exposure = Explosion.getExposure(bed, player);
+        double impact = (1.0 - (modDistance / 10.0)) * exposure;
+        double damage = (impact * impact + impact) / 2 * 7 * (5 * 2) + 1;
+
+        // Multiply damage by difficulty
+        damage = getDamageForDifficulty(damage);
+
+        // Reduce by resistance
+        damage = resistanceReduction(player, damage);
+
+        // Reduce by armour
+        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+
+        // Reduce by enchants
+        ((IExplosion) explosion).set(bed, 5, true);
+        damage = blastProtReduction(player, damage, explosion);
+
+        if (damage < 0) damage = 0;
+        return damage;
+    }
+
+    // Anchor damage
+
+    public static double anchorDamage(LivingEntity player, Vec3d anchor) {
+        mc.world.removeBlock(new BlockPos(anchor), false);
+        double damage = bedDamage(player, anchor);
+        mc.world.setBlockState(new BlockPos(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
+        return damage;
+    }
+
+    // Utils
+
+    private static double getDamageForDifficulty(double damage) {
+        return switch (mc.world.getDifficulty()) {
+            case PEACEFUL -> 0;
+            case EASY     -> Math.min(damage / 2 + 1, damage);
+            case HARD     -> damage * 3 / 2;
+            default       -> damage;
+        };
+    }
+
+    private static double normalProtReduction(Entity player, double damage) {
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.GENERIC);
+        if (protLevel > 20) protLevel = 20;
+
+        damage *= 1 - (protLevel / 25.0);
+        return damage < 0 ? 0 : damage;
     }
 
     private static double blastProtReduction(Entity player, double damage, Explosion explosion) {

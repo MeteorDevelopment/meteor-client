@@ -31,7 +31,7 @@ public class Offhand extends Module {
     private final Setting<Item> item = sgGeneral.add(new EnumSetting.Builder<Item>()
         .name("item")
         .description("Which item to hold in your offhand.")
-        .defaultValue(Item.EGap)
+        .defaultValue(Item.Crystal)
         .build()
     );
 
@@ -52,13 +52,20 @@ public class Offhand extends Module {
     private final Setting<Boolean> swordGap = sgGeneral.add(new BoolSetting.Builder()
         .name("sword-gap")
         .description("Holds an Enchanted Golden Apple when you are holding a sword.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> crystalCa = sgGeneral.add(new BoolSetting.Builder()
         .name("crystal-on-ca")
         .description("Holds a crystal when you have Crystal Aura enabled.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> crystalMine = sgGeneral.add(new BoolSetting.Builder()
+        .name("crystal-on-mine")
+        .description("Holds a crystal when you are mining.")
         .defaultValue(false)
         .build()
     );
@@ -82,11 +89,14 @@ public class Offhand extends Module {
     private void onTick(TickEvent.Pre event) {
         AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
 
-        // Sword Gap and CA checks
-        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && swordGap.get()) {
-            currentItem = Item.EGap;
-        }
-        else if (Modules.get().isActive(CrystalAura.class) && crystalCa.get()) currentItem = Item.Crystal;
+        // Sword Gap
+        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem
+            || mc.player.getMainHandStack().getItem() instanceof AxeItem) && swordGap.get()) currentItem = Item.EGap;
+
+        // Ca and mining
+        else if ((Modules.get().isActive(CrystalAura.class) && crystalCa.get())
+            || mc.interactionManager.isBreakingBlock() && crystalMine.get()) currentItem = Item.Crystal;
+
         else currentItem = item.get();
 
         // Checking offhand item

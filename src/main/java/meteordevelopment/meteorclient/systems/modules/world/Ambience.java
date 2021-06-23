@@ -5,10 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.ColorSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -23,141 +19,130 @@ import net.minecraft.util.math.Vec3d;
  * @author Walaryne
  */
 public class Ambience extends Module {
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgDynamic = settings.createGroup("Dynamic");
-    private final SettingGroup sgStatic = settings.createGroup("Static");
+    private final SettingGroup sgSky = settings.createGroup("Sky");
+    private final SettingGroup sgWorld = settings.createGroup("World");
 
-    // GENERAL
+    // Sky
 
-    public final Setting<Boolean> enderMode = sgGeneral.add(new BoolSetting.Builder()
-            .name("ender-mode")
-            .description("Makes the sky like the vast void of the End.")
-            .defaultValue(false)
-            .build()
+    public final Setting<Boolean> endSky = sgSky.add(new BoolSetting.Builder()
+        .name("end-sky")
+        .description("Makes the sky like the end.")
+        .defaultValue(false)
+        .build()
     );
 
-    public final Setting<Boolean> enderCustomSkyColor = sgGeneral.add(new BoolSetting.Builder()
-            .name("ender-custom-color")
-            .description("Allows a custom sky color for Ender Mode.")
-            .defaultValue(false)
-            .visible(enderMode::get)
-            .build()
+    public final Setting<Boolean> customSkyColor = sgSky.add(new BoolSetting.Builder()
+        .name("custom-sky-color")
+        .description("Whether the sky color should be changed.")
+        .defaultValue(false)
+        .build()
     );
 
-    // DYNAMIC
-
-    public final Setting<Boolean> changeSkyColor = sgDynamic.add(new BoolSetting.Builder()
-            .name("change-sky-color")
-            .description("Should the sky color be changed.")
-            .defaultValue(false)
-            .build()
+    public final Setting<SettingColor> skyColor = sgSky.add(new ColorSetting.Builder()
+        .name("sky-color")
+        .description("The color of the sky.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customSkyColor::get)
+        .build()
     );
 
-    public final Setting<SettingColor> skyColor = sgDynamic.add(new ColorSetting.Builder()
-            .name("sky-color")
-            .description("The color to change the sky to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeSkyColor::get)
-            .build()
+    public final Setting<Boolean> customCloudColor = sgSky.add(new BoolSetting.Builder()
+        .name("custom-cloud-color")
+        .description("Whether the clouds color should be changed.")
+        .defaultValue(false)
+        .build()
     );
 
-    public final Setting<SettingColor> endSkyColor = sgDynamic.add(new ColorSetting.Builder()
-            .name("end-sky-color")
-            .description("The color to change the End sky to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .build()
+    public final Setting<SettingColor> cloudColor = sgSky.add(new ColorSetting.Builder()
+        .name("cloud-color")
+        .description("The color of the clouds.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customCloudColor::get)
+        .build()
     );
 
-    public final Setting<Boolean> changeCloudColor = sgDynamic.add(new BoolSetting.Builder()
-            .name("change-cloud-color")
-            .description("Should the color of the clouds be changed.")
-            .defaultValue(false)
-            .build()
+    public final Setting<Boolean> changeLightningColor = sgSky.add(new BoolSetting.Builder()
+        .name("custom-lightning-color")
+        .description("Whether the lightning color should be changed.")
+        .defaultValue(false)
+        .build()
     );
 
-    public final Setting<SettingColor> cloudColor = sgDynamic.add(new ColorSetting.Builder()
-            .name("clouds-color")
-            .description("The color to change the clouds to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeCloudColor::get)
-            .build()
+    public final Setting<SettingColor> lightningColor = sgSky.add(new ColorSetting.Builder()
+        .name("lightning-color")
+        .description("The color of the lightning.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(changeLightningColor::get)
+        .build()
     );
 
-    public final Setting<Boolean> changeLightningColor = sgDynamic.add(new BoolSetting.Builder()
-            .name("change-lightning-color")
-            .description("Should the color of lightning be changed.")
-            .defaultValue(false)
-            .build()
+    // World
+    public final Setting<Boolean> customGrassColor = sgWorld.add(new BoolSetting.Builder()
+        .name("custom-grass-color")
+        .description("Whether the grass color should be changed.")
+        .defaultValue(false)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    public final Setting<SettingColor> lightningColor = sgDynamic.add(new ColorSetting.Builder()
-            .name("lightning-color")
-            .description("The color to change lightning to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeLightningColor::get)
-            .build()
+    public final Setting<SettingColor> grassColor = sgWorld.add(new ColorSetting.Builder()
+        .name("grass-color")
+        .description("The color of the grass.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customGrassColor::get)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    // STATIC
-
-    public final Setting<Boolean> changeWaterColor = sgStatic.add(new BoolSetting.Builder()
-            .name("change-water-color")
-            .description("Should the color of water be changed.")
-            .defaultValue(false)
-            .build()
+    public final Setting<Boolean> customFoliageColor = sgWorld.add(new BoolSetting.Builder()
+        .name("custom-foliage-color")
+        .description("Whether the foliage color should be changed.")
+        .defaultValue(false)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    public final Setting<SettingColor> waterColor = sgStatic.add(new ColorSetting.Builder()
-            .name("water-color")
-            .description("The color to change water to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeWaterColor::get)
-            .build()
+    public final Setting<SettingColor> foliageColor = sgWorld.add(new ColorSetting.Builder()
+        .name("foliage-color")
+        .description("The color of the foliage.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customFoliageColor::get)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    public final Setting<Boolean> changeLavaColor = sgStatic.add(new BoolSetting.Builder()
-            .name("change-lava-color")
-            .description("Should the color of lava be changed.")
-            .defaultValue(false)
-            .build()
+    public final Setting<Boolean> customWaterColor = sgWorld.add(new BoolSetting.Builder()
+        .name("custom-water-color")
+        .description("Whether the water color should be changed.")
+        .defaultValue(false)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    public final Setting<SettingColor> lavaColor = sgStatic.add(new ColorSetting.Builder()
-            .name("lava-color")
-            .description("The color to change lava to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeLavaColor::get)
-            .build()
+    public final Setting<SettingColor> waterColor = sgWorld.add(new ColorSetting.Builder()
+        .name("water-color")
+        .description("The color of the water.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customWaterColor::get)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    public final Setting<Boolean> changeFoliageColor = sgStatic.add(new BoolSetting.Builder()
-            .name("change-foliage-color")
-            .description("Should the color of the foliage be changed.")
-            .defaultValue(false)
-            .build()
+    public final Setting<Boolean> customLavaColor = sgWorld.add(new BoolSetting.Builder()
+        .name("custom-lava-color")
+        .description("Whether the lava color should be changed.")
+        .defaultValue(false)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
-    public final Setting<SettingColor> foliageColor = sgStatic.add(new ColorSetting.Builder()
-            .name("foliage-color")
-            .description("The color to change the foliage to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeFoliageColor::get)
-            .build()
-    );
-
-    public final Setting<Boolean> changeGrassColor = sgStatic.add(new BoolSetting.Builder()
-            .name("change-grass-color")
-            .description("Should the color of grass be changed.")
-            .defaultValue(false)
-            .build()
-    );
-
-    public final Setting<SettingColor> grassColor = sgStatic.add(new ColorSetting.Builder()
-            .name("grass-color")
-            .description("The color to change grass to.")
-            .defaultValue(new SettingColor(102, 0, 0, 255))
-            .visible(changeGrassColor::get)
-            .build()
+    public final Setting<SettingColor> lavaColor = sgWorld.add(new ColorSetting.Builder()
+        .name("lava-color")
+        .description("The color of the lava.")
+        .defaultValue(new SettingColor(102, 0, 0))
+        .visible(customLavaColor::get)
+        .onChanged(val -> mc.worldRenderer.reload())
+        .build()
     );
 
     public Ambience() {
@@ -172,18 +157,6 @@ public class Ambience extends Module {
     @Override
     public void onDeactivate() {
         if (mc.worldRenderer != null) mc.worldRenderer.reload();
-    }
-
-    @Override
-    public WWidget getWidget(GuiTheme theme) {
-        WHorizontalList list = theme.horizontalList();
-
-        WButton reloadWorld = list.add(theme.button("Reload World")).expandX().widget();
-        reloadWorld.action = () -> {
-            if (mc.worldRenderer != null) mc.worldRenderer.reload();
-        };
-
-        return list;
     }
 
     public static class Custom extends SkyProperties {

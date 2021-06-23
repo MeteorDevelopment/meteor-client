@@ -53,8 +53,10 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
     private void onCanWalkOnFluid(Fluid fluid, CallbackInfoReturnable<Boolean> info) {
-        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get((LivingEntity) (Object) this, fluid));
-        if (event.walkOnFluid) info.setReturnValue(true);
+        if ((Object) this != mc.player) return;
+        CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get(fluid));
+
+        info.setReturnValue(event.walkOnFluid);
     }
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasStatusEffect(Lnet/minecraft/entity/effect/StatusEffect;)Z"))

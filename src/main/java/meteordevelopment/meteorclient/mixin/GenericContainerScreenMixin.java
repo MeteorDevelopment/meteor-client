@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.world.AutoSteal;
-import meteordevelopment.meteorclient.utils.render.MeteorButtonWidget;
+import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
+import meteordevelopment.meteorclient.utils.render.ContainerButtonWidget;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
@@ -27,22 +27,29 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
     protected void init() {
         super.init();
 
-        AutoSteal autoSteal = Modules.get().get(AutoSteal.class);
+        InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
 
-        if (autoSteal.isActive() && autoSteal.getStealButtonEnabled())
-            addDrawableChild(new MeteorButtonWidget(x + backgroundWidth - 88, y + 3, 40, 12, new LiteralText("Steal"), button -> steal(handler)));
-        if (autoSteal.isActive() && autoSteal.getDumpButtonEnabled())
-            addDrawableChild(new MeteorButtonWidget(x + backgroundWidth - 46, y + 3, 40, 12, new LiteralText("Dump"), button -> dump(handler)));
+        if (invTweaks.isActive() && invTweaks.showButtons()) {
+            addDrawableChild(new ContainerButtonWidget(
+                x + backgroundWidth - 88,
+                y + 3,
+                40,
+                12,
+                new LiteralText("Steal"),
+                button -> invTweaks.steal(handler))
+            );
 
-        if (autoSteal.isActive() && autoSteal.getAutoStealEnabled()) steal(handler);
-        else if (autoSteal.isActive() && autoSteal.getAutoDumpEnabled()) dump(handler);
-    }
+            addDrawableChild(new ContainerButtonWidget(
+                x + backgroundWidth - 46,
+                y + 3,
+                40,
+                12,
+                new LiteralText("Dump"),
+                button -> invTweaks.dump(handler))
+            );
+        }
 
-    private void steal(GenericContainerScreenHandler handler) {
-        Modules.get().get(AutoSteal.class).stealAsync(handler);
-    }
-
-    private void dump(GenericContainerScreenHandler handler) {
-        Modules.get().get(AutoSteal.class).dumpAsync(handler);
+        if (invTweaks.autoSteal()) invTweaks.steal(handler);
+        if (invTweaks.autoDump()) invTweaks.dump(handler);
     }
 }

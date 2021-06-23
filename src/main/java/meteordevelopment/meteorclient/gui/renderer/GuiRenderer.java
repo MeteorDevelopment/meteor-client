@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.renderer.operations.TextOperation;
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
 import meteordevelopment.meteorclient.gui.renderer.packer.TexturePacker;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -99,7 +100,7 @@ public class GuiRenderer {
 
         r.render(matrices);
 
-        TEXTURE.bindTexture();
+        GL.bindTexture(TEXTURE.getGlId());
         rTex.render(matrices);
 
         // Normal text

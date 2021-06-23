@@ -45,9 +45,24 @@ public class EXPThrower extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (autoToggle.get()) {
+
+            boolean shouldThrow = false;
+
             for (ItemStack itemStack : mc.player.getInventory().armor) {
-                if (itemStack.isEmpty() || EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) < 1 || itemStack.isDamaged())
-                    continue;
+                // If empty
+                if (itemStack.isEmpty()) continue;
+
+                // If no mending
+                if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) < 1) continue;
+
+                // If damaged
+                if (itemStack.isDamaged()) {
+                    shouldThrow = true;
+                    break;
+                }
+            }
+
+            if (!shouldThrow) {
                 toggle();
                 return;
             }

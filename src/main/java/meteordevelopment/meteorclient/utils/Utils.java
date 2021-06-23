@@ -293,6 +293,7 @@ public class Utils {
             case GLFW_KEY_LEFT_SUPER: return "Left Super";
             case GLFW_KEY_RIGHT_SUPER: return "Right Super";
             case GLFW_KEY_ENTER: return "Enter";
+            case GLFW_KEY_KP_ENTER: return "Numpad Enter";
             case GLFW_KEY_NUM_LOCK: return "Num Lock";
             case GLFW_KEY_SPACE: return "Space";
             case GLFW_KEY_F1: return "F1";
