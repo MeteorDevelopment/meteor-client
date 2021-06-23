@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -59,6 +58,15 @@ public class Nuker extends Module {
         .name("delay")
         .description("Delay in ticks between breaking blocks.")
         .defaultValue(0)
+        .build()
+    );
+
+    private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
+        .name("max-blocks-per-tick")
+        .description("Maximum blocks to try to break per tick. Useful when insta mining.")
+        .defaultValue(1)
+        .min(0)
+        .sliderMax(6)
         .build()
     );
 
@@ -132,7 +140,7 @@ public class Nuker extends Module {
         // Find blocks to break
         BlockIterator.register((int) Math.ceil(range.get()), (int) Math.ceil(range.get()), (blockPos, blockState) -> {
             // Check for air, unbreakable blocks and distance
-            if (blockState.getHardness(mc.world, blockPos) < 0 || Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq || blockState.getOutlineShape(mc.world, blockPos) == VoxelShapes.empty()) return;
+            if (!BlockUtils.canBreak(blockPos, blockState) || Utils.squaredDistance(pX, pY, pZ, blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5) > rangeSq) return;
 
             // Flatten
             if (mode.get() == Mode.Flatten && blockPos.getY() < mc.player.getY()) return;
@@ -175,10 +183,21 @@ public class Nuker extends Module {
             }
 
             // Break
-            BlockUtils.breakBlock(blocks.get(0), swingHand.get());
+            int count = 0;
+
+            for (BlockPos block : blocks) {
+                if (count >= maxBlocksPerTick.get()) break;
+
+                boolean canInstaMine = BlockUtils.canInstaBreak(block);
+
+                BlockUtils.breakBlock(block, swingHand.get());
+                lastBlockPos.set(block);
+
+                count++;
+                if (!canInstaMine) break;
+            }
 
             firstBlock = false;
-            lastBlockPos.set(blocks.get(0));
 
             // Clear current block positions
             for (BlockPos.Mutable blockPos : blocks) blockPosPool.free(blockPos);
