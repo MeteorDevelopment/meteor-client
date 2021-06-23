@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.BlockState;
@@ -102,7 +103,7 @@ public class AutoTool extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         // Get blockState
         BlockState blockState = mc.world.getBlockState(event.blockPos);
-        if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
+        if (!BlockUtils.canBreak(event.blockPos, blockState)) return;
 
         // Check if we should switch to a better tool
         ItemStack currentStack = mc.player.getMainHandStack();
