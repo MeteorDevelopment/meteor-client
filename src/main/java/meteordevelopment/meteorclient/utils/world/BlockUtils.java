@@ -228,15 +228,15 @@ public class BlockUtils {
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos) {
         if (blockPos.getY() == 0) return MobSpawn.Never;
-        if (!(Utils.mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock)) return MobSpawn.Never;
+        if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock)) return MobSpawn.Never;
 
         if (!topSurface(Utils.mc.world.getBlockState(blockPos.down()))) {
-            if (Utils.mc.world.getBlockState(blockPos.down()).getCollisionShape(Utils.mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
-            if (Utils.mc.world.getBlockState(blockPos.down()).isTranslucent(Utils.mc.world, blockPos.down())) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
-        if (Utils.mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawn.Potential;
-        else if (Utils.mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawn.Always;
+        if (mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawn.Potential;
+        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawn.Always;
 
         return MobSpawn.Never;
     }
