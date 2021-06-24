@@ -260,6 +260,14 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noMobInSpawner = sgEntity.add(new BoolSetting.Builder()
+        .name("no-mob-in-spawner")
+        .description("Disables rendering of spinning mobs inside of mob spawners")
+        .defaultValue(false)
+        .build()
+    );
+
+
     public NoRender() {
         super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
     }
@@ -403,6 +411,10 @@ public class NoRender extends Module {
 
     public boolean noInvisibility() {
         return isActive() && noInvisibility.get();
+    }
+
+    public boolean noMobInSpawner() {
+        return isActive() && noMobInSpawner.get();
     }
 
     public enum BannerRenderMode {
