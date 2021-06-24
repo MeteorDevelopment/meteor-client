@@ -34,22 +34,20 @@ public class GiveCommand extends Command {
             if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
-            addItem(item);
+            if (!mc.player.getInventory().insertStack(item)) {
+                throw NO_SPACE.create();
+            }
 
             return SINGLE_SUCCESS;
         }).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
             if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "number"), false);
-            addItem(item);
+            if (!mc.player.getInventory().insertStack(item)) {
+                throw NO_SPACE.create();
+            }
 
             return SINGLE_SUCCESS;
         })));
-    }
-
-    private void addItem(ItemStack item) {
-		if (!mc.player.getInventory().insertStack(item)) {
-            throw NO_SPACE.create();
-		}
     }
 }
