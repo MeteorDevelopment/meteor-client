@@ -103,6 +103,7 @@ public class ActiveModulesHud extends HudElement {
 
     private double prevX, prevY;
     private double prevTextLength;
+    private Color prevColor = new Color();
 
     public ActiveModulesHud(HUD hud) {
         super(hud, "active-modules", "Displays your active modules.");
@@ -211,29 +212,38 @@ public class ActiveModulesHud extends HudElement {
 
         if (outlines.get()) {
             if (index == 0) {
-                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y - 2 - outlineWidth.get(), textLength + 4 + outlineWidth.get(), outlineWidth.get(), color); // Top quad
+                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y - 2, outlineWidth.get(), renderer.textHeight() + 4, prevColor, prevColor, color, color); // Left quad
+                Renderer2D.COLOR.quad(x + textLength + 2, y - 2, outlineWidth.get(), renderer.textHeight() + 4, prevColor, prevColor, color, color); // Right quad
 
-                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y - 2 - outlineWidth.get(), outlineWidth.get(), renderer.textHeight() + 4 + outlineWidth.get(), color); // Left quad
-                Renderer2D.COLOR.quad(x + textLength + 2, y - 2 - outlineWidth.get(), outlineWidth.get(), renderer.textHeight() + 4 + outlineWidth.get(), color); // Right quad
+                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y - 2 - outlineWidth.get(), textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Top quad
 
             } else if (index == modules.size() - 1) {
-                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y + renderer.textHeight() + 2, textLength + 4 + outlineWidth.get(), outlineWidth.get(), color); // Bottom quad
+                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), renderer.textHeight() + 4, prevColor, prevColor, color, color); // Left quad
+                Renderer2D.COLOR.quad(x + textLength + 2, y, outlineWidth.get(), renderer.textHeight() + 4, prevColor, prevColor, color, color); // Right quad
 
-                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), renderer.textHeight() + 2, color); // Left quad
-                Renderer2D.COLOR.quad(x + textLength + 2, y, outlineWidth.get(), renderer.textHeight() + 2, color); // Right quad
-
+                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y + renderer.textHeight() + 2, textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Bottom quad
             }
 
             if (index > 0) {
-                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), renderer.textHeight() + 2, color); // Left quad
-                Renderer2D.COLOR.quad(x + textLength + 2, y, outlineWidth.get(), renderer.textHeight() + 2, color); // Right quad
+                if (index < modules.size() - 1) {
 
-                Renderer2D.COLOR.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), prevY + renderer.textHeight() + 2, (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(), color); // Left inbetween quad
-                Renderer2D.COLOR.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, y, (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(), color); // Right inbetween quad
+                    Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), renderer.textHeight() + 2, prevColor, prevColor, color, color); // Left quad
+                    Renderer2D.COLOR.quad(x + textLength + 2, y, outlineWidth.get(), renderer.textHeight() + 2, prevColor, prevColor, color, color); // Right quad
+
+                }
+
+                Renderer2D.COLOR.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), prevY + renderer.textHeight() + 2,
+                                  (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
+                                         prevColor, prevColor, color, color); // Left inbetween quad
+
+                Renderer2D.COLOR.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, y,
+                                  (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
+                                         prevColor, prevColor, color, color); // Right inbetween quad
             }
         }
 
         prevTextLength = textLength;
+        prevColor = color;
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
