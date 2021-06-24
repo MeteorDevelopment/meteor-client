@@ -261,7 +261,7 @@ public class NoRender extends Module {
     );
 
     private final Setting<Boolean> noMobInSpawner = sgEntity.add(new BoolSetting.Builder()
-        .name("no-mob-in-spawner")
+        .name("spawner-entities")
         .description("Disables rendering of spinning mobs inside of mob spawners")
         .defaultValue(false)
         .build()
