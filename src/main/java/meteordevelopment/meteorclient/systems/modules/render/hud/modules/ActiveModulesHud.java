@@ -71,7 +71,9 @@ public class ActiveModulesHud extends HudElement {
         .name("outline-width")
         .description("Outline width")
         .defaultValue(4)
-        .min(1).sliderMax(10)
+        .min(1)
+        .sliderMin(1)
+        .sliderMax(10)
         .visible(outlines::get)
         .build()
     );
@@ -218,8 +220,8 @@ public class ActiveModulesHud extends HudElement {
                 Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y - 2 - outlineWidth.get(), textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Top quad
 
             } else if (index == modules.size() - 1) {
-                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), renderer.textHeight() + 4, prevColor, prevColor, color, color); // Left quad
-                Renderer2D.COLOR.quad(x + textLength + 2, y, outlineWidth.get(), renderer.textHeight() + 4, prevColor, prevColor, color, color); // Right quad
+                Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y, outlineWidth.get(), renderer.textHeight() + 2 + outlineWidth.get(), prevColor, prevColor, color, color); // Left quad
+                Renderer2D.COLOR.quad(x + textLength + 2, y, outlineWidth.get(), renderer.textHeight() + 2 + outlineWidth.get(), prevColor, prevColor, color, color); // Right quad
 
                 Renderer2D.COLOR.quad(x - 2 - outlineWidth.get(), y + renderer.textHeight() + 2, textLength + 4 + (outlineWidth.get() * 2), outlineWidth.get(), prevColor, prevColor, color, color); // Bottom quad
             }
