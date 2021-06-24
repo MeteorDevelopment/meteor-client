@@ -69,7 +69,7 @@ public class ActiveModulesHud extends HudElement {
 
     private final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
         .name("outline-width")
-        .description("Whether or not to render outlines")
+        .description("Outline width")
         .defaultValue(4)
         .min(1).sliderMax(10)
         .visible(outlines::get)
