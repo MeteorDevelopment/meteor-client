@@ -95,6 +95,7 @@
     "LivingEntityAccessor",
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
+    "LlamaEntityMixin",
     "MapRendererMixin",
     "Matrix4fMixin",
     "MinecraftClientAccessor",
