@@ -234,11 +234,11 @@ public class ActiveModulesHud extends HudElement {
 
                 }
 
-                Renderer2D.COLOR.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), prevY + renderer.textHeight() + 2,
+                Renderer2D.COLOR.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
                                   (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
                                          prevColor, prevColor, color, color); // Left inbetween quad
 
-                Renderer2D.COLOR.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, y,
+                Renderer2D.COLOR.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, Math.min(prevX + prevTextLength, x + textLength) == x + textLength ? y : y - outlineWidth.get(),
                                   (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
                                          prevColor, prevColor, color, color); // Right inbetween quad
             }
