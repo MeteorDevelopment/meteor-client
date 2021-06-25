@@ -52,7 +52,6 @@ dependencies {
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
-	dependency "com.g00fy2:versioncompare:${project.versioncompare_version}"
 	dependency "com.github.minndevelopment:java-discordrpc:${project.discordrpc_version}"
 }
 

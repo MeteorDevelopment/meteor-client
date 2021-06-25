@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.config;
 
-import com.g00fy2.versioncompare.Version;
 import meteordevelopment.meteorclient.gui.tabs.builtin.ConfigTab;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -55,7 +55,7 @@ public class Config extends System<Config> {
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-        tag.putString("version", version.getOriginalString());
+        tag.putString("version", version.toString());
 
         tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
