@@ -70,10 +70,15 @@ public class NoSlow extends Module {
         .build()
     );
 
-    private boolean usedTimer;
+    private boolean resetTimer;
 
     public NoSlow() {
         super(Categories.Movement, "no-slow", "Allows you to move normally when using objects that will slow you.");
+    }
+
+    @Override
+    public void onActivate() {
+        resetTimer = false;
     }
 
     public boolean airStrict() {
@@ -98,29 +103,19 @@ public class NoSlow extends Module {
 
     @EventHandler
     private void onWebEntityCollision(CobwebEntityCollisionEvent event) {
-        if (web.get() != WebMode.None) {
-            switch (web.get()) {
-                case Vanilla -> event.cancel();
-                case Timer -> {
-                    if (!mc.player.isOnGround()) {
-                        if (event.state.getBlock() == Blocks.COBWEB) {
-                            Modules.get().get(Timer.class).setOverride(webTimer.get());
-                            usedTimer = true;
-                        }
-                    } else {
-                        Modules.get().get(Timer.class).setOverride(Timer.OFF);
-                        usedTimer = false;
-                    }
-                }
-            }
-        }
+        if (web.get() == WebMode.Vanilla) event.cancel();
     }
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (usedTimer && mc.world.getBlockState(mc.player.getBlockPos()).getBlock() != Blocks.COBWEB) {
-            Modules.get().get(Timer.class).setOverride(Timer.OFF);
-            usedTimer = false;
+        if (web.get() == WebMode.Timer) {
+            if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.COBWEB && !mc.player.isOnGround()) {
+                resetTimer = false;
+                Modules.get().get(Timer.class).setOverride(webTimer.get());
+            } else if (!resetTimer) {
+                Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                resetTimer = true;
+            }
         }
     }
 
