@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.NewUpdateScreen;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.network.HttpUtils;
+import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
@@ -79,11 +79,16 @@ public class TitleScreenMixin extends Screen {
             Utils.firstTimeTitleScreen = false;
             MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-            MeteorExecutor.execute(() -> HttpUtils.getLines("http://meteorclient.com/api/version", s -> {
-                Version latestVer = new Version(s);
-                if (latestVer.isHigherThan(Config.get().version))
+            MeteorExecutor.execute(() -> {
+                String res = Http.get("https://meteorclient.com/api/version").sendString();
+                if (res == null) return;
+
+                Version latestVer = new Version(res);
+
+                if (latestVer.isHigherThan(Config.get().version)) {
                     Utils.mc.openScreen(new NewUpdateScreen(GuiThemes.get(), latestVer));
-            }));
+                }
+            });
         }
     }
 
