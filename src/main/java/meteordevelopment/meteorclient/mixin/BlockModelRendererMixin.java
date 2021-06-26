@@ -26,7 +26,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BlockModelRenderer.class)
 public class BlockModelRendererMixin {
-
     @Shadow @Final private BlockColors colorMap;
 
     @Inject(method = "renderQuad(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/client/util/math/MatrixStack$Entry;Lnet/minecraft/client/render/model/BakedQuad;FFFFIIIII)V",
@@ -34,7 +33,7 @@ public class BlockModelRendererMixin {
     private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, VertexConsumer vertexConsumer, MatrixStack.Entry matrixEntry, BakedQuad quad, float brightness0, float brightness1, float brightness2, float brightness3, int light0, int light1, int light2, int light3, int overlay, CallbackInfo ci) {
         WallHack wallHack = Modules.get().get(WallHack.class);
 
-        if(wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
+        if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
             BufferBuilder bufferBuilder = (BufferBuilder) vertexConsumer;
             BufferBuilderAccessor bufferBuilderAccessor = ((BufferBuilderAccessor) bufferBuilder);
 
@@ -43,14 +42,13 @@ public class BlockModelRendererMixin {
             if (prevOffset > 0) {
                 int i = bufferBuilderAccessor.getVertexFormat().getVertexSize();
 
-                for(int l = 1; l <= 4; l++) {
+                for (int l = 1; l <= 4; l++) {
                     bufferBuilderAccessor.setElementOffset(prevOffset - i * l);
-                    bufferBuilder.putByte(15, (byte)((int)(wallHack.opacity.get())));
+                    bufferBuilder.putByte(15, (byte) ((int) (wallHack.opacity.get())));
                 }
 
                 bufferBuilderAccessor.setElementOffset(prevOffset);
             }
         }
     }
-
 }
