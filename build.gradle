@@ -34,7 +34,7 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API Indigo Renderer (only used in mixins)
-	modImplementation fabricApi.module("fabric-renderer-indigo", project.api_version)
+	modCompileOnly fabricApi.module("fabric-renderer-indigo", project.api_version)
 
 	// For XRay compatibility
 	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
