@@ -31,6 +31,8 @@ import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
@@ -55,14 +57,30 @@ public class BetterChat extends Module {
             .build()
     );
 
-    private final Setting<Boolean> antiSpam = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
+        .name("coords-protection")
+        .description("Prevents you from sending messages in chat that may contain coordinates.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> rainbowPrefix = sgGeneral.add(new BoolSetting.Builder()
+        .name("rainbow-prefix")
+        .description("Makes the [Meteor] prefix on chat info rainbow.")
+        .defaultValue(false)
+        .build()
+    );
+
+    // Anti spam
+
+    private final Setting<Boolean> antiSpam = sgAntiSpam.add(new BoolSetting.Builder()
             .name("anti-spam")
             .description("Blocks duplicate messages from filling your chat.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> antiSpamDepth = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
             .name("depth")
             .description("How many messages to check for duplicate messages.")
             .defaultValue(20)
@@ -72,28 +90,23 @@ public class BetterChat extends Module {
             .build()
     );
 
-    private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
-            .name("coords-protection")
-            .description("Prevents you from sending messages in chat that may contain coordinates.")
-            .defaultValue(true)
-            .build()
-    );
+    // Longer chat
 
-    private final Setting<Boolean> infiniteChatBox = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> infiniteChatBox = sgLongerChat.add(new BoolSetting.Builder()
             .name("infinite-chat-box")
             .description("Lets you type infinitely long messages.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> longerChatHistory = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> longerChatHistory = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-history")
             .description("Extends chat length.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> longerChatLines = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
             .name("extra-lines")
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
@@ -260,7 +273,7 @@ public class BetterChat extends Module {
         if (coordsProtection.get() && containsCoordinates(message)) {
             BaseText warningMessage = new LiteralText("It looks like there are coordinates in your message! ");
 
-            BaseText sendButton = getSendButton(message, "Send your message to the global chat even if there are coordinates:");
+            BaseText sendButton = getSendButton(message);
             warningMessage.append(sendButton);
 
             ChatUtils.sendMsg(warningMessage);
@@ -270,20 +283,6 @@ public class BetterChat extends Module {
         }
 
         event.message = message;
-    }
-
-    // LONGER CHAT
-
-    public boolean isInfiniteChatBox() {
-        return isActive() && infiniteChatBox.get();
-    }
-
-    public boolean isLongerChat() {
-        return isActive() && longerChatHistory.get();
-    }
-
-    public int getChatLength() {
-        return longerChatLines.get();
     }
 
     // Annoy
@@ -335,26 +334,40 @@ public class BetterChat extends Module {
         return message.matches(".*(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?).*");
     }
 
-    private BaseText getSendButton(String message, String hint) {
+    private BaseText getSendButton(String message) {
         BaseText sendButton = new LiteralText("[SEND ANYWAY]");
         BaseText hintBaseText = new LiteralText("");
 
-        BaseText hintMsg = new LiteralText(hint);
+        BaseText hintMsg = new LiteralText("Send your message to the global chat even if there are coordinates:");
         hintMsg.setStyle(hintBaseText.getStyle().withFormatting(Formatting.GRAY));
         hintBaseText.append(hintMsg);
 
         hintBaseText.append(new LiteralText('\n' + message));
 
         sendButton.setStyle(sendButton.getStyle()
-                .withFormatting(Formatting.DARK_RED)
-                .withClickEvent(new ClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        Commands.get().get(SayCommand.class).toString(message)
-                ))
-                .withHoverEvent(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
-                        hintBaseText
-                )));
+            .withFormatting(Formatting.DARK_RED)
+            .withClickEvent(new ClickEvent(
+                ClickEvent.Action.RUN_COMMAND,
+                Commands.get().get(SayCommand.class).toString(message)
+            ))
+            .withHoverEvent(new HoverEvent(
+                HoverEvent.Action.SHOW_TEXT,
+                hintBaseText
+            )));
         return sendButton;
+    }
+
+    // Longer chat
+
+    public boolean isInfiniteChatBox() {
+        return isActive() && infiniteChatBox.get();
+    }
+
+    public boolean isLongerChat() {
+        return isActive() && longerChatHistory.get();
+    }
+
+    public int getChatLength() {
+        return longerChatLines.get();
     }
 }

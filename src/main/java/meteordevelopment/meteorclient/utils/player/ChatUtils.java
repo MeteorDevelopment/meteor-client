@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColor;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.text.*;
@@ -107,7 +109,9 @@ public class ChatUtils {
 
         RAINBOW.setSpeed(RainbowColors.GLOBAL.getSpeed());
 
-        if (Config.get().rainbowPrefix) {
+        BetterChat betterChat = Modules.get().get(BetterChat.class);
+
+        if (betterChat.isActive() && betterChat.rainbowPrefix.get()) {
             meteor.append(new LiteralText("M").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
             meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
             meteor.append(new LiteralText("t").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));

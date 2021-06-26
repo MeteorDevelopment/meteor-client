@@ -106,15 +106,6 @@ public class ConfigTab extends Tab {
             .build()
     );
 
-    public static final Setting<Boolean> rainbowPrefix = sgChat.add(new BoolSetting.Builder()
-            .name("rainbow-prefix")
-            .description("Makes the [Meteor] prefix on chat info rainbow.")
-            .defaultValue(false)
-            .onChanged(aBoolean -> Config.get().rainbowPrefix = aBoolean)
-            .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().rainbowPrefix))
-            .build()
-    );
-
     public static final Setting<Boolean> titleScreenCredits = sgScreens.add(new BoolSetting.Builder()
             .name("title-screen-credits")
             .description("Show Meteor credits on title screen")
