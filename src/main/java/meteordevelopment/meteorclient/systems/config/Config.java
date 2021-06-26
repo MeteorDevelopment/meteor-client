@@ -27,7 +27,6 @@ public class Config extends System<Config> {
     public boolean openChatOnPrefix = ConfigTab.openChatOnPrefix.get();
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
-    public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
 
     public boolean titleScreenCredits = ConfigTab.titleScreenCredits.get();
     public boolean titleScreenSplashes = ConfigTab.titleScreenSplashes.get();
@@ -66,7 +65,6 @@ public class Config extends System<Config> {
         tag.putBoolean("openChatOnPrefix", openChatOnPrefix);
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
-        tag.putBoolean("rainbowPrefix", rainbowPrefix);
 
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
         tag.putBoolean("titleScreenSplashes", titleScreenSplashes);
@@ -89,7 +87,6 @@ public class Config extends System<Config> {
         openChatOnPrefix = getBoolean(tag, "openChatOnPrefix", ConfigTab.openChatOnPrefix);
         chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.chatCommandsInfo);
         deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
-        rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
 
         titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
         titleScreenSplashes = getBoolean(tag, "titleScreenSplashes", ConfigTab.titleScreenSplashes);
