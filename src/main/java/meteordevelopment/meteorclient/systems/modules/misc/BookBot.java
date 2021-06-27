@@ -296,7 +296,9 @@ public class BookBot extends Module {
     public NbtCompound toTag() {
         NbtCompound tag = super.toTag();
 
-        tag.putString("file", file.getAbsolutePath());
+        if (file != null && file.exists()) {
+            tag.putString("file", file.getAbsolutePath());
+        }
 
         return tag;
     }
