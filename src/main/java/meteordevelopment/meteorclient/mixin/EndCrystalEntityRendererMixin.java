@@ -121,5 +121,4 @@ public abstract class EndCrystalEntityRendererMixin {
             frame.render(matrices, vertices, light, overlay, color.r/255f, color.g/255f, color.b/255f, color.a/255f);
         }
     }
-
 }
