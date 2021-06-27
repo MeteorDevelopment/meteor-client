@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
@@ -73,7 +74,10 @@ public abstract class WorldRendererMixin {
             Utils.renderingEntityOutline = true;
 
             Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+
+            GlStateManager._disableDepthTest();
             renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
+            GlStateManager._enableDepthTest();
 
             Utils.renderingEntityOutline = false;
             this.entityOutlinesFramebuffer = prevBuffer;
