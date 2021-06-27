@@ -42,7 +42,7 @@ public class BookScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4, 70, 20, new LiteralText("Copy"), button -> {
             NbtList listTag = new NbtList();
             for (int i = 0; i < contents.getPageCount(); i++) listTag.add(NbtString.of(contents.getPage(i).getString()));
 
