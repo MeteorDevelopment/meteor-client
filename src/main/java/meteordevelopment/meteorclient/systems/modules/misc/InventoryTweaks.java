@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.mixin.HandledScreenAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
@@ -69,7 +70,7 @@ public class InventoryTweaks extends Module {
         .description("Allows you to store four extra items in your crafting grid.")
         .defaultValue(true)
         .onChanged(v -> {
-            if (v) return;
+            if (v || !Utils.canUpdate()) return;
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
             invOpened = false;
         })
@@ -169,7 +170,7 @@ public class InventoryTweaks extends Module {
     @Override
     public void onDeactivate() {
         sorter = null;
-        
+
         if (invOpened) {
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
         }
@@ -224,7 +225,7 @@ public class InventoryTweaks extends Module {
     private void onDropItems(DropItemsEvent event) {
         if (antiDropItems.get().contains(event.itemStack.getItem())) event.cancel();
     }
-    
+
     // XCarry
 
     @EventHandler
@@ -294,7 +295,7 @@ public class InventoryTweaks extends Module {
     public boolean autoDump() {
         return isActive() && autoDump.get();
     }
-    
+
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
     }
