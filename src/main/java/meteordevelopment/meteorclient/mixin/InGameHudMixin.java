@@ -21,7 +21,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(InGameHud.class)
 public abstract class InGameHudMixin {
@@ -57,11 +59,10 @@ public abstract class InGameHudMixin {
         if (Modules.get().get(NoRender.class).noPortalOverlay()) info.cancel();
     }
 
-    // TODO: Fix
-    /*@Inject(method = "renderPumpkinOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderPumpkinOverlay(CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) info.cancel();
-    }*/
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/util/Identifier;F)V", ordinal = 0))
+    private void onRenderPumpkinOverlay(Args args) {
+        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(1, 0f);
+    }
 
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderVignetteOverlay(Entity entity, CallbackInfo info) {
