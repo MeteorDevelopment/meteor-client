@@ -50,7 +50,7 @@ public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData
 
         // Content
         matrices.push();
-        matrices.translate(x+16, y+12, z+1);
+        matrices.translate(x + 16, y + 12, z + 1);
         matrices.scale(0.7f, 0.7f, 1f);
         int offset = 0;
         for (OrderedText line : textRenderer.wrapLines(page, 112)) {

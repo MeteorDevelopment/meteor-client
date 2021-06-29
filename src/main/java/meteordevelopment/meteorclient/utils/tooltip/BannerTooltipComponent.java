@@ -34,11 +34,13 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public int getHeight() { return 32*5-2; }
+    public int getHeight() {
+        return 32 * 5 - 2;
+    }
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
-        return 16*5;
+        return 16 * 5;
     }
 
     @Override

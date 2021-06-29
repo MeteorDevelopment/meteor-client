@@ -31,17 +31,19 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
     @Override
     public int getHeight() {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
-        return (int)((128+16)*scale) + 2;
+        return (int) ((128 + 16) * scale) + 2;
     }
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
-        return (int)((128+16)*scale);
+        return (int) ((128 + 16) * scale);
     }
 
     @Override
-    public TooltipComponent getComponent() { return this; }
+    public TooltipComponent getComponent() {
+        return this;
+    }
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
@@ -50,8 +52,8 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         // Background
         matrices.push();
         matrices.translate(x, y, z);
-        matrices.scale((float)(scale)*2, (float)(scale)*2, 0);
-        matrices.scale((64+8)/64f,(64+8)/64f,0);
+        matrices.scale((float) (scale) * 2, (float) (scale) * 2, 0);
+        matrices.scale((64 + 8) / 64f, (64 + 8) / 64f, 0);
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderTexture(0, TEXTURE_MAP_BACKGROUND);
         DrawableHelper.drawTexture(matrices, 0, 0, 0, 0, 0, 64, 64, 64, 64);
@@ -63,7 +65,7 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         if (mapState == null) return;
         matrices.push();
         matrices.translate(x, y, z);
-        matrices.scale((float)scale, (float)scale, 0);
+        matrices.scale((float) scale, (float) scale, 0);
         matrices.translate(8, 8, 0);
         mc.gameRenderer.getMapRenderer().draw(matrices, consumer, this.mapId, mapState, false, 0xF000F0);
         matrices.pop();

@@ -9,6 +9,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.GetTooltipEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
+import meteordevelopment.meteorclient.mixin.EntityAccessor;
+import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -20,6 +22,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BannerPattern;
+import net.minecraft.entity.*;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
@@ -126,10 +129,17 @@ public class BetterTooltips extends Module {
     );
 
     private final Setting<Boolean> banners = sgPreviews.add(new BoolSetting.Builder()
-        .name("banners")
-        .description("Shows banners' patterns when hovering over it in an inventory.")
-        .defaultValue(true)
-        .build()
+            .name("banners")
+            .description("Shows banners' patterns when hovering over it in an inventory.")
+            .defaultValue(true)
+            .build()
+    );
+
+    private final Setting<Boolean> fishPeek = sgPreviews.add(new BoolSetting.Builder()
+            .name("entities")
+            .description("Shows entities in buckets.")
+            .defaultValue(true)
+            .build()
     );
 
     // Extras
@@ -169,20 +179,24 @@ public class BetterTooltips extends Module {
         return isActive() && shulkerCompactTooltip.get();
     }
 
-    boolean previewEChest() {
+    private boolean previewEChest() {
         return isActive() && isPressed() && echest.get();
     }
 
-    boolean previewMaps() {
+    private boolean previewMaps() {
         return isActive() && isPressed() && maps.get();
     }
 
-    boolean previewBooks() {
+    private boolean previewBooks() {
         return isActive() && isPressed() && books.get();
     }
 
-    boolean previewBanners() {
+    private boolean previewBanners() {
         return isActive() && isPressed() && banners.get();
+    }
+
+    private boolean previewEntities() {
+        return isActive() && isPressed() && fishPeek.get(); 
     }
 
     private boolean isPressed() {
@@ -266,6 +280,7 @@ public class BetterTooltips extends Module {
             || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
             || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
+            || (event.itemStack.getItem() instanceof EntityBucketItem && fishPeek.get() && !previewEntities())
             || ((event.itemStack.getItem() instanceof BannerItem || event.itemStack.getItem() instanceof BannerPatternItem) && !previewBanners())) {
             event.list.add(new LiteralText(""));
             event.list.add(new LiteralText("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
@@ -276,7 +291,7 @@ public class BetterTooltips extends Module {
             || (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest() && !showVanilla.get())
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && previewBooks() && !showVanilla.get())
             || (event.itemStack.getItem() == Items.WRITTEN_BOOK && previewBooks() && !showVanilla.get())
-            || (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest() && !showVanilla.get())
+            || (event.itemStack.getItem() instanceof EntityBucketItem && previewEntities() && !showVanilla.get())
             || (Utils.hasItems(event.itemStack) && previewShulkers() && !showVanilla.get())
             || ((event.itemStack.getItem() instanceof BannerItem || event.itemStack.getItem() instanceof BannerPatternItem) && previewBanners() && !showVanilla.get())) {
             event.list.clear();
@@ -323,6 +338,18 @@ public class BetterTooltips extends Module {
             event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(
                 ((BannerPatternItem)(event.itemStack.getItem())).getPattern()
             ));
+        }
+
+        // Fish peek
+        else if (event.itemStack.getItem() instanceof EntityBucketItem && previewEntities()) {
+            EntityBucketItem bucketItem = (EntityBucketItem) event.itemStack.getItem();
+            EntityType type = ((EntityBucketItemAccessor)bucketItem).getEntityType();
+            Entity entity = type.create(mc.world);
+            if (entity != null) {
+                ((Bucketable)entity).copyDataFromNbt(event.itemStack.getOrCreateTag());
+                ((EntityAccessor)entity).setInWater(true);
+                event.tooltipData = new EntityTooltipComponent(entity);
+            }
         }
     }
 
