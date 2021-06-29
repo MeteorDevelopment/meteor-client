@@ -26,26 +26,16 @@ import java.util.function.Function;
 
 @Mixin(value = AbstractQuadRenderer.class, remap = false)
 public abstract class AbstractQuadRendererMixin {
-    @Final
-    @Shadow
-    protected BlockRenderInfo blockInfo;
+    @Final @Shadow protected BlockRenderInfo blockInfo;
+    @Final @Shadow protected Function<RenderLayer, VertexConsumer> bufferFunc;
+    @Final @Shadow protected Vec3f normalVec;
 
-    @Final
-    @Shadow
-    protected Function<RenderLayer, VertexConsumer> bufferFunc;
+    @Shadow public static void bufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec) { }
 
-    @Final
-    @Shadow
-    protected Vec3f normalVec;
-
-    @Shadow
-    public static void bufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec) { }
-
+    @Shadow protected abstract Matrix3f normalMatrix();
     @Shadow protected abstract Matrix4f matrix();
 
     @Shadow protected abstract int overlay();
-
-    @Shadow protected abstract Matrix3f normalMatrix();
 
     @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lnet/minecraft/class_1921;)V",

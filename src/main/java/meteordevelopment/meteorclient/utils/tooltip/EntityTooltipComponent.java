@@ -23,7 +23,6 @@ import net.minecraft.util.math.Vec3f;
 // Thanks to
 // https://github.com/Queerbric/Inspecio/blob/1.17/src/main/java/io/github/queerbric/inspecio/tooltip/EntityTooltipComponent.java
 public class EntityTooltipComponent implements MeteorTooltipData, TooltipComponent {
-
     protected final Entity entity;
 
     public EntityTooltipComponent(Entity entity) {
@@ -41,18 +40,20 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) { return 60; }
+    public int getWidth(TextRenderer textRenderer) {
+        return 60;
+    }
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
         matrices.push();
         matrices.translate(15, 2, z);
         this.entity.setVelocity(1.f, 1.f, 1.f);
-        this.renderEntity(matrices, x, y, true, 90f);
+        this.renderEntity(matrices, x, y);
         matrices.pop();
     }
 
-    protected void renderEntity(MatrixStack matrices, int x, int y, boolean spin, float defaultYaw) {
+    protected void renderEntity(MatrixStack matrices, int x, int y) {
         if (mc.player == null) return;
         float size = 24;
         if (Math.max(entity.getWidth(), entity.getHeight()) > 1.0) {
@@ -61,10 +62,12 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         DiffuseLighting.disableGuiDepthLighting();
         matrices.push();
         int yOffset = 16;
+
         if (entity instanceof SquidEntity) {
             size = 16;
             yOffset = 2;
         }
+
         matrices.translate(x + 10, y + yOffset, 1050);
         matrices.scale(1f, 1f, -1);
         matrices.translate(0, 0, 1000);
@@ -73,7 +76,7 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         Quaternion quaternion2 = Vec3f.POSITIVE_X.getDegreesQuaternion(-10.f);
         quaternion.hamiltonProduct(quaternion2);
         matrices.multiply(quaternion);
-        setupAngles(spin, defaultYaw);
+        setupAngles();
         EntityRenderDispatcher entityRenderDispatcher = mc.getEntityRenderDispatcher();
         quaternion2.conjugate();
         entityRenderDispatcher.setRotation(quaternion2);
@@ -88,8 +91,8 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
         DiffuseLighting.enableGuiDepthLighting();
     }
 
-    protected void setupAngles(boolean spin, float defaultYaw) {
-        float yaw = spin ? (float) (((System.currentTimeMillis() / 10)) % 360) : defaultYaw;
+    protected void setupAngles() {
+        float yaw = (float) (((System.currentTimeMillis() / 10)) % 360);
         entity.setYaw(yaw);
         entity.setHeadYaw(yaw);
         entity.setPitch(0.f);
@@ -98,5 +101,4 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
             ((LivingEntity) entity).bodyYaw = yaw;
         }
     }
-
 }
