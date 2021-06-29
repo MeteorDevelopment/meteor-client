@@ -34,13 +34,11 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public int getHeight() {
-        return 32;
-    }
+    public int getHeight() { return 32*5-2; }
 
     @Override
     public int getWidth(TextRenderer textRenderer) {
-        return 16;
+        return 16*5;
     }
 
     @Override
@@ -53,6 +51,9 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
         matrices.translate(0.5, 16, 0);
         matrices.scale(6, -6, 1);
         matrices.scale(2, -2, -2);
+        matrices.push();
+        matrices.translate(2.5, 8.5, 0);
+        matrices.scale(5, 5, 5);
         VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
         this.bannerField.pitch = 0f;
         this.bannerField.pivotY = -32f;
@@ -69,6 +70,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
                 BannerBlockEntity.getPatternListTag(this.banner)
             )
         );
+        matrices.pop();
         matrices.pop();
         immediate.draw();
         matrices.pop();
