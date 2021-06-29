@@ -64,6 +64,11 @@ public abstract class InGameHudMixin {
         if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(1, 0f);
     }
 
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/util/Identifier;F)V", ordinal = 1))
+    private void onRenderPowderedSnowOverlay(Args args) {
+        if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(1, 0f);
+    }
+
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderVignetteOverlay(Entity entity, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noVignette()) info.cancel();

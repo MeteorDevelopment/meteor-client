@@ -57,6 +57,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noPowderedSnowOverlay = sgOverlay.add(new BoolSetting.Builder()
+        .name("powdered-snow-overlay")
+        .description("Disables rendering of the powdered snow overlay.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> noFireOverlay = sgOverlay.add(new BoolSetting.Builder()
             .name("fire-overlay")
             .description("Disables rendering of the fire overlay.")
@@ -296,6 +303,10 @@ public class NoRender extends Module {
 
     public boolean noWaterOverlay() {
         return isActive() && noWaterOverlay.get();
+    }
+
+    public boolean noPowderedSnowOverlay() {
+        return isActive() && noPowderedSnowOverlay.get();
     }
 
     public boolean noInWallOverlay() {
