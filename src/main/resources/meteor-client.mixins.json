@@ -63,6 +63,8 @@
     "EnchantingTableBlockEntityRendererMixin",
     "EndCrystalEntityRendererMixin",
     "EntityMixin",
+    "EntityAccessor",
+    "EntityBucketItemAccessor",
     "EntityRenderDispatcherMixin",
     "EntityRendererMixin",
     "EntityVelocityUpdateS2CPacketAccessor",
