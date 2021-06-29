@@ -1,0 +1,77 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.utils.tooltip;
+
+import net.minecraft.block.entity.BannerBlockEntity;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.model.ModelPart;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
+import net.minecraft.client.render.entity.model.EntityModelLayers;
+import net.minecraft.client.render.item.ItemRenderer;
+import net.minecraft.client.render.model.ModelLoader;
+import net.minecraft.client.texture.TextureManager;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.item.BannerItem;
+import net.minecraft.item.ItemStack;
+
+public class BannerTooltipComponent implements MeteorTooltipData, TooltipComponent {
+    private final ItemStack banner;
+    private final ModelPart bannerField;
+
+    public BannerTooltipComponent(ItemStack banner) {
+        this.banner = banner;
+        this.bannerField = mc.getEntityModelLoader().getModelPart(EntityModelLayers.BANNER).getChild("flag");
+    }
+
+    @Override
+    public TooltipComponent getComponent() {
+        return this;
+    }
+
+    @Override
+    public int getHeight() {
+        return 32;
+    }
+
+    @Override
+    public int getWidth(TextRenderer textRenderer) {
+        return 16;
+    }
+
+    @Override
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
+        DiffuseLighting.disableGuiDepthLighting();
+        matrices.push();
+        matrices.translate(x + 8, y + 8, z);
+
+        matrices.push();
+        matrices.translate(0.5, 16, 0);
+        matrices.scale(6, -6, 1);
+        matrices.scale(2, -2, -2);
+        VertexConsumerProvider.Immediate immediate = mc.getBufferBuilders().getEntityVertexConsumers();
+        this.bannerField.pitch = 0f;
+        this.bannerField.pivotY = -32f;
+        BannerBlockEntityRenderer.renderCanvas(
+            matrices,
+            immediate,
+            0xF000F0,
+            OverlayTexture.DEFAULT_UV,
+            this.bannerField,
+            ModelLoader.BANNER_BASE,
+            true,
+            BannerBlockEntity.getPatternsFromNbt(
+                ((BannerItem) this.banner.getItem()).getColor(),
+                BannerBlockEntity.getPatternListTag(this.banner)
+            )
+        );
+        matrices.pop();
+        immediate.draw();
+        matrices.pop();
+        DiffuseLighting.enableGuiDepthLighting();
+    }
+}

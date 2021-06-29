@@ -10,7 +10,10 @@ import meteordevelopment.meteorclient.events.game.GetTooltipEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.tooltip.MeteorTooltipData;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
+import net.minecraft.client.item.TooltipData;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
@@ -18,7 +21,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
+
+import java.util.List;
 
 @Mixin(Screen.class)
 public abstract class ScreenMixin {
@@ -36,5 +42,14 @@ public abstract class ScreenMixin {
         args.set(1, event.list);
         args.set(3, event.x);
         args.set(4, event.y);
+    }
+
+    @SuppressWarnings("UnresolvedMixinReference")
+    @Inject(method = "method_32635", at = @At("HEAD"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private static void onComponentConstruct(List<TooltipComponent> list, TooltipData data, CallbackInfo info) {
+        if (data instanceof MeteorTooltipData) {
+            list.add(((MeteorTooltipData) data).getComponent());
+            info.cancel();
+        }
     }
 }
