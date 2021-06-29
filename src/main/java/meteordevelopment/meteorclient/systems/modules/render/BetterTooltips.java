@@ -401,7 +401,7 @@ public class BetterTooltips extends Module {
     private ItemStack createBannerFromPattern(BannerPattern pattern) {
         ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
         NbtCompound nbt = itemStack.getOrCreateSubTag("BlockEntityTag");
-        NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, DyeColor.GRAY).add(pattern, DyeColor.WHITE).toNbt();
+        NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, DyeColor.BLACK).add(pattern, DyeColor.WHITE).toNbt();
         nbt.put("Patterns", listNbt);
         return itemStack;
     }
