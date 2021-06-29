@@ -31,13 +31,19 @@ public class ContainerTooltipComponent implements TooltipComponent, MeteorToolti
     }
 
     @Override
-    public TooltipComponent getComponent() { return this; }
+    public TooltipComponent getComponent() {
+        return this;
+    }
 
     @Override
-    public int getHeight() { return 67; }
+    public int getHeight() {
+        return 67;
+    }
 
     @Override
-    public int getWidth(TextRenderer textRenderer) { return 176; }
+    public int getWidth(TextRenderer textRenderer) {
+        return 176;
+    }
 
     @Override
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
