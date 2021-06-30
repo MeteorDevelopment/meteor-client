@@ -32,6 +32,7 @@ import net.minecraft.inventory.Inventories;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -126,7 +127,7 @@ public class BetterTooltips extends Module {
 
     private final Setting<Boolean> banners = sgPreviews.add(new BoolSetting.Builder()
         .name("banners")
-        .description("Shows banners' patterns when hovering over it in an inventory.")
+        .description("Shows banners' patterns when hovering over it in an inventory. Also works with shields.")
         .defaultValue(true)
         .build()
     );
@@ -243,7 +244,9 @@ public class BetterTooltips extends Module {
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
             || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
             || (event.itemStack.getItem() instanceof EntityBucketItem && entities.get() && !previewEntities())
-            || ((event.itemStack.getItem() instanceof BannerItem || event.itemStack.getItem() instanceof BannerPatternItem) && !previewBanners())) {
+            || (event.itemStack.getItem() instanceof BannerItem && banners.get() && !previewBanners())
+            || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get()  && !previewBanners())
+            || (event.itemStack.getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
             event.list.add(new LiteralText(""));
             event.list.add(new LiteralText("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
@@ -251,7 +254,7 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void getTooltipData(TooltipDataEvent event) {
-        // Shulker Preview
+        // Container preview
         if (Utils.hasItems(event.itemStack) && previewShulkers()) {
             NbtCompound compoundTag = event.itemStack.getSubTag("BlockEntityTag");
             DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
@@ -289,6 +292,12 @@ public class BetterTooltips extends Module {
             event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(
                 ((BannerPatternItem) (event.itemStack.getItem())).getPattern()
             ));
+        }
+        else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
+            ItemStack banner = createBannerFromShield(event.itemStack);
+            if (banner != null) {
+                event.tooltipData = new BannerTooltipComponent(banner);
+            }
         }
 
         // Fish peek
@@ -365,6 +374,22 @@ public class BetterTooltips extends Module {
         NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, DyeColor.BLACK).add(pattern, DyeColor.WHITE).toNbt();
         nbt.put("Patterns", listNbt);
         return itemStack;
+    }
+
+    private ItemStack createBannerFromShield(ItemStack item) {
+        if (!item.hasTag()
+            || !item.getTag().contains("BlockEntityTag")
+            || !item.getTag().getCompound("BlockEntityTag").contains("Base"))
+            return null;
+        NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, ShieldItem.getColor(item)).toNbt();
+        NbtCompound nbt = item.getOrCreateSubTag("BlockEntityTag");
+        ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
+        NbtCompound bannerTag = bannerItem.getOrCreateSubTag("BlockEntityTag");
+        bannerTag.put("Patterns", listNbt);
+        if (!nbt.contains("Patterns")) return bannerItem;
+        NbtList shieldPatterns = nbt.getList("Patterns", NbtElement.COMPOUND_TYPE);
+        listNbt.addAll(shieldPatterns);
+        return bannerItem;
     }
 
     public boolean middleClickOpen() {
