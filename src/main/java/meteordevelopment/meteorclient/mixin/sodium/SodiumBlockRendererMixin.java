@@ -5,36 +5,59 @@
 
 package meteordevelopment.meteorclient.mixin.sodium;
 
-import net.minecraft.client.MinecraftClient;
+import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
+import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadColorProvider;
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.model.quad.blender.BiomeColorBlender;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadOrientation;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadWinding;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
+import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
+import me.jellysquid.mods.sodium.client.render.pipeline.BlockRenderer;
+import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.WallHack;
+import meteordevelopment.meteorclient.systems.modules.render.Xray;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.render.model.BakedModel;
+import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.texture.Sprite;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.BlockRenderView;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 // TODO: Sodium
-@Mixin(MinecraftClient.class)
-//@Mixin(value = BlockRenderer.class, remap = false)
+//@Mixin(MinecraftClient.class)
+@Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
-    /*@Shadow
-    @Final
-    private ModelQuad cachedQuad;
 
     @Shadow
     @Final
     private BiomeColorBlender biomeColorBlender;
 
 
-    @Inject(method = "renderQuad", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/model/quad/ModelQuadViewMutable;setColor(II)V", shift = At.Shift.AFTER), cancellable = true)
-    private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, ModelQuadSinkDelegate consumer, Vec3d offset, BlockColorProvider colorProvider, BakedQuad bakedQuad, QuadLightData light, ModelQuadFacing facing, CallbackInfo ci) {
+    @Inject(method = "renderQuad", at = @At(value = "HEAD"), cancellable = true)
+    private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo ci) {
         WallHack wallHack = Modules.get().get(WallHack.class);
 
         if(wallHack.isActive()) {
             if(wallHack.blocks.get().contains(state.getBlock())) {
-                whRenderQuad(world, state, pos, consumer, offset, colorProvider, bakedQuad, light, facing, wallHack);
+                whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, wallHack);
                 ci.cancel();
             }
         }
     }
 
     @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
-    private void onRenderModel(BlockRenderView world, BlockState state, BlockPos pos, BakedModel model, ModelQuadSinkDelegate builder, boolean cull, long seed, CallbackInfoReturnable<Boolean> cir) {
+    private void onRenderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, CallbackInfoReturnable<Boolean> cir) {
         Xray xray = Modules.get().get(Xray.class);
 
         if (xray.isActive() && xray.isBlocked(state.getBlock())) {
@@ -42,38 +65,52 @@ public class SodiumBlockRendererMixin {
         }
     }
 
-    //https://github.com/CaffeineMC/sodium-fabric/blob/5af41c180e63590b7797b864393ef584a746eccd/src/main/java/me/jellysquid/mods/sodium/client/render/pipeline/BlockRenderer.java#L112
+    //https://github.com/CaffeineMC/sodium-fabric/blob/8b3015efe85be9336a150ff7c26085ea3d2d43d0/src/main/java/me/jellysquid/mods/sodium/client/render/pipeline/BlockRenderer.java#L119
     //Copied from Sodium, for now, can't think of a better way, because of the nature of the locals, and for loop.
     //Mixin seems to freak out when I try to do this the "right" way - Wala (sobbing)
-    private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, ModelQuadSinkDelegate consumer, Vec3d offset, BlockColorProvider colorProvider, BakedQuad bakedQuad, QuadLightData light, ModelQuadFacing facing, WallHack wallHack) {
-        ModelQuadView src = (ModelQuadView)bakedQuad;
-        ModelQuadOrientation order = ModelQuadOrientation.orient(light.br);
-        ModelQuadViewMutable copy = cachedQuad;
-        int norm = ModelQuadUtil.getFacingNormal(bakedQuad.getFace());
+    private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset,
+                            ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, WallHack wallHack) {
+        ModelQuadView src = (ModelQuadView) bakedQuad;
+        ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br);
+
         int[] colors = null;
+
         if (bakedQuad.hasColor()) {
-            colors = biomeColorBlender.getColors(colorProvider, world, state, pos, src);
+            colors = this.biomeColorBlender.getColors(world, pos, src, colorProvider, state);
         }
 
-        for(int dstIndex = 0; dstIndex < 4; ++dstIndex) {
-            int srcIndex = order.getVertexIndex(dstIndex);
-            copy.setX(dstIndex, src.getX(srcIndex) + (float)offset.getX());
-            copy.setY(dstIndex, src.getY(srcIndex) + (float)offset.getY());
-            copy.setZ(dstIndex, src.getZ(srcIndex) + (float)offset.getZ());
-            int newColor = ColorABGR.mul(colors != null ? colors[srcIndex] : -1, light.br[srcIndex]);
+        int vertexStart = vertices.getVertexCount();
+
+        for (int i = 0; i < 4; i++) {
+            int j = orientation.getVertexIndex(i);
+
+            float x = src.getX(j) + (float) blockOffset.getX();
+            float y = src.getY(j) + (float) blockOffset.getY();
+            float z = src.getZ(j) + (float) blockOffset.getZ();
+
+            int color = ColorABGR.mul(colors != null ? colors[j] : 0xFFFFFFFF, light.br[j]);
+
             int alpha = wallHack.opacity.get();
-            int blue = ColorABGR.unpackBlue(newColor);
-            int green = ColorABGR.unpackGreen(newColor);
-            int red = ColorABGR.unpackRed(newColor);
+            int blue = ColorABGR.unpackBlue(color);
+            int green = ColorABGR.unpackGreen(color);
+            int red = ColorABGR.unpackRed(color);
 
-            copy.setColor(dstIndex, ColorABGR.pack(red, green, blue, alpha));
-            copy.setTexU(dstIndex, src.getTexU(srcIndex));
-            copy.setTexV(dstIndex, src.getTexV(srcIndex));
-            copy.setLight(dstIndex, light.lm[srcIndex]);
-            copy.setNormal(dstIndex, norm);
-            copy.setSprite(src.getSprite());
+            color = ColorABGR.pack(red, green, blue, alpha);
+
+            float u = src.getTexU(j);
+            float v = src.getTexV(j);
+
+            int lm = light.lm[j];
+
+            vertices.writeVertex(origin, x, y, z, color, u, v, lm);
         }
 
-        consumer.get(facing).write(copy);
-    }*/
+        indices.add(vertexStart, ModelQuadWinding.CLOCKWISE);
+
+        Sprite sprite = src.getSprite();
+
+        if (sprite != null) {
+            model.addSprite(sprite);
+        }
+    }
 }
