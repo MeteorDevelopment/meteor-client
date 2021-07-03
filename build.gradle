@@ -38,6 +38,7 @@ dependencies {
 
 	// For XRay compatibility
 	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
+    modCompileOnly "com.github.MeteorDevelopment:sodium-fabric:${project.sodium_version}"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
 	/*modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
