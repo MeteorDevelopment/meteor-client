@@ -34,8 +34,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-// TODO: Sodium
-//@Mixin(MinecraftClient.class)
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
 
