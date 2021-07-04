@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement.speed;
 
+import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -12,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Lowhop;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Strafe;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -73,6 +75,7 @@ public class Speed extends Module {
     public final Setting<Boolean> inLiquids = sgGeneral.add(new BoolSetting.Builder()
             .name("in-liquids")
             .description("Uses speed when in lava or water.")
+            .visible(() -> speedMode.get() != SpeedModes.Lowhop)
             .defaultValue(false)
             .build()
     );
@@ -80,6 +83,7 @@ public class Speed extends Module {
     public final Setting<Boolean> whenSneaking = sgGeneral.add(new BoolSetting.Builder()
             .name("when-sneaking")
             .description("Uses speed when sneaking.")
+            .visible(() -> speedMode.get() != SpeedModes.Lowhop)
             .defaultValue(false)
             .build()
     );
@@ -89,6 +93,15 @@ public class Speed extends Module {
             .description("Uses speed only when standing on a block.")
             .visible(() -> speedMode.get() == SpeedModes.Vanilla)
             .defaultValue(false)
+            .build()
+    );
+    public final Setting<Double> hopHeight = sgGeneral.add(new DoubleSetting.Builder()
+            .name("hop-height")
+            .description("how high to hop. faster with lower values.")
+            .visible(() -> speedMode.get() == SpeedModes.Lowhop)
+            .defaultValue(0.2)
+            .min(0)
+            .sliderMax(1)
             .build()
     );
 
@@ -138,10 +151,17 @@ public class Speed extends Module {
         if (event.packet instanceof PlayerPositionLookS2CPacket) currentMode.onRubberband();
     }
 
+    @EventHandler
+    private void onJumpVelocityMultiplier(JumpVelocityMultiplierEvent event) {
+        if (speedMode.get() == SpeedModes.Lowhop) { event.multiplier *= hopHeight.get(); }
+        else event.multiplier = 1;
+    }
+
     private void onSpeedModeChanged(SpeedModes mode) {
         switch (mode) {
             case Vanilla:   currentMode = new Vanilla(); break;
             case Strafe:    currentMode = new Strafe(); break;
+            case Lowhop:    currentMode = new Lowhop(); break;
         }
     }
 
