@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgFilter = settings.createGroup("Filter");
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
@@ -71,18 +71,33 @@ public class BetterChat extends Module {
         .build()
     );
 
-    // Anti spam
+    // Filter
 
-    private final Setting<Boolean> antiSpam = sgAntiSpam.add(new BoolSetting.Builder()
+    private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
             .name("anti-spam")
             .description("Blocks duplicate messages from filling your chat.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
+    private final Setting<Boolean> filterRegex = sgFilter.add(new BoolSetting.Builder()
+        .name("filter-regex")
+        .description("Filter out chat messages that match the regex filter.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<String> regexFilter = sgFilter.add(new StringSetting.Builder()
+        .name("regex-filter")
+        .description("Regex filter used for filtering chat messages.")
+        .defaultValue("")
+        .visible(filterRegex::get)
+        .build()
+    );
+
+    private final Setting<Integer> filterDepth = sgFilter.add(new IntSetting.Builder()
             .name("depth")
-            .description("How many messages to check for duplicate messages.")
+            .description("How many messages to filter.")
             .defaultValue(20)
             .min(1)
             .sliderMin(1)
@@ -198,6 +213,28 @@ public class BetterChat extends Module {
 
         Text message = event.message;
 
+        for (int i = 0; i < filterDepth.get(); i++) {
+            boolean removed = false;
+
+            // Regex filter
+            if (filterRegex.get() && filterRegex(Pattern.compile(regexFilter.get()), i)) removed = true;
+
+            // Anti spam
+            if (antiSpam.get() && !removed) {
+                Text antiSpammed = appendAntiSpam(message, i);
+                if (antiSpammed != null) {
+                    message = antiSpammed;
+                    removed = true;
+                }
+            }
+
+
+            if (removed) {
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
+            }
+        }
+
         if (timestamps.get()) {
             Matcher matcher = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)").matcher(message.getString());
             if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
@@ -205,17 +242,6 @@ public class BetterChat extends Module {
             Text timestamp = new LiteralText("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
 
             message = new LiteralText("").append(timestamp).append(message);
-        }
-
-        if (antiSpam.get()) {
-            for (int i = 0; i < antiSpamDepth.get(); i++) {
-                Text antiSpammed = appendAntiSpam(message, i);
-                if (antiSpammed != null) {
-                    message = antiSpammed;
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
-                }
-            }
         }
 
         event.cancel();
@@ -258,6 +284,20 @@ public class BetterChat extends Module {
         }
 
         return null;
+    }
+
+    private boolean filterRegex(Pattern regex, int index) {
+        List<ChatHudLine<OrderedText>> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
+        if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return false;
+
+        LiteralText parsed = new LiteralText("");
+
+        visibleMessages.get(index).getText().accept((i, style, codePoint) -> {
+            parsed.append(new LiteralText(new String(Character.toChars(codePoint))).setStyle(style));
+            return true;
+        });
+
+        return regex.matcher(parsed.getString()).find();
     }
 
     @EventHandler
