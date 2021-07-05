@@ -274,6 +274,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noDeadEntities = sgEntity.add(new BoolSetting.Builder()
+        .name("dead-entities")
+        .description("Disables rendering of dead entities")
+        .defaultValue(false)
+        .build()
+    );
+
 
     public NoRender() {
         super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
@@ -426,6 +433,10 @@ public class NoRender extends Module {
 
     public boolean noMobInSpawner() {
         return isActive() && noMobInSpawner.get();
+    }
+
+    public boolean noDeadEntities() {
+        return isActive() && noDeadEntities.get();
     }
 
     public enum BannerRenderMode {
