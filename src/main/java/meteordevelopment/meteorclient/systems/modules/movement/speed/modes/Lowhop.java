@@ -16,7 +16,7 @@ public class Lowhop extends SpeedMode {
 
     @Override
     public void onMove(PlayerMoveEvent event) {
-        if (!mc.player.isOnGround() || mc.player.isSneaking() || !mc.player.isSprinting()) return;
+        if (!mc.player.isOnGround() || mc.player.isSneaking() || !mc.player.isSprinting() || mc.options.keyJump.isPressed()) return;
         ((IVec3d) event.movement).setY(getHop(0.40123128) * settings.hopHeight.get());
         mc.player.jump(); //mc.player.jump doesnt actually jump for some reason, it only gives horiz velocity. dont think about it too hard.
     }

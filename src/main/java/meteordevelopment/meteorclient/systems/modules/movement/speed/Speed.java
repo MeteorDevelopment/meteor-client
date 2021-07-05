@@ -153,7 +153,7 @@ public class Speed extends Module {
 
     @EventHandler
     private void onJumpVelocityMultiplier(JumpVelocityMultiplierEvent event) {
-        if (speedMode.get() == SpeedModes.Lowhop) { event.multiplier *= hopHeight.get(); }
+        if (speedMode.get() == SpeedModes.Lowhop && !mc.options.keyJump.isPressed()) { event.multiplier *= hopHeight.get(); }
         else event.multiplier = 1;
     }
 
