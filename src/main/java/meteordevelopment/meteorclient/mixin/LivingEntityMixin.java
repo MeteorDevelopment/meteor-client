@@ -99,14 +99,4 @@ public abstract class LivingEntityMixin extends Entity {
         }
         return hand;
     }
-
-    @Redirect(method = "baseTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;updatePostDeath()V"))
-    private void updatePostDeath(LivingEntity livingEntity) {
-        if (Modules.get().get(NoRender.class).noDeadEntities()) {
-            if (!this.world.isClient()) this.world.sendEntityStatus(this, (byte)60);
-            this.remove(Entity.RemovalReason.KILLED);
-        } else {
-            this.updatePostDeath();
-        }
-    }
 }
