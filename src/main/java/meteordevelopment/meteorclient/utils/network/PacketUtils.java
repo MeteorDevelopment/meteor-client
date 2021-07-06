@@ -75,7 +75,7 @@ public class PacketUtils {
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket.class, "ResourcePackSendS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket.class, "PlayerRespawnS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket.class, "EntitySetHeadYawS2CPacket");
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityDestroyS2CPacket.class, "EntityDestroyS2CPacket");
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket.class, "EntitiesDestroyS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.RemoveEntityStatusEffectS2CPacket.class, "RemoveEntityStatusEffectS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.UnlockRecipesS2CPacket.class, "UnlockRecipesS2CPacket");
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket.class, "PlayerPositionLookS2CPacket");
@@ -237,7 +237,7 @@ public class PacketUtils {
         S2C_PACKETS_R.put("ResourcePackSendS2CPacket", net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket.class);
         S2C_PACKETS_R.put("PlayerRespawnS2CPacket", net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket.class);
         S2C_PACKETS_R.put("EntitySetHeadYawS2CPacket", net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket.class);
-        S2C_PACKETS_R.put("EntityDestroyS2CPacket", net.minecraft.network.packet.s2c.play.EntityDestroyS2CPacket.class);
+        S2C_PACKETS_R.put("EntitiesDestroyS2CPacket", net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket.class);
         S2C_PACKETS_R.put("RemoveEntityStatusEffectS2CPacket", net.minecraft.network.packet.s2c.play.RemoveEntityStatusEffectS2CPacket.class);
         S2C_PACKETS_R.put("UnlockRecipesS2CPacket", net.minecraft.network.packet.s2c.play.UnlockRecipesS2CPacket.class);
         S2C_PACKETS_R.put("PlayerPositionLookS2CPacket", net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket.class);
