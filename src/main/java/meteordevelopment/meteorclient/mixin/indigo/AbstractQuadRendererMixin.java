@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixin.indigo;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.Xray;
+import meteordevelopment.meteorclient.systems.modules.render.WallHack;
 import net.fabricmc.fabric.impl.client.indigo.renderer.mesh.MutableQuadViewImpl;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractQuadRenderer;
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
@@ -30,26 +30,35 @@ public abstract class AbstractQuadRendererMixin {
     @Final @Shadow protected Function<RenderLayer, VertexConsumer> bufferFunc;
     @Final @Shadow protected Vec3f normalVec;
 
+    @Shadow public static void bufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec) { }
+
     @Shadow protected abstract Matrix3f normalMatrix();
     @Shadow protected abstract Matrix4f matrix();
+
     @Shadow protected abstract int overlay();
 
     @SuppressWarnings("UnresolvedMixinReference")
     @Inject(method = "bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lnet/minecraft/class_1921;)V",
-        at = @At("HEAD"), cancellable = true, remap = false)
+    at = @At("HEAD"), cancellable = true, remap = false)
     private void onBufferQuad(MutableQuadViewImpl quad, RenderLayer renderLayer, CallbackInfo ci) {
-        Xray xray = Modules.get().get(Xray.class);
+        WallHack wallHack = Modules.get().get(WallHack.class);
 
-        if (xray.isActive() && xray.isBlocked(blockInfo.blockState.getBlock())) {
-            whBufferQuad(bufferFunc.apply(renderLayer), quad, matrix(), overlay(), normalMatrix(), normalVec, xray.opacity.get());
-            ci.cancel();
+        if(wallHack.isActive()) {
+            if(wallHack.blocks.get().contains(blockInfo.blockState.getBlock())) {
+                whBufferQuad(bufferFunc.apply(renderLayer), quad, matrix(), overlay(), normalMatrix(), normalVec, wallHack);
+            } else {
+                bufferQuad(bufferFunc.apply(renderLayer), quad, matrix(), overlay(), normalMatrix(), normalVec);
+            }
+        } else {
+            bufferQuad(bufferFunc.apply(renderLayer), quad, matrix(), overlay(), normalMatrix(), normalVec);
         }
+        ci.cancel();
     }
 
     //https://github.com/FabricMC/fabric/blob/351679a7decdd3044d778e74001de67463bee205/fabric-renderer-indigo/src/main/java/net/fabricmc/fabric/impl/client/indigo/renderer/render/AbstractQuadRenderer.java#L86
     //Again, nasty problem with mixins and for loops, hopefully I can fix this at a later date - Wala
-    private static void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec, int a) {
-        boolean useNormals = quad.hasVertexNormals();
+    private static void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec, WallHack wallHack) {
+        final boolean useNormals = quad.hasVertexNormals();
 
         if (useNormals) {
             quad.populateMissingNormals();
@@ -62,7 +71,7 @@ public abstract class AbstractQuadRendererMixin {
         for (int i = 0; i < 4; i++) {
             buff.vertex(matrix, quad.x(i), quad.y(i), quad.z(i));
             final int color = quad.spriteColor(i, 0);
-            buff.color(color & 0xFF, (color >> 8) & 0xFF, (color >> 16) & 0xFF, a);
+            buff.color(color & 0xFF, (color >> 8) & 0xFF, (color >> 16) & 0xFF, wallHack.opacity.get());
             buff.texture(quad.spriteU(i, 0), quad.spriteV(i, 0));
             buff.overlay(overlay);
             buff.light(quad.lightmap(i));
