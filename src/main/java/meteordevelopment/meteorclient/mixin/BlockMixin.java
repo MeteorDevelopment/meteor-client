@@ -47,5 +47,4 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
             info.setReturnValue(slippy.slippness.get().floatValue());
         }
     }
-
 }
