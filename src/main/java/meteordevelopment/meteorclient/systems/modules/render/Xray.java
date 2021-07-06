@@ -8,9 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
-import meteordevelopment.meteorclient.settings.BlockListSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -28,16 +26,58 @@ import java.util.List;
 public class Xray extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Boolean> useBlockList = sgGeneral.add(new BoolSetting.Builder()
+        .name("whitelist-blocks")
+        .description("Whether to render certain blocks normally.")
+        .defaultValue(true)
+        .onChanged(v -> {
+            if (isActive()) mc.worldRenderer.reload();
+        })
+        .build()
+    );
+
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-            .name("blocks")
-            .description("Blocks.")
-            .defaultValue(Arrays.asList(Blocks.COAL_ORE, Blocks.IRON_ORE, Blocks.GOLD_ORE, Blocks.LAPIS_ORE,
-                    Blocks.REDSTONE_ORE, Blocks.DIAMOND_ORE, Blocks.EMERALD_ORE,
-                    Blocks.NETHER_GOLD_ORE, Blocks.NETHER_QUARTZ_ORE, Blocks.ANCIENT_DEBRIS))
-            .onChanged(blocks1 -> {
-                if (isActive()) mc.worldRenderer.reload();
-            })
-            .build()
+        .name("blocks")
+        .description("Which blocks to show x-rayed.")
+        .defaultValue(Arrays.asList(
+            Blocks.COAL_ORE,
+            Blocks.DEEPSLATE_COAL_ORE,
+            Blocks.IRON_ORE,
+            Blocks.DEEPSLATE_IRON_ORE,
+            Blocks.GOLD_ORE,
+            Blocks.DEEPSLATE_GOLD_ORE,
+            Blocks.LAPIS_ORE,
+            Blocks.DEEPSLATE_LAPIS_ORE,
+            Blocks.REDSTONE_ORE,
+            Blocks.DEEPSLATE_REDSTONE_ORE,
+            Blocks.DIAMOND_ORE,
+            Blocks.DEEPSLATE_DIAMOND_ORE,
+            Blocks.EMERALD_ORE,
+            Blocks.DEEPSLATE_EMERALD_ORE,
+            Blocks.COPPER_ORE,
+            Blocks.DEEPSLATE_COPPER_ORE,
+            Blocks.NETHER_GOLD_ORE,
+            Blocks.NETHER_QUARTZ_ORE,
+            Blocks.ANCIENT_DEBRIS
+            )
+        )
+        .onChanged(v -> {
+            if (isActive()) mc.worldRenderer.reload();
+        })
+        .visible(useBlockList::get)
+        .build()
+    );
+
+    public final Setting<Integer> opacity = sgGeneral.add(new IntSetting.Builder()
+        .name("opacity")
+        .description("The opacity for blocks which aren't being x-rayed for.")
+        .defaultValue(1)
+        .min(0).max(255)
+        .sliderMin(0).sliderMax(255)
+        .onChanged(v -> {
+            if (isActive()) mc.worldRenderer.reload();
+        })
+        .build()
     );
 
     public Xray() {
@@ -74,22 +114,17 @@ public class Xray extends Module {
     }
 
     public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
-        if (returns) {
-            if (isBlocked(state.getBlock())) return false;
-        }
-        else {
-            if (!isBlocked(state.getBlock())) {
-                BlockPos adjPos = pos.offset(facing);
-                BlockState adjState = view.getBlockState(adjPos);
+        if (!returns && !isBlocked(state.getBlock())) {
+            BlockPos adjPos = pos.offset(facing);
+            BlockState adjState = view.getBlockState(adjPos);
 
-                return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock();
-            }
+            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock();
         }
 
         return returns;
     }
 
     public boolean isBlocked(Block block) {
-        return !blocks.get().contains(block);
+        return !blocks.get().contains(block) || !useBlockList.get();
     }
 }
