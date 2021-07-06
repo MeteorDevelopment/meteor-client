@@ -437,6 +437,7 @@ public class Modules extends System<Modules> {
         add(new GUIMove());
         add(new HighJump());
         add(new Jesus());
+        add(new LongJump());
         add(new NoFall());
         add(new NoSlow());
         add(new Parkour());
