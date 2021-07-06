@@ -17,7 +17,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-
 @Mixin(value = BlockOcclusionCache.class, remap = false)
 public class SodiumBlockOcculsionCacheMixin {
     @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)

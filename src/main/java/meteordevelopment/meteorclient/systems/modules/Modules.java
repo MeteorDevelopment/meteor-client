@@ -484,7 +484,6 @@ public class Modules extends System<Modules> {
         add(new Trajectories());
         add(new UnfocusedCPU());
         add(new VoidESP());
-        add(new WallHack());
         add(new WaypointsModule());
         add(new Xray());
         add(new Zoom());
