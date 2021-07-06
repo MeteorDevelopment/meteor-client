@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -38,6 +39,21 @@ public class Xray extends Module {
                 if (isActive()) mc.worldRenderer.reload();
             })
             .build()
+    );
+
+    public final Setting<Integer> opacity = sgGeneral.add(new IntSetting.Builder()
+        .name("opacity")
+        .description("The opacity for all other blocks.")
+        .defaultValue(1)
+        .min(1)
+        .max(255)
+        .sliderMax(255)
+        .onChanged(onChanged -> {
+            if(this.isActive()) {
+                mc.worldRenderer.reload();
+            }
+        })
+        .build()
     );
 
     public Xray() {
@@ -74,16 +90,10 @@ public class Xray extends Module {
     }
 
     public boolean modifyDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, boolean returns) {
-        if (returns) {
-            if (isBlocked(state.getBlock())) return false;
-        }
-        else {
-            if (!isBlocked(state.getBlock())) {
-                BlockPos adjPos = pos.offset(facing);
-                BlockState adjState = view.getBlockState(adjPos);
-
-                return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock();
-            }
+        if (!returns && !isBlocked(state.getBlock())) {
+            BlockPos adjPos = pos.offset(facing);
+            BlockState adjState = view.getBlockState(adjPos);
+            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock();
         }
 
         return returns;

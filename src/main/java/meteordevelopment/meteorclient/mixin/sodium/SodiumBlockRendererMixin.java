@@ -20,7 +20,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.WallHack;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
@@ -32,7 +31,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
@@ -45,21 +43,24 @@ public class SodiumBlockRendererMixin {
     @Inject(method = "renderQuad", at = @At(value = "HEAD"), cancellable = true)
     private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo ci) {
         WallHack wallHack = Modules.get().get(WallHack.class);
+        Xray xray = Modules.get().get(Xray.class);
 
         if(wallHack.isActive()) {
             if(wallHack.blocks.get().contains(state.getBlock())) {
-                whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, wallHack);
+                int alpha;
+
+                if(xray.isActive()) {
+                    alpha = xray.opacity.get();
+                } else {
+                    alpha = wallHack.opacity.get();
+                }
+
+                whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, alpha);
                 ci.cancel();
             }
-        }
-    }
-
-    @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
-    private void onRenderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, CallbackInfoReturnable<Boolean> cir) {
-        Xray xray = Modules.get().get(Xray.class);
-
-        if (xray.isActive() && xray.isBlocked(state.getBlock())) {
-            cir.setReturnValue(false);
+        } else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
+            whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, xray.opacity.get());
+            ci.cancel();
         }
     }
 
@@ -67,7 +68,7 @@ public class SodiumBlockRendererMixin {
     //Copied from Sodium, for now, can't think of a better way, because of the nature of the locals, and for loop.
     //Mixin seems to freak out when I try to do this the "right" way - Wala (sobbing)
     private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset,
-                            ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, WallHack wallHack) {
+                            ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, int alpha) {
         ModelQuadView src = (ModelQuadView) bakedQuad;
         ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br);
 
@@ -88,7 +89,6 @@ public class SodiumBlockRendererMixin {
 
             int color = ColorABGR.mul(colors != null ? colors[j] : 0xFFFFFFFF, light.br[j]);
 
-            int alpha = wallHack.opacity.get();
             int blue = ColorABGR.unpackBlue(color);
             int green = ColorABGR.unpackGreen(color);
             int red = ColorABGR.unpackRed(color);
