@@ -63,6 +63,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
+        factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
     }
 
     @Override
@@ -318,6 +319,13 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(list, setting, () -> item.set(setting.get().potion));
+    }
+
+    private void stringListW(WTable table, StringListSetting setting) {
+        WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
+        button.action = () -> mc.openScreen(new StringListSettingScreen(theme, setting));
+
+        reset(table, setting, null);
     }
 
     // Other

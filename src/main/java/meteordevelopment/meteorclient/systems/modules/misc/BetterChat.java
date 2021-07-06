@@ -24,6 +24,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -97,10 +98,10 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private final Setting<String> regexFilter = sgFilter.add(new StringSetting.Builder()
+    private final Setting<List<String>> regexFilters = sgFilter.add(new StringListSetting.Builder()
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
-        .defaultValue("")
+        .defaultValue(Collections.emptyList())
         .visible(filterRegex::get)
         .build()
     );
@@ -223,9 +224,14 @@ public class BetterChat extends Module {
             message = new LiteralText("").append(timestamp).append(message);
         }
 
-        if (filterRegex.get() && filterRegex(Pattern.compile(regexFilter.get()))) {
-            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(0);
-            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(0);
+        if (filterRegex.get()) {
+            for (String regexFilters : regexFilters.get()) {
+                if (filterRegex(Pattern.compile(regexFilters))) {
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(0);
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(0);
+                    break; // No need to continue since the message is already filtered out (removed)
+                }
+            }
         }
 
         for (int i = 0; i < antiSpamDepth.get(); i++) {
