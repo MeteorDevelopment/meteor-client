@@ -322,10 +322,8 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void stringListW(WTable table, StringListSetting setting) {
-        WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
-        button.action = () -> mc.openScreen(new StringListSettingScreen(theme, setting));
-
-        reset(table, setting, null);
+        WTable wtable = table.add(theme.table()).widget();
+        StringListSetting.fillTable(theme, wtable, setting);
     }
 
     // Other
