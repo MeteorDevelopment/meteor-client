@@ -34,10 +34,11 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API Indigo Renderer (only used in mixins)
-	modImplementation fabricApi.module("fabric-renderer-indigo", project.api_version)
+	modCompileOnly fabricApi.module("fabric-renderer-indigo", project.api_version)
 
 	// For XRay compatibility
 	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
+    modCompileOnly "com.github.MeteorDevelopment:sodium-fabric:${project.sodium_version}"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
 	/*modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
@@ -52,7 +53,6 @@ dependencies {
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
-	dependency "com.g00fy2:versioncompare:${project.versioncompare_version}"
 	dependency "com.github.minndevelopment:java-discordrpc:${project.discordrpc_version}"
 }
 
@@ -77,15 +77,16 @@ processResources {
 	}
 }
 
-tasks.withType(JavaCompile) {
-	options.encoding = "UTF-8"
+tasks.withType(JavaCompile).configureEach {
+    it.options.encoding = "UTF-8"
+    it.options.release = 16
 }
 
 jar {
 	from "LICENSE"
 
 	manifest {
-		attributes("Main-Class": "minegame159.meteorclient.Main")
+		attributes("Main-Class": "meteordevelopment.meteorclient.Main")
 	}
 }
 
