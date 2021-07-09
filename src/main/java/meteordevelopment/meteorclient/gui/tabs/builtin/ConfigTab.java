@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.screens.PromptScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
@@ -14,6 +15,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
+
+import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class ConfigTab extends Tab {
     private static final Settings settings = new Settings();
@@ -174,6 +177,17 @@ public class ConfigTab extends Tab {
 
             settings.onActivated();
             add(theme.settings(settings)).expandX();
+
+
+            onClosed(() -> {
+                if (Config.get().prefix.isBlank()) {
+                    mc.openScreen(new PromptScreen(theme, "Invalid prefix.",
+                            "You have set your command prefix to nothing. This WILL prevent you from sending chat messages.\nDo you want to reset your prefix back to '.'?",
+                            () -> {
+                                Config.get().prefix = ".";
+                            }, () -> { }, this.parent));
+                }
+            });
         }
     }
 }
