@@ -5,16 +5,20 @@
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.screens.PromptScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
+import meteordevelopment.meteorclient.utils.render.PromptBuilder;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.option.KeyBinding;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
@@ -181,13 +185,59 @@ public class ConfigTab extends Tab {
 
             onClosed(() -> {
                 if (Config.get().prefix.isBlank()) {
-                    mc.openScreen(new PromptScreen(theme, "Invalid prefix.",
-                            "You have set your command prefix to nothing. This WILL prevent you from sending chat messages.\nDo you want to reset your prefix back to '.'?",
-                            () -> {
-                                Config.get().prefix = ".";
-                            }, () -> { }, this.parent));
+                    new PromptBuilder(theme, this.parent)
+                        .title("Empty command prefix")
+                        .message("You have set your command prefix to nothing.\nThis WILL prevent you from sending chat messages.\nDo you want to reset your prefix back to '.'?")
+                        .onYes(() -> {
+                            Config.get().prefix = ".";
+                        })
+                        .promptHash("empty-command-prefix")
+                        .show();
+                }
+                else if (Config.get().prefix.equals("/")) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Potential prefix conflict")
+                        .message("You have set your command prefix to /, which is used by minecraft.\nThis can cause conflict issues between meteor and minecraft commands.\nDo you want to reset your prefix to '.'?")
+                        .onYes(() -> {
+                            Config.get().prefix = ".";
+                        })
+                        .promptHash("minecraft-prefix-conflict")
+                        .show();
+                }
+                else if (Config.get().prefix.length() > 7) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Long command prefix")
+                        .message(String.format(
+                            "You have set your command prefix to a very long string.\nThis means that in order to execute any command, you will need to type %s followed by the command you want to run.\nDo you want to reset your prefix back to '.'?",
+                        Config.get().prefix))
+                        .onYes(() -> {
+                            Config.get().prefix = ".";
+                        })
+                        .promptHash("long-command-prefix")
+                        .show();
+                }
+                else if (isUsedKey()) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Prefix keybind")
+                        .message("You have \"Open Chat On Prefix\" setting enabled and your command prefix has a conflict with another keybind.\nDo you want to disable \"Open Chat On Prefix\" setting?")
+                        .onYes(() -> {
+                            Config.get().openChatOnPrefix = false;
+                        })
+                        .promptHash("prefix-keybind")
+                        .show();
                 }
             });
         }
+    }
+
+    private static boolean isUsedKey() {
+        if (!Config.get().openChatOnPrefix) return false;
+        String prefixKeybindTranslation = String.format("key.keyboard.%s",  Config.get().prefix.toLowerCase().substring(0,1));
+        MeteorClient.LOG.info(String.format("prefix=\"%s\"", prefixKeybindTranslation));
+        for (KeyBinding key: mc.options.keysAll) {
+            if (key.getBoundKeyTranslationKey().equals(prefixKeybindTranslation)) return true;
+            MeteorClient.LOG.info(String.format("key=\"%s\"", key.getBoundKeyTranslationKey()));
+        }
+        return false;
     }
 }

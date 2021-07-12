@@ -15,6 +15,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.nbt.NbtCompound;
 
+import java.util.*;
+
 public class Config extends System<Config> {
     public final Version version;
     public final String devBuild;
@@ -34,6 +36,8 @@ public class Config extends System<Config> {
     public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
 
     public boolean useTeamColor = ConfigTab.useTeamColor.get();
+
+    public List<Integer> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
         super("config");
@@ -73,6 +77,8 @@ public class Config extends System<Config> {
 
         tag.putBoolean("useTeamColor", useTeamColor);
 
+        tag.putIntArray("dontShowAgainPrompts", dontShowAgainPrompts);
+
         return tag;
     }
 
@@ -94,6 +100,10 @@ public class Config extends System<Config> {
         customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
 
         useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
+
+        for (int prompt : tag.getIntArray("dontShowAgainPrompts")) {
+            dontShowAgainPrompts.add(prompt);
+        }
 
         return this;
     }
