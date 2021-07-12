@@ -77,19 +77,18 @@ public class PromptBuilder {
         public PromptScreen(GuiTheme theme, String title, String message, Runnable onYes, Runnable onNo, Screen parent, int promptHash) {
             super(theme, title);
             this.parent = parent;
-
+            
             for (String line : message.split("\n")) {
-                add(theme.label(line)).expandCellX();
+                add(theme.label(line)).expandX();
             }
 
-            add(theme.horizontalSeparator()).expandCellX();
+            add(theme.horizontalSeparator()).expandX();
 
-
-            WHorizontalList checkboxContainer = add(theme.horizontalList()).expandCellX().widget();
+            WHorizontalList checkboxContainer = add(theme.horizontalList()).expandX().widget();
             WCheckbox dontShowAgainCheckbox = checkboxContainer.add(theme.checkbox(false)).widget();
-            checkboxContainer.add(theme.label("Don't show this prompt again.")).expandCellX();
+            checkboxContainer.add(theme.label("Don't show this prompt again.")).expandX();
 
-            WHorizontalList list = add(theme.horizontalList()).expandCellX().widget();
+            WHorizontalList list = add(theme.horizontalList()).expandX().widget();
 
             WButton yesButton = list.add(theme.button("Yes")).widget();
             yesButton.action = () -> {
