@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -233,10 +232,8 @@ public class ConfigTab extends Tab {
     private static boolean isUsedKey() {
         if (!Config.get().openChatOnPrefix) return false;
         String prefixKeybindTranslation = String.format("key.keyboard.%s",  Config.get().prefix.toLowerCase().substring(0,1));
-        MeteorClient.LOG.info(String.format("prefix=\"%s\"", prefixKeybindTranslation));
         for (KeyBinding key: mc.options.keysAll) {
             if (key.getBoundKeyTranslationKey().equals(prefixKeybindTranslation)) return true;
-            MeteorClient.LOG.info(String.format("key=\"%s\"", key.getBoundKeyTranslationKey()));
         }
         return false;
     }
