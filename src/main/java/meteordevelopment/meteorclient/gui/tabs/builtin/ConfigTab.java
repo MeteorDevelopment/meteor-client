@@ -12,8 +12,12 @@ import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.render.PromptBuilder;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.option.KeyBinding;
+
+import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class ConfigTab extends Tab {
     private static final Settings settings = new Settings();
@@ -174,6 +178,61 @@ public class ConfigTab extends Tab {
 
             settings.onActivated();
             add(theme.settings(settings)).expandX();
+
+
+            onClosed(() -> {
+                if (Config.get().prefix.isBlank()) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Empty command prefix")
+                        .message("You have set your command prefix to nothing.\nThis WILL prevent you from sending chat messages.\nDo you want to reset your prefix back to '.'?")
+                        .onYes(() -> {
+                            Config.get().prefix = ".";
+                        })
+                        .promptId("empty-command-prefix")
+                        .show();
+                }
+                else if (Config.get().prefix.equals("/")) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Potential prefix conflict")
+                        .message("You have set your command prefix to /, which is used by minecraft.\nThis can cause conflict issues between meteor and minecraft commands.\nDo you want to reset your prefix to '.'?")
+                        .onYes(() -> {
+                            Config.get().prefix = ".";
+                        })
+                        .promptId("minecraft-prefix-conflict")
+                        .show();
+                }
+                else if (Config.get().prefix.length() > 7) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Long command prefix")
+                        .message(String.format(
+                            "You have set your command prefix to a very long string.\nThis means that in order to execute any command, you will need to type %s followed by the command you want to run.\nDo you want to reset your prefix back to '.'?",
+                        Config.get().prefix))
+                        .onYes(() -> {
+                            Config.get().prefix = ".";
+                        })
+                        .promptId("long-command-prefix")
+                        .show();
+                }
+                else if (isUsedKey()) {
+                    new PromptBuilder(theme, this.parent)
+                        .title("Prefix keybind")
+                        .message("You have \"Open Chat On Prefix\" setting enabled and your command prefix has a conflict with another keybind.\nDo you want to disable \"Open Chat On Prefix\" setting?")
+                        .onYes(() -> {
+                            Config.get().openChatOnPrefix = false;
+                        })
+                        .promptId("prefix-keybind")
+                        .show();
+                }
+            });
         }
+    }
+
+    private static boolean isUsedKey() {
+        if (!Config.get().openChatOnPrefix) return false;
+        String prefixKeybindTranslation = String.format("key.keyboard.%s",  Config.get().prefix.toLowerCase().substring(0,1));
+        for (KeyBinding key: mc.options.keysAll) {
+            if (key.getBoundKeyTranslationKey().equals(prefixKeybindTranslation)) return true;
+        }
+        return false;
     }
 }

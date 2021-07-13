@@ -170,6 +170,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onCharTyped(CharTypedEvent event) {
         if (mc.currentScreen != null) return;
         if (!Config.get().openChatOnPrefix) return;
+        if (Config.get().prefix.isBlank()) return;
 
         if (event.c == Config.get().prefix.charAt(0)) {
             mc.openScreen(new ChatScreen(Config.get().prefix));
