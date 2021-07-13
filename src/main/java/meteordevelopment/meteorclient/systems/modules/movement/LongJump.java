@@ -30,15 +30,15 @@ public class LongJump extends Module {
         .build()
     );
 
-        private final Setting<Double> vanillaBoostFactor = sgGeneral.add(new DoubleSetting.Builder()
-            .name("vanilla-boost-factor")
-            .description("The amount by which to boost the jump.")
-            .visible(() -> jumpMode.get() == JumpMode.Vanilla)
-            .defaultValue(1.261)
-            .min(0)
-            .sliderMax(5)
-            .build()
-        );
+    private final Setting<Double> vanillaBoostFactor = sgGeneral.add(new DoubleSetting.Builder()
+        .name("vanilla-boost-factor")
+        .description("The amount by which to boost the jump.")
+        .visible(() -> jumpMode.get() == JumpMode.Vanilla)
+        .defaultValue(1.261)
+        .min(0)
+        .sliderMax(5)
+        .build()
+    );
 
     private final Setting<Double> burstInitialSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("burst-initial-speed")
