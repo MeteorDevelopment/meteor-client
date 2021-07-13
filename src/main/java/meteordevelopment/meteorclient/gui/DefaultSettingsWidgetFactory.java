@@ -87,6 +87,11 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         return list;
     }
 
+    // If a different theme uses has different heights of widgets this can method can be overwritten to account for it in the setting titles
+    protected double settingTitleTopMargin() {
+        return 6;
+    }
+
     private void group(WVerticalList list, SettingGroup group, String filter, List<RemoveInfo> removeInfoList) {
         WSection section = list.add(theme.section(group.name, group.sectionExpanded)).expandX().widget();
         section.action = () -> group.sectionExpanded = section.isExpanded();
@@ -105,7 +110,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
                 removeInfo.markRowForRemoval();
             }
 
-            table.add(theme.label(setting.title)).widget().tooltip = setting.description;
+            table.add(theme.label(setting.title)).top().marginTop(settingTitleTopMargin()).widget().tooltip = setting.description;
 
             Factory factory = factories.get(setting.getClass());
             if (factory != null) factory.create(table, setting);
