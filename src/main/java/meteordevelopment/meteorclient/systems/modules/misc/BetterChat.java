@@ -24,6 +24,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,7 +32,7 @@ import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgAntiSpam = settings.createGroup("Anti Spam");
+    private final SettingGroup sgFilter = settings.createGroup("Filter");
     private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
@@ -71,24 +72,40 @@ public class BetterChat extends Module {
         .build()
     );
 
-    // Anti spam
+    // Filter
 
-    private final Setting<Boolean> antiSpam = sgAntiSpam.add(new BoolSetting.Builder()
+    private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
             .name("anti-spam")
             .description("Blocks duplicate messages from filling your chat.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> antiSpamDepth = sgAntiSpam.add(new IntSetting.Builder()
-            .name("depth")
-            .description("How many messages to check for duplicate messages.")
-            .defaultValue(20)
-            .min(1)
-            .sliderMin(1)
-            .visible(antiSpam::get)
-            .build()
+    private final Setting<Integer> antiSpamDepth = sgFilter.add(new IntSetting.Builder()
+        .name("depth")
+        .description("How many messages to filter.")
+        .defaultValue(20)
+        .min(1)
+        .sliderMin(1)
+        .visible(antiSpam::get)
+        .build()
     );
+
+    private final Setting<Boolean> filterRegex = sgFilter.add(new BoolSetting.Builder()
+        .name("filter-regex")
+        .description("Filter out chat messages that match the regex filter.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<List<String>> regexFilters = sgFilter.add(new StringListSetting.Builder()
+        .name("regex-filter")
+        .description("Regex filter used for filtering chat messages.")
+        .defaultValue(Collections.emptyList())
+        .visible(filterRegex::get)
+        .build()
+    );
+
 
     // Longer chat
 
@@ -207,8 +224,18 @@ public class BetterChat extends Module {
             message = new LiteralText("").append(timestamp).append(message);
         }
 
-        if (antiSpam.get()) {
-            for (int i = 0; i < antiSpamDepth.get(); i++) {
+        if (filterRegex.get()) {
+            for (String regexFilters : regexFilters.get()) {
+                if (filterRegex(Pattern.compile(regexFilters))) {
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(0);
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(0);
+                    break; // No need to continue since the message is already filtered out (removed)
+                }
+            }
+        }
+
+        for (int i = 0; i < antiSpamDepth.get(); i++) {
+            if (antiSpam.get()) {
                 Text antiSpammed = appendAntiSpam(message, i);
                 if (antiSpammed != null) {
                     message = antiSpammed;
@@ -258,6 +285,17 @@ public class BetterChat extends Module {
         }
 
         return null;
+    }
+
+    private boolean filterRegex(Pattern regex) {
+        LiteralText parsed = new LiteralText("");
+
+        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().get(0).getText().accept((i, style, codePoint) -> {
+            parsed.append(new LiteralText(new String(Character.toChars(codePoint))).setStyle(style));
+            return true;
+        });
+
+        return regex.matcher(parsed.getString()).find();
     }
 
     @EventHandler
