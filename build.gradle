@@ -52,11 +52,10 @@ dependencies {
 	}
 	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
 
-    // Baritone, as a random jar file, best thing ever
+    // Baritone
     modImplementation "wagyourtail:baritone:1.7.0"
-    //modImplementation (name : "baritone-but-the-fucking-cache-is-annoying")
 
-    //include name : "baritone"
+    include "wagyourtail:baritone:1.7.0"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
