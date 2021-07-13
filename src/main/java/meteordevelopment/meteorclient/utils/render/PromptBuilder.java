@@ -21,7 +21,7 @@ public class PromptBuilder {
     private String message = "";
     private Runnable onYes = () -> {};
     private Runnable onNo = () -> {};
-    private int promptHash = -1;
+    private String promptId = null;
 
     public PromptBuilder() {
         this(GuiThemes.get(), mc.currentScreen);
@@ -52,32 +52,27 @@ public class PromptBuilder {
         return this;
     }
 
-    public PromptBuilder promptHash(int hash) {
-        this.promptHash = hash;
-        return this;
-    }
-
-    public PromptBuilder promptHash(Object from) {
-        this.promptHash = from.hashCode();
+    public PromptBuilder promptId(String from) {
+        this.promptId = from;
         return this;
     }
 
     public void show() {
-        if (promptHash == -1) this.promptHash(this);
-        if (Config.get().dontShowAgainPrompts.contains(promptHash)) {
+        if (promptId == null) this.promptId(this.title);
+        if (Config.get().dontShowAgainPrompts.contains(promptId)) {
             onNo.run();
             return;
         }
-        Screen prompt = new PromptScreen(theme, title, message, onYes, onNo, parent, promptHash);
+        Screen prompt = new PromptScreen(theme, title, message, onYes, onNo, parent, promptId);
         mc.openScreen(prompt);
     }
 
     private class PromptScreen extends WindowScreen {
 
-        public PromptScreen(GuiTheme theme, String title, String message, Runnable onYes, Runnable onNo, Screen parent, int promptHash) {
+        public PromptScreen(GuiTheme theme, String title, String message, Runnable onYes, Runnable onNo, Screen parent, String promptId) {
             super(theme, title);
             this.parent = parent;
-            
+
             for (String line : message.split("\n")) {
                 add(theme.label(line)).expandX();
             }
@@ -99,9 +94,8 @@ public class PromptBuilder {
             WButton noButton = list.add(theme.button("No")).widget();
             noButton.action = () -> {
                 onNo.run();
-                if (dontShowAgainCheckbox.checked) {
-                    Config.get().dontShowAgainPrompts.add(promptHash);
-                }
+                if (dontShowAgainCheckbox.checked)
+                    Config.get().dontShowAgainPrompts.add(promptId);
                 this.onClose();
             };
 

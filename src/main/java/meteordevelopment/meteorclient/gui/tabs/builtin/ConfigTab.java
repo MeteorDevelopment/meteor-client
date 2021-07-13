@@ -12,8 +12,6 @@ import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.render.PromptBuilder;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
@@ -190,7 +188,7 @@ public class ConfigTab extends Tab {
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
-                        .promptHash("empty-command-prefix")
+                        .promptId("empty-command-prefix")
                         .show();
                 }
                 else if (Config.get().prefix.equals("/")) {
@@ -200,7 +198,7 @@ public class ConfigTab extends Tab {
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
-                        .promptHash("minecraft-prefix-conflict")
+                        .promptId("minecraft-prefix-conflict")
                         .show();
                 }
                 else if (Config.get().prefix.length() > 7) {
@@ -212,7 +210,7 @@ public class ConfigTab extends Tab {
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
-                        .promptHash("long-command-prefix")
+                        .promptId("long-command-prefix")
                         .show();
                 }
                 else if (isUsedKey()) {
@@ -222,7 +220,7 @@ public class ConfigTab extends Tab {
                         .onYes(() -> {
                             Config.get().openChatOnPrefix = false;
                         })
-                        .promptHash("prefix-keybind")
+                        .promptId("prefix-keybind")
                         .show();
                 }
             });

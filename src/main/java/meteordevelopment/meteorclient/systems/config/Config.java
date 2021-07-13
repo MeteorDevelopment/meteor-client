@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.*;
 
 import java.util.*;
 
@@ -37,7 +37,7 @@ public class Config extends System<Config> {
 
     public boolean useTeamColor = ConfigTab.useTeamColor.get();
 
-    public List<Integer> dontShowAgainPrompts = new ArrayList<>();
+    public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
         super("config");
@@ -77,8 +77,7 @@ public class Config extends System<Config> {
 
         tag.putBoolean("useTeamColor", useTeamColor);
 
-        tag.putIntArray("dontShowAgainPrompts", dontShowAgainPrompts);
-
+        tag.put("dontShowAgainPrompts", listToNbt(dontShowAgainPrompts));
         return tag;
     }
 
@@ -101,9 +100,9 @@ public class Config extends System<Config> {
 
         useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
 
-        for (int prompt : tag.getIntArray("dontShowAgainPrompts")) {
-            dontShowAgainPrompts.add(prompt);
-        }
+        dontShowAgainPrompts.clear();
+        for (NbtElement item: tag.getList("dontShowAgainPrompts", NbtElement.STRING_TYPE))
+            dontShowAgainPrompts.add(item.asString());
 
         return this;
     }
@@ -122,5 +121,12 @@ public class Config extends System<Config> {
 
     private int getInt(NbtCompound tag, String key, Setting<Integer> setting) {
         return tag.contains(key) ? tag.getInt(key) : setting.get();
+    }
+
+    private NbtList listToNbt(List<String> lst) {
+        NbtList nbt = new NbtList();
+        for (String item: lst) 
+            nbt.add(NbtString.of(item));
+        return nbt;
     }
 }
