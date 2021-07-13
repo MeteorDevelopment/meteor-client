@@ -15,14 +15,12 @@ minecraft {
 }
 
 repositories {
-    flatDir {
-        dirs 'libs'
-    }
     maven {
 		name = "jitpack"
 		url = "https://jitpack.io"
 	}
 	jcenter()
+    mavenLocal()
 }
 
 dependencies {
@@ -55,9 +53,10 @@ dependencies {
 	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
 
     // Baritone, as a random jar file, best thing ever
-    modImplementation name : "baritone"
+    modImplementation "wagyourtail:baritone:1.7.0"
+    //modImplementation (name : "baritone-but-the-fucking-cache-is-annoying")
 
-    include name : "baritone"
+    //include name : "baritone"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -97,13 +98,12 @@ public class KillAura extends Module {
         .build()
     );
 
-    // TODO: Baritone
-//    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-//        .name("pause-on-combat")
-//        .description("Freezes Baritone temporarily until you are finished attacking the entity.")
-//        .defaultValue(true)
-//        .build()
-//    );
+    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-on-combat")
+        .description("Freezes Baritone temporarily until you are finished attacking the entity.")
+        .defaultValue(true)
+        .build()
+    );
 
     // Targeting
 
@@ -230,12 +230,11 @@ public class KillAura extends Module {
 
         TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
 
-        // TODO: Baritone
         if (targets.isEmpty()) {
-      /*      if (wasPathing) {
+            if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }*/
+            }
             return;
         }
 
