@@ -15,7 +15,10 @@ minecraft {
 }
 
 repositories {
-	maven {
+    flatDir {
+        dirs 'libs'
+    }
+    maven {
 		name = "jitpack"
 		url = "https://jitpack.io"
 	}
@@ -50,6 +53,11 @@ dependencies {
 		exclude(group: "org.ow2.asm", module: "asm-debug-all")
 	}
 	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
+
+    // Baritone, as a random jar file, best thing ever
+    modImplementation name : "baritone"
+
+    include name : "baritone"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
