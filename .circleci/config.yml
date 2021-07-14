@@ -6,7 +6,7 @@ orbs:
 parameters:
   version:
     type: string
-    default: 0.4.0
+    default: 0.4.4
 
 general:
   branches:
@@ -15,7 +15,7 @@ general:
 jobs:
   build:
     docker:
-      - image: circleci/openjdk:8-jdk
+      - image: cimg/openjdk:16.0.0
 
     working_directory: ~/repo
 
@@ -34,7 +34,7 @@ jobs:
             # fallback to using the latest cache if no exact match is found
             - v1-dependencies-
 
-      - run: gradle build
+      - run: ./gradlew build
 
       - save_cache:
           paths:
@@ -43,7 +43,7 @@ jobs:
 
       - store_artifacts:
           path: build/libs/
-      
+
       - node/install:
           install-yarn: true
 

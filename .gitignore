@@ -1,11 +1,16 @@
 *.DS_Store
 .gradle
-.idea
+.settings
+.project
+.classpath
 build
 out
 run
+bin
 logs
 .circleci/discordwebhook/node_modules
 *.iws
 *.ipr
 *.iml
+.idea/*
+!.idea/copyright/*

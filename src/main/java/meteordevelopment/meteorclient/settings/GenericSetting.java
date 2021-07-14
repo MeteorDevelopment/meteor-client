@@ -1,0 +1,95 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.settings;
+
+import meteordevelopment.meteorclient.gui.utils.IScreenFactory;
+import meteordevelopment.meteorclient.utils.misc.ICopyable;
+import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import net.minecraft.nbt.NbtCompound;
+
+import java.util.function.Consumer;
+
+public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> extends Setting<T> {
+    public GenericSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+    }
+
+    @Override
+    public void reset(boolean callbacks) {
+        if (value == null) value = defaultValue.copy();
+        value.set(defaultValue);
+
+        if (callbacks) changed();
+    }
+
+    @Override
+    protected T parseImpl(String str) {
+        return defaultValue.copy();
+    }
+
+    @Override
+    protected boolean isValueValid(T value) {
+        return true;
+    }
+
+    @Override
+    public NbtCompound toTag() {
+        NbtCompound tag = saveGeneral();
+
+        tag.put("value", get().toTag());
+
+        return tag;
+    }
+
+    @Override
+    public T fromTag(NbtCompound tag) {
+        get().fromTag(tag.getCompound("value"));
+
+        return get();
+    }
+
+    public static class Builder<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> {
+        private String name = "undefined", description = "";
+        private T defaultValue;
+        private Consumer<T> onChanged;
+        private Consumer<Setting<T>> onModuleActivated;
+        private IVisible visible;
+
+        public Builder<T> name(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder<T> description(String description) {
+            this.description = description;
+            return this;
+        }
+
+        public Builder<T> defaultValue(T defaultValue) {
+            this.defaultValue = defaultValue;
+            return this;
+        }
+
+        public Builder<T> onChanged(Consumer<T> onChanged) {
+            this.onChanged = onChanged;
+            return this;
+        }
+
+        public Builder<T> onModuleActivated(Consumer<Setting<T>> onModuleActivated) {
+            this.onModuleActivated = onModuleActivated;
+            return this;
+        }
+
+        public Builder visible(IVisible visible) {
+            this.visible = visible;
+            return this;
+        }
+
+        public GenericSetting<T> build() {
+            return new GenericSetting<>(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        }
+    }
+}

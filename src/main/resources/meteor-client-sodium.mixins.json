@@ -1,10 +1,11 @@
 {
   "required": false,
-  "package": "minegame159.meteorclient.mixin.sodium",
-  "compatibilityLevel": "JAVA_8",
+  "package": "meteordevelopment.meteorclient.mixin.sodium",
+  "compatibilityLevel": "JAVA_16",
   "client": [
     "SodiumBlockOcculsionCacheMixin",
-    "SodiumBlockRendererMixin"
+    "SodiumBlockRendererMixin",
+    "SodiumFluidRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

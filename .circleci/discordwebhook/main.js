@@ -1,3 +1,8 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
+ * Copyright (c) 2021 Meteor Development.
+ */
+
 const axios = require("axios").default
 
 const branch = process.argv[2]
@@ -30,18 +35,21 @@ axios
       description += "\n\n**Download:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
     }
 
-    axios.post(process.env.discord_webhook, {
-      username: "Dev Builds",
-      avatar_url: "https://meteorclient.com/icon.png",
-      embeds: [
-        {
-          title: "meteor client v" + version + " build #" + build,
-          description: description,
-          url: "https://meteorclient.com",
-          color: success ? 3066993 : 15158332
-        }
-      ]
-    })
+      const webhook = {
+          username: "Dev Builds",
+          avatar_url: "https://meteorclient.com/icon.png",
+          embeds: [
+              {
+                  title: "meteor client v" + version + " build #" + build,
+                  description: description,
+                  url: "https://meteorclient.com",
+                  color: success ? 3066993 : 15158332
+              }
+          ]
+      };
+
+      axios.post(process.env.discord_webhook, webhook);
+      axios.post(process.env.guilded_webhook, webhook);
 
     axios.post("https://meteorclient.com/api/setDevBuild?token=" + process.env.server_token + "&devBuild=" + build)
   })
