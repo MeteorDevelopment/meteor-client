@@ -160,7 +160,7 @@ public class Mesh {
         growIfNeeded();
     }
 
-    private void growIfNeeded() {
+    public void growIfNeeded() {
         // Vertices
         if ((vertexI + 1) * primitiveVerticesSize >= vertices.capacity()) {
             int newSize = vertices.capacity() * 2;

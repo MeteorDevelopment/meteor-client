@@ -91,6 +91,8 @@ public class Renderer3D {
             if (Dir.isNot(excludeDir, Dir.NORTH) && Dir.isNot(excludeDir, Dir.UP)) lines.line(tlb, trb);
             if (Dir.isNot(excludeDir, Dir.SOUTH) && Dir.isNot(excludeDir, Dir.UP)) lines.line(tlf, trf);
         }
+
+        lines.growIfNeeded();
     }
 
     public void blockLines(int x, int y, int z, Color color, int excludeDir) {
@@ -192,6 +194,8 @@ public class Renderer3D {
             // Top
             if (Dir.isNot(excludeDir, Dir.UP)) triangles.quad(tlb, tlf, trf, trb);
         }
+
+        triangles.growIfNeeded();
     }
 
     public void blockSides(int x, int y, int z, Color color, int excludeDir) {
