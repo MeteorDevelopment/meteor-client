@@ -53,7 +53,7 @@ dependencies {
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
-	dependency "com.github.minndevelopment:java-discordrpc:${project.discordrpc_version}"
+	dependency "com.github.MeteorDevelopment:java-discord-rpc:${project.discordrpc_version}"
 }
 
 shadowJar {
