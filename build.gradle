@@ -20,7 +20,6 @@ repositories {
 		url = "https://jitpack.io"
 	}
 	jcenter()
-    mavenLocal()
 }
 
 dependencies {
@@ -53,9 +52,9 @@ dependencies {
 	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
 
     // Baritone
-    modImplementation "wagyourtail:baritone:1.7.0"
+    modImplementation "com.github.timoreo22:baritone:1.17-SNAPSHOT"
 
-    include "wagyourtail:baritone:1.7.0"
+    include "com.github.timoreo22:baritone:1.17-SNAPSHOT"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
