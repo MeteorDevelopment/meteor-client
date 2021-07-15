@@ -31,7 +31,7 @@ public class AutoSmelter extends Module {
         .name("fuel-items")
         .description("Items to use as fuel")
         .defaultValue(Arrays.asList(Items.COAL, Items.CHARCOAL))
-        .filter(x -> AbstractFurnaceBlockEntity.canUseAsFuel(x.getDefaultStack()))
+        .filter(this::fuelItemFilter)
         .build()
     );
 
@@ -39,7 +39,7 @@ public class AutoSmelter extends Module {
         .name("smeltable-items")
         .description("Items to smelt")
         .defaultValue(Arrays.asList(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD))
-        .filter(x -> mc.world.getRecipeManager() == null || mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(x.getDefaultStack()), mc.world).isPresent())
+        .filter(this::smeltableItemFilter)
         .build()
     );
 
@@ -52,7 +52,15 @@ public class AutoSmelter extends Module {
 
 
     public AutoSmelter() {
-        super(Categories.World, "auto-smelter", "Automatically smelts all items in your inventory that can be smelted.");
+        super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
+    }
+
+    private boolean fuelItemFilter(Item item) {
+        return mc.world == null || AbstractFurnaceBlockEntity.canUseAsFuel(item.getDefaultStack());
+    }
+
+    private boolean smeltableItemFilter(Item item) {
+        return mc.world == null || mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(item.getDefaultStack()), mc.world).isPresent();
     }
 
     public void tick(AbstractFurnaceScreenHandler c) {
