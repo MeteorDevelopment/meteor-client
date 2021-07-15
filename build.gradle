@@ -15,7 +15,7 @@ minecraft {
 }
 
 repositories {
-	maven {
+    maven {
 		name = "jitpack"
 		url = "https://jitpack.io"
 	}
@@ -41,15 +41,8 @@ dependencies {
     modCompileOnly "com.github.MeteorDevelopment:sodium-fabric:${project.sodium_version}"
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-	/*modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}") {
-		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl-platform")
-		exclude(group: "org.lwjgl.lwjgl", module: "lwjgl")
-		exclude(group: "net.java.jinput", module: "jinput-platform")
-		exclude(group: "net.java.jinput", module: "jinput")
-		exclude(group: "net.sf.jopt-simple", module: "jopt-simple")
-		exclude(group: "org.ow2.asm", module: "asm-debug-all")
-	}
-	include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"*/
+    modImplementation "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
+    include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
@@ -70,16 +71,14 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
-        // TODO: Baritone
-        // preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
-        // if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
+        if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
         placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
-        // TODO: Baritone
-        //BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
+        BaritoneAPI.getSettings().maxFallHeightNoWater.value = preBaritoneFallHeight;
     }
 
     @EventHandler
