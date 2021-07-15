@@ -28,11 +28,4 @@ public abstract class AbstractFurnaceScreenMixin<T extends AbstractFurnaceScreen
     private void onTick(CallbackInfo info) {
         if (Modules.get().isActive(AutoSmelter.class)) Modules.get().get(AutoSmelter.class).tick(handler);
     }
-
-    @Override
-    public void onClose() {
-        super.onClose();
-
-        if (Modules.get().isActive(AutoSmelter.class)) Modules.get().get(AutoSmelter.class).onFurnaceClose();
-    }
 }
