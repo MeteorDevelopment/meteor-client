@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
-import meteordevelopment.meteorclient.events.meteor.ClientInitialisedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -122,7 +121,6 @@ public class MeteorClient implements ClientModInitializer {
         }));
 
         EVENT_BUS.subscribe(this);
-        EVENT_BUS.post(new ClientInitialisedEvent()); // TODO: This is there just for compatibility
 
         // Call onInitialize for addons
         addons.forEach(MeteorAddon::onInitialize);

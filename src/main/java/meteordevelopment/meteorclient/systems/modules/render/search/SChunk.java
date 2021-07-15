@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.chunk.Chunk;
 
@@ -67,8 +68,10 @@ public class SChunk {
 
     public boolean shouldBeDeleted() {
         int viewDist = getRenderDistance() + 1;
-        // TODO: Optimize getChunkPos()
-        return x > mc.player.getChunkPos().x + viewDist || x < mc.player.getChunkPos().x - viewDist || z > mc.player.getChunkPos().z + viewDist || z < mc.player.getChunkPos().z - viewDist;
+        int chunkX = ChunkSectionPos.getSectionCoord(mc.player.getBlockPos().getX());
+        int chunkZ = ChunkSectionPos.getSectionCoord(mc.player.getBlockPos().getZ());
+
+        return x > chunkX + viewDist || x < chunkX - viewDist || z > chunkZ + viewDist || z < chunkZ - viewDist;
     }
 
     public void render(Render3DEvent event) {
