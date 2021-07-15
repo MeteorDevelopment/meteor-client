@@ -87,7 +87,7 @@ public class SChunk {
             for (int z = chunk.getPos().getStartZ(); z <= chunk.getPos().getEndZ(); z++) {
                 int height = chunk.getHeightmap(Heightmap.Type.WORLD_SURFACE).get(x - chunk.getPos().getStartX(), z - chunk.getPos().getStartZ());
 
-                for (int y = 0; y < height; y++) {
+                for (int y = mc.world.getBottomY(); y < height; y++) {
                     blockPos.set(x, y, z);
                     BlockState bs = chunk.getBlockState(blockPos);
 
