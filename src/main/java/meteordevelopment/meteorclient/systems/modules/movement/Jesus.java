@@ -35,8 +35,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Jesus extends Module {
+    private final SettingGroup sgGeneral = settings.createGroup("General");
     private final SettingGroup sgWater = settings.createGroup("Water");
     private final SettingGroup sgLava = settings.createGroup("Lava");
+
+    // General
+
+    private final Setting<Boolean> powderSnow = sgGeneral.add(new BoolSetting.Builder()
+        .name("powder-snow")
+        .description("Walk on powder snow.")
+        .defaultValue(true)
+        .build()
+    );
 
     // Water
 
@@ -135,7 +145,7 @@ public class Jesus extends Module {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Categories.Movement, "jesus", "Walk on liquids like Jesus.");
+        super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.");
     }
 
     @Override
@@ -306,5 +316,9 @@ public class Jesus extends Module {
         Solid,
         Bob,
         Ignore
+    }
+
+    public boolean canWalkOnPowderSnow() {
+        return isActive() && powderSnow.get();
     }
 }
