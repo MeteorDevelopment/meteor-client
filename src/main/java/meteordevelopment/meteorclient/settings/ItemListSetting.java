@@ -20,12 +20,14 @@ import java.util.function.Predicate;
 
 public class ItemListSetting extends Setting<List<Item>> {
     public final Predicate<Item> filter;
+    private boolean bypassFilterWhenSavingAndLoading;
 
-    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter) {
+    public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.value = new ArrayList<>(defaultValue);
         this.filter = filter;
+        this.bypassFilterWhenSavingAndLoading = bypassFilterWhenSavingAndLoading;
     }
 
     @Override
@@ -65,7 +67,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         NbtList valueTag = new NbtList();
         for (Item item : get()) {
-            valueTag.add(NbtString.of(Registry.ITEM.getId(item).toString()));
+            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registry.ITEM.getId(item).toString()));
         }
         tag.put("value", valueTag);
 
@@ -80,7 +82,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         for (NbtElement tagI : valueTag) {
             Item item = Registry.ITEM.get(new Identifier(tagI.asString()));
 
-            if (filter == null || filter.test(item)) get().add(item);
+            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }
 
         changed();
@@ -94,6 +96,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         private Consumer<Setting<List<Item>>> onModuleActivated;
         private IVisible visible;
         private Predicate<Item> filter;
+        private boolean bypassFilterWhenSavingAndLoading;
 
         public Builder name(String name) {
             this.name = name;
@@ -130,8 +133,13 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
+        public Builder bypassFilterWhenSavingAndLoading() {
+            this.bypassFilterWhenSavingAndLoading = true;
+            return this;
+        }
+
         public ItemListSetting build() {
-            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter);
+            return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypassFilterWhenSavingAndLoading);
         }
     }
 }

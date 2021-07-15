@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.inventory.SimpleInventory;
@@ -23,6 +24,7 @@ import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class AutoSmelter extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -32,6 +34,7 @@ public class AutoSmelter extends Module {
         .description("Items to use as fuel")
         .defaultValue(Arrays.asList(Items.COAL, Items.CHARCOAL))
         .filter(this::fuelItemFilter)
+        .bypassFilterWhenSavingAndLoading()
         .build()
     );
 
@@ -40,6 +43,7 @@ public class AutoSmelter extends Module {
         .description("Items to smelt")
         .defaultValue(Arrays.asList(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD))
         .filter(this::smeltableItemFilter)
+        .bypassFilterWhenSavingAndLoading()
         .build()
     );
 
@@ -50,17 +54,21 @@ public class AutoSmelter extends Module {
         .build()
     );
 
+    private Map<Item, Integer> fuelTimeMap;
 
     public AutoSmelter() {
         super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
     }
 
     private boolean fuelItemFilter(Item item) {
-        return mc.world == null || AbstractFurnaceBlockEntity.canUseAsFuel(item.getDefaultStack());
+        if (!Utils.canUpdate() && fuelTimeMap == null) return false;
+
+        if (fuelTimeMap == null) fuelTimeMap = AbstractFurnaceBlockEntity.createFuelTimeMap();
+        return fuelTimeMap.containsKey(item);
     }
 
     private boolean smeltableItemFilter(Item item) {
-        return mc.world == null || mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(item.getDefaultStack()), mc.world).isPresent();
+        return mc.world != null && mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(item.getDefaultStack()), mc.world).isPresent();
     }
 
     public void tick(AbstractFurnaceScreenHandler c) {
@@ -87,12 +95,14 @@ public class AutoSmelter extends Module {
             ItemStack item = c.slots.get(i).getStack();
             if (!((AbstractFurnaceScreenHandlerAccessor) c).isSmeltable(item)) continue;
             if (!smeltableItems.get().contains(item.getItem())) continue;
+            if (!smeltableItemFilter(item.getItem())) continue;
+
             slot = i;
             break;
         }
 
         if (disableWhenOutOfItems.get() && slot == -1) {
-            error("You do not have any items in your inventory that can be smelted... disabling.");
+            error("You do not have any items in your inventory that can be smelted. Disabling.");
             toggle();
             return;
         }
@@ -110,13 +120,14 @@ public class AutoSmelter extends Module {
         for (int i = 3; i < c.slots.size(); i++) {
             ItemStack item = c.slots.get(i).getStack();
             if (!fuelItems.get().contains(item.getItem())) continue;
-            if (!AbstractFurnaceBlockEntity.canUseAsFuel(item)) continue;
+            if (!fuelItemFilter(item.getItem())) continue;
+
             slot = i;
             break;
         }
 
         if (disableWhenOutOfItems.get() && slot == -1) {
-            error("You do not have any fuel in your inventory... disabling.");
+            error("You do not have any fuel in your inventory. Disabling.");
             toggle();
             return;
         }
@@ -131,7 +142,7 @@ public class AutoSmelter extends Module {
         InvUtils.quickMove().slotId(2);
 
         if (!resultStack.isEmpty()) {
-            error("Your inventory is full... disabling.");
+            error("Your inventory is full. Disabling.");
             toggle();
         }
     }
