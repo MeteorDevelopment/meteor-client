@@ -20,6 +20,12 @@ repositories {
 		url = "https://jitpack.io"
 	}
 	jcenter()
+
+    // For Canvas
+    maven {
+        name = "dblsaiko"
+        url = "https://maven.dblsaiko.net/"
+    }
 }
 
 dependencies {
@@ -39,6 +45,9 @@ dependencies {
 	// For XRay compatibility
 	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
     modCompileOnly "com.github.MeteorDevelopment:sodium-fabric:${project.sodium_version}"
+
+    // Canvas for compatibility
+    modCompileOnly("grondag:canvas-mc117-1.17:1.0.+") { transitive = false }
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
     modImplementation "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
