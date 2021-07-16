@@ -6,15 +6,13 @@
 package meteordevelopment.meteorclient.renderer;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Vec3d;
 import org.lwjgl.BufferUtils;
 
-import java.nio.FloatBuffer;
-import java.nio.IntBuffer;
+import java.nio.ByteBuffer;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL32C.*;
@@ -41,8 +39,8 @@ public class Mesh {
 
     private final int vao, vbo, ibo;
 
-    private FloatBuffer vertices;
-    private IntBuffer indices;
+    private ByteBuffer vertices;
+    private ByteBuffer indices;
     private int vertexI, indicesCount;
 
     private boolean building, rendering3D;
@@ -54,37 +52,33 @@ public class Mesh {
         for (Attrib attribute : attributes) stride += attribute.size * 4;
 
         this.drawMode = drawMode;
-        this.primitiveVerticesSize = stride / 4 * drawMode.indicesCount;
+        this.primitiveVerticesSize = stride * drawMode.indicesCount;
 
-        vertices = BufferUtils.createFloatBuffer(primitiveVerticesSize * 256);
-        indices = BufferUtils.createIntBuffer(drawMode.indicesCount * 512);
+        vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * 256 * 4);
+        indices = BufferUtils.createByteBuffer(drawMode.indicesCount * 512 * 4);
 
-        vao = glGenVertexArrays();
-        glBindVertexArray(vao);
+        vao = GL.genVertexArray();
+        GL.bindVertexArray(vao);
 
-        vbo = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        vbo = GL.genBuffer();
+        GL.bindVertexBuffer(vbo);
 
-        ibo = glGenBuffers();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        ibo = GL.genBuffer();
+        GL.bindIndexBuffer(ibo);
 
         int offset = 0;
         for (int i = 0; i < attributes.length; i++) {
             int attribute = attributes[i].size;
 
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(i, attribute, GL_FLOAT, false, stride, offset);
+            GL.enableVertexAttribute(i);
+            GL.vertexAttribute(i, attribute, GL_FLOAT, false, stride, offset);
 
             offset += attribute * 4;
         }
 
-        glBindVertexArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-        BufferRendererAccessor.setCurrentVertexArray(0);
-        BufferRendererAccessor.setCurrentVertexBuffer(0);
-        BufferRendererAccessor.setCurrentElementBuffer(0);
+        GL.bindVertexArray(0);
+        GL.bindVertexBuffer(0);
+        GL.bindIndexBuffer(0);
     }
 
     public void begin() {
@@ -112,25 +106,25 @@ public class Mesh {
     }
 
     public Mesh vec3(double x, double y, double z) {
-        vertices.put((float) (x - cameraX));
-        vertices.put((float) y);
-        vertices.put((float) (z - cameraZ));
+        vertices.putFloat((float) (x - cameraX));
+        vertices.putFloat((float) y);
+        vertices.putFloat((float) (z - cameraZ));
 
         return this;
     }
 
     public Mesh vec2(double x, double y) {
-        vertices.put((float) x);
-        vertices.put((float) y);
+        vertices.putFloat((float) x);
+        vertices.putFloat((float) y);
 
         return this;
     }
 
     public Mesh color(Color c) {
-        vertices.put(c.r / 255f);
-        vertices.put(c.g / 255f);
-        vertices.put(c.b / 255f);
-        vertices.put(c.a / 255f * (float) alpha);
+        vertices.putFloat(c.r / 255f);
+        vertices.putFloat(c.g / 255f);
+        vertices.putFloat(c.b / 255f);
+        vertices.putFloat(c.a / 255f * (float) alpha);
 
         return this;
     }
@@ -140,21 +134,21 @@ public class Mesh {
     }
 
     public void line(int i1, int i2) {
-        indices.put(i1);
-        indices.put(i2);
+        indices.putInt(i1);
+        indices.putInt(i2);
 
         indicesCount += 2;
         growIfNeeded();
     }
 
     public void quad(int i1, int i2, int i3, int i4) {
-        indices.put(i1);
-        indices.put(i2);
-        indices.put(i3);
+        indices.putInt(i1);
+        indices.putInt(i2);
+        indices.putInt(i3);
 
-        indices.put(i3);
-        indices.put(i4);
-        indices.put(i1);
+        indices.putInt(i3);
+        indices.putInt(i4);
+        indices.putInt(i1);
 
         indicesCount += 6;
         growIfNeeded();
@@ -166,7 +160,7 @@ public class Mesh {
             int newSize = vertices.capacity() * 2;
             if (newSize % primitiveVerticesSize != 0) newSize += newSize % primitiveVerticesSize;
 
-            FloatBuffer newVertices = BufferUtils.createFloatBuffer(newSize);
+            ByteBuffer newVertices = BufferUtils.createByteBuffer(newSize);
 
             vertices.flip();
             newVertices.put(vertices);
@@ -175,11 +169,11 @@ public class Mesh {
         }
 
         // Indices
-        if (indicesCount >= indices.capacity()) {
+        if (indicesCount * 4 >= indices.capacity()) {
             int newSize = indices.capacity() * 2;
-            if (newSize % drawMode.indicesCount != 0) newSize += newSize % drawMode.indicesCount;
+            if (newSize % drawMode.indicesCount != 0) newSize += newSize % (drawMode.indicesCount * 4);
 
-            IntBuffer newIndices = BufferUtils.createIntBuffer(newSize);
+            ByteBuffer newIndices = BufferUtils.createByteBuffer(newSize);
 
             indices.flip();
             newIndices.put(indices);
@@ -193,17 +187,14 @@ public class Mesh {
 
         if (indicesCount > 0) {
             vertices.flip();
-            glBindBuffer(GL_ARRAY_BUFFER, vbo);
-            glBufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_ARRAY_BUFFER, 0);
+            GL.bindVertexBuffer(vbo);
+            GL.bufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
+            GL.bindVertexBuffer(0);
 
             indices.flip();
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-            BufferRendererAccessor.setCurrentVertexBuffer(0);
-            BufferRendererAccessor.setCurrentElementBuffer(0);
+            GL.bindIndexBuffer(ibo);
+            GL.bufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
+            GL.bindIndexBuffer(0);
         }
 
         building = false;
@@ -244,16 +235,11 @@ public class Mesh {
 
             Shader.BOUND.setDefaults();
 
-            glBindVertexArray(vao);
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-            glDrawElements(drawMode.getGL(), indicesCount, GL_UNSIGNED_INT, 0);
+            GL.bindVertexArray(vao);
+            GL.drawElements(drawMode.getGL(), indicesCount, GL_UNSIGNED_INT);
 
             // Cleanup opengl state and matrix stack
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-            glBindVertexArray(0);
-
-            BufferRendererAccessor.setCurrentElementBuffer(0);
-            BufferRendererAccessor.setCurrentVertexArray(0);
+            GL.bindVertexArray(0);
 
             if (!wasBeganRendering) endRender();
         }
