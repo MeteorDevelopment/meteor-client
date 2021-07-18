@@ -5,11 +5,17 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.misc.TPSSync;
 
 public class Timer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -36,5 +42,21 @@ public class Timer extends Module {
 
     public void setOverride(double override) {
         this.override = override;
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        if (Modules.get().get(TPSSync.class).isActive()) {
+            WHorizontalList list = theme.horizontalList();
+            list.add(theme.label("Multiplier is overwritten by TPSSync."));
+            WButton disableBtn = list.add(theme.button("Disable TPSSync")).widget();
+            disableBtn.action = () -> {
+                TPSSync tpsSync = Modules.get().get(TPSSync.class);
+                if (tpsSync.isActive()) tpsSync.toggle();
+                list.visible = false;
+            };
+            return list;
+        }
+        return null;
     }
 }
