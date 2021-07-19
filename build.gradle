@@ -47,7 +47,7 @@ dependencies {
     include modImplementation("com.github.MeteorDevelopment:baritone:${project.baritone_version}")
 
 	// Other dependencies
-	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
+    include modImplementation("com.github.MeteorDevelopment:orbit:${project.orbit_version}")
 }
 
 processResources {

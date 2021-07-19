@@ -19,7 +19,6 @@ import java.util.*;
 
 public class Config extends System<Config> {
     public final Version version;
-    public final String devBuild;
 
     public String font = ConfigTab.font.get();
     public boolean customFont = ConfigTab.customFont.get();
@@ -41,7 +40,6 @@ public class Config extends System<Config> {
         if (versionString.contains("-")) versionString = versionString.split("-")[0];
 
         version = new Version(versionString);
-        devBuild = metadata.getCustomValue("meteor-client:devbuild").getAsString();
     }
 
     public static Config get() {
