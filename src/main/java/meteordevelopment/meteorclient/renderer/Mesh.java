@@ -155,9 +155,9 @@ public class Mesh {
     }
 
     public void triangle(int i1, int i2, int i3) {
-        indices.put(i1);
-        indices.put(i2);
-        indices.put(i3);
+        indices.putInt(i1);
+        indices.putInt(i2);
+        indices.putInt(i3);
 
         indicesCount += 3;
         growIfNeeded();
