@@ -10,7 +10,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.utils.misc.text.TextUtils;
-import meteordevelopment.meteorclient.utils.network.HttpUtils;
+import meteordevelopment.meteorclient.utils.network.Http;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.network.PlayerListEntry;
@@ -35,60 +36,61 @@ public class NameHistoryCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("player", PlayerListEntryArgumentType.playerListEntry()).executes(context -> {
-            PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.getPlayerListEntry(context);
+            MeteorExecutor.execute(() -> {
+                PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.getPlayerListEntry(context);
 
-            Type type = new TypeToken<List<NameHistoryObject>>(){}.getType();
-            List<NameHistoryObject> nameHistoryObjects = HttpUtils.get("https://api.mojang.com/user/profiles/" + lookUpTarget.getProfile().getId().toString().replace("-", "") + "/names", type);
+                Type type = new TypeToken<List<NameHistoryObject>>(){}.getType();
+                List<NameHistoryObject> nameHistoryObjects = Http.get("https://api.mojang.com/user/profiles/" + lookUpTarget.getProfile().getId().toString().replace("-", "") + "/names").sendJson(type);
 
-            if (nameHistoryObjects == null || nameHistoryObjects.isEmpty()) {
-                error("There was an error fetching that users name history.");
-                return SINGLE_SUCCESS;
-            }
-
-            BaseText initial = new LiteralText(lookUpTarget.getProfile().getName());
-            initial.append(new LiteralText("'s"));
-
-            Color nameColor = TextUtils.getMostPopularColor(lookUpTarget.getDisplayName());
-
-            initial.setStyle(initial.getStyle()
-                    .withColor(new TextColor(nameColor.getPacked()))
-                    .withClickEvent(new ClickEvent(
-                                    ClickEvent.Action.OPEN_URL,
-                                    "https://namemc.com/search?q=" + lookUpTarget.getProfile().getName()
-                            )
-                    )
-                    .withHoverEvent(new HoverEvent(
-                            HoverEvent.Action.SHOW_TEXT,
-                            new LiteralText("View on NameMC")
-                                    .formatted(Formatting.YELLOW)
-                                    .formatted(Formatting.ITALIC)
-                    ))
-            );
-
-            info(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
-
-            for (NameHistoryObject nameHistoryObject : nameHistoryObjects) {
-                BaseText nameText = new LiteralText(nameHistoryObject.name);
-                nameText.formatted(Formatting.AQUA);
-
-                if (nameHistoryObject.changedToAt != 0L) {
-                    BaseText changed = new LiteralText("Changed at: ");
-                    changed.formatted(Formatting.GRAY);
-
-                    Date date = new Date(nameHistoryObject.changedToAt);
-                    DateFormat formatter = new SimpleDateFormat("hh:mm:ss, dd/MM/yyyy");
-                    changed.append(new LiteralText(formatter.format(date)).formatted(Formatting.WHITE));
-
-                    nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
+                if (nameHistoryObjects == null || nameHistoryObjects.isEmpty()) {
+                    error("There was an error fetching that users name history.");
+                    return;
                 }
 
-                ChatUtils.sendMsg(nameText);
-            }
+                BaseText initial = new LiteralText(lookUpTarget.getProfile().getName());
+                initial.append(new LiteralText("'s"));
+
+                Color nameColor = TextUtils.getMostPopularColor(lookUpTarget.getDisplayName());
+
+                initial.setStyle(initial.getStyle()
+                        .withColor(new TextColor(nameColor.getPacked()))
+                        .withClickEvent(new ClickEvent(
+                                        ClickEvent.Action.OPEN_URL,
+                                        "https://namemc.com/search?q=" + lookUpTarget.getProfile().getName()
+                                )
+                        )
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                new LiteralText("View on NameMC")
+                                        .formatted(Formatting.YELLOW)
+                                        .formatted(Formatting.ITALIC)
+                        ))
+                );
+
+                info(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
+
+                for (NameHistoryObject nameHistoryObject : nameHistoryObjects) {
+                    BaseText nameText = new LiteralText(nameHistoryObject.name);
+                    nameText.formatted(Formatting.AQUA);
+
+                    if (nameHistoryObject.changedToAt != 0L) {
+                        BaseText changed = new LiteralText("Changed at: ");
+                        changed.formatted(Formatting.GRAY);
+
+                        Date date = new Date(nameHistoryObject.changedToAt);
+                        DateFormat formatter = new SimpleDateFormat("hh:mm:ss, dd/MM/yyyy");
+                        changed.append(new LiteralText(formatter.format(date)).formatted(Formatting.WHITE));
+
+                        nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
+                    }
+
+                    ChatUtils.sendMsg(nameText);
+                }
+            });
 
             return SINGLE_SUCCESS;
         }));
     }
-
 }
 
 class NameHistoryObject {

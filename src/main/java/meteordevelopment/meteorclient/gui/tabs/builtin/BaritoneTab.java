@@ -5,14 +5,19 @@
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.utils.SettingsUtil;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.Settings;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.Screen;
+
+import java.awt.*;
+import java.lang.reflect.Field;
 
 public class BaritoneTab extends Tab {
     private static Settings settings;
@@ -41,14 +46,13 @@ public class BaritoneTab extends Tab {
         SettingGroup sgInt = settings.createGroup("Whole Numbers");
         SettingGroup sgColor = settings.createGroup("Colors");
 
-        // TODO: Baritone
-        /*try {
+        try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
             for (Field field : klass.getDeclaredFields()) {
                 Object obj = field.get(BaritoneAPI.getSettings());
-                if (!(obj instanceof baritone.api.Settings.Setting)) continue;
+                if (!(obj instanceof baritone.api.Settings$Setting)) continue;
 
-                baritone.api.Settings.Setting setting = (baritone.api.Settings.Setting<?>) obj;
+                baritone.api.Settings$Setting setting = (baritone.api.Settings$Setting<?>) obj;
                 Object value = setting.value;
 
                 if (value instanceof Boolean) {
@@ -111,7 +115,7 @@ public class BaritoneTab extends Tab {
             }
         } catch (IllegalAccessException e) {
             e.printStackTrace();
-        }*/
+        }
 
         return settings;
     }
@@ -133,10 +137,9 @@ public class BaritoneTab extends Tab {
             add(theme.settings(getSettings(), filter.get().trim())).expandX();
         }
 
-        // TODO: Baritone
-        /*@Override
+        @Override
         protected void onClosed() {
             SettingsUtil.save(BaritoneAPI.getSettings());
-        }*/
+        }
     }
 }

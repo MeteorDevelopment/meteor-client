@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.utils.Rotation;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -12,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.misc.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.misc.text.TextUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dimension;
@@ -53,11 +56,10 @@ public class PlayerUtils {
     public static Vec3d getHorizontalVelocity(double bps) {
         float yaw = mc.player.getYaw();
 
-        // TODO: Baritone
-        /*if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        if (BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
             Rotation target = BaritoneUtils.getTarget();
             if (target != null) yaw = target.getYaw();
-        }*/
+        }
 
         Vec3d forward = Vec3d.fromPolar(0, yaw);
         Vec3d right = Vec3d.fromPolar(0, yaw + 90);
@@ -179,22 +181,20 @@ public class PlayerUtils {
         return possibleHealthReductions(true, true);
     }
 
-    private static double damageTaken;
-
     public static double possibleHealthReductions(boolean entities, boolean fall) {
-        damageTaken = 0;
+        double damageTaken = 0;
 
         if (entities) {
             for (Entity entity : mc.world.getEntities()) {
                 // Check for end crystals
-                if (entity instanceof EndCrystalEntity && damageTaken < DamageCalcUtils.crystalDamage(mc.player, entity.getPos())) {
-                    damageTaken = DamageCalcUtils.crystalDamage(mc.player, entity.getPos());
+                if (entity instanceof EndCrystalEntity && damageTaken < DamageUtils.crystalDamage(mc.player, entity.getPos())) {
+                    damageTaken = DamageUtils.crystalDamage(mc.player, entity.getPos());
                 }
                 // Check for players holding swords
-                else if (entity instanceof PlayerEntity && damageTaken < DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true)) {
+                else if (entity instanceof PlayerEntity && damageTaken < DamageUtils.getSwordDamage((PlayerEntity) entity, true)) {
                     if (!Friends.get().isFriend((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
                         if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
-                            damageTaken = DamageCalcUtils.getSwordDamage((PlayerEntity) entity, true);
+                            damageTaken = DamageUtils.getSwordDamage((PlayerEntity) entity, true);
                         }
                     }
                 }
@@ -206,8 +206,8 @@ public class PlayerUtils {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
 
-                    if (blockEntity instanceof BedBlockEntity && damageTaken < DamageCalcUtils.bedDamage(mc.player, pos)) {
-                        damageTaken = DamageCalcUtils.bedDamage(mc.player, pos);
+                    if (blockEntity instanceof BedBlockEntity && damageTaken < DamageUtils.bedDamage(mc.player, pos)) {
+                        damageTaken = DamageUtils.bedDamage(mc.player, pos);
                     }
                 }
             }

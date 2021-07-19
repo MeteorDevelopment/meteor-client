@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
-import meteordevelopment.meteorclient.events.game.GetTooltipEvent;
+import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
@@ -32,7 +32,7 @@ public abstract class ItemStackMixin {
     @Inject(method = "getTooltip", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info, List<Text> list) {
         if (Utils.canUpdate()) {
-            MeteorClient.EVENT_BUS.post(GetTooltipEvent.Append.get((ItemStack) (Object) this, list));
+            MeteorClient.EVENT_BUS.post(ItemStackTooltipEvent.get((ItemStack) (Object) this, list));
         }
     }
 

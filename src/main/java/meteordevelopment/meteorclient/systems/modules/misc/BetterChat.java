@@ -24,6 +24,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -31,6 +32,8 @@ import java.util.regex.Pattern;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgFilter = settings.createGroup("Filter");
+    private final SettingGroup sgLongerChat = settings.createGroup("Longer Chat");
     private final SettingGroup sgPrefix = settings.createGroup("Prefix");
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
@@ -55,45 +58,72 @@ public class BetterChat extends Module {
             .build()
     );
 
-    private final Setting<Boolean> antiSpam = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
+        .name("coords-protection")
+        .description("Prevents you from sending messages in chat that may contain coordinates.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> rainbowPrefix = sgGeneral.add(new BoolSetting.Builder()
+        .name("rainbow-prefix")
+        .description("Makes the [Meteor] prefix on chat info rainbow.")
+        .defaultValue(false)
+        .build()
+    );
+
+    // Filter
+
+    private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
             .name("anti-spam")
             .description("Blocks duplicate messages from filling your chat.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> antiSpamDepth = sgGeneral.add(new IntSetting.Builder()
-            .name("depth")
-            .description("How many messages to check for duplicate messages.")
-            .defaultValue(20)
-            .min(1)
-            .sliderMin(1)
-            .visible(antiSpam::get)
-            .build()
+    private final Setting<Integer> antiSpamDepth = sgFilter.add(new IntSetting.Builder()
+        .name("depth")
+        .description("How many messages to filter.")
+        .defaultValue(20)
+        .min(1)
+        .sliderMin(1)
+        .visible(antiSpam::get)
+        .build()
     );
 
-    private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
-            .name("coords-protection")
-            .description("Prevents you from sending messages in chat that may contain coordinates.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> filterRegex = sgFilter.add(new BoolSetting.Builder()
+        .name("filter-regex")
+        .description("Filter out chat messages that match the regex filter.")
+        .defaultValue(false)
+        .build()
     );
 
-    private final Setting<Boolean> infiniteChatBox = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<List<String>> regexFilters = sgFilter.add(new StringListSetting.Builder()
+        .name("regex-filter")
+        .description("Regex filter used for filtering chat messages.")
+        .defaultValue(Collections.emptyList())
+        .visible(filterRegex::get)
+        .build()
+    );
+
+
+    // Longer chat
+
+    private final Setting<Boolean> infiniteChatBox = sgLongerChat.add(new BoolSetting.Builder()
             .name("infinite-chat-box")
             .description("Lets you type infinitely long messages.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Boolean> longerChatHistory = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> longerChatHistory = sgLongerChat.add(new BoolSetting.Builder()
             .name("longer-chat-history")
             .description("Extends chat length.")
             .defaultValue(true)
             .build()
     );
 
-    private final Setting<Integer> longerChatLines = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
             .name("extra-lines")
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
@@ -194,8 +224,18 @@ public class BetterChat extends Module {
             message = new LiteralText("").append(timestamp).append(message);
         }
 
-        if (antiSpam.get()) {
-            for (int i = 0; i < antiSpamDepth.get(); i++) {
+        if (filterRegex.get()) {
+            for (String regexFilters : regexFilters.get()) {
+                if (filterRegex(Pattern.compile(regexFilters))) {
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(0);
+                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(0);
+                    break; // No need to continue since the message is already filtered out (removed)
+                }
+            }
+        }
+
+        for (int i = 0; i < antiSpamDepth.get(); i++) {
+            if (antiSpam.get()) {
                 Text antiSpammed = appendAntiSpam(message, i);
                 if (antiSpammed != null) {
                     message = antiSpammed;
@@ -247,6 +287,17 @@ public class BetterChat extends Module {
         return null;
     }
 
+    private boolean filterRegex(Pattern regex) {
+        LiteralText parsed = new LiteralText("");
+
+        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().get(0).getText().accept((i, style, codePoint) -> {
+            parsed.append(new LiteralText(new String(Character.toChars(codePoint))).setStyle(style));
+            return true;
+        });
+
+        return regex.matcher(parsed.getString()).find();
+    }
+
     @EventHandler
     private void onMessageSend(SendMessageEvent event) {
         String message = event.message;
@@ -260,7 +311,7 @@ public class BetterChat extends Module {
         if (coordsProtection.get() && containsCoordinates(message)) {
             BaseText warningMessage = new LiteralText("It looks like there are coordinates in your message! ");
 
-            BaseText sendButton = getSendButton(message, "Send your message to the global chat even if there are coordinates:");
+            BaseText sendButton = getSendButton(message);
             warningMessage.append(sendButton);
 
             ChatUtils.sendMsg(warningMessage);
@@ -270,20 +321,6 @@ public class BetterChat extends Module {
         }
 
         event.message = message;
-    }
-
-    // LONGER CHAT
-
-    public boolean isInfiniteChatBox() {
-        return isActive() && infiniteChatBox.get();
-    }
-
-    public boolean isLongerChat() {
-        return isActive() && longerChatHistory.get();
-    }
-
-    public int getChatLength() {
-        return longerChatLines.get();
     }
 
     // Annoy
@@ -335,26 +372,40 @@ public class BetterChat extends Module {
         return message.matches(".*(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?).*");
     }
 
-    private BaseText getSendButton(String message, String hint) {
+    private BaseText getSendButton(String message) {
         BaseText sendButton = new LiteralText("[SEND ANYWAY]");
         BaseText hintBaseText = new LiteralText("");
 
-        BaseText hintMsg = new LiteralText(hint);
+        BaseText hintMsg = new LiteralText("Send your message to the global chat even if there are coordinates:");
         hintMsg.setStyle(hintBaseText.getStyle().withFormatting(Formatting.GRAY));
         hintBaseText.append(hintMsg);
 
         hintBaseText.append(new LiteralText('\n' + message));
 
         sendButton.setStyle(sendButton.getStyle()
-                .withFormatting(Formatting.DARK_RED)
-                .withClickEvent(new ClickEvent(
-                        ClickEvent.Action.RUN_COMMAND,
-                        Commands.get().get(SayCommand.class).toString(message)
-                ))
-                .withHoverEvent(new HoverEvent(
-                        HoverEvent.Action.SHOW_TEXT,
-                        hintBaseText
-                )));
+            .withFormatting(Formatting.DARK_RED)
+            .withClickEvent(new ClickEvent(
+                ClickEvent.Action.RUN_COMMAND,
+                Commands.get().get(SayCommand.class).toString(message)
+            ))
+            .withHoverEvent(new HoverEvent(
+                HoverEvent.Action.SHOW_TEXT,
+                hintBaseText
+            )));
         return sendButton;
+    }
+
+    // Longer chat
+
+    public boolean isInfiniteChatBox() {
+        return isActive() && infiniteChatBox.get();
+    }
+
+    public boolean isLongerChat() {
+        return isActive() && longerChatHistory.get();
+    }
+
+    public int getChatLength() {
+        return longerChatLines.get();
     }
 }

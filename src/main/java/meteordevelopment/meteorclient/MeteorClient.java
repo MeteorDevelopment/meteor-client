@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.meteor.ClientInitialisedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -22,11 +21,13 @@ import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import meteordevelopment.meteorclient.utils.player.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.Outlines;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
@@ -74,10 +75,10 @@ public class MeteorClient implements ClientModInitializer {
             addons.add(entrypoint.getEntrypoint());
         }
 
+        GL.init();
         Shaders.init();
         Renderer2D.init();
         Outlines.init();
-        Blur.init();
 
         MeteorExecutor.init();
         RainbowColors.init();
@@ -90,6 +91,8 @@ public class MeteorClient implements ClientModInitializer {
         Tabs.init();
         GuiThemes.init();
         Fonts.init();
+        DamageUtils.init();
+        BlockUtils.init();
 
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
@@ -105,7 +108,6 @@ public class MeteorClient implements ClientModInitializer {
         }));
 
         EVENT_BUS.subscribe(this);
-        EVENT_BUS.post(new ClientInitialisedEvent()); // TODO: This is there just for compatibility
 
         // Call onInitialize for addons
         addons.forEach(MeteorAddon::onInitialize);

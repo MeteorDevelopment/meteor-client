@@ -9,8 +9,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.nbt.NbtCompound;
 
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     private boolean isKey;
@@ -37,7 +36,7 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     }
 
     public boolean canBindTo(boolean isKey, int value) {
-        if (isKey) return true;
+        if (isKey) return value != GLFW_KEY_ESCAPE;
         return value != GLFW_MOUSE_BUTTON_LEFT && value != GLFW_MOUSE_BUTTON_RIGHT;
     }
 

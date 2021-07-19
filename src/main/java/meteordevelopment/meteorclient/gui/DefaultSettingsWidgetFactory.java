@@ -63,6 +63,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
+        factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
     }
 
     @Override
@@ -86,6 +87,11 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         return list;
     }
 
+    // If a different theme uses has different heights of widgets this can method can be overwritten to account for it in the setting titles
+    protected double settingTitleTopMargin() {
+        return 6;
+    }
+
     private void group(WVerticalList list, SettingGroup group, String filter, List<RemoveInfo> removeInfoList) {
         WSection section = list.add(theme.section(group.name, group.sectionExpanded)).expandX().widget();
         section.action = () -> group.sectionExpanded = section.isExpanded();
@@ -104,7 +110,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
                 removeInfo.markRowForRemoval();
             }
 
-            table.add(theme.label(setting.title)).widget().tooltip = setting.description;
+            table.add(theme.label(setting.title)).top().marginTop(settingTitleTopMargin()).widget().tooltip = setting.description;
 
             Factory factory = factories.get(setting.getClass());
             if (factory != null) factory.create(table, setting);
@@ -318,6 +324,11 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(list, setting, () -> item.set(setting.get().potion));
+    }
+
+    private void stringListW(WTable table, StringListSetting setting) {
+        WTable wtable = table.add(theme.table()).widget();
+        StringListSetting.fillTable(theme, wtable, setting);
     }
 
     // Other

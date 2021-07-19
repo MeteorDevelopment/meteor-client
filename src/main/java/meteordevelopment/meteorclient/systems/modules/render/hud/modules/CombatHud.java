@@ -46,13 +46,12 @@ public class CombatHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("Scale of combat info.")
-            .defaultValue(3)
-            .min(1)
-            .sliderMin(1)
-            .sliderMax(5)
-            .build()
+        .name("scale")
+        .description("The scale.")
+        .defaultValue(2)
+        .min(1)
+        .sliderMin(1).sliderMax(5)
+        .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()

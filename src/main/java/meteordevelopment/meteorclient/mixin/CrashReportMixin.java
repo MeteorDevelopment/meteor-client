@@ -24,13 +24,13 @@ public class CrashReportMixin {
         if (Modules.get() != null) {
             sb.append("\n\n");
             sb.append("-- Meteor Client --\n");
-            sb.append("Version: ").append(Config.get().versionString).append("\n");
+            sb.append("Version: ").append(Config.get().version).append("\n");
 
             for (Category category : Modules.loopCategories()) {
                 List<Module> modules = Modules.get().getGroup(category);
                 boolean active = false;
                 for (Module module : modules) {
-                    if (module instanceof Module && module.isActive()) {
+                    if (module != null && module.isActive()) {
                         active = true;
                         break;
                     }

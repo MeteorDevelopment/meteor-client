@@ -6,137 +6,144 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.ItemListSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
+import net.minecraft.inventory.SimpleInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.recipe.RecipeType;
 import net.minecraft.screen.AbstractFurnaceScreenHandler;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
 public class AutoSmelter extends Module {
-    private int step;
-    private boolean first;
-    private int timer;
-    private boolean waitingForItemsToSmelt;
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<List<Item>> fuelItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("fuel-items")
+        .description("Items to use as fuel")
+        .defaultValue(Arrays.asList(Items.COAL, Items.CHARCOAL))
+        .filter(this::fuelItemFilter)
+        .bypassFilterWhenSavingAndLoading()
+        .build()
+    );
+
+    private final Setting<List<Item>> smeltableItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("smeltable-items")
+        .description("Items to smelt")
+        .defaultValue(Arrays.asList(Items.IRON_ORE, Items.GOLD_ORE, Items.COPPER_ORE, Items.RAW_IRON, Items.RAW_COPPER, Items.RAW_GOLD))
+        .filter(this::smeltableItemFilter)
+        .bypassFilterWhenSavingAndLoading()
+        .build()
+    );
+
+    private final Setting<Boolean> disableWhenOutOfItems = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-when-out-of-items")
+        .description("Disable the module when you run out of items")
+        .defaultValue(true)
+        .build()
+    );
+
+    private Map<Item, Integer> fuelTimeMap;
 
     public AutoSmelter() {
-        super(Categories.World, "auto-smelter", "Automatically smelts all items in your inventory that can be smelted.");
+        super(Categories.World, "auto-smelter", "Automatically smelts items from your inventory");
     }
 
-    @Override
-    public void onActivate() {
-        first = true;
-        waitingForItemsToSmelt = false;
+    private boolean fuelItemFilter(Item item) {
+        if (!Utils.canUpdate() && fuelTimeMap == null) return false;
+
+        if (fuelTimeMap == null) fuelTimeMap = AbstractFurnaceBlockEntity.createFuelTimeMap();
+        return fuelTimeMap.containsKey(item);
     }
 
-    public void onFurnaceClose() {
-        first = true;
-        waitingForItemsToSmelt = false;
+    private boolean smeltableItemFilter(Item item) {
+        return mc.world != null && mc.world.getRecipeManager().getFirstMatch(RecipeType.SMELTING, new SimpleInventory(item.getDefaultStack()), mc.world).isPresent();
     }
 
     public void tick(AbstractFurnaceScreenHandler c) {
-        timer++;
+        // Limit actions to happen every n ticks
+        if (mc.player.age % 10 == 0) return;
 
-        // When the furnace is opened.
-        if (!first) {
-            first = true;
+        // Check for fuel
+        checkFuel(c);
 
-            step = 0;
-            timer = 0;
-        }
+        // Take the smelted results
+        takeResults(c);
 
-        // Check for fuel.
-        if (checkFuel(c)) return;
-
-        // Wait for the smelting to be complete.
-        if (c.getCookProgress() != 0 || timer < 5) return;
-
-        if (step == 0) {
-            // Take the smelted results.
-            if (takeResults(c)) return;
-
-            step++;
-            timer = 0;
-        } else if (step == 1) {
-            // Wait for the items to smelt.
-            if (waitingForItemsToSmelt) {
-                if (c.slots.get(0).getStack().isEmpty()) {
-                    step = 0;
-                    timer = 0;
-                    waitingForItemsToSmelt = false;
-                }
-                return;
-            }
-
-            // Insert items.
-            if (insertItems(c)) return;
-
-            waitingForItemsToSmelt = true;
-        }
+        // Insert new items
+        insertItems(c);
     }
 
-    private boolean insertItems(AbstractFurnaceScreenHandler c) {
-        if (!c.slots.get(0).getStack().isEmpty()) return true;
+    private void insertItems(AbstractFurnaceScreenHandler c) {
+        ItemStack inputItemStack = c.slots.get(0).getStack();
+        if (!inputItemStack.isEmpty()) return;
 
         int slot = -1;
 
         for (int i = 3; i < c.slots.size(); i++) {
-            if (((AbstractFurnaceScreenHandlerAccessor) c).isSmeltable(c.slots.get(i).getStack())) {
-                slot = i;
-                break;
-            }
+            ItemStack item = c.slots.get(i).getStack();
+            if (!((AbstractFurnaceScreenHandlerAccessor) c).isSmeltable(item)) continue;
+            if (!smeltableItems.get().contains(item.getItem())) continue;
+            if (!smeltableItemFilter(item.getItem())) continue;
+
+            slot = i;
+            break;
         }
 
-        if (slot == -1) {
-            error("You do not have any items in your inventory that can be smelted... disabling.");
+        if (disableWhenOutOfItems.get() && slot == -1) {
+            error("You do not have any items in your inventory that can be smelted. Disabling.");
             toggle();
-            return true;
+            return;
         }
 
         InvUtils.move().fromId(slot).toId(0);
-
-        return false;
     }
 
-    private boolean checkFuel(AbstractFurnaceScreenHandler c) {
-        if (c.getFuelProgress() <= 1 && !((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(1).getStack())) {
-            if (!c.slots.get(1).getStack().isEmpty()) {
-                InvUtils.quickMove().slotId(1);
+    private void checkFuel(AbstractFurnaceScreenHandler c) {
+        ItemStack fuelStack = c.slots.get(1).getStack();
 
-                if (!c.slots.get(1).getStack().isEmpty()) {
-                    error("Your inventory is currently full... disabling.");
-                    toggle();
-                    return true;
-                }
-            }
+        if (c.getFuelProgress() > 0) return;
+        if (!fuelStack.isEmpty()) return;
 
-            int slot = -1;
-            for (int i = 3; i < c.slots.size(); i++) {
-                if (((AbstractFurnaceScreenHandlerAccessor) c).isFuel(c.slots.get(i).getStack())) {
-                    slot = i;
-                    break;
-                }
-            }
+        int slot = -1;
+        for (int i = 3; i < c.slots.size(); i++) {
+            ItemStack item = c.slots.get(i).getStack();
+            if (!fuelItems.get().contains(item.getItem())) continue;
+            if (!fuelItemFilter(item.getItem())) continue;
 
-            if (slot == -1) {
-                error("You do not have any fuel in your inventory... disabling.");
-                toggle();
-                return true;
-            }
-
-            InvUtils.move().fromId(slot).toId(1);
+            slot = i;
+            break;
         }
 
-        return false;
+        if (disableWhenOutOfItems.get() && slot == -1) {
+            error("You do not have any fuel in your inventory. Disabling.");
+            toggle();
+            return;
+        }
+
+        InvUtils.move().fromId(slot).toId(1);
     }
 
-    private boolean takeResults(AbstractFurnaceScreenHandler c) {
+    private void takeResults(AbstractFurnaceScreenHandler c) {
+        ItemStack resultStack = c.slots.get(2).getStack();
+        if (resultStack.isEmpty()) return;
+
         InvUtils.quickMove().slotId(2);
 
-        if (!c.slots.get(2).getStack().isEmpty()) {
-            error("Your inventory is full... disabling.");
+        if (!resultStack.isEmpty()) {
+            error("Your inventory is full. Disabling.");
             toggle();
-            return true;
         }
-
-        return false;
     }
 }

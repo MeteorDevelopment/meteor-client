@@ -40,6 +40,13 @@ public class AutoCity extends Module {
         .build()
     );
 
+    private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-switch")
+        .description("Auto switches to a pickaxe when AutoCity is enabled.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> support = sgGeneral.add(new BoolSetting.Builder()
         .name("support")
         .description("If there is no block below a city block it will place one before mining.")
@@ -116,11 +123,9 @@ public class AutoCity extends Module {
             return;
         }
 
-        if (support.get()) {
-            BlockUtils.place(blockPosTarget.down(1), InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
-        }
+        if (support.get()) BlockUtils.place(blockPosTarget.down(1), InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
 
-        InvUtils.swap(pickaxe.getSlot());
+        if (autoSwitch.get()) InvUtils.swap(pickaxe.getSlot());
 
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPosTarget), Rotations.getPitch(blockPosTarget), () -> mine(blockPosTarget));
         else mine(blockPosTarget);

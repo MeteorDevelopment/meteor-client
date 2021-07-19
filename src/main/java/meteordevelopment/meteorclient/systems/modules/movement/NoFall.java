@@ -5,14 +5,19 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -32,27 +37,6 @@ import net.minecraft.world.RaycastContext;
 import java.util.function.Predicate;
 
 public class NoFall extends Module {
-    public enum Mode {
-        Packet,
-        AirPlace,
-        Bucket
-    }
-
-    public enum PlaceMode {
-        BeforeDamage(height -> height > 2),
-        BeforeDeath(height -> height > Math.max(PlayerUtils.getTotalHealth(), 2));
-
-        private final Predicate<Float> fallHeight;
-
-        PlaceMode(Predicate<Float> fallHeight) {
-            this.fallHeight = fallHeight;
-        }
-
-        public boolean test(float fallheight) {
-            return fallHeight.test(fallheight);
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -78,15 +62,6 @@ public class NoFall extends Module {
         .build()
     );
 
-    private final Setting<Double> elytraStopHeight = sgGeneral.add(new DoubleSetting.Builder()
-        .name("elytra-stop-height")
-        .description("The height at which you will stop elytra flying.")
-        .defaultValue(0.5)
-        .min(0)
-        .sliderMax(10)
-        .build()
-    );
-
     private boolean placedWater;
     private int preBaritoneFallHeight;
 
@@ -96,39 +71,39 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
-        // TODO: Baritone
-        // preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
-        // if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
+        if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
         placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
-        // TODO: Baritone
-        //BaritoneAPI.getSettings().maxFallHeightNoWater.value = fallHeightBaritone;
+        BaritoneAPI.getSettings().maxFallHeightNoWater.value = preBaritoneFallHeight;
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (mc.player.getAbilities().creativeMode) return;
+        if (mc.player.getAbilities().creativeMode
+            || !(event.packet instanceof PlayerMoveC2SPacket)
+            || mode.get() != Mode.Packet
+            || ((IPlayerMoveC2SPacket) event.packet).getTag() == 1337) return;
 
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            // Elytra compat
-            if (mc.player.isFallFlying()) {
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, elytraStopHeight.get(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
-                if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                    return;
-                }
+        if ((mc.player.isFallFlying() || Modules.get().isActive(Flight.class)) && mc.player.getVelocity().y < 1) {
+            BlockHitResult result = mc.world.raycast(new RaycastContext(
+                mc.player.getPos(),
+                mc.player.getPos().subtract(0, 0.5, 0),
+                RaycastContext.ShapeType.OUTLINE,
+                RaycastContext.FluidHandling.NONE,
+                mc.player)
+            );
+
+            if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
             }
-
-            // Packet mode
-            else if (mode.get() == Mode.Packet) {
-                if (((IPlayerMoveC2SPacket) event.packet).getTag() != 1337) {
-                    ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-                }
-            }
+        }
+        else {
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         }
     }
 
@@ -187,8 +162,7 @@ public class NoFall extends Module {
         Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
             if (bucket.isOffhand()) {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
-            }
-            else {
+            } else {
                 int preSlot = mc.player.getInventory().selectedSlot;
                 InvUtils.swap(bucket.getSlot());
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
@@ -202,5 +176,26 @@ public class NoFall extends Module {
     @Override
     public String getInfoString() {
         return mode.get().toString();
+    }
+
+    public enum Mode {
+        Packet,
+        AirPlace,
+        Bucket
+    }
+
+    public enum PlaceMode {
+        BeforeDamage(height -> height > 2),
+        BeforeDeath(height -> height > Math.max(PlayerUtils.getTotalHealth(), 2));
+
+        private final Predicate<Float> fallHeight;
+
+        PlaceMode(Predicate<Float> fallHeight) {
+            this.fallHeight = fallHeight;
+        }
+
+        public boolean test(float fallheight) {
+            return fallHeight.test(fallheight);
+        }
     }
 }

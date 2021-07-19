@@ -111,7 +111,7 @@ public class VoidESP extends Module {
 
     private boolean isHole(BlockPos.Mutable blockPos, boolean nether) {
         for (int i = 0; i < holeHeight.get(); i++) {
-            blockPos.setY(nether ? 127 - i : 0);
+            blockPos.setY(nether ? 127 - i : mc.world.getBottomY());
             if (isBlockWrong(blockPos)) return false;
         }
 
@@ -129,8 +129,8 @@ public class VoidESP extends Module {
 
         for (int x = px - radius; x <= px + radius; x++) {
             for (int z = pz - radius; z <= pz + radius; z++) {
-                blockPos.set(x, 0, z);
-                if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 0, z), false));
+                blockPos.set(x, mc.world.getBottomY(), z);
+                if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.world.getBottomY(), z), false));
 
                 // Check for nether roof
                 if (netherRoof.get() && PlayerUtils.getDimension() == Dimension.Nether) {

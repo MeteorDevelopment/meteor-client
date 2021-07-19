@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.network.PacketUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.network.Packet;
@@ -25,7 +26,7 @@ public class PacketCanceller extends Module {
         .name("S2C-packets")
         .description("Server-to-client packets to cancel.")
         .defaultValue(new ObjectOpenHashSet<>(0))
-        .filter(aClass -> aClass.getSimpleName().contains("S2C"))
+        .filter(aClass -> PacketUtils.getS2CPackets().contains(aClass))
         .build()
     );
 
@@ -33,7 +34,7 @@ public class PacketCanceller extends Module {
         .name("C2S-packets")
         .description("Client-to-server packets to cancel.")
         .defaultValue(new ObjectOpenHashSet<>(0))
-        .filter(aClass -> aClass.getSimpleName().contains("C2S"))
+        .filter(aClass -> PacketUtils.getC2SPackets().contains(aClass))
         .build()
     );
 

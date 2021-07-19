@@ -34,26 +34,19 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 @Mixin(BookEditScreen.class)
 public abstract class BookEditScreenMixin extends Screen {
-    @Shadow
-    @Final
-    private List<String> pages;
-
-    @Shadow
-    private int currentPage;
-
-    @Shadow
-    private boolean dirty;
-
-    @Shadow
-    protected abstract void updateButtons();
+    @Shadow @Final private List<String> pages;
+    @Shadow private int currentPage;
+    @Shadow private boolean dirty;
 
     public BookEditScreenMixin(Text title) {
         super(title);
     }
 
+    @Shadow protected abstract void updateButtons();
+
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(4, 4, 70, 16, new LiteralText("Copy"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4, 70, 20, new LiteralText("Copy"), button -> {
             NbtList listTag = new NbtList();
             pages.stream().map(NbtString::of).forEach(listTag::add);
 
@@ -76,7 +69,7 @@ public abstract class BookEditScreenMixin extends Screen {
             }
         }));
 
-        addDrawableChild(new ButtonWidget(4, 4 + 16 + 4, 70, 16, new LiteralText("Paste"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4 + 16 + 4, 70, 20, new LiteralText("Paste"), button -> {
             String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().getHandle());
             if (clipboard == null) return;
 

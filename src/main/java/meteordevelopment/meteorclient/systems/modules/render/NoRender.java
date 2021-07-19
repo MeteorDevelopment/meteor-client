@@ -57,6 +57,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noPowderedSnowOverlay = sgOverlay.add(new BoolSetting.Builder()
+        .name("powdered-snow-overlay")
+        .description("Disables rendering of the powdered snow overlay.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> noFireOverlay = sgOverlay.add(new BoolSetting.Builder()
             .name("fire-overlay")
             .description("Disables rendering of the fire overlay.")
@@ -260,6 +267,21 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noMobInSpawner = sgEntity.add(new BoolSetting.Builder()
+        .name("spawner-entities")
+        .description("Disables rendering of spinning mobs inside of mob spawners")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noDeadEntities = sgEntity.add(new BoolSetting.Builder()
+        .name("dead-entities")
+        .description("Disables rendering of dead entities")
+        .defaultValue(false)
+        .build()
+    );
+
+
     public NoRender() {
         super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
     }
@@ -288,6 +310,10 @@ public class NoRender extends Module {
 
     public boolean noWaterOverlay() {
         return isActive() && noWaterOverlay.get();
+    }
+
+    public boolean noPowderedSnowOverlay() {
+        return isActive() && noPowderedSnowOverlay.get();
     }
 
     public boolean noInWallOverlay() {
@@ -403,6 +429,14 @@ public class NoRender extends Module {
 
     public boolean noInvisibility() {
         return isActive() && noInvisibility.get();
+    }
+
+    public boolean noMobInSpawner() {
+        return isActive() && noMobInSpawner.get();
+    }
+
+    public boolean noDeadEntities() {
+        return isActive() && noDeadEntities.get();
     }
 
     public enum BannerRenderMode {

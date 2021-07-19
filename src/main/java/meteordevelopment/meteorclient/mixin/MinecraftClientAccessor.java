@@ -29,6 +29,9 @@ public interface MinecraftClientAccessor {
     @Accessor("itemUseCooldown")
     void setItemUseCooldown(int itemUseCooldown);
 
+    @Accessor("itemUseCooldown")
+    int getItemUseCooldown();
+
     @Invoker("doAttack")
     void leftClick();
 }

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -192,11 +193,10 @@ public class AutoGap extends Module {
 
         // Pause baritone
         wasBaritone = false;
-        // TODO: Baritone
-        /*if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
             wasBaritone = true;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-        }*/
+        }
     }
 
     private void eat() {
@@ -225,10 +225,9 @@ public class AutoGap extends Module {
         }
 
         // Resume baritone
-        // TODO: Baritone
-        /*if (pauseBaritone.get() && wasBaritone) {
+        if (pauseBaritone.get() && wasBaritone) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
-        }*/
+        }
     }
 
     private void setPressed(boolean pressed) {

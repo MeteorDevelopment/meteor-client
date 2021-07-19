@@ -19,13 +19,12 @@ public class TotemHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("Scale of totem counter.")
-            .defaultValue(3)
-            .min(1)
-            .sliderMin(1)
-            .sliderMax(4)
-            .build()
+        .name("scale")
+        .description("The scale.")
+        .defaultValue(2)
+        .min(1)
+        .sliderMin(1).sliderMax(5)
+        .build()
     );
 
     public TotemHud(HUD hud) {

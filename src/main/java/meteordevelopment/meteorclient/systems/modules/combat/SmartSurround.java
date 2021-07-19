@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.player.DamageCalcUtils;
+import meteordevelopment.meteorclient.utils.player.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -54,7 +54,7 @@ public class SmartSurround extends Module {
         crystal = event.entity;
 
         if (event.entity.getType() == EntityType.END_CRYSTAL) {
-            if (DamageCalcUtils.crystalDamage(mc.player, event.entity.getPos()) > minDamage.get()) {
+            if (DamageUtils.crystalDamage(mc.player, event.entity.getPos()) > minDamage.get()) {
                 rPosX = mc.player.getBlockPos().getX() - event.entity.getBlockPos().getX();
                 rPosZ = mc.player.getBlockPos().getZ() - event.entity.getBlockPos().getZ();
             }

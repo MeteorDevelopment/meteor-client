@@ -28,11 +28,12 @@ public class HoleHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .defaultValue(3)
-            .min(1)
-            .sliderMin(1)
-            .build()
+        .name("scale")
+        .description("The scale.")
+        .defaultValue(2)
+        .min(1)
+        .sliderMin(1).sliderMax(5)
+        .build()
     );
 
     public final Setting<List<Block>> safe = sgGeneral.add(new BlockListSetting.Builder()

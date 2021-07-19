@@ -72,15 +72,6 @@ public class MeteorGuiTheme extends GuiTheme {
             .build()
     );
 
-    private final Setting<Integer> blur = sgGeneral.add(new IntSetting.Builder()
-        .name("blur")
-        .description("How much blur to apply behind the GUI.")
-        .defaultValue(0)
-        .min(0)
-        .sliderMax(6)
-        .build()
-    );
-
     public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
             .name("hide-HUD")
             .description("Hide HUD when in GUI.")
@@ -113,6 +104,7 @@ public class MeteorGuiTheme extends GuiTheme {
 
     public final Setting<SettingColor> textColor = color(sgTextColors, "text", "Color of text.", new SettingColor(255, 255, 255));
     public final Setting<SettingColor> textSecondaryColor = color(sgTextColors, "text-secondary-text", "Color of secondary text.", new SettingColor(150, 150, 150));
+    public final Setting<SettingColor> textHighlightColor = color(sgTextColors, "text-highlight", "Color of text highlighting.", new SettingColor(45, 125, 245, 100));
     public final Setting<SettingColor> titleTextColor = color(sgTextColors, "title-text", "Color of title text.", new SettingColor(255, 255, 255));
     public final Setting<SettingColor> loggedInColor = color(sgTextColors, "logged-in-text", "Color of logged in account name.", new SettingColor(45, 225, 45));
 
@@ -309,11 +301,6 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public boolean categoryIcons() {
         return categoryIcons.get();
-    }
-
-    @Override
-    public int blur() {
-        return blur.get();
     }
 
     @Override

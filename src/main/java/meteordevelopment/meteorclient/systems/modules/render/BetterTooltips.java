@@ -7,29 +7,37 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import meteordevelopment.meteorclient.events.game.GetTooltipEvent;
+import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
+import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
+import meteordevelopment.meteorclient.mixin.EntityAccessor;
+import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ByteCountDataOutput;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.entity.BannerPattern;
+import net.minecraft.entity.Bucketable;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.inventory.Inventories;
-import net.minecraft.item.FoodComponent;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.DyeColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -40,6 +48,7 @@ import java.util.List;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_LEFT_ALT;
 
 public class BetterTooltips extends Module {
+    public static final Color ECHEST_COLOR = new Color(0, 50, 50);
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPreviews = settings.createGroup("Previews");
     private final SettingGroup sgOther = settings.createGroup("Other");
@@ -47,166 +56,118 @@ public class BetterTooltips extends Module {
     // General
 
     private final Setting<DisplayWhen> displayWhen = sgGeneral.add(new EnumSetting.Builder<DisplayWhen>()
-            .name("display-when")
-            .description("When to display previews.")
-            .defaultValue(DisplayWhen.Keybind)
-            .build()
+        .name("display-when")
+        .description("When to display previews.")
+        .defaultValue(DisplayWhen.Keybind)
+        .build()
     );
 
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
-            .name("keybind")
-            .description("The bind for keybind mode.")
-            .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
-            .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
-            .build()
-    );
-
-    public final Setting<Boolean> showVanilla = sgGeneral.add(new BoolSetting.Builder()
-            .name("show-vanilla")
-            .description("Displays the vanilla tooltip as well as the preview.")
-            .defaultValue(true)
-            .build()
+        .name("keybind")
+        .description("The bind for keybind mode.")
+        .defaultValue(Keybind.fromKey(GLFW_KEY_LEFT_ALT))
+        .visible(() -> displayWhen.get() == DisplayWhen.Keybind)
+        .build()
     );
 
     private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
-            .name("middle-click-open")
-            .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
-            .defaultValue(true)
-            .build()
+        .name("middle-click-open")
+        .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
+        .defaultValue(true)
+        .build()
     );
 
     // Previews
 
     private final Setting<Boolean> shulkers = sgPreviews.add(new BoolSetting.Builder()
-            .name("storage-blocks")
-            .description("Shows a preview of a shulker box when hovering over it in an inventory.")
-            .defaultValue(true)
-            .build()
+        .name("containers")
+        .description("Shows a preview of a containers when hovering over it in an inventory.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> shulkerCompactTooltip = sgPreviews.add(new BoolSetting.Builder()
-            .name("compact-shulker-tooltip")
-            .description("Compacts the lines of the shulker tooltip.")
-            .defaultValue(true)
-            .visible(shulkers::get)
-            .build()
+        .name("compact-shulker-tooltip")
+        .description("Compacts the lines of the shulker tooltip.")
+        .defaultValue(true)
+        .visible(shulkers::get)
+        .build()
     );
 
     public final Setting<Boolean> echest = sgPreviews.add(new BoolSetting.Builder()
-            .name("echests")
-            .description("Shows a preview of your echest when hovering over it in an inventory.")
-            .defaultValue(true)
-            .build()
+        .name("echests")
+        .description("Shows a preview of your echest when hovering over it in an inventory.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> maps = sgPreviews.add(new BoolSetting.Builder()
-            .name("maps")
-            .description("Shows a preview of a map when hovering over it in an inventory.")
-            .defaultValue(true)
-            .build()
+        .name("maps")
+        .description("Shows a preview of a map when hovering over it in an inventory.")
+        .defaultValue(true)
+        .build()
     );
 
     public final Setting<Double> mapsScale = sgPreviews.add(new DoubleSetting.Builder()
-            .name("map-scale")
-            .description("The scale of the map preview.")
-            .defaultValue(1)
-            .min(1)
-            .sliderMax(5)
-            .visible(maps::get)
-            .build()
+        .name("map-scale")
+        .description("The scale of the map preview.")
+        .defaultValue(1)
+        .min(0.001)
+        .sliderMax(1)
+        .visible(maps::get)
+        .build()
     );
 
     private final Setting<Boolean> books = sgPreviews.add(new BoolSetting.Builder()
-            .name("books")
-            .description("Shows contents of a book when hovering over it in an inventory.")
-            .defaultValue(true)
-            .build()
+        .name("books")
+        .description("Shows contents of a book when hovering over it in an inventory.")
+        .defaultValue(true)
+        .build()
     );
 
-    public final Setting<Double> booksScale = sgPreviews.add(new DoubleSetting.Builder()
-            .name("book-scale")
-            .description("The scale of the book preview.")
-            .defaultValue(1)
-            .min(1)
-            .sliderMax(5)
-            .visible(books::get)
-            .build()
+    private final Setting<Boolean> banners = sgPreviews.add(new BoolSetting.Builder()
+        .name("banners")
+        .description("Shows banners' patterns when hovering over it in an inventory. Also works with shields.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> entities = sgPreviews.add(new BoolSetting.Builder()
+        .name("entities")
+        .description("Shows entities in buckets when hovering over it in an inventory.")
+        .defaultValue(true)
+        .build()
     );
 
     // Extras
 
     public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
-            .name("byte-size")
-            .description("Displays an item's size in bytes in the tooltip.")
-            .defaultValue(true)
-            .build()
+        .name("byte-size")
+        .description("Displays an item's size in bytes in the tooltip.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> statusEffects = sgOther.add(new BoolSetting.Builder()
-            .name("status-effects")
-            .description("Adds list of status effects to tooltips of food items.")
-            .defaultValue(true)
-            .build()
+        .name("status-effects")
+        .description("Adds list of status effects to tooltips of food items.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> beehive = sgOther.add(new BoolSetting.Builder()
-            .name("beehive")
-            .description("Displays information about a beehive or bee nest.")
-            .defaultValue(true)
-            .build()
+        .name("beehive")
+        .description("Displays information about a beehive or bee nest.")
+        .defaultValue(true)
+        .build()
     );
-
-    public static final Color ECHEST_COLOR = new Color(0, 50, 50);
 
     public BetterTooltips() {
         super(Categories.Render, "better-tooltips", "Displays more useful tooltips for certain items.");
     }
 
-    public boolean previewShulkers() {
-        return isActive() && isPressed() && shulkers.get();
-    }
-
-    public boolean shulkerCompactTooltip() {
-        return isActive() && shulkerCompactTooltip.get();
-    }
-
-    public boolean previewEChest() {
-        return isActive() && isPressed() && echest.get();
-    }
-
-    public boolean previewMaps() {
-        return isActive() && isPressed() && maps.get();
-    }
-
-    public boolean previewBooks() {
-        return isActive() && isPressed() && books.get();
-    }
-
-    private boolean isPressed() {
-        return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
-    }
-
     @EventHandler
-    private void appendTooltip(GetTooltipEvent.Append event) {
-        // Item size tooltip
-        if (byteSize.get()) {
-            try {
-                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
-
-                int byteCount = ByteCountDataOutput.INSTANCE.getCount();
-                String count;
-
-                ByteCountDataOutput.INSTANCE.reset();
-
-                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                else count = String.format("%d bytes", byteCount);
-
-                event.list.add(new LiteralText(Formatting.GRAY + count));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-
+    private void appendTooltip(ItemStackTooltipEvent event) {
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
@@ -257,24 +218,97 @@ public class BetterTooltips extends Module {
             }
         }
 
+        // Item size tooltip
+        if (byteSize.get()) {
+            try {
+                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
+
+                int byteCount = ByteCountDataOutput.INSTANCE.getCount();
+                String count;
+
+                ByteCountDataOutput.INSTANCE.reset();
+
+                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
+                else count = String.format("%d bytes", byteCount);
+
+                event.list.add(new LiteralText(count).formatted(Formatting.GRAY));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
         // Hold to preview tooltip
         if ((Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers())
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
             || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
-            || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())) {
+            || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
+            || (event.itemStack.getItem() instanceof EntityBucketItem && entities.get() && !previewEntities())
+            || (event.itemStack.getItem() instanceof BannerItem && banners.get() && !previewBanners())
+            || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get()  && !previewBanners())
+            || (event.itemStack.getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
             event.list.add(new LiteralText(""));
             event.list.add(new LiteralText("Hold " + Formatting.YELLOW + keybind + Formatting.RESET + " to preview"));
         }
     }
 
     @EventHandler
-    private void modifyTooltip(GetTooltipEvent.Modify event) {
-        if ((Utils.hasItems(event.itemStack) && shulkers.get() && previewShulkers())
-            || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && previewEChest())
-            || (willRenderBookPreview(event.itemStack) && books.get() && previewBooks())) {
-            event.y -= 10 * event.list.size();
-            event.y -= 4;
+    private void getTooltipData(TooltipDataEvent event) {
+        // Container preview
+        if (Utils.hasItems(event.itemStack) && previewShulkers()) {
+            NbtCompound compoundTag = event.itemStack.getSubTag("BlockEntityTag");
+            DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
+            Inventories.readNbt(compoundTag, itemStacks);
+            event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
+        }
+
+        // EChest preview
+        else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
+            event.tooltipData = new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR);
+        }
+
+        // Map preview
+        else if (event.itemStack.getItem() == Items.FILLED_MAP && previewMaps()) {
+            Integer mapId = FilledMapItem.getMapId(event.itemStack);
+            if (mapId != null)
+                event.tooltipData = new MapTooltipComponent(mapId);
+        }
+
+        // Book preview
+        else if ((event.itemStack.getItem() == Items.WRITABLE_BOOK
+            || event.itemStack.getItem() == Items.WRITTEN_BOOK)
+            && previewBooks()) {
+            Text page = getFirstPage(event.itemStack);
+            if (page != null) {
+                event.tooltipData = new BookTooltipComponent(page);
+            }
+        }
+
+        // Banner preview
+        else if (event.itemStack.getItem() instanceof BannerItem && previewBanners()) {
+            event.tooltipData = new BannerTooltipComponent(event.itemStack);
+        }
+        else if (event.itemStack.getItem() instanceof BannerPatternItem && previewBanners()) {
+            event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(
+                ((BannerPatternItem) (event.itemStack.getItem())).getPattern()
+            ));
+        }
+        else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
+            ItemStack banner = createBannerFromShield(event.itemStack);
+            if (banner != null) {
+                event.tooltipData = new BannerTooltipComponent(banner);
+            }
+        }
+
+        // Fish peek
+        else if (event.itemStack.getItem() instanceof EntityBucketItem bucketItem && previewEntities()) {
+            EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
+            Entity entity = type.create(mc.world);
+            if (entity != null) {
+                ((Bucketable) entity).copyDataFromNbt(event.itemStack.getOrCreateTag());
+                ((EntityAccessor) entity).setInWater(true);
+                event.tooltipData = new EntityTooltipComponent(entity);
+            }
         }
     }
 
@@ -325,16 +359,73 @@ public class BetterTooltips extends Module {
         }
     }
 
-    public static boolean willRenderBookPreview(ItemStack stack) {
-        if (stack.getItem() != Items.WRITABLE_BOOK && stack.getItem() != Items.WRITTEN_BOOK) return false;
+    private Text getFirstPage(ItemStack stack) {
         NbtCompound tag = stack.getTag();
-        if (tag == null) return false;
+        if (tag == null) return null;
         NbtList ltag = tag.getList("pages", 8);
-        return ltag.size() >= 1;
+        if (ltag.size() < 1) return null;
+        if (stack.getItem() == Items.WRITABLE_BOOK) return new LiteralText(ltag.getString(0));
+        else return Text.Serializer.fromLenientJson(ltag.getString(0));
+    }
+
+    private ItemStack createBannerFromPattern(BannerPattern pattern) {
+        ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
+        NbtCompound nbt = itemStack.getOrCreateSubTag("BlockEntityTag");
+        NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, DyeColor.BLACK).add(pattern, DyeColor.WHITE).toNbt();
+        nbt.put("Patterns", listNbt);
+        return itemStack;
+    }
+
+    private ItemStack createBannerFromShield(ItemStack item) {
+        if (!item.hasTag()
+            || !item.getTag().contains("BlockEntityTag")
+            || !item.getTag().getCompound("BlockEntityTag").contains("Base"))
+            return null;
+        NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, ShieldItem.getColor(item)).toNbt();
+        NbtCompound nbt = item.getOrCreateSubTag("BlockEntityTag");
+        ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
+        NbtCompound bannerTag = bannerItem.getOrCreateSubTag("BlockEntityTag");
+        bannerTag.put("Patterns", listNbt);
+        if (!nbt.contains("Patterns")) return bannerItem;
+        NbtList shieldPatterns = nbt.getList("Patterns", NbtElement.COMPOUND_TYPE);
+        listNbt.addAll(shieldPatterns);
+        return bannerItem;
     }
 
     public boolean middleClickOpen() {
         return isActive() && middleClickOpen.get();
+    }
+
+    public boolean previewShulkers() {
+        return isActive() && isPressed() && shulkers.get();
+    }
+
+    public boolean shulkerCompactTooltip() {
+        return isActive() && shulkerCompactTooltip.get();
+    }
+
+    private boolean previewEChest() {
+        return isPressed() && echest.get();
+    }
+
+    private boolean previewMaps() {
+        return isPressed() && maps.get();
+    }
+
+    private boolean previewBooks() {
+        return isPressed() && books.get();
+    }
+
+    private boolean previewBanners() {
+        return isPressed() && banners.get();
+    }
+
+    private boolean previewEntities() {
+        return isPressed() && entities.get();
+    }
+
+    private boolean isPressed() {
+        return (keybind.get().isPressed() && displayWhen.get() == DisplayWhen.Keybind) || displayWhen.get() == DisplayWhen.Always;
     }
 
     public enum DisplayWhen {

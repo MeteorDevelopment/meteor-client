@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
@@ -22,8 +23,7 @@ public class BaritoneCommand extends Command {
         builder.then(argument("command", StringArgumentType.greedyString())
                 .executes(context -> {
                     String command = context.getArgument("command", String.class);
-                    // TODO: Baritone
-                    //BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute(command);
                     return SINGLE_SUCCESS;
                 }));
     }

@@ -46,22 +46,22 @@ public class Texture {
 
         bind();
 
-        glPixelStorei(GL_UNPACK_SWAP_BYTES, GL_FALSE);
-        glPixelStorei(GL_UNPACK_LSB_FIRST, GL_FALSE);
-        glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-        glPixelStorei(GL_UNPACK_IMAGE_HEIGHT, 0);
-        glPixelStorei(GL_UNPACK_SKIP_ROWS, 0);
-        glPixelStorei(GL_UNPACK_SKIP_PIXELS, 0);
-        glPixelStorei(GL_UNPACK_SKIP_IMAGES, 0);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        GL.pixelStore(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+        GL.pixelStore(GL_UNPACK_LSB_FIRST, GL_FALSE);
+        GL.pixelStore(GL_UNPACK_ROW_LENGTH, 0);
+        GL.pixelStore(GL_UNPACK_IMAGE_HEIGHT, 0);
+        GL.pixelStore(GL_UNPACK_SKIP_ROWS, 0);
+        GL.pixelStore(GL_UNPACK_SKIP_PIXELS, 0);
+        GL.pixelStore(GL_UNPACK_SKIP_IMAGES, 0);
+        GL.pixelStore(GL_UNPACK_ALIGNMENT, 4);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMin.toOpenGL());
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMag.toOpenGL());
+        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMin.toOpenGL());
+        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMag.toOpenGL());
 
         ((Buffer) buffer).rewind();
-        glTexImage2D(GL_TEXTURE_2D, 0, format.toOpenGL(), width, height, 0, format.toOpenGL(), GL_UNSIGNED_BYTE, buffer);
+        GL.textureImage2D(GL_TEXTURE_2D, 0, format.toOpenGL(), width, height, 0, format.toOpenGL(), GL_UNSIGNED_BYTE, buffer);
     }
 
     public boolean isValid() {
