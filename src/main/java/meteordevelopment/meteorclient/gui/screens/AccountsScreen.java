@@ -14,6 +14,8 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
+import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
+import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
@@ -46,6 +48,18 @@ public class AccountsScreen extends WindowScreen {
 
         addButton(l, "Cracked", () -> mc.openScreen(new AddCrackedAccountScreen(theme)));
         addButton(l, "Premium", () -> mc.openScreen(new AddPremiumAccountScreen(theme)));
+        addButton(l, "Microsoft", () -> {
+            locked = true;
+
+            MicrosoftLogin.getRefreshToken(refreshToken -> {
+                locked = false;
+
+                if (refreshToken != null) {
+                    MicrosoftAccount account = new MicrosoftAccount(refreshToken);
+                    addAccount(null, this, account);
+                }
+            });
+        });
         addButton(l, "The Altening", () -> mc.openScreen(new AddAlteningAccountScreen(theme)));
     }
 
@@ -55,17 +69,22 @@ public class AccountsScreen extends WindowScreen {
     }
 
     public static void addAccount(WButton add, WidgetScreen screen, Account<?> account) {
-        add.set("...");
+        if (add != null) add.set("...");
         screen.locked = true;
 
         MeteorExecutor.execute(() -> {
             if (account.fetchInfo() && account.fetchHead()) {
                 Accounts.get().add(account);
                 screen.locked = false;
-                screen.onClose();
+
+                if (add != null) screen.onClose();
+                else if (screen instanceof AccountsScreen s) {
+                    s.clear();
+                    s.initWidgets();
+                }
             }
 
-            add.set("Add");
+            if (add != null) add.set("Add");
             screen.locked = false;
         });
     }

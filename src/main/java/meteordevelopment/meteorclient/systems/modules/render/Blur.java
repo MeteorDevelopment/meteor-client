@@ -89,7 +89,7 @@ public class Blur extends Module {
     );
 
     private Shader shader;
-    private Framebuffer fbo;
+    private Framebuffer fbo1, fbo2;
 
     private boolean enabled;
     private long fadeEndAt;
@@ -99,7 +99,10 @@ public class Blur extends Module {
 
         // The listeners need to run even when the module is not enabled
         MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(WindowResizedEvent.class, event -> {
-            if (fbo != null) fbo.resize();
+            if (fbo1 != null) {
+                fbo1.resize();
+                fbo2.resize();
+            }
         }));
 
         MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(RenderAfterWorldEvent.class, event -> onRenderAfterWorld()));
@@ -132,7 +135,8 @@ public class Blur extends Module {
         // Initialize shader and framebuffer if running for the first time
         if (shader == null) {
             shader = new Shader("blur.vert", "blur.frag");
-            fbo = new Framebuffer();
+            fbo1 = new Framebuffer();
+            fbo2 = new Framebuffer();
         }
 
         // Prepare stuff for rendering
@@ -158,24 +162,25 @@ public class Blur extends Module {
 
         PostProcessRenderer.beginRender();
 
-        fbo.bind();
+        fbo1.bind();
         GL.bindTexture(sourceTexture);
         shader.set("u_Direction", 1.0, 0.0);
         PostProcessRenderer.render();
 
-        fbo.unbind();
-        GL.bindTexture(fbo.texture);
+        if (mode.get() == Mode.Fancy) fbo2.bind();
+        else fbo2.unbind();
+        GL.bindTexture(fbo1.texture);
         shader.set("u_Direction", 0.0, 1.0);
         PostProcessRenderer.render();
 
         if (mode.get() == Mode.Fancy) {
-            fbo.bind();
-            GL.bindTexture(sourceTexture);
+            fbo1.bind();
+            GL.bindTexture(fbo2.texture);
             shader.set("u_Direction", 1.0, 0.0);
             PostProcessRenderer.render();
 
-            fbo.unbind();
-            GL.bindTexture(fbo.texture);
+            fbo2.unbind();
+            GL.bindTexture(fbo1.texture);
             shader.set("u_Direction", 0.0, 1.0);
             PostProcessRenderer.render();
         }

@@ -30,7 +30,6 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 
 public class EChestFarmer extends Module {
@@ -63,6 +62,13 @@ public class EChestFarmer extends Module {
     );
 
     // Render
+
+    private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
+        .name("swing-hand")
+        .description("Swing hand client side.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
@@ -149,7 +155,7 @@ public class EChestFarmer extends Module {
 
             for (int i = 0; i < 9; i++) {
                 ItemStack itemStack = mc.player.getInventory().getStack(i);
-                if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) continue;
+                if (EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) > 0) continue;
 
                 double score = itemStack.getMiningSpeedMultiplier(Blocks.ENDER_CHEST.getDefaultState());
 
@@ -162,7 +168,7 @@ public class EChestFarmer extends Module {
             if (bestSlot == -1) return;
 
             InvUtils.swap(bestSlot);
-            mc.interactionManager.updateBlockBreakingProgress(target, Direction.UP);
+            BlockUtils.breakBlock(target, swingHand.get());
         }
 
         // Place echest if the target pos is empty

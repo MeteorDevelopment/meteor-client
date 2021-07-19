@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
@@ -123,8 +124,7 @@ public class InstaMine extends Module {
 
     private boolean shouldMine() {
         if (blockPos.getY() == -1) return false;
-        if (mc.world.getBlockState(blockPos).getHardness(mc.world, blockPos) < 0) return false;
-        if (mc.world.getBlockState(blockPos).isAir()) return false;
+        if (!BlockUtils.canBreak(blockPos)) return false;
         return !pick.get() || (mc.player.getMainHandStack().getItem() == Items.DIAMOND_PICKAXE || mc.player.getMainHandStack().getItem() == Items.NETHERITE_PICKAXE);
     }
 

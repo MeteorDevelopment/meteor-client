@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.ProfileResponse;
-import meteordevelopment.meteorclient.utils.network.HttpUtils;
+import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.client.util.Session;
 
 public class CrackedAccount extends Account<CrackedAccount> {
@@ -25,12 +25,10 @@ public class CrackedAccount extends Account<CrackedAccount> {
 
     @Override
     public boolean fetchHead() {
-        try {
-            ProfileResponse response = HttpUtils.get("https://api.mojang.com/users/profiles/minecraft/" + cache.username, ProfileResponse.class);
-            return cache.makeHead("https://www.mc-heads.net/avatar/" + response.getId() + "/8");
-        } catch (Exception e) {
-            return cache.makeHead("steve");
-        }
+        ProfileResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + cache.username).sendJson(ProfileResponse.class);
+
+        if (res == null) return cache.makeHead("steve");
+        return cache.makeHead("https://www.mc-heads.net/avatar/" + res.id + "/8");
     }
 
     @Override

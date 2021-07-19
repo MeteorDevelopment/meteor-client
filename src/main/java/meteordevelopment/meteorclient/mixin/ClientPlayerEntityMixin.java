@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import baritone.api.BaritoneAPI;
 import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -56,8 +57,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     private void onSendChatMessage(String message, CallbackInfo info) {
         if (ignoreChatMessage) return;
 
-        // TODO: Baritone
-        if (!message.startsWith(Config.get().prefix) && !message.startsWith("/")/* && !message.startsWith(BaritoneAPI.getSettings().prefix.value)*/) {
+        if (!message.startsWith(Config.get().prefix) && !message.startsWith("/") && !message.startsWith(BaritoneAPI.getSettings().prefix.value)) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
             if (!event.isCancelled()) {
@@ -87,7 +87,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     }
 
     @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
-    private boolean proxy_tickMovement_isUsingItem(ClientPlayerEntity player) {
+    private boolean redirectUsingItem(ClientPlayerEntity player) {
         if (Modules.get().get(NoSlow.class).items()) return false;
         return player.isUsingItem();
     }

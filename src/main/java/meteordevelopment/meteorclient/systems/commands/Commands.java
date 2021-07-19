@@ -67,6 +67,7 @@ public class Commands extends System<Commands> {
         add(new BindsCommand());
         add(new GiveCommand());
         add(new NameHistoryCommand());
+        add(new BindCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }

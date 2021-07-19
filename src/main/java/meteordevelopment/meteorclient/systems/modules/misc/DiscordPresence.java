@@ -56,7 +56,7 @@ public class DiscordPresence extends Module {
 
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
         rpc.largeImageKey = "meteor_client";
-        String largeText = "Meteor Client " + Config.get().version.getOriginalString();
+        String largeText = "Meteor Client " + Config.get().version;
         if (!Config.get().devBuild.isEmpty()) largeText += " Dev Build: " + Config.get().devBuild;
         rpc.largeImageText = largeText;
         currentSmallImage = SmallImage.MineGame;

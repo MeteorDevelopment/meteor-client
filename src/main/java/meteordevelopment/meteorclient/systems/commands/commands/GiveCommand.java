@@ -22,6 +22,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class GiveCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
+    private final static SimpleCommandExceptionType NO_SPACE = new SimpleCommandExceptionType(new LiteralText("No space in hotbar."));
 
     public GiveCommand() {
         super("give", "Gives you any item.");
@@ -33,25 +34,20 @@ public class GiveCommand extends Command {
             if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(1, false);
-            addItem(item);
+            if (!mc.player.getInventory().insertStack(item)) {
+                throw NO_SPACE.create();
+            }
 
             return SINGLE_SUCCESS;
         }).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
             if (!mc.player.getAbilities().creativeMode) throw NOT_IN_CREATIVE.create();
 
             ItemStack item = ItemStackArgumentType.getItemStackArgument(context, "item").createStack(IntegerArgumentType.getInteger(context, "number"), false);
-            addItem(item);
+            if (!mc.player.getInventory().insertStack(item)) {
+                throw NO_SPACE.create();
+            }
 
             return SINGLE_SUCCESS;
         })));
-    }
-
-    private void addItem(ItemStack item) {
-		for(int i = 0; i < 36; i++) {
-		    ItemStack stack = mc.player.getInventory().getStack(SlotUtils.indexToId(i));
-			if (!stack.isEmpty()) continue;
-			mc.player.networkHandler.sendPacket(new CreativeInventoryActionC2SPacket(SlotUtils.indexToId(i), item));
-			return;
-		}
     }
 }

@@ -5,15 +5,17 @@
 
 package meteordevelopment.meteorclient.systems.config;
 
-import com.g00fy2.versioncompare.Version;
 import meteordevelopment.meteorclient.gui.tabs.builtin.ConfigTab;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.*;
+
+import java.util.*;
 
 public class Config extends System<Config> {
     public final Version version;
@@ -27,7 +29,6 @@ public class Config extends System<Config> {
     public boolean openChatOnPrefix = ConfigTab.openChatOnPrefix.get();
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
-    public boolean rainbowPrefix = ConfigTab.rainbowPrefix.get();
 
     public boolean titleScreenCredits = ConfigTab.titleScreenCredits.get();
     public boolean titleScreenSplashes = ConfigTab.titleScreenSplashes.get();
@@ -35,6 +36,8 @@ public class Config extends System<Config> {
     public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
 
     public boolean useTeamColor = ConfigTab.useTeamColor.get();
+
+    public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
         super("config");
@@ -55,7 +58,7 @@ public class Config extends System<Config> {
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-        tag.putString("version", version.getOriginalString());
+        tag.putString("version", version.toString());
 
         tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
@@ -66,7 +69,6 @@ public class Config extends System<Config> {
         tag.putBoolean("openChatOnPrefix", openChatOnPrefix);
         tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
         tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
-        tag.putBoolean("rainbowPrefix", rainbowPrefix);
 
         tag.putBoolean("titleScreenCredits", titleScreenCredits);
         tag.putBoolean("titleScreenSplashes", titleScreenSplashes);
@@ -75,6 +77,7 @@ public class Config extends System<Config> {
 
         tag.putBoolean("useTeamColor", useTeamColor);
 
+        tag.put("dontShowAgainPrompts", listToNbt(dontShowAgainPrompts));
         return tag;
     }
 
@@ -89,7 +92,6 @@ public class Config extends System<Config> {
         openChatOnPrefix = getBoolean(tag, "openChatOnPrefix", ConfigTab.openChatOnPrefix);
         chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.chatCommandsInfo);
         deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
-        rainbowPrefix = getBoolean(tag, "rainbowPrefix", ConfigTab.rainbowPrefix);
 
         titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
         titleScreenSplashes = getBoolean(tag, "titleScreenSplashes", ConfigTab.titleScreenSplashes);
@@ -97,6 +99,10 @@ public class Config extends System<Config> {
         customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
 
         useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
+
+        dontShowAgainPrompts.clear();
+        for (NbtElement item: tag.getList("dontShowAgainPrompts", NbtElement.STRING_TYPE))
+            dontShowAgainPrompts.add(item.asString());
 
         return this;
     }
@@ -115,5 +121,12 @@ public class Config extends System<Config> {
 
     private int getInt(NbtCompound tag, String key, Setting<Integer> setting) {
         return tag.contains(key) ? tag.getInt(key) : setting.get();
+    }
+
+    private NbtList listToNbt(List<String> lst) {
+        NbtList nbt = new NbtList();
+        for (String item: lst) 
+            nbt.add(NbtString.of(item));
+        return nbt;
     }
 }

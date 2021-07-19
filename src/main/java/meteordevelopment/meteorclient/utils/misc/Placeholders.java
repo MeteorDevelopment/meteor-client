@@ -19,7 +19,7 @@ public class Placeholders {
 
     public static String apply(String string) {
         Matcher matcher = pattern.matcher(string);
-        StringBuffer sb = new StringBuffer(string.length());
+        StringBuilder sb = new StringBuilder(string.length());
 
         while (matcher.find()) {
             matcher.appendReplacement(sb, getReplacement(matcher.group(1)));
@@ -30,13 +30,12 @@ public class Placeholders {
     }
 
     private static String getReplacement(String placeholder) {
-        switch (placeholder) {
-            case "{version}":    return Config.get().version != null ? (Config.get().devBuild.isEmpty() ? Config.get().version.getOriginalString() : Config.get().version.getOriginalString() + " " + Config.get().devBuild) : "";
-            case "{mc_version}": return SharedConstants.getGameVersion().getName();
-            case "{player}":
-            case "{username}":   return mc.getSession().getUsername();
-            case "{server}":     return Utils.getWorldName();
-            default:             return "";
-        }
+        return switch (placeholder) {
+            case "{version}" -> Config.get().version != null ? (Config.get().devBuild.isEmpty() ? Config.get().version.toString() : Config.get().version + " " + Config.get().devBuild) : "";
+            case "{mc_version}" -> SharedConstants.getGameVersion().getName();
+            case "{player}", "{username}" -> mc.getSession().getUsername();
+            case "{server}" -> Utils.getWorldName();
+            default -> "";
+        };
     }
 }

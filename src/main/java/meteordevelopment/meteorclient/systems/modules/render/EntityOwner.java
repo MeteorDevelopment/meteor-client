@@ -17,7 +17,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
-import meteordevelopment.meteorclient.utils.network.HttpUtils;
+import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -122,11 +122,11 @@ public class EntityOwner extends Module {
         // Makes a HTTP request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
-                List<UuidNameHistoryResponseItem> response = HttpUtils.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names", RESPONSE_TYPE);
+                List<UuidNameHistoryResponseItem> res = Http.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names").sendJson(RESPONSE_TYPE);
 
                 if (isActive()) {
-                    if (response == null || response.size() <= 0) uuidToName.put(uuid, "Failed to get name");
-                    else uuidToName.put(uuid, response.get(response.size() - 1).name);
+                    if (res == null || res.size() <= 0) uuidToName.put(uuid, "Failed to get name");
+                    else uuidToName.put(uuid, res.get(res.size() - 1).name);
                 }
             }
         });

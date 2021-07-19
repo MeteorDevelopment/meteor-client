@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -71,13 +72,13 @@ public class BowAimbot extends Module {
         .build()
     );
 
-    // TODO: Baritone
-//    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-//        .name("pause-on-combat")
-//        .description("Freezes Baritone temporarily until you released the bow.")
-//        .defaultValue(false)
-//        .build()
-//    );
+
+    private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-on-combat")
+        .description("Freezes Baritone temporarily until you released the bow.")
+        .defaultValue(false)
+        .build()
+    );
 
     private boolean wasPathing;
     private Entity target;
@@ -112,20 +113,18 @@ public class BowAimbot extends Module {
         }, priority.get());
 
         if (target == null) {
-            // TODO: Baritone
-            /*if (wasPathing) {
+            if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }*/
+            }
             return;
         }
 
         if (mc.options.keyUse.isPressed() && itemInHand()) {
-            // TODO: Baritone
-            /*if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
-            }*/
+            }
             aim(event.tickDelta);
         }
     }
