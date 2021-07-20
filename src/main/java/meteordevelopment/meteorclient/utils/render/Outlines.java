@@ -26,18 +26,29 @@ public class Outlines {
     public static OutlineVertexConsumerProvider vertexConsumerProvider;
     private static Shader outlinesShader;
 
+    private static ESP esp;
+
     public static void init() {
         outlinesShader = new Shader("outline.vert", "outline.frag");
         outlinesFbo = new SimpleFramebuffer(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false, false);
         vertexConsumerProvider = new OutlineVertexConsumerProvider(mc.getBufferBuilders().getEntityVertexConsumers());
     }
 
+    private static boolean shouldCancel() {
+        return !esp.isActive() || !esp.isShader();
+    }
+
     public static void beginRender() {
+        if (esp == null) esp = Modules.get().get(ESP.class);
+        if (shouldCancel()) return;
+
         outlinesFbo.clear(MinecraftClient.IS_SYSTEM_MAC);
         mc.getFramebuffer().beginWrite(false);
     }
 
     public static void endRender() {
+        if (shouldCancel()) return;
+
         WorldRenderer worldRenderer = mc.worldRenderer;
         WorldRendererAccessor wra = (WorldRendererAccessor) worldRenderer;
 
@@ -45,8 +56,6 @@ public class Outlines {
         wra.setEntityOutlinesFramebuffer(outlinesFbo);
         vertexConsumerProvider.draw();
         wra.setEntityOutlinesFramebuffer(fbo);
-
-        ESP esp = Modules.get().get(ESP.class);
 
         mc.getFramebuffer().beginWrite(false);
 
