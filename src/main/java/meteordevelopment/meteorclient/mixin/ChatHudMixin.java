@@ -37,8 +37,8 @@ public abstract class ChatHudMixin implements IChatHud {
 
     private static final Pattern METEOR_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Meteor\\]");
     private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Baritone\\]");
-    private static final Identifier METEOR_CHAT_ICON = new Identifier("meteor-client", "textures/chat-icons/meteor.png");
-    private static final Identifier BARITONE_CHAT_ICON = new Identifier("meteor-client", "textures/chat-icons/baritone.png");
+    private static final Identifier METEOR_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/meteor.png");
+    private static final Identifier BARITONE_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/baritone.png");
 
     @Shadow
     @Final
@@ -71,6 +71,7 @@ public abstract class ChatHudMixin implements IChatHud {
         double h = -8.0D * (mc.options.chatLineSpacing + 1.0D) + 4.0D * mc.options.chatLineSpacing + 8.0D;
 
         matrices.push();
+        matrices.translate(2, -0.1f, 10);
         RenderSystem.enableBlend();
         for(int m = 0; m + this.scrolledLines < this.visibleMessages.size() && m < maxLineCount; ++m) {
             ChatHudLine<OrderedText> chatHudLine = this.visibleMessages.get(m + this.scrolledLines);
@@ -108,19 +109,27 @@ public abstract class ChatHudMixin implements IChatHud {
 
     private void drawIcon(MatrixStack matrices, String line, int y, float opacity) {
         if (METEOR_PREFIX_REGEX.matcher(line).find()) {
-            RenderSystem.setShaderColor(1, 1, 1, opacity);
             RenderSystem.setShaderTexture(0, METEOR_CHAT_ICON);
-            DrawableHelper.drawTexture(matrices, 0, y, 0f, 0f, 8, 8, 8, 8);
+            matrices.push();
+            RenderSystem.setShaderColor(1, 1, 1, opacity);
+            matrices.translate(0, y, 0);
+            matrices.scale(0.125f, 0.125f, 1);
+            DrawableHelper.drawTexture(matrices, 0, 0, 0f, 0f, 64, 64, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
+            matrices.pop();
             return;
         } else if (BARITONE_PREFIX_REGEX.matcher(line).find()) {
-            RenderSystem.setShaderColor(1, 1, 1, opacity);
             RenderSystem.setShaderTexture(0, BARITONE_CHAT_ICON);
-            DrawableHelper.drawTexture(matrices, 0, y, 0f, 0f, 8, 8, 8, 8);
+            matrices.push();
+            RenderSystem.setShaderColor(1, 1, 1, opacity);
+            matrices.translate(0, y, 10);
+            matrices.scale(0.125f, 0.125f, 1);
+            DrawableHelper.drawTexture(matrices, 0, 0, 0f, 0f, 64, 64, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
+            matrices.pop();
             return;
         }
-        
+
         Identifier skin = getMessageTexture(line);
         if (skin != null) {
             RenderSystem.setShaderColor(1, 1, 1, opacity);
@@ -128,7 +137,7 @@ public abstract class ChatHudMixin implements IChatHud {
             DrawableHelper.drawTexture(matrices, 0, y, 8, 8, 8.0F, 8.0F,8, 8, 64, 64);
             DrawableHelper.drawTexture(matrices, 0, y, 8, 8, 40.0F, 8.0F,8, 8, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
-        } 
+        }
     }
 
     private static Identifier getMessageTexture(String message) {
