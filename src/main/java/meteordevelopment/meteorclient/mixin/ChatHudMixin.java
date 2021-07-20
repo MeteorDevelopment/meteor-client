@@ -35,8 +35,8 @@ import java.util.regex.Pattern;
 public abstract class ChatHudMixin implements IChatHud {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private static final Pattern METEOR_PREFIX_REGEX = Pattern.compile("^[^\\[]*\\[Meteor\\]");
-    private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^[^\\[]*\\[Baritone\\]");
+    private static final Pattern METEOR_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Meteor\\]");
+    private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Baritone\\]");
     private static final Identifier METEOR_CHAT_ICON = new Identifier("meteor-client", "textures/chat-icons/meteor.png");
     private static final Identifier BARITONE_CHAT_ICON = new Identifier("meteor-client", "textures/chat-icons/baritone.png");
 
@@ -107,6 +107,20 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     private void drawIcon(MatrixStack matrices, String line, int y, float opacity) {
+        if (METEOR_PREFIX_REGEX.matcher(line).find()) {
+            RenderSystem.setShaderColor(1, 1, 1, opacity);
+            RenderSystem.setShaderTexture(0, METEOR_CHAT_ICON);
+            DrawableHelper.drawTexture(matrices, 0, y, 0f, 0f, 8, 8, 8, 8);
+            RenderSystem.setShaderColor(1, 1, 1, 1);
+            return;
+        } else if (BARITONE_PREFIX_REGEX.matcher(line).find()) {
+            RenderSystem.setShaderColor(1, 1, 1, opacity);
+            RenderSystem.setShaderTexture(0, BARITONE_CHAT_ICON);
+            DrawableHelper.drawTexture(matrices, 0, y, 0f, 0f, 8, 8, 8, 8);
+            RenderSystem.setShaderColor(1, 1, 1, 1);
+            return;
+        }
+        
         Identifier skin = getMessageTexture(line);
         if (skin != null) {
             RenderSystem.setShaderColor(1, 1, 1, opacity);
@@ -114,17 +128,7 @@ public abstract class ChatHudMixin implements IChatHud {
             DrawableHelper.drawTexture(matrices, 0, y, 8, 8, 8.0F, 8.0F,8, 8, 64, 64);
             DrawableHelper.drawTexture(matrices, 0, y, 8, 8, 40.0F, 8.0F,8, 8, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
-        } else if (METEOR_PREFIX_REGEX.matcher(line).find()) {
-            RenderSystem.setShaderColor(1, 1, 1, opacity);
-            RenderSystem.setShaderTexture(0, METEOR_CHAT_ICON);
-            DrawableHelper.drawTexture(matrices, 0, y, 0f, 0f, 8, 8, 8, 8);
-            RenderSystem.setShaderColor(1, 1, 1, 1);
-        } else if (BARITONE_PREFIX_REGEX.matcher(line).find()) {
-            RenderSystem.setShaderColor(1, 1, 1, opacity);
-            RenderSystem.setShaderTexture(0, BARITONE_CHAT_ICON);
-            DrawableHelper.drawTexture(matrices, 0, y, 0f, 0f, 8, 8, 8, 8);
-            RenderSystem.setShaderColor(1, 1, 1, 1);
-        }
+        } 
     }
 
     private static Identifier getMessageTexture(String message) {
