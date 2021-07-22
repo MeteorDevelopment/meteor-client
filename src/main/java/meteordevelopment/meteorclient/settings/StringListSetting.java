@@ -40,7 +40,7 @@ public class StringListSetting extends Setting<List<String>>{
 
     @Override
     public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+        NbtCompound tag = saveGeneral();
 
         NbtList valueTag = new NbtList();
         for (int i = 0; i < this.value.size(); i++) {
@@ -79,13 +79,8 @@ public class StringListSetting extends Setting<List<String>>{
             String message = setting.get().get(i);
 
             WTextBox textBox = table.add(theme.textBox(message)).expandX().widget();
-            textBox.action = () -> {
-                strings.set(msgI, textBox.get());
-                setting.set(strings);
-
-                table.clear();
-                fillTable(theme, table, setting);
-            };
+            textBox.action = () -> strings.set(msgI, textBox.get());
+            textBox.actionOnUnfocused = () -> setting.set(strings);
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {

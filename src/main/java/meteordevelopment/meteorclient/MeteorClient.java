@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
@@ -129,6 +130,7 @@ public class MeteorClient implements ClientModInitializer {
         Fonts.load();
         GuiRenderer.init();
         GuiThemes.postInit();
+        MeteorStarscript.init();
     }
 
     private void openClickGui() {
