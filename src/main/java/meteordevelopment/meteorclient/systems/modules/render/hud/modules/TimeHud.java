@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
+import meteordevelopment.meteorclient.utils.Utils;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -31,15 +32,7 @@ public class TimeHud extends DoubleTextHudElement {
     @Override
     protected String getRight() {
         return switch (timeType.get()) {
-            case World -> {
-                if (isInEditor()) yield "00:00";
-
-                int ticks = (int) (mc.world.getTimeOfDay() % 24000);
-                ticks += 6000;
-                if (ticks > 24000) ticks -= 24000;
-
-                yield String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
-            }
+            case World -> isInEditor() ? "00:00" : Utils.getWorldTime();
             case Local ->  LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
         };
     }
