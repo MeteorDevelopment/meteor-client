@@ -1,12 +1,12 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
+	id 'fabric-loom' version '0.9-SNAPSHOT'
 	id 'maven-publish'
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
+version = project.mod_version
 group = project.maven_group
 
 minecraft {
