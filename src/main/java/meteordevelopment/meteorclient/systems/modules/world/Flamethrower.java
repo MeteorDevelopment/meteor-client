@@ -80,7 +80,6 @@ public class Flamethrower extends Module {
     );
 
     private Entity entity;
-    private int preSlot;
     private int ticks = 0;
 
     public Flamethrower() {
@@ -136,12 +135,10 @@ public class Flamethrower extends Module {
             }
         }
 
-        InvUtils.swap(preSlot);
+        InvUtils.swapBack();
     }
 
     private boolean selectSlot() {
-        preSlot = mc.player.getInventory().selectedSlot;
-
         boolean findNewFlintAndSteel = false;
         if (mc.player.getInventory().getMainHandStack().getItem() == Items.FLINT_AND_STEEL) {
             if (antiBreak.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1)
@@ -155,7 +152,7 @@ public class Flamethrower extends Module {
 
         boolean foundFlintAndSteel = !findNewFlintAndSteel;
         if (findNewFlintAndSteel) {
-            foundFlintAndSteel = InvUtils.swap(InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL).getSlot());
+            foundFlintAndSteel = InvUtils.swap(InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL).getSlot(), true);
         }
         return foundFlintAndSteel;
     }

@@ -14,7 +14,9 @@ import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftServerAccessor;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -78,6 +80,31 @@ public class Utils {
         DecimalFormatSymbols dfs = new DecimalFormatSymbols();
         dfs.setDecimalSeparator('.');
         df.setDecimalFormatSymbols(dfs);
+    }
+
+    public static double getPlayerSpeed() {
+        if (mc.player == null) return 0;
+
+        double tX = Math.abs(mc.player.getX() - mc.player.prevX);
+        double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
+        double length = Math.sqrt(tX * tX + tZ * tZ);
+
+        Timer timer = Modules.get().get(Timer.class);
+        if (timer.isActive()) {
+            length *= Modules.get().get(Timer.class).getMultiplier();
+        }
+
+        return length * 20;
+    }
+
+    public static String getWorldTime() {
+        if (mc.world == null) return "00:00";
+
+        int ticks = (int) (mc.world.getTimeOfDay() % 24000);
+        ticks += 6000;
+        if (ticks > 24000) ticks -= 24000;
+
+        return String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
     }
 
     public static Iterable<WorldChunk> chunks() {

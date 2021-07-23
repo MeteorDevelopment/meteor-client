@@ -91,7 +91,7 @@ public class SmartSurround extends Module {
             placeObi(crystal, rPosX + 1, rPosZ, obsidian);
         }
 
-        InvUtils.swap(prevSlot);
+        InvUtils.swap(prevSlot, false);
     }
 
     private void placeObi(Entity crystal, int x, int z, FindItemResult findItemResult) {

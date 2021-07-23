@@ -48,6 +48,7 @@ dependencies {
 
 	// Other dependencies
     include modImplementation("com.github.MeteorDevelopment:orbit:${project.orbit_version}")
+    include modImplementation("com.github.MeteorDevelopment:starscript:${project.starscript_version}")
 }
 
 processResources {

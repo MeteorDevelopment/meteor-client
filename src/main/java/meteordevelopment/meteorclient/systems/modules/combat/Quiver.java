@@ -46,7 +46,6 @@ public class Quiver extends Module {
     );
 
     private final List<Integer> arrowSlots = new ArrayList<>();
-    private int prevSlot;
 
     public Quiver() {
         super(Categories.Combat, "quiver", "Shoots arrows at yourself.");
@@ -54,7 +53,6 @@ public class Quiver extends Module {
 
     @Override
     public void onActivate() {
-        prevSlot = mc.player.getInventory().selectedSlot;
 
         FindItemResult bow = InvUtils.findInHotbar(Items.BOW);
 
@@ -66,7 +64,7 @@ public class Quiver extends Module {
         mc.options.keyUse.setPressed(false);
         mc.interactionManager.stopUsingItem(mc.player);
 
-        InvUtils.swap(bow.getSlot());
+        InvUtils.swap(bow.getSlot(), true);
 
         arrowSlots.clear();
 
@@ -104,7 +102,7 @@ public class Quiver extends Module {
 
     @Override
     public void onDeactivate() {
-        InvUtils.swap(prevSlot);
+        InvUtils.swapBack();
     }
 
     @EventHandler

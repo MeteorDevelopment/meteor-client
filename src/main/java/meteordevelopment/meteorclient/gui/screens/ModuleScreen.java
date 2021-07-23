@@ -45,6 +45,7 @@ public class ModuleScreen extends WindowScreen {
         WWidget widget = module.getWidget(theme);
 
         if (widget != null) {
+            add(theme.horizontalSeparator()).expandX();
             Cell<WWidget> cell = add(widget);
             if (widget instanceof WContainer) cell.expandX();
         }
