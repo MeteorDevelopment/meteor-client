@@ -17,6 +17,7 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class InvUtils {
     private static final Action ACTION = new Action();
+    public static int previousSlot = -1;
 
     // Finding items
 
@@ -89,6 +90,20 @@ public class InvUtils {
     }
 
     // Interactions
+
+    public static boolean autoSwap(int slot) {
+        if (previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
+
+        return swap(slot);
+    }
+
+    public static boolean swapBack() {
+        if (previousSlot == -1) return false;
+
+        boolean return_ = swap(previousSlot);
+        previousSlot = -1;
+        return return_;
+    }
 
     public static boolean swap(int slot) {
         if (slot < 0 || slot > 8) return false;
