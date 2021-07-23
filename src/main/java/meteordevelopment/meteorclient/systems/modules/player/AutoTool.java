@@ -88,7 +88,7 @@ public class AutoTool extends Module {
         }
 
         if (ticks <= 0 && shouldSwitch && bestSlot != -1) {
-            InvUtils.swap(bestSlot, false);
+            InvUtils.swap(bestSlot, switchBack.get());
             shouldSwitch = false;
         } else {
             ticks--;
