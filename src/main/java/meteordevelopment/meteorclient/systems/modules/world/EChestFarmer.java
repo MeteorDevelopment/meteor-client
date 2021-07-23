@@ -116,7 +116,7 @@ public class EChestFarmer extends Module {
 
     @Override
     public void onDeactivate() {
-        InvUtils.swap(prevSlot);
+        InvUtils.swapBack();
     }
 
     @EventHandler
@@ -143,7 +143,7 @@ public class EChestFarmer extends Module {
 
         // Toggle if obby amount reached
         if (selfToggle.get() && InvUtils.find(Items.OBSIDIAN).getCount() - (ignoreExisting.get() ? startCount : 0) >= amount.get()) {
-            InvUtils.swap(prevSlot);
+            InvUtils.swapBack();
             toggle();
             return;
         }
@@ -167,7 +167,7 @@ public class EChestFarmer extends Module {
 
             if (bestSlot == -1) return;
 
-            InvUtils.swap(bestSlot);
+            InvUtils.swap(bestSlot, true);
             BlockUtils.breakBlock(target, swingHand.get());
         }
 

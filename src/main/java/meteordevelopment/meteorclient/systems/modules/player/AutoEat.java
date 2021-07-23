@@ -194,7 +194,7 @@ public class AutoEat extends Module {
     }
 
     private void changeSlot(int slot) {
-        InvUtils.swap(slot);
+        InvUtils.swap(slot, false);
         this.slot = slot;
     }
 

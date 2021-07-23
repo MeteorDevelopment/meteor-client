@@ -66,7 +66,6 @@ public class AutoNametag extends Module {
 
     private Entity target;
     private boolean offHand;
-    private int preSlot;
 
     public AutoNametag() {
         super(Categories.World, "auto-nametag", "Automatically uses nametags on entities without a nametag. WILL nametag ALL entities in the specified distance.");
@@ -98,8 +97,7 @@ public class AutoNametag extends Module {
 
 
         // Swapping slots
-        preSlot = mc.player.getInventory().selectedSlot;
-        InvUtils.swap(findNametag.getSlot());
+        InvUtils.swap(findNametag.getSlot(), true);
 
         offHand = findNametag.isOffhand();
 
@@ -111,6 +109,6 @@ public class AutoNametag extends Module {
 
     private void interact() {
         mc.interactionManager.interactEntity(mc.player, target, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
-        InvUtils.swap(preSlot);
+        InvUtils.swapBack();
     }
 }
