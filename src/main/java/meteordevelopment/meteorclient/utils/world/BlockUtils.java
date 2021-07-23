@@ -92,20 +92,18 @@ public class BlockUtils {
 
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
-                int prevSlot = Utils.mc.player.getInventory().selectedSlot;
-                InvUtils.swap(slot);
+                InvUtils.swap(slot, swapBack);
 
                 place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
 
-                if (swapBack) InvUtils.swap(prevSlot);
+                if (swapBack) InvUtils.swapBack();
             });
         } else {
-            int prevSlot = Utils.mc.player.getInventory().selectedSlot;
-            InvUtils.swap(slot);
+            InvUtils.swap(slot, swapBack);
 
             place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
 
-            if (swapBack) InvUtils.swap(prevSlot);
+            if (swapBack) InvUtils.swapBack();
         }
 
 

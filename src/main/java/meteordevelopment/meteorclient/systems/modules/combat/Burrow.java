@@ -199,16 +199,15 @@ public class Burrow extends Module {
         }
 
 
-        int prevSlot = mc.player.getInventory().selectedSlot;
         FindItemResult block = getItem();
 
         if (!(mc.player.getInventory().getStack(block.getSlot()).getItem() instanceof BlockItem)) return;
-        InvUtils.swap(block.getSlot());
+        InvUtils.swap(block.getSlot(), true);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
-        InvUtils.swap(prevSlot);
+        InvUtils.swapBack();
 
         if (instant.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));

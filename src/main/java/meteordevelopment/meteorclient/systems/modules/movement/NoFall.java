@@ -164,9 +164,9 @@ public class NoFall extends Module {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
             } else {
                 int preSlot = mc.player.getInventory().selectedSlot;
-                InvUtils.swap(bucket.getSlot());
+                InvUtils.swap(bucket.getSlot(), true);
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                InvUtils.swap(preSlot);
+                InvUtils.swapBack();
             }
 
             this.placedWater = placedWater;
