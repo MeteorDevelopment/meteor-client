@@ -104,7 +104,7 @@ public class ElytraFlightMode {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
                     mc.player.swingHand(Hand.OFF_HAND);
                 } else {
-                    InvUtils.autoSwap(itemResult.getSlot());
+                    InvUtils.swap(itemResult.getSlot(), true);
 
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                     mc.player.swingHand(Hand.MAIN_HAND);

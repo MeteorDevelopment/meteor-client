@@ -80,7 +80,7 @@ public class EXPThrower extends Module {
         if (exp.isOffhand()) {
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
         } else {
-            InvUtils.autoSwap(exp.getSlot());
+            InvUtils.swap(exp.getSlot(), true);
             mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
             InvUtils.swapBack();
         }

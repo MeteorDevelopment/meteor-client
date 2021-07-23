@@ -91,26 +91,21 @@ public class InvUtils {
 
     // Interactions
 
-    public static boolean autoSwap(int slot) {
-        if (previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
+    public static boolean swap(int slot, boolean swapBack) {
+        if (slot < 0 || slot > 8) return false;
+        if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
 
-        return swap(slot);
+        mc.player.getInventory().selectedSlot = slot;
+        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelected();
+        return true;
     }
 
     public static boolean swapBack() {
         if (previousSlot == -1) return false;
 
-        boolean return_ = swap(previousSlot);
+        boolean return_ = swap(previousSlot, false);
         previousSlot = -1;
         return return_;
-    }
-
-    public static boolean swap(int slot) {
-        if (slot < 0 || slot > 8) return false;
-
-        mc.player.getInventory().selectedSlot = slot;
-        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelected();
-        return true;
     }
 
     public static Action move() {

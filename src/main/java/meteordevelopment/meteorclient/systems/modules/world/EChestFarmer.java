@@ -167,7 +167,7 @@ public class EChestFarmer extends Module {
 
             if (bestSlot == -1) return;
 
-            InvUtils.autoSwap(bestSlot);
+            InvUtils.swap(bestSlot, true);
             BlockUtils.breakBlock(target, swingHand.get());
         }
 

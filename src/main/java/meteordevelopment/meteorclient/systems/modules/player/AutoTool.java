@@ -88,7 +88,7 @@ public class AutoTool extends Module {
         }
 
         if (ticks <= 0 && shouldSwitch && bestSlot != -1) {
-            InvUtils.swap(bestSlot);
+            InvUtils.swap(bestSlot, false);
             shouldSwitch = false;
         } else {
             ticks--;
@@ -122,7 +122,7 @@ public class AutoTool extends Module {
         if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState)) || shouldStopUsing(currentStack) || !(currentStack.getItem() instanceof ToolItem))) {
             ticks = switchDelay.get();
 
-            if (ticks == 0) InvUtils.autoSwap(bestSlot);
+            if (ticks == 0) InvUtils.swap(bestSlot, true);
             else shouldSwitch = true;
         }
 

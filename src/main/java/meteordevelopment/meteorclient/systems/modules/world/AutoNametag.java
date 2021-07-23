@@ -97,7 +97,7 @@ public class AutoNametag extends Module {
 
 
         // Swapping slots
-        InvUtils.autoSwap(findNametag.getSlot());
+        InvUtils.swap(findNametag.getSlot(), true);
 
         offHand = findNametag.isOffhand();
 
