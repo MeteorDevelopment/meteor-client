@@ -10,9 +10,12 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.config.Config;
+
 import net.minecraft.client.gui.screen.Screen;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
+
+import com.mojang.blaze3d.systems.RenderSystem;
 
 public class PromptBuilder {
     private final GuiTheme theme;
@@ -42,6 +45,11 @@ public class PromptBuilder {
         return this;
     }
 
+    public PromptBuilder appendLine(String line) {
+        this.message += "\n" + line;
+        return this;
+    }
+
     public PromptBuilder onYes(Runnable runnable) {
         this.onYes = runnable;
         return this;
@@ -63,8 +71,16 @@ public class PromptBuilder {
             onNo.run();
             return;
         }
-        Screen prompt = new PromptScreen(theme, title, message, onYes, onNo, parent, promptId);
-        mc.openScreen(prompt);
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> {
+                Screen prompt = new PromptScreen(theme, title, message, onYes, onNo, parent, promptId);
+                mc.openScreen(prompt);
+            });
+        } else {
+            Screen prompt = new PromptScreen(theme, title, message, onYes, onNo, parent, promptId);
+            mc.openScreen(prompt);
+        }
+        
     }
 
     private class PromptScreen extends WindowScreen {
