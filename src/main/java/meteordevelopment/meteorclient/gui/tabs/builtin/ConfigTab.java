@@ -184,7 +184,9 @@ public class ConfigTab extends Tab {
                 if (Config.get().prefix.isBlank()) {
                     new PromptBuilder(theme, this.parent)
                         .title("Empty command prefix")
-                        .message("You have set your command prefix to nothing.\nThis WILL prevent you from sending chat messages.\nDo you want to reset your prefix back to '.'?")
+                        .message("You have set your command prefix to nothing.")
+                        .appendLine("This WILL prevent you from sending chat messages.")
+                        .appendLine("Do you want to reset your prefix back to '.'?")
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
@@ -194,7 +196,9 @@ public class ConfigTab extends Tab {
                 else if (Config.get().prefix.equals("/")) {
                     new PromptBuilder(theme, this.parent)
                         .title("Potential prefix conflict")
-                        .message("You have set your command prefix to /, which is used by minecraft.\nThis can cause conflict issues between meteor and minecraft commands.\nDo you want to reset your prefix to '.'?")
+                        .message("You have set your command prefix to /, which is used by minecraft.")
+                        .appendLine("This can cause conflict issues between meteor and minecraft commands.")
+                        .appendLine("Do you want to reset your prefix to '.'?")
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
@@ -204,9 +208,10 @@ public class ConfigTab extends Tab {
                 else if (Config.get().prefix.length() > 7) {
                     new PromptBuilder(theme, this.parent)
                         .title("Long command prefix")
-                        .message(String.format(
-                            "You have set your command prefix to a very long string.\nThis means that in order to execute any command, you will need to type %s followed by the command you want to run.\nDo you want to reset your prefix back to '.'?",
-                        Config.get().prefix))
+                        .message("You have set your command prefix to a very long string.")
+                        .appendLine(String.format("This means that in order to execute any command, you will need to type %s followed by the command you want to run.",
+                            Config.get().prefix))
+                        .appendLine("Do you want to reset your prefix back to '.'?")
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
@@ -216,7 +221,8 @@ public class ConfigTab extends Tab {
                 else if (isUsedKey()) {
                     new PromptBuilder(theme, this.parent)
                         .title("Prefix keybind")
-                        .message("You have \"Open Chat On Prefix\" setting enabled and your command prefix has a conflict with another keybind.\nDo you want to disable \"Open Chat On Prefix\" setting?")
+                        .message("You have \"Open Chat On Prefix\" setting enabled and your command prefix has a conflict with another keybind.")
+                        .appendLine("Do you want to disable \"Open Chat On Prefix\" setting?")
                         .onYes(() -> {
                             Config.get().openChatOnPrefix = false;
                         })
