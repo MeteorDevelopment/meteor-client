@@ -206,25 +206,25 @@ public class GuiRenderer {
         rTex.texQuad(x, y, width, height, texture.get(width, height), color);
     }
 
-    public void quadRounded(double x, double y, double width, double height, Color color, int round, boolean roundTop) {
+    public void quadRounded(double x, double y, double width, double height, Color color, double round, boolean roundTop) {
         r.quadRounded(x, y, width, height, color, round, roundTop);
     }
-    public void quadRounded(double x, double y, double width, double height, Color color, int round) {
+    public void quadRounded(double x, double y, double width, double height, Color color, double round) {
         quadRounded(x, y, width, height, color, round, true);
     }
-    public void quadRounded(WWidget widget, Color color, int round) {
+    public void quadRounded(WWidget widget, Color color, double round) {
         quadRounded(widget.x, widget.y, widget.width, widget.height, color, round);
     }
-    public void quadOutlineRounded(double x, double y, double width, double height, Color color, int round, double s) {
+    public void quadOutlineRounded(double x, double y, double width, double height, Color color, double round, double s) {
         r.quadRoundedOutline(x, y, width, height, color, round, s);
     }
-    public void quadOutlineRounded(WWidget widget, Color color, int round, double s) {
+    public void quadOutlineRounded(WWidget widget, Color color, double round, double s) {
         quadOutlineRounded(widget.x, widget.y, widget.width, widget.height, color, round, s);
     }
-    public void quadRoundedSide(double x, double y, double width, double height, Color color, int r, boolean right) {
+    public void quadRoundedSide(double x, double y, double width, double height, Color color, double r, boolean right) {
         this.r.quadRoundedSide(x, y, width, height, color, r, right);
     }
-    public void quadRoundedSide(WWidget widget, Color color, int round, boolean right) {
+    public void quadRoundedSide(WWidget widget, Color color, double round, boolean right) {
         quadRoundedSide(widget.x, widget.y, widget.width, widget.height, color, round, right);
     }
     public void circlePart(double x, double y, double r, double startAngle, double angle, Color color) {
