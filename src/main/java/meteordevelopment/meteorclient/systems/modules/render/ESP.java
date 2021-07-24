@@ -211,4 +211,7 @@ public class ESP extends Module {
         return Integer.toString(count);
     }
 
+    public boolean isShader() {
+        return mode.get() == Mode.Shader;
+    }
 }

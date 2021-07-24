@@ -104,13 +104,12 @@ public class ElytraFlightMode {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
                     mc.player.swingHand(Hand.OFF_HAND);
                 } else {
-                    int prevSlot = mc.player.getInventory().selectedSlot;
-                    InvUtils.swap(itemResult.getSlot());
+                    InvUtils.swap(itemResult.getSlot(), true);
 
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                     mc.player.swingHand(Hand.MAIN_HAND);
 
-                    InvUtils.swap(prevSlot);
+                    InvUtils.swapBack();
                 }
             }
             ticksLeft--;

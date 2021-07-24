@@ -58,6 +58,13 @@ public class BetterChat extends Module {
             .build()
     );
 
+    private final Setting<Boolean> playerHeads = sgGeneral.add(new BoolSetting.Builder()
+        .name("player-heads")
+        .description("Displays player heads next to their messages.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> coordsProtection = sgGeneral.add(new BoolSetting.Builder()
         .name("coords-protection")
         .description("Prevents you from sending messages in chat that may contain coordinates.")
@@ -222,6 +229,10 @@ public class BetterChat extends Module {
             Text timestamp = new LiteralText("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
 
             message = new LiteralText("").append(timestamp).append(message);
+        }
+
+        if (playerHeads.get()) {
+            message = new LiteralText("  ").append(message);
         }
 
         if (filterRegex.get()) {
@@ -404,6 +415,8 @@ public class BetterChat extends Module {
     public boolean isLongerChat() {
         return isActive() && longerChatHistory.get();
     }
+
+    public boolean displayPlayerHeads() { return isActive() && playerHeads.get(); }
 
     public int getChatLength() {
         return longerChatLines.get();

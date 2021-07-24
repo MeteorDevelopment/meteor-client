@@ -55,6 +55,7 @@ dependencies {
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
+    dependency "com.github.MeteorDevelopment:starscript:${project.starscript_version}"
 	dependency "com.github.MeteorDevelopment:java-discord-rpc:${project.discordrpc_version}"
 }
 

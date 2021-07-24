@@ -5,31 +5,55 @@
 
 package meteordevelopment.meteorclient;
 
+import meteordevelopment.meteorclient.asm.Asm;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.tree.*;
+import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.mixin.transformer.FabricMixinTransformerProxy;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
     private boolean isResourceLoaderPresent = false;
-    private String gameRenderer, getFovDesc;
 
     @Override
     public void onLoad(String mixinPackage) {
+        try {
+            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+            Class<?> classLoaderClass = classLoader.getClass();
+
+            Field delegateField = classLoaderClass.getDeclaredField("delegate");
+            delegateField.setAccessible(true);
+            Object delegate = delegateField.get(classLoader);
+            Class<?> delegateClass = delegate.getClass();
+
+            Field mixinTransformerField = delegateClass.getDeclaredField("mixinTransformer");
+            mixinTransformerField.setAccessible(true);
+
+            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            Unsafe unsafe = (Unsafe) unsafeField.get(null);
+
+            Transformer mixinTransformer = (Transformer) unsafe.allocateInstance(Transformer.class);
+            mixinTransformer.asm = new Asm();
+            mixinTransformer.delegate = (FabricMixinTransformerProxy) mixinTransformerField.get(delegate);
+
+            mixinTransformerField.set(delegate, mixinTransformer);
+        } catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
+            e.printStackTrace();
+        }
+
         for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
             if (mod.getMetadata().getId().startsWith("fabric-resource-loader")) {
                 isResourceLoaderPresent = true;
                 break;
             }
         }
-
-        gameRenderer = FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", "net.minecraft.class_757");
-        getFovDesc = "(L" + FabricLoader.getInstance().getMappingResolver().mapClassName("intermediary", "net.minecraft.class_4184").replace('.', '/') + ";FZ)D";
     }
 
     @Override
@@ -48,7 +72,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
     }
 
     @Override
@@ -58,57 +81,20 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-        // Couldn't get it working with a mixins so here we go
-
-        // Modify GameRenderer.getFov()
-        // return MeteorClient.EVENT_BUS.post(GetFovEvent.get(d));
-        if (targetClassName.equals(gameRenderer)) {
-            MethodNode method = getMethod(targetClass, getFovDesc);
-            if (method == null) throw new RuntimeException("[Meteor Client] Could not find method GameRenderer.getFov()");
-
-            // Find injection point
-            AbstractInsnNode lastInsn = null;
-            AbstractInsnNode lastLabel = null;
-
-            VarInsnNode targetInsn = null;
-
-            for (AbstractInsnNode insn : method.instructions) {
-                if (insn.getOpcode() == Opcodes.DRETURN && lastInsn instanceof VarInsnNode && lastInsn.getOpcode() == Opcodes.DLOAD && lastLabel != null) {
-                    targetInsn = (VarInsnNode) lastInsn;
-                    break;
-                }
-
-                lastInsn = insn;
-                if (insn instanceof LabelNode) lastLabel = lastInsn;
-            }
-
-            if (targetInsn == null) throw new RuntimeException("[Meteor Client] Could not find injection point for GameRenderer.getFov()");
-
-            // Inject
-            InsnList insns = new InsnList();
-
-            insns.add(new FieldInsnNode(Opcodes.GETSTATIC, "meteordevelopment/meteorclient/MeteorClient", "EVENT_BUS", "Lmeteordevelopment/orbit/IEventBus;"));
-            insns.add(new VarInsnNode(Opcodes.DLOAD, targetInsn.var));
-            insns.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "meteordevelopment/meteorclient/events/render/GetFovEvent", "get", "(D)Lmeteordevelopment/meteorclient/events/render/GetFovEvent;"));
-            insns.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "meteordevelopment/orbit/IEventBus", "post", "(Ljava/lang/Object;)Ljava/lang/Object;"));
-            insns.add(new TypeInsnNode(Opcodes.CHECKCAST, "meteordevelopment/meteorclient/events/render/GetFovEvent"));
-            insns.add(new FieldInsnNode(Opcodes.GETFIELD, "meteordevelopment/meteorclient/events/render/GetFovEvent", "fov", "D"));
-
-            method.instructions.insert(targetInsn, insns);
-            method.instructions.remove(targetInsn);
-        }
     }
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
     }
 
-    private MethodNode getMethod(ClassNode classNode, String desc) {
-        for (MethodNode method : classNode.methods) {
-            if (method.desc.equals(desc)) return method;
-        }
+    private static class Transformer extends FabricMixinTransformerProxy {
+        private Asm asm;
+        private FabricMixinTransformerProxy delegate;
 
-        return null;
+        @Override
+        public byte[] transformClassBytes(String name, String transformedName, byte[] basicClass) {
+            basicClass = delegate.transformClassBytes(name, transformedName, basicClass);
+            return asm.transform(name, basicClass);
+        }
     }
 }
