@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
@@ -35,8 +36,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Jesus extends Module {
+    private final SettingGroup sgGeneral = settings.createGroup("General");
     private final SettingGroup sgWater = settings.createGroup("Water");
     private final SettingGroup sgLava = settings.createGroup("Lava");
+
+    // General
+
+    private final Setting<Boolean> powderSnow = sgGeneral.add(new BoolSetting.Builder()
+        .name("powder-snow")
+        .description("Walk on powder snow.")
+        .defaultValue(true)
+        .build()
+    );
 
     // Water
 
@@ -135,24 +146,22 @@ public class Jesus extends Module {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Categories.Movement, "jesus", "Walk on liquids like Jesus.");
+        super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.");
     }
 
     @Override
     public void onActivate() {
-        // TODO: Baritone
-        /*preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
+        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
         preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
 
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = walkOnWater.get();
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = walkOnLava.get();*/
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = waterMode.get() == Mode.Solid;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = lavaMode.get() == Mode.Solid;
     }
 
     @Override
     public void onDeactivate() {
-        // TODO: Baritone
-        /*BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;*/
+        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
+        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
     }
 
     @EventHandler
@@ -306,5 +315,9 @@ public class Jesus extends Module {
         Solid,
         Bob,
         Ignore
+    }
+
+    public boolean canWalkOnPowderSnow() {
+        return isActive() && powderSnow.get();
     }
 }

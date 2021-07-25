@@ -17,6 +17,7 @@ public class Cell<T extends WWidget> {
     private AlignmentY alignY = AlignmentY.Top;
 
     private double padTop, padRight, padBottom, padLeft;
+    private double marginTop;
 
     private boolean expandWidgetX;
     private boolean expandWidgetY;
@@ -121,6 +122,13 @@ public class Cell<T extends WWidget> {
         return s(padLeft);
     }
 
+    // Margin
+
+    public Cell<T> marginTop(double m) {
+        marginTop = m;
+        return this;
+    }
+
     // Expand
 
     public Cell<T> expandWidgetX() {
@@ -163,7 +171,7 @@ public class Cell<T extends WWidget> {
             widget.height = height;
         } else {
             switch (alignY) {
-                case Top:    widget.y = y; break;
+                case Top:    widget.y = y + s(marginTop); break;
                 case Center: widget.y = y + height / 2 - widget.height / 2; break;
                 case Bottom: widget.y = y + height - widget.height; break;
             }

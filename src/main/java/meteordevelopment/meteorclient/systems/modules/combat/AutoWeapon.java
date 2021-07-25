@@ -46,7 +46,7 @@ public class AutoWeapon extends Module {
 
     @EventHandler
     private void onAttack(AttackEntityEvent event) {
-        InvUtils.swap(getBestWeapon());
+        InvUtils.swap(getBestWeapon(), false);
     }
 
     private int getBestWeapon() {

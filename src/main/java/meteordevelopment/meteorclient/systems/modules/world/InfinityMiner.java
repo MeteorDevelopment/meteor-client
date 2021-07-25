@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalBlock;
 import com.google.common.collect.Lists;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -146,9 +148,8 @@ public class InfinityMiner extends Module {
             originalSettings.clear();
             BLOCKER = false;
         }
-        // TODO: Baritone
-        /*if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
-            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;*/
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         baritoneRequestStop();
         baritoneRunning = false;
         currentMode = Mode.Still;
@@ -175,9 +176,8 @@ public class InfinityMiner extends Module {
                 requestLogout(currentMode);
             } else if (currentMode == Mode.Repair) {
                 int REPAIR_BUFFER = 15;
-                // TODO: Baritone
-                /*if (BaritoneAPI.getSettings().mineScanDroppedItems.value)
-                    BaritoneAPI.getSettings().mineScanDroppedItems.value = false;*/
+                if (BaritoneAPI.getSettings().mineScanDroppedItems.value)
+                    BaritoneAPI.getSettings().mineScanDroppedItems.value = false;
                 if (isTool() && getCurrentDamage() >= mc.player.getMainHandStack().getMaxDamage() - REPAIR_BUFFER) {
                     if (secondaryMode != Mode.Home) {
                         currentMode = Mode.Target;
@@ -188,9 +188,8 @@ public class InfinityMiner extends Module {
                     }
                 }
             } else if (currentMode == Mode.Target) {
-                // TODO: Baritone
-                /*if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
-                    BaritoneAPI.getSettings().mineScanDroppedItems.value = true;*/
+                if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+                    BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
                 if (isTool() && getCurrentDamage() <= durabilityThreshold.get() * mc.player.getMainHandStack().getMaxDamage()) {
                     currentMode = Mode.Repair;
                     baritoneRequestMineRepairBlock();
@@ -217,26 +216,23 @@ public class InfinityMiner extends Module {
     }
 
     private void baritoneRequestMineTargetBlock() {
-        // TODO: Baritone
-        /*try {
+        try {
             BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(targetBlock.get());
             baritoneRunning = true;
         } catch (Exception ignored) {
-        }*/
+        }
     }
 
     private void baritoneRequestMineRepairBlock() {
-        // TODO: Baritone
-        /*try {
+        try {
             BaritoneAPI.getProvider().getPrimaryBaritone().getMineProcess().mine(repairBlock.get());
             baritoneRunning = true;
         } catch (Exception ignored) {
-        }*/
+        }
     }
 
     private void baritoneRequestStop() {
-        // TODO: Baritone
-        //BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
         baritoneRunning = false;
         currentMode = Mode.Still;
     }
@@ -246,8 +242,7 @@ public class InfinityMiner extends Module {
             baritoneRequestStop();
             secondaryMode = Mode.Home;
             currentMode = Mode.Home;
-            // TODO: Baritone
-            //BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(playerX, playerY, playerZ));
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalBlock(playerX, playerY, playerZ));
         }
     }
 
@@ -286,9 +281,8 @@ public class InfinityMiner extends Module {
     @EventHandler
     private void onGameDisconnect(GameLeftEvent event) {
         baritoneRequestStop();
-        // TODO: Baritone
-        /*if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
-            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;*/
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
     }
 
@@ -296,9 +290,8 @@ public class InfinityMiner extends Module {
     @EventHandler
     private void onGameJoin(GameJoinedEvent event) {
         baritoneRequestStop();
-        // TODO: Baritone
-        /*if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
-            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;*/
+        if (!BaritoneAPI.getSettings().mineScanDroppedItems.value)
+            BaritoneAPI.getSettings().mineScanDroppedItems.value = true;
         if (this.isActive()) this.toggle();
     }
 

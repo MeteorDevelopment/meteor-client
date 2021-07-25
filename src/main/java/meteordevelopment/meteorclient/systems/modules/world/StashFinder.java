@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.GoalXZ;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,6 +19,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -134,7 +137,7 @@ public class StashFinder extends Module {
                             if (lastTime == -1) lastTime = currentTime;
                             else timer += currentTime - lastTime;
 
-                            manager.getGame().getTextureManager().bindTexture(new Identifier("textures/gui/toasts.png"));
+                            GL.bindTexture(new Identifier("textures/gui/toasts.png"));
                             manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
 
                             manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
@@ -181,8 +184,7 @@ public class StashFinder extends Module {
             open.action = () -> mc.openScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            // TODO: Baritone
-            //gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
+            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
 
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {

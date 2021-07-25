@@ -72,7 +72,6 @@ public class MiddleClickExtra extends Module {
     );
 
     private boolean isUsing;
-    private int preSlot;
 
     public MiddleClickExtra() {
         super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click.");
@@ -94,13 +93,12 @@ public class MiddleClickExtra extends Module {
             return;
         }
 
-        preSlot = mc.player.getInventory().selectedSlot;
-        InvUtils.swap(result.getSlot());
+        InvUtils.swap(result.getSlot(), true);
 
         switch (mode.get().type) {
             case Immediate -> {
                 mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
-                InvUtils.swap(preSlot);
+                InvUtils.swapBack();
             }
             case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
             case Longer -> {
@@ -136,7 +134,7 @@ public class MiddleClickExtra extends Module {
     private void stopIfUsing() {
         if (isUsing) {
             mc.options.keyUse.setPressed(false);
-            InvUtils.swap(preSlot);
+            InvUtils.swapBack();
             isUsing = false;
         }
     }

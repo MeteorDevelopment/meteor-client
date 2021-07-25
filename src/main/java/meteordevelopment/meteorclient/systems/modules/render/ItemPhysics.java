@@ -40,7 +40,6 @@ public class ItemPhysics extends Module {
 
         event.matrixStack.push();
 
-        // TODO: Test
         BakedModel bakedModel = event.itemRenderer.getHeldItemModel(itemStack, event.itemEntity.world, null, 0);
         boolean hasDepthInGui = bakedModel.hasDepth();
         int renderCount = getRenderedAmount(itemStack);
@@ -161,7 +160,6 @@ public class ItemPhysics extends Module {
         }
 
         event.matrixStack.pop();
-//        mc.getEntityRenderDispatcher().getRenderer(event.itemEntity).render(event.itemEntity, event.f, event.tickDelta, event.matrixStack, event.vertexConsumerProvider, event.light);
         event.setCancelled(true);
     }
 

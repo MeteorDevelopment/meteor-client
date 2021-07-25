@@ -34,22 +34,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
-
-    @Shadow
-    @Final
-    private BiomeColorBlender biomeColorBlender;
-
+    @Shadow @Final private BiomeColorBlender biomeColorBlender;
 
     @Inject(method = "renderQuad", at = @At(value = "HEAD"), cancellable = true)
     private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo ci) {
         WallHack wallHack = Modules.get().get(WallHack.class);
         Xray xray = Modules.get().get(Xray.class);
 
-        if(wallHack.isActive()) {
-            if(wallHack.blocks.get().contains(state.getBlock())) {
+        if (wallHack.isActive()) {
+            if (wallHack.blocks.get().contains(state.getBlock())) {
                 int alpha;
 
-                if(xray.isActive()) {
+                if (xray.isActive()) {
                     alpha = xray.opacity.get();
                 } else {
                     alpha = wallHack.opacity.get();
@@ -58,7 +54,8 @@ public class SodiumBlockRendererMixin {
                 whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, alpha);
                 ci.cancel();
             }
-        } else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
+        }
+        else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
             whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, xray.opacity.get());
             ci.cancel();
         }
@@ -67,8 +64,7 @@ public class SodiumBlockRendererMixin {
     //https://github.com/CaffeineMC/sodium-fabric/blob/8b3015efe85be9336a150ff7c26085ea3d2d43d0/src/main/java/me/jellysquid/mods/sodium/client/render/pipeline/BlockRenderer.java#L119
     //Copied from Sodium, for now, can't think of a better way, because of the nature of the locals, and for loop.
     //Mixin seems to freak out when I try to do this the "right" way - Wala (sobbing)
-    private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset,
-                            ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, int alpha) {
+    private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, int alpha) {
         ModelQuadView src = (ModelQuadView) bakedQuad;
         ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br);
 
@@ -100,7 +96,7 @@ public class SodiumBlockRendererMixin {
 
             int lm = light.lm[j];
 
-            vertices.writeVertex(origin, x, y, z, color, u, v, lm);
+            vertices.writeVertex(origin, x, y, z, color, u, v, lm, model.getChunkId());
         }
 
         indices.add(vertexStart, ModelQuadWinding.CLOCKWISE);

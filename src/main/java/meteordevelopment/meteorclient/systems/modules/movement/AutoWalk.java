@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -39,8 +40,7 @@ public class AutoWalk extends Module {
             .onChanged(mode1 -> {
                 if (isActive()) {
                     if (mode1 == Mode.Simple) {
-                        // TODO: Baritone
-                        //BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
                         goal = null;
                     } else {
                         timer = 0;
@@ -79,8 +79,7 @@ public class AutoWalk extends Module {
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Simple) unpress();
-        // TODO: Baritone
-        //else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+        else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
         goal = null;
     }
@@ -127,7 +126,6 @@ public class AutoWalk extends Module {
     private void createGoal() {
         timer = 0;
         goal = new GoalDirection(mc.player.getPos(), mc.player.getYaw());
-        // TODO: Baritone
-        //BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
     }
 }

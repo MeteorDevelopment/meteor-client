@@ -14,7 +14,4 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 public interface AbstractFurnaceScreenHandlerAccessor {
     @Invoker("isSmeltable")
     boolean isSmeltable(ItemStack itemStack);
-
-    @Invoker("isFuel")
-    boolean isFuel(ItemStack itemStack);
 }
