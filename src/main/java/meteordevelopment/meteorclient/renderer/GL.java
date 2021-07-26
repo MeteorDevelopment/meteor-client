@@ -10,6 +10,7 @@ import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import org.lwjgl.BufferUtils;
 
@@ -17,6 +18,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
+import static meteordevelopment.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL32C.*;
 
 public class GL {
@@ -206,6 +208,11 @@ public class GL {
     }
     public static void disableLineSmooth() {
         glDisable(GL_LINE_SMOOTH);
+    }
+
+    public static void bindTexture(Identifier id) {
+        GlStateManager._activeTexture(GL_TEXTURE0);
+        mc.getTextureManager().bindTexture(id);
     }
 
     public static void bindTexture(int i) {
