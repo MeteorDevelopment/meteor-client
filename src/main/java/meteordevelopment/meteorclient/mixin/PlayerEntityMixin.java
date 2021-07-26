@@ -9,12 +9,20 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.EntityMountWarning;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.passive.HorseBaseEntity;
+import net.minecraft.entity.passive.LlamaEntity;
+import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,5 +59,13 @@ public class PlayerEntityMixin {
     public void dontJump(CallbackInfo info) {
         Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
+    }
+    
+    @Inject(method = "interact", at = @At("HEAD"), cancellable = true)
+    public void onInteractEntity(Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> cir) {
+    	EntityMountWarning warning = Modules.get().get(EntityMountWarning.class);
+    	if (warning.isActive() && !mc.player.isOnGround() && !mc.player.isTouchingWater() && (entity instanceof HorseBaseEntity || entity instanceof LlamaEntity || entity instanceof PigEntity)) {
+    		warning.warn();
+    	}
     }
 }

@@ -15,7 +15,7 @@ public class SpeedHud extends DoubleTextHudElement {
 
     @Override
     protected String getRight() {
-        if (isInEditor()) return "0,0";
-        return String.format("%.1f", Utils.getPlayerSpeed());
+        if (isInEditor()) return "0,00";
+        return String.format("%.2f", Utils.getPlayerSpeed());
     }
 }

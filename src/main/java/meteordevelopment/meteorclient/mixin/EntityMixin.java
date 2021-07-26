@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplie
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
+import meteordevelopment.meteorclient.systems.modules.movement.NoClip;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
@@ -120,4 +121,11 @@ public abstract class EntityMixin {
     private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (player == null) info.setReturnValue(false);
     }
+    
+    @Inject(method = "adjustMovementForCollisions", at = @At("HEAD"), cancellable = true)
+	private void onMovementAdjustment(Vec3d movement, CallbackInfoReturnable<Vec3d> cir) {
+		if (Modules.get().get(NoClip.class).isActive()) {
+			cir.setReturnValue(movement);
+		}
+	}
 }

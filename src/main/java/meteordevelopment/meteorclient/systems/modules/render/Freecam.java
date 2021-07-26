@@ -40,6 +40,14 @@ public class Freecam extends Module {
             .min(0.0)
             .build()
     );
+    
+    private final Setting<Double> sprintSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    		.name("sprint-speed")
+    		.description("Your speed while sprinting in freecam.")
+    		.defaultValue(2.0)
+    		.min(0.0)
+    		.build()
+    );
 
     private final Setting<Boolean> autoDisableOnDamage = sgGeneral.add(new BoolSetting.Builder()
             .name("toggle-on-damage")
@@ -176,8 +184,8 @@ public class Freecam extends Module {
             }
         }
 
-        double s = 0.5;
-        if (mc.options.keySprint.isPressed()) s = 1;
+        double s = 1;
+        if (mc.options.keySprint.isPressed()) s = sprintSpeed.get();
 
         boolean a = false;
         if (this.forward) {

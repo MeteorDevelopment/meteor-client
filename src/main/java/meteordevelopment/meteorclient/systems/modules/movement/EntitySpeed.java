@@ -29,6 +29,34 @@ public class EntitySpeed extends Module {
             .sliderMax(50)
             .build()
     );
+    
+    private final Setting<Boolean> flight = sgGeneral.add(new BoolSetting.Builder()
+            .name("flight")
+            .description("Fly with entity.")
+            .defaultValue(false)
+            .build()
+    );
+    
+    private final Setting<Double> flySpeed = sgGeneral.add(new DoubleSetting.Builder()
+    		.name("vertical-speed")
+    		.description("Vertical speed while flying.")
+    		.defaultValue(0.5)
+    		.min(0)
+    		.build());
+    
+    private final Setting<Double> gravity = sgGeneral.add(new DoubleSetting.Builder()
+    		.name("gravity")
+    		.description("Strength of gravity while flying.")
+    		.defaultValue(0.5)
+    		.min(0)
+    		.build());
+    
+    private final Setting<Boolean> gravityInWater = sgGeneral.add(new BoolSetting.Builder()
+            .name("gravity-in-water")
+            .description("Gravity affects flight while in water.")
+            .defaultValue(false)
+            .build()
+    );
 
     private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
             .name("only-on-ground")
@@ -52,13 +80,21 @@ public class EntitySpeed extends Module {
     private void onLivingEntityMove(LivingEntityMoveEvent event) {
         if (event.entity.getPrimaryPassenger() != mc.player) return;
 
-        // Check for onlyOnGround and inWater
-        LivingEntity entity = event.entity;
-        if (onlyOnGround.get() && !entity.isOnGround()) return;
-        if (!inWater.get() && entity.isTouchingWater()) return;
-
         // Set horizontal velocity
         Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
-        ((IVec3d) event.movement).setXZ(vel.x, vel.z);
+        LivingEntity entity = event.entity;
+        if(!flight.get()) {
+            // Check for onlyOnGround and inWater
+            if (onlyOnGround.get() && !entity.isOnGround()) return;
+            if (!inWater.get() && entity.isTouchingWater()) return;
+            
+            ((IVec3d) event.movement).setXZ(vel.x, vel.z);
+        }else {
+            double fallspeed = -(gravity.get());
+            if (!gravityInWater.get() && entity.isTouchingWater()) fallspeed = 0;
+            if (mc.options.keyJump.isPressed()) fallspeed = flySpeed.get();
+            if (mc.options.keySprint.isPressed()) fallspeed = -(flySpeed.get());
+            ((IVec3d) event.movement).set(vel.x, fallspeed, vel.z);
+        }
     }
 }

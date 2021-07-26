@@ -23,6 +23,7 @@ public class AutoReconnect extends Module {
             .description("The amount of seconds to wait before reconnecting to the server.")
             .defaultValue(3.5)
             .min(0)
+            .sliderMax(30)
             .decimalPlaces(1)
             .build()
     );

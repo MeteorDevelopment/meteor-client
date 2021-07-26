@@ -423,6 +423,7 @@ public class Modules extends System<Modules> {
         add(new AntiAFK());
         add(new AntiLevitation());
         add(new AntiVoid());
+        add(new AntiHazard());
         add(new AutoJump());
         add(new AutoWalk());
         add(new Blink());
@@ -438,6 +439,7 @@ public class Modules extends System<Modules> {
         add(new HighJump());
         add(new Jesus());
         add(new LongJump());
+        add(new NoClip());
         add(new NoFall());
         add(new NoSlow());
         add(new Parkour());
@@ -540,6 +542,7 @@ public class Modules extends System<Modules> {
         add(new TPSSync());
         add(new VanillaSpoof());
         add(new InventoryTweaks());
+        add(new EntityMountWarning());
     }
 
     public static class ModuleRegistry extends Registry<Module> {
