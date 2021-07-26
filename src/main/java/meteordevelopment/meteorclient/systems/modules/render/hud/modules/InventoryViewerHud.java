@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render.hud.modules;
 
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
@@ -96,7 +97,7 @@ public class InventoryViewerHud extends HudElement {
 
         switch (background.get()) {
             case Texture, Outline -> {
-                mc.getTextureManager().bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
+                GL.bindTexture(background.get() == Background.Texture ? TEXTURE : TEXTURE_TRANSPARENT);
 
                 Renderer2D.TEXTURE.begin();
                 Renderer2D.TEXTURE.texQuad(x, y, w, h, color.get());
