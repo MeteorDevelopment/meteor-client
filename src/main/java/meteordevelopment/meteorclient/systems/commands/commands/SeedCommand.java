@@ -5,16 +5,14 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.text.BaseText;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.Formatting;
 
 import kaptainwutax.mcutils.version.MCVersion;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.EnumArgumentType;
 import meteordevelopment.meteorclient.systems.seeds.Seed;
 import meteordevelopment.meteorclient.systems.seeds.Seeds;
+import meteordevelopment.meteorclient.utils.Utils;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -35,6 +33,26 @@ public class SeedCommand extends Command {
             info(seed.toText());
             return SINGLE_SUCCESS;
         });
+
+        builder.then(literal("list").executes(ctx -> {
+            Seeds.get().seeds.forEach((name, seed) -> {
+                BaseText text = new LiteralText(name + " ");
+                text.append(seed.toText());
+                info(text);
+            });
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("delete").executes(ctx -> {
+            Seed seed = Seeds.get().getSeed();
+            if (seed != null) {
+                BaseText text = new LiteralText("Deleted ");
+                text.append(seed.toText());
+                info(text);
+            }
+            Seeds.get().seeds.remove(Utils.getWorldName());
+            return SINGLE_SUCCESS;
+        }));
 
         builder.then(argument("seed", LongArgumentType.longArg()).executes(ctx -> {
             Seeds.get().setSeed(LongArgumentType.getLong(ctx, "seed"));

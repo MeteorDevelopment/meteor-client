@@ -14,7 +14,7 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class Seeds extends System<Seeds> {
 
-    private HashMap<String, Seed> seeds = new HashMap<>();
+    public HashMap<String, Seed> seeds = new HashMap<>();
 
     public Seeds() {
         super("seeds");

@@ -37,7 +37,7 @@ public class Seed {
         BaseText text = new LiteralText(String.format("[%s%s%s] (%s)",
             Formatting.GREEN,
             seed.toString(),
-            Formatting.GRAY,
+            Formatting.WHITE,
             version.toString()
         ));
         text.setStyle(text.getStyle()
