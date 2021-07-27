@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.seeds.Seeds;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
@@ -29,7 +30,7 @@ public class Profile implements ISerializable<Profile> {
     public String name = "";
     public boolean onLaunch = false;
     public List<String> loadOnJoinIps = new ArrayList<>();
-    public boolean accounts = false, config = true, friends = false, macros = true, modules = true, waypoints = false;
+    public boolean accounts = false, config = true, friends = false, macros = true, modules = true, waypoints = false, seeds = false;
 
     public void load(System<?> system) {
         File folder = new File(Profiles.FOLDER, name);
@@ -45,6 +46,7 @@ public class Profile implements ISerializable<Profile> {
         if (macros) Macros.get().load(folder);
         if (modules) Modules.get().load(folder);
         if (waypoints) Waypoints.get().load(folder);
+        if (seeds) Seeds.get().load(folder);
     }
 
     public void save(System<?> system) {
@@ -61,6 +63,7 @@ public class Profile implements ISerializable<Profile> {
         if (macros) Macros.get().save(folder);
         if (modules) Modules.get().save(folder);
         if (waypoints) Waypoints.get().save(folder);
+        if (seeds) Seeds.get().save(folder);
     }
 
     public void delete(System<?> system) {
@@ -89,6 +92,7 @@ public class Profile implements ISerializable<Profile> {
         tag.putBoolean("macros", macros);
         tag.putBoolean("modules", modules);
         tag.putBoolean("waypoints", waypoints);
+        tag.putBoolean("seeds", seeds);
 
         loadOnJoinIps.removeIf(String::isEmpty);
 
@@ -110,6 +114,7 @@ public class Profile implements ISerializable<Profile> {
         macros = tag.contains("macros") && tag.getBoolean("macros");
         modules = tag.contains("modules") && tag.getBoolean("modules");
         waypoints = tag.contains("waypoints") && tag.getBoolean("waypoints");
+        seeds = tag.contains("seeds") && tag.getBoolean("seeds");
 
         loadOnJoinIps.clear();
 
@@ -133,6 +138,7 @@ public class Profile implements ISerializable<Profile> {
         this.macros = profile.macros;
         this.modules = profile.modules;
         this.waypoints = profile.waypoints;
+        this.seeds = profile.seeds;
         return this;
     }
 

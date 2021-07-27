@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
+import meteordevelopment.meteorclient.systems.seeds.Seeds;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 
 import java.io.File;
@@ -42,6 +43,7 @@ public class Systems {
         add(new Waypoints());
         add(new Profiles());
         add(new Proxies());
+        add(new Seeds());
 
         for (System<?> system : systems.values()) {
             if (system != config) system.init();

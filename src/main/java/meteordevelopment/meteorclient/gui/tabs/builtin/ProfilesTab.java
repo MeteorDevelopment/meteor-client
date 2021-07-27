@@ -182,6 +182,12 @@ public class ProfilesTab extends Tab {
             waypointsBool.action = () -> newProfile.waypoints = waypointsBool.checked;
             table.row();
 
+            // Seeds
+            table.add(theme.label("Seeds:"));
+            WCheckbox seedsBool = table.add(theme.checkbox(ogProfile.seeds)).widget();
+            seedsBool.action = () -> newProfile.seeds = seedsBool.checked;
+            table.row();
+
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
 

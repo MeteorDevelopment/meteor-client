@@ -56,6 +56,7 @@ public class Commands extends System<Commands> {
         add(new ReloadCommand());
         add(new ResetCommand());
         add(new SayCommand());
+        add(new SeedCommand());
         add(new ServerCommand());
         add(new SwarmCommand());
         add(new ToggleCommand());
