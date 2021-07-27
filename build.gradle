@@ -54,7 +54,8 @@ dependencies {
     include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
 
 	// Seed .locate features
-	implementation 'com.github.hube12:SEED:master-SNAPSHOT'
+	modImplementation 'com.github.hube12:SEED:master-SNAPSHOT'
+	include 'com.github.hube12:SEED:master-SNAPSHOT'
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
