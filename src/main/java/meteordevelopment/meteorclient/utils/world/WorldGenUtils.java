@@ -22,6 +22,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.mob.*;
+import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.entity.passive.VillagerEntity;
+import net.minecraft.entity.vehicle.ChestMinecartEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.*;
@@ -50,6 +53,19 @@ public class WorldGenUtils {
             Blocks.END_PORTAL_FRAME,
             Blocks.END_PORTAL
         ));
+        put(Feature.end_city, Arrays.asList(
+           Blocks.PURPUR_BLOCK,
+           Blocks.PURPUR_PILLAR,
+           Blocks.PURPUR_STAIRS,
+           Blocks.END_ROD
+        ));
+        put(Feature.village, Arrays.asList(
+            Blocks.BELL,
+            Blocks.BREWING_STAND
+        ));
+        put(Feature.mineshaft, Collections.singletonList(
+            Blocks.RAIL
+        ));
     }};
 
     private static final HashMap<Feature, List<Class<? extends Entity>>> FEATURE_ENTITIES = new HashMap<>(){{
@@ -67,6 +83,19 @@ public class WorldGenUtils {
        put(Feature.slime_chunk, Collections.singletonList(
            SlimeEntity.class
        ));
+       put(Feature.bastion_remnant, Collections.singletonList(
+          PiglinBruteEntity.class
+       ));
+       put(Feature.end_city, Collections.singletonList(
+           ShulkerEntity.class
+       ));
+       put(Feature.village, Arrays.asList(
+           VillagerEntity.class,
+           IronGolemEntity.class
+       ));
+       put(Feature.mineshaft, Collections.singletonList(
+           ChestMinecartEntity.class
+       ));
     }};
 
     public enum Feature {
@@ -77,6 +106,8 @@ public class WorldGenUtils {
         ocean_monument,
         bastion_remnant,
         end_city,
+        village,
+        mineshaft,
         slime_chunk
     }
 
@@ -228,6 +259,8 @@ public class WorldGenUtils {
             case ocean_monument -> { return Dimension.OVERWORLD; }
             case bastion_remnant -> { return Dimension.NETHER; }
             case slime_chunk -> { return Dimension.OVERWORLD; }
+            case village -> { return Dimension.OVERWORLD; }
+            case mineshaft -> { return Dimension.OVERWORLD; }
             case end_city -> { return Dimension.END; }
             default -> { return Dimension.OVERWORLD; }
         }
@@ -242,6 +275,8 @@ public class WorldGenUtils {
             case ocean_monument -> { return new Monument(version); }
             case bastion_remnant -> { return new BastionRemnant(version); }
             case end_city -> { return new EndCity(version); }
+            case village -> { return new Village(version); }
+            case mineshaft -> { return new Mineshaft(version); }
             default -> { return null;}
         }
     }
