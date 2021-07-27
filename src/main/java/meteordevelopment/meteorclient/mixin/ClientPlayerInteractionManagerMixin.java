@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
     @Shadow private int blockBreakingCooldown;
     @Shadow protected abstract void syncSelectedSlot();
+    @Shadow private BlockPos currentBreakingPos;
 
     @Shadow
     @Final
@@ -110,6 +111,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     private void onCancelBlockBreaking(CallbackInfo info) {
         if (BlockUtils.breaking) info.cancel();
     }
+    
+	@Inject(method = "isCurrentlyBreaking", at = @At(value = "HEAD"), cancellable = true)
+	private void blChange(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
+		if (Modules.get().isActive(NoBreakDelay.class)) {
+			cir.setReturnValue(pos.equals(this.currentBreakingPos));
+		}
+	}
 
     @Override
     public void syncSelected() {

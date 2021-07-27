@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IHorseBaseEntity;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -29,6 +30,15 @@ public class EntityControl extends Module {
             .defaultValue(true)
             .build()
     );
+    
+    private final Setting<Double> jumpHeight = sgGeneral.add(new DoubleSetting.Builder()
+    		.name("jump-height")
+    		.description("Sets the height of jump.")
+    		.defaultValue(4.4)
+    		.min(0)
+    		.sliderMax(20)
+    		.build()
+    		);
 
     public EntityControl() {
         super(Categories.Movement, "entity-control", "Lets you control rideable entities without a saddle.");
@@ -50,5 +60,9 @@ public class EntityControl extends Module {
         }
 
         if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).setMountJumpStrength(1);
+    }
+    
+    public double getJumpHeight() {
+    	return jumpHeight.get();
     }
 }

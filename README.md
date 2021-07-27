@@ -3,23 +3,18 @@
 <img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="20%"/>
 </p>
 
-<h1 align="center">Meteor Client</h1>
+<h1 align="center">2b2t Client</h1>
 
-<p align="center">A Minecraft Fabric Utility Mod for the latest Minecraft release.</p>
+<p align="center">A Minecraft Fabric Utility Mod. Based on Meteor Client.</p>
 
 <div align="center">
-    <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
-    <img src="https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client" alt="GitHub commit activity"/>
+    <img src="https://img.shields.io/github/last-commit/Tomatobird8/meteor-client" alt="GitHub last commit"/>
+    <img src="https://img.shields.io/github/languages/code-size/Tomatobird8/meteor-client" alt="GitHub code size in bytes"/>
     <br>
-    <img src="https://img.shields.io/github/languages/code-size/MeteorDevelopment/meteor-client" alt="GitHub code size in bytes"/>
-    <img src="https://tokei.rs/b1/github/MeteorDevelopment/meteor-client" alt="GitHub lines of code"/>
-    <img src="https://img.shields.io/github/contributors/MeteorDevelopment/meteor-client" alt="GitHub contributors"/>
-    <br>
-    <img src="https://www.codefactor.io/repository/github/meteordevelopment/meteor-client/badge" alt="CodeFactor"/>
-    <img src="https://circleci.com/gh/MeteorDevelopment/meteor-client/tree/master.svg?style=shield" alt="CircleCI"/>
-    <br><br>
-    <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
+    <img src="https://img.shields.io/github/contributors/Tomatobird8/meteor-client" alt="GitHub contributors"/>
 </div>
+<br>
+<p align="center">2b2t Client is fork of Meteor Client intended to be used on the 2b2t Minecraft servers.<br>Features even more customizability and more modules designed for the 2b2t.</p>
 
 ## Usage
 
@@ -28,22 +23,15 @@
 - Run `./gradlew build`
 
 ### Installation
-Follow guide on the [wiki](https://github.com/MeteorDevelopment/meteor-client/wiki/Installation).
-
-## Contributions
-See [CONTRIBUTING.md](https://github.com/MeteorDevelopment/meteor-client/blob/master/CONTRIBUTING.md)
-
-## Bugs and Suggestions
-Bug reports and suggestions should be made in this repo's [issue tracker](https://github.com/MeteorDevelopment/meteor-client/issues) using the templates provided. Please provide as much information as you can to best help us understand your issue and give a better chance of it being resolved.
+I'm not providing binary files for this client. (...yet?)  
+You can install [Meteor Client](https://github.com/MeteorDevelopment/meteor-client) instead using the follow guide on their [wiki](https://github.com/MeteorDevelopment/meteor-client/wiki/Installation).
 
 ## Donations
-All of our work is completely free and non-profit, therefore we are very grateful for all donations made to help support us running our community. All of the money made through donations is used to pay for our servers, none of it is taken for profit.
-
-Donations can be made to our [paypal](https://www.paypal.me/MineGame159), the minimum amount to get donator benefits is 5$.
-You will be rewarded with a role on our discord, an in-game cape and extra kit + a colored name on our pvp server (`pvp.meteorclient.com`).
-Make sure to include your **discord tag** and **Minecraft ign** so we can give you your rewards.
+I'm not accepting donations for this project.  
+Donate to the creator of [Meteor Client](https://github.com/MeteorDevelopment/meteor-client) instead over on their [paypal](https://www.paypal.me/MineGame159).
 
 ## Credits
+[MeteorDevelopment](https://github.com/MeteorDevelopment) for [Meteor Client](https://github.com/MeteorDevelopment/meteor-client)  
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [Minn](https://github.com/MinnDevelopment) for [Discord Rpc](https://github.com/MinnDevelopment/java-discord-rpc)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
@@ -56,4 +44,4 @@ If you use **ANY** code from the source:
 - Your application must also be licensed under the same license.
 
 
-*If you have any other questions, check our [FAQ](https://github.com/MeteorDevelopment/meteor-client/wiki).*
+*If you have any other questions, check [Meteor Client](https://github.com/MeteorDevelopment/meteor-client)'s [FAQ](https://github.com/MeteorDevelopment/meteor-client/wiki) as I may not provide any support for my fork.*

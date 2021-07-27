@@ -38,12 +38,6 @@ public class TitleScreenMixin extends Screen {
     private int text3Length;
 
     private String text4;
-    private int text4Length;
-
-    private String text5;
-    private int text5Length;
-
-    private String text6;
 
     private int fullLength;
     private int prevWidth;
@@ -55,21 +49,17 @@ public class TitleScreenMixin extends Screen {
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
 
-        text1 = "Meteor Client by ";
-        text2 = "MineGame159";
-        text3 = ", ";
-        text4 = "squidoodly";
-        text5 = " & ";
-        text6 = "seasnail";
+        text1 = "2b2t Client by ";
+        text2 = "MeteorDevelopment";
+        text3 = " & ";
+        text4 = "Tomatobird8";
 
         text1Length = textRenderer.getWidth(text1);
         text2Length = textRenderer.getWidth(text2);
         text3Length = textRenderer.getWidth(text3);
-        text4Length = textRenderer.getWidth(text4);
-        text5Length = textRenderer.getWidth(text5);
-        int text6Length = textRenderer.getWidth(text6);
+        int text4Length = textRenderer.getWidth(text4);
 
-        fullLength = text1Length + text2Length + text3Length + text4Length + text5Length + text6Length;
+        fullLength = text1Length + text2Length + text3Length + text4Length;
         prevWidth = 0;
     }
 
@@ -103,9 +93,5 @@ public class TitleScreenMixin extends Screen {
         textRenderer.drawWithShadow(matrices, text3, width - fullLength + prevWidth - 3, 3, WHITE);
         prevWidth += text3Length;
         textRenderer.drawWithShadow(matrices, text4, width - fullLength + prevWidth - 3, 3, GRAY);
-        prevWidth += text4Length;
-        textRenderer.drawWithShadow(matrices, text5, width - fullLength + prevWidth - 3, 3, WHITE);
-        prevWidth += text5Length;
-        textRenderer.drawWithShadow(matrices, text6, width - fullLength + prevWidth - 3, 3, GRAY);
     }
 }
