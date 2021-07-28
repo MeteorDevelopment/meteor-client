@@ -34,6 +34,11 @@ public class Reach extends Module {
     public Reach() {
         super(Categories.Player, "reach", "Gives you super long arms.");
     }
+    
+    @Override
+    public String getInfoString() {
+        return reachBlocks.get() ? "Both" : "Entities";
+    }
 
     public float getReach() {
         if (isActive() && reachBlocks.get().booleanValue()) {

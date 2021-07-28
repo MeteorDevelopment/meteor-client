@@ -1,19 +1,16 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
+  "name": "2b2t Client",
   "id": "meteor-client",
   "version": "${version}",
-  "description": "Based utility mod.",
+  "description": "Utility mod for 2b2t.",
   "authors": [
-    "MineGame159",
-    "squidoodly",
-    "seasnail"
+    "MeteorDevelopment",
+    "Tomatobird8"
   ],
   "contact": {
     "homepage": "https://meteorclient.com",
-    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
-    "sources": "https://github.com/MeteorDevelopment/meteor-client",
-    "discord": "https://meteorclient.com/discord"
+    "sources": "https://github.com/Tomatobird8/2b2t-client"
   },
   "license": "GPL-3.0",
   "icon": "assets/meteor-client/icon.png",

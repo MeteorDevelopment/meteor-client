@@ -39,6 +39,11 @@ public class Timer extends Module {
     public double getMultiplier() {
         return override != OFF ? override : (isActive() ? multiplier.get() : OFF);
     }
+    
+    @Override
+    public String getInfoString() {
+        return Double.toString(multiplier.get());
+    }
 
     public void setOverride(double override) {
         this.override = override;

@@ -1,6 +1,6 @@
 
 <p align="center">
-<img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="20%"/>
+<img src="https://i.imgur.com/hFoHnsM.png" alt="meteor-client-logo" width="30%"/>
 </p>
 
 <h1 align="center">2b2t Client</h1>

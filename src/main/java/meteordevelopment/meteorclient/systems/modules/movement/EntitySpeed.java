@@ -75,6 +75,11 @@ public class EntitySpeed extends Module {
     public EntitySpeed() {
         super(Categories.Movement, "entity-speed", "Makes you go faster when riding entities.");
     }
+    
+    @Override
+    public String getInfoString() {
+        return flight.get() ? "Flight" : "Normal";
+    }
 
     @EventHandler
     private void onLivingEntityMove(LivingEntityMoveEvent event) {
