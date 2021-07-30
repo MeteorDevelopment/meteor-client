@@ -116,7 +116,7 @@ public class Flight extends Module {
     private void onPreTick(TickEvent.Pre event) {
         float currentYaw = mc.player.getYaw();
         if (mc.player.fallDistance >= 3f && currentYaw == lastYaw && mc.player.getVelocity().length() < 0.003d) {
-            mc.player.setYaw(flip ? 1 : -1);
+            mc.player.setYaw(currentYaw + (flip ? 1 : -1));
             flip = !flip;
         }
         lastYaw = currentYaw;

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render.hud.modules;
 
+import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
@@ -85,7 +86,7 @@ public class ContainerViewerHud extends HudElement {
     }
 
     private void drawBackground(int x, int y, ItemStack container) {
-        mc.getTextureManager().bindTexture(TEXTURE);
+        GL.bindTexture(TEXTURE);
 
         Renderer2D.TEXTURE.begin();
         Renderer2D.TEXTURE.texQuad(x, y, box.width, box.height, Utils.getShulkerColor(container));

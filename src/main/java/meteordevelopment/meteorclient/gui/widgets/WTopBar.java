@@ -75,7 +75,6 @@ public abstract class WTopBar extends WHorizontalList {
             double pad = pad();
             Color color = getButtonColor(pressed || (mc.currentScreen instanceof TabScreen && ((TabScreen) mc.currentScreen).tab == tab), mouseOver);
 
-            //renderer.quad(x, y, width, height, color);
             switch (getState(this)) {
                 case 1:
                     renderer.quadRoundedSide(this, color, theme.roundAmount(), false);
