@@ -5,12 +5,18 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import meteordevelopment.meteorclient.gui.*;
+import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.screen.Screen;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
@@ -18,7 +24,7 @@ public class PromptBuilder {
     private final GuiTheme theme;
     private final Screen parent;
     private String title = "";
-    private String message = "";
+    private final List<String> messages = new ArrayList<>();
     private Runnable onYes = () -> {};
     private Runnable onNo = () -> {};
     private String promptId = null;
@@ -38,7 +44,12 @@ public class PromptBuilder {
     }
 
     public PromptBuilder message(String message) {
-        this.message = message;
+        this.messages.add(message);
+        return this;
+    }
+
+    public PromptBuilder message(String message, Object... args) {
+        this.messages.add(String.format(message, args));
         return this;
     }
 
@@ -59,21 +70,30 @@ public class PromptBuilder {
 
     public void show() {
         if (promptId == null) this.promptId(this.title);
+
         if (Config.get().dontShowAgainPrompts.contains(promptId)) {
             onNo.run();
             return;
         }
-        Screen prompt = new PromptScreen(theme, title, message, onYes, onNo, parent, promptId);
-        mc.openScreen(prompt);
+
+        if (!RenderSystem.isOnRenderThread()) {
+            RenderSystem.recordRenderCall(() -> {
+                Screen prompt = new PromptScreen(theme);
+                mc.openScreen(prompt);
+            });
+        }
+        else {
+            Screen prompt = new PromptScreen(theme);
+            mc.openScreen(prompt);
+        }
     }
 
     private class PromptScreen extends WindowScreen {
+        public PromptScreen(GuiTheme theme) {
+            super(theme, PromptBuilder.this.title);
+            this.parent = PromptBuilder.this.parent;
 
-        public PromptScreen(GuiTheme theme, String title, String message, Runnable onYes, Runnable onNo, Screen parent, String promptId) {
-            super(theme, title);
-            this.parent = parent;
-
-            for (String line : message.split("\n")) {
+            for (String line : messages) {
                 add(theme.label(line)).expandX();
             }
 
@@ -85,13 +105,13 @@ public class PromptBuilder {
 
             WHorizontalList list = add(theme.horizontalList()).expandX().widget();
 
-            WButton yesButton = list.add(theme.button("Yes")).widget();
+            WButton yesButton = list.add(theme.button("Yes")).expandX().widget();
             yesButton.action = () -> {
                 onYes.run();
                 this.onClose();
             };
 
-            WButton noButton = list.add(theme.button("No")).widget();
+            WButton noButton = list.add(theme.button("No")).expandX().widget();
             noButton.action = () -> {
                 onNo.run();
                 if (dontShowAgainCheckbox.checked)
@@ -103,6 +123,5 @@ public class PromptBuilder {
                 yesButton.visible = !dontShowAgainCheckbox.checked;
             };
         }
-
     }
 }

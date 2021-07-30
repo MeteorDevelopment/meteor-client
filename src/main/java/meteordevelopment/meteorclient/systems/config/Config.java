@@ -13,9 +13,13 @@ import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.minecraft.nbt.*;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtList;
+import net.minecraft.nbt.NbtString;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Config extends System<Config> {
     public final Version version;
@@ -78,8 +82,9 @@ public class Config extends System<Config> {
         useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
 
         dontShowAgainPrompts.clear();
-        for (NbtElement item: tag.getList("dontShowAgainPrompts", NbtElement.STRING_TYPE))
+        for (NbtElement item : tag.getList("dontShowAgainPrompts", NbtElement.STRING_TYPE)) {
             dontShowAgainPrompts.add(item.asString());
+        }
 
         return this;
     }
