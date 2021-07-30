@@ -9,8 +9,8 @@ archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
 
-minecraft {
-	accessWidener "src/main/resources/meteor-client.accesswidener"
+loom {
+    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
 }
 
 repositories {
@@ -56,14 +56,9 @@ processResources {
 
     duplicatesStrategy = DuplicatesStrategy.WARN
 
-    from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
-	}
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
