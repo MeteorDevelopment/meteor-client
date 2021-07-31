@@ -179,34 +179,39 @@ public class ConfigTab extends Tab {
             settings.onActivated();
             add(theme.settings(settings)).expandX();
 
-
             onClosed(() -> {
-                if (Config.get().prefix.isBlank()) {
+                String prefix = Config.get().prefix;
+
+                if (prefix.isBlank()) {
                     new PromptBuilder(theme, this.parent)
                         .title("Empty command prefix")
-                        .message("You have set your command prefix to nothing.\nThis WILL prevent you from sending chat messages.\nDo you want to reset your prefix back to '.'?")
+                        .message("You have set your command prefix to nothing.")
+                        .message("This WILL prevent you from sending chat messages.")
+                        .message("Do you want to reset your prefix back to '.'?")
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
                         .promptId("empty-command-prefix")
                         .show();
                 }
-                else if (Config.get().prefix.equals("/")) {
+                else if (prefix.equals("/")) {
                     new PromptBuilder(theme, this.parent)
                         .title("Potential prefix conflict")
-                        .message("You have set your command prefix to /, which is used by minecraft.\nThis can cause conflict issues between meteor and minecraft commands.\nDo you want to reset your prefix to '.'?")
+                        .message("You have set your command prefix to '/', which is used by minecraft.")
+                        .message("This can cause conflict issues between meteor and minecraft commands.")
+                        .message("Do you want to reset your prefix to '.'?")
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
                         .promptId("minecraft-prefix-conflict")
                         .show();
                 }
-                else if (Config.get().prefix.length() > 7) {
+                else if (prefix.length() > 7) {
                     new PromptBuilder(theme, this.parent)
                         .title("Long command prefix")
-                        .message(String.format(
-                            "You have set your command prefix to a very long string.\nThis means that in order to execute any command, you will need to type %s followed by the command you want to run.\nDo you want to reset your prefix back to '.'?",
-                        Config.get().prefix))
+                        .message("You have set your command prefix to a very long string.")
+                        .message("This means that in order to execute any command, you will need to type %s followed by the command you want to run.", prefix)
+                        .message("Do you want to reset your prefix back to '.'?")
                         .onYes(() -> {
                             Config.get().prefix = ".";
                         })
@@ -216,7 +221,8 @@ public class ConfigTab extends Tab {
                 else if (isUsedKey()) {
                     new PromptBuilder(theme, this.parent)
                         .title("Prefix keybind")
-                        .message("You have \"Open Chat On Prefix\" setting enabled and your command prefix has a conflict with another keybind.\nDo you want to disable \"Open Chat On Prefix\" setting?")
+                        .message("You have \"Open Chat On Prefix\" setting enabled and your command prefix has a conflict with another keybind.")
+                        .message("Do you want to disable \"Open Chat On Prefix\" setting?")
                         .onYes(() -> {
                             Config.get().openChatOnPrefix = false;
                         })
@@ -229,10 +235,12 @@ public class ConfigTab extends Tab {
 
     private static boolean isUsedKey() {
         if (!Config.get().openChatOnPrefix) return false;
+
         String prefixKeybindTranslation = String.format("key.keyboard.%s",  Config.get().prefix.toLowerCase().substring(0,1));
         for (KeyBinding key: mc.options.keysAll) {
             if (key.getBoundKeyTranslationKey().equals(prefixKeybindTranslation)) return true;
         }
+
         return false;
     }
 }

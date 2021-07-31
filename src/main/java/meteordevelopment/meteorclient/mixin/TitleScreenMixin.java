@@ -6,18 +6,18 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.gui.GuiThemes;
-import meteordevelopment.meteorclient.gui.screens.NewUpdateScreen;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import meteordevelopment.meteorclient.utils.render.PromptBuilder;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Util;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -76,7 +76,17 @@ public class TitleScreenMixin extends Screen {
                 Version latestVer = new Version(res);
 
                 if (latestVer.isHigherThan(Config.get().version)) {
-                    Utils.mc.openScreen(new NewUpdateScreen(GuiThemes.get(), latestVer));
+                    new PromptBuilder()
+                        .title("New Update")
+                        .message("A new version of Meteor has been released.")
+                        .message("Your version: %s", Config.get().version)
+                        .message("Latest version: %s", latestVer)
+                        .message("Do you want to update?")
+                        .onYes(() -> {
+                            Util.getOperatingSystem().open("https://meteorclient.com/");
+                        })
+                        .promptId("new-update")
+                        .show();
                 }
             });
         }
