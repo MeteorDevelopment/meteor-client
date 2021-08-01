@@ -99,6 +99,8 @@ public class Capes {
     }
 
     private static class Cape extends Identifier {
+        private static int COUNT = 0;
+
         private final String name;
 
         private boolean downloaded;
@@ -109,7 +111,7 @@ public class Capes {
         private int retryTimer;
 
         public Cape(String name) {
-            super("meteor-client", "capes/" + name);
+            super("meteor-client", "capes/" + COUNT++);
 
             this.name = name;
         }
