@@ -79,6 +79,11 @@ public abstract class InGameHudMixin {
         if (Modules.get().get(NoRender.class).noScoreboard()) info.cancel();
     }
 
+    @Inject(method = "renderSpyglassOverlay", at = @At("HEAD"), cancellable = true)
+    private void onRenderSpyglassOverlay(float scale, CallbackInfo info) {
+        if (Modules.get().get(NoRender.class).noSpyglassOverlay()) info.cancel();
+    }
+
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void onRenderCrosshair(MatrixStack matrices, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noCrosshair()) info.cancel();
