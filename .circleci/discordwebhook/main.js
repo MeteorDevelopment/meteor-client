@@ -13,43 +13,43 @@ const compareUrl = process.argv[5]
 const downloadUrl = "https://meteorclient.com/download?devBuild=" + build
 
 axios
-  .get(compareUrl)
-  .then(res => {
-    let success = true
-    let description = ""
+    .get(compareUrl)
+    .then(res => {
+        let success = true
+        let description = ""
 
-    description += "**Branch:** " + branch
-    description += "\n**Status:** " + (success ? "success" : "failure")
+        description += "**Branch:** " + branch
+        description += "\n**Status:** " + (success ? "success" : "failure")
 
-    let changes = "\n\n**Changes:**"
-    let hasChanges = false
-    for (let i in res.data.commits) {
-      let commit = res.data.commits[i]
+        let changes = "\n\n**Changes:**"
+        let hasChanges = false
+        for (let i in res.data.commits) {
+            let commit = res.data.commits[i]
 
-      changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MeteorDevelopment/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*"
-      hasChanges = true
-    }
-    if (hasChanges) description += changes
+            changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MeteorDevelopment/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*"
+            hasChanges = true
+        }
+        if (hasChanges) description += changes
 
-    if (success) {
-      description += "\n\n**Download:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
-    }
+        if (success) {
+            description += "\n\n**Download:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
+        }
 
-      const webhook = {
-          username: "Dev Builds",
-          avatar_url: "https://meteorclient.com/icon.png",
-          embeds: [
-              {
-                  title: "meteor client v" + version + " build #" + build,
-                  description: description,
-                  url: "https://meteorclient.com",
-                  color: success ? 3066993 : 15158332
-              }
-          ]
-      };
+        const webhook = {
+            username: "Dev Builds",
+            avatar_url: "https://meteorclient.com/icon.png",
+            embeds: [
+                {
+                    title: "meteor client v" + version + " build #" + build,
+                    description: description,
+                    url: "https://meteorclient.com",
+                    color: success ? 3066993 : 15158332
+                }
+            ]
+        };
 
-      axios.post(process.env.discord_webhook, webhook);
-      axios.post(process.env.guilded_webhook, webhook);
+        axios.post(process.env.discord_webhook, webhook);
+        axios.post(process.env.guilded_webhook, webhook);
 
-    axios.post("https://meteorclient.com/api/setDevBuild?token=" + process.env.server_token + "&devBuild=" + build)
-  })
+        axios.post("https://meteorclient.com/api/setDevBuid?devBuild=" + build, {}, { headers: { "Authorization": process.env.server_token } })
+    })
