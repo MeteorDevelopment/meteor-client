@@ -51,5 +51,5 @@ axios
         axios.post(process.env.discord_webhook, webhook);
         axios.post(process.env.guilded_webhook, webhook);
 
-        axios.post("https://meteorclient.com/api/setDevBuid?devBuild=" + build, {}, { headers: { "Authorization": process.env.server_token } })
+        axios.post("https://meteorclient.com/api/setDevBuild?devBuild=" + build, {}, { headers: { "Authorization": process.env.server_token } })
     })
