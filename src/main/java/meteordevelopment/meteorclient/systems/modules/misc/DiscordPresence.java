@@ -25,7 +25,6 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.starscript.Script;
 import meteordevelopment.starscript.compiler.Compiler;
 import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.Error;
 import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.util.Util;
 
@@ -148,8 +147,7 @@ public class DiscordPresence extends Module {
 
             if (result.hasErrors()) {
                 if (Utils.canUpdate()) {
-                    Error error = result.errors.get(0);
-                    ChatUtils.error("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
+                    MeteorStarscript.printChatError(i, result.errors.get(0));
                 }
 
                 continue;
