@@ -45,26 +45,25 @@ public class DiscordPresence extends Module {
 
     private final Setting<List<String>> line1Strings = sgLine1.add(new StringListSetting.Builder()
         .name("line-1-messages")
-        .description("Messages used for first line.")
-        .defaultValue(List.of("{player} || {server}"))
+        .description("Messages used for the first line.")
+        .defaultValue(List.of("{player}", "{server}"))
         .onChanged(strings -> recompileLine1())
         .build()
     );
 
     private final Setting<Integer> line1UpdateDelay = sgLine1.add(new IntSetting.Builder()
         .name("line-1-update-delay")
-        .description("How fast to update first line in ticks.")
-        .defaultValue(20)
+        .description("How fast to update the first line in ticks.")
+        .defaultValue(200)
         .min(10)
-        .sliderMin(10)
-        .sliderMax(100)
+        .sliderMin(10).sliderMax(200)
         .build()
     );
 
     private final Setting<SelectMode> line1SelectMode = sgLine1.add(new EnumSetting.Builder<SelectMode>()
         .name("line-1-select-mode")
-        .description("How to select messages for first line.")
-        .defaultValue(SelectMode.Random)
+        .description("How to select messages for the first line.")
+        .defaultValue(SelectMode.Sequential)
         .build()
     );
 
@@ -72,26 +71,25 @@ public class DiscordPresence extends Module {
 
     private final Setting<List<String>> line2Strings = sgLine2.add(new StringListSetting.Builder()
         .name("line-2-messages")
-        .description("Messages used for second line.")
-        .defaultValue(List.of("Meteor on Crack!"))
+        .description("Messages used for the second line.")
+        .defaultValue(List.of("Meteor on Crack!", "{round({server.tps}, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count Players online}"))
         .onChanged(strings -> recompileLine2())
         .build()
     );
 
     private final Setting<Integer> line2UpdateDelay = sgLine2.add(new IntSetting.Builder()
         .name("line-2-update-delay")
-        .description("How fast to update second line in ticks.")
-        .defaultValue(20)
+        .description("How fast to update the second line in ticks.")
+        .defaultValue(60)
         .min(10)
-        .sliderMin(10)
-        .sliderMax(100)
+        .sliderMin(10).sliderMax(200)
         .build()
     );
 
     private final Setting<SelectMode> line2SelectMode = sgLine2.add(new EnumSetting.Builder<SelectMode>()
         .name("line-2-select-mode")
-        .description("How to select messages for second line.")
-        .defaultValue(SelectMode.Random)
+        .description("How to select messages for the second line.")
+        .defaultValue(SelectMode.Sequential)
         .build()
     );
 
@@ -108,7 +106,7 @@ public class DiscordPresence extends Module {
     private int line2Ticks, line2I;
 
     public DiscordPresence() {
-        super(Categories.Misc, "discord-presence", "Displays a RPC for you on Discord to show that you're playing Meteor Client!");
+        super(Categories.Misc, "discord-presence", "Displays Meteor as your presence on Discord.");
     }
 
     @Override

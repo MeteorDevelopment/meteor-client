@@ -42,6 +42,8 @@ public class MeteorStarscript {
             ))
             .set("yaw", () -> Value.number(mc.player != null ? mc.player.getYaw() : 0))
             .set("pitch", () -> Value.number(mc.player != null ? mc.player.getPitch() : 0))
+            .set("hand", () -> Value.string(mc.player != null ? Names.get(mc.player.getMainHandStack().getItem()) : ""))
+            .set("offhand", () -> Value.string(mc.player != null ? Names.get(mc.player.getOffHandStack().getItem()) : ""))
         ));
 
         // Server
@@ -49,6 +51,8 @@ public class MeteorStarscript {
             .set("_toString", () -> Value.string(Utils.getWorldName()))
             .set("tps", () -> Value.number(TickRate.INSTANCE.getTickRate()))
             .set("time", () -> Value.string(Utils.getWorldTime()))
+            .set("player_count", () -> Value.number(mc.getNetworkHandler() != null ? mc.getNetworkHandler().getPlayerList().size() : 0))
+            .set("difficulty", () -> Value.string(mc.world != null ? mc.world.getDifficulty().getName() : ""))
         ));
     }
 
