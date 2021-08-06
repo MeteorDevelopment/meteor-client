@@ -1104,42 +1104,7 @@ public class CrystalAura extends Module {
     }
 
     private boolean intersectsWithEntities(Box box) {
-        // TODO: Improve
-        return mc.world.getOtherEntities(mc.player, box, entity -> !entity.isSpectator() && !removed.contains(entity.getId())).size() > 0;
-
-        // Not using mc.world.getOtherEntities() just because this is a bit faster
-        /*int startX = MathHelper.floor((box.minX - 2) / 16);
-        int endX = MathHelper.floor((box.maxX + 2) / 16);
-        int startZ = MathHelper.floor((box.minZ - 2) / 16);
-        int endZ = MathHelper.floor((box.maxZ + 2) / 16);
-        ChunkManager chunkManager = mc.world.getChunkManager();
-
-        for (int x = startX; x <= endX; x++) {
-            for (int z = startZ; z <= endZ; z++) {
-                WorldChunk chunk = chunkManager.getWorldChunk(x, z, false);
-
-                if (chunk != null) {
-                    TypeFilterableList<Entity>[] entitySections = chunk.getEntitySectionArray();
-
-                    int startY = MathHelper.floor((box.minY - 2) / 16);
-                    int endY = MathHelper.floor((box.maxY + 2) / 16);
-                    startY = MathHelper.clamp(startY, 0, entitySections.length - 1);
-                    endY = MathHelper.clamp(endY, 0, entitySections.length - 1);
-
-                    for (int y = startY; y <= endY; y++) {
-                        TypeFilterableList<Entity> entitySection = entitySections[y];
-
-                        for (Entity entity : entitySection) {
-                            if (entity.getBoundingBox().intersects(box) && !entity.isSpectator() && !removed.contains(entity.getId())) {
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        return false;*/
+        return EntityUtils.intersectsWithEntity(box, entity -> !entity.isSpectator() && !removed.contains(entity.getId()));
     }
 
     // Render
