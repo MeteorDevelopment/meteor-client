@@ -225,8 +225,8 @@ public class BlockUtils {
     }
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos) {
-        if (blockPos.getY() == 0) return MobSpawn.Never;
-        if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock)) return MobSpawn.Never;
+        if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock) ||
+            mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
 
         if (!topSurface(Utils.mc.world.getBlockState(blockPos.down()))) {
             if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
