@@ -114,8 +114,8 @@ public class NoRender extends Module {
     );
 
     private final Setting<Boolean> noSuggestion = sgOverlay.add(new BoolSetting.Builder()
-        .name("chat-suggestion")
-        .description("Disables suggestions in chat.")
+        .name("command-suggestions")
+        .description("Disables command suggestions in chat.")
         .defaultValue(false)
         .build()
     );
