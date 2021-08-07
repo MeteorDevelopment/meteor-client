@@ -76,7 +76,7 @@ public abstract class CommandSuggestorMixin {
 
     @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
     public void render(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).onRenderSuggestion()) info.cancel();
+        if (Modules.get().get(NoRender.class).noCommandSuggestions()) info.cancel();
     }
 
 }
