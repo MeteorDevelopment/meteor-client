@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.WallHack;
+import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.RenderLayers;
@@ -22,11 +23,14 @@ public class RenderLayersMixin {
     private static void onGetBlockLayer(BlockState state, CallbackInfoReturnable<RenderLayer> cir) {
         if(Modules.get() != null) {
             WallHack wallHack = Modules.get().get(WallHack.class);
+            Xray xray = Modules.get().get(Xray.class);
 
             if(wallHack.isActive()) {
                 if(wallHack.blocks.get().contains(state.getBlock())) {
                     cir.setReturnValue(RenderLayer.getTranslucent());
                 }
+            } else if(xray.isActive()) {
+                cir.setReturnValue(RenderLayer.getTranslucent());
             }
         }
     }

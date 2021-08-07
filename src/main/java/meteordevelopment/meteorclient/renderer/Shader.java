@@ -12,15 +12,8 @@ import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.io.IOUtils;
-import org.lwjgl.BufferUtils;
-import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.APIUtil;
-import org.lwjgl.system.MemoryStack;
-import org.lwjgl.system.MemoryUtil;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
@@ -29,64 +22,38 @@ import static org.lwjgl.opengl.GL32C.*;
 public class Shader {
     public static Shader BOUND;
 
-    private static final FloatBuffer MAT = BufferUtils.createFloatBuffer(4 * 4);
-
     private final int id;
     private final Object2IntMap<String> uniformLocations = new Object2IntOpenHashMap<>();
 
     public Shader(String vertPath, String fragPath) {
-        int vert = glCreateShader(GL_VERTEX_SHADER);
-        shaderSource(vert, read(vertPath));
-        glCompileShader(vert);
+        int vert = GL.createShader(GL_VERTEX_SHADER);
+        GL.shaderSource(vert, read(vertPath));
 
-        int[] a = new int[1];
-        glGetShaderiv(vert, GL_COMPILE_STATUS, a);
-        if (a[0] == GL_FALSE) {
-            MeteorClient.LOG.error("Failed to compile vertex shader (" + vertPath + "): " + glGetShaderInfoLog(vert));
-            throw new RuntimeException("Failed to compile vertex shader (" + vertPath + "): " + glGetShaderInfoLog(vert));
+        String vertError = GL.compileShader(vert);
+        if (vertError != null) {
+            MeteorClient.LOG.error("Failed to compile vertex shader (" + vertPath + "): " + vertError);
+            throw new RuntimeException("Failed to compile vertex shader (" + vertPath + "): " + vertError);
         }
 
-        int frag = glCreateShader(GL_FRAGMENT_SHADER);
-        shaderSource(frag, read(fragPath));
-        glCompileShader(frag);
+        int frag = GL.createShader(GL_FRAGMENT_SHADER);
+        GL.shaderSource(frag, read(fragPath));
 
-        glGetShaderiv(frag, GL_COMPILE_STATUS, a);
-        if (a[0] == GL_FALSE) {
-            MeteorClient.LOG.error("Failed to compile fragment shader (" + fragPath + "): " + glGetShaderInfoLog(frag));
-            throw new RuntimeException("Failed to compile fragment shader (" + fragPath + "): " + glGetShaderInfoLog(frag));
+        String fragError = GL.compileShader(frag);
+        if (fragError != null) {
+            MeteorClient.LOG.error("Failed to compile fragment shader (" + fragPath + "): " + fragError);
+            throw new RuntimeException("Failed to compile fragment shader (" + fragPath + "): " + fragError);
         }
 
-        id = glCreateProgram();
-        glAttachShader(id, vert);
-        glAttachShader(id, frag);
-        glLinkProgram(id);
+        id = GL.createProgram();
 
-        glGetProgramiv(id, GL_LINK_STATUS, a);
-        if (a[0] == GL_FALSE) {
-            MeteorClient.LOG.error("Failed to link program: " + glGetProgramInfoLog(frag));
-            throw new RuntimeException("Failed to link program: " + glGetProgramInfoLog(frag));
+        String programError = GL.linkProgram(id, vert, frag);
+        if (programError != null) {
+            MeteorClient.LOG.error("Failed to link program: " + programError);
+            throw new RuntimeException("Failed to link program: " + programError);
         }
 
-        glDeleteShader(vert);
-        glDeleteShader(frag);
-    }
-
-    // Apparently there is an AMD bug and this supposedly fixes it
-    private void shaderSource(int shader, String source) {
-        MemoryStack stack = MemoryStack.stackGet();
-        int stackPointer = stack.getPointer();
-
-        try {
-            ByteBuffer sourceBuffer = MemoryUtil.memUTF8(source, true);
-
-            PointerBuffer pointers = stack.mallocPointer(1);
-            pointers.put(sourceBuffer);
-
-            nglShaderSource(shader, 1, pointers.address0(), 0);
-            APIUtil.apiArrayFree(pointers.address0(), 1);
-        } finally {
-            stack.setPointer(stackPointer);
-        }
+        GL.deleteShader(vert);
+        GL.deleteShader(frag);
     }
 
     private String read(String path) {
@@ -99,37 +66,36 @@ public class Shader {
     }
 
     public void bind() {
-        glUseProgram(id);
+        GL.useProgram(id);
         BOUND = this;
     }
 
     private int getLocation(String name) {
         if (uniformLocations.containsKey(name)) return uniformLocations.getInt(name);
 
-        int location = glGetUniformLocation(id, name);
+        int location = GL.getUniformLocation(id, name);
         uniformLocations.put(name, location);
         return location;
     }
 
     public void set(String name, boolean v) {
-        glUniform1i(getLocation(name), v ? GL_TRUE : GL_FALSE);
+        GL.uniformInt(getLocation(name), v ? GL_TRUE : GL_FALSE);
     }
 
     public void set(String name, int v) {
-        glUniform1i(getLocation(name), v);
+        GL.uniformInt(getLocation(name), v);
     }
 
     public void set(String name, double v) {
-        glUniform1f(getLocation(name), (float) v);
+        GL.uniformFloat(getLocation(name), (float) v);
     }
 
     public void set(String name, double v1, double v2) {
-        glUniform2f(getLocation(name), (float) v1, (float) v2);
+        GL.uniformFloat2(getLocation(name), (float) v1, (float) v2);
     }
 
     public void set(String name, Matrix4f mat) {
-        mat.writeColumnMajor(MAT);
-        glUniformMatrix4fv(getLocation(name), false, MAT);
+        GL.uniformMatrix(getLocation(name), mat);
     }
 
     public void setDefaults() {

@@ -7,16 +7,12 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
-import meteordevelopment.meteorclient.events.meteor.ClientInitialisedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
-import meteordevelopment.meteorclient.renderer.Fonts;
-import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
-import meteordevelopment.meteorclient.renderer.Renderer2D;
-import meteordevelopment.meteorclient.renderer.Shaders;
+import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -24,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
@@ -88,6 +85,7 @@ public class MeteorClient implements ClientModInitializer {
             }
         });
 
+        GL.init();
         Shaders.init();
         Renderer2D.init();
         Outlines.init();
@@ -122,7 +120,6 @@ public class MeteorClient implements ClientModInitializer {
         }));
 
         EVENT_BUS.subscribe(this);
-        EVENT_BUS.post(new ClientInitialisedEvent()); // TODO: This is there just for compatibility
 
         // Call onInitialize for addons
         addons.forEach(MeteorAddon::onInitialize);
@@ -133,6 +130,7 @@ public class MeteorClient implements ClientModInitializer {
         Fonts.load();
         GuiRenderer.init();
         GuiThemes.postInit();
+        MeteorStarscript.init();
     }
 
     private void openClickGui() {
@@ -170,6 +168,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onCharTyped(CharTypedEvent event) {
         if (mc.currentScreen != null) return;
         if (!Config.get().openChatOnPrefix) return;
+        if (Config.get().prefix.isBlank()) return;
 
         if (event.c == Config.get().prefix.charAt(0)) {
             mc.openScreen(new ChatScreen(Config.get().prefix));

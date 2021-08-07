@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.renderer.Renderer3D;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
 import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
+import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -33,9 +34,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -115,7 +114,7 @@ public abstract class GameRendererMixin {
 
     private boolean freecamSet = false;
 
-    @Inject(method = "updateTargetedEntity", at = @At("INVOKE"), cancellable = true)
+    @Inject(method = "updateTargetedEntity", at = @At("HEAD"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
         Freecam freecam = Modules.get().get(Freecam.class);
 
@@ -161,5 +160,17 @@ public abstract class GameRendererMixin {
     @Inject(method = "renderHand", at = @At("INVOKE"), cancellable = true)
     private void renderHand(MatrixStack matrices, Camera camera, float tickDelta, CallbackInfo info) {
         if (!Modules.get().get(Freecam.class).renderHands()) info.cancel();
+    }
+
+    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3))
+    private double updateTargetedEntityModifySurvivalReach(double d) {
+        Reach reach = Modules.get().get(Reach.class);
+        return reach.isActive() ? reach.getReach() : d;
+    }
+
+    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
+    private double updateTargetedEntityModifySquaredMaxReach(double d) {
+        Reach reach = Modules.get().get(Reach.class);
+        return reach.isActive() ? reach.getReach() * reach.getReach() : d;
     }
 }

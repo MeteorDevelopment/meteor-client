@@ -92,20 +92,18 @@ public class BlockUtils {
 
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
-                int prevSlot = Utils.mc.player.getInventory().selectedSlot;
-                InvUtils.swap(slot);
+                InvUtils.swap(slot, swapBack);
 
                 place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
 
-                if (swapBack) InvUtils.swap(prevSlot);
+                if (swapBack) InvUtils.swapBack();
             });
         } else {
-            int prevSlot = Utils.mc.player.getInventory().selectedSlot;
-            InvUtils.swap(slot);
+            InvUtils.swap(slot, swapBack);
 
             place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
 
-            if (swapBack) InvUtils.swap(prevSlot);
+            if (swapBack) InvUtils.swapBack();
         }
 
 
@@ -173,12 +171,14 @@ public class BlockUtils {
     private static void onTickPost(TickEvent.Post event) {
         if (!breakingThisTick && breaking) {
             breaking = false;
-            mc.interactionManager.cancelBlockBreaking();
+            if (mc.interactionManager != null) mc.interactionManager.cancelBlockBreaking();
         }
     }
 
     /** Needs to be used in {@link TickEvent.Pre} */
-    public static void breakBlock(BlockPos blockPos, boolean swing) {
+    public static boolean breakBlock(BlockPos blockPos, boolean swing) {
+        if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
+
         // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
@@ -190,6 +190,23 @@ public class BlockUtils {
 
         breaking = true;
         breakingThisTick = true;
+
+        return true;
+    }
+
+    public static boolean canBreak(BlockPos blockPos, BlockState state) {
+        if (!mc.player.isCreative() && state.getHardness(mc.world, blockPos) < 0) return false;
+        return state.getOutlineShape(mc.world, blockPos) != VoxelShapes.empty();
+    }
+    public static boolean canBreak(BlockPos blockPos) {
+        return canBreak(blockPos, mc.world.getBlockState(blockPos));
+    }
+
+    public static boolean canInstaBreak(BlockPos blockPos, BlockState state) {
+        return mc.player.isCreative() || state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) >= 1;
+    }
+    public static boolean canInstaBreak(BlockPos blockPos) {
+        return canInstaBreak(blockPos, mc.world.getBlockState(blockPos));
     }
 
     // Other
@@ -209,15 +226,15 @@ public class BlockUtils {
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos) {
         if (blockPos.getY() == 0) return MobSpawn.Never;
-        if (!(Utils.mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock)) return MobSpawn.Never;
+        if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock)) return MobSpawn.Never;
 
         if (!topSurface(Utils.mc.world.getBlockState(blockPos.down()))) {
-            if (Utils.mc.world.getBlockState(blockPos.down()).getCollisionShape(Utils.mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
-            if (Utils.mc.world.getBlockState(blockPos.down()).isTranslucent(Utils.mc.world, blockPos.down())) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
-        if (Utils.mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawn.Potential;
-        else if (Utils.mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawn.Always;
+        if (mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawn.Potential;
+        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawn.Always;
 
         return MobSpawn.Never;
     }

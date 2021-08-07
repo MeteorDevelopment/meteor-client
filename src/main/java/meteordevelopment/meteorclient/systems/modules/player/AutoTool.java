@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.BlockState;
@@ -69,7 +70,6 @@ public class AutoTool extends Module {
         .build()
     ));
 
-    private int prevSlot;
     private boolean wasPressed;
     private boolean shouldSwitch;
     private int ticks;
@@ -81,15 +81,14 @@ public class AutoTool extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && prevSlot != -1) {
-            InvUtils.swap(prevSlot);
-            prevSlot = -1;
+        if (switchBack.get() && !mc.options.keyAttack.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
+            InvUtils.swapBack();
             wasPressed = false;
             return;
         }
 
         if (ticks <= 0 && shouldSwitch && bestSlot != -1) {
-            InvUtils.swap(bestSlot);
+            InvUtils.swap(bestSlot, switchBack.get());
             shouldSwitch = false;
         } else {
             ticks--;
@@ -102,7 +101,7 @@ public class AutoTool extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         // Get blockState
         BlockState blockState = mc.world.getBlockState(event.blockPos);
-        if (blockState.getHardness(mc.world, event.blockPos) < 0 || blockState.isAir()) return;
+        if (!BlockUtils.canBreak(event.blockPos, blockState)) return;
 
         // Check if we should switch to a better tool
         ItemStack currentStack = mc.player.getMainHandStack();
@@ -123,9 +122,7 @@ public class AutoTool extends Module {
         if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState)) || shouldStopUsing(currentStack) || !(currentStack.getItem() instanceof ToolItem))) {
             ticks = switchDelay.get();
 
-            prevSlot = mc.player.getInventory().selectedSlot;
-
-            if (ticks == 0) InvUtils.swap(bestSlot);
+            if (ticks == 0) InvUtils.swap(bestSlot, true);
             else shouldSwitch = true;
         }
 

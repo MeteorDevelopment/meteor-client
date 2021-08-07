@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
     @Shadow @Final private MinecraftClient client;
-
     @Shadow private ClientWorld world;
 
     private boolean worldNotNull;
@@ -68,9 +67,11 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(ContainerSlotUpdateEvent.get(packet));
     }
 
-    @Inject(method = "onEntityDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;removeEntity(ILnet/minecraft/entity/Entity$RemovalReason;)V"))
-    private void onEntityDestroy(EntityDestroyS2CPacket packet, CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(packet.getEntityId())));
+    @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/EntitiesDestroyS2CPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
+    private void onEntitiesDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo ci) {
+        for (int id : packet.getEntityIds()) {
+            MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(id)));
+        }
     }
 
     @Inject(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER))

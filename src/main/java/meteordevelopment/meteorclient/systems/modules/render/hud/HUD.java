@@ -7,10 +7,14 @@ package meteordevelopment.meteorclient.systems.modules.render.hud;
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.HudElementScreen;
+import meteordevelopment.meteorclient.gui.tabs.Tab;
+import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -163,13 +167,20 @@ public class HUD extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        WHorizontalList list = theme.horizontalList();
+        WTable table = theme.table();
 
-        WButton reset = list.add(theme.button("Reset")).widget();
+        // because some people are just monkies
+        WButton openEditor = table.add(theme.button(GuiRenderer.EDIT)).widget();
+        openEditor.action = this::openHudEditor;
+        table.add(theme.label("Opens HUD editor."));
+        table.row();
+
+        WButton reset = table.add(theme.button(GuiRenderer.RESET)).widget();
         reset.action = this.reset;
-        list.add(theme.label("Resets positions (do this after changing scale)."));
+        table.add(theme.label("Resets positions (do this after changing scale)."));
+        table.row();
 
-        return list;
+        return table;
     }
 
     @Override
@@ -205,5 +216,17 @@ public class HUD extends Module {
         }
 
         return null;
+    }
+
+    private void openHudEditor() {
+        HudTab hudTab = null;
+        for (Tab tab : Tabs.get()) {
+            if (tab instanceof HudTab) {
+                hudTab = (HudTab) tab;
+                break;
+            }
+        }
+        if (hudTab == null) return;
+        hudTab.openScreen(GuiThemes.get());
     }
 }

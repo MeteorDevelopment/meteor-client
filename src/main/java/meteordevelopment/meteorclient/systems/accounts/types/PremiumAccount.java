@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.accounts.types;
 
-import com.google.gson.Gson;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.exceptions.AuthenticationUnavailableException;
@@ -22,8 +21,6 @@ import net.minecraft.nbt.NbtCompound;
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class PremiumAccount extends Account<PremiumAccount> {
-    private static final Gson GSON = new Gson();
-
     private String password;
 
     public PremiumAccount(String name, String password) {

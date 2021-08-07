@@ -46,8 +46,8 @@ public class BlockIterator {
 
         for (int x = px - hRadius; x <= px + hRadius; x++) {
             for (int z = pz - hRadius; z <= pz + hRadius; z++) {
-                for (int y = Math.max(0, py - vRadius); y <= py + vRadius; y++) {
-                    if (y > 255) break;
+                for (int y = Math.max(mc.world.getBottomY(), py - vRadius); y <= py + vRadius; y++) {
+                    if (y > mc.world.getTopY()) break;
 
                     blockPos.set(x, y, z);
                     BlockState blockState = mc.world.getBlockState(blockPos);

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -17,7 +18,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 
 public class Fullbright extends Module {
-
     public enum Mode {
         Gamma,
         Luminance
@@ -30,11 +30,25 @@ public class Fullbright extends Module {
             .description("The mode to use for Fullbright.")
             .defaultValue(Mode.Luminance)
             .onChanged(mode -> {
-                if(mode == Mode.Luminance) {
+                if (mode == Mode.Luminance) {
                     mc.options.gamma = StaticListener.prevGamma;
                 }
             })
             .build()
+    );
+
+    private final Setting<Integer> minimumLightLevel = sgGeneral.add(new IntSetting.Builder()
+        .name("minimum-light-level")
+        .description("Minimum light level when using Luminance mode.")
+        .visible(() -> mode.get() == Mode.Luminance)
+        .defaultValue(8)
+        .onChanged(integer -> {
+            if (mc.worldRenderer != null) mc.worldRenderer.reload();
+        })
+        .min(0)
+        .max(15)
+        .sliderMax(15)
+        .build()
     );
 
     public Fullbright() {
@@ -46,11 +60,20 @@ public class Fullbright extends Module {
     @Override
     public void onActivate() {
         enable();
+
+        if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
     }
 
     @Override
     public void onDeactivate() {
         disable();
+
+        if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
+    }
+
+    public int getMinimumLightLevel() {
+        if (!isActive() || mode.get() != Mode.Luminance) return 0;
+        return minimumLightLevel.get();
     }
 
     public static boolean isEnabled() {
