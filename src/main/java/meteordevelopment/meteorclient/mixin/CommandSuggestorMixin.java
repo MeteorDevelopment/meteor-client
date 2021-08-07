@@ -11,6 +11,8 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.suggestion.Suggestions;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.CommandSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
@@ -22,6 +24,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -69,6 +72,11 @@ public abstract class CommandSuggestorMixin {
             }
             ci.cancel();
         }
+    }
+
+    @Inject(method = "render", at = @At(value = "HEAD"), cancellable = true)
+    public void render(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo info) {
+        if (Modules.get().get(NoRender.class).noSuggestion()) info.cancel();
     }
 
 }
