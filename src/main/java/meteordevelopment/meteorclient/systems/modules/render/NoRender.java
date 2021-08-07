@@ -343,7 +343,7 @@ public class NoRender extends Module {
         return isActive() && noEatParticles.get();
     }
 
-    public boolean noSuggestion() {
+    public boolean onRenderSuggestion() {
         return isActive() && onRenderSuggestion.get();
     }
 
