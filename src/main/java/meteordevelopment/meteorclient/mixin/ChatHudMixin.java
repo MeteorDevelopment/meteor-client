@@ -22,6 +22,8 @@ import net.minecraft.client.option.ChatVisibility;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,6 +41,7 @@ public abstract class ChatHudMixin implements IChatHud {
     private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Baritone\\]");
     private static final Identifier METEOR_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/meteor.png");
     private static final Identifier BARITONE_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/baritone.png");
+    private static final Logger LOGGER = LogManager.getLogger();
 
     @Shadow
     @Final
@@ -51,6 +54,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;I)V", cancellable = true)
     private void onAddMessage(Text text, int id, CallbackInfo info) {
+        LOGGER.info("[CHAT] {}", text.getString().replaceAll("\r", "\\\\r").replaceAll("\n", "\\\\n"));
         if (MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(text, id)).isCancelled()) info.cancel();
     }
 
