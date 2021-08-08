@@ -265,7 +265,7 @@ public class CrystalAura extends Module {
     private final Setting<Keybind> forceFacePlace = sgFacePlace.add(new KeybindSetting.Builder()
         .name("force-face-place")
         .description("Starts face place when this button is pressed.")
-        .defaultValue(Keybind.fromKey(-1))
+        .defaultValue(Keybind.none())
         .build()
     );
 
