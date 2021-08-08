@@ -93,7 +93,7 @@ public class KeybindSetting extends Setting<Keybind> {
 
     public static class Builder {
         private String name = "undefined", description = "";
-        private Keybind defaultValue = Keybind.fromKey(-1);
+        private Keybind defaultValue = Keybind.none();
         private Consumer<Keybind> onChanged;
         private Consumer<Setting<Keybind>> onModuleActivated;
         private IVisible visible;

@@ -22,7 +22,7 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 public class Macro implements ISerializable<Macro> {
     public String name = "";
     public List<String> messages = new ArrayList<>(1);
-    public Keybind keybind = Keybind.fromKey(-1);
+    public Keybind keybind = Keybind.none();
 
     public void addMessage(String command) {
         messages.add(command);
