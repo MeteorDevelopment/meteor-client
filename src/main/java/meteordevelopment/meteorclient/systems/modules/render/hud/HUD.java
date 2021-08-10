@@ -72,6 +72,15 @@ public class HUD extends Module {
             .build()
     );
 
+    // Improve vanilla HUD
+
+    public final Setting<Boolean> mountHud = sgGeneral.add(new BoolSetting.Builder()
+        .name("mount-hud")
+        .description("Display xp bar and hunger when riding.")
+        .defaultValue(true)
+        .build()
+    );
+
     public final List<HudElement> elements = new ArrayList<>();
 
     private final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
@@ -228,5 +237,9 @@ public class HUD extends Module {
         }
         if (hudTab == null) return;
         hudTab.openScreen(GuiThemes.get());
+    }
+
+    public boolean mountHud() {
+        return isActive() && mountHud.get();
     }
 }
