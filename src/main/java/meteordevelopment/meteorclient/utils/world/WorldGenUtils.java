@@ -61,10 +61,22 @@ public class WorldGenUtils {
         ));
         put(Feature.village, Arrays.asList(
             Blocks.BELL,
-            Blocks.BREWING_STAND
+            Blocks.BREWING_STAND,
+            Blocks.SMOKER,
+            Blocks.BLAST_FURNACE,
+            Blocks.FLETCHING_TABLE,
+            Blocks.STONECUTTER,
+            Blocks.LOOM,
+            Blocks.GRINDSTONE,
+            Blocks.LECTERN
         ));
         put(Feature.mineshaft, Collections.singletonList(
             Blocks.RAIL
+        ));
+        put(Feature.desert_pyramid, Arrays.asList(
+            Blocks.TNT,
+            Blocks.CHISELED_SANDSTONE,
+            Blocks.STONE_PRESSURE_PLATE
         ));
     }};
 
@@ -108,7 +120,8 @@ public class WorldGenUtils {
         end_city,
         village,
         mineshaft,
-        slime_chunk
+        slime_chunk,
+        desert_pyramid
     }
 
     public static BlockPos locateFeature(Feature feature, BlockPos center) {
@@ -262,6 +275,7 @@ public class WorldGenUtils {
             case village -> { return Dimension.OVERWORLD; }
             case mineshaft -> { return Dimension.OVERWORLD; }
             case end_city -> { return Dimension.END; }
+            case desert_pyramid -> { return Dimension.OVERWORLD; }
             default -> { return Dimension.OVERWORLD; }
         }
     }
@@ -277,6 +291,7 @@ public class WorldGenUtils {
             case end_city -> { return new EndCity(version); }
             case village -> { return new Village(version); }
             case mineshaft -> { return new Mineshaft(version); }
+            case desert_pyramid -> { return new DesertPyramid(version); }
             default -> { return null;}
         }
     }
