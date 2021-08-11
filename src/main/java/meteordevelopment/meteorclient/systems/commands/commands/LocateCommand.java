@@ -110,7 +110,7 @@ public class LocateCommand extends Command {
                     secondStart = null;
                     secondEnd = null;
                     MeteorClient.EVENT_BUS.subscribe(this);
-                    info("Please throw the first Eye of Ender");
+                    info("Please throw the first Eye of Ender.");
                 }
             }
             throw NOT_FOUND.create(feature);
@@ -123,7 +123,7 @@ public class LocateCommand extends Command {
     }
 
     private void cancel() {
-        warning("Locate canceled");
+        warning("Locate canceled.");
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 
@@ -176,7 +176,7 @@ public class LocateCommand extends Command {
         final double[] end = new double[]{this.firstStart.x, this.firstStart.z, this.firstEnd.x, this.firstEnd.z};
         final double[] intersection = calcIntersection(start, end);
         if (Double.isNaN(intersection[0]) || Double.isNaN(intersection[1]) || Double.isInfinite(intersection[0]) || Double.isInfinite(intersection[1])) {
-            error("Lines are parallel");
+            error("Lines are parallel.");
             cancel();
             return;
         }
