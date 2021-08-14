@@ -222,6 +222,15 @@ public class BetterChat extends Module {
 
         Text message = event.message;
 
+        if (filterRegex.get()) {
+            for (String regexFilter : regexFilters.get()) {
+                if (Pattern.compile(regexFilter).matcher(message.getString()).find()) {
+                    event.cancel();
+                    return;
+                }
+            }
+        }
+
         if (timestamps.get()) {
             Matcher matcher = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)").matcher(message.getString());
             if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
@@ -233,15 +242,6 @@ public class BetterChat extends Module {
 
         if (playerHeads.get()) {
             message = new LiteralText("  ").append(message);
-        }
-
-        if (filterRegex.get()) {
-            for (String regexFilter : regexFilters.get()) {
-                if (Pattern.compile(regexFilter).matcher(message.getString()).find()) {
-                    event.cancel();
-                    return;
-                }
-            }
         }
 
         for (int i = 0; i < antiSpamDepth.get(); i++) {
