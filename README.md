@@ -14,7 +14,7 @@
     <img src="https://img.shields.io/github/contributors/Tomatobird8/meteor-client" alt="GitHub contributors"/>
 </div>
 <br>
-<p align="center">2b2t Client is fork of Meteor Client intended to be used on the 2b2t Minecraft servers.<br>Features even more customizability and more modules designed for the 2b2t.</p>
+<p align="center">2b2t Client is fork of Meteor Client intended to be used on the 2b2t Minecraft servers.<br>Features even more customizability and modules designed for the 2b2t.</p>
 
 ## Usage
 
