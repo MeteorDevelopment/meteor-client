@@ -236,11 +236,10 @@ public class BetterChat extends Module {
         }
 
         if (filterRegex.get()) {
-            for (String regexFilters : regexFilters.get()) {
-                if (filterRegex(Pattern.compile(regexFilters))) {
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(0);
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(0);
-                    break; // No need to continue since the message is already filtered out (removed)
+            for (String regexFilter : regexFilters.get()) {
+                if (Pattern.compile(regexFilter).matcher(message.getString()).find()) {
+                    event.cancel();
+                    return;
                 }
             }
         }
@@ -296,17 +295,6 @@ public class BetterChat extends Module {
         }
 
         return null;
-    }
-
-    private boolean filterRegex(Pattern regex) {
-        LiteralText parsed = new LiteralText("");
-
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().get(0).getText().accept((i, style, codePoint) -> {
-            parsed.append(new LiteralText(new String(Character.toChars(codePoint))).setStyle(style));
-            return true;
-        });
-
-        return regex.matcher(parsed.getString()).find();
     }
 
     @EventHandler
