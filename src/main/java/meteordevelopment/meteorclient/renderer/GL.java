@@ -46,6 +46,28 @@ public class GL {
         return GlStateManager._glGenBuffers();
     }
 
+    public static int genTexture() {
+        return GlStateManager._genTexture();
+    }
+
+    public static int genFramebuffer() {
+        return GlStateManager.glGenFramebuffers();
+    }
+
+    // Deletion
+
+    public static void deleteShader(int shader) {
+        GlStateManager.glDeleteShader(shader);
+    }
+
+    public static void deleteTexture(int id) {
+        GlStateManager._deleteTexture(id);
+    }
+
+    public static void deleteFramebuffer(int fbo) {
+        GlStateManager._glDeleteFramebuffers(fbo);
+    }
+
     // Binding
 
     public static void bindVertexArray(int vao) {
@@ -61,6 +83,10 @@ public class GL {
     public static void bindIndexBuffer(int ibo) {
         GlStateManager._glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
         if (changeBufferRenderer) BufferRendererAccessor.setCurrentElementBuffer(ibo);
+    }
+
+    public static void bindFramebuffer(int fbo) {
+        GlStateManager._glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     }
 
     // Buffers
@@ -119,10 +145,6 @@ public class GL {
         return null;
     }
 
-    public static void deleteShader(int shader) {
-        GlStateManager.glDeleteShader(shader);
-    }
-
     public static void useProgram(int program) {
         GlStateManager._glUseProgram(program);
     }
@@ -162,6 +184,23 @@ public class GL {
 
     public static void textureImage2D(int target, int level, int internalFormat, int width, int height, int border, int format, int type, ByteBuffer pixels) {
         glTexImage2D(target, level, internalFormat, width, height, border, format, type, pixels);
+    }
+
+    public static void defaultPixelStore() {
+        pixelStore(GL_UNPACK_SWAP_BYTES, GL_FALSE);
+        pixelStore(GL_UNPACK_LSB_FIRST, GL_FALSE);
+        pixelStore(GL_UNPACK_ROW_LENGTH, 0);
+        pixelStore(GL_UNPACK_IMAGE_HEIGHT, 0);
+        pixelStore(GL_UNPACK_SKIP_ROWS, 0);
+        pixelStore(GL_UNPACK_SKIP_PIXELS, 0);
+        pixelStore(GL_UNPACK_SKIP_IMAGES, 0);
+        pixelStore(GL_UNPACK_ALIGNMENT, 4);
+    }
+
+    // Framebuffers
+
+    public static void framebufferTexture2D(int target, int attachment, int textureTarget, int texture, int level) {
+        GlStateManager._glFramebufferTexture2D(target, attachment, textureTarget, texture, level);
     }
 
     // State

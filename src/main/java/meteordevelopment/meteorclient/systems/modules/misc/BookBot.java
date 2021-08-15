@@ -40,6 +40,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.PrimitiveIterator;
 import java.util.Random;
 
@@ -238,10 +239,9 @@ public class BookBot extends Module {
     }
 
     private void writeBook(PrimitiveIterator.OfInt chars) {
-        NbtList pageList = new NbtList();
-        ArrayList<String> pagesList = new ArrayList<>();
+        ArrayList<String> pages = new ArrayList<>();
 
-        for (int pageI = 0; pageI < (mode.get() == Mode.File ? 100 : pages.get()); pageI++) {
+        for (int pageI = 0; pageI < (mode.get() == Mode.File ? 100 : this.pages.get()); pageI++) {
             // Check if the stream is empty before creating a new page
             if (!chars.hasNext()) break;
 
@@ -261,7 +261,7 @@ public class BookBot extends Module {
                     // Get the next character
                     int nextChar = chars.nextInt();
 
-                    // Ingore newline chars when writing lines, should already be organised
+                    // Ignore newline chars when writing lines, should already be organised
                     if (nextChar == '\r' || nextChar == '\n') break;
 
                     // Make sure the character will fit on the line
@@ -277,20 +277,25 @@ public class BookBot extends Module {
                 page.append(line).append('\n');
             }
 
-            pagesList.add(page.toString());
-            // Add the page to the pages nbt tag
-            pageList.addElement(pageI, NbtString.of(page.toString()));
+            // Append page to the page list
+            pages.add(page.toString());
         }
 
         // Get the title with count
         String title = name.get();
         if (count.get() && bookCount != 0) title += " #" + bookCount;
 
-        // Write the pages to the book and sign it
+        // Write data to book
         mc.player.getMainHandStack().putSubTag("title", NbtString.of(title));
         mc.player.getMainHandStack().putSubTag("author", NbtString.of(mc.player.getGameProfile().getName()));
-        mc.player.getMainHandStack().putSubTag("pages", pageList);
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pagesList, java.util.Optional.of(title)));
+
+        // Write pages NBT
+        NbtList pageNbt = new NbtList();
+        pages.stream().map(NbtString::of).forEach(pageNbt::add);
+        if (!pages.isEmpty()) mc.player.getMainHandStack().putSubTag("pages", pageNbt);
+
+        // Send book update to server
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, Optional.of(title)));
 
         bookCount++;
     }

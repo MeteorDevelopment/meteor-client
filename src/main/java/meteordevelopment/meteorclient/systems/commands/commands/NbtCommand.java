@@ -32,43 +32,53 @@ public class NbtCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(literal("add").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
+
             if (validBasic(stack)) {
                 NbtCompound tag = CompoundNbtTagArgumentType.getTag(s, "nbt_data");
-                NbtCompound source = stack.getTag();
+                NbtCompound source = stack.getOrCreateTag();
 
-                if (tag != null && source != null) {
-                    stack.getTag().copyFrom(tag);
+                if (tag != null) {
+                    source.copyFrom(tag);
                     setStack(stack);
                 } else {
                     error("Some of the NBT data could not be found, try using: " + Config.get().prefix + "nbt set {nbt}");
                 }
             }
+
             return SINGLE_SUCCESS;
         })));
+
         builder.then(literal("set").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
+
             if (validBasic(stack)) {
                 NbtCompound tag = s.getArgument("nbt_data", NbtCompound.class);
                 stack.setTag(tag);
                 setStack(stack);
             }
+
             return SINGLE_SUCCESS;
         })));
+
         builder.then(literal("remove").then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
+
             if (validBasic(stack)) {
                 NbtPathArgumentType.NbtPath path = s.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
                 path.remove(stack.getTag());
             }
+
             return SINGLE_SUCCESS;
         })));
+
         builder.then(literal("get").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
+
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
                 NbtCompound tag = stack.getTag();
-                String nbt = tag == null ? "none" : tag.asString();
+                String nbt = tag == null ? "{}" : tag.asString();
 
                 BaseText copyButton = new LiteralText("NBT");
                 copyButton.setStyle(copyButton.getStyle()
@@ -88,35 +98,36 @@ public class NbtCommand extends Command {
 
                 info(text);
             }
+
             return SINGLE_SUCCESS;
         }));
+
         builder.then(literal("copy").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
+
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                NbtCompound tag = stack.getTag();
-                if (tag == null)
-                    error("No NBT data on this item.");
-                else {
-                    mc.keyboard.setClipboard(tag.toString());
-                    BaseText nbt = new LiteralText("NBT");
-                    nbt.setStyle(nbt.getStyle()
-                            .withFormatting(Formatting.UNDERLINE)
-                            .withHoverEvent(new HoverEvent(
-                                    HoverEvent.Action.SHOW_TEXT,
-                                    new LiteralText(tag.toString())
-                            )));
+                NbtCompound tag = stack.getOrCreateTag();
+                mc.keyboard.setClipboard(tag.toString());
+                BaseText nbt = new LiteralText("NBT");
+                nbt.setStyle(nbt.getStyle()
+                        .withFormatting(Formatting.UNDERLINE)
+                        .withHoverEvent(new HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                new LiteralText(tag.toString())
+                        )));
 
-                    BaseText text = new LiteralText("");
-                    text.append(nbt);
-                    text.append(new LiteralText(" data copied!"));
+                BaseText text = new LiteralText("");
+                text.append(nbt);
+                text.append(new LiteralText(" data copied!"));
 
-                    info(text);
-                }
+                info(text);
             }
+
             return SINGLE_SUCCESS;
         }));
+
         builder.then(literal("count").then(argument("count", IntegerArgumentType.integer(-127, 127)).executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
