@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.player.NoBreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.world.Nuker;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.world.ClientWorld;
@@ -29,7 +28,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,12 +39,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
     @Shadow private int blockBreakingCooldown;
-    @Shadow protected abstract void syncSelectedSlot();
-    @Shadow private BlockPos currentBreakingPos;
 
-    @Shadow
-    @Final
-    private MinecraftClient client;
+    @Shadow protected abstract void syncSelectedSlot();
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void onClickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {
@@ -111,13 +105,6 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     private void onCancelBlockBreaking(CallbackInfo info) {
         if (BlockUtils.breaking) info.cancel();
     }
-    
-	@Inject(method = "isCurrentlyBreaking", at = @At(value = "HEAD"), cancellable = true)
-	private void blChange(BlockPos pos, CallbackInfoReturnable<Boolean> cir) {
-		if (Modules.get().isActive(NoBreakDelay.class)) {
-			cir.setReturnValue(pos.equals(this.currentBreakingPos));
-		}
-	}
 
     @Override
     public void syncSelected() {
