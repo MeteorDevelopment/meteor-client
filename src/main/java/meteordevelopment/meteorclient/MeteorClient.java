@@ -43,12 +43,14 @@ import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.nbt.NbtCompound;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
@@ -58,6 +60,7 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
+    public static final HashMap<String, NbtCompound> ADDONS_NBT = new HashMap<>();
 
     public static Screen screenToOpen;
 
@@ -76,6 +79,7 @@ public class MeteorClient implements ClientModInitializer {
         List<MeteorAddon> addons = new ArrayList<>();
         for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
             addons.add(entrypoint.getEntrypoint());
+            ADDONS_NBT.put(entrypoint.getProvider().getMetadata().getId(), entrypoint.getEntrypoint().getAddonNBT());
         }
 
         Systems.addPreLoadTask(() -> {

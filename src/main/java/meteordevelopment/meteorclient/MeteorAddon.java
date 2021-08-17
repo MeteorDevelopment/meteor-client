@@ -5,8 +5,12 @@
 
 package meteordevelopment.meteorclient;
 
+import net.minecraft.nbt.NbtCompound;
+
 public abstract class MeteorAddon {
     public abstract void onInitialize();
 
     public void onRegisterCategories() {}
+
+    public abstract NbtCompound getAddonNBT();
 }
