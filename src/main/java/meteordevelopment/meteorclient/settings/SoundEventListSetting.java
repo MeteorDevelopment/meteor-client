@@ -61,7 +61,8 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
 
         NbtList valueTag = new NbtList();
         for (SoundEvent sound : get()) {
-            valueTag.add(NbtString.of(Registry.SOUND_EVENT.getId(sound).toString()));
+            Identifier id = Registry.SOUND_EVENT.getId(sound);
+            if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -74,7 +75,8 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            get().add(Registry.SOUND_EVENT.get(new Identifier(tagI.asString())));
+            SoundEvent soundEvent = Registry.SOUND_EVENT.get(new Identifier(tagI.asString()));
+            if (soundEvent != null) get().add(soundEvent);
         }
 
         changed();
