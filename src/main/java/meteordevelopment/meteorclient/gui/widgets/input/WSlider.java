@@ -98,6 +98,19 @@ public abstract class WSlider extends WWidget {
 
         return false;
     }
+	
+	@Override
+	public void onMouseScrolled(double ammount) {
+		if(handleMouseOver) {
+			if(parent instanceof WIntEdit) {
+				WIntEdit p = (WIntEdit)parent;
+				p.set(Utils.clamp((int)Math.round(value+ammount), (int)min, (int)max));
+			} else if(parent instanceof WDoubleEdit) {
+				WDoubleEdit p = (WDoubleEdit)parent;
+				p.set(Utils.clamp(value+0.05*ammount, min, max));
+			}
+		}
+	}
 
     public void set(double value) {
         this.value = Utils.clamp(value, min, max);
