@@ -16,6 +16,7 @@ import java.nio.ByteBuffer;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 import static org.lwjgl.opengl.GL32C.*;
+import static org.lwjgl.system.MemoryUtil.*;
 
 public class Mesh {
     public enum Attrib {
@@ -40,7 +41,12 @@ public class Mesh {
     private final int vao, vbo, ibo;
 
     private ByteBuffer vertices;
+    private long verticesPointer;
+    private int vertexComponentCount;
+
     private ByteBuffer indices;
+    private long indicesPointer;
+
     private int vertexI, indicesCount;
 
     private boolean building, rendering3D;
@@ -55,7 +61,10 @@ public class Mesh {
         this.primitiveVerticesSize = stride * drawMode.indicesCount;
 
         vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * 256 * 4);
+        verticesPointer = memAddress0(vertices);
+
         indices = BufferUtils.createByteBuffer(drawMode.indicesCount * 512 * 4);
+        indicesPointer = memAddress0(indices);
 
         vao = GL.genVertexArray();
         GL.bindVertexArray(vao);
@@ -84,9 +93,7 @@ public class Mesh {
     public void begin() {
         if (building) throw new IllegalStateException("Mesh.end() called while already building.");
 
-        vertices.clear();
-        indices.clear();
-
+        vertexComponentCount = 0;
         vertexI = 0;
         indicesCount = 0;
 
@@ -106,26 +113,35 @@ public class Mesh {
     }
 
     public Mesh vec3(double x, double y, double z) {
-        vertices.putFloat((float) (x - cameraX));
-        vertices.putFloat((float) y);
-        vertices.putFloat((float) (z - cameraZ));
+        long p = verticesPointer + vertexComponentCount * 4L;
 
+        memPutFloat(p, (float) (x - cameraX));
+        memPutFloat(p + 4, (float) y);
+        memPutFloat(p + 8, (float) (z - cameraZ));
+
+        vertexComponentCount += 3;
         return this;
     }
 
     public Mesh vec2(double x, double y) {
-        vertices.putFloat((float) x);
-        vertices.putFloat((float) y);
+        long p = verticesPointer + vertexComponentCount * 4L;
 
+        memPutFloat(p, (float) x);
+        memPutFloat(p + 4, (float) y);
+
+        vertexComponentCount += 2;
         return this;
     }
 
     public Mesh color(Color c) {
-        vertices.putFloat(c.r / 255f);
-        vertices.putFloat(c.g / 255f);
-        vertices.putFloat(c.b / 255f);
-        vertices.putFloat(c.a / 255f * (float) alpha);
+        long p = verticesPointer + vertexComponentCount * 4L;
 
+        memPutFloat(p, c.r / 255f);
+        memPutFloat(p + 4, c.g / 255f);
+        memPutFloat(p + 8, c.b / 255f);
+        memPutFloat(p + 12, c.a / 255f * (float) alpha);
+
+        vertexComponentCount += 4;
         return this;
     }
 
@@ -134,21 +150,25 @@ public class Mesh {
     }
 
     public void line(int i1, int i2) {
-        indices.putInt(i1);
-        indices.putInt(i2);
+        long p = indicesPointer + indicesCount * 4L;
+
+        memPutInt(p, i1);
+        memPutInt(p + 4, i2);
 
         indicesCount += 2;
         growIfNeeded();
     }
 
     public void quad(int i1, int i2, int i3, int i4) {
-        indices.putInt(i1);
-        indices.putInt(i2);
-        indices.putInt(i3);
+        long p = indicesPointer + indicesCount * 4L;
 
-        indices.putInt(i3);
-        indices.putInt(i4);
-        indices.putInt(i1);
+        memPutInt(p, i1);
+        memPutInt(p + 4, i2);
+        memPutInt(p + 8, i3);
+
+        memPutInt(p + 12, i3);
+        memPutInt(p + 16, i4);
+        memPutInt(p + 20, i1);
 
         indicesCount += 6;
         growIfNeeded();
@@ -161,11 +181,10 @@ public class Mesh {
             if (newSize % primitiveVerticesSize != 0) newSize += newSize % primitiveVerticesSize;
 
             ByteBuffer newVertices = BufferUtils.createByteBuffer(newSize);
-
-            vertices.flip();
-            newVertices.put(vertices);
+            memCopy(memAddress0(vertices), memAddress0(newVertices), vertexComponentCount * 4L);
 
             vertices = newVertices;
+            verticesPointer = memAddress0(vertices);
         }
 
         // Indices
@@ -174,11 +193,10 @@ public class Mesh {
             if (newSize % drawMode.indicesCount != 0) newSize += newSize % (drawMode.indicesCount * 4);
 
             ByteBuffer newIndices = BufferUtils.createByteBuffer(newSize);
-
-            indices.flip();
-            newIndices.put(indices);
+            memCopy(memAddress0(indices), memAddress0(newIndices), indicesCount * 4L);
 
             indices = newIndices;
+            indicesPointer = memAddress0(indices);
         }
     }
 
@@ -186,14 +204,12 @@ public class Mesh {
         if (!building) throw new IllegalStateException("Mesh.end() called while not building.");
 
         if (indicesCount > 0) {
-            vertices.flip();
             GL.bindVertexBuffer(vbo);
-            GL.bufferData(GL_ARRAY_BUFFER, vertices, GL_DYNAMIC_DRAW);
+            GL.bufferData(GL_ARRAY_BUFFER, vertices.limit(vertexComponentCount * 4), GL_DYNAMIC_DRAW);
             GL.bindVertexBuffer(0);
 
-            indices.flip();
             GL.bindIndexBuffer(ibo);
-            GL.bufferData(GL_ELEMENT_ARRAY_BUFFER, indices, GL_DYNAMIC_DRAW);
+            GL.bufferData(GL_ELEMENT_ARRAY_BUFFER, indices.limit(indicesCount * 4), GL_DYNAMIC_DRAW);
             GL.bindIndexBuffer(0);
         }
 
