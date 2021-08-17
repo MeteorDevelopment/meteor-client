@@ -34,9 +34,14 @@ import net.minecraft.util.math.BlockPos;
 import java.util.*;
 import java.util.stream.StreamSupport;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class WorldGenUtils {
+
+    private static final Logger LOG = LogManager.getLogger();
 
     private static final HashMap<Feature, List<Block>> FEATURE_BLOCKS = new HashMap<>(){{
         put(Feature.nether_fortress, Arrays.asList(
@@ -128,7 +133,11 @@ public class WorldGenUtils {
         Seed seed = Seeds.get().getSeed();
         BlockPos pos = null;
         if (seed != null) {
-            pos = locateFeature(seed, feature, center);
+            try {
+                pos = locateFeature(seed, feature, center);
+            } catch (Exception | Error ex) {
+                LOG.error(ex);
+            }
             if (pos != null) return pos;
         }
         if (mc.player != null) {
@@ -136,13 +145,25 @@ public class WorldGenUtils {
             if (stack.getItem() != Items.FILLED_MAP)
                 stack = mc.player.getStackInHand(Hand.OFF_HAND);
             if (stack.getItem() == Items.FILLED_MAP) {
-                pos = locateFeatureMap(feature, stack);
+                try {
+                    pos = locateFeatureMap(feature, stack);
+                } catch (Exception | Error ex) {
+                    LOG.error(ex);
+                }
                 if (pos != null) return pos;
             }
         }
-        pos = locateFeatureEntities(feature);
+        try {
+            pos = locateFeatureEntities(feature);
+        } catch (Exception | Error ex) {
+            LOG.error(ex);
+        }
         if (pos != null) return pos;
-        pos = locateFeatureBlocks(feature);
+        try {
+            pos = locateFeatureBlocks(feature);
+        } catch (Exception | Error ex) {
+            LOG.error(ex);
+        }
         return pos;
     }
 

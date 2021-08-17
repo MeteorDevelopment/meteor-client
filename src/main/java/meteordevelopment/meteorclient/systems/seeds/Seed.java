@@ -2,8 +2,6 @@ package meteordevelopment.meteorclient.systems.seeds;
 
 import kaptainwutax.mcutils.version.MCVersion;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
-
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtLong;
 import net.minecraft.nbt.NbtString;
@@ -16,20 +14,22 @@ public class Seed {
 
     public Seed(Long seed, MCVersion version) {
         this.seed = seed;
+        if (version == null)
+            version = MCVersion.latest();
         this.version = version;
     }
 
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
         tag.put("seed", NbtLong.of(seed));
-        tag.put("version", NbtString.of(version.name()));
+        tag.put("version", NbtString.of(version.name));
         return tag;
     }
 
     public static Seed fromTag(NbtCompound tag) {
         return new Seed(
             tag.getLong("seed"),
-            MCVersion.valueOf(tag.getString("version"))
+            MCVersion.fromString(tag.getString("version"))
         );
     }
 

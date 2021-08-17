@@ -59,8 +59,8 @@ public class SeedCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(argument("seed", LongArgumentType.longArg()).then(argument("version", EnumArgumentType.enumArgument(MCVersion.v1_17_1)).executes(ctx -> {
-            Seeds.get().setSeed(LongArgumentType.getLong(ctx, "seed"), EnumArgumentType.getEnum(ctx, "version", MCVersion.v1_17_1));
+        builder.then(argument("seed", LongArgumentType.longArg()).then(argument("version", EnumArgumentType.enumArgument(MCVersion.latest())).executes(ctx -> {
+            Seeds.get().setSeed(LongArgumentType.getLong(ctx, "seed"), EnumArgumentType.getEnum(ctx, "version", MCVersion.latest()));
             return SINGLE_SUCCESS;
         })));
     }
