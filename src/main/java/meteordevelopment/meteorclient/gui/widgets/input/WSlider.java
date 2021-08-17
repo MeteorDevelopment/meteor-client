@@ -100,9 +100,13 @@ public abstract class WSlider extends WWidget {
     }
 	
 	@Override
-	public void onMouseScrolled(double ammount) {
+	public void onMouseScrolled(double amount) {
 		if(handleMouseOver) {
-			set(value+0.05*ammount);
+			if(parent instanceof WIntEdit) {
+				set(value+amount);
+			} else {
+				set(value+0.05*amount);
+			}
 			if (action != null) action.run();
 		}
 	}
