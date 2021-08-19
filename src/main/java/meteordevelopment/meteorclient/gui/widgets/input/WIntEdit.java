@@ -93,11 +93,15 @@ public class WIntEdit extends WHorizontalList {
     }
 
     public void set(int value) {
-		if(min != null && max != null) {
-			this.value = Utils.clamp(value, min, max);
-		} else {
-			this.value = value;
+		double clmax = 0;
+		double clmin = 0;
+		if(max == null) {
+			clmax = Double::MAX_VALUE;
 		}
+		if(min == null) {
+			clmin = Double::MIN_VALUE;
+		}
+		this.value = Utils.clamp(value, min, max);
 
         textBox.set(Integer.toString(value));
         if (slider != null) slider.set(value);
