@@ -108,15 +108,7 @@ public class WDoubleEdit extends WHorizontalList {
     }
 
     public void set(double value) {
-		double clmax = 0;
-		double clmin = 0;
-		if(max == null) {
-			clmax = Double::MAX_VALUE;
-		}
-		if(min == null) {
-			clmin = Double::MIN_VALUE;
-		}
-		this.value = Utils.clamp(value, min, max);
+		this.value = value;
 
         textBox.set(valueString());
         if (slider != null) slider.set(value);
