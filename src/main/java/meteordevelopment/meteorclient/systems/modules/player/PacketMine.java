@@ -251,7 +251,7 @@ public class PacketMine extends Module {
         return speed;
     }
 
-    private class MyBlock {
+    public class MyBlock {
         public BlockPos blockPos;
         public BlockState blockState;
         public Block block;
