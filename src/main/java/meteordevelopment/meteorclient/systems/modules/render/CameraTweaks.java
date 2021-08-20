@@ -7,18 +7,18 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.game.ChangePerspectiveEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.DoubleSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.Perspective;
 
 public class CameraTweaks extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgScrolling = settings.createGroup("Scrolling");
+
+    // General
 
     private final Setting<Boolean> clip = sgGeneral.add(new BoolSetting.Builder()
             .name("clip")
@@ -36,12 +36,30 @@ public class CameraTweaks extends Module {
             .build()
     );
 
-    private final Setting<Double> scrollSensitivity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("distance-scroll-sensitivity")
+    // Scrolling
+
+    private final Setting<Boolean> scrollingEnabled = sgScrolling.add(new BoolSetting.Builder()
+        .name("scrolling-enabled")
+        .description("Allows you to scroll to change camera distance.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Double> scrollSensitivity = sgScrolling.add(new DoubleSetting.Builder()
+            .name("scroll-sensitivity")
             .description("Scroll sensitivity when changing the cameras distance. 0 to disable.")
+            .visible(scrollingEnabled::get)
             .defaultValue(1)
             .min(0)
             .build()
+    );
+
+    private final Setting<Keybind> scrollKeybind = sgScrolling.add(new KeybindSetting.Builder()
+        .name("scroll-keybind")
+        .description("Makes it so a keybind needs to be pressed for scrolling to work.")
+        .visible(scrollingEnabled::get)
+        .defaultValue(Keybind.none())
+        .build()
     );
 
     public double distance;
@@ -62,9 +80,10 @@ public class CameraTweaks extends Module {
 
     @EventHandler
     private void onMouseScroll(MouseScrollEvent event) {
-        if (mc.options.getPerspective() == Perspective.FIRST_PERSON) return;
+        if (mc.options.getPerspective() == Perspective.FIRST_PERSON || mc.currentScreen != null || !scrollingEnabled.get() || (scrollKeybind.get().isValid() && !scrollKeybind.get().isPressed())) return;
+
         if (scrollSensitivity.get() > 0) {
-            distance += event.value * 0.25 * (scrollSensitivity.get() * distance);
+            distance -= event.value * 0.25 * (scrollSensitivity.get() * distance);
 
             event.cancel();
         }

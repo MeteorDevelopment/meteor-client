@@ -54,6 +54,13 @@ public class BetterTab extends Module {
             .build()
     );
 
+    public final Setting<Boolean> accurateLatency = sgGeneral.add(new BoolSetting.Builder()
+        .name("accurate-latency")
+        .description("Shows latency as a number in the tablist.")
+        .defaultValue(true)
+        .build()
+    );
+
 
     public BetterTab() {
         super(Categories.Misc, "better-tab", "Various improvements to the tab list.");

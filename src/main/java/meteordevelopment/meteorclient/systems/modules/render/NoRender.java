@@ -43,6 +43,13 @@ public class NoRender extends Module {
             .build()
     );
 
+    private final Setting<Boolean> noSpyglassOverlay = sgOverlay.add(new BoolSetting.Builder()
+        .name("spyglass-overlay")
+        .description("Disables rendering of the spyglass overlay.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> noNausea = sgOverlay.add(new BoolSetting.Builder()
             .name("nausea")
             .description("Disables rendering of the nausea overlay.")
@@ -294,6 +301,10 @@ public class NoRender extends Module {
 
     public boolean noPortalOverlay() {
         return isActive() && noPortalOverlay.get();
+    }
+
+    public boolean noSpyglassOverlay() {
+        return isActive() && noSpyglassOverlay.get();
     }
 
     public boolean noNausea() {
