@@ -19,6 +19,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
         set(isKey, value);
     }
 
+    public static Keybind none() {
+        return new Keybind(true, -1);
+    }
+
     public static Keybind fromKey(int key) {
         return new Keybind(true, key);
     }
@@ -56,6 +60,10 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     public boolean matches(boolean isKey, int value) {
         if (this.isKey != isKey) return false;
         return this.value == value;
+    }
+
+    public boolean isValid() {
+        return value != -1;
     }
 
     public boolean isKey() {
