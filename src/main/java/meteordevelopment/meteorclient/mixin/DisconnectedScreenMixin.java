@@ -46,10 +46,11 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     @Override
     public void tick() {
-        if (!Modules.get().isActive(AutoReconnect.class)) return;
+        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+        if (!autoReconnect.isActive() || autoReconnect.lastServerInfo == null) return;
 
         if (time <= 0) {
-            ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address), Modules.get().get(AutoReconnect.class).lastServerInfo);
+            ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(autoReconnect.lastServerInfo.address), autoReconnect.lastServerInfo);
         } else {
             time--;
             if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(getText()));

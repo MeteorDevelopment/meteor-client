@@ -39,7 +39,7 @@ public abstract class Module implements ISerializable<Module> {
 
     public boolean serialize = true;
 
-    public final Keybind keybind = Keybind.fromKey(-1);
+    public final Keybind keybind = Keybind.none();
     public boolean toggleOnBindRelease = false;
 
     public Module(Category category, String name, String description) {

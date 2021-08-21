@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
     @Shadow @Final private MinecraftClient client;
-
     @Shadow private ClientWorld world;
 
     private boolean worldNotNull;
@@ -70,7 +69,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/EntitiesDestroyS2CPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
     private void onEntitiesDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo ci) {
-        for(int id : packet.getEntityIds()) {
+        for (int id : packet.getEntityIds()) {
             MeteorClient.EVENT_BUS.post(EntityDestroyEvent.get(client.world.getEntityById(id)));
         }
     }

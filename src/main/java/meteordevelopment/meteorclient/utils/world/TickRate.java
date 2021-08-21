@@ -32,12 +32,11 @@ public class TickRate {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
-            if (timeLastTimeUpdate != -1L) {
-                float timeElapsed = (float) (System.currentTimeMillis() - timeLastTimeUpdate) / 1000.0F;
-                tickRates[(nextIndex % tickRates.length)] = Utils.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
-                nextIndex += 1;
-            }
-            timeLastTimeUpdate = System.currentTimeMillis();
+            long now = System.currentTimeMillis();
+            float timeElapsed = (float) (now - timeLastTimeUpdate) / 1000.0F;
+            tickRates[nextIndex] = Utils.clamp(20.0f / timeElapsed, 0.0f, 20.0f);
+            nextIndex = (nextIndex + 1) % tickRates.length;
+            timeLastTimeUpdate = now;
         }
     }
 
@@ -45,27 +44,27 @@ public class TickRate {
     private void onGameJoined(GameJoinedEvent event) {
         Arrays.fill(tickRates, 0);
         nextIndex = 0;
-        timeLastTimeUpdate = -1;
-        timeGameJoined = System.currentTimeMillis();
+        timeGameJoined = timeLastTimeUpdate = System.currentTimeMillis();
     }
 
     public float getTickRate() {
         if (!Utils.canUpdate()) return 0;
         if (System.currentTimeMillis() - timeGameJoined < 4000) return 20;
 
-        float numTicks = 0.0f;
+        int numTicks = 0;
         float sumTickRates = 0.0f;
         for (float tickRate : tickRates) {
-            if (tickRate > 0.0f) {
+            if (tickRate > 0) {
                 sumTickRates += tickRate;
-                numTicks += 1.0f;
+                numTicks++;
             }
         }
-        return Utils.clamp(sumTickRates / numTicks, 0.0f, 20.0f);
+        return sumTickRates / numTicks;
     }
 
     public float getTimeSinceLastTick() {
-        if (System.currentTimeMillis() - timeGameJoined < 4000) return 0;
-        return (System.currentTimeMillis() - timeLastTimeUpdate) / 1000f;
+        long now = System.currentTimeMillis();
+        if (now - timeGameJoined < 4000) return 0;
+        return (now - timeLastTimeUpdate) / 1000f;
     }
 }

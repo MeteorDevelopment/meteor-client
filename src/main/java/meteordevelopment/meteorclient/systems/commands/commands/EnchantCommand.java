@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
-//Created by squidoodly 27/05/2020
-
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -19,10 +19,13 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.registry.Registry;
 
+import java.util.function.Function;
+
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class EnchantCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(new LiteralText("You must be in creative mode to use this."));
+    private final static SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(new LiteralText("You need to hold some item to enchant."));
 
     public EnchantCommand() {
         super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");
@@ -30,56 +33,66 @@ public class EnchantCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("one").then(argument("enchantment", EnchantmentArgumentType.enchantment()).then(argument("level", IntegerArgumentType.integer()).executes(context -> {
-            if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
+        builder.then(literal("one").then(argument("enchantment", EnchantmentArgumentType.enchantment())
+            .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
+                one(context, enchantment -> context.getArgument("level", Integer.class));
+                return SINGLE_SUCCESS;
+            })))
+            .then(literal("max").executes(context -> {
+                one(context, Enchantment::getMaxLevel);
+                return SINGLE_SUCCESS;
+            }))
+        ));
 
-            ItemStack itemStack = getItemStack();
-            if (itemStack != null) {
-                Enchantment enchantment = context.getArgument("enchantment", Enchantment.class);
-                int level = context.getArgument("level", Integer.class);
+        builder.then(literal("all_possible")
+            .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
+                all(true, enchantment -> context.getArgument("level", Integer.class));
+                return SINGLE_SUCCESS;
+            })))
+            .then(literal("max").executes(context -> {
+                all(true, Enchantment::getMaxLevel);
+                return SINGLE_SUCCESS;
+            }))
+        );
 
-                Utils.addEnchantment(itemStack, enchantment, level);
+        builder.then(literal("all")
+            .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
+                all(false, enchantment -> context.getArgument("level", Integer.class));
+                return SINGLE_SUCCESS;
+            })))
+            .then(literal("max").executes(context -> {
+                all(false, Enchantment::getMaxLevel);
+                return SINGLE_SUCCESS;
+            }))
+        );
+    }
+
+    private void one(CommandContext<CommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
+        if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
+
+        ItemStack itemStack = getItemStack();
+        if (itemStack == null) throw NOT_HOLDING_ITEM.create();
+
+        Enchantment enchantment = context.getArgument("enchantment", Enchantment.class);
+        Utils.addEnchantment(itemStack, enchantment, level.apply(enchantment));
+    }
+
+    private void all(boolean onlyPossible, Function<Enchantment, Integer> level) throws CommandSyntaxException {
+        if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
+
+        ItemStack itemStack = getItemStack();
+        if (itemStack == null) throw NOT_HOLDING_ITEM.create();
+
+        for (Enchantment enchantment : Registry.ENCHANTMENT) {
+            if (!onlyPossible || enchantment.isAcceptableItem(itemStack)) {
+                Utils.addEnchantment(itemStack, enchantment, level.apply(enchantment));
             }
-
-            return SINGLE_SUCCESS;
-        }))));
-
-        builder.then(literal("all_possible").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
-            if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
-
-            ItemStack itemStack = getItemStack();
-            if (itemStack != null) {
-                int level = context.getArgument("level", Integer.class);
-
-                for (Enchantment enchantment : Registry.ENCHANTMENT) {
-                    if (enchantment.isAcceptableItem(itemStack)) {
-                        Utils.addEnchantment(itemStack, enchantment, level);
-                    }
-                }
-            }
-
-            return SINGLE_SUCCESS;
-        })));
-
-        builder.then(literal("all").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
-            if (!mc.player.isCreative()) throw NOT_IN_CREATIVE.create();
-
-            ItemStack itemStack = getItemStack();
-            if (itemStack != null) {
-                int level = context.getArgument("level", Integer.class);
-
-                for (Enchantment enchantment : Registry.ENCHANTMENT) {
-                    Utils.addEnchantment(itemStack, enchantment, level);
-                }
-            }
-
-            return SINGLE_SUCCESS;
-        })));
+        }
     }
 
     private ItemStack getItemStack() {
         ItemStack itemStack = mc.player.getMainHandStack();
         if (itemStack == null) itemStack = mc.player.getOffHandStack();
-        return itemStack;
+        return itemStack.isEmpty() ? null : itemStack;
     }
 }

@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import net.minecraft.block.Block;
 
 import java.util.ArrayDeque;
-import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 
@@ -22,7 +21,7 @@ public class SGroup {
 
     private final Block block;
 
-    public final List<SBlock> blocks = new UnorderedArrayList<>();
+    public final UnorderedArrayList<SBlock> blocks = new UnorderedArrayList<>();
 
     private double sumX, sumY, sumZ;
 
@@ -99,7 +98,7 @@ public class SGroup {
 
         if (neighbours.size() > 0) {
             SGroup group = search.newGroup(this.block);
-            ((UnorderedArrayList<SBlock>) group.blocks).ensureCapacity(remainingBlocks.size());
+            group.blocks.ensureCapacity(remainingBlocks.size());
 
             blocks.removeIf(remainingBlocks::contains);
 
@@ -134,6 +133,7 @@ public class SGroup {
     }
 
     public void merge(SGroup group) {
+        blocks.ensureCapacity(blocks.size() + group.blocks.size());
         for (SBlock block : group.blocks) add(block, false, false);
         search.removeGroup(group);
     }

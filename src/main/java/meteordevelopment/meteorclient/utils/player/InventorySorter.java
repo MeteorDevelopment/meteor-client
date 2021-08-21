@@ -32,7 +32,7 @@ public class InventorySorter {
         this.screen = screen;
 
         this.originInvPart = getInvPart(originSlot);
-        if (originInvPart == InvPart.Hotbar) {
+        if (originInvPart == InvPart.Invalid || originInvPart == InvPart.Hotbar) {
             invalid = true;
             return;
         }

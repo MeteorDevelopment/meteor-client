@@ -18,6 +18,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -43,11 +44,11 @@ public class Trajectories extends Module {
             .build()
     );
 
-    private final Setting<Boolean> accurate = sgGeneral.add(new BoolSetting.Builder()
-            .name("accurate")
-            .description("Calculates accurate trajectories while moving.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> otherPlayers = sgGeneral.add(new BoolSetting.Builder()
+        .name("other-players")
+        .description("Calculates trajectories for other players.")
+        .defaultValue(true)
+        .build()
     );
 
     // Render
@@ -106,34 +107,37 @@ public class Trajectories extends Module {
         return path;
     }
 
-    private void calculatePath(Render3DEvent event) {
+    private void calculatePath(PlayerEntity player, double tickDelta) {
         // Clear paths
         for (Path path : paths) path.clear();
 
         // Get item
-        ItemStack itemStack = mc.player.getMainHandStack();
-        if (itemStack == null) itemStack = mc.player.getOffHandStack();
+        ItemStack itemStack = player.getMainHandStack();
+        if (itemStack == null) itemStack = player.getOffHandStack();
         if (itemStack == null) return;
         if (!items.get().contains(itemStack.getItem())) return;
 
         // Calculate paths
-        if (!simulator.set(mc.player, itemStack, 0, accurate.get(), event.tickDelta)) return;
+        if (!simulator.set(player, itemStack, 0, false, tickDelta)) return;
         getEmptyPath().calculate();
 
         if (itemStack.getItem() instanceof CrossbowItem && EnchantmentHelper.getLevel(Enchantments.MULTISHOT, itemStack) > 0) {
-            if (!simulator.set(mc.player, itemStack, -10, accurate.get(), event.tickDelta)) return;
+            if (!simulator.set(player, itemStack, -10, false, tickDelta)) return;
             getEmptyPath().calculate();
 
-            if (!simulator.set(mc.player, itemStack, 10, accurate.get(), event.tickDelta)) return;
+            if (!simulator.set(player, itemStack, 10, false, tickDelta)) return;
             getEmptyPath().calculate();
         }
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        calculatePath(event);
+        for (PlayerEntity player : mc.world.getPlayers()) {
+            if (!otherPlayers.get() && player != mc.player) continue;
 
-        for (Path path : paths) path.render(event);
+            calculatePath(player, event.tickDelta);
+            for (Path path : paths) path.render(event);
+        }
     }
 
     private class Path {
@@ -225,7 +229,7 @@ public class Trajectories extends Module {
 
             // Render hit quad
             if (hitQuad) {
-                if (hitQuadHorizontal) event.renderer.sideHorizontal(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX1 + 0.5, hitQuadZ1, sideColor.get(), lineColor.get(), shapeMode.get());
+                if (hitQuadHorizontal) event.renderer.sideHorizontal(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX1 + 0.5, hitQuadZ1 + 0.5, sideColor.get(), lineColor.get(), shapeMode.get());
                 else event.renderer.sideVertical(hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2, sideColor.get(), lineColor.get(), shapeMode.get());
             }
 
