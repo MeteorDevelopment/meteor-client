@@ -91,6 +91,13 @@ public class Notebot extends Module {
             .build()
     );
 
+    private final Setting<Boolean> repeatMode = sgGeneral.add(new BoolSetting.Builder()
+            .name("repeat-mode")
+            .description("Whether or not to repeat current song.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
             .description("Whether or not to render the outline around the noteblocks.")
@@ -206,6 +213,9 @@ public class Notebot extends Module {
 
             if (mc.player == null || currentIndex >= song.size()) {
                 stop();
+                if(repeatMode.get()){
+                    Pause();
+                }
                 return;
             }
 
