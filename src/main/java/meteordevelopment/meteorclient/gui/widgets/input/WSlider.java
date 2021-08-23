@@ -14,6 +14,10 @@ public abstract class WSlider extends WWidget {
 
     protected double value;
     protected double min, max;
+	
+	// ghost slider for scrolling event
+	protected double scrollHandleX, scrollHandleY, scrollHandleH;
+	protected boolean scrollHandleMouseOver;
 
     protected boolean handleMouseOver;
     protected boolean dragging;
@@ -62,6 +66,20 @@ public abstract class WSlider extends WWidget {
 
         double x = this.x + s2 + valueWidth - height / 2;
         handleMouseOver =  mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
+		
+		if(!scrollHandleMouseOver) {
+			scrollHandleX = x;
+			scrollHandleY = y;
+			scrollHandleH = height;
+			if(handleMouseOver) {
+				scrollHandleMouseOver = true;
+			}
+		} else {
+			scrollHandleMouseOver = mouseX >= scrollHandleX &&
+									mouseX <= scrollHandleX + scrollHandleH &&
+									mouseY >= scrollHandleY &&
+									mouseY <= scrollHandleY + scrollHandleH;
+		}
 
         boolean mouseOverX = mouseX >= this.x + s2 && mouseX <= this.x + s2 + width - s;
         mouseOver = mouseOverX && mouseY >= this.y && mouseY <= this.y + height;
@@ -98,6 +116,27 @@ public abstract class WSlider extends WWidget {
 
         return false;
     }
+	
+	@Override
+	public void onMouseScrolled(double amount) {
+		// when user starts to scroll over regular handle
+		// remember it's position and check only this "ghost"
+		// position to allow scroll (until it leaves ghost area)
+		if(!scrollHandleMouseOver && handleMouseOver) {
+			scrollHandleX = x;
+			scrollHandleY = y;
+			scrollHandleH = height;
+			scrollHandleMouseOver = true;
+		}
+		if(scrollHandleMouseOver) {
+			if(parent instanceof WIntEdit) {
+				set(value+amount);
+			} else {
+				set(value+0.05*amount);
+			}
+			if (action != null) action.run();
+		}
+	}
 
     public void set(double value) {
         this.value = Utils.clamp(value, min, max);

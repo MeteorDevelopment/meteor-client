@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.utils.Utils;
 
 public class WIntEdit extends WHorizontalList {
     public Runnable action;
@@ -92,7 +93,7 @@ public class WIntEdit extends WHorizontalList {
     }
 
     public void set(int value) {
-        this.value = value;
+		this.value = value;
 
         textBox.set(Integer.toString(value));
         if (slider != null) slider.set(value);
