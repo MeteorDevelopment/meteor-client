@@ -17,8 +17,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-import com.mojang.brigadier.arguments.LongArgumentType;
-
 public class SeedCommand extends Command {
     private final static SimpleCommandExceptionType NO_SEED = new SimpleCommandExceptionType(new LiteralText("No seed for current world saved."));
 
