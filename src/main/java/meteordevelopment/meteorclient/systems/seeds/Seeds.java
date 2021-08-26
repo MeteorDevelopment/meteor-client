@@ -42,13 +42,13 @@ public class Seeds extends System<Seeds> {
         return seeds.get(Utils.getWorldName());
     }
 
-    public void setSeed(long seed, MCVersion version) {
+    public void setSeed(String seed, MCVersion version) {
         if (mc.isIntegratedServerRunning()) return;
 
-        seeds.put(Utils.getWorldName(), new Seed(seed, version));
+        seeds.put(Utils.getWorldName(), new Seed(toSeed(seed), version));
     }
 
-    public void setSeed(long seed) {
+    public void setSeed(String seed) {
         ServerInfo server = mc.getCurrentServerEntry();
         MCVersion ver = null;
         if (server != null)
@@ -80,9 +80,18 @@ public class Seeds extends System<Seeds> {
         return this;
     }
 
-    private static void sendInvalidVersionWarning(long seed, String targetVer) {
+    // https://minecraft.fandom.com/wiki/Seed_(level_generation)#Java_Edition
+    private static long toSeed(String inSeed) {
+        try {
+            return Long.parseLong(inSeed);
+        } catch (NumberFormatException e) {
+            return inSeed.hashCode();
+        }
+    }
+
+    private static void sendInvalidVersionWarning(String seed, String targetVer) {
         BaseText msg = new LiteralText(String.format("Couldn't resolve minecraft version \"%s\". Using %s instead. If you wish to change the version run: ", targetVer, MCVersion.latest().name));
-        String cmd = String.format("%sseed %d ", Config.get().prefix, seed);
+        String cmd = String.format("%sseed %s ", Config.get().prefix, seed);
         BaseText cmdText = new LiteralText(cmd+"<version>");
         cmdText.setStyle(cmdText.getStyle()
             .withUnderline(true)
