@@ -35,7 +35,7 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtCompound tag = CompoundNbtTagArgumentType.getTag(s, "nbt_data");
-                NbtCompound source = stack.getOrCreateTag();
+                NbtCompound source = stack.getOrCreateNbt();
 
                 if (tag != null) {
                     source.copyFrom(tag);
@@ -53,7 +53,7 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtCompound tag = s.getArgument("nbt_data", NbtCompound.class);
-                stack.setTag(tag);
+                stack.setNbt(tag);
                 setStack(stack);
             }
 
@@ -65,7 +65,7 @@ public class NbtCommand extends Command {
 
             if (validBasic(stack)) {
                 NbtPathArgumentType.NbtPath path = s.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
-                path.remove(stack.getTag());
+                path.remove(stack.getNbt());
             }
 
             return SINGLE_SUCCESS;
@@ -77,7 +77,7 @@ public class NbtCommand extends Command {
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                NbtCompound tag = stack.getTag();
+                NbtCompound tag = stack.getNbt();
                 String nbt = tag == null ? "{}" : tag.asString();
 
                 BaseText copyButton = new LiteralText("NBT");
@@ -108,7 +108,7 @@ public class NbtCommand extends Command {
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
-                NbtCompound tag = stack.getOrCreateTag();
+                NbtCompound tag = stack.getOrCreateNbt();
                 mc.keyboard.setClipboard(tag.toString());
                 BaseText nbt = new LiteralText("NBT");
                 nbt.setStyle(nbt.getStyle()

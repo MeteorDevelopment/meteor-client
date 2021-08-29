@@ -218,9 +218,9 @@ public class InventorySorter {
         }
 
         private boolean areEqual(ItemStack i1, ItemStack i2) {
-            if (!i1.isOf(i2.getItem()) || (i1.getTag() == null && i2.getTag() != null)) return false;
+            if (!i1.isOf(i2.getItem()) || (i1.getNbt() == null && i2.getNbt() != null)) return false;
 
-            return i1.getTag() == null || i1.getTag().equals(i2.getTag());
+            return i1.getNbt() == null || i1.getNbt().equals(i2.getNbt());
         }
     }
 

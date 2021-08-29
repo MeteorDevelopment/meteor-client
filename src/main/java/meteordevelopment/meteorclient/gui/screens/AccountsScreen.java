@@ -46,8 +46,8 @@ public class AccountsScreen extends WindowScreen {
         // Add account
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
-        addButton(l, "Cracked", () -> mc.openScreen(new AddCrackedAccountScreen(theme)));
-        addButton(l, "Premium", () -> mc.openScreen(new AddPremiumAccountScreen(theme)));
+        addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme)));
+        addButton(l, "Premium", () -> mc.setScreen(new AddPremiumAccountScreen(theme)));
         addButton(l, "Microsoft", () -> {
             locked = true;
 
@@ -60,7 +60,7 @@ public class AccountsScreen extends WindowScreen {
                 }
             });
         });
-        addButton(l, "The Altening", () -> mc.openScreen(new AddAlteningAccountScreen(theme)));
+        addButton(l, "The Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme)));
     }
 
     private void addButton(WContainer c, String text, Runnable action) {

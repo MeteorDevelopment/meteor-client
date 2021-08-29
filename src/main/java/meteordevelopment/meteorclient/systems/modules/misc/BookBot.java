@@ -286,13 +286,13 @@ public class BookBot extends Module {
         if (count.get() && bookCount != 0) title += " #" + bookCount;
 
         // Write data to book
-        mc.player.getMainHandStack().putSubTag("title", NbtString.of(title));
-        mc.player.getMainHandStack().putSubTag("author", NbtString.of(mc.player.getGameProfile().getName()));
+        mc.player.getMainHandStack().setSubNbt("title", NbtString.of(title));
+        mc.player.getMainHandStack().setSubNbt("author", NbtString.of(mc.player.getGameProfile().getName()));
 
         // Write pages NBT
         NbtList pageNbt = new NbtList();
         pages.stream().map(NbtString::of).forEach(pageNbt::add);
-        if (!pages.isEmpty()) mc.player.getMainHandStack().putSubTag("pages", pageNbt);
+        if (!pages.isEmpty()) mc.player.getMainHandStack().setSubNbt("pages", pageNbt);
 
         // Send book update to server
         mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, Optional.of(title)));

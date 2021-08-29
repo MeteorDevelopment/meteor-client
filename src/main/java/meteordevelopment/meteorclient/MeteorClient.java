@@ -147,7 +147,7 @@ public class MeteorClient implements ClientModInitializer {
         Capes.tick();
 
         if (screenToOpen != null && mc.currentScreen == null) {
-            mc.openScreen(screenToOpen);
+            mc.setScreen(screenToOpen);
             screenToOpen = null;
         }
 
@@ -171,7 +171,7 @@ public class MeteorClient implements ClientModInitializer {
         if (Config.get().prefix.isBlank()) return;
 
         if (event.c == Config.get().prefix.charAt(0)) {
-            mc.openScreen(new ChatScreen(Config.get().prefix));
+            mc.setScreen(new ChatScreen(Config.get().prefix));
             event.cancel();
         }
     }

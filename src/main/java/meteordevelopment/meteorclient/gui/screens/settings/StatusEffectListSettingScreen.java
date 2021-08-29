@@ -36,7 +36,7 @@ public class StatusEffectListSettingScreen extends LeftRightListSettingScreen<St
 
     private ItemStack getPotionStack(StatusEffect effect) {
         ItemStack potion = Items.POTION.getDefaultStack();
-        potion.getTag().putInt("CustomPotionColor", PotionUtil.getColor(new Potion(new StatusEffectInstance(effect))));
+        potion.getOrCreateNbt().putInt("CustomPotionColor", PotionUtil.getColor(new Potion(new StatusEffectInstance(effect))));
         return potion;
     }
 }

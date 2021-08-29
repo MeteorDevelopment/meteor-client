@@ -75,7 +75,7 @@ public class ProfilesTab extends Tab {
 
                 // Edit
                 WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-                edit.action = () -> mc.openScreen(new EditProfileScreen(theme, profile, this::initWidget));
+                edit.action = () -> mc.setScreen(new EditProfileScreen(theme, profile, this::initWidget));
 
                 // Remove
                 WMinus remove = table.add(theme.minus()).widget();
@@ -92,7 +92,7 @@ public class ProfilesTab extends Tab {
 
             // Create
             WButton create = table.add(theme.button("Create")).expandX().widget();
-            create.action = () -> mc.openScreen(new EditProfileScreen(theme, null, this::initWidget));
+            create.action = () -> mc.setScreen(new EditProfileScreen(theme, null, this::initWidget));
         }
     }
 
