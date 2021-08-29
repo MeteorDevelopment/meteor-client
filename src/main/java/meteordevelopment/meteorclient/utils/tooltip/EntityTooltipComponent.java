@@ -20,6 +20,8 @@ import net.minecraft.entity.passive.SquidEntity;
 import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.Vec3f;
 
+import static meteordevelopment.meteorclient.utils.Utils.mc;
+
 // Thanks to
 // https://github.com/Queerbric/Inspecio/blob/1.17/src/main/java/io/github/queerbric/inspecio/tooltip/EntityTooltipComponent.java
 public class EntityTooltipComponent implements MeteorTooltipData, TooltipComponent {

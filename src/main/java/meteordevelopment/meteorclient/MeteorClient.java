@@ -58,6 +58,7 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
+    public static final List<MeteorAddon> ADDONS = new ArrayList<>();
 
     public static Screen screenToOpen;
 
@@ -73,9 +74,8 @@ public class MeteorClient implements ClientModInitializer {
         Utils.mc = MinecraftClient.getInstance();
         EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
-        List<MeteorAddon> addons = new ArrayList<>();
         for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
-            addons.add(entrypoint.getEntrypoint());
+            ADDONS.add(entrypoint.getEntrypoint());
         }
 
         Systems.addPreLoadTask(() -> {
@@ -108,7 +108,7 @@ public class MeteorClient implements ClientModInitializer {
         // Register categories
         Modules.REGISTERING_CATEGORIES = true;
         Categories.register();
-        addons.forEach(MeteorAddon::onRegisterCategories);
+        ADDONS.forEach(MeteorAddon::onRegisterCategories);
         Modules.REGISTERING_CATEGORIES = false;
 
         Systems.init();
@@ -122,7 +122,7 @@ public class MeteorClient implements ClientModInitializer {
         EVENT_BUS.subscribe(this);
 
         // Call onInitialize for addons
-        addons.forEach(MeteorAddon::onInitialize);
+        ADDONS.forEach(MeteorAddon::onInitialize);
 
         Modules.get().sortModules();
         Systems.load();
