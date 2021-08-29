@@ -137,8 +137,8 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> thrashItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("thrash-items")
+    private final Setting<List<Item>> trashItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
         .defaultValue(List.of(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT))
         .build()
@@ -526,7 +526,7 @@ public class HighwayBuilder extends Module {
                 for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
                     ItemStack itemStack = b.mc.player.getInventory().getStack(i);
 
-                    if (itemStack.getItem() instanceof BlockItem && b.thrashItems.get().contains(itemStack.getItem()) && itemStack.getCount() > biggestCount) {
+                    if (itemStack.getItem() instanceof BlockItem && b.trashItems.get().contains(itemStack.getItem()) && itemStack.getCount() > biggestCount) {
                         biggestCount = itemStack.getCount();
                         skipSlot = i;
 
@@ -561,7 +561,7 @@ public class HighwayBuilder extends Module {
 
                     ItemStack itemStack = b.mc.player.getInventory().getStack(i);
 
-                    if (b.thrashItems.get().contains(itemStack.getItem())) {
+                    if (b.trashItems.get().contains(itemStack.getItem())) {
                         InvUtils.drop().slot(i);
                         return;
                     }
@@ -786,7 +786,7 @@ public class HighwayBuilder extends Module {
                 if (replaceTools && AutoTool.isTool(itemStack)) return i;
 
                 // Store the slot if it contains thrash
-                if (b.thrashItems.get().contains(itemStack.getItem())) thrashSlot = i;
+                if (b.trashItems.get().contains(itemStack.getItem())) thrashSlot = i;
 
                 // Update tracked stats about slots that contain building blocks
                 if (itemStack.getItem() instanceof BlockItem blockItem && b.blocksToPlace.get().contains(blockItem.getBlock())) {
@@ -907,7 +907,7 @@ public class HighwayBuilder extends Module {
         protected int findBlocksToPlacePrioritizeTrash(HighwayBuilder b) {
             int slot = findAndMoveToHotbar(b, itemStack -> {
                 if (!(itemStack.getItem() instanceof BlockItem)) return false;
-                return b.thrashItems.get().contains(itemStack.getItem());
+                return b.trashItems.get().contains(itemStack.getItem());
             }, false);
 
             return slot != -1 ? slot : findBlocksToPlace(b);
