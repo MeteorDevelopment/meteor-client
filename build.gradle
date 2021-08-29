@@ -36,7 +36,7 @@ dependencies {
 
 	// Minecraft
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API Indigo Renderer (only used in mixins)
@@ -73,6 +73,7 @@ processResources {
 		expand "version": project.version
 
 		filter { line -> line.replace("@devbuild@", System.getenv("CIRCLE_BUILD_NUM") != null ? System.getenv("CIRCLE_BUILD_NUM") : "") }
+        filter { line -> line.replace("@mc_version@", project.minecraft_version) }
 	}
 
 	from(sourceSets.main.resources.srcDirs) {
