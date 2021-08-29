@@ -56,7 +56,6 @@
     "CreativeSlotMixin",
     "CrossbowItemAccessor",
     "CustomPayloadC2SPacketAccessor",
-    "DeathScreenMixin",
     "DefaultSkinHelperMixin",
     "DimensionTypeAccessor",
     "DisconnectedScreenMixin",
