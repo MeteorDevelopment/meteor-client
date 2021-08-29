@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.mixininterface.ISlot;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -177,7 +178,7 @@ public class InventorySorter {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
             else if (SlotUtils.isMain(i)) return InvPart.Player;
         }
-        else if (screen instanceof GenericContainerScreen && slot.inventory instanceof SimpleInventory) {
+        else if ((screen instanceof GenericContainerScreen || screen instanceof ShulkerBoxScreen) && slot.inventory instanceof SimpleInventory) {
             return InvPart.Main;
         }
 
