@@ -15,10 +15,9 @@ public class Prone extends Module {
     @EventHandler
     private void onCollisionShape(CollisionShapeEvent event) {
         if (mc.world == null || mc.player == null) return;
-        if (event.type != CollisionShapeEvent.CollisionType.BLOCK) return;
         if (event.state == null) return;
 
-        if (event.pos.getY() != mc.player.getY()+1) return;
+        if (event.pos.getY() != mc.player.getY() + 1) return;
 
         event.shape = VoxelShapes.fullCube();
     }
