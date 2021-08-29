@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -46,6 +47,7 @@ public abstract class GameRendererMixin {
 
     @Shadow public abstract void reset();
 
+    @Shadow @Final private Camera camera;
     @Unique private Renderer3D renderer;
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
@@ -117,43 +119,50 @@ public abstract class GameRendererMixin {
     @Inject(method = "updateTargetedEntity", at = @At("HEAD"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
         Freecam freecam = Modules.get().get(Freecam.class);
+        boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
 
-        if (freecam.isActive() && client.getCameraEntity() != null && !freecamSet) {
+        if ((freecam.isActive() || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
             info.cancel();
-            Entity camera = client.getCameraEntity();
+            Entity cameraE = client.getCameraEntity();
 
-            double x = camera.getX();
-            double y = camera.getY();
-            double z = camera.getZ();
-            double prevX = camera.prevX;
-            double prevY = camera.prevY;
-            double prevZ = camera.prevZ;
-            float yaw = camera.getYaw();
-            float pitch = camera.getPitch();
-            float prevYaw = camera.prevYaw;
-            float prevPitch = camera.prevPitch;
+            double x = cameraE.getX();
+            double y = cameraE.getY();
+            double z = cameraE.getZ();
+            double prevX = cameraE.prevX;
+            double prevY = cameraE.prevY;
+            double prevZ = cameraE.prevZ;
+            float yaw = cameraE.getYaw();
+            float pitch = cameraE.getPitch();
+            float prevYaw = cameraE.prevYaw;
+            float prevPitch = cameraE.prevPitch;
 
-            ((IVec3d) camera.getPos()).set(freecam.pos.x, freecam.pos.y - camera.getEyeHeight(camera.getPose()), freecam.pos.z);
-            camera.prevX = freecam.prevPos.x;
-            camera.prevY = freecam.prevPos.y - camera.getEyeHeight(camera.getPose());
-            camera.prevZ = freecam.prevPos.z;
-            camera.setYaw(freecam.yaw);
-            camera.setPitch(freecam.pitch);
-            camera.prevYaw = freecam.prevYaw;
-            camera.prevPitch = freecam.prevPitch;
+            if (highwayBuilder) {
+                cameraE.setYaw(camera.getYaw());
+                cameraE.setPitch(camera.getPitch());
+            }
+            else {
+                ((IVec3d) cameraE.getPos()).set(freecam.pos.x, freecam.pos.y - cameraE.getEyeHeight(cameraE.getPose()), freecam.pos.z);
+                cameraE.prevX = freecam.prevPos.x;
+                cameraE.prevY = freecam.prevPos.y - cameraE.getEyeHeight(cameraE.getPose());
+                cameraE.prevZ = freecam.prevPos.z;
+                cameraE.setYaw(freecam.yaw);
+                cameraE.setPitch(freecam.pitch);
+                cameraE.prevYaw = freecam.prevYaw;
+                cameraE.prevPitch = freecam.prevPitch;
+            }
 
             freecamSet = true;
             updateTargetedEntity(tickDelta);
             freecamSet = false;
 
-            ((IVec3d) camera.getPos()).set(x, y, z);
-            camera.prevX = prevX;
-            camera.prevY = prevY;
-            camera.prevZ = prevZ;
-            camera.setYaw(yaw);
-            camera.setPitch(pitch);
-            camera.prevYaw = prevYaw;
-            camera.prevPitch = prevPitch;
+            ((IVec3d) cameraE.getPos()).set(x, y, z);
+            cameraE.prevX = prevX;
+            cameraE.prevY = prevY;
+            cameraE.prevZ = prevZ;
+            cameraE.setYaw(yaw);
+            cameraE.setPitch(pitch);
+            cameraE.prevYaw = prevYaw;
+            cameraE.prevPitch = prevPitch;
         }
     }
 
