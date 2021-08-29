@@ -93,8 +93,8 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         }
     }
 
-    @Inject(method = "openScreen", at = @At("HEAD"), cancellable = true)
-    private void onOpenScreen(Screen screen, CallbackInfo info) {
+    @Inject(method = "setScreen", at = @At("HEAD"), cancellable = true)
+    private void onSetScreen(Screen screen, CallbackInfo info) {
         if (screen instanceof WidgetScreen) screen.mouseMoved(mouse.getX() * window.getScaleFactor(), mouse.getY() * window.getScaleFactor());
 
         OpenScreenEvent event = OpenScreenEvent.get(screen);

@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
-import net.minecraft.item.FireworkItem;
+import net.minecraft.item.FireworkRocketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.sound.SoundCategory;
@@ -73,7 +73,7 @@ public class ElytraBoost extends Module {
     private void onInteractItem(InteractItemEvent event) {
         ItemStack itemStack = mc.player.getStackInHand(event.hand);
 
-        if (itemStack.getItem() instanceof FireworkItem && dontConsumeFirework.get()) {
+        if (itemStack.getItem() instanceof FireworkRocketItem && dontConsumeFirework.get()) {
             event.toReturn = ActionResult.PASS;
 
             boost();
@@ -89,7 +89,7 @@ public class ElytraBoost extends Module {
         if (!Utils.canUpdate()) return;
         if (mc.player.isFallFlying() && mc.currentScreen == null) {
             ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultStack();
-            itemStack.getOrCreateSubTag("Fireworks").putByte("Flight", fireworkLevel.get().byteValue());
+            itemStack.getOrCreateSubNbt("Fireworks").putByte("Flight", fireworkLevel.get().byteValue());
 
             FireworkRocketEntity entity = new FireworkRocketEntity(mc.world, itemStack, mc.player);
             fireworks.add(entity);

@@ -81,7 +81,7 @@ public abstract class ChatHudMixin implements IChatHud {
                     double o = isChatFocused() ? 1.0D : getMessageOpacityMultiplier(x);
                     if (o * d > 0.01D) {
                         double s = ((double)(-m) * g);
-                        var visitor = new StringCharacterVisitor();
+                        StringCharacterVisitor visitor = new StringCharacterVisitor();
                         chatHudLine.getText().accept(visitor);
                         drawIcon(matrices, visitor.result.toString(), (int)(s + h), (float)(o * d));
                     }

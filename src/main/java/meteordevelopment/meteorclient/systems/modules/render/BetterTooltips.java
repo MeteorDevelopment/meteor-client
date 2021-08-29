@@ -171,7 +171,7 @@ public class BetterTooltips extends Module {
         // Status effects
         if (statusEffects.get()) {
             if (event.itemStack.getItem() == Items.SUSPICIOUS_STEW) {
-                NbtCompound tag = event.itemStack.getTag();
+                NbtCompound tag = event.itemStack.getNbt();
                 if (tag != null) {
                     NbtList effects = tag.getList("Effects", 10);
                     if (effects != null) {
@@ -199,7 +199,7 @@ public class BetterTooltips extends Module {
         //Beehive
         if (beehive.get()) {
             if (event.itemStack.getItem() == Items.BEEHIVE || event.itemStack.getItem() == Items.BEE_NEST) {
-                NbtCompound tag = event.itemStack.getTag();
+                NbtCompound tag = event.itemStack.getNbt();
                 if (tag != null) {
                     NbtCompound blockStateTag = tag.getCompound("BlockStateTag");
                     if (blockStateTag != null) {
@@ -256,7 +256,7 @@ public class BetterTooltips extends Module {
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
         if (Utils.hasItems(event.itemStack) && previewShulkers()) {
-            NbtCompound compoundTag = event.itemStack.getSubTag("BlockEntityTag");
+            NbtCompound compoundTag = event.itemStack.getSubNbt("BlockEntityTag");
             DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
             Inventories.readNbt(compoundTag, itemStacks);
             event.tooltipData = new ContainerTooltipComponent(itemStacks, Utils.getShulkerColor(event.itemStack));
@@ -305,7 +305,7 @@ public class BetterTooltips extends Module {
             EntityType<?> type = ((EntityBucketItemAccessor) bucketItem).getEntityType();
             Entity entity = type.create(mc.world);
             if (entity != null) {
-                ((Bucketable) entity).copyDataFromNbt(event.itemStack.getOrCreateTag());
+                ((Bucketable) entity).copyDataFromNbt(event.itemStack.getOrCreateNbt());
                 ((EntityAccessor) entity).setInWater(true);
                 event.tooltipData = new EntityTooltipComponent(entity);
             }
@@ -313,7 +313,7 @@ public class BetterTooltips extends Module {
     }
 
     public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
-        NbtCompound tag = stack.getSubTag("BlockEntityTag");
+        NbtCompound tag = stack.getSubNbt("BlockEntityTag");
         if (tag != null) {
             if (tag.contains("LootTable", 8)) {
                 tooltip.add(new LiteralText("???????"));
@@ -360,7 +360,7 @@ public class BetterTooltips extends Module {
     }
 
     private Text getFirstPage(ItemStack stack) {
-        NbtCompound tag = stack.getTag();
+        NbtCompound tag = stack.getNbt();
         if (tag == null) return null;
         NbtList ltag = tag.getList("pages", 8);
         if (ltag.size() < 1) return null;
@@ -370,21 +370,21 @@ public class BetterTooltips extends Module {
 
     private ItemStack createBannerFromPattern(BannerPattern pattern) {
         ItemStack itemStack = new ItemStack(Items.GRAY_BANNER);
-        NbtCompound nbt = itemStack.getOrCreateSubTag("BlockEntityTag");
+        NbtCompound nbt = itemStack.getOrCreateSubNbt("BlockEntityTag");
         NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, DyeColor.BLACK).add(pattern, DyeColor.WHITE).toNbt();
         nbt.put("Patterns", listNbt);
         return itemStack;
     }
 
     private ItemStack createBannerFromShield(ItemStack item) {
-        if (!item.hasTag()
-            || !item.getTag().contains("BlockEntityTag")
-            || !item.getTag().getCompound("BlockEntityTag").contains("Base"))
+        if (!item.hasNbt()
+            || !item.getNbt().contains("BlockEntityTag")
+            || !item.getNbt().getCompound("BlockEntityTag").contains("Base"))
             return null;
         NbtList listNbt = (new BannerPattern.Patterns()).add(BannerPattern.BASE, ShieldItem.getColor(item)).toNbt();
-        NbtCompound nbt = item.getOrCreateSubTag("BlockEntityTag");
+        NbtCompound nbt = item.getOrCreateSubNbt("BlockEntityTag");
         ItemStack bannerItem = new ItemStack(Items.GRAY_BANNER);
-        NbtCompound bannerTag = bannerItem.getOrCreateSubTag("BlockEntityTag");
+        NbtCompound bannerTag = bannerItem.getOrCreateSubNbt("BlockEntityTag");
         bannerTag.put("Patterns", listNbt);
         if (!nbt.contains("Patterns")) return bannerItem;
         NbtList shieldPatterns = nbt.getList("Patterns", NbtElement.COMPOUND_TYPE);

@@ -181,7 +181,7 @@ public class StashFinder extends Module {
             table.add(theme.label("Total: " + chunk.getTotal()));
 
             WButton open = table.add(theme.button("Open")).widget();
-            open.action = () -> mc.openScreen(new ChunkScreen(theme, chunk));
+            open.action = () -> mc.setScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
             gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));

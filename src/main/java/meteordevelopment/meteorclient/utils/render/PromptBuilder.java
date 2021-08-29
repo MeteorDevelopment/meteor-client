@@ -79,12 +79,12 @@ public class PromptBuilder {
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> {
                 Screen prompt = new PromptScreen(theme);
-                mc.openScreen(prompt);
+                mc.setScreen(prompt);
             });
         }
         else {
             Screen prompt = new PromptScreen(theme);
-            mc.openScreen(prompt);
+            mc.setScreen(prompt);
         }
     }
 
