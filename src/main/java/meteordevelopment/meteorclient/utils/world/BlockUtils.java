@@ -111,17 +111,17 @@ public class BlockUtils {
     }
 
     private static void place(BlockHitResult blockHitResult, Hand hand, boolean swing) {
-        boolean wasSneaking = Utils.mc.player.input.sneaking;
-        Utils.mc.player.input.sneaking = false;
+        boolean wasSneaking = mc.player.input.sneaking;
+        mc.player.input.sneaking = false;
 
-        ActionResult result = Utils.mc.interactionManager.interactBlock(Utils.mc.player, Utils.mc.world, hand, blockHitResult);
+        ActionResult result = mc.interactionManager.interactBlock(mc.player, mc.world, hand, blockHitResult);
 
         if (result.shouldSwingHand()) {
-            if (swing) Utils.mc.player.swingHand(hand);
-            else Utils.mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+            if (swing) mc.player.swingHand(hand);
+            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
         }
 
-        Utils.mc.player.input.sneaking = wasSneaking;
+        mc.player.input.sneaking = wasSneaking;
     }
 
     public static boolean canPlace(BlockPos blockPos, boolean checkEntities) {
@@ -131,10 +131,10 @@ public class BlockUtils {
         if (!World.isValid(blockPos)) return false;
 
         // Check if current block is replaceable
-        if (!Utils.mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
+        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
         // Check if intersects entities
-        return !checkEntities || Utils.mc.world.canPlace(Blocks.STONE.getDefaultState(), blockPos, ShapeContext.absent());
+        return !checkEntities || mc.world.canPlace(mc.world.getBlockState(blockPos), blockPos, ShapeContext.absent());
     }
 
     public static boolean canPlace(BlockPos blockPos) {
@@ -146,7 +146,7 @@ public class BlockUtils {
             BlockPos neighbor = blockPos.offset(side);
             Direction side2 = side.getOpposite();
 
-            BlockState state = Utils.mc.world.getBlockState(neighbor);
+            BlockState state = mc.world.getBlockState(neighbor);
 
             // Check if neighbour isn't empty
             if (state.isAir() || isClickable(state.getBlock())) continue;
@@ -228,7 +228,7 @@ public class BlockUtils {
         if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock) ||
             mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
 
-        if (!topSurface(Utils.mc.world.getBlockState(blockPos.down()))) {
+        if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
             if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
             if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }

@@ -5,10 +5,13 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.CameraTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
+import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.BlockView;
@@ -23,10 +26,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
 @Mixin(Camera.class)
-public abstract class CameraMixin {
+public abstract class CameraMixin implements ICamera {
     @Shadow private boolean thirdPerson;
 
     @Shadow protected abstract double clipToSpace(double desiredCameraDistance);
+
+    @Shadow private float yaw;
+    @Shadow private float pitch;
+
+    @Shadow protected abstract void setRotation(float yaw, float pitch);
 
     @Unique private float tickDelta;
 
@@ -74,10 +82,18 @@ public abstract class CameraMixin {
             args.set(0, (float) freecam.getYaw(tickDelta));
             args.set(1, (float) freecam.getPitch(tickDelta));
         }
-
-        if (freeLook.isActive()) {
+        else if (Modules.get().isActive(HighwayBuilder.class)) {
+            args.set(0, yaw);
+            args.set(1, pitch);
+        }
+        else if (freeLook.isActive()) {
             args.set(0, freeLook.cameraYaw);
             args.set(1, freeLook.cameraPitch);
         }
+    }
+
+    @Override
+    public void setRot(double yaw, double pitch) {
+        setRotation((float) yaw, (float) Utils.clamp(pitch, -90, 90));
     }
 }
