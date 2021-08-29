@@ -15,6 +15,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.UnfocusedCPU;
 import meteordevelopment.meteorclient.utils.misc.Placeholders;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
@@ -30,6 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -46,6 +49,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public Screen currentScreen;
 
     @Shadow public abstract Profiler getProfiler();
+
+    @Shadow
+    public abstract boolean isWindowFocused();
 
     @Unique private boolean doItemUseCalled;
     @Unique private boolean rightClick;
@@ -118,6 +124,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Inject(method = "onResolutionChanged", at = @At("TAIL"))
     private void onResolutionChanged(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(WindowResizedEvent.get());
+    }
+
+    @Inject(method = "getFramerateLimit", at = @At("HEAD"), cancellable = true)
+    private void onGetFramerateLimit(CallbackInfoReturnable<Integer> info) {
+        if (Modules.get().isActive(UnfocusedCPU.class) && !isWindowFocused()) info.setReturnValue(1);
     }
 
     // Interface
