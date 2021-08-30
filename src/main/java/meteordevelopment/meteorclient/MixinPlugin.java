@@ -20,6 +20,7 @@ import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
     private boolean isResourceLoaderPresent = false;
+    private boolean isOriginsPresent = false;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -49,10 +50,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
         }
 
         for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-            if (mod.getMetadata().getId().startsWith("fabric-resource-loader")) {
-                isResourceLoaderPresent = true;
-                break;
-            }
+            if (mod.getMetadata().getId().startsWith("fabric-resource-loader")) isResourceLoaderPresent = true;
+            else if (mod.getMetadata().getId().equals("origins")) isOriginsPresent = true;
         }
     }
 
@@ -65,6 +64,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (mixinClassName.endsWith("NamespaceResourceManagerMixin") || mixinClassName.endsWith("ReloadableResourceManagerImplMixin")) {
             return !isResourceLoaderPresent;
+        }
+        else if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
+            return !isOriginsPresent;
         }
 
         return true;
