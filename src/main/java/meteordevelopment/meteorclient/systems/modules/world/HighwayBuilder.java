@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -32,6 +33,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -81,7 +83,7 @@ public class HighwayBuilder extends Module {
     private final Setting<Integer> width = sgGeneral.add(new IntSetting.Builder()
         .name("width")
         .description("Width of the highway.")
-        .defaultValue(3)
+        .defaultValue(4)
         .min(1)
         .max(5)
         .sliderMin(1)
@@ -118,7 +120,7 @@ public class HighwayBuilder extends Module {
         .name("mine-above-railings")
         .description("Mines blocks above railings.")
         .visible(railings::get)
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -160,7 +162,14 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> disconnectOnToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect-on-toggle")
-        .description("Automatically disconnects when the module is turned off for example for not having enough blocks.")
+        .description("Automatically disconnects when the module is turned off, for example for not having enough blocks.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> disconnectOnUntrustedPlayer = sgGeneral.add(new BoolSetting.Builder()
+        .name("disconnect-on-untrusted-player")
+        .description("Automatically disconnects when a player not on your friends list appears in render distance.")
         .defaultValue(false)
         .build()
     );
@@ -283,12 +292,7 @@ public class HighwayBuilder extends Module {
         toggle();
 
         if (disconnectOnToggle.get()) {
-            MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
-            text.append(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
-            text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
-            text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
-
-            mc.getNetworkHandler().getConnection().disconnect(text);
+            disconnect(message, args);
         }
     }
 
@@ -307,6 +311,15 @@ public class HighwayBuilder extends Module {
         }
 
         if (Modules.get().get(AutoEat.class).eating) return;
+
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
+                if (disconnectOnUntrustedPlayer.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
+                    toggle();
+                    disconnect("A non-trusted player appeared in your render distance.");
+                }
+            }
+        }
 
         state.tick(this);
     }
@@ -385,6 +398,15 @@ public class HighwayBuilder extends Module {
 
     private boolean canPlace(MBlockPos pos, boolean liquids) {
         return liquids ? !pos.getState().getFluidState().isEmpty() : pos.getState().isAir();
+    }
+
+    private void disconnect(String message, Object... args) {
+        MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
+        text.append(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
+        text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
+        text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
+
+        mc.getNetworkHandler().getConnection().disconnect(text);
     }
 
     private enum State {
