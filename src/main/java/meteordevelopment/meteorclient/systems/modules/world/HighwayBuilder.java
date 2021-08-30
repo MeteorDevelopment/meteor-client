@@ -81,7 +81,7 @@ public class HighwayBuilder extends Module {
     private final Setting<Integer> width = sgGeneral.add(new IntSetting.Builder()
         .name("width")
         .description("Width of the highway.")
-        .defaultValue(3)
+        .defaultValue(4)
         .min(1)
         .max(5)
         .sliderMin(1)
@@ -118,7 +118,7 @@ public class HighwayBuilder extends Module {
         .name("mine-above-railings")
         .description("Mines blocks above railings.")
         .visible(railings::get)
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -160,7 +160,14 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> disconnectOnToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect-on-toggle")
-        .description("Automatically disconnects when the module is turned off for example for not having enough blocks.")
+        .description("Automatically disconnects when the module is turned off, for example for not having enough blocks.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> disconnectOnUntrustedPlayer = sgGeneral.add(new BoolSetting.Builder()
+        .name("disconnect-on-untrusted-player")
+        .description("Automatically disconnects when a player not on your friends list appears in render distance.")
         .defaultValue(false)
         .build()
     );
@@ -233,8 +240,8 @@ public class HighwayBuilder extends Module {
     private State state, lastState;
     private IBlockPosProvider blockPosProvider;
 
-    private Vec3d start;
-    private int blocksBroken, blocksPlaced;
+    public Vec3d start;
+    public int blocksBroken, blocksPlaced;
     private final MBlockPos lastBreakingPos = new MBlockPos();
     private boolean displayInfo;
 
@@ -283,12 +290,7 @@ public class HighwayBuilder extends Module {
         toggle();
 
         if (disconnectOnToggle.get()) {
-            MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
-            text.append(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
-            text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
-            text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
-
-            mc.getNetworkHandler().getConnection().disconnect(text);
+            disconnect(message, args);
         }
     }
 
@@ -385,6 +387,21 @@ public class HighwayBuilder extends Module {
 
     private boolean canPlace(MBlockPos pos, boolean liquids) {
         return liquids ? !pos.getState().getFluidState().isEmpty() : pos.getState().isAir();
+    }
+
+    private void disconnect(String message, Object... args) {
+        MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
+        text.append(getStatsText());
+
+        mc.getNetworkHandler().getConnection().disconnect(text);
+    }
+
+    public MutableText getStatsText() {
+        MutableText text = new LiteralText(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
+        text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
+        text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
+
+        return text;
     }
 
     private enum State {
