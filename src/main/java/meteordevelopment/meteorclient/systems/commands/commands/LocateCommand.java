@@ -18,14 +18,11 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.WorldGenUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
@@ -33,9 +30,6 @@ import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-
-import java.util.Arrays;
-import java.util.List;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -111,10 +105,6 @@ public class LocateCommand extends Command {
                     secondEnd = null;
                     MeteorClient.EVENT_BUS.subscribe(this);
                     info("Please throw the first Eye of Ender.");
-                    BaseText text = new LiteralText("Fortress located at ");
-                    text.append(ChatUtils.formatCoords(coords));
-                    text.append(".");
-                    info(text);
                     return SINGLE_SUCCESS;
                 }
             }

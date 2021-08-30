@@ -49,6 +49,8 @@ public class Seeds extends System<Seeds> {
     }
 
     public void setSeed(String seed) {
+        if (mc.isIntegratedServerRunning()) return;
+        
         ServerInfo server = mc.getCurrentServerEntry();
         MCVersion ver = null;
         if (server != null)

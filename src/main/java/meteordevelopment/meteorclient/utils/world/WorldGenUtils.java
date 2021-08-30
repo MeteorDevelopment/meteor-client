@@ -322,9 +322,9 @@ public class WorldGenUtils {
     }
 
     private static boolean isValidMap(Feature feature, ItemStack stack) {
-        if (!stack.hasTag()) return false;
-        if (!stack.getTag().contains("display")) return false;
-        NbtCompound displayTag = stack.getTag().getCompound("display");
+        if (!stack.hasNbt()) return false;
+        if (!stack.getNbt().contains("display")) return false;
+        NbtCompound displayTag = stack.getNbt().getCompound("display");
         if (!displayTag.contains("Name")) return false;
         String nameTag = displayTag.getString("Name");
         if (!nameTag.contains("translate")) return false;
@@ -340,9 +340,9 @@ public class WorldGenUtils {
     }
 
     private static BlockPos getMapMarker(ItemStack stack) {
-        if (!stack.hasTag()) return null;
-        if (!stack.getTag().contains("Decorations")) return null;
-        NbtList decorationsTag = stack.getTag().getList("Decorations", NbtElement.COMPOUND_TYPE);
+        if (!stack.hasNbt()) return null;
+        if (!stack.getNbt().contains("Decorations")) return null;
+        NbtList decorationsTag = stack.getNbt().getList("Decorations", NbtElement.COMPOUND_TYPE);
         if (decorationsTag.size() < 1) return null;
         NbtCompound iconTag = decorationsTag.getCompound(0);
         return new BlockPos(
