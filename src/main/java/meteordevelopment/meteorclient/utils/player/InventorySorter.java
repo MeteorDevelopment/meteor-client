@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.mixininterface.ISlot;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
@@ -32,7 +33,7 @@ public class InventorySorter {
         this.screen = screen;
 
         this.originInvPart = getInvPart(originSlot);
-        if (originInvPart == InvPart.Hotbar) {
+        if (originInvPart == InvPart.Invalid || originInvPart == InvPart.Hotbar) {
             invalid = true;
             return;
         }
@@ -177,7 +178,7 @@ public class InventorySorter {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
             else if (SlotUtils.isMain(i)) return InvPart.Player;
         }
-        else if (screen instanceof GenericContainerScreen && slot.inventory instanceof SimpleInventory) {
+        else if ((screen instanceof GenericContainerScreen || screen instanceof ShulkerBoxScreen) && slot.inventory instanceof SimpleInventory) {
             return InvPart.Main;
         }
 
@@ -217,9 +218,9 @@ public class InventorySorter {
         }
 
         private boolean areEqual(ItemStack i1, ItemStack i2) {
-            if (!i1.isOf(i2.getItem()) || (i1.getTag() == null && i2.getTag() != null)) return false;
+            if (!i1.isOf(i2.getItem()) || (i1.getNbt() == null && i2.getNbt() != null)) return false;
 
-            return i1.getTag() == null || i1.getTag().equals(i2.getTag());
+            return i1.getNbt() == null || i1.getNbt().equals(i2.getNbt());
         }
     }
 

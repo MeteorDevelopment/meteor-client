@@ -34,7 +34,7 @@ public class ProxiesScreen extends WindowScreen {
     }
 
     protected void openEditProxyScreen(Proxy proxy) {
-        mc.openScreen(new EditProxyScreen(theme, proxy));
+        mc.setScreen(new EditProxyScreen(theme, proxy));
     }
 
     @Override

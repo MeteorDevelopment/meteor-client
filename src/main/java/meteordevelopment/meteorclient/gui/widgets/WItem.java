@@ -29,19 +29,21 @@ public class WItem extends WWidget {
 
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        renderer.post(() -> {
-            double s = theme.scale(2);
+        if (!itemStack.isEmpty()) {
+            renderer.post(() -> {
+                double s = theme.scale(2);
 
-            MatrixStack matrices = RenderSystem.getModelViewStack();
+                MatrixStack matrices = RenderSystem.getModelViewStack();
 
-            matrices.push();
-            matrices.scale((float) s, (float) s, 1);
-            matrices.translate(x / s, y / s, 0);
+                matrices.push();
+                matrices.scale((float) s, (float) s, 1);
+                matrices.translate(x / s, y / s, 0);
 
-            mc.getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
+                mc.getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
 
-            matrices.pop();
-        });
+                matrices.pop();
+            });
+        }
     }
 
     public void set(ItemStack itemStack) {

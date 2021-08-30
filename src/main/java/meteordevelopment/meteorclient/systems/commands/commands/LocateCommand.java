@@ -62,13 +62,13 @@ public class LocateCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("lodestone").executes(ctx -> {
+        builder.then(literal("lodestone").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.COMPASS) {
                 error("You need to hold a lodestone compass");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getTag();
+            NbtCompound tag = stack.getNbt();
             if (tag == null) {
                 error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
@@ -111,6 +111,11 @@ public class LocateCommand extends Command {
                     secondEnd = null;
                     MeteorClient.EVENT_BUS.subscribe(this);
                     info("Please throw the first Eye of Ender.");
+                    BaseText text = new LiteralText("Fortress located at ");
+                    text.append(ChatUtils.formatCoords(coords));
+                    text.append(".");
+                    info(text);
+                    return SINGLE_SUCCESS;
                 }
             }
             throw NOT_FOUND.create(feature);

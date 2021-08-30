@@ -64,7 +64,7 @@ public class MacrosTab extends Tab {
                     table.add(theme.label(macro.name + " (" + macro.keybind + ")"));
 
                     WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                    edit.action = () -> mc.openScreen(new MacroEditorScreen(theme, macro));
+                    edit.action = () -> mc.setScreen(new MacroEditorScreen(theme, macro));
 
                     WMinus remove = table.add(theme.minus()).widget();
                     remove.action = () -> {
@@ -80,7 +80,7 @@ public class MacrosTab extends Tab {
 
             // New
             WButton create = add(theme.button("Create")).expandX().widget();
-            create.action = () -> mc.openScreen(new MacroEditorScreen(theme, null));
+            create.action = () -> mc.setScreen(new MacroEditorScreen(theme, null));
         }
     }
 

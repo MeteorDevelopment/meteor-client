@@ -8,14 +8,20 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
+import meteordevelopment.meteorclient.mixininterface.ICamera;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.FreeLook;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.render.Camera;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -26,6 +32,8 @@ import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
 @Mixin(Mouse.class)
 public class MouseMixin {
+    @Shadow @Final private MinecraftClient client;
+
     @Inject(method = "onMouseButton", at = @At("HEAD"), cancellable = true)
     private void onMouseButton(long window, int button, int action, int mods, CallbackInfo info) {
         Input.setButtonState(button, action != GLFW_RELEASE);
@@ -44,6 +52,10 @@ public class MouseMixin {
         FreeLook freeLook = Modules.get().get(FreeLook.class);
 
         if (freecam.isActive()) freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
+        else if (Modules.get().isActive(HighwayBuilder.class)) {
+            Camera camera = client.gameRenderer.getCamera();
+            ((ICamera) camera).setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
+        }
         else if (!freeLook.cameraMode()) player.changeLookDirection(cursorDeltaX, cursorDeltaY);
     }
 

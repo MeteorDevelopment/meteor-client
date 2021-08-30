@@ -21,16 +21,21 @@ public class AddCrackedAccountScreen extends WindowScreen {
 
         // Name
         t.add(theme.label("Name: "));
-        WTextBox name = t.add(theme.textBox("")).minWidth(400).expandX().widget();
+        WTextBox name = t.add(theme.textBox("", (text, c) ->
+            // Username can't contain spaces
+            c != ' '
+        )).minWidth(400).expandX().widget();
         name.setFocused(true);
         t.row();
 
         // Add
         WButton add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            CrackedAccount account = new CrackedAccount(name.get());
-            if (!name.get().trim().isEmpty() && !(Accounts.get().exists(account))) {
-                AccountsScreen.addAccount(add, this, account);
+            if(!name.get().isEmpty()) {
+                CrackedAccount account = new CrackedAccount(name.get());
+                if (!(Accounts.get().exists(account))) {
+                    AccountsScreen.addAccount(add, this, account);
+                }
             }
         };
 
