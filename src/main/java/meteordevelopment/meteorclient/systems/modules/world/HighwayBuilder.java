@@ -242,8 +242,8 @@ public class HighwayBuilder extends Module {
     private State state, lastState;
     private IBlockPosProvider blockPosProvider;
 
-    private Vec3d start;
-    private int blocksBroken, blocksPlaced;
+    public Vec3d start;
+    public int blocksBroken, blocksPlaced;
     private final MBlockPos lastBreakingPos = new MBlockPos();
     private boolean displayInfo;
 
@@ -311,15 +311,6 @@ public class HighwayBuilder extends Module {
         }
 
         if (Modules.get().get(AutoEat.class).eating) return;
-
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
-                if (disconnectOnUntrustedPlayer.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
-                    toggle();
-                    disconnect("A non-trusted player appeared in your render distance.");
-                }
-            }
-        }
 
         state.tick(this);
     }
