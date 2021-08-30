@@ -362,6 +362,7 @@ public class Modules extends System<Modules> {
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
+        add(new AutoEz());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
