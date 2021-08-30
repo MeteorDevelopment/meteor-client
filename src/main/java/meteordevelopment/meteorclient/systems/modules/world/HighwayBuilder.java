@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -33,7 +32,6 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -393,11 +391,17 @@ public class HighwayBuilder extends Module {
 
     private void disconnect(String message, Object... args) {
         MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
-        text.append(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
+        text.append(getStatsText());
+
+        mc.getNetworkHandler().getConnection().disconnect(text);
+    }
+
+    public MutableText getStatsText() {
+        MutableText text = new LiteralText(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
         text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
         text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
 
-        mc.getNetworkHandler().getConnection().disconnect(text);
+        return text;
     }
 
     private enum State {

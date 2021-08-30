@@ -28,8 +28,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
-
 @Mixin(ClientConnection.class)
 public class ClientConnectionMixin {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
@@ -40,10 +38,8 @@ public class ClientConnectionMixin {
     @Inject(method = "disconnect", at = @At("HEAD"))
     private void disconnect(Text disconnectReason, CallbackInfo ci) {
         if (Modules.get().get(HighwayBuilder.class).isActive()) {
-            MutableText text = new LiteralText(String.format("\n\n%s[%sHighway Builder%s] Statistics:", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY));
-            text.append(String.format("\n%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(Modules.get().get(HighwayBuilder.class).start)));
-            text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, Modules.get().get(HighwayBuilder.class).blocksBroken));
-            text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, Modules.get().get(HighwayBuilder.class).blocksPlaced));
+            MutableText text = new LiteralText(String.format("\n\n%s[%sHighway Builder%s] Statistics:", Formatting.GRAY, Formatting.BLUE, Formatting.GRAY)).append("\n");
+            text.append(Modules.get().get(HighwayBuilder.class).getStatsText());
 
             ((MutableText) disconnectReason).append(text);
         }
