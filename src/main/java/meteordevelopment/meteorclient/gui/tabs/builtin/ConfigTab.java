@@ -112,7 +112,7 @@ public class ConfigTab extends Tab {
 
     public static final Setting<Boolean> titleScreenCredits = sgScreens.add(new BoolSetting.Builder()
             .name("title-screen-credits")
-            .description("Show Meteor credits on the title screen")
+            .description("Show Meteor credits on title screen")
             .defaultValue(true)
             .onChanged(aBool -> Config.get().titleScreenCredits = aBool)
             .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenCredits))
@@ -121,7 +121,7 @@ public class ConfigTab extends Tab {
 
     public static final Setting<Boolean> titleScreenSplashes = sgScreens.add(new BoolSetting.Builder()
             .name("title-screen-splashes")
-            .description("Show Meteor splash texts on the title screen")
+            .description("Show Meteor splash texts on title screen")
             .defaultValue(true)
             .onChanged(aBool -> Config.get().titleScreenSplashes = aBool)
             .onModuleActivated(boolSetting -> boolSetting.set(Config.get().titleScreenSplashes))
