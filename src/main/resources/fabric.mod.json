@@ -31,9 +31,12 @@
     "meteor-client-canvas.mixins.json"
   ],
   "accessWidener": "meteor-client.accesswidener",
+  "custom": {
+    "meteor-client:color": "145,61,226"
+  },
   "depends": {
     "java": ">=16",
-    "minecraft": ">=1.17.1"
+    "minecraft": ">=@mc_version@"
   },
   "breaks": {
     "optifabric": "*"

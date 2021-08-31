@@ -69,7 +69,7 @@ public class AutoEat extends Module {
             .build()
     );
 
-    private boolean eating;
+    public boolean eating;
     private int slot, prevSlot;
 
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();

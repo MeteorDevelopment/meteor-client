@@ -70,7 +70,7 @@ public class LocateCommand extends Command {
                 error("You need to hold a treasure map first");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getTag();
+            NbtCompound tag = stack.getNbt();
             NbtList nbt1 = (NbtList) tag.get("Decorations");
             if (nbt1 == null) {
                 error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
@@ -97,7 +97,7 @@ public class LocateCommand extends Command {
                 error("You need to hold a lodestone compass");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getTag();
+            NbtCompound tag = stack.getNbt();
             if (tag == null) {
                 error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
                 return SINGLE_SUCCESS;
@@ -122,7 +122,7 @@ public class LocateCommand extends Command {
                 error("You need to hold a woodland explorer map first");
                 return SINGLE_SUCCESS;
             }
-            NbtCompound tag = stack.getTag();
+            NbtCompound tag = stack.getNbt();
             NbtList nbt1 = (NbtList) tag.get("Decorations");
             if (nbt1 == null) {
                 error("Couldn't locate the mansion. Are you holding a (highlight)woodland explorer map(default)?");
@@ -184,7 +184,7 @@ public class LocateCommand extends Command {
         builder.then(literal("monument").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() == Items.FILLED_MAP) {
-                NbtCompound tag = stack.getTag();
+                NbtCompound tag = stack.getNbt();
                 NbtList nbt1 = (NbtList) tag.get("Decorations");
                 if (nbt1 != null) {
                     NbtCompound iconNBT = nbt1.getCompound(0);

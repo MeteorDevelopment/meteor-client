@@ -147,7 +147,7 @@ public class WaypointsModule extends Module {
     private void fillTable(GuiTheme theme, WTable table) {
         // Create
         WButton create = table.add(theme.button("Create")).expandX().widget();
-        create.action = () -> mc.openScreen(new EditWaypointScreen(theme, null, () -> {
+        create.action = () -> mc.setScreen(new EditWaypointScreen(theme, null, () -> {
             table.clear();
             fillTable(theme, table);
         }));
@@ -176,7 +176,7 @@ public class WaypointsModule extends Module {
 
             // Edit
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-            edit.action = () -> mc.openScreen(new EditWaypointScreen(theme, waypoint, null));
+            edit.action = () -> mc.setScreen(new EditWaypointScreen(theme, waypoint, null));
 
             // Remove
             WMinus remove = table.add(theme.minus()).widget();
@@ -256,7 +256,7 @@ public class WaypointsModule extends Module {
             table.add(theme.label("Color:"));
             list = table.add(theme.horizontalList()).widget();
             list.add(theme.quad(waypoint.color));
-            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> mc.openScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
+            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> mc.setScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();

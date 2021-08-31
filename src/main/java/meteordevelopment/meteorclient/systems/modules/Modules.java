@@ -28,8 +28,8 @@ import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.search.Search;
-import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
+import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -515,6 +515,7 @@ public class Modules extends System<Modules> {
         add(new SpawnProofer());
         add(new Timer());
         add(new VeinMiner());
+        add(new HighwayBuilder());
     }
 
     private void initMisc() {

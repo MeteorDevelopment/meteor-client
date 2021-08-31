@@ -278,7 +278,7 @@ public class Notebot extends Module {
             table.add(theme.label("No songs found.")).expandCellX();
             table.row();
             WButton help = table.add(theme.button("Help")).expandCellX().widget();
-            help.action = () -> mc.openScreen(new NotebotHelpScreen(theme));
+            help.action = () -> mc.setScreen(new NotebotHelpScreen(theme));
         }
         return table;
     }

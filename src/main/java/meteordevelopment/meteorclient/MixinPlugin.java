@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
+    private boolean isOriginsPresent = false;
+
     @Override
     public void onLoad(String mixinPackage) {
         try {
@@ -45,6 +47,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
         } catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
+
+        for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
+            if (mod.getMetadata().getId().equals("origins")) isOriginsPresent = true;
+        }
     }
 
     @Override
@@ -54,6 +60,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
+            return !isOriginsPresent;
+        }
+
         return true;
     }
 

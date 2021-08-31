@@ -38,7 +38,7 @@ public class HudTab extends Tab {
 
     @Override
     public void openScreen(GuiTheme theme) {
-        mc.openScreen(createScreen(theme));
+        mc.setScreen(createScreen(theme));
     }
 
     @Override
@@ -91,7 +91,7 @@ public class HudTab extends Tab {
             if (hoveredModule != null) {
                 if (button == GLFW.GLFW_MOUSE_BUTTON_RIGHT) {
                     if (!selectedElements.isEmpty()) selectedElements.clear();
-                    mc.openScreen(new HudElementScreen(theme, hoveredModule));
+                    mc.setScreen(new HudElementScreen(theme, hoveredModule));
                 }
                 else {
                     dragging = true;

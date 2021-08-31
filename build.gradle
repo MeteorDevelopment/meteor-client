@@ -30,7 +30,7 @@ repositories {
 dependencies {
 	// Minecraft
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_version}:v2"
+	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API
@@ -56,9 +56,16 @@ processResources {
 
     duplicatesStrategy = DuplicatesStrategy.WARN
 
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
+    from(sourceSets.main.resources.srcDirs) {
+		include "fabric.mod.json"
+		expand "version": project.version
+
+        filter { line -> line.replace("@mc_version@", project.minecraft_version) }
+	}
+
+	from(sourceSets.main.resources.srcDirs) {
+		exclude "fabric.mod.json"
+	}
 }
 
 tasks.withType(JavaCompile).configureEach {

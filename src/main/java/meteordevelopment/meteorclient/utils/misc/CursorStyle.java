@@ -18,8 +18,8 @@ public enum CursorStyle {
     public long getGlfwCursor() {
         if (!created) {
             switch (this) {
-                case Click: cursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_HAND_CURSOR); break;
-                case Type:  cursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_IBEAM_CURSOR); break;
+                case Click -> cursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_HAND_CURSOR);
+                case Type -> cursor = GLFW.glfwCreateStandardCursor(GLFW.GLFW_IBEAM_CURSOR);
             }
 
             created = true;

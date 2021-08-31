@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.utils.Utils;
 
 import java.util.Locale;
 
@@ -107,7 +108,7 @@ public class WDoubleEdit extends WHorizontalList {
     }
 
     public void set(double value) {
-        this.value = value;
+		this.value = value;
 
         textBox.set(valueString());
         if (slider != null) slider.set(value);

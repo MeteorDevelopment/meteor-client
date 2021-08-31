@@ -85,6 +85,7 @@ public class MeteorStarscript {
         if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
         else ChatUtils.error("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
     }
+
     public static void printChatError(Error error) {
         printChatError(-1, error);
     }
@@ -146,7 +147,8 @@ public class MeteorStarscript {
         if (mc.crosshairTarget == null) return Value.null_();
 
         if (mc.crosshairTarget.getType() == HitResult.Type.MISS) return Value.string("");
-        if (mc.crosshairTarget instanceof BlockHitResult hit) return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
+        if (mc.crosshairTarget instanceof BlockHitResult hit)
+            return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
         return wrap(((EntityHitResult) mc.crosshairTarget).getEntity());
     }
 

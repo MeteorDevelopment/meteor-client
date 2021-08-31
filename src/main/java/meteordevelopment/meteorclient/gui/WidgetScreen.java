@@ -310,7 +310,7 @@ public abstract class WidgetScreen extends Screen {
             if (onClose) {
                 taskAfterRender = () -> {
                     locked = true;
-                    mc.openScreen(parent);
+                    mc.setScreen(parent);
                 };
             }
         }

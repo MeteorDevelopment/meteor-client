@@ -5,12 +5,10 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.WallHack;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.color.block.BlockColors;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumer;
 import net.minecraft.client.render.block.BlockModelRenderer;
@@ -18,19 +16,15 @@ import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.BlockRenderView;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(BlockModelRenderer.class)
 public class BlockModelRendererMixin {
-    @Shadow @Final private BlockColors colorMap;
-
     @Inject(method = "renderQuad(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/client/util/math/MatrixStack$Entry;Lnet/minecraft/client/render/model/BakedQuad;FFFFIIIII)V",
-            at = @At("TAIL"))
+        at = @At("TAIL"))
     private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, VertexConsumer vertexConsumer, MatrixStack.Entry matrixEntry, BakedQuad quad, float brightness0, float brightness1, float brightness2, float brightness3, int light0, int light1, int light2, int light3, int overlay, CallbackInfo ci) {
         WallHack wallHack = Modules.get().get(WallHack.class);
         Xray xray = Modules.get().get(Xray.class);
@@ -38,21 +32,20 @@ public class BlockModelRendererMixin {
         if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
             int alpha;
 
-            if(xray.isActive()) {
+            if (xray.isActive()) {
                 alpha = xray.opacity.get();
             } else {
                 alpha = wallHack.opacity.get();
             }
 
             rewriteBuffer(vertexConsumer, alpha);
-        } else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
+        } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
             rewriteBuffer(vertexConsumer, xray.opacity.get());
         }
     }
 
     private void rewriteBuffer(VertexConsumer vertexConsumer, int alpha) {
-        if(vertexConsumer instanceof BufferBuilder) {
-            BufferBuilder bufferBuilder = (BufferBuilder) vertexConsumer;
+        if (vertexConsumer instanceof BufferBuilder bufferBuilder) {
             BufferBuilderAccessor bufferBuilderAccessor = ((BufferBuilderAccessor) bufferBuilder);
 
             int prevOffset = bufferBuilderAccessor.getElementOffset();
