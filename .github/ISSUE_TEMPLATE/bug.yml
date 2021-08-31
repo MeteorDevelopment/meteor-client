@@ -1,21 +1,20 @@
 name: Bug
 description: Report a bug to help us improve Meteor.
-title: "[Bug] "
+title: '[Bug] '
 labels: bug
-
 body:
   - type: textarea
     id: description
     attributes:
       label: Describe the bug
-      description: "A clear and concise description of what the issue is."
+      description: A clear and concise description of what the issue is.
     validations:
       required: true
   - type: textarea
     id: reproducing
     attributes:
       label: Steps to reproduce
-      description: "How do you trigger this bug?"
+      description: How do you trigger this bug?
       value: |
         1.
         2.
@@ -37,7 +36,7 @@ body:
     validations:
       required: true
   - type: dropdown
-    id: operating-systems      
+    id: operating-systems
     attributes:
       label: Operating System
       options:
