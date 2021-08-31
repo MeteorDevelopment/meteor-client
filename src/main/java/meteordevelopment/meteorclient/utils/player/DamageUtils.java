@@ -90,7 +90,9 @@ public class DamageUtils {
         // Get sword damage
         double damage = 0;
         if (charged) {
-            if (entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
+            if (entity.getActiveItem().getItem() == Items.NETHERITE_SWORD) {
+                damage += 8;
+            } else if (entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
                 damage += 7;
             } else if (entity.getActiveItem().getItem() == Items.GOLDEN_SWORD) {
                 damage += 4;
