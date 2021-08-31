@@ -69,10 +69,13 @@ public class Utils {
     public static MinecraftClient mc;
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
-    public static final Color WHITE = new Color(255, 255, 255);
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
+
+    public static final Color WHITE = new Color(255, 255, 255);
+    public static final Color GRAY = new Color(175, 175, 175);
+    public static final Color METEOR = new Color(155, 0, 255);
 
     static {
         df = new DecimalFormat("0");
