@@ -40,6 +40,8 @@ import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -58,7 +60,9 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
+
     public static final List<MeteorAddon> ADDONS = new ArrayList<>();
+    public static MeteorAddon METEOR_ADDON;
 
     public static Screen screenToOpen;
 
@@ -74,10 +78,43 @@ public class MeteorClient implements ClientModInitializer {
         Utils.mc = MinecraftClient.getInstance();
         EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
-        for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
-            ADDONS.add(entrypoint.getEntrypoint());
+        // Meteor pseudo addon
+        {
+            METEOR_ADDON = new MeteorAddon() {
+                @Override
+                public void onInitialize() {}
+            };
+
+            ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
+
+            METEOR_ADDON.name = metadata.getName();
+            METEOR_ADDON.authors = new String[metadata.getAuthors().size()];
+            if (metadata.containsCustomValue("meteor-client:color")) METEOR_ADDON.color.parse(metadata.getCustomValue("meteor-client:color").getAsString());
+
+            int i = 0;
+            for (Person author : metadata.getAuthors()) {
+                METEOR_ADDON.authors[i++] = author.getName();
+            }
         }
 
+        // Addons
+        for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
+            ModMetadata metadata = entrypoint.getProvider().getMetadata();
+            MeteorAddon addon = entrypoint.getEntrypoint();
+
+            addon.name = metadata.getName();
+            addon.authors = new String[metadata.getAuthors().size()];
+            if (metadata.containsCustomValue("meteor-client:color")) addon.color.parse(metadata.getCustomValue("meteor-client:color").getAsString());
+
+            int i = 0;
+            for (Person author : metadata.getAuthors()) {
+                addon.authors[i++] = author.getName();
+            }
+
+            ADDONS.add(addon);
+        }
+
+        // Initialize
         Systems.addPreLoadTask(() -> {
             if (!Modules.get().getFile().exists()) {
                 Modules.get().get(DiscordPresence.class).toggle(false);
