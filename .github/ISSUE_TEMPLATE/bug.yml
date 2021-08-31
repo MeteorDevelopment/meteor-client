@@ -1,0 +1,54 @@
+name: Bug
+description: Report a bug to help us improve Meteor.
+title: "[Bug] "
+lables: bug
+
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the bug
+      description: "A clear and concise description of what the issue is."
+    validations:
+      required: true
+  - type: textarea
+    id: reproducing
+    attributes:
+      label: Steps to reproduce
+      description: "How do you trigger this bug?"
+      value: |
+        1.
+        2.
+        3.
+        ...
+      render: bash
+    validations:
+      required: true
+  - type: input
+    id: meteor-version
+    attributes:
+      label: Meteor Version
+    validations:
+      required: true
+  - type: input
+    id: mc-version
+    attributes:
+      label: Minecraft Version
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating System
+    validations:
+      required: true
+  - type: dropdown
+    id: operating-systems      
+    attributes:
+      label: Operating System
+      options:
+        - label: macOS
+        - label: Windows
+        - label: Linux
+    validations:
+      required: true
