@@ -19,7 +19,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.CreditsManager;
 import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.misc.Names;
@@ -124,7 +123,6 @@ public class MeteorClient implements ClientModInitializer {
 
         // Call onInitialize for addons
         ADDONS.forEach(MeteorAddon::onInitialize);
-        CreditsManager.init();
 
         Modules.get().sortModules();
         Systems.load();
