@@ -165,13 +165,6 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<Boolean> disconnectOnUntrustedPlayer = sgGeneral.add(new BoolSetting.Builder()
-        .name("disconnect-on-untrusted-player")
-        .description("Automatically disconnects when a player not on your friends list appears in render distance.")
-        .defaultValue(false)
-        .build()
-    );
-
     // Render Mine
 
     private final Setting<Boolean> renderMine = sgRenderMine.add(new BoolSetting.Builder()
