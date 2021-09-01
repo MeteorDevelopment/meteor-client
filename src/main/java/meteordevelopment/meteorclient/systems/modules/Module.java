@@ -180,29 +180,13 @@ public abstract class Module implements ISerializable<Module> {
             NbtCompound pasted = NbtIo.readCompressed(new DataInputStream(bis));
             NbtCompound current = this.toTag();
 
-            if (invalidKey(current, pasted) || invalidKey(pasted, current)) return;
+            for (String key : current.getKeys()) if (!pasted.getKeys().contains(key)) return;
+            if (!pasted.getString("name").equals(current.getString("name"))) return;
 
             this.fromTag(pasted);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private boolean invalidKey(NbtCompound tag1, NbtCompound tag2) {
-        for (String key : tag1.getKeys()) {
-            boolean keyFound = false;
-
-            for (String pastedKey : tag2.getKeys()) {
-                if (key.equals(pastedKey)) {
-                    keyFound = true;
-                    break;
-                }
-            }
-
-            if (!keyFound) return true;
-        }
-
-        return false;
     }
 
     @Override
