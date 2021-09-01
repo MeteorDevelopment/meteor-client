@@ -85,18 +85,23 @@ public class MacrosTab extends Tab {
     }
 
     private static class MacroEditorScreen extends WindowScreen {
+        private final boolean isNew;
+
         private final Macro macro;
-        private final boolean isNewMacro;
 
         private WKeybind keybind;
         private boolean binding;
 
         public MacroEditorScreen(GuiTheme theme, Macro m) {
             super(theme, m == null ? "Create Macro" : "Edit Macro");
-            isNewMacro = m == null;
-            this.macro = isNewMacro ? new Macro() : m;
 
-            initWidgets(m);
+            isNew = m == null;
+            macro = isNew ? new Macro() : m;
+        }
+
+        @Override
+        public void initWidgets() {
+            initWidgets(macro);
         }
 
         private void initWidgets(Macro m) {
@@ -112,16 +117,16 @@ public class MacrosTab extends Tab {
             // Messages
             t.add(theme.label("Messages:")).padTop(4).top();
             WTable lines = t.add(theme.table()).widget();
-            fillMessagesTable(lines);
+            initTable(lines);
 
             // Bind
             keybind = add(theme.keybind(macro.keybind)).expandX().widget();
             keybind.actionOnSet = () -> binding = true;
 
             // Apply
-            WButton apply = add(theme.button(isNewMacro ? "Add" : "Apply")).expandX().widget();
+            WButton apply = add(theme.button(isNew ? "Add" : "Apply")).expandX().widget();
             apply.action = () -> {
-                if (isNewMacro) {
+                if (isNew) {
                     if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.keybind.isSet()) {
                         Macros.get().add(macro);
                         onClose();
@@ -135,7 +140,7 @@ public class MacrosTab extends Tab {
             enterAction = apply.action;
         }
 
-        private void fillMessagesTable(WTable lines) {
+        private void initTable(WTable lines) {
             if (macro.messages.isEmpty()) macro.addMessage("");
 
             for (int i = 0; i < macro.messages.size(); i++) {

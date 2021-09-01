@@ -91,8 +91,12 @@ public class PromptBuilder {
     private class PromptScreen extends WindowScreen {
         public PromptScreen(GuiTheme theme) {
             super(theme, PromptBuilder.this.title);
-            this.parent = PromptBuilder.this.parent;
 
+            this.parent = PromptBuilder.this.parent;
+        }
+
+        @Override
+        public void initWidgets() {
             for (String line : messages) {
                 add(theme.label(line)).expandX();
             }

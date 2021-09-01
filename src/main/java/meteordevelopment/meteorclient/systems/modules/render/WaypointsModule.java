@@ -226,16 +226,15 @@ public class WaypointsModule extends Module {
                 this.waypoint.actualDimension = PlayerUtils.getDimension();
 
                 switch (PlayerUtils.getDimension()) {
-                    case Overworld: this.waypoint.overworld = true; break;
-                    case Nether:    this.waypoint.nether = true; break;
-                    case End:       this.waypoint.end = true; break;
+                    case Overworld -> this.waypoint.overworld = true;
+                    case Nether -> this.waypoint.nether = true;
+                    case End -> this.waypoint.end = true;
                 }
             }
-
-            initWidgets();
         }
 
-        private void initWidgets() {
+        @Override
+        public void initWidgets() {
             WTable table = add(theme.table()).expandX().widget();
 
             // Name

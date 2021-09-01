@@ -111,12 +111,11 @@ public class ProfilesTab extends Tab {
             this.action = action;
 
             newProfile.set(oldProfile);
-
-            initWidgets(oldProfile, newProfile.loadOnJoinIps);
         }
 
-        private boolean nameFilter(String text, char character) {
-            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '-' || character == '.';
+        @Override
+        public void initWidgets() {
+            initWidgets(oldProfile, newProfile.loadOnJoinIps);
         }
 
         public void initWidgets(Profile ogProfile, List<String> list) {
@@ -140,7 +139,7 @@ public class ProfilesTab extends Tab {
             // On Server Join
             table.add(theme.label("Load when Joining:"));
             WTable ips = table.add(theme.table()).widget();
-            fillTable(ips, list);
+            initTable(ips, list);
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();
@@ -208,12 +207,7 @@ public class ProfilesTab extends Tab {
             enterAction = save.action;
         }
 
-        private boolean ipFilter(String text, char character) {
-            if (text.contains(":") && character == ':') return false;
-            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
-        }
-
-        private void fillTable(WTable table, List<String> ipList) {
+        private void initTable(WTable table, List<String> ipList) {
             if (ipList.isEmpty()) ipList.add("");
 
             for (int i = 0; i < ipList.size(); i++) {
@@ -248,6 +242,15 @@ public class ProfilesTab extends Tab {
 
                 table.row();
             }
+        }
+
+        private boolean nameFilter(String text, char character) {
+            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '-' || character == '.';
+        }
+
+        private boolean ipFilter(String text, char character) {
+            if (text.contains(":") && character == ':') return false;
+            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
         }
 
         @Override

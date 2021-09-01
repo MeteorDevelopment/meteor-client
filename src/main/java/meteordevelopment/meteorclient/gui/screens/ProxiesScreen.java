@@ -38,16 +38,7 @@ public class ProxiesScreen extends WindowScreen {
     }
 
     @Override
-    protected void init() {
-        super.init();
-
-        initWidgets();
-    }
-
-    private void initWidgets() {
-        clear();
-        checkboxes.clear();
-
+    public void initWidgets() {
         // Proxies
         WTable table = add(theme.table()).expandX().widget();
 
@@ -90,7 +81,7 @@ public class ProxiesScreen extends WindowScreen {
             WMinus remove = table.add(theme.minus()).widget();
             remove.action = () -> {
                 Proxies.get().remove(proxy);
-                initWidgets();
+                reload();
             };
 
             table.row();
@@ -103,12 +94,18 @@ public class ProxiesScreen extends WindowScreen {
     }
 
     protected static class EditProxyScreen extends WindowScreen {
+        private final boolean isNew;
+        private final Proxy proxy;
+
         public EditProxyScreen(GuiTheme theme, Proxy p) {
             super(theme, p == null ? "New Proxy" : "Edit Proxy");
 
-            boolean isNew = p == null;
-            Proxy proxy = p == null ? new Proxy() : p;
+            isNew = p == null;
+            proxy = isNew ? new Proxy() : p;
+        }
 
+        @Override
+        public void initWidgets() {
             // General
             WTable general = add(theme.table()).expandX().widget();
 
