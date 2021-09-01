@@ -312,14 +312,14 @@ public class HighwayBuilder extends Module {
             render(event, blockPosProvider.getFront(), mBlockPos -> canMine(mBlockPos, true), true);
             if (floor.get() == Floor.Replace) render(event, blockPosProvider.getFloor(), mBlockPos -> canMine(mBlockPos, false), true);
             if (railings.get()) render(event, blockPosProvider.getRailings(true), mBlockPos -> canMine(mBlockPos, false), true);
-            if (state == State.MineEChestBlockade) render(event, blockPosProvider.getEChestBlockade(), mBlockPos -> canMine(mBlockPos, true), true);
+            if (state == State.MineEChestBlockade) render(event, blockPosProvider.getEChestBlockade(true), mBlockPos -> canMine(mBlockPos, true), true);
         }
 
         if (renderPlace.get()) {
             render(event, blockPosProvider.getLiquids(), mBlockPos -> canPlace(mBlockPos, true), false);
             if (railings.get()) render(event, blockPosProvider.getRailings(false), mBlockPos -> canPlace(mBlockPos, false), false);
             render(event, blockPosProvider.getFloor(), mBlockPos -> canPlace(mBlockPos, false), false);
-            if (state == State.PlaceEChestBlockade) render(event, blockPosProvider.getEChestBlockade(), mBlockPos -> canPlace(mBlockPos, false), false);
+            if (state == State.PlaceEChestBlockade) render(event, blockPosProvider.getEChestBlockade(false), mBlockPos -> canPlace(mBlockPos, false), false);
         }
     }
 
@@ -588,14 +588,14 @@ public class HighwayBuilder extends Module {
                 int slot = findBlocksToPlacePrioritizeTrash(b);
                 if (slot == -1) return;
 
-                place(b, b.blockPosProvider.getEChestBlockade(), slot, MineEnderChests);
+                place(b, b.blockPosProvider.getEChestBlockade(false), slot, MineEnderChests);
             }
         },
 
         MineEChestBlockade {
             @Override
             protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getEChestBlockade(), true, Center, Forward);
+                mine(b, b.blockPosProvider.getEChestBlockade(true), true, Center, Forward);
             }
         },
 
@@ -991,7 +991,7 @@ public class HighwayBuilder extends Module {
         MBPIterator getFloor();
         MBPIterator getRailings(boolean mine);
         MBPIterator getLiquids();
-        MBPIterator getEChestBlockade();
+        MBPIterator getEChestBlockade(boolean mine);
     }
 
     private class StraightBlockPosProvider implements IBlockPosProvider {
@@ -1159,15 +1159,16 @@ public class HighwayBuilder extends Module {
         }
 
         @Override
-        public MBPIterator getEChestBlockade() {
+        public MBPIterator getEChestBlockade(boolean mine) {
             return new MBPIterator() {
-                private int i, y;
+                private int i = mine ? -1 : 0, y;
                 private int pi, py;
 
                 private MBlockPos get(int i) {
                     pos.set(mc.player).offset(dir.opposite());
 
                     return switch (i) {
+                        case -1 -> pos;
                         default -> pos.offset(dir.opposite());
                         case 1 -> pos.offset(leftDir);
                         case 2 -> pos.offset(rightDir);
@@ -1449,9 +1450,9 @@ public class HighwayBuilder extends Module {
         }
 
         @Override
-        public MBPIterator getEChestBlockade() {
+        public MBPIterator getEChestBlockade(boolean mine) {
             return new MBPIterator() {
-                private int i, y;
+                private int i = mine ? -1 : 0, y;
                 private int pi, py;
 
                 private MBlockPos get(int i) {
@@ -1460,6 +1461,7 @@ public class HighwayBuilder extends Module {
                     pos.set(mc.player).offset(dir2);
 
                     return switch (i) {
+                        case -1 -> pos;
                         default -> pos.offset(dir2);
                         case 1 -> pos.offset(dir2.rotateLeftSkipOne());
                         case 2 -> pos.offset(dir2.rotateLeftSkipOne().opposite());
