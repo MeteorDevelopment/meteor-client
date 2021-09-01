@@ -261,7 +261,7 @@ public class Notebot extends Module {
             table.row();
 
             WButton guide = table.add(theme.button("Guide")).expandX().widget();
-            guide.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide");
+            guide.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
         }
 
         return table;
