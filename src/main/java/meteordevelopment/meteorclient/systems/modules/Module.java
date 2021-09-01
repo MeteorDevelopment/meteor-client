@@ -18,9 +18,15 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
+import net.minecraft.nbt.NbtIo;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.Base64;
 import java.util.Objects;
 
 public abstract class Module implements ISerializable<Module> {
@@ -154,6 +160,49 @@ public abstract class Module implements ISerializable<Module> {
         setVisible(tag.getBoolean("visible"));
 
         return this;
+    }
+
+    public void toClipboard() {
+        try {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            NbtIo.writeCompressed(toTag(), byteArrayOutputStream);
+            mc.keyboard.setClipboard(Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void fromClipboard() {
+        try {
+            byte[] data = Base64.getDecoder().decode(mc.keyboard.getClipboard());
+            ByteArrayInputStream bis = new ByteArrayInputStream(data);
+
+            NbtCompound pasted = NbtIo.readCompressed(new DataInputStream(bis));
+            NbtCompound current = this.toTag();
+
+            if (invalidKey(current, pasted) || invalidKey(pasted, current)) return;
+
+            this.fromTag(pasted);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private boolean invalidKey(NbtCompound tag1, NbtCompound tag2) {
+        for (String key : tag1.getKeys()) {
+            boolean keyFound = false;
+
+            for (String pastedKey : tag2.getKeys()) {
+                if (key.equals(pastedKey)) {
+                    keyFound = true;
+                    break;
+                }
+            }
+
+            if (!keyFound) return true;
+        }
+
+        return false;
     }
 
     @Override
