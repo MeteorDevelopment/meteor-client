@@ -26,21 +26,11 @@ public class AccountsScreen extends WindowScreen {
     }
 
     @Override
-    protected void init() {
-        super.init();
-
-        clear();
-        initWidgets();
-    }
-
-    private void initWidgets() {
+    public void initWidgets() {
         // Accounts
         for (Account<?> account : Accounts.get()) {
             WAccount wAccount = add(theme.account(this, account)).expandX().widget();
-            wAccount.refreshScreenAction = () -> {
-                clear();
-                initWidgets();
-            };
+            wAccount.refreshScreenAction = this::reload;
         }
 
         // Add account
@@ -79,8 +69,7 @@ public class AccountsScreen extends WindowScreen {
 
                 if (add != null) screen.onClose();
                 else if (screen instanceof AccountsScreen s) {
-                    s.clear();
-                    s.initWidgets();
+                    s.reload();
                 }
             }
 

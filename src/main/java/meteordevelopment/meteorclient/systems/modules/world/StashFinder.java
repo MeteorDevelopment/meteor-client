@@ -333,9 +333,16 @@ public class StashFinder extends Module {
     }
 
     private static class ChunkScreen extends WindowScreen {
+        private final Chunk chunk;
+
         public ChunkScreen(GuiTheme theme, Chunk chunk) {
             super(theme, "Chunk at " + chunk.x + ", " + chunk.z);
 
+            this.chunk = chunk;
+        }
+
+        @Override
+        public void initWidgets() {
             WTable t = add(theme.table()).expandX().widget();
 
             // Total

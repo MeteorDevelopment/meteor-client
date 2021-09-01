@@ -20,6 +20,20 @@ public abstract class WindowScreen extends WidgetScreen {
     }
 
     @Override
+    protected void init() {
+        super.init();
+
+        initWidgets();
+    }
+
+    public abstract void initWidgets();
+
+    public void reload() {
+        clear();
+        initWidgets();
+    }
+
+    @Override
     public <W extends WWidget> Cell<W> add(W widget) {
         return window.add(widget);
     }

@@ -173,8 +173,7 @@ public abstract class WidgetScreen extends Screen {
             AtomicBoolean foundFocused = new AtomicBoolean(false);
 
             loopWidgets(root, wWidget -> {
-                if (done.get() || !(wWidget instanceof WTextBox)) return;
-                WTextBox textBox = (WTextBox) wWidget;
+                if (done.get() || !(wWidget instanceof WTextBox textBox)) return;
 
                 if (foundFocused.get()) {
                     textBox.setFocused(true);

@@ -22,33 +22,36 @@ import java.util.List;
 
 public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
     private final Setting<Object2IntMap<StatusEffect>> setting;
-    private final WTextBox filter;
-
-    private String filterText = "";
 
     private WTable table;
+
+    private WTextBox filter;
+    private String filterText = "";
 
     public StatusEffectAmplifierMapSettingScreen(GuiTheme theme, Setting<Object2IntMap<StatusEffect>> setting) {
         super(theme, "Modify Amplifiers");
 
         this.setting = setting;
 
-        // Filter
+        initWidgets();
+    }
+
+    @Override
+    public void initWidgets() {
         filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
         filter.action = () -> {
             filterText = filter.get().trim();
 
             table.clear();
-            initWidgets();
+            initTable();
         };
 
         table = add(theme.table()).expandX().widget();
-
-        initWidgets();
+        initTable();
     }
 
-    private void initWidgets() {
+    private void initTable() {
         List<StatusEffect> statusEffects = new ArrayList<>(setting.get().keySet());
         statusEffects.sort(Comparator.comparing(Names::get));
 
