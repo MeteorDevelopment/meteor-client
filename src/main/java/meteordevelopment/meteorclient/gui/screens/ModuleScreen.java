@@ -19,19 +19,25 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.MinecraftClient;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class ModuleScreen extends WindowScreen {
     private final Module module;
 
-    private final WContainer settings;
-    private final WKeybind keybind;
+    private WContainer settings;
+    private WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
         super(theme, module.title);
-        this.module = module;
 
+        this.module = module;
+    }
+
+    @Override
+    public void initWidgets() {
         // Description
         add(theme.label(module.description, getWindowWidth() / 2.0));
 
@@ -92,5 +98,24 @@ public class ModuleScreen extends WindowScreen {
     @EventHandler
     private void onModuleBindChanged(ModuleBindChangedEvent event) {
         keybind.reset();
+    }
+
+    @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (super.keyPressed(keyCode, scanCode, modifiers)) return true;
+
+        boolean control = MinecraftClient.IS_SYSTEM_MAC ? modifiers == GLFW_MOD_SUPER : modifiers == GLFW_MOD_CONTROL;
+
+        if (control && keyCode == GLFW_KEY_C) {
+            module.toClipboard();
+            return true;
+        }
+        else if (control && keyCode == GLFW_KEY_V) {
+            module.fromClipboard();
+            reload();
+            return true;
+        }
+
+        return false;
     }
 }
