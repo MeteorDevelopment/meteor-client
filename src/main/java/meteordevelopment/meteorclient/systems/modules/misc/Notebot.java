@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.screens.NotebotHelpScreen;
 import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -35,6 +34,7 @@ import net.minecraft.block.NoteBlock;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Util;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -57,85 +57,67 @@ import java.util.List;
 
 public class Notebot extends Module {
 
-    private enum Stage {
-        None,
-        SetUp,
-        Tune,
-        Playing,
-        Preview
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render",false);
-
+    private final SettingGroup sgRender = settings.createGroup("Render", false);
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
-            .name("tick-delay")
-            .description("The delay when loading a song.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(20)
-            .build()
+        .name("tick-delay")
+        .description("The delay when loading a song.")
+        .defaultValue(2)
+        .min(0)
+        .sliderMax(20)
+        .build()
     );
-
     private final Setting<NotebotUtils.InstrumentType> instrument = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.InstrumentType>()
         .name("instrument")
         .description("Select which instrument will be played")
         .defaultValue(NotebotUtils.InstrumentType.NotDrums)
         .build()
     );
-
     private final Setting<Boolean> polyphonic = sgGeneral.add(new BoolSetting.Builder()
-            .name("polyphonic")
-            .description("Whether or not to allow multiple notes to be played at the same time")
-            .defaultValue(true)
-            .build()
+        .name("polyphonic")
+        .description("Whether or not to allow multiple notes to be played at the same time")
+        .defaultValue(true)
+        .build()
     );
-
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-            .name("render")
-            .description("Whether or not to render the outline around the noteblocks.")
-            .defaultValue(true)
-            .build()
+        .name("render")
+        .description("Whether or not to render the outline around the noteblocks.")
+        .defaultValue(true)
+        .build()
     );
-
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
-
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The color of the sides of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 10))
-            .build()
+        .name("side-color")
+        .description("The color of the sides of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 10))
+        .build()
     );
-
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The color of the lines of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 255))
-            .build()
+        .name("line-color")
+        .description("The color of the lines of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 255))
+        .build()
     );
-
     private final List<BlockPos> possibleBlockPos = new ArrayList<>();
-
-    private Stage stage = Stage.None;
-    private boolean isPlaying = false;
-    private final List<ImmutablePair<Integer,Integer>> song = new ArrayList<>();
+    private final List<ImmutablePair<Integer, Integer>> song = new ArrayList<>();
     private final List<Integer> uniqueNotes = new ArrayList<>();
     private final HashMap<Integer, BlockPos> blockPositions = new HashMap<>();
     private final List<BlockPos> scannedNoteblocks = new ArrayList<>();
+    private Stage stage = Stage.None;
+    private boolean isPlaying = false;
     private int currentNote = 0;
     private int currentIndex = 0;
     private int offset = 0;
     private int ticks = 0;
     private boolean noSongsFound = true;
     private WLabel status;
-
     public Notebot() {
-        super(Categories.Misc, "notebot","Plays noteblock nicely");
+        super(Categories.Misc, "notebot", "Plays noteblock nicely");
 
         for (int y = -5; y < 5; y++) {
             for (int x = -5; x < 5; x++) {
@@ -196,10 +178,10 @@ public class Notebot extends Module {
         ticks++;
 
         if (stage == Stage.SetUp) {
-            onTickSetup();
+            setup();
         }
         else if (stage == Stage.Tune) {
-            onTickTune();
+            tune();
         }
         else if (stage == Stage.Preview || stage == Stage.Playing) {
             if (!isPlaying) return;
@@ -228,7 +210,6 @@ public class Notebot extends Module {
         }
     }
 
-
     @Override
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
@@ -239,7 +220,7 @@ public class Notebot extends Module {
         // Pause
         WButton pause = table.add(theme.button(isPlaying ? "Pause" : "Resume")).right().widget();
         pause.action = () -> {
-            Pause();
+            pause();
             pause.set(isPlaying ? "Pause" : "Resume");
             status.set(getStatus());
         };
@@ -270,38 +251,41 @@ public class Notebot extends Module {
                     table.row();
                 }
             });
-        }  catch (IOException e) {
-            table.add(theme.label("Missing \"notebot\" folder.")).expandCellX();
+        } catch (IOException e) {
+            table.add(theme.label("Missing meteor-client/notebot folder.")).expandCellX();
             table.row();
         }
+
         if (noSongsFound) {
             table.add(theme.label("No songs found.")).expandCellX();
             table.row();
-            WButton help = table.add(theme.button("Help")).expandCellX().widget();
-            help.action = () -> mc.setScreen(new NotebotHelpScreen(theme));
+
+            WButton guide = table.add(theme.button("Guide")).expandX().widget();
+            guide.action = () -> Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Swarm-Guide");
         }
+
         return table;
     }
 
     private String getStatus() {
         if (!this.isActive()) return "Module disabled.";
         if (song.isEmpty()) return "No song loaded.";
-        if (isPlaying) return String.format("Playing song. %d/%d",currentIndex,song.size());
+        if (isPlaying) return String.format("Playing song. %d/%d", currentIndex, song.size());
         if (stage == Stage.Playing || stage == Stage.Preview) return "Ready to play.";
         if (stage == Stage.SetUp || stage == Stage.Tune) return "Setting up the noteblocks.";
         else return String.format("Stage: %s.", stage.toString());
     }
 
     public void printStatus() {
-        info( getStatus());
+        info(getStatus());
     }
 
     private String getFileLabel(Path file) {
         return file
-                .getFileName()
-                .toString()
-                .replace(".txt","")
-                .replace(".nbs","");
+            .getFileName()
+            .toString()
+            .replace(".txt", "")
+            .replace(".nbs", "");
     }
 
     private boolean isValidFile(Path file) {
@@ -310,12 +294,11 @@ public class Notebot extends Module {
         else return extension.equals("nbs");
     }
 
-    public void Play() {
+    public void play() {
         if (mc.player == null) return;
         if (mc.player.getAbilities().creativeMode && stage != Stage.Preview) {
             error("You need to be in survival mode.");
-        }
-        else if (stage == Stage.Preview || stage == Stage.Playing) {
+        } else if (stage == Stage.Preview || stage == Stage.Playing) {
             isPlaying = true;
             info("Playing.");
         } else {
@@ -323,7 +306,7 @@ public class Notebot extends Module {
         }
     }
 
-    public void Pause() {
+    public void pause() {
         if (!isActive()) toggle();
         if (isPlaying) {
             info("Pausing.");
@@ -362,9 +345,9 @@ public class Notebot extends Module {
     public void previewSong(File file) {
         if (!isActive()) toggle();
         if (loadFileToMap(file)) {
-            info("Song \"%s\" loaded.",getFileLabel(file.toPath()));
+            info("Song \"%s\" loaded.", getFileLabel(file.toPath()));
             stage = Stage.Preview;
-            Play();
+            play();
         }
     }
 
@@ -373,7 +356,7 @@ public class Notebot extends Module {
             song.add(new ImmutablePair<>(tick, value));
         } else if (song.size() == 0) {
             song.add(new ImmutablePair<>(tick, value));
-        } else if (song.get(song.size()-1).left != tick) {
+        } else if (song.get(song.size() - 1).left != tick) {
             song.add(new ImmutablePair<>(tick, value));
         }
     }
@@ -398,13 +381,13 @@ public class Notebot extends Module {
         try {
             data = Files.readAllLines(file.toPath());
         } catch (IOException e) {
-            error("Error while reading \"%s\"",file.getName());
+            error("Error while reading \"%s\"", file.getName());
             return false;
         }
         resetVariables();
         for (int i = 0; i < data.size(); i++) {
             String[] parts = data.get(i).split(":");
-            if (parts.length<2) {
+            if (parts.length < 2) {
                 warning("Malformed line %d", i);
                 continue;
             }
@@ -413,7 +396,7 @@ public class Notebot extends Module {
             try {
                 key = Integer.parseInt(parts[0]);
                 val = Integer.parseInt(parts[1]);
-                if (parts.length>2) {
+                if (parts.length > 2) {
                     int type = Integer.parseInt(parts[2]);
                     if (!NotebotUtils.isValidIntrumentTextFile(type, instrument.get())) continue;
                 }
@@ -421,11 +404,10 @@ public class Notebot extends Module {
                 warning("Invalid character at line %d", i);
                 continue;
             }
-            addNote(key,val);
+            addNote(key, val);
         }
         return true;
     }
-
 
     private boolean loadNbsFile(File file) {
         Song nbsSong = NBSDecoder.parse(file);
@@ -441,10 +423,10 @@ public class Notebot extends Module {
                 tick *= nbsSong.getDelay();
                 if (note == null) continue;
                 byte instr = note.getInstrument();
-                if (!NotebotUtils.isValidInstrumentNbsFile(instr,instrument.get())) continue;
+                if (!NotebotUtils.isValidInstrumentNbsFile(instr, instrument.get())) continue;
                 int n = Byte.toUnsignedInt(note.getKey());
                 n -= 33; // amazing conversion
-                if (n<0 || n>24) {
+                if (n < 0 || n > 24) {
                     warning("Note at tick %d out of range.", tick);
                     continue;
                 }
@@ -455,19 +437,19 @@ public class Notebot extends Module {
     }
 
     private void scanForNoteblocks() {
-        if (mc.interactionManager==null || mc.world == null || mc.player == null) return;
+        if (mc.interactionManager == null || mc.world == null || mc.player == null) return;
         scannedNoteblocks.clear();
-        int min = (int)(-mc.interactionManager.getReachDistance())-1;
-        int max = (int)mc.interactionManager.getReachDistance()+1;
+        int min = (int) (-mc.interactionManager.getReachDistance()) - 1;
+        int max = (int) mc.interactionManager.getReachDistance() + 1;
         // 5^3 kek
         for (int x = min; x < max; x++) {
             for (int y = min; y < max; y++) {
                 for (int z = min; z < max; z++) {
-                    BlockPos pos = mc.player.getBlockPos().add(x,y,z);
+                    BlockPos pos = mc.player.getBlockPos().add(x, y, z);
                     if (mc.world.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) continue;
                     float reach = mc.interactionManager.getReachDistance();
-                    reach = reach*reach; //^2
-                    if (pos.getSquaredDistance(mc.player.getPos(),false) > reach) continue;
+                    reach = reach * reach; //^2
+                    if (pos.getSquaredDistance(mc.player.getPos(), false) > reach) continue;
                     if (!isValidScanSpot(pos) || !NotebotUtils.isValidInstrument(pos, instrument.get())) continue;
                     scannedNoteblocks.add(pos);
                 }
@@ -483,7 +465,7 @@ public class Notebot extends Module {
             }
         });
         scanForNoteblocks();
-        if (uniqueNotes.size() > possibleBlockPos.size()+scannedNoteblocks.size()) {
+        if (uniqueNotes.size() > possibleBlockPos.size() + scannedNoteblocks.size()) {
             error("Too many notes. %d is the maximum.", possibleBlockPos.size());
             return false;
         }
@@ -499,7 +481,7 @@ public class Notebot extends Module {
         }
     }
 
-    private void onTickSetup() {
+    private void setup() {
         if (ticks < tickDelay.get()) return;
 
         ticks = 0;
@@ -507,7 +489,7 @@ public class Notebot extends Module {
         if (currentNote >= uniqueNotes.size()) {
             stage = Stage.Playing;
             info("Loading done.");
-            Play();
+            play();
             return;
         }
 
@@ -559,9 +541,8 @@ public class Notebot extends Module {
         }
     }
 
-
-    private void onTickTune() {
-        if (ticks<tickDelay.get()) return;
+    private void tune() {
+        if (ticks < tickDelay.get()) return;
         ticks = 0;
         BlockPos pos = blockPositions.get(uniqueNotes.get(currentNote));
         if (pos == null) return;
@@ -648,5 +629,13 @@ public class Notebot extends Module {
         if (pos.getY() > eyesPos.y) return Direction.DOWN;
 
         return Direction.UP;
+    }
+
+    private enum Stage {
+        None,
+        SetUp,
+        Tune,
+        Playing,
+        Preview
     }
 }
