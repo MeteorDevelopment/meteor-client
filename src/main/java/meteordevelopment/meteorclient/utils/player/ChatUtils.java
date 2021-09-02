@@ -27,6 +27,7 @@ public class ChatUtils {
     private static final RainbowColor RAINBOW = new RainbowColor();
 
     private static final List<Pair<String, Supplier<Text>>> customPrefixes = new ArrayList<>();
+    private static String forcedPrefixClassName;
 
     /** Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used. */
     public static void registerCustomPrefix(String packageName, Supplier<Text> supplier) {
@@ -38,6 +39,10 @@ public class ChatUtils {
         }
 
         customPrefixes.add(new Pair<>(packageName, supplier));
+    }
+
+    public static void forceNextPrefixClass(Class<?> klass) {
+        forcedPrefixClassName = klass.getName();
     }
 
     // Default
@@ -123,18 +128,28 @@ public class ChatUtils {
     }
 
     private static Text getPrefix() {
+        if (customPrefixes.isEmpty()) {
+            forcedPrefixClassName = null;
+            return getMeteorPrefix();
+        }
+
         boolean foundChatUtils = false;
         String className = null;
 
-        for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
-            if (foundChatUtils) {
-                if (!element.getClassName().equals(ChatUtils.class.getName())) {
-                    className = element.getClassName();
-                    break;
+        if (forcedPrefixClassName != null) {
+            className = forcedPrefixClassName;
+            forcedPrefixClassName = null;
+        }
+        else {
+            for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+                if (foundChatUtils) {
+                    if (!element.getClassName().equals(ChatUtils.class.getName())) {
+                        className = element.getClassName();
+                        break;
+                    }
+                } else {
+                    if (element.getClassName().equals(ChatUtils.class.getName())) foundChatUtils = true;
                 }
-            }
-            else {
-                if (element.getClassName().equals(ChatUtils.class.getName())) foundChatUtils = true;
             }
         }
 
