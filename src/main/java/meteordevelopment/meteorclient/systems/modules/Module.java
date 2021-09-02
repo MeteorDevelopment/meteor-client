@@ -92,22 +92,29 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatCommandsInfo) ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        if (Config.get().chatCommandsInfo) {
+            ChatUtils.forceNextPrefixClass(getClass());
+            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        }
     }
 
     public void info(Text message) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.sendMsg(title, message);
     }
 
     public void info(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.info(title, message, args);
     }
 
     public void warning(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.warning(title, message, args);
     }
 
     public void error(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.error(title, message, args);
     }
 
