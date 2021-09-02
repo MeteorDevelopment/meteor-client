@@ -40,8 +40,8 @@ body:
     attributes:
       label: Operating System
       options:
-        - label: macOS
-        - label: Windows
-        - label: Linux
+        - macOS
+        - Windows
+        - Linux
     validations:
       required: true
