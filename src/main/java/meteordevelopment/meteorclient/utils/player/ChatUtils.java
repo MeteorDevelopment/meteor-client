@@ -13,13 +13,32 @@ import meteordevelopment.meteorclient.utils.render.color.RainbowColor;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class ChatUtils {
     private static final RainbowColor RAINBOW = new RainbowColor();
+
+    private static final List<Pair<String, Supplier<Text>>> customPrefixes = new ArrayList<>();
+
+    /** Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used. */
+    public static void registerCustomPrefix(String packageName, Supplier<Text> supplier) {
+        for (Pair<String, Supplier<Text>> pair : customPrefixes) {
+            if (pair.getLeft().equals(packageName)) {
+                pair.setRight(supplier);
+                return;
+            }
+        }
+
+        customPrefixes.add(new Pair<>(packageName, supplier));
+    }
 
     // Default
     public static void info(String message, Object... args) {
@@ -79,7 +98,7 @@ public class ChatUtils {
         if (mc.world == null) return;
 
         BaseText message = new LiteralText("");
-        message.append(getMeteorPrefix());
+        message.append(getPrefix());
         if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
 
@@ -103,7 +122,35 @@ public class ChatUtils {
         return prefix;
     }
 
-    private static BaseText getMeteorPrefix() {
+    private static Text getPrefix() {
+        boolean foundChatUtils = false;
+        String className = null;
+
+        for (StackTraceElement element : Thread.currentThread().getStackTrace()) {
+            if (foundChatUtils) {
+                if (!element.getClassName().equals(ChatUtils.class.getName())) {
+                    className = element.getClassName();
+                    break;
+                }
+            }
+            else {
+                if (element.getClassName().equals(ChatUtils.class.getName())) foundChatUtils = true;
+            }
+        }
+
+        if (className == null) return getMeteorPrefix();
+
+        for (Pair<String, Supplier<Text>> pair : customPrefixes) {
+            if (className.startsWith(pair.getLeft())) {
+                Text prefix = pair.getRight().get();
+                return prefix != null ? prefix : getMeteorPrefix();
+            }
+        }
+
+        return getMeteorPrefix();
+    }
+
+    private static Text getMeteorPrefix() {
         BaseText meteor = new LiteralText("");
         BaseText prefix = new LiteralText("");
 
