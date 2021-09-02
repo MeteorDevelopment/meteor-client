@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -223,8 +224,19 @@ public class BetterChat extends Module {
         Text message = event.message;
 
         if (filterRegex.get()) {
-            for (String regexFilter : regexFilters.get()) {
-                if (Pattern.compile(regexFilter).matcher(message.getString()).find()) {
+            for (int i = 0; i < regexFilters.get().size(); i++) {
+                Pattern p;
+                try {
+                    p = Pattern.compile(regexFilters.get().get(i));
+                }
+                catch (PatternSyntaxException e) {
+                    error("Removing Invalid regex: %s", regexFilters.get().get(i));
+                    regexFilters.get().remove(i);
+                    continue;
+                }
+
+
+                if (p.matcher(message.getString()).find()) {
                     event.cancel();
                     return;
                 }
