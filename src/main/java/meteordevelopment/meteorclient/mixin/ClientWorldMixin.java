@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.render.SkyProperties;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -38,8 +39,8 @@ public abstract class ClientWorldMixin {
         if (entity != null) MeteorClient.EVENT_BUS.post(EntityAddedEvent.get(entity));
     }
 
-    @Inject(method = "removeEntity", at = @At("TAIL"))
-    private void onFinishRemovingEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo info) {
+    @Inject(method = "removeEntity", at = @At("HEAD"))
+    private void onRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo info) {
         if (getEntityById(entityId) != null) MeteorClient.EVENT_BUS.post(EntityRemovedEvent.get(getEntityById(entityId)));
     }
 
