@@ -19,69 +19,61 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.*;
-import net.minecraft.client.toast.Toast;
-import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.Identifier;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.ChunkPos;
 
 import java.io.*;
 import java.util.*;
 
 public class StashFinder extends Module {
-    public enum Mode {
-        Chat,
-        Toast
-    }
-
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
-            .name("storage-blocks")
-            .description("Select the storage blocks to search for.")
-            .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
-            .build()
+        .name("storage-blocks")
+        .description("Select the storage blocks to search for.")
+        .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+        .build()
     );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
-            .name("minimum-storage-cont")
-            .description("The minimum amount of storage blocks in a chunk to record the chunk.")
-            .defaultValue(4)
-            .min(1)
-            .build()
+        .name("minimum-storage-cont")
+        .description("The minimum amount of storage blocks in a chunk to record the chunk.")
+        .defaultValue(4)
+        .min(1)
+        .build()
     );
 
     private final Setting<Integer> minimumDistance = sgGeneral.add(new IntSetting.Builder()
-            .name("minimum-distance")
-            .description("The minimum distance you must be from spawn to record a certain chunk.")
-            .defaultValue(0)
-            .min(0)
-            .sliderMax(10000)
-            .build()
+        .name("minimum-distance")
+        .description("The minimum distance you must be from spawn to record a certain chunk.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(10000)
+        .build()
     );
 
     private final Setting<Boolean> sendNotifications = sgGeneral.add(new BoolSetting.Builder()
-            .name("send-notifications")
-            .description("Sends Minecraft notifications when new stashes are found.")
-            .defaultValue(true)
-            .build()
+        .name("notifications")
+        .description("Sends Minecraft notifications when new stashes are found.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<StashFinder.Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("notification-mode")
-            .description("The mode to use for notifications.")
-            .defaultValue(Mode.Toast)
-            .visible(sendNotifications::get)
-            .build()
+    private final Setting<Mode> notificationMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("notification-mode")
+        .description("The mode to use for notifications.")
+        .defaultValue(Mode.Both)
+        .visible(sendNotifications::get)
+        .build()
     );
 
     public List<Chunk> chunks = new ArrayList<>();
@@ -127,26 +119,14 @@ public class StashFinder extends Module {
             saveCsv();
 
             if (sendNotifications.get() && (!chunk.equals(prevChunk) || !chunk.countsEqual(prevChunk))) {
-                if (mode.get() == Mode.Toast) {
-                    mc.getToastManager().add(new Toast() {
-                        private long timer;
-                        private long lastTime = -1;
-
-                        @Override
-                        public Visibility draw(MatrixStack matrices, ToastManager manager, long currentTime) {
-                            if (lastTime == -1) lastTime = currentTime;
-                            else timer += currentTime - lastTime;
-
-                            GL.bindTexture(new Identifier("textures/gui/toasts.png"));
-                            manager.drawTexture(matrices, 0, 0, 0, 32, 160, 32);
-
-                            manager.getGame().textRenderer.draw(matrices, "StashRecorder found stash.", 12.0F, 12.0F, -11534256);
-
-                            return timer >= 32000 ? Visibility.HIDE : Visibility.SHOW;
-                        }
-                    });
-                } else
-                    info("(highlight)Found stash.");
+                switch (notificationMode.get()) {
+                    case Chat -> info("Found stash at (highlight)%s(default), (highlight)%s(default).", chunk.x, chunk.z);
+                    case Toast -> mc.getToastManager().add(new MeteorToast(Items.CHEST, title, "Found Stash!"));
+                    case Both -> {
+                        info("Found stash at (highlight)%s(default), (highlight)%s(default).", chunk.x, chunk.z);
+                        mc.getToastManager().add(new MeteorToast(Items.CHEST, title, "Found Stash!"));
+                    }
+                }
             }
         }
     }
@@ -282,6 +262,12 @@ public class StashFinder extends Module {
 
     private File getCsvFile() {
         return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getWorldName()), "stashes.csv");
+    }
+
+    public enum Mode {
+        Chat,
+        Toast,
+        Both
     }
 
     public static class Chunk {
