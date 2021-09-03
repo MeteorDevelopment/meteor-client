@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.sound.PositionedSoundInstance;
+import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
 import net.minecraft.client.util.math.MatrixStack;
@@ -72,7 +73,7 @@ public class MeteorToast implements Toast {
         if (icon != null) mc.getItemRenderer().renderInGui(icon, 8, 8);
 
         if (!playedSound) {
-            mc.getSoundManager().play(PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, 1.2f, 1));
+            mc.getSoundManager().play(getSound());
             playedSound = true;
         }
 
@@ -97,5 +98,9 @@ public class MeteorToast implements Toast {
     public void setDuration(long duration) {
         this.duration = duration;
         justUpdated = true;
+    }
+
+    public SoundInstance getSound() {
+        return PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, 1.2f, 1);
     }
 }
