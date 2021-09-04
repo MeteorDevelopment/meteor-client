@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 
 public abstract class WindowScreen extends WidgetScreen {
-    private final WWindow window;
+    protected final WWindow window;
     private boolean firstInit = true;
 
     public WindowScreen(GuiTheme theme, String title) {

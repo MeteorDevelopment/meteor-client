@@ -29,10 +29,7 @@ public class ConfigTab extends Tab {
             .name("custom-font")
             .description("Use a custom font.")
             .defaultValue(true)
-            .onChanged(aBoolean -> {
-                Config.get().customFont = aBoolean;
-                if (ConfigTab.currentScreen != null) ConfigTab.currentScreen.invalidate();
-            })
+            .onChanged(aBoolean -> Config.get().customFont = aBoolean)
             .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().customFont))
             .build()
     );
@@ -230,6 +227,12 @@ public class ConfigTab extends Tab {
                         .show();
                 }
             });
+        }
+
+        @Override
+        public void tick() {
+            super.tick();
+            settings.tick(window, theme);
         }
     }
 
