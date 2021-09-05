@@ -67,6 +67,7 @@ public class AccountsScreen extends WindowScreen {
         MeteorExecutor.execute(() -> {
             if (account.fetchInfo() && account.fetchHead()) {
                 Accounts.get().add(account);
+                if (account.login()) Accounts.get().save();
 
                 if (screen != null) {
                     screen.locked = false;
