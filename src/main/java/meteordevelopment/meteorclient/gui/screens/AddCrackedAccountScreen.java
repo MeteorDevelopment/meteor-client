@@ -6,16 +6,14 @@
 package meteordevelopment.meteorclient.gui.screens;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 
-public class AddCrackedAccountScreen extends WindowScreen {
-    public AddCrackedAccountScreen(GuiTheme theme) {
-        super(theme, "Add Cracked Account");
+public class AddCrackedAccountScreen extends AddAccountScreen {
+    public AddCrackedAccountScreen(GuiTheme theme, AccountsScreen parent) {
+        super(theme, "Add Cracked Account", parent);
     }
 
     @Override
@@ -32,12 +30,12 @@ public class AddCrackedAccountScreen extends WindowScreen {
         t.row();
 
         // Add
-        WButton add = t.add(theme.button("Add")).expandX().widget();
+        add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            if(!name.get().isEmpty()) {
+            if (!name.get().isEmpty()) {
                 CrackedAccount account = new CrackedAccount(name.get());
                 if (!(Accounts.get().exists(account))) {
-                    AccountsScreen.addAccount(add, this, account);
+                    AccountsScreen.addAccount(this, account);
                 }
             }
         };
