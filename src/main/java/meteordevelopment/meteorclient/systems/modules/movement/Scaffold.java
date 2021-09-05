@@ -152,7 +152,8 @@ public class Scaffold extends Module {
         renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
 
         if (airPlace.get()) {
-            bp.set(mc.player.getBlockPos().down());
+            Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
+            bp.set(vec.getX(), vec.getY(), vec.getZ());
 
         } else {
             if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
