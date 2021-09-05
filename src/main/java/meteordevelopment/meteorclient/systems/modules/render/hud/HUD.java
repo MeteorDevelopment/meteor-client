@@ -40,39 +40,28 @@ public class HUD extends Module {
     // General
 
     public final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("Scale of the HUD.")
-            .defaultValue(1)
-            .min(0.75)
-            .sliderMin(0.75)
-            .sliderMax(4)
-            .build()
+        .name("scale")
+        .description("Scale of the HUD.")
+        .defaultValue(1)
+        .min(0.75)
+        .sliderMin(0.75)
+        .sliderMax(4)
+        .build()
     );
 
     public final Setting<SettingColor> primaryColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("primary-color")
-            .description("Primary color of text.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
+        .name("primary-color")
+        .description("Primary color of text.")
+        .defaultValue(new SettingColor(255, 255, 255))
+        .build()
     );
 
     public final Setting<SettingColor> secondaryColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("secondary-color")
-            .description("Secondary color of text.")
-            .defaultValue(new SettingColor(175, 175, 175))
-            .build()
+        .name("secondary-color")
+        .description("Secondary color of text.")
+        .defaultValue(new SettingColor(175, 175, 175))
+        .build()
     );
-
-    // Editor
-
-    public final Setting<Integer> snappingRange = sgEditor.add(new IntSetting.Builder()
-            .name("snapping-range")
-            .description("Snapping range in editor.")
-            .defaultValue(6)
-            .build()
-    );
-
-    // Improve vanilla HUD
 
     public final Setting<Boolean> mountHud = sgGeneral.add(new BoolSetting.Builder()
         .name("mount-hud")
@@ -81,9 +70,17 @@ public class HUD extends Module {
         .build()
     );
 
-    public final List<HudElement> elements = new ArrayList<>();
+    // Editor
 
-    private final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
+    public final Setting<Integer> snappingRange = sgEditor.add(new IntSetting.Builder()
+        .name("snapping-range")
+        .description("Snapping range in editor.")
+        .defaultValue(6)
+        .build()
+    );
+
+    public final List<HudElement> elements = new ArrayList<>();
+    public final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
 
     public final Runnable reset = () -> {
         align();

@@ -18,46 +18,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ActiveModulesHud extends HudElement {
-    public enum Sort {
-        Biggest,
-        Smallest
-    }
-
-    public enum ColorMode {
-        Flat,
-        Random,
-        Rainbow
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Sort> sort = sgGeneral.add(new EnumSetting.Builder<Sort>()
-            .name("sort")
-            .description("How to sort active modules.")
-            .defaultValue(ActiveModulesHud.Sort.Biggest)
-            .build()
+        .name("sort")
+        .description("How to sort active modules.")
+        .defaultValue(Sort.Biggest)
+        .build()
     );
 
     private final Setting<Boolean> activeInfo = sgGeneral.add(new BoolSetting.Builder()
-            .name("additional-info")
-            .description("Shows additional info from the module next to the name in the active modules list.")
-            .defaultValue(true)
-            .build()
+        .name("additional-info")
+        .description("Shows additional info from the module next to the name in the active modules list.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ColorMode> colorMode = sgGeneral.add(new EnumSetting.Builder<ColorMode>()
-            .name("color-mode")
-            .description("What color to use for active modules.")
-            .defaultValue(ColorMode.Rainbow)
-            .build()
+        .name("color-mode")
+        .description("What color to use for active modules.")
+        .defaultValue(ColorMode.Rainbow)
+        .build()
     );
 
     private final Setting<SettingColor> flatColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("flat-color")
-            .description("Color for flat color mode.")
-            .defaultValue(new SettingColor(225, 25, 25))
-            .visible(() -> colorMode.get() == ColorMode.Flat)
-            .build()
+        .name("flat-color")
+        .description("Color for flat color mode.")
+        .defaultValue(new SettingColor(225, 25, 25))
+        .visible(() -> colorMode.get() == ColorMode.Flat)
+        .build()
     );
 
     private final Setting<Boolean> outlines = sgGeneral.add(new BoolSetting.Builder()
@@ -72,30 +61,29 @@ public class ActiveModulesHud extends HudElement {
         .description("Outline width")
         .defaultValue(4)
         .min(1)
-        .sliderMin(1)
-        .sliderMax(10)
+        .sliderMin(1).sliderMax(10)
         .visible(outlines::get)
         .build()
     );
 
     private final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("rainbow-speed")
-            .description("Rainbow speed of rainbow color mode.")
-            .defaultValue(0.0035)
-            .sliderMax(0.1)
-            .decimalPlaces(4)
-            .visible(() -> colorMode.get() == ColorMode.Rainbow)
-            .build()
+        .name("rainbow-speed")
+        .description("Rainbow speed of rainbow color mode.")
+        .defaultValue(0.0035)
+        .sliderMax(0.1)
+        .decimalPlaces(4)
+        .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .build()
     );
 
     private final Setting<Double> rainbowSpread = sgGeneral.add(new DoubleSetting.Builder()
-            .name("rainbow-spread")
-            .description("Rainbow spread of rainbow color mode.")
-            .defaultValue(0.025)
-            .sliderMax(0.05)
-            .decimalPlaces(4)
-            .visible(() -> colorMode.get() == ColorMode.Rainbow)
-            .build()
+        .name("rainbow-spread")
+        .description("Rainbow spread of rainbow color mode.")
+        .defaultValue(0.025)
+        .sliderMax(0.05)
+        .decimalPlaces(4)
+        .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .build()
     );
 
     private final List<Module> modules = new ArrayList<>();
@@ -235,12 +223,12 @@ public class ActiveModulesHud extends HudElement {
                 }
 
                 Renderer2D.COLOR.quad(Math.min(prevX, x) - 2 - outlineWidth.get(), Math.max(prevX, x) == x ? y : y - outlineWidth.get(),
-                                  (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
-                                         prevColor, prevColor, color, color); // Left inbetween quad
+                    (Math.max(prevX, x) - 2) - (Math.min(prevX, x) - 2 - outlineWidth.get()), outlineWidth.get(),
+                    prevColor, prevColor, color, color); // Left inbetween quad
 
                 Renderer2D.COLOR.quad(Math.min(prevX + prevTextLength, x + textLength) + 2, Math.min(prevX + prevTextLength, x + textLength) == x + textLength ? y : y - outlineWidth.get(),
-                                  (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
-                                         prevColor, prevColor, color, color); // Right inbetween quad
+                    (Math.max(prevX + prevTextLength, x + textLength) + 2 + outlineWidth.get()) - (Math.min(prevX + prevTextLength, x + textLength) + 2), outlineWidth.get(),
+                    prevColor, prevColor, color, color); // Right inbetween quad
             }
         }
 
@@ -257,5 +245,16 @@ public class ActiveModulesHud extends HudElement {
         }
 
         return width;
+    }
+
+    public enum Sort {
+        Biggest,
+        Smallest
+    }
+
+    public enum ColorMode {
+        Flat,
+        Random,
+        Rainbow
     }
 }

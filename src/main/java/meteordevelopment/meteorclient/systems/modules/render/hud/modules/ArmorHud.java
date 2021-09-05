@@ -15,39 +15,27 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
 public class ArmorHud extends HudElement {
-    public enum Durability {
-        None,
-        Default,
-        Numbers,
-        Percentage
-    }
-
-    public enum Orientation {
-        Horizontal,
-        Vertical
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> flipOrder = sgGeneral.add(new BoolSetting.Builder()
-            .name("flip-order")
-            .description("Flips the order of armor items.")
-            .defaultValue(true)
-            .build()
+        .name("flip-order")
+        .description("Flips the order of armor items.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<ArmorHud.Orientation> orientation = sgGeneral.add(new EnumSetting.Builder<Orientation>()
-            .name("orientation")
-            .description("How to display armor.")
-            .defaultValue(ArmorHud.Orientation.Horizontal)
-            .build()
+    private final Setting<Orientation> orientation = sgGeneral.add(new EnumSetting.Builder<Orientation>()
+        .name("orientation")
+        .description("How to display armor.")
+        .defaultValue(Orientation.Horizontal)
+        .build()
     );
 
-    private final Setting<ArmorHud.Durability> durability = sgGeneral.add(new EnumSetting.Builder<ArmorHud.Durability>()
-            .name("durability")
-            .description("How to display armor durability.")
-            .defaultValue(ArmorHud.Durability.Default)
-            .build()
+    private final Setting<Durability> durability = sgGeneral.add(new EnumSetting.Builder<Durability>()
+        .name("durability")
+        .description("How to display armor durability.")
+        .defaultValue(Durability.Bar)
+        .build()
     );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
@@ -67,7 +55,7 @@ public class ArmorHud extends HudElement {
     public void update(HudRenderer renderer) {
         switch (orientation.get()) {
             case Horizontal -> box.setSize(16 * scale.get() * 4 + 2 * 4, 16 * scale.get());
-            case Vertical   -> box.setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
+            case Vertical -> box.setSize(16 * scale.get(), 16 * scale.get() * 4 + 2 * 4);
         }
     }
 
@@ -95,13 +83,13 @@ public class ArmorHud extends HudElement {
                 armorY = y / scale.get();
             }
 
-            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, (itemStack.isDamageable() && durability.get() == Durability.Default));
+            RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, (itemStack.isDamageable() && durability.get() == Durability.Bar));
 
-            if (itemStack.isDamageable() && !isInEditor() && durability.get() != Durability.Default && durability.get() != Durability.None) {
+            if (itemStack.isDamageable() && !isInEditor() && durability.get() != Durability.Bar && durability.get() != Durability.None) {
                 String message = switch (durability.get()) {
-                    case Numbers    -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
+                    case Total -> Integer.toString(itemStack.getMaxDamage() - itemStack.getDamage());
                     case Percentage -> Integer.toString(Math.round(((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage()));
-                    default         -> "err";
+                    default -> "err";
                 };
 
                 double messageWidth = renderer.textWidth(message);
@@ -128,12 +116,24 @@ public class ArmorHud extends HudElement {
         if (isInEditor()) {
             return switch (i) {
                 default -> Items.NETHERITE_BOOTS.getDefaultStack();
-                case 1  -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2  -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 3  -> Items.NETHERITE_HELMET.getDefaultStack();
+                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
+                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+                case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
             };
         }
 
         return mc.player.getInventory().getArmorStack(i);
+    }
+
+    public enum Durability {
+        None,
+        Bar,
+        Total,
+        Percentage
+    }
+
+    public enum Orientation {
+        Horizontal,
+        Vertical
     }
 }
