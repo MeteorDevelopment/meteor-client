@@ -21,11 +21,17 @@ import net.minecraft.block.Blocks;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class HoleHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    public final Setting<List<Block>> safe = sgGeneral.add(new BlockListSetting.Builder()
+        .name("safe-blocks")
+        .description("Which blocks to consider safe.")
+        .defaultValue(List.of(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK))
+        .build()
+    );
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
         .name("scale")
@@ -34,13 +40,6 @@ public class HoleHud extends HudElement {
         .min(1)
         .sliderMin(1).sliderMax(5)
         .build()
-    );
-
-    public final Setting<List<Block>> safe = sgGeneral.add(new BlockListSetting.Builder()
-            .name("safe-blocks")
-            .description("Which blocks to consider safe.")
-            .defaultValue(Arrays.asList(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK))
-            .build()
     );
 
     private final Color BG_COLOR = new Color(255, 25, 25, 100);
@@ -79,7 +78,7 @@ public class HoleHud extends HudElement {
         Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
         if (!safe.get().contains(block)) return;
 
-        RenderUtils.drawItem(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get(),false);
+        RenderUtils.drawItem(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get(), false);
 
         if (dir == Direction.DOWN) return;
 
@@ -94,7 +93,7 @@ public class HoleHud extends HudElement {
         Renderer2D.COLOR.quad(x, y, (16 * percent) * scale.get(), 16 * scale.get(), BG_COLOR);
         Renderer2D.COLOR.quad(x, y, 16 * scale.get(), 1 * scale.get(), OL_COLOR);
         Renderer2D.COLOR.quad(x, y + 15 * scale.get(), 16 * scale.get(), 1 * scale.get(), OL_COLOR);
-        Renderer2D.COLOR.quad(x, y, 1 * scale.get(), 16 * scale.get(),OL_COLOR);
+        Renderer2D.COLOR.quad(x, y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
         Renderer2D.COLOR.quad(x + 15 * scale.get(), y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);
     }
 

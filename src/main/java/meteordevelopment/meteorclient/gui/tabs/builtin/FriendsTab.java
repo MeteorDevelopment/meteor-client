@@ -43,11 +43,11 @@ public class FriendsTab extends Tab {
         public FriendsScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
 
-            Settings s = new Settings();
+            Settings settings = new Settings();
 
-            SettingGroup sgDefault = s.getDefaultGroup();
+            SettingGroup sgGeneral = settings.getDefaultGroup();
 
-            sgDefault.add(new ColorSetting.Builder()
+            sgGeneral.add(new ColorSetting.Builder()
                     .name("color")
                     .description("The color used to show friends.")
                     .defaultValue(new SettingColor(0, 255, 180))
@@ -56,7 +56,7 @@ public class FriendsTab extends Tab {
                     .build()
             );
 
-            sgDefault.add(new BoolSetting.Builder()
+            sgGeneral.add(new BoolSetting.Builder()
                     .name("attack")
                     .description("Whether to attack friends.")
                     .defaultValue(false)
@@ -65,8 +65,8 @@ public class FriendsTab extends Tab {
                     .build()
             );
 
-            s.onActivated();
-            add(theme.settings(s)).expandX();
+            settings.onActivated();
+            add(theme.settings(settings)).expandX();
 
             // Friends
             WSection friends = add(theme.section("Friends")).expandX().widget();
