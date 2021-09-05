@@ -100,6 +100,7 @@ public class MeteorToast implements Toast {
         justUpdated = true;
     }
 
+    // Addons: @Override this method in a subclass if you want a different sound
     public SoundInstance getSound() {
         return PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, 1.2f, 1);
     }
