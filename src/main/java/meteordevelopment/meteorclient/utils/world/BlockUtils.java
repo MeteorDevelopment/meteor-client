@@ -141,7 +141,7 @@ public class BlockUtils {
         return canPlace(blockPos, true);
     }
 
-    private static Direction getPlaceSide(BlockPos blockPos) {
+    public static Direction getPlaceSide(BlockPos blockPos) {
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
             Direction side2 = side.getOpposite();
