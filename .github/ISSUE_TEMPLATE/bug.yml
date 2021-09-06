@@ -3,6 +3,13 @@ description: Report a bug to help us improve Meteor.
 title: '[Bug] '
 labels: bug
 body:
+  - type: markdown
+    value: |
+      ## Before making sure your bug report
+
+      1. Wasn't already reported.
+      2. Is a valid bug (check every module and their settings).
+      3. Provide as much information as possible, videos, crash reports, etc.
   - type: textarea
     id: description
     attributes:
