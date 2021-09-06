@@ -3,6 +3,13 @@ description: Suggest a new feature or change for Meteor.
 title: '[Suggestion] '
 labels: enhancement
 body:
+  - type: markdown
+    value: |
+      ## Before making your suggestion
+
+      1. Wasn't already suggested.
+      2. Doesn't already exist in the client (check every module and their settings).
+      3. Is a valid suggestion (check the FAQ, Installation, and Guides).
   - type: textarea
     id: description
     attributes:
