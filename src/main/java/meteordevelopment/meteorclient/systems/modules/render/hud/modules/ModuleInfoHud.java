@@ -20,31 +20,31 @@ public class ModuleInfoHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<Module>> modules = sgGeneral.add(new ModuleListSetting.Builder()
-            .name("modules")
-            .description("Which modules to display")
-            .defaultValue(getDefaultModules())
-            .build()
+        .name("modules")
+        .description("Which modules to display")
+        .defaultValue(getDefaultModules())
+        .build()
     );
 
     private final Setting<Boolean> info = sgGeneral.add(new BoolSetting.Builder()
-            .name("additional-info")
-            .description("Shows additional info from the module next to the name in the module info list.")
-            .defaultValue(true)
-            .build()
+        .name("additional-info")
+        .description("Shows additional info from the module next to the name in the module info list.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<SettingColor> onColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("on-color")
-            .description("Color when module is on.")
-            .defaultValue(new SettingColor(25, 225, 25))
-            .build()
+        .name("on-color")
+        .description("Color when module is on.")
+        .defaultValue(new SettingColor(25, 225, 25))
+        .build()
     );
 
     private final Setting<SettingColor> offColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("off-color")
-            .description("Color when module is off.")
-            .defaultValue(new SettingColor(225, 25, 25))
-            .build()
+        .name("off-color")
+        .description("Color when module is off.")
+        .defaultValue(new SettingColor(225, 25, 25))
+        .build()
     );
 
     public ModuleInfoHud(HUD hud) {
@@ -94,7 +94,7 @@ public class ModuleInfoHud extends HudElement {
         renderer.text(module.title, x, y, hud.primaryColor.get());
 
         String info = getModuleInfo(module);
-        renderer.text(info,x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, module.isActive() ? onColor.get() : offColor.get());
+        renderer.text(info, x + renderer.textWidth(module.title) + renderer.textWidth(" "), y, module.isActive() ? onColor.get() : offColor.get());
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {

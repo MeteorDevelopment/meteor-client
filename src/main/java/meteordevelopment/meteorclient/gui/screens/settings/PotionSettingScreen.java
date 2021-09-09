@@ -13,9 +13,16 @@ import meteordevelopment.meteorclient.settings.PotionSetting;
 import meteordevelopment.meteorclient.utils.misc.MyPotion;
 
 public class PotionSettingScreen extends WindowScreen {
+    private final PotionSetting setting;
+
     public PotionSettingScreen(GuiTheme theme, PotionSetting setting) {
         super(theme, "Select Potion");
 
+        this.setting = setting;
+    }
+
+    @Override
+    public void initWidgets() {
         WTable table = add(theme.table()).expandX().widget();
 
         for (MyPotion potion : MyPotion.values()) {

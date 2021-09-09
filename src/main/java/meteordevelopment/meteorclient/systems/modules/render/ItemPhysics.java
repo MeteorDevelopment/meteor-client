@@ -46,7 +46,7 @@ public class ItemPhysics extends Module {
         IItemEntity rotator = (IItemEntity) event.itemEntity;
         boolean renderBlockFlat = false;
 
-        if ( event.itemEntity.getStack().getItem() instanceof BlockItem && !(event.itemEntity.getStack().getItem() instanceof AliasedBlockItem)) {
+        if (event.itemEntity.getStack().getItem() instanceof BlockItem && !(event.itemEntity.getStack().getItem() instanceof AliasedBlockItem)) {
             Block b = ((BlockItem) event.itemEntity.getStack().getItem()).getBlock();
             VoxelShape shape = b.getOutlineShape(b.getDefaultState(), event.itemEntity.world, event.itemEntity.getBlockPos(), ShapeContext.absent());
 
@@ -81,27 +81,18 @@ public class ItemPhysics extends Module {
 
             if (event.itemEntity.getStack().getItem() instanceof AliasedBlockItem) {
                 event.matrixStack.translate(0, 0, .195);
-            }
-
-            else if (!(event.itemEntity.getStack().getItem() instanceof BlockItem)) {
+            } else if (!(event.itemEntity.getStack().getItem() instanceof BlockItem)) {
                 event.matrixStack.translate(0, 0, .195);
             }
-        }
-
-        else if (event.itemEntity.getStack().getItem() instanceof AliasedBlockItem){
+        } else if (event.itemEntity.getStack().getItem() instanceof AliasedBlockItem) {
             event.matrixStack.translate(0, .185, .0);
             event.matrixStack.multiply(Vec3f.POSITIVE_Z.getRadialQuaternion((float) rotator.getRotation().z));
             event.matrixStack.translate(0, -.185, .0);
             event.matrixStack.translate(0, 0, .195);
-        }
-
-        else if (renderBlockFlat) {
+        } else if (renderBlockFlat) {
             event.matrixStack.multiply(Vec3f.POSITIVE_Y.getRadialQuaternion((float) rotator.getRotation().y));
             event.matrixStack.translate(0, -.065, 0);
-        }
-
-
-        else {
+        } else {
             if (!(event.itemEntity.getStack().getItem() instanceof BlockItem)) {
                 event.matrixStack.translate(0, 0, .195);
             }
@@ -128,13 +119,13 @@ public class ItemPhysics extends Module {
         float x;
         float y;
         if (!hasDepthInGui) {
-            float r = -0.0F * (float)(renderCount) * 0.5F * scaleX;
-            x = -0.0F * (float)(renderCount) * 0.5F * scaleY;
-            y = -0.09375F * (float)(renderCount) * 0.5F * scaleZ;
+            float r = -0.0F * (float) (renderCount) * 0.5F * scaleX;
+            x = -0.0F * (float) (renderCount) * 0.5F * scaleY;
+            y = -0.09375F * (float) (renderCount) * 0.5F * scaleZ;
             event.matrixStack.translate(r, x, y);
         }
 
-        for(int u = 0; u < renderCount; ++u) {
+        for (int u = 0; u < renderCount; ++u) {
             event.matrixStack.push();
             if (u > 0) {
                 if (hasDepthInGui) {
@@ -150,7 +141,7 @@ public class ItemPhysics extends Module {
                 }
             }
 
-            event.itemRenderer.renderItem(itemStack, ModelTransformation.Mode.GROUND, false, event.matrixStack,event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV, bakedModel);
+            event.itemRenderer.renderItem(itemStack, ModelTransformation.Mode.GROUND, false, event.matrixStack, event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV, bakedModel);
 
             event.matrixStack.pop();
 

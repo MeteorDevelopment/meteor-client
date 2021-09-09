@@ -83,18 +83,22 @@ public abstract class Command {
     }
 
     public void info(Text message) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.sendMsg(title, message);
     }
 
     public void info(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.info(title, message, args);
     }
 
     public void warning(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.warning(title, message, args);
     }
 
     public void error(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
         ChatUtils.error(title, message, args);
     }
 }

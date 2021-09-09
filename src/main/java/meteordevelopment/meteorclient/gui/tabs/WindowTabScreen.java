@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 
 public class WindowTabScreen extends TabScreen {
-    private final WWindow window;
+    protected final WWindow window;
 
     public WindowTabScreen(GuiTheme theme, Tab tab) {
         super(theme, tab);

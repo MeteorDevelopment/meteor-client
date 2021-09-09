@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.gui.screens;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.WAccount;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
@@ -17,6 +16,7 @@ import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import org.jetbrains.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
@@ -26,28 +26,18 @@ public class AccountsScreen extends WindowScreen {
     }
 
     @Override
-    protected void init() {
-        super.init();
-
-        clear();
-        initWidgets();
-    }
-
-    private void initWidgets() {
+    public void initWidgets() {
         // Accounts
         for (Account<?> account : Accounts.get()) {
             WAccount wAccount = add(theme.account(this, account)).expandX().widget();
-            wAccount.refreshScreenAction = () -> {
-                clear();
-                initWidgets();
-            };
+            wAccount.refreshScreenAction = this::reload;
         }
 
         // Add account
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
-        addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme)));
-        addButton(l, "Premium", () -> mc.setScreen(new AddPremiumAccountScreen(theme)));
+        addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme, this)));
+        addButton(l, "Premium", () -> mc.setScreen(new AddPremiumAccountScreen(theme, this)));
         addButton(l, "Microsoft", () -> {
             locked = true;
 
@@ -56,11 +46,11 @@ public class AccountsScreen extends WindowScreen {
 
                 if (refreshToken != null) {
                     MicrosoftAccount account = new MicrosoftAccount(refreshToken);
-                    addAccount(null, this, account);
+                    addAccount(null, account);
                 }
             });
         });
-        addButton(l, "The Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme)));
+        addButton(l, "The Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme, this)));
     }
 
     private void addButton(WContainer c, String text, Runnable action) {
@@ -68,24 +58,30 @@ public class AccountsScreen extends WindowScreen {
         button.action = action;
     }
 
-    public static void addAccount(WButton add, WidgetScreen screen, Account<?> account) {
-        if (add != null) add.set("...");
-        screen.locked = true;
+    public static void addAccount(@Nullable AddAccountScreen screen, Account<?> account) {
+        if (screen != null) {
+            screen.add.set("...");
+            screen.locked = true;
+        }
 
         MeteorExecutor.execute(() -> {
             if (account.fetchInfo() && account.fetchHead()) {
                 Accounts.get().add(account);
-                screen.locked = false;
+                if (account.login()) Accounts.get().save();
 
-                if (add != null) screen.onClose();
-                else if (screen instanceof AccountsScreen s) {
-                    s.clear();
-                    s.initWidgets();
+                if (screen != null) {
+                    screen.locked = false;
+                    screen.onClose();
+                    screen.parent.reload();
                 }
+
+                return;
             }
 
-            if (add != null) add.set("Add");
-            screen.locked = false;
+            if (screen != null) {
+                screen.add.set("Add");
+                screen.locked = false;
+            }
         });
     }
 }

@@ -33,19 +33,18 @@ public class TextRadarHud extends HudElement {
         .build()
     );
 
-
     private final Setting<Boolean> distance = sgGeneral.add(new BoolSetting.Builder()
-            .name("distance")
-            .description("Shows the distance to the player next to their name.")
-            .defaultValue(false)
-            .build()
+        .name("distance")
+        .description("Shows the distance to the player next to their name.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> friends = sgGeneral.add(new BoolSetting.Builder()
-            .name("display-friends")
-            .description("Whether to show friends or not.")
-            .defaultValue(true)
-            .build()
+        .name("display-friends")
+        .description("Whether to show friends or not.")
+        .defaultValue(true)
+        .build()
     );
 
     private final List<AbstractClientPlayerEntity> players = new ArrayList<>();

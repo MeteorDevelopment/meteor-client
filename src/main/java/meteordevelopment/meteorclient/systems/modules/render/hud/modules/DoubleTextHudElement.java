@@ -13,9 +13,7 @@ public abstract class DoubleTextHudElement extends HudElement {
     protected Color rightColor;
     protected boolean visible = true;
 
-    private String left;
-    private String right;
-
+    private String left, right;
     private double leftWidth;
 
     public DoubleTextHudElement(HUD hud, String name, String description, String left, boolean defaultActive) {
