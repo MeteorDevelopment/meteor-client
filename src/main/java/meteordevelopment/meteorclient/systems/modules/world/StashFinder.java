@@ -235,7 +235,7 @@ public class StashFinder extends Module {
             file.getParentFile().mkdirs();
             Writer writer = new FileWriter(file);
 
-            writer.write("X,Z,Chests,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hopper\n");
+            writer.write("X,Z,Chests,Barrels,Shulkers,EnderChests,Furnaces,DispensersDroppers,Hoppers\n");
             for (Chunk chunk : chunks) chunk.write(writer);
 
             writer.close();
