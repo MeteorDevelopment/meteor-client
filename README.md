@@ -7,6 +7,8 @@
 
 <p align="center">A Minecraft Fabric Utility Mod for the latest Minecraft release.</p>
 
+<p align="center">This fork is designed to work better on p2w Minecraft Servers, so it includes modules like dupe, and it includes Multiconnect.</p>
+
 <div align="center">
     <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/commit-activity/w/MeteorDevelopment/meteor-client" alt="GitHub commit activity"/>
