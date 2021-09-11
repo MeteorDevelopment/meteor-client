@@ -15,9 +15,15 @@ body:
     attributes:
       label: Before submitting a suggestion
       options:
-        - label: This feature doesn't already exist in the client.
-          required: true
-        - label: This wasn't already suggested.
-          required: true
-        - label: This feature is a valid suggestion, according to the FAQ and Guides.
-          required: true
+        - label: |
+            This feature doesn't already exist in the client.
+            (I have checked every module and their settings on the **latest dev build**)
+          required: false
+        - label: |
+            This wasn't already suggested.
+            (I have checked every suggestion on github)
+          required: false
+        - label: |
+            This feature is a valid suggestion.
+            (I have read the FAQs and Guides)
+          required: false
