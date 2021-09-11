@@ -49,7 +49,6 @@ Make sure to include your **discord tag** and **Minecraft ign** so we can give y
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 [Minn](https://github.com/MinnDevelopment) for [Discord Rpc](https://github.com/MinnDevelopment/java-discord-rpc)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
-
 [Earthcomputer](https://github.com/Earthcomputer) for [Multiconnect](https://github.com/Earthcomputer/multiconnect)
 
 ## Licensing
