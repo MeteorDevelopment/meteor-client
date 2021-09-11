@@ -52,6 +52,9 @@ dependencies {
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
     modImplementation "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
     include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
+    
+    // Multiconnect
+    modRuntime 'net.earthcomputer.multiconnect:multiconnect-slim:1.4.15'
 
 	// Other dependencies
 	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
