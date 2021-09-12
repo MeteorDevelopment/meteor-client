@@ -40,7 +40,8 @@ public class ResetCommand extends Command {
                 }))
         ).then(literal("gui").executes(context -> {
             GuiThemes.get().clearWindowConfigs();
-            ChatUtils.info("The ClickGUI positioning has been reset.");
+            GuiThemes.get().settings.get("scale").reset();
+            ChatUtils.info("The ClickGUI positioning and scale has been reset.");
             return SINGLE_SUCCESS;
         })).then(literal("bind")
                 .then(argument("module", ModuleArgumentType.module()).executes(context -> {
