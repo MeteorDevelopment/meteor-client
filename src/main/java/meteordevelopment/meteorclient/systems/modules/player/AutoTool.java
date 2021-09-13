@@ -139,7 +139,7 @@ public class AutoTool extends Module {
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && itemStack.getMaxDamage() - itemStack.getDamage() < itemStack.getMaxDamage() / breakDurability.get();
+        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
