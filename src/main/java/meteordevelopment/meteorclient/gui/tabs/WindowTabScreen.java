@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 
-public class WindowTabScreen extends TabScreen {
+public abstract class WindowTabScreen extends TabScreen {
     protected final WWindow window;
 
     public WindowTabScreen(GuiTheme theme, Tab tab) {

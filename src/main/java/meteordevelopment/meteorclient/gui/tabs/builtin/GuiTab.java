@@ -35,6 +35,11 @@ public class GuiTab extends Tab {
         public GuiScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
 
+            theme.settings.onActivated();
+        }
+
+        @Override
+        public void initWidgets() {
             WTable table = add(theme.table()).expandX().widget();
 
             table.add(theme.label("Theme:"));
@@ -46,7 +51,6 @@ public class GuiTab extends Tab {
                 tab.openScreen(GuiThemes.get());
             };
 
-            theme.settings.onActivated();
             add(theme.settings(theme.settings)).expandX();
         }
     }

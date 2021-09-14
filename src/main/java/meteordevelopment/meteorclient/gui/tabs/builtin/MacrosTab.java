@@ -48,14 +48,7 @@ public class MacrosTab extends Tab {
         }
 
         @Override
-        protected void init() {
-            super.init();
-
-            clear();
-            initWidgets();
-        }
-
-        private void initWidgets() {
+        public void initWidgets() {
             // Macros
             if (Macros.get().getAll().size() > 0) {
                 WTable table = add(theme.table()).expandX().widget();

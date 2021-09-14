@@ -174,7 +174,6 @@ public class ConfigTab extends Tab {
             super(theme, tab);
 
             settings.onActivated();
-            add(theme.settings(settings)).expandX();
 
             onClosed(() -> {
                 String prefix = Config.get().prefix;
@@ -230,8 +229,14 @@ public class ConfigTab extends Tab {
         }
 
         @Override
+        public void initWidgets() {
+            add(theme.settings(settings)).expandX();
+        }
+
+        @Override
         public void tick() {
             super.tick();
+
             settings.tick(window, theme);
         }
     }
