@@ -38,6 +38,7 @@ public class AccountsScreen extends WindowScreen {
 
         addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme, this)));
         addButton(l, "Premium", () -> mc.setScreen(new AddPremiumAccountScreen(theme, this)));
+        addButton(l, "Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme, this)));
         addButton(l, "Microsoft", () -> {
             locked = true;
 
@@ -50,7 +51,6 @@ public class AccountsScreen extends WindowScreen {
                 }
             });
         });
-        addButton(l, "The Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme, this)));
     }
 
     private void addButton(WContainer c, String text, Runnable action) {
@@ -59,10 +59,7 @@ public class AccountsScreen extends WindowScreen {
     }
 
     public static void addAccount(@Nullable AddAccountScreen screen, Account<?> account) {
-        if (screen != null) {
-            screen.add.set("...");
-            screen.locked = true;
-        }
+        if (screen != null) screen.locked = true;
 
         MeteorExecutor.execute(() -> {
             if (account.fetchInfo() && account.fetchHead()) {
@@ -78,10 +75,7 @@ public class AccountsScreen extends WindowScreen {
                 return;
             }
 
-            if (screen != null) {
-                screen.add.set("Add");
-                screen.locked = false;
-            }
+            if (screen != null) screen.locked = false;
         });
     }
 }
