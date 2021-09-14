@@ -35,7 +35,7 @@ public class Surround extends Module {
 
     private final Setting<Boolean> underHeight = sgGeneral.add(new BoolSetting.Builder()
         .name("under-height")
-        .description("Places obsidian next to the block you are standing on. (Bypasses some anti cheats)")
+        .description("Places obsidian next to the block you are standing on. (Bypasses some anticheats blocking surround in air)")
         .defaultValue(true)
         .build()
     );
