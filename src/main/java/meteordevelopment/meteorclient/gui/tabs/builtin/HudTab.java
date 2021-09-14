@@ -71,18 +71,23 @@ public class HudTab extends Tab {
         public HudScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
 
-            this.hud = Modules.get().get(HUD.class);
+            hud = Modules.get().get(HUD.class);
         }
 
         @Override
         protected void init() {
             super.init();
+
             mc.options.hudHidden = false;
         }
 
         @Override
+        public void initWidgets() {} // Unused
+
+        @Override
         public void onClose() {
             super.onClose();
+
             if (theme.hideHUD() && parent instanceof WidgetScreen) mc.options.hudHidden = true;
         }
 

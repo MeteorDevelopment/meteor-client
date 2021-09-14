@@ -55,6 +55,8 @@ public abstract class WidgetScreen extends Screen {
 
     private List<Runnable> onClosed;
 
+    private boolean firstInit = true;
+
     public WidgetScreen(GuiTheme theme, String title) {
         super(new LiteralText(title));
 
@@ -90,6 +92,18 @@ public abstract class WidgetScreen extends Screen {
         MeteorClient.EVENT_BUS.subscribe(this);
         if (theme.hideHUD()) mc.options.hudHidden = true;
         closed = false;
+
+        if (firstInit) {
+            firstInit = false;
+            initWidgets();
+        }
+    }
+
+    public abstract void initWidgets();
+
+    public void reload() {
+        clear();
+        initWidgets();
     }
 
     public void onClosed(Runnable action) {
@@ -199,6 +213,16 @@ public abstract class WidgetScreen extends Screen {
             return true;
         }
 
+        boolean control = MinecraftClient.IS_SYSTEM_MAC ? modifiers == GLFW_MOD_SUPER : modifiers == GLFW_MOD_CONTROL;
+
+        if (control && keyCode == GLFW_KEY_C && toClipboard()) {
+            return true;
+        }
+        else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
+            reload();
+            return true;
+        }
+
         return false;
     }
 
@@ -292,8 +316,7 @@ public abstract class WidgetScreen extends Screen {
             Input.setCursorStyle(CursorStyle.Default);
 
             loopWidgets(root, widget -> {
-                if (widget instanceof WTextBox) {
-                    WTextBox textBox = (WTextBox) widget;
+                if (widget instanceof WTextBox textBox) {
 
                     if (textBox.isFocused()) textBox.setFocused(false);
                 }
@@ -324,6 +347,14 @@ public abstract class WidgetScreen extends Screen {
     }
 
     protected void onClosed() {}
+
+    public boolean toClipboard() {
+        return false;
+    }
+
+    public boolean fromClipboard() {
+        return false;
+    }
 
     @Override
     public boolean shouldCloseOnEsc() {

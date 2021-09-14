@@ -17,7 +17,9 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Pair;
 
 import java.util.List;
@@ -26,19 +28,20 @@ import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
 public class ModulesScreen extends TabScreen {
+
+
     public ModulesScreen(GuiTheme theme) {
         super(theme, Tabs.get().get(0));
+    }
 
-        add(createCategoryContainer());
+    @Override
+    public void initWidgets() {
+        add(new WCategoryController());
 
         // Help
         WVerticalList help = add(theme.verticalList()).pad(4).bottom().widget();
         help.add(theme.label("Left click - Toggle module"));
         help.add(theme.label("Right click - Open module settings"));
-    }
-
-    protected WCategoryController createCategoryContainer() {
-        return new WCategoryController();
     }
 
     // Category
@@ -117,6 +120,23 @@ public class ModulesScreen extends TabScreen {
 
         w.add(l).expandX();
         createSearchW(l, text.get());
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(Modules.get().toTag());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(Modules.get().toTag());
+
+        if (clipboard != null) {
+            Modules.get().fromTag(clipboard);
+            return true;
+        }
+
+        return false;
     }
 
     // Stuff
