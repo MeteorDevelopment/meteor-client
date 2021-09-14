@@ -51,8 +51,8 @@ body:
         - label: |
             This bug wasn't already reported.
             (I have checked every bug report on github)
-          required: false
+          required: true
         - label: |
             This is a valid bug.
             (I am able to reproduce this on the latest dev build)
-          required: false
+          required: true
