@@ -143,9 +143,9 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    public final Setting<Double> pitch40bottomThreshold = sgGeneral.add(new DoubleSetting.Builder()
-        .name("pitch40-bottom-threshold")
-        .description("The bottom height threshold for pitch40.")
+    public final Setting<Double> pitch40lowerBounds = sgGeneral.add(new DoubleSetting.Builder()
+        .name("pitch40-lower-bounds")
+        .description("The bottom height boundary for pitch40.")
         .defaultValue(80)
         .min(0)
         .sliderMax(260)
@@ -153,9 +153,9 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    public final Setting<Double> pitch40upperThreshold = sgGeneral.add(new DoubleSetting.Builder()
-        .name("pitch40-upper-threshold")
-        .description("The upper height threshold for pitch40.")
+    public final Setting<Double> pitch40upperBounds = sgGeneral.add(new DoubleSetting.Builder()
+        .name("pitch40-upper-bounds")
+        .description("The upper height boundary for pitch40.")
         .defaultValue(120)
         .min(0)
         .sliderMax(260)
