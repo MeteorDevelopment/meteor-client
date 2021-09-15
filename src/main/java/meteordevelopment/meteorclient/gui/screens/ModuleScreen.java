@@ -27,6 +27,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public class ModuleScreen extends WindowScreen {
     private final Module module;
 
+    private WContainer settingsContainer;
     private WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
@@ -42,7 +43,8 @@ public class ModuleScreen extends WindowScreen {
 
         // Settings
         if (module.settings.groups.size() > 0) {
-            add(theme.settings(module.settings)).expandX();
+            settingsContainer = add(theme.verticalList()).expandX().widget();
+            settingsContainer.add(theme.settings(module.settings)).expandX();
         }
 
         // Custom widget
@@ -89,7 +91,7 @@ public class ModuleScreen extends WindowScreen {
     @Override
     public void tick() {
         super.tick();
-        module.settings.tick(window, theme);
+        module.settings.tick(settingsContainer, theme);
     }
 
     @EventHandler
