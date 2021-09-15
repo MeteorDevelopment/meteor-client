@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Packet;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Pitch40;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.orbit.EventHandler;
@@ -29,156 +30,185 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
 public class ElytraFly extends Module {
-    public enum ChestSwapMode {
-        Always,
-        Never,
-        WaitForGround
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
 
     // General
 
     public final Setting<ElytraFlightModes> flightMode = sgGeneral.add(new EnumSetting.Builder<ElytraFlightModes>()
-            .name("mode")
-            .description("The mode of flying.")
-            .defaultValue(ElytraFlightModes.Vanilla)
-            .onModuleActivated(flightModesSetting -> onModeChanged(flightModesSetting.get()))
-            .onChanged(this::onModeChanged)
-            .build()
+        .name("mode")
+        .description("The mode of flying.")
+        .defaultValue(ElytraFlightModes.Vanilla)
+        .onModuleActivated(flightModesSetting -> onModeChanged(flightModesSetting.get()))
+        .onChanged(this::onModeChanged)
+        .build()
     );
 
     public final Setting<Boolean> autoTakeOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-take-off")
-            .description("Automatically takes off when you hold jump without needing to double jump.")
-            .defaultValue(false)
-            .build()
+        .name("auto-take-off")
+        .description("Automatically takes off when you hold jump without needing to double jump.")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
     );
 
     public final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
-            .name("elytra-replace")
-            .description("Replaces broken elytra with a new elytra.")
-            .defaultValue(false)
-            .build()
+        .name("elytra-replace")
+        .description("Replaces broken elytra with a new elytra.")
+        .defaultValue(false)
+        .build()
     );
 
     public final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
-            .name("replace-durability")
-            .description("The durability threshold your elytra will be replaced at.")
-            .defaultValue(2)
-            .min(1)
-            .max(Items.ELYTRA.getMaxDamage() - 1)
-            .sliderMax(20)
-            .build()
+        .name("replace-durability")
+        .description("The durability threshold your elytra will be replaced at.")
+        .defaultValue(2)
+        .min(1)
+        .max(Items.ELYTRA.getMaxDamage() - 1)
+        .sliderMax(20)
+        .build()
     );
 
     public final Setting<Double> fallMultiplier = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fall-multiplier")
-            .description("Controls how fast will you go down naturally.")
-            .defaultValue(0.01)
-            .min(0)
-            .build()
+        .name("fall-multiplier")
+        .description("Controls how fast will you go down naturally.")
+        .defaultValue(0.01)
+        .min(0)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
     );
 
     public final Setting<Double> horizontalSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("horizontal-speed")
-            .description("How fast you go forward and backward.")
-            .defaultValue(1)
-            .min(0)
-            .build()
+        .name("horizontal-speed")
+        .description("How fast you go forward and backward.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
     );
 
     public final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("vertical-speed")
-            .description("How fast you go up and down.")
-            .defaultValue(1)
-            .min(0)
-            .build()
+        .name("vertical-speed")
+        .description("How fast you go up and down.")
+        .defaultValue(1)
+        .min(0)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
     );
 
     public final Setting<Boolean> stopInWater = sgGeneral.add(new BoolSetting.Builder()
-            .name("stop-in-water")
-            .description("Stops flying in water.")
-            .defaultValue(true)
-            .build()
+        .name("stop-in-water")
+        .description("Stops flying in water.")
+        .defaultValue(true)
+        .build()
     );
 
     public final Setting<Boolean> dontGoIntoUnloadedChunks = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-unloaded-chunks")
-            .description("Stops you from going into unloaded chunks.")
-            .defaultValue(true)
-            .build()
+        .name("no-unloaded-chunks")
+        .description("Stops you from going into unloaded chunks.")
+        .defaultValue(true)
+        .build()
     );
 
     public final Setting<Boolean> noCrash = sgGeneral.add(new BoolSetting.Builder()
-            .name("no-crash")
-            .description("Stops you from going into walls.")
-            .defaultValue(false)
-            .build()
+        .name("no-crash")
+        .description("Stops you from going into walls.")
+        .defaultValue(false)
+        .build()
     );
 
     public final Setting<Integer> crashLookAhead = sgGeneral.add(new IntSetting.Builder()
-            .name("crash-look-ahead")
-            .description("Distance to look ahead when flying.")
-            .defaultValue(5)
-            .min(1)
-            .max(15)
-            .sliderMin(1)
-            .sliderMax(10)
-            .visible(noCrash::get)
-            .build()
+        .name("crash-look-ahead")
+        .description("Distance to look ahead when flying.")
+        .defaultValue(5)
+        .min(1)
+        .max(15)
+        .sliderMin(1)
+        .sliderMax(10)
+        .visible(noCrash::get)
+        .build()
     );
 
     public final Setting<ChestSwapMode> chestSwap = sgGeneral.add(new EnumSetting.Builder<ChestSwapMode>()
-            .name("chest-swap")
-            .description("Enables ChestSwap when toggling this module.")
-            .defaultValue(ChestSwapMode.Never)
-            .build()
+        .name("chest-swap")
+        .description("Enables ChestSwap when toggling this module.")
+        .defaultValue(ChestSwapMode.Never)
+        .build()
     );
 
     private final Setting<Boolean> instaDrop = sgGeneral.add(new BoolSetting.Builder()
-            .name("insta-drop")
-            .description("Makes you drop out of flight instantly.")
-            .defaultValue(false)
-            .build()
+        .name("insta-drop")
+        .description("Makes you drop out of flight instantly.")
+        .defaultValue(false)
+        .build()
     );
 
+    public final Setting<Double> pitch40bottomThreshold = sgGeneral.add(new DoubleSetting.Builder()
+        .name("pitch40-bottom-threshold")
+        .description("The bottom height threshold for pitch40.")
+        .defaultValue(80)
+        .min(0)
+        .sliderMax(260)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    public final Setting<Double> pitch40upperThreshold = sgGeneral.add(new DoubleSetting.Builder()
+        .name("pitch40-upper-threshold")
+        .description("The upper height threshold for pitch40.")
+        .defaultValue(120)
+        .min(0)
+        .sliderMax(260)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    public final Setting<Double> pitch40rotationSpeed = sgGeneral.add(new DoubleSetting.Builder()
+        .name("pitch40-rotate-speed")
+        .description("The speed for pitch rotation (degrees/tick)")
+        .defaultValue(4)
+        .min(0)
+        .sliderMax(6)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .build()
+    );
 
     // Autopilot
 
+    public final Setting<Boolean> autoPilot = sgAutopilot.add(new BoolSetting.Builder()
+        .name("auto-pilot")
+        .description("Moves forward while elytra flying.")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
+    );
+
     public final Setting<Boolean> useFireworks = sgAutopilot.add(new BoolSetting.Builder()
-            .name("use-fireworks")
-            .description("Uses firework rockets every second of your choice.")
-            .defaultValue(false)
-            .build()
+        .name("use-fireworks")
+        .description("Uses firework rockets every second of your choice.")
+        .defaultValue(false)
+        .visible(autoPilot::get)
+        .build()
     );
 
     public final Setting<Double> autoPilotFireworkDelay = sgAutopilot.add(new DoubleSetting.Builder()
-            .name("firework-delay")
-            .description("The delay in seconds in between using fireworks if \"Use Fireworks\" is enabled.")
-            .min(1)
-            .defaultValue(8)
-            .sliderMax(20)
-            .visible(useFireworks::get)
-            .build()
-    );
-
-    public final Setting<Boolean> moveForward = sgAutopilot.add(new BoolSetting.Builder()
-            .name("move-forward")
-            .description("Moves forward while elytra flying.")
-            .defaultValue(false)
-            .build()
+        .name("firework-delay")
+        .description("The delay in seconds in between using fireworks if \"Use Fireworks\" is enabled.")
+        .min(1)
+        .defaultValue(8)
+        .sliderMax(20)
+        .visible(useFireworks::get)
+        .build()
     );
 
     public final Setting<Double> autoPilotMinimumHeight = sgAutopilot.add(new DoubleSetting.Builder()
-            .name("minimum-height")
-            .description("The minimum height for moving forward.")
-            .defaultValue(120)
-            .min(0)
-            .sliderMax(260)
-            .visible(moveForward::get)
-            .build()
+        .name("minimum-height")
+        .description("The minimum height for autopilot.")
+        .defaultValue(120)
+        .min(0)
+        .sliderMax(260)
+        .visible(autoPilot::get)
+        .build()
     );
 
     private ElytraFlightMode currentMode;
@@ -198,7 +228,7 @@ public class ElytraFly extends Module {
 
     @Override
     public void onDeactivate() {
-        if (moveForward.get()) mc.options.keyForward.setPressed(false);
+        if (autoPilot.get()) mc.options.keyForward.setPressed(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             Modules.get().get(ChestSwap.class).swap();
@@ -235,8 +265,8 @@ public class ElytraFly extends Module {
             currentMode.handleFallMultiplier();
             currentMode.handleAutopilot();
 
-            currentMode.handleHorizontalSpeed();
-            currentMode.handleVerticalSpeed();
+            currentMode.handleHorizontalSpeed(event);
+            currentMode.handleVerticalSpeed(event);
 
             int chunkX = (int) ((mc.player.getX() + currentMode.velX) / 16);
             int chunkZ = (int) ((mc.player.getZ() + currentMode.velZ) / 16);
@@ -280,6 +310,10 @@ public class ElytraFly extends Module {
         switch (mode) {
             case Vanilla:   currentMode = new Vanilla(); break;
             case Packet:    currentMode = new Packet(); break;
+            case Pitch40:
+                currentMode = new Pitch40();
+                autoPilot.set(false); // Pitch 40 is an autopilot of its own
+                break;
         }
     }
 
@@ -332,5 +366,16 @@ public class ElytraFly extends Module {
     @Override
     public String getInfoString() {
         return currentMode.getHudString();
+    }
+
+    public enum ChestSwapMode {
+        Always,
+        Never,
+        WaitForGround
+    }
+
+    public enum AutoPilotMode {
+        Vanilla,
+        Pitch40
     }
 }
