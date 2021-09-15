@@ -21,8 +21,10 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.nbt.NbtCompound;
 
 public class FriendsTab extends Tab {
     public FriendsTab() {
@@ -114,6 +116,23 @@ public class FriendsTab extends Tab {
 
                 table.row();
             }
+        }
+
+        @Override
+        public boolean toClipboard() {
+            return NbtUtils.toClipboard(Friends.get());
+        }
+
+        @Override
+        public boolean fromClipboard() {
+            NbtCompound clipboard = NbtUtils.fromClipboard(Friends.get().toTag());
+
+            if (clipboard != null) {
+                Friends.get().fromTag(clipboard);
+                return true;
+            }
+
+            return false;
         }
     }
 }

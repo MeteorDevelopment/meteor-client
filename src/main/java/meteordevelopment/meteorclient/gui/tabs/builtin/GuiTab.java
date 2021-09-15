@@ -12,7 +12,9 @@ import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WDropdown;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
@@ -52,6 +54,23 @@ public class GuiTab extends Tab {
             };
 
             add(theme.settings(theme.settings)).expandX();
+        }
+
+        @Override
+        public boolean toClipboard() {
+            return NbtUtils.toClipboard(theme.name + " GUI Theme", theme.toTag());
+        }
+
+        @Override
+        public boolean fromClipboard() {
+            NbtCompound clipboard = NbtUtils.fromClipboard(theme.toTag());
+
+            if (clipboard != null) {
+                theme.fromTag(clipboard);
+                return true;
+            }
+
+            return false;
         }
     }
 }

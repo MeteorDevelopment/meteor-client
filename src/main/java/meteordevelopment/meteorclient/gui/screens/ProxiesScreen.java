@@ -20,6 +20,8 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.systems.proxies.ProxyType;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +93,23 @@ public class ProxiesScreen extends WindowScreen {
         // New
         WButton newBtn = add(theme.button("New")).expandX().widget();
         newBtn.action = () -> openEditProxyScreen(null);
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(Proxies.get());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(Proxies.get().toTag());
+
+        if (clipboard != null) {
+            Proxies.get().fromTag(clipboard);
+            return true;
+        }
+
+        return false;
     }
 
     protected static class EditProxyScreen extends WindowScreen {

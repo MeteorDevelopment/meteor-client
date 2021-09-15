@@ -12,11 +12,12 @@ import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.render.PromptBuilder;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
+import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
@@ -231,6 +232,23 @@ public class ConfigTab extends Tab {
             super.tick();
 
             settings.tick(window, theme);
+        }
+
+        @Override
+        public boolean toClipboard() {
+            return NbtUtils.toClipboard(Config.get());
+        }
+
+        @Override
+        public boolean fromClipboard() {
+            NbtCompound clipboard = NbtUtils.fromClipboard(Config.get().toTag());
+
+            if (clipboard != null) {
+                Config.get().fromTag(clipboard);
+                return true;
+            }
+
+            return false;
         }
     }
 
