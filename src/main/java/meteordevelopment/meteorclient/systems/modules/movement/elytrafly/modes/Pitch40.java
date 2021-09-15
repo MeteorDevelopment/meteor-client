@@ -6,10 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
-import meteordevelopment.meteorclient.systems.modules.player.Rotation;
 
 public class Pitch40 extends ElytraFlightMode {
     private boolean pitchingDown = true;
@@ -21,8 +19,8 @@ public class Pitch40 extends ElytraFlightMode {
 
     @Override
     public void onActivate() {
-        if (mc.player.getY() < elytraFly.pitch40upperThreshold.get()) {
-            elytraFly.error("Player is below upper height threshold!");
+        if (mc.player.getY() < elytraFly.pitch40upperBounds.get()) {
+            elytraFly.error("Player must be above upper bounds!");
             elytraFly.toggle();
         }
 
@@ -36,28 +34,23 @@ public class Pitch40 extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (pitchingDown && mc.player.getY() <= elytraFly.pitch40bottomThreshold.get()) {
+        if (pitchingDown && mc.player.getY() <= elytraFly.pitch40lowerBounds.get()) {
             pitchingDown = false;
         }
-        else if (!pitchingDown && mc.player.getY() >= elytraFly.pitch40upperThreshold.get()) {
+        else if (!pitchingDown && mc.player.getY() >= elytraFly.pitch40upperBounds.get()) {
             pitchingDown = true;
         }
-
 
         // Pitch upwards
         if (!pitchingDown && mc.player.getPitch() > -40) {
             pitch -= elytraFly.pitch40rotationSpeed.get();
 
-            if (pitch < -40) {
-                pitch = -40;
-            }
+            if (pitch < -40) pitch = -40;
         // Pitch downwards
         } else if (pitchingDown && mc.player.getPitch() < 40) {
             pitch += elytraFly.pitch40rotationSpeed.get();
 
-            if (pitch > 40) {
-                pitch = 40;
-            }
+            if (pitch > 40) pitch = 40;
         }
 
         mc.player.setPitch(pitch);
