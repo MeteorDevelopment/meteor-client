@@ -36,7 +36,7 @@ public class AddPremiumAccountScreen extends AddAccountScreen {
         add.action = () -> {
             PremiumAccount account = new PremiumAccount(email.get(), password.get());
             if (!email.get().isEmpty() && !password.get().isEmpty() && email.get().contains("@") && !Accounts.get().exists(account)) {
-                AccountsScreen.addAccount(this, account);
+                AccountsScreen.addAccount(this, parent, account);
             }
         };
 

@@ -47,7 +47,7 @@ public class AccountsScreen extends WindowScreen {
 
                 if (refreshToken != null) {
                     MicrosoftAccount account = new MicrosoftAccount(refreshToken);
-                    addAccount(null, account);
+                    addAccount(null, this, account);
                 }
             });
         });
@@ -58,7 +58,7 @@ public class AccountsScreen extends WindowScreen {
         button.action = action;
     }
 
-    public static void addAccount(@Nullable AddAccountScreen screen, Account<?> account) {
+    public static void addAccount(@Nullable AddAccountScreen screen, AccountsScreen parent, Account<?> account) {
         if (screen != null) screen.locked = true;
 
         MeteorExecutor.execute(() -> {
@@ -69,8 +69,9 @@ public class AccountsScreen extends WindowScreen {
                 if (screen != null) {
                     screen.locked = false;
                     screen.onClose();
-                    screen.parent.reload();
                 }
+
+                parent.reload();
 
                 return;
             }
