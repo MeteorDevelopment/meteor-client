@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.render;
+package meteordevelopment.meteorclient.utils.render.prompts;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -20,111 +20,106 @@ import java.util.List;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
-public class PromptBuilder {
+public class YesNoPrompt {
     private final GuiTheme theme;
     private final Screen parent;
+
     private String title = "";
     private final List<String> messages = new ArrayList<>();
+    private String id = null;
+
     private Runnable onYes = () -> {};
     private Runnable onNo = () -> {};
-    private String promptId = null;
 
-    public PromptBuilder() {
+    private YesNoPrompt() {
         this(GuiThemes.get(), mc.currentScreen);
     }
 
-    public PromptBuilder(GuiTheme theme, Screen parent) {
+    private YesNoPrompt(GuiTheme theme, Screen parent) {
         this.theme = theme;
         this.parent = parent;
     }
 
-    public PromptBuilder title(String title) {
+    public static YesNoPrompt create() {
+        return new YesNoPrompt();
+    }
+
+    public static YesNoPrompt create(GuiTheme theme, Screen parent) {
+        return new YesNoPrompt(theme, parent);
+    }
+
+    public YesNoPrompt title(String title) {
         this.title = title;
         return this;
     }
 
-    public PromptBuilder message(String message) {
+    public YesNoPrompt message(String message) {
         this.messages.add(message);
         return this;
     }
 
-    public PromptBuilder message(String message, Object... args) {
+    public YesNoPrompt message(String message, Object... args) {
         this.messages.add(String.format(message, args));
         return this;
     }
 
-    public PromptBuilder onYes(Runnable runnable) {
-        this.onYes = runnable;
+    public YesNoPrompt id(String from) {
+        this.id = from;
         return this;
     }
 
-    public PromptBuilder onNo(Runnable runnable) {
-        this.onNo = runnable;
+    public YesNoPrompt onYes(Runnable action) {
+        this.onYes = action;
         return this;
     }
 
-    public PromptBuilder promptId(String from) {
-        this.promptId = from;
+    public YesNoPrompt onNo(Runnable action) {
+        this.onNo = action;
         return this;
     }
 
     public void show() {
-        if (promptId == null) this.promptId(this.title);
-
-        if (Config.get().dontShowAgainPrompts.contains(promptId)) {
-            onNo.run();
-            return;
-        }
+        if (id == null) this.id(this.title);
+        if (!Config.get().dontShowAgainPrompts.contains(id)) return;
 
         if (!RenderSystem.isOnRenderThread()) {
-            RenderSystem.recordRenderCall(() -> {
-                Screen prompt = new PromptScreen(theme);
-                mc.setScreen(prompt);
-            });
+            RenderSystem.recordRenderCall(() -> mc.setScreen(new PromptScreen(theme)));
         }
         else {
-            Screen prompt = new PromptScreen(theme);
-            mc.setScreen(prompt);
+            mc.setScreen(new PromptScreen(theme));
         }
     }
 
     private class PromptScreen extends WindowScreen {
         public PromptScreen(GuiTheme theme) {
-            super(theme, PromptBuilder.this.title);
+            super(theme, YesNoPrompt.this.title);
 
-            this.parent = PromptBuilder.this.parent;
+            this.parent = YesNoPrompt.this.parent;
         }
 
         @Override
         public void initWidgets() {
-            for (String line : messages) {
-                add(theme.label(line)).expandX();
-            }
-
+            for (String line : messages) add(theme.label(line)).expandX();
             add(theme.horizontalSeparator()).expandX();
 
             WHorizontalList checkboxContainer = add(theme.horizontalList()).expandX().widget();
             WCheckbox dontShowAgainCheckbox = checkboxContainer.add(theme.checkbox(false)).widget();
-            checkboxContainer.add(theme.label("Don't show this prompt again.")).expandX();
+            checkboxContainer.add(theme.label("Don't show this again.")).expandX();
 
             WHorizontalList list = add(theme.horizontalList()).expandX().widget();
 
             WButton yesButton = list.add(theme.button("Yes")).expandX().widget();
             yesButton.action = () -> {
+                if (dontShowAgainCheckbox.checked) Config.get().dontShowAgainPrompts.add(id);
                 onYes.run();
-                this.onClose();
+                onClose();
             };
 
             WButton noButton = list.add(theme.button("No")).expandX().widget();
             noButton.action = () -> {
+                if (dontShowAgainCheckbox.checked) Config.get().dontShowAgainPrompts.add(id);
                 onNo.run();
-                if (dontShowAgainCheckbox.checked)
-                    Config.get().dontShowAgainPrompts.add(promptId);
-                this.onClose();
-            };
-
-            dontShowAgainCheckbox.action = () -> {
-                yesButton.visible = !dontShowAgainCheckbox.checked;
+                onClose();
             };
         }
     }

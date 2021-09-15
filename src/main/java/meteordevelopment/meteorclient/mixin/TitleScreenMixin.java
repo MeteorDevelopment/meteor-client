@@ -42,14 +42,20 @@ public class TitleScreenMixin extends Screen {
                 Version latestVer = new Version(res);
 
                 if (latestVer.isHigherThan(Config.get().version)) {
-                    new PromptBuilder()
+                    YesNoPrompt.create()
                         .title("New Update")
                         .message("A new version of Meteor has been released.")
                         .message("Your version: %s", Config.get().version)
                         .message("Latest version: %s", latestVer)
                         .message("Do you want to update?")
                         .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
-                        .promptId("new-update")
+                        .onNo(() -> OkPrompt.create()
+                            .title("Are you sure?")
+                            .message("Using old versions of Meteor is not recommended")
+                            .message("and could report in issues.")
+                            .id("new-update-no")
+                            .show())
+                        .id("new-update")
                         .show();
                 }
             });

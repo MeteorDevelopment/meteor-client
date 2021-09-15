@@ -15,6 +15,7 @@ public abstract class TabScreen extends WidgetScreen {
 
     public TabScreen(GuiTheme theme, Tab tab) {
         super(theme, tab.name);
+
         this.tab = tab;
     }
 
