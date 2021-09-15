@@ -62,7 +62,8 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
         NbtList valueTag = new NbtList();
 
         for (StatusEffect effect : get()) {
-            valueTag.add(NbtString.of(Registry.STATUS_EFFECT.getId(effect).toString()));
+            Identifier id = Registry.STATUS_EFFECT.getId(effect);
+            if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -75,7 +76,8 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            get().add(Registry.STATUS_EFFECT.get(new Identifier(tagI.asString())));
+            StatusEffect effect = Registry.STATUS_EFFECT.get(new Identifier(tagI.asString()));
+            if (effect != null) get().add(effect);
         }
 
         changed();
