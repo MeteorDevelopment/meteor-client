@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,7 +81,7 @@ public class YesNoPrompt {
 
     public void show() {
         if (id == null) this.id(this.title);
-        if (!Config.get().dontShowAgainPrompts.contains(id)) return;
+        if (Config.get().dontShowAgainPrompts.contains(id)) return;
 
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> mc.setScreen(new PromptScreen(theme)));
@@ -121,6 +122,11 @@ public class YesNoPrompt {
                 onNo.run();
                 onClose();
             };
+        }
+
+        @Override
+        public void renderBackground(MatrixStack matrices) {
+            if (parent == null) renderBackground(matrices, 0);
         }
     }
 }

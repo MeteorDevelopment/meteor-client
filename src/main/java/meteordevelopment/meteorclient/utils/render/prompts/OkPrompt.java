@@ -74,7 +74,7 @@ public class OkPrompt {
 
     public void show() {
         if (id == null) this.id(this.title);
-        if (!Config.get().dontShowAgainPrompts.contains(id)) return;
+        if (Config.get().dontShowAgainPrompts.contains(id)) return;
 
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> mc.setScreen(new PromptScreen(theme)));
