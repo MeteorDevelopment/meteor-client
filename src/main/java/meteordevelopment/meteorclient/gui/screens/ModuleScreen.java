@@ -18,11 +18,11 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.*;
 
 public class ModuleScreen extends WindowScreen {
     private final Module module;
@@ -91,6 +91,7 @@ public class ModuleScreen extends WindowScreen {
     @Override
     public void tick() {
         super.tick();
+
         module.settings.tick(settingsContainer, theme);
     }
 
@@ -100,18 +101,16 @@ public class ModuleScreen extends WindowScreen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) return true;
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(module.title, module.toTag());
+    }
 
-        boolean control = MinecraftClient.IS_SYSTEM_MAC ? modifiers == GLFW_MOD_SUPER : modifiers == GLFW_MOD_CONTROL;
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(module.toTag());
 
-        if (control && keyCode == GLFW_KEY_C) {
-            module.toClipboard();
-            return true;
-        }
-        else if (control && keyCode == GLFW_KEY_V) {
-            module.fromClipboard();
-            reload();
+        if (clipboard != null) {
+            module.fromTag(clipboard);
             return true;
         }
 

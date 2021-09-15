@@ -18,15 +18,9 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
-import net.minecraft.nbt.NbtIo;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
-import java.io.IOException;
-import java.util.Base64;
 import java.util.Objects;
 
 public abstract class Module implements ISerializable<Module> {
@@ -167,33 +161,6 @@ public abstract class Module implements ISerializable<Module> {
         setVisible(tag.getBoolean("visible"));
 
         return this;
-    }
-
-    public void toClipboard() {
-        try {
-            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            NbtIo.writeCompressed(toTag(), byteArrayOutputStream);
-            mc.keyboard.setClipboard(Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void fromClipboard() {
-        try {
-            byte[] data = Base64.getDecoder().decode(mc.keyboard.getClipboard());
-            ByteArrayInputStream bis = new ByteArrayInputStream(data);
-
-            NbtCompound pasted = NbtIo.readCompressed(new DataInputStream(bis));
-            NbtCompound current = this.toTag();
-
-            for (String key : current.getKeys()) if (!pasted.getKeys().contains(key)) return;
-            if (!pasted.getString("name").equals(current.getString("name"))) return;
-
-            this.fromTag(pasted);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
     @Override

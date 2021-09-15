@@ -19,7 +19,9 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.nbt.NbtCompound;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
@@ -84,6 +86,23 @@ public class ProfilesTab extends Tab {
             // Create
             WButton create = table.add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new EditProfileScreen(theme, null, this::reload));
+        }
+
+        @Override
+        public boolean toClipboard() {
+            return NbtUtils.toClipboard(Profiles.get());
+        }
+
+        @Override
+        public boolean fromClipboard() {
+            NbtCompound clipboard = NbtUtils.fromClipboard(Profiles.get().toTag());
+
+            if (clipboard != null) {
+                Profiles.get().fromTag(clipboard);
+                return true;
+            }
+
+            return false;
         }
     }
 

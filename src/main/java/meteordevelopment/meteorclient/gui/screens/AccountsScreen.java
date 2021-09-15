@@ -15,7 +15,9 @@ import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import net.minecraft.nbt.NbtCompound;
 import org.jetbrains.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
@@ -78,5 +80,22 @@ public class AccountsScreen extends WindowScreen {
 
             if (screen != null) screen.locked = false;
         });
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(Accounts.get());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(Accounts.get().toTag());
+
+        if (clipboard != null) {
+            Accounts.get().fromTag(clipboard);
+            return true;
+        }
+
+        return false;
     }
 }

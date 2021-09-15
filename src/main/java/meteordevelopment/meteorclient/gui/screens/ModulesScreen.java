@@ -28,8 +28,6 @@ import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
 public class ModulesScreen extends TabScreen {
-
-
     public ModulesScreen(GuiTheme theme) {
         super(theme, Tabs.get().get(0));
     }
@@ -124,7 +122,7 @@ public class ModulesScreen extends TabScreen {
 
     @Override
     public boolean toClipboard() {
-        return NbtUtils.toClipboard(Modules.get().toTag());
+        return NbtUtils.toClipboard(Modules.get());
     }
 
     @Override
@@ -138,6 +136,9 @@ public class ModulesScreen extends TabScreen {
 
         return false;
     }
+
+    @Override
+    public void reload() {}
 
     // Stuff
 
