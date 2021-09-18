@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
@@ -77,7 +76,7 @@ public class ModuleScreen extends WindowScreen {
         bottom.add(theme.label("Active: "));
         WCheckbox active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
-            if (module.isActive() != active.checked) module.toggle(Utils.canUpdate());
+            if (module.isActive() != active.checked) module.toggle();
         };
 
         //   Visible
