@@ -10,8 +10,10 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
@@ -26,6 +28,15 @@ import meteordevelopment.starscript.Script;
 import meteordevelopment.starscript.compiler.Compiler;
 import meteordevelopment.starscript.compiler.Parser;
 import meteordevelopment.starscript.utils.StarscriptError;
+import net.minecraft.client.gui.screen.*;
+import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
+import net.minecraft.client.gui.screen.option.*;
+import net.minecraft.client.gui.screen.pack.PackScreen;
+import net.minecraft.client.gui.screen.world.CreateWorldScreen;
+import net.minecraft.client.gui.screen.world.EditGameRulesScreen;
+import net.minecraft.client.gui.screen.world.EditWorldScreen;
+import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.realms.gui.screen.RealmsScreen;
 import net.minecraft.util.Util;
 
 import java.util.ArrayList;
@@ -96,7 +107,7 @@ public class DiscordPresence extends Module {
     private static final DiscordRPC instance = DiscordRPC.INSTANCE;
     private SmallImage currentSmallImage;
     private int ticks;
-    private boolean forceUpdate;
+    private boolean forceUpdate, lastWasInMainMenu;
 
     private final List<Script> line1Scripts = new ArrayList<>();
     private int line1Ticks, line1I;
@@ -106,6 +117,8 @@ public class DiscordPresence extends Module {
 
     public DiscordPresence() {
         super(Categories.Misc, "discord-presence", "Displays Meteor as your presence on Discord.");
+
+        runInMainMenu = true;
     }
 
     @Override
@@ -128,6 +141,7 @@ public class DiscordPresence extends Module {
         ticks = 0;
         line1Ticks = 0;
         line2Ticks = 0;
+        lastWasInMainMenu = false;
 
         line1I = 0;
         line2I = 0;
@@ -169,7 +183,6 @@ public class DiscordPresence extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!Utils.canUpdate()) return;
         boolean update = false;
 
         // Image
@@ -182,53 +195,87 @@ public class DiscordPresence extends Module {
         }
         else ticks++;
 
-        // Line 1
-        if (line1Ticks >= line1UpdateDelay.get() || forceUpdate) {
-            if (line1Scripts.size() > 0) {
-                int i = Utils.random(0, line1Scripts.size());
-                if (line1SelectMode.get() == SelectMode.Sequential) {
-                    if (line1I >= line1Scripts.size()) line1I = 0;
-                    i = line1I++;
-                }
+        if (Utils.canUpdate()) {
+            // Line 1
+            if (line1Ticks >= line1UpdateDelay.get() || forceUpdate) {
+                if (line1Scripts.size() > 0) {
+                    int i = Utils.random(0, line1Scripts.size());
+                    if (line1SelectMode.get() == SelectMode.Sequential) {
+                        if (line1I >= line1Scripts.size()) line1I = 0;
+                        i = line1I++;
+                    }
 
-                try {
-                    rpc.details = MeteorStarscript.ss.run(line1Scripts.get(i));
-                } catch (StarscriptError e) {
-                    ChatUtils.error("Starscript", e.getMessage());
+                    try {
+                        rpc.details = MeteorStarscript.ss.run(line1Scripts.get(i));
+                    } catch (StarscriptError e) {
+                        ChatUtils.error("Starscript", e.getMessage());
+                    }
                 }
-            }
-            update = true;
+                update = true;
 
-            line1Ticks = 0;
+                line1Ticks = 0;
+            } else line1Ticks++;
+
+            // Line 2
+            if (line2Ticks >= line2UpdateDelay.get() || forceUpdate) {
+                if (line2Scripts.size() > 0) {
+                    int i = Utils.random(0, line2Scripts.size());
+                    if (line2SelectMode.get() == SelectMode.Sequential) {
+                        if (line2I >= line2Scripts.size()) line2I = 0;
+                        i = line2I++;
+                    }
+
+                    try {
+                        rpc.state = MeteorStarscript.ss.run(line2Scripts.get(i));
+                    } catch (StarscriptError e) {
+                        ChatUtils.error("Starscript", e.getMessage());
+                    }
+                }
+                update = true;
+
+                line2Ticks = 0;
+            } else line2Ticks++;
         }
-        else line1Ticks++;
+        else {
+            if (!lastWasInMainMenu) {
+                rpc.details = "Meteor Client " + (Config.get().devBuild.isEmpty() ? Config.get().version : Config.get().version + " " + Config.get().devBuild);
 
-        // Line 2
-        if (line2Ticks >= line2UpdateDelay.get() || forceUpdate) {
-            if (line2Scripts.size() > 0) {
-                int i = Utils.random(0, line2Scripts.size());
-                if (line2SelectMode.get() == SelectMode.Sequential) {
-                    if (line2I >= line2Scripts.size()) line2I = 0;
-                    i = line2I++;
+                if (mc.currentScreen instanceof TitleScreen) rpc.state = "Looking at title screen";
+                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.state = "Selecting world";
+                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.state = "Creating world";
+                else if (mc.currentScreen instanceof EditWorldScreen) rpc.state = "Editing world";
+                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.state = "Loading world";
+                else if (mc.currentScreen instanceof SaveLevelScreen) rpc.state = "Saving world";
+                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.state = "Selecting server";
+                else if (mc.currentScreen instanceof AddServerScreen) rpc.state = "Adding server";
+                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.state = "Connecting to server";
+                else if (mc.currentScreen instanceof WidgetScreen) rpc.state = "Browsing Meteor's GUI";
+                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.state = "Changing options";
+                else if (mc.currentScreen instanceof CreditsScreen) rpc.state = "Reading credits";
+                else if (mc.currentScreen instanceof RealmsScreen) rpc.state = "Browsing Realms";
+                else {
+                    String className = mc.currentScreen.getClass().getName();
+
+                    if (className.startsWith("com.terraformersmc.modmenu.gui")) rpc.state = "Browsing mods";
+                    else if (className.startsWith("me.jellysquid.mods.sodium.client")) rpc.state = "Changing options";
+                    else rpc.state = "In main menu";
                 }
 
-                try {
-                    rpc.state = MeteorStarscript.ss.run(line2Scripts.get(i));
-                } catch (StarscriptError e) {
-                    ChatUtils.error("Starscript", e.getMessage());
-                }
+                update = true;
             }
-            update = true;
-
-            line2Ticks = 0;
         }
-        else line2Ticks++;
 
         // Update
         if (update) instance.Discord_UpdatePresence(rpc);
         forceUpdate = false;
+        lastWasInMainMenu = !Utils.canUpdate();
 
         instance.Discord_RunCallbacks();
+    }
+
+    @EventHandler
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (!Utils.canUpdate()) lastWasInMainMenu = false;
     }
 
     @Override

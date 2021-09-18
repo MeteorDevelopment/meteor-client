@@ -28,8 +28,8 @@ import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.search.Search;
-import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -267,7 +267,7 @@ public class Modules extends System<Modules> {
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
             for (Module module : modules) {
-                if (module.isActive()) {
+                if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.subscribe(module);
                     module.onActivate();
                 }
@@ -279,7 +279,7 @@ public class Modules extends System<Modules> {
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
             for (Module module : modules) {
-                if (module.isActive()) {
+                if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.unsubscribe(module);
                     module.onDeactivate();
                 }
@@ -290,7 +290,7 @@ public class Modules extends System<Modules> {
     public void disableAll() {
         synchronized (active) {
             for (Module module : modules) {
-                if (module.isActive()) module.toggle(Utils.canUpdate());
+                if (module.isActive()) module.toggle();
             }
         }
     }
