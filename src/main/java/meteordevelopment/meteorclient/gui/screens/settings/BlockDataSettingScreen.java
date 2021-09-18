@@ -48,7 +48,7 @@ public class BlockDataSettingScreen extends WindowScreen {
             filterText = filter.get().trim();
 
             table.clear();
-            initWidgets();
+            initTable();
         };
 
         table = add(theme.table()).expandX().widget();
