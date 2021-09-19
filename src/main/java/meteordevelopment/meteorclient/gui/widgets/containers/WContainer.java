@@ -154,14 +154,14 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public void mouseScrolled(double amount) {
+    public boolean mouseScrolled(double amount) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget())) cell.widget().mouseScrolled(amount);
+                if (propagateEvents(cell.widget()) && cell.widget().mouseScrolled(amount)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        super.mouseScrolled(amount);
+        return super.mouseScrolled(amount);
     }
 
     @Override

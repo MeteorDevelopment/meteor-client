@@ -103,10 +103,10 @@ public abstract class WWidget implements BaseWidget {
     }
     public void onMouseMoved(double mouseX, double mouseY, double lastMouseX, double lastMouseY) {}
 
-    public void mouseScrolled(double amount) {
-        onMouseScrolled(amount);
+    public boolean mouseScrolled(double amount) {
+        return onMouseScrolled(amount);
     }
-    public void onMouseScrolled(double amount) {}
+    public boolean onMouseScrolled(double amount) { return false; }
 
     public boolean keyPressed(int key, int mods) {
         return onKeyPressed(key, mods);
