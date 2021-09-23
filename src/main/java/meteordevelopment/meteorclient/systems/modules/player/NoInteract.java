@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Interaction extends Module {
+public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
     private final SettingGroup sgEntities = settings.createGroup("Entities");
 
@@ -130,7 +130,7 @@ public class Interaction extends Module {
         .build()
     );
 
-    public Interaction() {
+    public NoInteract() {
         super(Categories.Player, "interaction", "Blocks interactions with certain types of inputs.");
     }
 
