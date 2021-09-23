@@ -404,7 +404,7 @@ public class Modules extends System<Modules> {
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new NoBreakDelay());
-        add(new NoInteract());
+        add(new Interaction());
         add(new NoMiningTrace());
         add(new NoRotate());
         add(new OffhandCrash());
