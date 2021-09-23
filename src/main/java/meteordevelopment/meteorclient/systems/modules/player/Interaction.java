@@ -240,19 +240,19 @@ public class Interaction extends Module {
             entityInteract.get().getBoolean(entity.getType());
     }
 
-    private enum HandMode {
+    public enum HandMode {
         Mainhand,
         Offhand,
         Both,
         None
     }
 
-    private enum ListMode {
+    public enum ListMode {
         WhiteList,
         BlackList
     }
 
-    private enum InteractMode {
+    public enum InteractMode {
         Hit,
         Interact,
         Both,
