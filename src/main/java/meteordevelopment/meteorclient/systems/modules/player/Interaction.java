@@ -131,7 +131,7 @@ public class Interaction extends Module {
     );
 
     public Interaction() {
-        super(Categories.Player, "no-interact", "Blocks interactions with certain types of inputs.");
+        super(Categories.Player, "interaction", "Blocks interactions with certain types of inputs.");
     }
 
     @EventHandler(priority = EventPriority.HIGH)
