@@ -35,7 +35,7 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
             if (!name.get().isEmpty()) {
                 CrackedAccount account = new CrackedAccount(name.get());
                 if (!(Accounts.get().exists(account))) {
-                    AccountsScreen.addAccount(this, account);
+                    AccountsScreen.addAccount(this, parent, account);
                 }
             }
         };

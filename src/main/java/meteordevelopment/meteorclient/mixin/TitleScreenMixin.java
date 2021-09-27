@@ -12,7 +12,8 @@ import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.TitleScreenCreditsRenderer;
-import meteordevelopment.meteorclient.utils.render.PromptBuilder;
+import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
+import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.util.math.MatrixStack;
@@ -42,14 +43,20 @@ public class TitleScreenMixin extends Screen {
                 Version latestVer = new Version(res);
 
                 if (latestVer.isHigherThan(Config.get().version)) {
-                    new PromptBuilder()
+                    YesNoPrompt.create()
                         .title("New Update")
                         .message("A new version of Meteor has been released.")
                         .message("Your version: %s", Config.get().version)
                         .message("Latest version: %s", latestVer)
                         .message("Do you want to update?")
                         .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
-                        .promptId("new-update")
+                        .onNo(() -> OkPrompt.create()
+                            .title("Are you sure?")
+                            .message("Using old versions of Meteor is not recommended")
+                            .message("and could report in issues.")
+                            .id("new-update-no")
+                            .show())
+                        .id("new-update")
                         .show();
                 }
             });

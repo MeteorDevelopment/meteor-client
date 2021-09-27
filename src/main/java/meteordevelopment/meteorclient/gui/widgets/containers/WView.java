@@ -119,11 +119,14 @@ public abstract class WView extends WVerticalList {
     }
 
     @Override
-    public void onMouseScrolled(double amount) {
+    public boolean onMouseScrolled(double amount) {
         if (!scrollOnlyWhenMouseOver || mouseOver) {
             targetScroll -= Math.round(theme.scale(amount * 40));
             targetScroll = Utils.clamp(targetScroll, 0, actualHeight - height);
+            return true;
         }
+
+        return false;
     }
 
     @Override

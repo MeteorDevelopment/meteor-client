@@ -29,7 +29,7 @@ public class AddAlteningAccountScreen extends AddAccountScreen {
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
             if (!token.get().isEmpty()) {
-                AccountsScreen.addAccount(this, new TheAlteningAccount(token.get()));
+                AccountsScreen.addAccount(this, parent, new TheAlteningAccount(token.get()));
             }
         };
 

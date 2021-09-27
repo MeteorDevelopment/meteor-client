@@ -17,16 +17,16 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.glfw.GLFW.*;
 
 public class ModuleScreen extends WindowScreen {
     private final Module module;
 
+    private WContainer settingsContainer;
     private WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
@@ -42,7 +42,8 @@ public class ModuleScreen extends WindowScreen {
 
         // Settings
         if (module.settings.groups.size() > 0) {
-            add(theme.settings(module.settings)).expandX();
+            settingsContainer = add(theme.verticalList()).expandX().widget();
+            settingsContainer.add(theme.settings(module.settings)).expandX();
         }
 
         // Custom widget
@@ -75,7 +76,7 @@ public class ModuleScreen extends WindowScreen {
         bottom.add(theme.label("Active: "));
         WCheckbox active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
-            if (module.isActive() != active.checked) module.toggle(Utils.canUpdate());
+            if (module.isActive() != active.checked) module.toggle();
         };
 
         //   Visible
@@ -89,7 +90,8 @@ public class ModuleScreen extends WindowScreen {
     @Override
     public void tick() {
         super.tick();
-        module.settings.tick(window, theme);
+
+        module.settings.tick(settingsContainer, theme);
     }
 
     @EventHandler
@@ -98,18 +100,16 @@ public class ModuleScreen extends WindowScreen {
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (super.keyPressed(keyCode, scanCode, modifiers)) return true;
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(module.title, module.toTag());
+    }
 
-        boolean control = MinecraftClient.IS_SYSTEM_MAC ? modifiers == GLFW_MOD_SUPER : modifiers == GLFW_MOD_CONTROL;
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(module.toTag());
 
-        if (control && keyCode == GLFW_KEY_C) {
-            module.toClipboard();
-            return true;
-        }
-        else if (control && keyCode == GLFW_KEY_V) {
-            module.fromClipboard();
-            reload();
+        if (clipboard != null) {
+            module.fromTag(clipboard);
             return true;
         }
 

@@ -26,7 +26,6 @@ import java.util.Stack;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.opengl.GL11.*;
 
 public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
@@ -74,7 +73,8 @@ public class GuiRenderer {
     public void begin(MatrixStack matrices) {
         this.matrices = matrices;
 
-        glEnable(GL_SCISSOR_TEST);
+        GL.enableBlend();
+        GL.enableScissorTest();
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
@@ -86,7 +86,7 @@ public class GuiRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        glDisable(GL_SCISSOR_TEST);
+        GL.disableScissorTest();
     }
 
     private void beginRender() {
