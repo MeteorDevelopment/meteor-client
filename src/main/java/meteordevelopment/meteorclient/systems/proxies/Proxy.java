@@ -8,13 +8,12 @@ package meteordevelopment.meteorclient.systems.proxies;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 
-import java.util.regex.Pattern;
+import java.net.InetSocketAddress;
 
 public class Proxy implements ISerializable<Proxy> {
-    private static final Pattern IP_PATTERN = Pattern.compile("\\b(?:(?:2(?:[0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9])\\.){3}(?:(?:2([0-4][0-9]|5[0-5])|[0-1]?[0-9]?[0-9]))\\b");
 
     public ProxyType type = ProxyType.Socks5;
-    public String ip = "";
+    public String address = "";
     public int port = 0;
 
     public String name = "";
@@ -23,8 +22,10 @@ public class Proxy implements ISerializable<Proxy> {
 
     public boolean enabled = false;
 
-    public boolean isValid() {
-        return IP_PATTERN.matcher(ip).matches() && port >= 0 && port <= 65535 && !name.isEmpty();
+    public boolean resolveAddress() {
+        if(port < 0 || port > 65535) return false;
+        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+        return !socketAddress.isUnresolved();
     }
 
     @Override
@@ -32,7 +33,7 @@ public class Proxy implements ISerializable<Proxy> {
         NbtCompound tag = new NbtCompound();
 
         tag.putString("type", type.name());
-        tag.putString("ip", ip);
+        tag.putString("ip", address);
         tag.putInt("port", port);
 
         tag.putString("name", name);
@@ -47,7 +48,7 @@ public class Proxy implements ISerializable<Proxy> {
     @Override
     public Proxy fromTag(NbtCompound tag) {
         type = ProxyType.valueOf(tag.getString("type"));
-        ip = tag.getString("ip");
+        address = tag.getString("ip");
         port = tag.getInt("port");
 
         name = tag.getString("name");
