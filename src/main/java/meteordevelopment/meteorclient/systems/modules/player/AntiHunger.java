@@ -35,10 +35,10 @@ public class AntiHunger extends Module {
     );
 
     private final Setting<Boolean> waterCheck = sgGeneral.add(new BoolSetting.Builder()
-        .name("water-check")
-        .description("Pauses the module if you are in water")
-        .defaultValue(true)
-        .build());
+            .name("water-check")
+            .description("Pauses the module if you are in water")
+            .defaultValue(true)
+            .build());
 
     private boolean lastOnGround;
     private boolean sendOnGroundTruePacket;
