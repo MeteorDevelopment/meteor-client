@@ -32,9 +32,6 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         // Add
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-			// Username can't be empty or longer than 16 characters
-			// Username must only contain the following characters:
-			// abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_
             if (!name.get().isEmpty() && !(name.get().length() > 16) && name.get().matches("^[a-zA-Z0-9_]+$")) {
                 CrackedAccount account = new CrackedAccount(name.get());
                 if (!(Accounts.get().exists(account))) {
