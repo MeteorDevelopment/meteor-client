@@ -94,6 +94,7 @@ public class ActiveModulesHud extends HudElement {
     private double prevX, prevY;
     private double prevTextLength;
     private Color prevColor = new Color();
+    private long lastColorUpdate;
 
     public ActiveModulesHud(HUD hud) {
         super(hud, "active-modules", "Displays your active modules.");
@@ -151,7 +152,8 @@ public class ActiveModulesHud extends HudElement {
             return;
         }
 
-        rainbowHue1 += rainbowSpeed.get() * renderer.delta;
+        rainbowHue1 += rainbowSpeed.get() * (System.currentTimeMillis() - lastColorUpdate) / 100D;
+        lastColorUpdate = System.currentTimeMillis();
         if (rainbowHue1 > 1) rainbowHue1 -= 1;
         else if (rainbowHue1 < -1) rainbowHue1 += 1;
 
