@@ -28,7 +28,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public boolean add(Proxy proxy) {
         for (Proxy p : proxies) {
-            if (p.type == proxy.type && p.ip.equals(proxy.ip) && p.port == proxy.port) return false;
+            if (p.type == proxy.type && p.address.equals(proxy.address) && p.port == proxy.port) return false;
         }
 
         if (proxies.isEmpty()) proxy.enabled = true;
