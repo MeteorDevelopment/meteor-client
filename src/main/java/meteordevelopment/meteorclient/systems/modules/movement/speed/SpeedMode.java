@@ -55,7 +55,7 @@ public class SpeedMode {
 
     protected double getHop(double height) {
         StatusEffectInstance jumpBoost = mc.player.hasStatusEffect(StatusEffects.JUMP_BOOST) ? mc.player.getStatusEffect(StatusEffects.JUMP_BOOST) : null;
-        if (jumpBoost != null) height += jumpBoost.getAmplifier() + 1 * 0.1f;
+        if (jumpBoost != null) height += (jumpBoost.getAmplifier() + 1) * 0.1f;
         return height;
     }
 
