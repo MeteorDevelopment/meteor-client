@@ -55,10 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -465,6 +462,30 @@ public class Utils {
         enchTag.putShort("lvl", (short) level);
 
         listTag.add(enchTag);
+    }
+
+    public static void clearEnchantments(ItemStack itemStack) {
+        NbtCompound nbt = itemStack.getNbt();
+        if (nbt != null) nbt.remove("Enchantments");
+    }
+
+    public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
+        NbtCompound nbt = itemStack.getNbt();
+        if (nbt == null) return;
+
+        if (!nbt.contains("Enchantments", 9)) return;
+        NbtList list = nbt.getList("Enchantments", 10);
+
+        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+
+        for (Iterator<NbtElement> it = list.iterator(); it.hasNext();) {
+            NbtCompound ench = (NbtCompound) it.next();
+
+            if (ench.getString("id").equals(enchId)) {
+                it.remove();
+                break;
+            }
+        }
     }
 
     @SafeVarargs
