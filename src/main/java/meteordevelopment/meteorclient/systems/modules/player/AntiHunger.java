@@ -73,7 +73,7 @@ public class AntiHunger extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if(waterCheck.get() && mc.player.isTouchingWater()) {
+        if (waterCheck.get() && mc.player.isTouchingWater()) {
             ignorePacket = true;
             return;
         }
