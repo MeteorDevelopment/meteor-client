@@ -20,9 +20,13 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.option.ChatVisibility;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.*;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -40,18 +44,27 @@ public abstract class ChatHudMixin implements IChatHud {
     private static final Identifier METEOR_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/meteor.png");
     private static final Identifier BARITONE_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/baritone.png");
 
-    @Shadow
-    @Final
-    private List<ChatHudLine<OrderedText>> visibleMessages;
-
-    @Shadow
-    private int scrolledLines;
+    @Shadow @Final private List<ChatHudLine<OrderedText>> visibleMessages;
+    @Shadow private int scrolledLines;
 
     @Shadow protected abstract void addMessage(Text message, int messageId, int timestamp, boolean refresh);
 
+    @Unique private boolean skipOnAddMessage;
+
     @Inject(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;I)V", cancellable = true)
     private void onAddMessage(Text text, int id, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(text, id)).isCancelled()) info.cancel();
+        if (skipOnAddMessage) return;
+
+        ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(text, id));
+
+        if (event.isCancelled()) info.cancel();
+        else if (event.isModified()) {
+            info.cancel();
+
+            skipOnAddMessage = true;
+            addMessage(event.getMessage(), id);
+            skipOnAddMessage = false;
+        }
     }
 
     @Redirect(method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
@@ -106,6 +119,9 @@ public abstract class ChatHudMixin implements IChatHud {
     private static double getMessageOpacityMultiplier(int age) {
         throw new AssertionError();
     }
+
+    @Shadow
+    protected abstract void addMessage(Text message, int messageId);
 
     private void drawIcon(MatrixStack matrices, String line, int y, float opacity) {
         if (METEOR_PREFIX_REGEX.matcher(line).find()) {
