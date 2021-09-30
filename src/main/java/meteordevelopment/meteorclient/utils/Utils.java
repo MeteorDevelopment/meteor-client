@@ -70,6 +70,7 @@ public class Utils {
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
+    public static double frameTime;
 
     static {
         df = new DecimalFormat("0");
