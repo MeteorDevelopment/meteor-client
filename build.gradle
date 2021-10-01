@@ -105,6 +105,10 @@ remapJar {
 	input.set(shadowJar.archiveFile)
 }
 
+javadoc {
+    options.addStringOption('Xdoclint:none', '-quiet')
+}
+
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier.set("sources")
 	from sourceSets.main.allSource
@@ -117,7 +121,10 @@ task javadocJar(type: Jar) {
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        java(MavenPublication) {
+            artifactId = "meteor-client"
+            version = System.getenv("CIRCLE_BUILD_NUM") == null ? project.mod_version : "SNAPSHOT"
+
             artifact(remapJar) {
                 builtBy remapJar
             }
@@ -128,6 +135,22 @@ publishing {
 
             artifact(javadocJar) {
                 builtBy javadocJar
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            name = "meteor-maven"
+            url = System.getenv("CIRCLE_BUILD_NUM") == null ? "https://maven.meteordev.org" : "https://maven.meteordev.org/snapshots"
+
+            credentials {
+                username = System.getenv("MAVEN_METEOR_ALIAS")
+                password = System.getenv("MAVEN_METEOR_TOKEN")
+            }
+
+            authentication {
+                basic(BasicAuthentication)
             }
         }
     }
