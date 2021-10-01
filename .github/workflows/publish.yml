@@ -1,0 +1,26 @@
+name: Publish
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+  
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clone repo
+      uses: actions/checkout@v2
+      
+    - name: Set up JDK 16
+      uses: actions/setup-java@v2
+      with:
+        java-version: '16'
+        distribution: 'adopt'
+    
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+        
+    - name: Publish
+      run: ./gradlew publish
