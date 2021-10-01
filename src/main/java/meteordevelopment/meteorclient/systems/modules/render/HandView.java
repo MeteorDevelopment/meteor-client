@@ -134,7 +134,7 @@ public class HandView extends Module {
 
         matrices.scale(scaleX.get().floatValue(), scaleY.get().floatValue(), scaleZ.get().floatValue());
         matrices.translate(posX.get(), posY.get(), posZ.get());
-        matrices.multiply(Quaternion.method_35825(rotationX.get().floatValue(), rotationY.get().floatValue(), rotationZ.get().floatValue()));
+        matrices.multiply(Quaternion.fromEulerXyz(rotationX.get().floatValue(), rotationY.get().floatValue(), rotationZ.get().floatValue()));
     }
 
     public enum SwingMode {
