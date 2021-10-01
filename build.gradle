@@ -16,9 +16,13 @@ minecraft {
 
 repositories {
     maven {
-		name = "jitpack"
-		url = "https://jitpack.io"
+		name = "meteor-maven"
+		url = "https://maven.meteordev.org"
 	}
+    maven {
+        name = "meteor-maven-snapshots"
+        url = "https://maven.meteordev.org/snapshots"
+    }
 	jcenter()
 
     // For Canvas
@@ -44,19 +48,21 @@ dependencies {
 
 	// For XRay compatibility
 	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
-    modCompileOnly "com.github.MeteorDevelopment:sodium-fabric:${project.sodium_version}"
+    modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") {
+        transitive = false
+    }
 
     // Canvas for compatibility
     modCompileOnly("grondag:canvas-mc117-1.17:1.0.+") { transitive = false }
 
 	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-    modImplementation "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
-    include "com.github.MeteorDevelopment:baritone:${project.baritone_version}"
+    modImplementation "baritone:baritone:${project.baritone_version}"
+    include "baritone:baritone:${project.baritone_version}"
 
 	// Other dependencies
-	dependency "com.github.MeteorDevelopment:orbit:${project.orbit_version}"
-    dependency "com.github.MeteorDevelopment:starscript:${project.starscript_version}"
-	dependency "com.github.MeteorDevelopment:java-discord-rpc:${project.discordrpc_version}"
+	dependency "meteordevelopment:orbit:${project.orbit_version}"
+    dependency "meteordevelopment:starscript:${project.starscript_version}"
+	dependency "club.minnced:java-discord-rpc:${project.discordrpc_version}"
 }
 
 shadowJar {
