@@ -37,7 +37,7 @@ public class WBlockPosEdit extends WHorizontalList {
 
     @Override
     public void init() {
-        setTextBox();
+        addTextBox();
 
         WButton click = add(theme.button("Click")).expandX().widget();
         click.action = () -> {
@@ -117,26 +117,35 @@ public class WBlockPosEdit extends WHorizontalList {
         this.value = value;
     }
 
-    private void setTextBox() {
+    private void addTextBox() {
         textBoxX = add(theme.textBox(Integer.toString(value.getX()), this::filter)).minWidth(75).widget();
         textBoxY = add(theme.textBox(Integer.toString(value.getY()), this::filter)).minWidth(75).widget();
         textBoxZ = add(theme.textBox(Integer.toString(value.getZ()), this::filter)).minWidth(75).widget();
 
         textBoxX.actionOnUnfocused = () -> {
             lastValue = value;
-            textBoxCheck(textBoxX);
+            if (textBoxX.get().isEmpty()) set(new BlockPos(0, 0, 0));
+            else {
+                set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
+            }
             newValueCheck();
         };
 
         textBoxY.actionOnUnfocused = () -> {
             lastValue = value;
-            textBoxCheck(textBoxY);
+            if (textBoxY.get().isEmpty()) set(new BlockPos(0, 0, 0));
+            else {
+                set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
+            }
             newValueCheck();
         };
 
         textBoxZ.actionOnUnfocused = () -> {
             lastValue = value;
-            textBoxCheck(textBoxZ);
+            if (textBoxZ.get().isEmpty()) set(new BlockPos(0, 0, 0));
+            else {
+                set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
+            }
             newValueCheck();
         };
     }
@@ -145,13 +154,6 @@ public class WBlockPosEdit extends WHorizontalList {
         if (value != lastValue) {
             if (action != null) action.run();
             if (actionOnRelease != null) actionOnRelease.run();
-        }
-    }
-
-    private void textBoxCheck(WTextBox textBox) {
-        if (textBox.get().isEmpty()) set(new BlockPos(0, 0, 0));
-        else {
-            set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
         }
     }
 }
