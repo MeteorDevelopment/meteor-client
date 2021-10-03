@@ -27,6 +27,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
+import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.search.Search;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
@@ -475,6 +476,7 @@ public class Modules extends System<Modules> {
         add(new ItemHighlight());
         add(new LightOverlay());
         add(new LogoutSpots());
+        add(new Marker());
         add(new Nametags());
         add(new NoRender());
         add(new Search());
