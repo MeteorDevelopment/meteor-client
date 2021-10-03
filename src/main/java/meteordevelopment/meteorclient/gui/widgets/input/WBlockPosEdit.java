@@ -12,11 +12,13 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+
+import static meteordevelopment.meteorclient.utils.Utils.canUpdate;
+import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class WBlockPosEdit extends WHorizontalList {
     public Runnable action;
@@ -39,28 +41,30 @@ public class WBlockPosEdit extends WHorizontalList {
     public void init() {
         addTextBox();
 
-        WButton click = add(theme.button("Click")).expandX().widget();
-        click.action = () -> {
-            StringBuilder sb = new StringBuilder("Click!\n");
-            sb.append("Right click to pick a new position.\n");
-            sb.append("Left click to cancel.");
-            Modules.get().get(Marker.class).info(sb.toString());
+        if (canUpdate()) {
+            WButton click = add(theme.button("Click")).expandX().widget();
+            click.action = () -> {
+                StringBuilder sb = new StringBuilder("Click!\n");
+                sb.append("Right click to pick a new position.\n");
+                sb.append("Left click to cancel.");
+                Modules.get().get(Marker.class).info(sb.toString());
 
-            clicking = true;
-            MeteorClient.EVENT_BUS.subscribe(this);
-            previousScreen = Utils.mc.currentScreen;
-            Utils.mc.setScreen(null);
-        };
+                clicking = true;
+                MeteorClient.EVENT_BUS.subscribe(this);
+                previousScreen = mc.currentScreen;
+                mc.setScreen(null);
+            };
 
-        WButton here = add(theme.button("Set Here")).expandX().widget();
-        here.action = () -> {
-            lastValue = value;
-            set(new BlockPos(Utils.mc.player.getPos().getX(), Utils.mc.player.getPos().getY(), Utils.mc.player.getPos().getZ()));
-            newValueCheck();
+            WButton here = add(theme.button("Set Here")).expandX().widget();
+            here.action = () -> {
+                lastValue = value;
+                set(new BlockPos(mc.player.getBlockPos()));
+                newValueCheck();
 
-            clear();
-            init();
-        };
+                clear();
+                init();
+            };
+        }
     }
 
     @EventHandler
@@ -69,7 +73,7 @@ public class WBlockPosEdit extends WHorizontalList {
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            Utils.mc.setScreen(previousScreen);
+            mc.setScreen(previousScreen);
         }
     }
 
@@ -84,7 +88,7 @@ public class WBlockPosEdit extends WHorizontalList {
             clicking = false;
             event.cancel();
             MeteorClient.EVENT_BUS.unsubscribe(this);
-            Utils.mc.setScreen(previousScreen);
+            mc.setScreen(previousScreen);
         }
     }
 

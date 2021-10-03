@@ -136,8 +136,8 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
-        public Builder noSlider(boolean b) {
-            this.noSlider = b;
+        public Builder noSlider() {
+            this.noSlider = false;
             return this;
         }
 

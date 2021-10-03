@@ -256,14 +256,13 @@ public class PlayerUtils {
     }
 
     public static Dimension getDimension() {
-        switch (mc.world.getRegistryKey().getValue().getPath()) {
-            case "the_nether":
-                return Dimension.Nether;
-            case "the_end":
-                return Dimension.End;
-            default:
-                return Dimension.Overworld;
-        }
+        if (mc.world == null) return Dimension.Overworld;
+
+        return switch (mc.world.getRegistryKey().getValue().getPath()) {
+            case "the_nether" -> Dimension.Nether;
+            case "the_end" -> Dimension.End;
+            default -> Dimension.Overworld;
+        };
     }
 
     public static GameMode getGameMode() {

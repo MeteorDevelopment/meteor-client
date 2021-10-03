@@ -6,8 +6,6 @@
 package meteordevelopment.meteorclient.settings;
 
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtInt;
-import net.minecraft.nbt.NbtIntArray;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
@@ -38,21 +36,17 @@ public class BlockPosSetting extends Setting<BlockPos> {
 
     @Override
     public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
-
-        NbtIntArray array = new NbtIntArray(new int[3]);
-        array.set(0, NbtInt.of(value.getX()));
-        array.set(1, NbtInt.of(value.getY()));
-        array.set(2, NbtInt.of(value.getZ()));
-
-        tag.put("value", array);
+        NbtCompound tag = saveGeneral();
+        tag.putIntArray("value", new int[] { value.getX(), value.getY(), value.getZ() });
         return tag;
     }
 
     @Override
     public BlockPos fromTag(NbtCompound tag) {
-        NbtIntArray value = new NbtIntArray(tag.getIntArray("value"));
-        set(new BlockPos(value.get(0).intValue(), value.get(1).intValue(), value.get(2).intValue()));
+        int[] value = tag.getIntArray("value");
+        set(new BlockPos(value[0], value[1], value[2]));
+
+        changed();
         return get();
     }
 

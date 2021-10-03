@@ -6,13 +6,12 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
-import meteordevelopment.meteorclient.utils.Utils;
 
 public class WIntEdit extends WHorizontalList {
     public Runnable action;
     public Runnable actionOnRelease;
 
-    public boolean hasSlider = true;
+    public boolean noSlider;
     public boolean small;
 
     private int value;
@@ -28,13 +27,18 @@ public class WIntEdit extends WHorizontalList {
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
-        if (noSlider || (sliderMin == 0 && sliderMax == 0)) hasSlider = false;
+        if (noSlider || (sliderMin == 0 && sliderMax == 0)) this.noSlider = true;
     }
 
     @Override
     public void init() {
         textBox = add(theme.textBox(Integer.toString(value), this::filter)).minWidth(75).widget();
-        if (hasSlider) slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
+
+        if (noSlider) {
+            add(theme.button("+")).widget().action = () -> setButton(get() + 1);
+            add(theme.button("-")).widget().action = () -> setButton(get() - 1);
+        }
+        else slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
 
         textBox.actionOnUnfocused = () -> {
             int lastValue = value;
@@ -86,6 +90,22 @@ public class WIntEdit extends WHorizontalList {
         }
 
         return good;
+    }
+
+    private void setButton(int v) {
+        if (this.value == v) return;
+
+        if (min != null && v < min) this.value = min;
+        else if (max != null && v > max) this.value = max;
+        else this.value = v;
+
+        if (this.value == v) {
+            textBox.set(Integer.toString(this.value));
+            if (slider != null) slider.set(this.value);
+
+            if (action != null) action.run();
+            if (actionOnRelease != null) actionOnRelease.run();
+        }
     }
 
     public int get() {
