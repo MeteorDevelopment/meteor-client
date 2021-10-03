@@ -11,12 +11,13 @@ import java.util.function.Consumer;
 
 public class DoubleSetting extends Setting<Double> {
     public final Double min, max;
+    public final Boolean noSlider;
     private final Double sliderMin, sliderMax;
 
     public final int decimalPlaces;
     public final boolean onSliderRelease;
 
-    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, Double min, Double max, Double sliderMin, Double sliderMax, boolean onSliderRelease, int decimalPlaces) {
+    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, Double min, Double max, Double sliderMin, Double sliderMax, boolean onSliderRelease, int decimalPlaces, boolean noSlider) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
         this.min = min;
         this.max = max;
@@ -24,6 +25,7 @@ public class DoubleSetting extends Setting<Double> {
         this.sliderMax = sliderMax;
         this.decimalPlaces = decimalPlaces;
         this.onSliderRelease = onSliderRelease;
+        this.noSlider = noSlider;
     }
 
     @Override
@@ -72,6 +74,7 @@ public class DoubleSetting extends Setting<Double> {
         private Double sliderMin, sliderMax;
         private boolean onSliderRelease;
         private int decimalPlaces = 3;
+        private boolean noSlider = false;
 
         public Builder name(String name) {
             this.name = name;
@@ -133,8 +136,13 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
+        public Builder noSlider(boolean b) {
+            this.noSlider = b;
+            return this;
+        }
+
         public DoubleSetting build() {
-            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax, onSliderRelease, decimalPlaces);
+            return new DoubleSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax, onSliderRelease, decimalPlaces, noSlider);
         }
     }
 }
