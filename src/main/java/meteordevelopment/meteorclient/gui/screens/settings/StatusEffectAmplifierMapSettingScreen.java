@@ -62,7 +62,7 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
             table.add(theme.label(name)).expandCellX();
 
             WIntEdit level = theme.intEdit(setting.get().getInt(statusEffect), 0, 0);
-            level.hasSlider = false;
+            level.noSlider = false;
             level.action = () -> {
                 setting.get().put(statusEffect, level.get());
                 setting.changed();

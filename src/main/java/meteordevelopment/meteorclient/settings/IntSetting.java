@@ -119,8 +119,8 @@ public class IntSetting extends Setting<Integer> {
             return this;
         }
 
-        public Builder noSlider(boolean slider) {
-            noSlider = slider;
+        public Builder noSlider() {
+            noSlider = true;
             return this;
         }
 
