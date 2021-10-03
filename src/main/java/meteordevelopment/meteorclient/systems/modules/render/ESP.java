@@ -85,10 +85,18 @@ public class ESP extends Module {
 
     // Colors
 
+    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
+            .name("distance-colors")
+            .description("Changes the color of ESP depending on distance.")
+            .defaultValue(false)
+            .build()
+    );
+
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
             .name("players-color")
             .description("The other player's color.")
             .defaultValue(new SettingColor(255, 255, 255))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -96,6 +104,7 @@ public class ESP extends Module {
             .name("animals-color")
             .description("The animal's color.")
             .defaultValue(new SettingColor(25, 255, 25, 255))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -103,6 +112,7 @@ public class ESP extends Module {
             .name("water-animals-color")
             .description("The water animal's color.")
             .defaultValue(new SettingColor(25, 25, 255, 255))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -110,6 +120,7 @@ public class ESP extends Module {
             .name("monsters-color")
             .description("The monster's color.")
             .defaultValue(new SettingColor(255, 25, 25, 255))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -117,6 +128,7 @@ public class ESP extends Module {
             .name("ambient-color")
             .description("The ambient's color.")
             .defaultValue(new SettingColor(25, 25, 25, 255))
+            .visible(() -> !distance.get())
             .build()
     );
 
@@ -124,11 +136,13 @@ public class ESP extends Module {
             .name("misc-color")
             .description("The misc color.")
             .defaultValue(new SettingColor(175, 175, 175, 255))
+            .visible(() -> !distance.get())
             .build()
     );
 
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
+    private final Color distanceColor = new Color();
 
     private int count;
 
@@ -137,7 +151,12 @@ public class ESP extends Module {
     }
 
     private void render(Render3DEvent event, Entity entity) {
-        lineColor.set(getColor(entity));
+        if (distance.get()) {
+            lineColor.set(getColorFromDistance(entity));
+        } 
+        else {
+            lineColor.set(getColor(entity));
+        }
         sideColor.set(lineColor).a(fillOpacity.get());
 
         double a = getFadeAlpha(entity);
@@ -193,6 +212,31 @@ public class ESP extends Module {
         };
     }
 
+    private Color getColorFromDistance(Entity entity) {
+        // Credit to Icy from Stackoverflow
+        double distance = mc.gameRenderer.getCamera().getPos().distanceTo(entity.getPos());
+        double percent = distance / 60;
+
+        if (percent < 0 || percent > 1) {
+            distanceColor.set(0, 255, 0, 255);
+            return distanceColor;
+        }
+
+        int r, g;
+
+        if (percent < 0.5) {
+            r = 255;
+            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
+        }
+        else {
+            g = 255;
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
+        }
+
+        distanceColor.set(r, g, 0, 255);
+        return distanceColor;
+    }
+
     // Outlines
 
     public boolean shouldDrawOutline(Entity entity) {
@@ -201,7 +245,13 @@ public class ESP extends Module {
 
     public Color getOutlineColor(Entity entity) {
         if (!entities.get().getBoolean(entity.getType())) return null;
-        Color color = getColor(entity);
+        Color color;
+        if (distance.get()) {
+            color = getColorFromDistance(entity);
+        }
+        else {
+            color = getColor(entity);
+        }
         double alpha = getFadeAlpha(entity);
         return lineColor.set(color).a((int) (alpha * 255));
     }
