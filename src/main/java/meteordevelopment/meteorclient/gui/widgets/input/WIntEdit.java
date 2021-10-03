@@ -23,12 +23,12 @@ public class WIntEdit extends WHorizontalList {
     private WTextBox textBox;
     private WSlider slider;
 
-    public WIntEdit(int value, int sliderMin, int sliderMax) {
+    public WIntEdit(int value, int sliderMin, int sliderMax, boolean noSlider) {
         this.value = value;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
-        if (sliderMin == 0 && sliderMax == 0) hasSlider = false;
+        if (noSlider || (sliderMin == 0 && sliderMax == 0)) hasSlider = false;
     }
 
     @Override

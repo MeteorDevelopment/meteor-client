@@ -11,14 +11,16 @@ import java.util.function.Consumer;
 
 public class IntSetting extends Setting<Integer> {
     public final Integer min, max;
+    public final Boolean noSlider;
     private final Integer sliderMin, sliderMax;
 
-    private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, IVisible visible, Integer min, Integer max, Integer sliderMin, Integer sliderMax) {
+    private IntSetting(String name, String description, Integer defaultValue, Consumer<Integer> onChanged, Consumer<Setting<Integer>> onModuleActivated, IVisible visible, Integer min, Integer max, Integer sliderMin, Integer sliderMax, Boolean noSlider) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
+        this.noSlider = noSlider;
     }
 
     @Override
@@ -65,6 +67,7 @@ public class IntSetting extends Setting<Integer> {
         private IVisible visible;
         private Integer min, max;
         private Integer sliderMin, sliderMax;
+        private Boolean noSlider = false;
 
         public Builder name(String name) {
             this.name = name;
@@ -116,8 +119,13 @@ public class IntSetting extends Setting<Integer> {
             return this;
         }
 
+        public Builder noSlider(boolean slider) {
+            noSlider = slider;
+            return this;
+        }
+
         public IntSetting build() {
-            return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax);
+            return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax, noSlider);
         }
     }
 }
