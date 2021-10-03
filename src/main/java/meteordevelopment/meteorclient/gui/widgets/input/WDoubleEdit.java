@@ -26,12 +26,12 @@ public class WDoubleEdit extends WHorizontalList {
     private WTextBox textBox;
     private WSlider slider;
 
-    public WDoubleEdit(double value, double sliderMin, double sliderMax) {
+    public WDoubleEdit(double value, double sliderMin, double sliderMax, boolean noSlider) {
         this.value = value;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
-        if (sliderMin == 0 && sliderMax == 0) noSlider = true;
+        if (noSlider || (sliderMin == 0 && sliderMax == 0)) noSlider = true;
      }
 
     @Override
