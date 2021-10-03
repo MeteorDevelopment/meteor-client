@@ -264,7 +264,7 @@ public class WaypointsModule extends Module {
             // X
             table.add(theme.label("X:"));
             WIntEdit x = theme.intEdit(waypoint.x, 0, 0);
-            x.noSlider = false;
+            x.noSlider = true;
             x.action = () -> waypoint.x = x.get();
             table.add(x).expandX();
             table.row();
@@ -272,7 +272,7 @@ public class WaypointsModule extends Module {
             // Y
             table.add(theme.label("Y:"));
             WIntEdit y = theme.intEdit(waypoint.y, 0, 0);
-            y.noSlider = false;
+            y.noSlider = true;
             y.actionOnRelease = () -> {
                 if (y.get() < 0) y.set(0);
                 else if (y.get() > 255) y.set(255);
