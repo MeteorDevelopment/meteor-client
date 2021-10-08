@@ -386,8 +386,9 @@ public class Utils {
         return mc != null && mc.world != null && mc.player != null;
     }
 
-    public static boolean isWhitelistedScreen() {
-        if (mc.currentScreen instanceof TitleScreen) return true;
+    public static boolean canOpenClickGUI() {
+        if (mc.currentScreen == null) return true;
+        else if (mc.currentScreen instanceof TitleScreen) return true;
         else if (mc.currentScreen instanceof MultiplayerScreen) return true;
         else return mc.currentScreen instanceof SelectWorldScreen;
     }
