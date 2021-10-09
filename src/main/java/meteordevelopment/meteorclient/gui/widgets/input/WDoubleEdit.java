@@ -31,7 +31,7 @@ public class WDoubleEdit extends WHorizontalList {
         this.sliderMax = sliderMax;
 
         if (noSlider || (sliderMin == 0 && sliderMax == 0)) this.noSlider = true;
-     }
+    }
 
     @Override
     public void init() {
@@ -51,13 +51,12 @@ public class WDoubleEdit extends WHorizontalList {
             else if (textBox.get().equals(".")) value = 0;
             else if (textBox.get().equals("-.")) value = 0;
             else value = Double.parseDouble(textBox.get());
-
-            double preValidationValue = value;
+            if (min != null && this.min >= 0 && value < 0) value = 0;
 
             if (min != null && value < min) value = min;
             else if (max != null && value > max) value = max;
 
-            if (value != preValidationValue) textBox.set(valueString());
+            textBox.set(valueString());
             if (slider != null) slider.set(value);
 
             if (value != lastValue) {
@@ -84,19 +83,12 @@ public class WDoubleEdit extends WHorizontalList {
 
     private boolean filter(String text, char c) {
         boolean good;
-        boolean validate = true;
 
-        if (c == '-' && text.isEmpty()) {
-            good = true;
-            validate = false;
-        }
-        else if (c == '.' && !text.contains(".")) {
-            good = true;
-            if (text.isEmpty()) validate = false;
-        }
+        if (c == '-' && text.isEmpty()) good = true;
+        else if (c == '.' && !text.contains(".")) good = true;
         else good = Character.isDigit(c);
 
-        if (good && validate) {
+        if (good && (c != '-') && (c != '.')) {
             try {
                 Double.parseDouble(text + c);
             } catch (NumberFormatException ignored) {
@@ -128,7 +120,7 @@ public class WDoubleEdit extends WHorizontalList {
     }
 
     public void set(double value) {
-		this.value = value;
+        this.value = value;
 
         textBox.set(valueString());
         if (slider != null) slider.set(value);
