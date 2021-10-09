@@ -199,7 +199,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
-            if (!Utils.canUpdate() && Utils.canOpenClickGUI()) openClickGui();
+            if (Utils.canOpenClickGUI()) openClickGui();
         }
     }
 
@@ -207,7 +207,7 @@ public class MeteorClient implements ClientModInitializer {
     private void onMouseButton(MouseButtonEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && event.button != GLFW.GLFW_MOUSE_BUTTON_LEFT && KeyBinds.OPEN_CLICK_GUI.matchesMouse(event.button)) {
-            if (!Utils.canUpdate() && Utils.canOpenClickGUI()) openClickGui();
+            if (Utils.canOpenClickGUI()) openClickGui();
         }
     }
 
