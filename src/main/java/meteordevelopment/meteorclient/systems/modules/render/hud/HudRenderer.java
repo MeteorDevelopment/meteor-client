@@ -15,10 +15,10 @@ public class HudRenderer {
     public double delta;
     private final List<Runnable> postTasks = new ArrayList<>();
 
-    public void begin(double scale, double tickDelta, boolean scaleOnly) {
+    public void begin(double scale, double frameDelta, boolean scaleOnly) {
         TextRenderer.get().begin(scale, scaleOnly, false);
 
-        this.delta = tickDelta;
+        this.delta = frameDelta;
     }
 
     public void end() {

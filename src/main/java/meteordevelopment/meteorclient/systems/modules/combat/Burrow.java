@@ -165,10 +165,11 @@ public class Burrow extends Module {
         if (!shouldBurrow && instant.get()) blockPos.set(mc.player.getBlockPos());
 
         if (shouldBurrow) {
-            if (!mc.player.isOnGround()) {
+            //When automatic was on (and instant was off), this would just always toggle off without trying to burrow.
+/*            if (!mc.player.isOnGround()) {
                 toggle();
                 return;
-            }
+            }*/
 
             if (rotate.get())
                 Rotations.rotate(Rotations.getYaw(mc.player.getBlockPos()), Rotations.getPitch(mc.player.getBlockPos()), 50, this::burrow);
@@ -192,10 +193,10 @@ public class Burrow extends Module {
         if (center.get()) PlayerUtils.centerPlayer();
 
         if (instant.get()) {
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), true));
-            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), true));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.4, mc.player.getZ(), false));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 0.75, mc.player.getZ(), false));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.01, mc.player.getZ(), false));
+            mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + 1.15, mc.player.getZ(), false));
         }
 
 
@@ -212,7 +213,7 @@ public class Burrow extends Module {
         if (instant.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
         } else {
-            mc.player.setVelocity(mc.player.getVelocity().add(0, rubberbandHeight.get(), 0));
+            mc.player.updatePosition(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ());
         }
     }
 
@@ -220,7 +221,7 @@ public class Burrow extends Module {
         return switch (block.get()) {
             case EChest -> InvUtils.findInHotbar(Items.ENDER_CHEST);
             case Anvil -> InvUtils.findInHotbar(itemStack -> net.minecraft.block.Block.getBlockFromItem(itemStack.getItem()) instanceof AnvilBlock);
-            case Held -> InvUtils.findInHotbar(itemStack -> true);
+            case Held -> new FindItemResult(mc.player.getInventory().selectedSlot, mc.player.getMainHandStack().getCount());
             default -> InvUtils.findInHotbar(Items.OBSIDIAN, Items.CRYING_OBSIDIAN);
         };
     }

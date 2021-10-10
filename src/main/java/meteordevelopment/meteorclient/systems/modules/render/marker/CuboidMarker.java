@@ -22,19 +22,21 @@ public class CuboidMarker extends BaseMarker {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
+    // General
+
     private final Setting<BlockPos> pos1 = sgGeneral.add(new BlockPosSetting.Builder()
         .name("pos-1")
         .description("1st corner of the cuboid")
-        .onChanged(bp -> onChanged())
         .build()
     );
 
     private final Setting<BlockPos> pos2 = sgGeneral.add(new BlockPosSetting.Builder()
         .name("pos-2")
         .description("2nd corner of the cuboid")
-        .onChanged(bp -> onChanged())
         .build()
     );
+
+    // Render
 
     private final Setting<Mode> mode = sgRender.add(new EnumSetting.Builder<Mode>()
         .name("mode")
@@ -64,9 +66,6 @@ public class CuboidMarker extends BaseMarker {
         .build()
     );
 
-    private static final BlockPos.Mutable bp = new BlockPos.Mutable();
-    private int minX = 0, minY = 0, minZ = 0, maxX = 0, maxY = 0, maxZ = 0;
-
     public CuboidMarker() {
         super(type);
     }
@@ -78,50 +77,13 @@ public class CuboidMarker extends BaseMarker {
 
     @Override
     protected void render(Render3DEvent event) {
-        switch (mode.get()) {
-            case Full    : renderFull(event);
-        }
-    }
+        int minX = Math.min(pos1.get().getX(), pos2.get().getX());
+        int minY = Math.min(pos1.get().getY(), pos2.get().getY());
+        int minZ = Math.min(pos1.get().getZ(), pos2.get().getZ());
+        int maxX = Math.max(pos1.get().getX(), pos2.get().getX());
+        int maxY = Math.max(pos1.get().getY(), pos2.get().getY());
+        int maxZ = Math.max(pos1.get().getZ(), pos2.get().getZ());
 
-    private void renderFull(Render3DEvent event) {
-        // Edges
-        if (shapeMode.get() == ShapeMode.Lines || shapeMode.get() == ShapeMode.Both) {
-            event.renderer.line(minX, minY, minZ, maxX + 1, minY, minZ, lineColor.get());
-            event.renderer.line(minX, minY, minZ, minX, maxY + 1, minZ, lineColor.get());
-            event.renderer.line(minX, minY, minZ, minX, minY, maxZ + 1, lineColor.get());
-
-            event.renderer.line(maxX + 1, minY, minZ, maxX + 1, minY, maxZ + 1, lineColor.get());
-            event.renderer.line(maxX + 1, minY, minZ, maxX + 1, maxY + 1, minZ, lineColor.get());
-
-            event.renderer.line(minX, maxY + 1, minZ, minX, maxY + 1, maxZ + 1, lineColor.get());
-            event.renderer.line(minX, maxY + 1, minZ, maxX + 1, maxY + 1, minZ, lineColor.get());
-
-            event.renderer.line(minX, minY, maxZ + 1, minX, maxY + 1, maxZ + 1, lineColor.get());
-            event.renderer.line(minX, minY, maxZ + 1, maxX + 1, minY, maxZ + 1, lineColor.get());
-
-            event.renderer.line(maxX + 1, maxY + 1, maxZ + 1, minX, maxY + 1, maxZ + 1, lineColor.get());
-            event.renderer.line(maxX + 1, maxY + 1, maxZ + 1, maxX + 1, minY, maxZ + 1, lineColor.get());
-            event.renderer.line(maxX + 1, maxY + 1, maxZ + 1, maxX + 1, maxY + 1, minZ, lineColor.get());
-        }
-
-        // Faces
-        if (shapeMode.get() == ShapeMode.Sides || shapeMode.get() == ShapeMode.Both) {
-            event.renderer.quad(minX, minY, minZ, maxX + 1, minY, minZ, maxX + 1, maxY + 1, minZ, minX, maxY + 1, minZ, sideColor.get());
-            event.renderer.quad(minX, minY, minZ, minX, minY, maxZ + 1, minX, maxY + 1, maxZ + 1, minX, maxY + 1, maxZ + 1, sideColor.get());
-            event.renderer.quad(minX, minY, minZ, maxX + 1, minY, minZ, maxX + 1, minY, maxZ + 1, minX, minY, maxZ + 1, sideColor.get());
-
-            event.renderer.quad(maxX + 1, maxY + 1, maxZ + 1, minX, maxY + 1, maxZ + 1, minX, minY, maxZ + 1, maxX + 1, minY, maxZ + 1, sideColor.get());
-            event.renderer.quad(maxX + 1, maxY + 1, maxZ + 1, maxX + 1, maxY + 1, minZ, maxX + 1, minY, minZ, maxX + 1, minY, maxZ + 1, sideColor.get());
-            event.renderer.quad(maxX + 1, maxY + 1, maxZ + 1, minX, maxY + 1, maxZ + 1, minX, maxY + 1, minZ, maxX + 1, maxY + 1, minZ, sideColor.get());
-        }
-    }
-
-    private void onChanged() {
-        minX = Math.min(pos1.get().getX(), pos2.get().getX());
-        maxX = Math.max(pos1.get().getX(), pos2.get().getX());
-        minY = Math.min(pos1.get().getY(), pos2.get().getY());
-        maxY = Math.max(pos1.get().getY(), pos2.get().getY());
-        minZ = Math.min(pos1.get().getZ(), pos2.get().getZ());
-        maxZ = Math.max(pos1.get().getZ(), pos2.get().getZ());
+        event.renderer.box(minX, minY, minZ, maxX + 1, maxY + 1, maxZ + 1, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

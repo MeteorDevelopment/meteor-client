@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render.marker;
 
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -20,7 +19,6 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -29,32 +27,24 @@ import net.minecraft.nbt.NbtList;
 import java.util.ArrayList;
 
 public class Marker extends Module {
-    public final Markers markers;
-    private ArrayList<BaseMarker> markerList = new ArrayList<>();
+    private final MarkerFactory factory = new MarkerFactory();
+    private final ArrayList<BaseMarker> markers = new ArrayList<>();
 
     public Marker() {
         super(Categories.Render, "marker", "Renders shapes. Useful for large scale projects");
-
-        markers = new Markers();
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        for (BaseMarker marker : markerList) if (marker.isActive()) marker.tick();
+        for (BaseMarker marker : markers) {
+            if (marker.isVisible()) marker.tick();
+        }
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        for (BaseMarker marker : markerList) if (marker.isActive()) marker.render(event);
-    }
-
-    @EventHandler
-    private void onKey(KeyEvent event) {
-        for (BaseMarker marker : markerList) {
-            if (marker.isActive()) {
-                if (event.action == KeyAction.Press) marker.onKeyPress(event.key);
-                else if (event.action == KeyAction.Release) marker.onKeyRelease(event.key);
-            }
+        for (BaseMarker marker : markers) {
+            if (marker.isVisible()) marker.render(event);
         }
     }
 
@@ -63,13 +53,13 @@ public class Marker extends Module {
         NbtCompound tag = super.toTag();
 
         NbtList list = new NbtList();
-        markerList.forEach(marker -> {
+        for (BaseMarker marker : markers) {
             NbtCompound mTag = new NbtCompound();
             mTag.putString("type", marker.getTypeName());
             mTag.put("marker", marker.toTag());
 
             list.add(mTag);
-        });
+        }
 
         tag.put("markers", list);
         return tag;
@@ -79,19 +69,20 @@ public class Marker extends Module {
     public Module fromTag(NbtCompound tag) {
         super.fromTag(tag);
 
-        NbtList list = tag.getList("markers", 9);
-        markerList.clear();
+        markers.clear();
+        NbtList list = tag.getList("markers", 10);
+
         for (NbtElement tagII : list) {
             NbtCompound tagI = (NbtCompound) tagII;
 
             String type = tagI.getString("type");
-            BaseMarker marker = markers.createMarker(type);
+            BaseMarker marker = factory.createMarker(type);
 
             if (marker != null) {
                 NbtCompound markerTag = (NbtCompound) tagI.get("marker");
                 if (markerTag != null) marker.fromTag(markerTag);
 
-                markerList.add(marker);
+                markers.add(marker);
             }
         }
 
@@ -107,12 +98,15 @@ public class Marker extends Module {
 
     protected void fillList(GuiTheme theme, WVerticalList list) {
         // Marker List
-        for (BaseMarker marker : markerList) {
+        for (BaseMarker marker : markers) {
             WHorizontalList hList = list.add(theme.horizontalList()).expandX().widget();
 
             // Name
-            WLabel label = hList.add(theme.label(marker.name.get())).expandX().widget();
+            WLabel label = hList.add(theme.label(marker.name.get())).widget();
             label.tooltip = marker.description.get();
+
+            // Dimension
+            hList.add(theme.label(" - " + marker.getDimension().toString())).expandX().widget().color = theme.textSecondaryColor();
 
             // Toggle
             WCheckbox checkbox = hList.add(theme.checkbox(marker.isActive())).widget();
@@ -122,14 +116,14 @@ public class Marker extends Module {
 
             // Edit
             WButton edit = hList.add(theme.button(GuiRenderer.EDIT)).widget();
-            edit.action = () -> {
-                mc.setScreen(marker.getScreen(theme));
-            };
+            edit.action = () -> mc.setScreen(marker.getScreen(theme));
 
             // Remove
             WMinus remove = hList.add(theme.minus()).widget();
             remove.action = () -> {
-                markerList.remove(marker);
+                markers.remove(marker);
+                marker.settings.unregisterColorSettings();
+
                 list.clear();
                 fillList(theme, list);
             };
@@ -138,13 +132,11 @@ public class Marker extends Module {
         // Bottom
         WHorizontalList bottom = list.add(theme.horizontalList()).expandX().widget();
 
-        String[] names = new String[markers.getNames().size()];
-        markers.getNames().toArray(names);
-        WDropdown<String> newMarker = bottom.add(theme.dropdown(names, markers.getNames().get(0))).widget();
+        WDropdown<String> newMarker = bottom.add(theme.dropdown(factory.getNames(), factory.getNames()[0])).widget();
         WButton add = bottom.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
             String name = newMarker.get();
-            markerList.add(markers.createMarker(name));
+            markers.add(factory.createMarker(name));
 
             list.clear();
             fillList(theme, list);

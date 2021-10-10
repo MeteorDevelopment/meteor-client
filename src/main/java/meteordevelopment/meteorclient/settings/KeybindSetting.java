@@ -31,12 +31,12 @@ public class KeybindSetting extends Setting<Keybind> {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
-        if (widget != null && widget.onAction(true, event.key)) event.cancel();
+        if (event.action == KeyAction.Release && widget != null && widget.onAction(true, event.key)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onMouseButtonBinding(MouseButtonEvent event) {
-        if (widget != null && widget.onAction(false, event.button)) event.cancel();
+        if (event.action == KeyAction.Release && widget != null && widget.onAction(false, event.button)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
