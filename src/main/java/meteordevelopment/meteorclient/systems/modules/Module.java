@@ -39,6 +39,7 @@ public abstract class Module implements ISerializable<Module> {
 
     public boolean serialize = true;
     public boolean runInMainMenu = false;
+    public boolean autoSubscribe = true;
 
     public final Keybind keybind = Keybind.none();
     public boolean toggleOnBindRelease = false;
@@ -67,13 +68,13 @@ public abstract class Module implements ISerializable<Module> {
             settings.onActivated();
 
             if (runInMainMenu || Utils.canUpdate()) {
-                MeteorClient.EVENT_BUS.subscribe(this);
+                if (autoSubscribe) MeteorClient.EVENT_BUS.subscribe(this);
                 onActivate();
             }
         }
         else {
             if (runInMainMenu || Utils.canUpdate()) {
-                MeteorClient.EVENT_BUS.unsubscribe(this);
+                if (autoSubscribe) MeteorClient.EVENT_BUS.unsubscribe(this);
                 onDeactivate();
             }
 

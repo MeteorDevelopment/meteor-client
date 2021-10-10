@@ -30,6 +30,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.BlockPos;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -155,11 +156,22 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return w(new WTexture(width, height, rotation, texture));
     }
 
+    public WIntEdit intEdit(int value, int sliderMin, int sliderMax, boolean noSlider) {
+        return w(new WIntEdit(value, sliderMin, sliderMax, noSlider));
+    }
     public WIntEdit intEdit(int value, int sliderMin, int sliderMax) {
-        return w(new WIntEdit(value, sliderMin, sliderMax));
+        return w(new WIntEdit(value, sliderMin, sliderMax, false));
+    }
+
+    public WDoubleEdit doubleEdit(double value, double sliderMin, double sliderMax, boolean noSlider) {
+        return w(new WDoubleEdit(value, sliderMin, sliderMax, noSlider));
     }
     public WDoubleEdit doubleEdit(double value, double sliderMin, double sliderMax) {
-        return w(new WDoubleEdit(value, sliderMin, sliderMax));
+        return w(new WDoubleEdit(value, sliderMin, sliderMax, false));
+    }
+
+    public WBlockPosEdit blockPosEdit(BlockPos value) {
+        return w(new WBlockPosEdit(value));
     }
 
     public WKeybind keybind(Keybind keybind) {

@@ -70,6 +70,7 @@ public class Utils {
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
+    public static double frameTime;
 
     static {
         df = new DecimalFormat("0");
@@ -385,10 +386,10 @@ public class Utils {
         return mc != null && mc.world != null && mc.player != null;
     }
 
-    public static boolean isWhitelistedScreen() {
-        if (mc.currentScreen instanceof TitleScreen) return true;
-        else if (mc.currentScreen instanceof MultiplayerScreen) return true;
-        else return mc.currentScreen instanceof SelectWorldScreen;
+    public static boolean canOpenClickGUI() {
+        if (canUpdate()) return mc.currentScreen == null;
+
+        return mc.currentScreen instanceof TitleScreen || mc.currentScreen instanceof MultiplayerScreen || mc.currentScreen instanceof SelectWorldScreen;
     }
 
     public static int random(int min, int max) {
