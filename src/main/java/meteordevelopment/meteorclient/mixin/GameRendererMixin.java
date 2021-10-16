@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.player.LiquidInteract;
 import meteordevelopment.meteorclient.systems.modules.player.NoMiningTrace;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.systems.modules.render.HideRenderModules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -53,6 +54,7 @@ public abstract class GameRendererMixin {
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILSOFT)
     private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack, double d, float f, Matrix4f matrix4f) {
         if (!Utils.canUpdate()) return;
+        if (HideRenderModules.INSTANCE.isActive()) return;
 
         client.getProfiler().push("meteor-client_render");
 

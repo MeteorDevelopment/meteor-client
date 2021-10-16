@@ -492,6 +492,7 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new Zoom());
         add(new Blur());
+        add(HideRenderModules.INSTANCE);
     }
 
     private void initWorld() {

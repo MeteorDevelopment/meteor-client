@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.HideRenderModules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -38,6 +39,7 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrixStack, float tickDelta, CallbackInfo info) {
+        if (HideRenderModules.INSTANCE.isActive()) return;
         client.getProfiler().push("meteor-client_render_2d");
 
         Utils.unscaledProjection();

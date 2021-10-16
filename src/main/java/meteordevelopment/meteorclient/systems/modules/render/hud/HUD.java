@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.render.HideRenderModules;
 import meteordevelopment.meteorclient.systems.modules.render.hud.modules.*;
 import meteordevelopment.meteorclient.utils.render.AlignmentX;
 import meteordevelopment.meteorclient.utils.render.AlignmentY;
@@ -158,6 +159,7 @@ public class HUD extends Module {
     @EventHandler
     public void onRender(Render2DEvent event) {
         if (mc.options.debugEnabled || mc.options.hudHidden) return;
+        if (HideRenderModules.INSTANCE.isActive()) return;
 
         RENDERER.begin(scale.get(), event.frameTime, false);
 

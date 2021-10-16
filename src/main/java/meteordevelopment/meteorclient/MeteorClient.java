@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.HideRenderModules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
@@ -157,6 +158,7 @@ public class MeteorClient implements ClientModInitializer {
         GuiThemes.postInit();
         MeteorStarscript.init();
         ChatUtils.init();
+        HideRenderModules.init();
     }
 
     private void openClickGui() {
