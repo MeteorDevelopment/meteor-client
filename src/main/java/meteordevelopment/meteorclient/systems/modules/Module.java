@@ -35,7 +35,6 @@ public abstract class Module implements ISerializable<Module> {
     public final Settings settings = new Settings();
 
     private boolean active;
-    private boolean visible = true;
 
     public boolean serialize = true;
     public boolean runInMainMenu = false;
@@ -110,14 +109,6 @@ public abstract class Module implements ISerializable<Module> {
         ChatUtils.error(title, message, args);
     }
 
-    public void setVisible(boolean visible) {
-        this.visible = visible;
-    }
-
-    public boolean isVisible() {
-        return visible;
-    }
-
     public boolean isActive() {
         return active;
     }
@@ -137,7 +128,6 @@ public abstract class Module implements ISerializable<Module> {
         tag.put("settings", settings.toTag());
 
         tag.putBoolean("active", active);
-        tag.putBoolean("visible", visible);
 
         return tag;
     }
@@ -156,7 +146,6 @@ public abstract class Module implements ISerializable<Module> {
 
         boolean active = tag.getBoolean("active");
         if (active != isActive()) toggle();
-        setVisible(tag.getBoolean("visible"));
 
         return this;
     }

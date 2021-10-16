@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.Capes;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.DamageUtils;
 import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -170,6 +171,7 @@ public class MeteorClient implements ClientModInitializer {
         GuiRenderer.init();
         GuiThemes.postInit();
         MeteorStarscript.init();
+        ChatUtils.init();
     }
 
     private void openClickGui() {
