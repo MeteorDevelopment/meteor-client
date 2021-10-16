@@ -27,11 +27,11 @@ public class ClientConnectionInitChannelMixin {
 
         switch (proxy.type) {
             case Socks4:
-                channel.pipeline().addFirst(new Socks4ProxyHandler(new InetSocketAddress(proxy.ip, proxy.port), proxy.username));
+                channel.pipeline().addFirst(new Socks4ProxyHandler(new InetSocketAddress(proxy.address, proxy.port), proxy.username));
                 break;
 
             case Socks5:
-                channel.pipeline().addFirst(new Socks5ProxyHandler(new InetSocketAddress(proxy.ip, proxy.port), proxy.username, proxy.password));
+                channel.pipeline().addFirst(new Socks5ProxyHandler(new InetSocketAddress(proxy.address, proxy.port), proxy.username, proxy.password));
                 break;
         }
     }

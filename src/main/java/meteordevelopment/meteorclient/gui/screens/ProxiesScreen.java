@@ -20,6 +20,8 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.systems.proxies.ProxyType;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +71,7 @@ public class ProxiesScreen extends WindowScreen {
             WHorizontalList ipList = table.add(theme.horizontalList()).expandCellX().widget();
             ipList.spacing = 0;
 
-            ipList.add(theme.label(proxy.ip));
+            ipList.add(theme.label(proxy.address));
             ipList.add(theme.label(":")).widget().color = theme.textSecondaryColor();
             ipList.add(theme.label(Integer.toString(proxy.port)));
 
@@ -91,6 +93,23 @@ public class ProxiesScreen extends WindowScreen {
         // New
         WButton newBtn = add(theme.button("New")).expandX().widget();
         newBtn.action = () -> openEditProxyScreen(null);
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(Proxies.get());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(Proxies.get().toTag());
+
+        if (clipboard != null) {
+            Proxies.get().fromTag(clipboard);
+            return true;
+        }
+
+        return false;
     }
 
     protected static class EditProxyScreen extends WindowScreen {
@@ -123,8 +142,8 @@ public class ProxiesScreen extends WindowScreen {
 
             //   IP
             general.add(theme.label("IP:"));
-            WTextBox ip = general.add(theme.textBox(proxy.ip)).minWidth(400).expandX().widget();
-            ip.action = () -> proxy.ip = ip.get();
+            WTextBox ip = general.add(theme.textBox(proxy.address)).minWidth(400).expandX().widget();
+            ip.action = () -> proxy.address = ip.get();
             general.row();
 
             //   Port
@@ -154,7 +173,7 @@ public class ProxiesScreen extends WindowScreen {
 
             WButton addSave = add(theme.button(isNew ? "Add" : "Save")).expandX().widget();
             addSave.action = () -> {
-                if (proxy.isValid() && (!isNew || Proxies.get().add(proxy))) {
+                if (proxy.resolveAddress() && (!isNew || Proxies.get().add(proxy))) {
                     onClose();
                 }
             };

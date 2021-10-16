@@ -1,4 +1,4 @@
-name: Suggesion
+name: Suggestion
 description: Suggest a new feature or change for Meteor.
 title: '[Suggestion] '
 labels: enhancement
@@ -15,9 +15,15 @@ body:
     attributes:
       label: Before submitting a suggestion
       options:
-        - label: This feature doesn't already exist in the client.
+        - label: |
+            This feature doesn't already exist in the client.
+            (I have checked every module and their settings on the **latest dev build**)
           required: true
-        - label: This wasn't already suggested.
+        - label: |
+            This wasn't already suggested.
+            (I have checked every suggestion on github)
           required: true
-        - label: This feature is a valid suggestion, according to the FAQ and Guides.
+        - label: |
+            This feature is a valid suggestion.
+            (I have read the FAQs and Guides)
           required: true

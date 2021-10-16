@@ -55,10 +55,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.lwjgl.glfw.GLFW.*;
@@ -73,6 +70,7 @@ public class Utils {
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
+    public static double frameTime;
 
     static {
         df = new DecimalFormat("0");
@@ -370,10 +368,10 @@ public class Utils {
         return mc != null && mc.world != null && mc.player != null;
     }
 
-    public static boolean isWhitelistedScreen() {
-        if (mc.currentScreen instanceof TitleScreen) return true;
-        else if (mc.currentScreen instanceof MultiplayerScreen) return true;
-        else return mc.currentScreen instanceof SelectWorldScreen;
+    public static boolean canOpenClickGUI() {
+        if (canUpdate()) return mc.currentScreen == null;
+
+        return mc.currentScreen instanceof TitleScreen || mc.currentScreen instanceof MultiplayerScreen || mc.currentScreen instanceof SelectWorldScreen;
     }
 
     public static int random(int min, int max) {
@@ -449,11 +447,35 @@ public class Utils {
         listTag.add(enchTag);
     }
 
+    public static void clearEnchantments(ItemStack itemStack) {
+        NbtCompound nbt = itemStack.getNbt();
+        if (nbt != null) nbt.remove("Enchantments");
+    }
+
+    public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
+        NbtCompound nbt = itemStack.getNbt();
+        if (nbt == null) return;
+
+        if (!nbt.contains("Enchantments", 9)) return;
+        NbtList list = nbt.getList("Enchantments", 10);
+
+        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+
+        for (Iterator<NbtElement> it = list.iterator(); it.hasNext();) {
+            NbtCompound ench = (NbtCompound) it.next();
+
+            if (ench.getString("id").equals(enchId)) {
+                it.remove();
+                break;
+            }
+        }
+    }
+
     @SafeVarargs
     public static <T> Object2BooleanOpenHashMap<T> asObject2BooleanOpenHashMap(T... checked) {
         Map<T, Boolean> map = new HashMap<>();
         for (T item : checked)
             map.put(item, true);
-        return new Object2BooleanOpenHashMap<T>(map);
+        return new Object2BooleanOpenHashMap<>(map);
     }
 }

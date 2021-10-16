@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -41,6 +42,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
@@ -180,7 +182,15 @@ public class MeteorClient implements ClientModInitializer {
     private void onKey(KeyEvent event) {
         // Click GUI
         if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
-            if (!Utils.canUpdate() && Utils.isWhitelistedScreen() || mc.currentScreen == null) openClickGui();
+            if (Utils.canOpenClickGUI()) openClickGui();
+        }
+    }
+
+    @EventHandler
+    private void onMouseButton(MouseButtonEvent event) {
+        // Click GUI
+        if (event.action == KeyAction.Press && event.button != GLFW.GLFW_MOUSE_BUTTON_LEFT && KeyBinds.OPEN_CLICK_GUI.matchesMouse(event.button)) {
+            if (Utils.canOpenClickGUI()) openClickGui();
         }
     }
 }

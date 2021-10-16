@@ -18,11 +18,6 @@ body:
     attributes:
       label: Steps to reproduce
       description: How do you trigger this bug?
-      value: |
-        1.
-        2.
-        3.
-        ...
       render: bash
     validations:
       required: true
@@ -53,7 +48,11 @@ body:
     attributes:
       label: Before submitting a bug report
       options:
-        - label: This bug wasn't already reported.
+        - label: |
+            This bug wasn't already reported.
+            (I have checked every bug report on github)
           required: true
-        - label: This is a valid bug and I have checked all settings.
+        - label: |
+            This is a valid bug.
+            (I am able to reproduce this on the latest dev build)
           required: true

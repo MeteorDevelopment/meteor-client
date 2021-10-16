@@ -14,7 +14,7 @@ public abstract class WSlider extends WWidget {
 
     protected double value;
     protected double min, max;
-	
+
 	// ghost slider for scrolling event
 	protected double scrollHandleX, scrollHandleY, scrollHandleH;
 	protected boolean scrollHandleMouseOver;
@@ -66,7 +66,7 @@ public abstract class WSlider extends WWidget {
 
         double x = this.x + s2 + valueWidth - height / 2;
         handleMouseOver =  mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
-		
+
 		if(!scrollHandleMouseOver) {
 			scrollHandleX = x;
 			scrollHandleY = y;
@@ -116,26 +116,32 @@ public abstract class WSlider extends WWidget {
 
         return false;
     }
-	
+
 	@Override
-	public void onMouseScrolled(double amount) {
+	public boolean onMouseScrolled(double amount) {
 		// when user starts to scroll over regular handle
 		// remember it's position and check only this "ghost"
 		// position to allow scroll (until it leaves ghost area)
-		if(!scrollHandleMouseOver && handleMouseOver) {
+		if (!scrollHandleMouseOver && handleMouseOver) {
 			scrollHandleX = x;
 			scrollHandleY = y;
 			scrollHandleH = height;
 			scrollHandleMouseOver = true;
 		}
-		if(scrollHandleMouseOver) {
-			if(parent instanceof WIntEdit) {
-				set(value+amount);
-			} else {
-				set(value+0.05*amount);
+
+		if (scrollHandleMouseOver) {
+			if (parent instanceof WIntEdit) {
+				set(value + amount);
 			}
+			else {
+				set(value + 0.05 * amount);
+			}
+
 			if (action != null) action.run();
+			return true;
 		}
+
+		return false;
 	}
 
     public void set(double value) {

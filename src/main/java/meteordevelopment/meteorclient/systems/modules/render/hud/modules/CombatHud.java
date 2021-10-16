@@ -147,7 +147,7 @@ public class CombatHud extends HudElement {
     );
 
     private final Setting<SettingColor> healthColor1 = sgGeneral.add(new ColorSetting.Builder()
-        .name("healh-stage-1")
+        .name("health-stage-1")
         .description("The color on the left of the health gradient.")
         .defaultValue(new SettingColor(255, 15, 15))
         .build()

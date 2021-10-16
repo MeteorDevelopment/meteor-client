@@ -17,6 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.hud.modules.HudElement;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
@@ -71,5 +73,22 @@ public class HudElementScreen extends WindowScreen {
     @Override
     protected void onRenderBefore(float delta) {
         if (!Utils.canUpdate()) Modules.get().get(HUD.class).onRender(Render2DEvent.get(0, 0, delta));
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(element.title, element.toTag());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(element.toTag());
+
+        if (clipboard != null) {
+            element.fromTag(clipboard);
+            return true;
+        }
+
+        return false;
     }
 }

@@ -10,11 +10,12 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 
-public class TabScreen extends WidgetScreen {
+public abstract class TabScreen extends WidgetScreen {
     public final Tab tab;
 
     public TabScreen(GuiTheme theme, Tab tab) {
         super(theme, tab.name);
+
         this.tab = tab;
     }
 
