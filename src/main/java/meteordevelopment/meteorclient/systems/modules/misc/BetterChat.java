@@ -72,13 +72,6 @@ public class BetterChat extends Module {
         .build()
     );
 
-    public final Setting<Boolean> rainbowPrefix = sgGeneral.add(new BoolSetting.Builder()
-        .name("rainbow-prefix")
-        .description("Makes the [Meteor] prefix on chat info rainbow.")
-        .defaultValue(false)
-        .build()
-    );
-
     // Filter
 
     private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
