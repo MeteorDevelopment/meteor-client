@@ -35,7 +35,6 @@ public abstract class Module implements ISerializable<Module> {
     public final Settings settings = new Settings();
 
     private boolean active;
-    private boolean visible = true;
 
     public boolean serialize = true;
     public boolean runInMainMenu = false;
