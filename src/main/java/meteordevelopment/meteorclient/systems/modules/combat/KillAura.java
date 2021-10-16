@@ -26,6 +26,10 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.PiglinEntity;
+import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
@@ -70,6 +74,13 @@ public class KillAura extends Module {
         .name("only-when-look")
         .description("Only attacks when you are looking at the entity.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> ignorePassive = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-passive")
+        .description("Only attacks when piglins and enderman if not passive.")
+        .defaultValue(true)
         .build()
     );
 
@@ -301,6 +312,12 @@ public class KillAura extends Module {
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
+        if (ignorePassive.get()) {
+            if (entity instanceof EndermanEntity) if (!((EndermanEntity) entity).isAngry()) return false;
+            if (entity instanceof PiglinEntity || entity instanceof ZombifiedPiglinEntity) {
+                if (!((MobEntity) entity).isAttacking()) return false;
+            }
+        }
         if (entity instanceof PlayerEntity) {
             if (((PlayerEntity) entity).isCreative()) return false;
             if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
