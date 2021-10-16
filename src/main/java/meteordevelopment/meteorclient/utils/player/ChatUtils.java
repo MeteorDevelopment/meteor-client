@@ -5,12 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
-import meteordevelopment.meteorclient.utils.render.color.RainbowColor;
-import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
@@ -24,10 +21,18 @@ import java.util.function.Supplier;
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class ChatUtils {
-    private static final RainbowColor RAINBOW = new RainbowColor();
-
     private static final List<Pair<String, Supplier<Text>>> customPrefixes = new ArrayList<>();
     private static String forcedPrefixClassName;
+
+    private static Text PREFIX;
+
+    public static void init() {
+        PREFIX = new LiteralText("")
+            .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
+            .append("[")
+            .append(new LiteralText("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(MeteorClient.METEOR_ADDON.color.getPacked()))))
+            .append("] ");
+    }
 
     /** Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used. */
     public static void registerCustomPrefix(String packageName, Supplier<Text> supplier) {
@@ -130,7 +135,7 @@ public class ChatUtils {
     private static Text getPrefix() {
         if (customPrefixes.isEmpty()) {
             forcedPrefixClassName = null;
-            return getMeteorPrefix();
+            return PREFIX;
         }
 
         boolean foundChatUtils = false;
@@ -153,44 +158,16 @@ public class ChatUtils {
             }
         }
 
-        if (className == null) return getMeteorPrefix();
+        if (className == null) return PREFIX;
 
         for (Pair<String, Supplier<Text>> pair : customPrefixes) {
             if (className.startsWith(pair.getLeft())) {
                 Text prefix = pair.getRight().get();
-                return prefix != null ? prefix : getMeteorPrefix();
+                return prefix != null ? prefix : PREFIX;
             }
         }
 
-        return getMeteorPrefix();
-    }
-
-    private static Text getMeteorPrefix() {
-        BaseText meteor = new LiteralText("");
-        BaseText prefix = new LiteralText("");
-
-        RAINBOW.setSpeed(RainbowColors.GLOBAL.getSpeed());
-
-        BetterChat betterChat = Modules.get().get(BetterChat.class);
-
-        if (betterChat.isActive() && betterChat.rainbowPrefix.get()) {
-            meteor.append(new LiteralText("M").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
-            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
-            meteor.append(new LiteralText("t").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
-            meteor.append(new LiteralText("e").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
-            meteor.append(new LiteralText("o").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
-            meteor.append(new LiteralText("r").setStyle(meteor.getStyle().withColor(new TextColor(RAINBOW.getNext().getPacked()))));
-        } else {
-            meteor = new LiteralText("Meteor");
-            meteor.setStyle(meteor.getStyle().withFormatting(Formatting.BLUE));
-        }
-
-        prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
-        prefix.append("[");
-        prefix.append(meteor);
-        prefix.append("] ");
-
-        return prefix;
+        return PREFIX;
     }
 
     private static String formatMsg(String format, Formatting defaultColor, Object... args) {
