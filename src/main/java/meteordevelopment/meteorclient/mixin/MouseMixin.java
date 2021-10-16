@@ -60,7 +60,7 @@ public class MouseMixin {
     }
 
     @Inject(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/TutorialManager;onUpdateMouse(DD)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void perspectiveUpdatePitchYaw(CallbackInfo info, double adjustedSens, double x, double y, int invert) {
+    private void perspectiveUpdatePitchYaw(CallbackInfo info, double adjustedSens, double x, double y, double d1, double d2, double d3, double d4, int invert) {
         FreeLook freeLook = Modules.get().get(FreeLook.class);
         if (freeLook.cameraMode()) {
             freeLook.cameraYaw += x / freeLook.sensitivity.get().floatValue();

@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.asm;
 
+import io.gitlab.jfronny.libjf.unsafe.asm.AsmConfig;
+import io.gitlab.jfronny.libjf.unsafe.asm.patch.Patch;
 import meteordevelopment.meteorclient.asm.transformers.CanvasWorldRendererTransformer;
 import meteordevelopment.meteorclient.asm.transformers.GameRendererTransformer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -18,49 +20,36 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 /** When mixins are just not good enough **/
-public class Asm {
-    private final Map<String, AsmTransformer> transformers = new HashMap<>();
-    private final boolean export;
+public class Asm implements AsmConfig {
+    private final Set<Patch> transformers = new HashSet<>();
 
     public Asm() {
         add(new GameRendererTransformer());
         add(new CanvasWorldRendererTransformer());
-
-        export = System.getProperty("meteor.asm.export") != null;
     }
 
     private void add(AsmTransformer transformer) {
-        transformers.put(transformer.targetName, transformer);
+        transformers.add(new Patch() {
+            @Override
+            public void apply(ClassNode klazz) {
+                if (klazz.name.equals(transformer.targetName))
+                    transformer.transform(klazz);
+            }
+        });
     }
 
-    public byte[] transform(String name, byte[] bytes) {
-        AsmTransformer transformer = transformers.get(name);
+    @Override
+    public Set<String> skipClasses() {
+        return null;
+    }
 
-        if (transformer != null) {
-            ClassNode klass = new ClassNode();
-            ClassReader reader = new ClassReader(bytes);
-            reader.accept(klass, ClassReader.EXPAND_FRAMES);
-
-            transformer.transform(klass);
-
-            ClassWriter writer = new MixinClassWriter(reader, ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-            klass.accept(writer);
-            bytes = writer.toByteArray();
-
-            if (export) {
-                try {
-                    Path path = Path.of(FabricLoader.getInstance().getGameDir().toString(), ".meteor.asm.out", name.replace('.', '/') + ".class");
-                    new File(path.toUri()).getParentFile().mkdirs();
-                    Files.write(path, bytes);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        return  bytes;
+    @Override
+    public Set<Patch> getPatches() {
+        return transformers;
     }
 }

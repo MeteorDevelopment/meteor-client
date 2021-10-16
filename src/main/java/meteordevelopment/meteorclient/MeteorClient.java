@@ -86,7 +86,7 @@ public class MeteorClient implements ClientModInitializer {
 
             METEOR_ADDON.name = metadata.getName();
             METEOR_ADDON.authors = new String[metadata.getAuthors().size()];
-            if (metadata.containsCustomValue("meteor-client:color")) METEOR_ADDON.color.parse(metadata.getCustomValue("meteor-client:color").getAsString());
+            METEOR_ADDON.color.parse("145,61,226");
 
             int i = 0;
             for (Person author : metadata.getAuthors()) {

@@ -1,27 +1,25 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
-  "id": "meteor-client",
+  "id": "fabric-api-base",
+  "name": "Fabric API Base",
+  "provides": ["meteor-client", "com_github_meteordevelopment_starscript", "com_github_meteordevelopment_orbit"],
   "version": "${version}",
-  "description": "Based utility mod.",
+  "description": "Contains the essentials for Fabric API modules.",
   "authors": [
-    "MineGame159",
-    "squidoodly",
-    "seasnail"
+    "FabricMC"
   ],
   "contact": {
-    "homepage": "https://meteorclient.com",
-    "issues": "https://github.com/MeteorDevelopment/meteor-client/issues",
-    "sources": "https://github.com/MeteorDevelopment/meteor-client",
-    "discord": "https://meteorclient.com/discord"
+    "homepage": "https://fabricmc.net",
+    "irc": "irc://irc.esper.net:6667/fabric",
+    "issues": "https://github.com/FabricMC/fabric/issues",
+    "sources": "https://github.com/FabricMC/fabric"
   },
   "license": "GPL-3.0",
-  "icon": "assets/meteor-client/icon.png",
+  "icon": "assets/fabric-api-base/icon.png",
   "environment": "client",
   "entrypoints": {
-    "client": [
-      "meteordevelopment.meteorclient.MeteorClient"
-    ]
+    "client": ["meteordevelopment.meteorclient.MeteorClient"],
+    "libjf:asm": ["meteordevelopment.meteorclient.asm.Asm"]
   },
   "mixins": [
     "meteor-client.mixins.json",
@@ -32,11 +30,12 @@
   ],
   "accessWidener": "meteor-client.accesswidener",
   "custom": {
-    "meteor-client:color": "145,61,226"
+    "fabric-api:module-lifecycle": "stable"
   },
   "depends": {
     "java": ">=16",
-    "minecraft": ">=@mc_version@"
+    "minecraft": ">=@mc_version@",
+    "fabricloader": ">=0.12.0"
   },
   "breaks": {
     "optifabric": "*"

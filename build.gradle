@@ -1,6 +1,7 @@
 plugins {
 	id 'fabric-loom' version '0.10-SNAPSHOT'
 	id 'maven-publish'
+	id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
@@ -23,6 +24,10 @@ repositories {
         url = "https://maven.meteordev.org/snapshots"
     }
 	jcenter()
+    maven {
+        url "https://gitlab.com/api/v4/projects/25805200/packages/maven"
+    }
+    maven { url 'https://api.modrinth.com/maven' }
 
     // For Canvas
     maven {
@@ -32,6 +37,11 @@ repositories {
 }
 
 dependencies {
+	def dependency = { id ->
+		implementation id
+		shadow id
+	}
+
 	// Minecraft
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
@@ -39,10 +49,13 @@ dependencies {
 
 	// Fabric API
 	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.api_version}"
+    shadow(fabricApi.module("fabric-api-base", project.api_version)) {
+        transitive = false
+    }
 
 	// For XRay compatibility
 	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
-    modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") {
+    modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") {
         transitive = false
     }
 
@@ -53,8 +66,14 @@ dependencies {
     include modImplementation("baritone:baritone:${project.baritone_version}")
 
 	// Other dependencies
-    include modImplementation("meteordevelopment:orbit:${project.orbit_version}")
-    include modImplementation("meteordevelopment:starscript:${project.starscript_version}")
+	dependency "meteordevelopment:orbit:${project.orbit_version}"
+    dependency "meteordevelopment:starscript:${project.starscript_version}"
+    include modImplementation("io.gitlab.jfronny.libjf:libjf-unsafe-v0:${project.jfapi_version}")
+    include("io.gitlab.jfronny.libjf:libjf-base:${project.jfapi_version}")
+}
+
+shadowJar {
+	configurations = [ project.configurations.shadow ]
 }
 
 processResources {
@@ -81,6 +100,11 @@ tasks.withType(JavaCompile).configureEach {
 
 jar {
 	from "LICENSE"
+}
+
+remapJar {
+	dependsOn shadowJar
+	input.set(shadowJar.archiveFile)
 }
 
 javadoc {
