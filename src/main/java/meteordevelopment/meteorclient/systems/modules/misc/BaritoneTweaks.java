@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -25,6 +26,14 @@ public class BaritoneTweaks extends Module {
         .build()
     );
 
+    private final Setting<Integer> smartSprintHunger = sgGeneral.add(new IntSetting.Builder()
+        .name("smart-sprint-hunger")
+        .description("Smart sprint food saturation level.")
+        .defaultValue(8)
+        .sliderMax(20)
+        .build()
+    );
+
     public BaritoneTweaks() {
         super(Categories.Misc, "baritone-tweaks", "Various baritone related utilities.");
     }
@@ -32,8 +41,11 @@ public class BaritoneTweaks extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         if (smartSprint.get()) {
-            if (mc.player.getHungerManager().getFoodLevel() >= 8) BaritoneAPI.getSettings().allowSprint.value = true;
-            else BaritoneAPI.getSettings().allowSprint.value = false;
+            if (mc.player.getHungerManager().getFoodLevel() >= smartSprintHunger.get()) {
+                BaritoneAPI.getSettings().allowSprint.value = true;
+            } else {
+                BaritoneAPI.getSettings().allowSprint.value = false;
+            }
         }
     }
 
