@@ -17,17 +17,17 @@ import meteordevelopment.orbit.EventHandler;
 
 public class BaritoneTweaks extends Module {
 
-    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgSmartSprint = settings.createGroup("Smart Sprint");
 
-    private final Setting<Boolean> smartSprint = sgGeneral.add(new BoolSetting.Builder()
-        .name("smart-sprint")
-        .description("Sprint only with enough food saturation.")
+    private final Setting<Boolean> smartSprintActive = sgSmartSprint.add(new BoolSetting.Builder()
+        .name("active")
+        .description("Sprint with enough food saturation only.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Integer> smartSprintHunger = sgGeneral.add(new IntSetting.Builder()
-        .name("smart-sprint-hunger")
+    private final Setting<Integer> smartSprintHunger = sgSmartSprint.add(new IntSetting.Builder()
+        .name("hunger")
         .description("Smart sprint food saturation level.")
         .defaultValue(8)
         .sliderMax(20)
@@ -40,7 +40,7 @@ public class BaritoneTweaks extends Module {
 
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
-        if (smartSprint.get()) {
+        if (smartSprintActive.get()) {
             if (mc.player.getHungerManager().getFoodLevel() >= smartSprintHunger.get()) {
                 BaritoneAPI.getSettings().allowSprint.value = true;
             } else {
