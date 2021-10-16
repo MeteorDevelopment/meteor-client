@@ -79,7 +79,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> ignorePassive = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-passive")
-        .description("Only attacks non-passive piglins and enderman.")
+        .description("Only attacks angry piglins and enderman.")
         .defaultValue(true)
         .build()
     );
