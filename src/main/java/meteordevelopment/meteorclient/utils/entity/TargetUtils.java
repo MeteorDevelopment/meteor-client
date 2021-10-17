@@ -38,11 +38,11 @@ public class TargetUtils {
         targetList.clear();
 
         for (Entity entity : mc.world.getEntities()) {
-            if (isGood.test(entity)) targetList.add(entity);
+            if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 
         for (Entity entity : FakePlayerManager.getPlayers()) {
-            if (isGood.test(entity)) targetList.add(entity);
+            if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 
         targetList.sort((e1, e2) -> sort(e1, e2, sortPriority));
