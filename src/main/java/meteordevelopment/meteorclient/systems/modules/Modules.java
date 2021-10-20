@@ -160,10 +160,7 @@ public class Modules extends System<Modules> {
         for (Module module : this.moduleInstances.values()) {
             int words = Utils.search(module.title, text);
             if (words > 0) {
-                if (modules.containsKey(module))
-                    modules.put(module, modules.get(module) + words);
-                else
-                    modules.put(module, words);
+                modules.put(module, modules.getOrDefault(module, 0) + words);
             }
         }
 
@@ -178,10 +175,7 @@ public class Modules extends System<Modules> {
                 for (Setting<?> setting : sg) {
                     int words = Utils.search(setting.title, text);
                     if (words > 0) {
-                        if (modules.containsKey(module))
-                            modules.put(module, modules.get(module) + words);
-                        else
-                            modules.put(module, words);
+                        modules.put(module, modules.getOrDefault(module, 0) + words);
                     }
                 }
             }
