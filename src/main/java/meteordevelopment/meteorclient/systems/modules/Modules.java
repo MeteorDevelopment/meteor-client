@@ -159,9 +159,7 @@ public class Modules extends System<Modules> {
 
         for (Module module : this.moduleInstances.values()) {
             int words = Utils.search(module.title, text);
-            if (words > 0) {
-                modules.put(module, modules.getOrDefault(module, 0) + words);
-            }
+            if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
         }
 
         return modules;
@@ -174,9 +172,7 @@ public class Modules extends System<Modules> {
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
                     int words = Utils.search(setting.title, text);
-                    if (words > 0) {
-                        modules.put(module, modules.getOrDefault(module, 0) + words);
-                    }
+                    if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
                 }
             }
         }
