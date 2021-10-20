@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.google.common.base.Functions;
+import com.google.common.collect.ImmutableSortedMap;
+import com.google.common.collect.Ordering;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -32,6 +35,7 @@ import meteordevelopment.meteorclient.systems.modules.render.search.Search;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
@@ -150,34 +154,39 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public List<Pair<Module, Integer>> searchTitles(String text) {
-        List<Pair<Module, Integer>> modules = new ArrayList<>();
+    public Map<Module, Integer> searchTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
             int words = Utils.search(module.title, text);
-            if (words > 0) modules.add(new Pair<>(module, words));
+            if (words > 0) {
+                if (modules.containsKey(module))
+                    modules.put(module, modules.get(module) + words);
+                else
+                    modules.put(module, words);
+            }
         }
 
-        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
         return modules;
     }
 
-    public List<Pair<Module, Integer>> searchSettingTitles(String text) {
-        List<Pair<Module, Integer>> modules = new ArrayList<>();
+    public Map<Module, Integer> searchSettingTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
                     int words = Utils.search(setting.title, text);
                     if (words > 0) {
-                        modules.add(new Pair<>(module, words));
-                        break;
+                        if (modules.containsKey(module))
+                            modules.put(module, modules.get(module) + words);
+                        else
+                            modules.put(module, words);
                     }
                 }
             }
         }
 
-        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
         return modules;
     }
 
