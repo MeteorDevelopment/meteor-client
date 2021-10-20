@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import com.google.common.base.Functions;
 import com.google.common.collect.Ordering;
 
 import java.util.Comparator;

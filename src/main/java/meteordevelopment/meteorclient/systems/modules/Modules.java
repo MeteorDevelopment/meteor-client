@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
-import com.google.common.base.Functions;
-import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.Ordering;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.MeteorClient;
