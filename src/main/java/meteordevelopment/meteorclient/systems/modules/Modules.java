@@ -157,6 +157,8 @@ public class Modules extends System<Modules> {
 
         for (Module module : this.moduleInstances.values()) {
             int words = Utils.search(module.title, text);
+            for (String alias : module.aliases)
+                words += Utils.search(alias, text);
             if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
         }
 
