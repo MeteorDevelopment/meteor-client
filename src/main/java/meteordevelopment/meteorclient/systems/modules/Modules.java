@@ -154,7 +154,7 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public Map<Module, Integer> searchTitles(String text) {
+    public Set<Module> searchTitles(String text) {
         Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
@@ -162,10 +162,10 @@ public class Modules extends System<Modules> {
             if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
         }
 
-        return modules;
+        return modules.keySet();
     }
 
-    public Map<Module, Integer> searchSettingTitles(String text) {
+    public Set<Module> searchSettingTitles(String text) {
         Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
@@ -177,7 +177,7 @@ public class Modules extends System<Modules> {
             }
         }
 
-        return modules;
+        return modules.keySet();
     }
 
     void addActive(Module module) {
