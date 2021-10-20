@@ -22,7 +22,9 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Pair;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
@@ -68,6 +70,7 @@ public class ModulesScreen extends TabScreen {
 
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
+            Set<Module> knownModules = new HashSet<>();
             // Titles
             List<Pair<Module, Integer>> modules = Modules.get().searchTitles(text);
 
@@ -77,11 +80,15 @@ public class ModulesScreen extends TabScreen {
 
                 for (Pair<Module, Integer> pair : modules) {
                     section.add(theme.module(pair.getLeft())).expandX();
+                    knownModules.add(pair.getLeft());
                 }
             }
 
             // Settings
             modules = Modules.get().searchSettingTitles(text);
+            modules.removeIf(pair -> {
+                return !knownModules.add(pair.getLeft());
+            });
 
             if (modules.size() > 0) {
                 WSection section = w.add(theme.section("Settings")).expandX().widget();
