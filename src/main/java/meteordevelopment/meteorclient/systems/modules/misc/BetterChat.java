@@ -201,7 +201,7 @@ public class BetterChat extends Module {
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
     public BetterChat() {
-        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.", "fancy-chat");
+        super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.", "fancy");
 
         String[] a = "abcdefghijklmnopqrstuvwxyz".split("");
         String[] b = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴩqʀꜱᴛᴜᴠᴡxyᴢ".split("");

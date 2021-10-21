@@ -156,9 +156,7 @@ public class Modules extends System<Modules> {
         Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
-            int words = Utils.search(module.title, text);
-            for (String alias : module.aliases)
-                words += Utils.search(alias, text);
+            int words = Utils.search(module.queryString, text);
             if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
         }
 

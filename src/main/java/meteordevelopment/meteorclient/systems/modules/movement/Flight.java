@@ -84,7 +84,7 @@ public class Flight extends Module {
     );
 
     public Flight() {
-        super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.", "creative-flight");
+        super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.", "creative");
     }
 
     private int delayLeft = delay.get();

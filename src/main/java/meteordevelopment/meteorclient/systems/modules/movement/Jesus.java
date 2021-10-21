@@ -146,7 +146,7 @@ public class Jesus extends Module {
     private boolean preBaritoneAssumeWalkOnLava;
 
     public Jesus() {
-        super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.", "dolphin", "snow-shoe");
+        super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.", "dolphin", "snow", "shoe");
     }
 
     @Override
