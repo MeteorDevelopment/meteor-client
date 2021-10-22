@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.asm;
 
 import io.gitlab.jfronny.libjf.unsafe.asm.AsmConfig;
 import io.gitlab.jfronny.libjf.unsafe.asm.patch.Patch;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.asm.transformers.CanvasWorldRendererTransformer;
 import meteordevelopment.meteorclient.asm.transformers.GameRendererTransformer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,7 +38,7 @@ public class Asm implements AsmConfig {
         transformers.add(new Patch() {
             @Override
             public void apply(ClassNode klazz) {
-                if (klazz.name.equals(transformer.targetName))
+                if (klazz.name.equals(transformer.targetName.replace('.', '/')))
                     transformer.transform(klazz);
             }
         });
