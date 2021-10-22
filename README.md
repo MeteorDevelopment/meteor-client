@@ -3,6 +3,20 @@ Look [upstream](https://github.com/MeteorDevelopment/meteor-client) for a proper
 
 You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-client/actions)
 
+## Changes
+- Use GitHub Actions for CI -> no dev build numbers
+- Shadow to subpackage for compat
+- Utilize LibJF for ASM
+- Pretend to be fabric-api-base
+- Remove discord presence, capes, player count, meteor PVP adding
+- Add module to disable custom rendering
+- Use FAPI resource loader and client commands instead of custom systems (requires FAPI now)
+- Merge round-ui (#619)
+- Remove credit/spash/title/prefix customization
+- Update fabric loader and loom dependencies
+- Merge keywords in search (#1600)
+- Use browser user agent in Http Utils instead of "Meteor Client"
+
 ## Credits
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
