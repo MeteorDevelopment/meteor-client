@@ -6,7 +6,9 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
+import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -14,7 +16,9 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -26,7 +30,13 @@ import net.minecraft.util.math.Box;
 public class ESP extends Module {
     public enum Mode {
         Box,
-        Shader
+        _2D,
+        Shader;
+
+        @Override
+        public String toString() {
+            return this == _2D ? "2D" : super.toString();
+        }
     }
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -51,10 +61,10 @@ public class ESP extends Module {
     public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
             .name("width")
             .description("The width of the shader outline.")
+            .visible(() -> mode.get() == Mode.Shader)
             .defaultValue(2)
             .min(1).max(10)
             .sliderMin(1).sliderMax(5)
-            .visible(() -> mode.get() == Mode.Shader)
             .build()
     );
 
@@ -130,6 +140,10 @@ public class ESP extends Module {
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
 
+    private final Vec3 pos1 = new Vec3();
+    private final Vec3 pos2 = new Vec3();
+    private final Vec3 pos = new Vec3();
+
     private int count;
 
     public ESP() {
@@ -159,21 +173,106 @@ public class ESP extends Module {
         sideColor.a = prevSideA;
     }
 
+    private boolean shouldSkip(Entity entity) {
+        if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) return true;
+        return !EntityUtils.isInRenderDistance(entity);
+    }
+
     @EventHandler
-    private void onRender(Render3DEvent event) {
+    private void onRender3D(Render3DEvent event) {
+        if (mode.get() == Mode._2D) return;
+
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) continue;
-            if (!EntityUtils.isInRenderDistance(entity)) continue;
+            if (shouldSkip(entity)) continue;
 
             if (mode.get() == Mode.Box) render(event, entity);
             count++;
         }
     }
 
+    private boolean checkCorner(double x, double y, double z, Vec3 min, Vec3 max) {
+        pos.set(x, y, z);
+        if (!NametagUtils.to2D(pos, 1)) return true;
+
+        // Check Min
+        if (pos.x < min.x) min.x = pos.x;
+        if (pos.y < min.y) min.y = pos.y;
+        if (pos.z < min.z) min.z = pos.z;
+
+        // Check Max
+        if (pos.x > max.x) max.x = pos.x;
+        if (pos.y > max.y) max.y = pos.y;
+        if (pos.z > max.z) max.z = pos.z;
+
+        return false;
+    }
+
+    @EventHandler
+    private void onRender2D(Render2DEvent event) {
+        if (mode.get() != Mode._2D) return;
+
+        Renderer2D.COLOR.begin();
+        count = 0;
+
+        for (Entity entity : mc.world.getEntities()) {
+            if (shouldSkip(entity)) continue;
+
+            Box box = entity.getBoundingBox();
+
+            double x = (entity.getX() - entity.prevX) * event.tickDelta;
+            double y = (entity.getY() - entity.prevY) * event.tickDelta;
+            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
+
+            // Check corners
+            pos1.set(Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+            pos2.set(0, 0, 0);
+
+            //     Bottom
+            if (checkCorner(box.minX + x, box.minY + y, box.minZ + z, pos1, pos2)) continue;
+            if (checkCorner(box.maxX + x, box.minY + y, box.minZ + z, pos1, pos2)) continue;
+            if (checkCorner(box.minX + x, box.minY + y, box.maxZ + z, pos1, pos2)) continue;
+            if (checkCorner(box.maxX + x, box.minY + y, box.maxZ + z, pos1, pos2)) continue;
+
+            //     Top
+            if (checkCorner(box.minX + x, box.maxY + y, box.minZ + z, pos1, pos2)) continue;
+            if (checkCorner(box.maxX + x, box.maxY + y, box.minZ + z, pos1, pos2)) continue;
+            if (checkCorner(box.minX + x, box.maxY + y, box.maxZ + z, pos1, pos2)) continue;
+            if (checkCorner(box.maxX + x, box.maxY + y, box.maxZ + z, pos1, pos2)) continue;
+
+            // Setup color
+            lineColor.set(getColor(entity));
+            sideColor.set(lineColor).a(fillOpacity.get());
+
+            double a = getFadeAlpha(entity);
+
+            int prevLineA = lineColor.a;
+            int prevSideA = sideColor.a;
+
+            lineColor.a *= a;
+            sideColor.a *= a;
+
+            // Render
+            if (sideColor.a != 0) Renderer2D.COLOR.quad(pos1.x, pos1.y, pos2.x - pos1.x, pos2.y - pos1.y, sideColor);
+
+            Renderer2D.COLOR.line(pos1.x, pos1.y, pos1.x, pos2.y, lineColor);
+            Renderer2D.COLOR.line(pos2.x, pos1.y, pos2.x, pos2.y, lineColor);
+            Renderer2D.COLOR.line(pos1.x, pos1.y, pos2.x, pos1.y, lineColor);
+            Renderer2D.COLOR.line(pos1.x, pos2.y, pos2.x, pos2.y, lineColor);
+
+            // End
+            lineColor.a = prevLineA;
+            sideColor.a = prevSideA;
+
+            count++;
+        }
+
+        Renderer2D.COLOR.render(null);
+    }
+
     private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.distanceTo(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
+        double dist = PlayerUtils.distanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
         double fadeDist = fadeDistance.get().floatValue() * fadeDistance.get().floatValue();
         double alpha = 1;
         if (dist <= fadeDist) alpha = (float) (dist / fadeDist);
