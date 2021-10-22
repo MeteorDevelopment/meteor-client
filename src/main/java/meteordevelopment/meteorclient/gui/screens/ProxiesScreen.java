@@ -30,6 +30,7 @@ import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class ProxiesScreen extends WindowScreen {
     private final List<WCheckbox> checkboxes = new ArrayList<>();
+    private boolean dirty;
 
     public ProxiesScreen(GuiTheme theme) {
         super(theme, "Proxies");
@@ -37,6 +38,16 @@ public class ProxiesScreen extends WindowScreen {
 
     protected void openEditProxyScreen(Proxy proxy) {
         mc.setScreen(new EditProxyScreen(theme, proxy));
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        if (dirty) {
+            reload();
+            dirty = false;
+        }
     }
 
     @Override
@@ -112,7 +123,7 @@ public class ProxiesScreen extends WindowScreen {
         return false;
     }
 
-    protected static class EditProxyScreen extends WindowScreen {
+    protected class EditProxyScreen extends WindowScreen {
         private final boolean isNew;
         private final Proxy proxy;
 
@@ -174,6 +185,7 @@ public class ProxiesScreen extends WindowScreen {
             WButton addSave = add(theme.button(isNew ? "Add" : "Save")).expandX().widget();
             addSave.action = () -> {
                 if (proxy.resolveAddress() && (!isNew || Proxies.get().add(proxy))) {
+                    dirty = true;
                     onClose();
                 }
             };

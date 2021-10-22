@@ -83,11 +83,15 @@ public class PositionHud extends HudElement {
             switch (PlayerUtils.getDimension()) {
                 case Overworld -> {
                     left2 = "Nether Pos: ";
-                    right2 = String.format("%.1f %.1f %.1f", x / 8.0, y, z / 8.0);
+                    right2 = accurate.get() ?
+                        String.format("%.1f %.1f %.1f", x / 8.0, y, z / 8.0) :
+                        String.format("%d %d %d", (int) x / 8, (int) y, (int) z / 8);
                 }
                 case Nether -> {
                     left2 = "Overworld Pos: ";
-                    right2 = String.format("%.1f %.1f %.1f", x * 8.0, y, z * 8.0);
+                    right2 = accurate.get() ?
+                        String.format("%.1f %.1f %.1f", x * 8.0, y, z * 8.0) :
+                        String.format("%d %d %d", (int) x * 8, (int) y, (int) z / 8);
                 }
             }
         }
