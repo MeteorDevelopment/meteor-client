@@ -23,7 +23,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class SayCommand extends Command {
     public SayCommand() {
-        super("say-c", "Sends messages in chat.");
+        super("say", "Sends messages in chat.");
     }
 
     @Override

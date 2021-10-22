@@ -51,9 +51,10 @@ public abstract class Command {
     }
 
     public void register(CommandDispatcher<CommandSource> dispatcher, String name) {
-        LiteralArgumentBuilder<CommandSource> builder = LiteralArgumentBuilder.literal(name);
+        LiteralArgumentBuilder<CommandSource> builder = literal(name);
         build(builder);
-        dispatcher.register(builder);
+        dispatcher.register(literal("m").then(builder));
+        dispatcher.register(literal("meteor").then(builder));
     }
 
     public abstract void build(LiteralArgumentBuilder<CommandSource> builder);
