@@ -68,6 +68,7 @@ public class Commands extends System<Commands> {
         add(new GiveCommand());
         add(new NameHistoryCommand());
         add(new BindCommand());
+        add(new FOVCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }
