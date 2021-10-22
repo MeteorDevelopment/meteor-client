@@ -9,6 +9,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.CompoundNbtTagArgumentType;
+import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
@@ -40,7 +41,7 @@ public class NbtCommand extends Command {
                     source.copyFrom(tag);
                     setStack(stack);
                 } else {
-                    error("Some of the NBT data could not be found, try using: /nbt set {nbt}");
+                    error("Some of the NBT data could not be found, try using: " + Config.get().prefix + "nbt set {nbt}");
                 }
             }
 

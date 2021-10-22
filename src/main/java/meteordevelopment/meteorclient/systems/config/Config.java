@@ -28,6 +28,7 @@ public class Config extends System<Config> {
     public boolean customFont = ConfigTab.customFont.get();
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
 
+    public final String prefix = "/";
     public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
     public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
 

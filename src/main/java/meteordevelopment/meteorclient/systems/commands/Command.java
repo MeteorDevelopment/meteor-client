@@ -72,7 +72,7 @@ public abstract class Command {
     }
 
     public String toString() {
-        return "/" + name;
+        return Config.get().prefix + name;
     }
 
     public String toString(String... args) {

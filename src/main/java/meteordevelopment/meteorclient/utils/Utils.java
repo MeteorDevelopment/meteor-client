@@ -265,8 +265,6 @@ public class Utils {
     }
 
     public static String nameToTitle(String name) {
-        if (name.endsWith("-c"))
-            name = name.substring(0, name.length() - 2);
         return Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
 

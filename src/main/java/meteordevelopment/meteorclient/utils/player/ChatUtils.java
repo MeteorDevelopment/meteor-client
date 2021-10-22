@@ -187,7 +187,7 @@ public class ChatUtils {
                 .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        String.format("/b goto %d %d %d", (int) pos.x, (int) pos.y, (int) pos.z)
+                        String.format("%sb goto %d %d %d", Config.get().prefix, (int) pos.x, (int) pos.y, (int) pos.z)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
