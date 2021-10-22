@@ -21,6 +21,7 @@ import java.util.*;
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class Commands extends System<Commands> {
+    private final CommandDispatcher<CommandSource> DISPATCHER = (CommandDispatcher<CommandSource>)(Object)ClientCommandManager.DISPATCHER;
     private final List<Command> commands = new ArrayList<>();
     private final Map<Class<? extends Command>, Command> commandInstances = new HashMap<>();
 
@@ -81,7 +82,7 @@ public class Commands extends System<Commands> {
     }
 
     public CommandDispatcher<CommandSource> getDispatcher() {
-        return (CommandDispatcher<CommandSource>)(Object)ClientCommandManager.DISPATCHER;
+        return DISPATCHER;
     }
 
     private final static class ChatCommandSource extends ClientCommandSource {
