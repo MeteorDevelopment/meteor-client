@@ -37,7 +37,17 @@ public class AutoEat extends Module {
     private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
         .name("blacklist")
         .description("Which items to not eat.")
-        .defaultValue(getDefaultBlacklist())
+        .defaultValue(
+            Items.ENCHANTED_GOLDEN_APPLE,
+            Items.GOLDEN_APPLE,
+            Items.CHORUS_FRUIT,
+            Items.POISONOUS_POTATO,
+            Items.PUFFERFISH,
+            Items.CHICKEN,
+            Items.ROTTEN_FLESH,
+            Items.SPIDER_EYE,
+            Items.SUSPICIOUS_STEW
+        )
         .filter(Item::isFood)
         .build()
     );
@@ -222,21 +232,5 @@ public class AutoEat extends Module {
         }
 
         return slot;
-    }
-
-    private static List<Item> getDefaultBlacklist() {
-        List<Item> l = new ArrayList<>(9);
-
-        l.add(Items.ENCHANTED_GOLDEN_APPLE);
-        l.add(Items.GOLDEN_APPLE);
-        l.add(Items.CHORUS_FRUIT);
-        l.add(Items.POISONOUS_POTATO);
-        l.add(Items.PUFFERFISH);
-        l.add(Items.CHICKEN);
-        l.add(Items.ROTTEN_FLESH);
-        l.add(Items.SPIDER_EYE);
-        l.add(Items.SUSPICIOUS_STEW);
-
-        return l;
     }
 }

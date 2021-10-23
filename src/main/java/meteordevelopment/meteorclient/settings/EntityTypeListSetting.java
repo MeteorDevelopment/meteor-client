@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.settings;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
@@ -94,6 +95,10 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
         public Builder() {
             super(new Object2BooleanOpenHashMap<>(0));
+        }
+
+        public Builder defaultValue(EntityType<?>... defaults) {
+            return defaultValue(defaults != null ? Utils.asO2BMap(defaults) : new Object2BooleanOpenHashMap<>(0));
         }
 
         public Builder onlyAttackable() {

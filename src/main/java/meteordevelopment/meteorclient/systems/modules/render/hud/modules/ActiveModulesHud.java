@@ -23,7 +23,6 @@ public class ActiveModulesHud extends HudElement {
     private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
         .name("hidden-modules")
         .description("Which modules not to show in the list.")
-        .defaultValue(new ArrayList<>())
         .build()
     );
 

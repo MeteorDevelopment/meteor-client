@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import com.google.common.collect.Lists;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -67,7 +66,15 @@ public class LiquidFiller extends Module {
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
             .name("block-whitelist")
             .description("The allowed blocks that it will use to fill up the liquid.")
-            .defaultValue(getDefaultWhitelist())
+            .defaultValue(
+                Blocks.DIRT,
+                Blocks.COBBLESTONE,
+                Blocks.STONE,
+                Blocks.NETHERRACK,
+                Blocks.DIORITE,
+                Blocks.GRANITE,
+                Blocks.ANDESITE
+            )
             .build()
     );
 
@@ -121,17 +128,5 @@ public class LiquidFiller extends Module {
 
     private boolean isSource(BlockState blockState) {
         return blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill();
-    }
-
-    private List<Block> getDefaultWhitelist() {
-        return Lists.newArrayList(
-                Blocks.DIRT,
-                Blocks.COBBLESTONE,
-                Blocks.STONE,
-                Blocks.NETHERRACK,
-                Blocks.DIORITE,
-                Blocks.GRANITE,
-                Blocks.ANDESITE
-        );
     }
 }

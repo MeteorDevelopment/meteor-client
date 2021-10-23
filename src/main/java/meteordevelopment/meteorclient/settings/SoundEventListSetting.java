@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -88,6 +89,10 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     public static class Builder extends SettingBuilder<Builder, List<SoundEvent>, SoundEventListSetting> {
         public Builder() {
             super(new ArrayList<>(0));
+        }
+
+        public Builder defaultValue(SoundEvent... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
         @Override

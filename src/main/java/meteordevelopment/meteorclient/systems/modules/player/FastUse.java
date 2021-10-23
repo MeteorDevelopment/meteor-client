@@ -37,7 +37,6 @@ public class FastUse extends Module {
         .name("items")
         .description("Which items should fast place work on in \"Some\" mode.")
         .visible(() -> mode.get() == Mode.Some)
-        .defaultValue(new ArrayList<>(0))
         .build()
     );
 

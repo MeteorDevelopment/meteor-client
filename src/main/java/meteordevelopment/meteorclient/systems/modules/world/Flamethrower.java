@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -73,9 +72,13 @@ public class Flamethrower extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to cook.")
-            .defaultValue(Utils.asO2BMap(
-                EntityType.PIG, EntityType.COW, EntityType.SHEEP,
-                EntityType.CHICKEN, EntityType.RABBIT))
+            .defaultValue(
+                EntityType.PIG,
+                EntityType.COW,
+                EntityType.SHEEP,
+                EntityType.CHICKEN,
+                EntityType.RABBIT
+            )
             .build()
     );
 

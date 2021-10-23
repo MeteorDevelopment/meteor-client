@@ -29,7 +29,6 @@ public class AutoNametag extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Which entities to nametag.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 

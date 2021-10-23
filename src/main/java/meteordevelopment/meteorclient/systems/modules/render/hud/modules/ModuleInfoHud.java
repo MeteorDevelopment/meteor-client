@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ModuleInfoHud extends HudElement {
@@ -22,7 +21,7 @@ public class ModuleInfoHud extends HudElement {
     private final Setting<List<Module>> modules = sgGeneral.add(new ModuleListSetting.Builder()
         .name("modules")
         .description("Which modules to display")
-        .defaultValue(getDefaultModules())
+        .defaultValue(KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class, Surround.class)
         .build()
     );
 
@@ -107,15 +106,5 @@ public class ModuleInfoHud extends HudElement {
         if (module.getInfoString() != null && module.isActive() && info.get()) return module.getInfoString();
         else if (module.isActive()) return "ON";
         else return "OFF";
-    }
-
-    private static List<Module> getDefaultModules() {
-        List<Module> modules = new ArrayList<>(5);
-        modules.add(Modules.get().get(KillAura.class));
-        modules.add(Modules.get().get(CrystalAura.class));
-        modules.add(Modules.get().get(AnchorAura.class));
-        modules.add(Modules.get().get(BedAura.class));
-        modules.add(Modules.get().get(Surround.class));
-        return modules;
     }
 }

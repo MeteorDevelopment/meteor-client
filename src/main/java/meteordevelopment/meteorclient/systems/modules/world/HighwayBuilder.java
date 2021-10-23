@@ -128,7 +128,7 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Block>> blocksToPlace = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
-        .defaultValue(List.of(Blocks.OBSIDIAN))
+        .defaultValue(Blocks.OBSIDIAN)
         .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, ZERO)))
         .build()
     );
@@ -136,7 +136,7 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Item>> trashItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
-        .defaultValue(List.of(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT))
+        .defaultValue(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT)
         .build()
     );
 

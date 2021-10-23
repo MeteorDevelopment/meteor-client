@@ -54,7 +54,6 @@ public class InventoryTweaks extends Module {
     private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
             .name("anti-drop-items")
             .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
-            .defaultValue(new ArrayList<>(0))
             .build()
     );
 
@@ -108,7 +107,6 @@ public class InventoryTweaks extends Module {
     private final Setting<List<Item>> autoDropItems = sgAutoDrop.add(new ItemListSetting.Builder()
             .name("auto-drop-items")
             .description("Items to drop.")
-            .defaultValue(new ArrayList<>(0))
             .build()
     );
 

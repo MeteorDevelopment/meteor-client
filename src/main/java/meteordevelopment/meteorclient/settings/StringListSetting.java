@@ -122,6 +122,10 @@ public class StringListSetting extends Setting<List<String>>{
             super(new ArrayList<>(0));
         }
 
+        public Builder defaultValue(String... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
+        }
+
         @Override
         public StringListSetting build() {
             return new StringListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
