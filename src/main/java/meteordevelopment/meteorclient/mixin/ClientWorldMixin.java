@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.events.entity.EntityRemovedEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.render.SkyProperties;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
