@@ -27,7 +27,7 @@ import net.minecraft.util.math.*;
 
 import static meteordevelopment.meteorclient.utils.Utils.mc;
 
-public class BoxesEntityRenderer {
+public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();
     private static final Vector4f pos1 = new Vector4f();
     private static final Vector4f pos2 = new Vector4f();
@@ -38,9 +38,9 @@ public class BoxesEntityRenderer {
     private static ShapeMode shapeMode;
 
     public static void render(Render3DEvent event, Entity entity, Color sideColor, Color lineColor, ShapeMode shapeMode) {
-        BoxesEntityRenderer.sideColor = sideColor;
-        BoxesEntityRenderer.lineColor = lineColor;
-        BoxesEntityRenderer.shapeMode = shapeMode;
+        WireframeEntityRenderer.sideColor = sideColor;
+        WireframeEntityRenderer.lineColor = lineColor;
+        WireframeEntityRenderer.shapeMode = shapeMode;
 
         matrices.push();
         matrices.translate(MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()), MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()), MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()));
@@ -96,7 +96,7 @@ public class BoxesEntityRenderer {
 
             float pitch = MathHelper.lerp(event.tickDelta, livingEntity.prevPitch, livingEntity.getPitch());
 
-            animationProgress = livingEntity.age + event.tickDelta;
+            animationProgress = renderer.getAnimationProgress(livingEntity, event.tickDelta);
             float limbDistance = 0;
             float limbAngle = 0;
 

@@ -20,6 +20,7 @@ Accessible   field   net/minecraft/client/model/ModelPart$Cuboid sides [Lnet/min
 Accessible   method  net/minecraft/client/render/entity/PlayerEntityRenderer getArmPose (Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/client/render/entity/model/BipedEntityModel$ArmPose;
 Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer setupTransforms (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;FFF)V
 Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer scale (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V
+Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer getAnimationProgress (Lnet/minecraft/entity/LivingEntity;F)F
 Accessible   method  net/minecraft/client/render/entity/model/AnimalModel getHeadParts ()Ljava/lang/Iterable;
 Accessible   method  net/minecraft/client/render/entity/model/AnimalModel getBodyParts ()Ljava/lang/Iterable;
 
