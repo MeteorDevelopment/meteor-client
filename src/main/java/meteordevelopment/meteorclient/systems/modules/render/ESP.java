@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -178,7 +177,7 @@ public class ESP extends Module {
             event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
         }
         else {
-            WireframeEntityRenderer.render(event, entity, sideColor, lineColor, shapeMode.get());
+            WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
         }
 
         lineColor.a = prevLineA;

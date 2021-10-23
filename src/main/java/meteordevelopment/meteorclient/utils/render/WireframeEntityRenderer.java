@@ -37,13 +37,18 @@ public class WireframeEntityRenderer {
     private static Color sideColor, lineColor;
     private static ShapeMode shapeMode;
 
-    public static void render(Render3DEvent event, Entity entity, Color sideColor, Color lineColor, ShapeMode shapeMode) {
+    public static void render(Render3DEvent event, Entity entity, double scale, Color sideColor, Color lineColor, ShapeMode shapeMode) {
         WireframeEntityRenderer.sideColor = sideColor;
         WireframeEntityRenderer.lineColor = lineColor;
         WireframeEntityRenderer.shapeMode = shapeMode;
 
+        double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX());
+        double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY());
+        double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ());
+
         matrices.push();
-        matrices.translate(MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()), MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY()), MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ()));
+        matrices.translate(x, y, z);
+        matrices.scale((float) scale, (float) scale, (float) scale);
 
         EntityRenderer<?> entityRenderer = mc.getEntityRenderDispatcher().getRenderer(entity);
 
@@ -281,12 +286,12 @@ public class WireframeEntityRenderer {
             matrices.pop();
         }
         else if (entityRenderer instanceof ItemEntityRenderer) {
-            double x = (entity.getX() - entity.prevX) * event.tickDelta;
-            double y = (entity.getY() - entity.prevY) * event.tickDelta;
-            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
+            double dx = (entity.getX() - entity.prevX) * event.tickDelta;
+            double dy = (entity.getY() - entity.prevY) * event.tickDelta;
+            double dz = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
             Box box = entity.getBoundingBox();
-            event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode, 0);
+            event.renderer.box(dx + box.minX, dy + box.minY, dz + box.minZ, dx + box.maxX, dy + box.maxY, dz + box.maxZ, sideColor, lineColor, shapeMode, 0);
         }
 
         matrices.pop();
