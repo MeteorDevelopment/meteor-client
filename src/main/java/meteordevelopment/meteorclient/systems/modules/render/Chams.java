@@ -25,7 +25,7 @@ public class Chams extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Select entities to show through walls.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+            .defaultValue(Utils.asO2BMap(EntityType.PLAYER))
             .build()
     );
 

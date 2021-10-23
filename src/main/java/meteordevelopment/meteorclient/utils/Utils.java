@@ -492,7 +492,7 @@ public class Utils {
     }
 
     @SafeVarargs
-    public static <T> Object2BooleanOpenHashMap<T> asObject2BooleanOpenHashMap(T... checked) {
+    public static <T> Object2BooleanOpenHashMap<T> asO2BMap(T... checked) {
         Map<T, Boolean> map = new HashMap<>();
         for (T item : checked)
             map.put(item, true);

@@ -94,7 +94,7 @@ public class Notifier extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Which entities to nofity about.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+            .defaultValue(Utils.asO2BMap(EntityType.PLAYER))
             .build()
     );
 
