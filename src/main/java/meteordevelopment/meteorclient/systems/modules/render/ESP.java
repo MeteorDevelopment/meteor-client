@@ -29,28 +29,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 
 public class ESP extends Module {
-    public enum Mode {
-        Box,
-        Wireframe,
-        _2D,
-        Shader;
-
-        @Override
-        public String toString() {
-            return this == _2D ? "2D" : super.toString();
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Rendering mode.")
-            .defaultValue(Mode.Shader)
-            .build()
+        .name("mode")
+        .description("Rendering mode.")
+        .defaultValue(Mode.Shader)
+        .build()
     );
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
@@ -65,79 +53,79 @@ public class ESP extends Module {
         .description("The opacity of the shape fill.")
         .visible(() -> shapeMode.get() != ShapeMode.Lines)
         .defaultValue(80)
-        .min(0).max(255)
+        .range(0, 255)
         .sliderMax(255)
         .build()
     );
 
     public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
-            .name("width")
-            .description("The width of the shader outline.")
-            .visible(() -> mode.get() == Mode.Shader)
-            .defaultValue(2)
-            .min(1).max(10)
-            .sliderMin(1).sliderMax(5)
-            .build()
+        .name("width")
+        .description("The width of the shader outline.")
+        .visible(() -> mode.get() == Mode.Shader)
+        .defaultValue(2)
+        .range(1, 10)
+        .sliderRange(1, 5)
+        .build()
     );
 
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fade-distance")
-            .description("The distance from an entity where the color begins to fade.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(12)
-            .build()
+        .name("fade-distance")
+        .description("The distance from an entity where the color begins to fade.")
+        .defaultValue(2)
+        .min(0)
+        .sliderMax(12)
+        .build()
     );
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Select specific entities.")
-            .defaultValue(Utils.asO2BMap(EntityType.PLAYER))
-            .build()
+        .name("entities")
+        .description("Select specific entities.")
+        .defaultValue(Utils.asO2BMap(EntityType.PLAYER))
+        .build()
     );
 
     // Colors
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
-            .name("players-color")
-            .description("The other player's color.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .build()
+        .name("players-color")
+        .description("The other player's color.")
+        .defaultValue(new SettingColor(255, 255, 255))
+        .build()
     );
 
     private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
-            .name("animals-color")
-            .description("The animal's color.")
-            .defaultValue(new SettingColor(25, 255, 25, 255))
-            .build()
+        .name("animals-color")
+        .description("The animal's color.")
+        .defaultValue(new SettingColor(25, 255, 25, 255))
+        .build()
     );
 
     private final Setting<SettingColor> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
-            .name("water-animals-color")
-            .description("The water animal's color.")
-            .defaultValue(new SettingColor(25, 25, 255, 255))
-            .build()
+        .name("water-animals-color")
+        .description("The water animal's color.")
+        .defaultValue(new SettingColor(25, 25, 255, 255))
+        .build()
     );
 
     private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
-            .name("monsters-color")
-            .description("The monster's color.")
-            .defaultValue(new SettingColor(255, 25, 25, 255))
-            .build()
+        .name("monsters-color")
+        .description("The monster's color.")
+        .defaultValue(new SettingColor(255, 25, 25, 255))
+        .build()
     );
 
     private final Setting<SettingColor> ambientColor = sgColors.add(new ColorSetting.Builder()
-            .name("ambient-color")
-            .description("The ambient's color.")
-            .defaultValue(new SettingColor(25, 25, 25, 255))
-            .build()
+        .name("ambient-color")
+        .description("The ambient's color.")
+        .defaultValue(new SettingColor(25, 25, 25, 255))
+        .build()
     );
 
     private final Setting<SettingColor> miscColor = sgColors.add(new ColorSetting.Builder()
-            .name("misc-color")
-            .description("The misc color.")
-            .defaultValue(new SettingColor(175, 175, 175, 255))
-            .build()
+        .name("misc-color")
+        .description("The misc color.")
+        .defaultValue(new SettingColor(175, 175, 175, 255))
+        .build()
     );
 
     private final Color lineColor = new Color();
@@ -330,5 +318,17 @@ public class ESP extends Module {
 
     public boolean isShader() {
         return mode.get() == Mode.Shader;
+    }
+
+    public enum Mode {
+        Box,
+        Wireframe,
+        _2D,
+        Shader;
+
+        @Override
+        public String toString() {
+            return this == _2D ? "2D" : super.toString();
+        }
     }
 }

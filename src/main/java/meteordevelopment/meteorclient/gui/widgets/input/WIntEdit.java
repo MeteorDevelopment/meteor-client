@@ -8,22 +8,23 @@ package meteordevelopment.meteorclient.gui.widgets.input;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 
 public class WIntEdit extends WHorizontalList {
-    public Runnable action;
-    public Runnable actionOnRelease;
-
-    public boolean noSlider;
-    public boolean small;
-
     private int value;
 
+    public final int min, max;
     private final int sliderMin, sliderMax;
-    public Integer min, max;
+    public boolean noSlider = false;
+    public boolean small = false;
+
+    public Runnable action;
+    public Runnable actionOnRelease;
 
     private WTextBox textBox;
     private WSlider slider;
 
-    public WIntEdit(int value, int sliderMin, int sliderMax, boolean noSlider) {
+    public WIntEdit(int value, int min, int max, int sliderMin, int sliderMax, boolean noSlider) {
         this.value = value;
+        this.min = min;
+        this.max = max;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
@@ -38,7 +39,9 @@ public class WIntEdit extends WHorizontalList {
             add(theme.button("+")).widget().action = () -> setButton(get() + 1);
             add(theme.button("-")).widget().action = () -> setButton(get() - 1);
         }
-        else slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
+        else {
+            slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
+        }
 
         textBox.actionOnUnfocused = () -> {
             int lastValue = value;
@@ -95,8 +98,8 @@ public class WIntEdit extends WHorizontalList {
     private void setButton(int v) {
         if (this.value == v) return;
 
-        if (min != null && v < min) this.value = min;
-        else if (max != null && v > max) this.value = max;
+        if (v < min) this.value = min;
+        else if (v > max) this.value = max;
         else this.value = v;
 
         if (this.value == v) {

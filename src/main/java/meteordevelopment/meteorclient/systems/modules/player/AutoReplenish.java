@@ -30,7 +30,7 @@ public class AutoReplenish extends Module {
             .description("The threshold of items left this actives at.")
             .defaultValue(8)
             .min(1)
-            .sliderMax(63)
+            .sliderRange(1, 63)
             .build()
     );
 
@@ -39,7 +39,6 @@ public class AutoReplenish extends Module {
             .description("The tick delay to replenish your hotbar.")
             .defaultValue(1)
             .min(0)
-            .sliderMax(10)
             .build()
     );
 

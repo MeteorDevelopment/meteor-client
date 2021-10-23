@@ -66,7 +66,7 @@ public class DiscordPresence extends Module {
         .description("How fast to update the first line in ticks.")
         .defaultValue(200)
         .min(10)
-        .sliderMin(10).sliderMax(200)
+        .sliderRange(10, 200)
         .build()
     );
 
@@ -92,7 +92,7 @@ public class DiscordPresence extends Module {
         .description("How fast to update the second line in ticks.")
         .defaultValue(60)
         .min(10)
-        .sliderMin(10).sliderMax(200)
+        .sliderRange(10, 200)
         .build()
     );
 

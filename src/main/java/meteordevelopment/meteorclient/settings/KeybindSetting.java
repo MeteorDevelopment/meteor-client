@@ -25,7 +25,6 @@ public class KeybindSetting extends Setting<Keybind> {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.action = action;
-
         MeteorClient.EVENT_BUS.subscribe(this);
     }
 

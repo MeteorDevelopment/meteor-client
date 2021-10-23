@@ -82,10 +82,8 @@ public class HighwayBuilder extends Module {
         .name("width")
         .description("Width of the highway.")
         .defaultValue(4)
-        .min(1)
-        .max(5)
-        .sliderMin(1)
-        .sliderMax(5)
+        .range(1, 5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -93,10 +91,8 @@ public class HighwayBuilder extends Module {
         .name("height")
         .description("Height of the highway.")
         .defaultValue(3)
-        .min(2)
-        .max(5)
-        .sliderMin(2)
-        .sliderMax(5)
+        .range(2, 5)
+        .sliderRange(2, 5)
         .build()
     );
 

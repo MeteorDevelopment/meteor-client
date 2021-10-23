@@ -37,7 +37,7 @@ public class SelfWeb extends Module {
             .description("How far away the player has to be from you to place webs. Requires Mode to Smart.")
             .defaultValue(3)
             .min(1)
-            .sliderMax(7)
+            .sliderRange(1, 7)
             .visible(() -> mode.get() == Mode.Smart)
             .build()
     );

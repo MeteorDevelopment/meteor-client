@@ -37,8 +37,7 @@ public class BowAimbot extends Module {
         .name("range")
         .description("The maximum range the entity can be to aim at it.")
         .defaultValue(20)
-        .min(0)
-        .max(100)
+        .range(0, 100)
         .sliderMax(100)
         .build()
     );

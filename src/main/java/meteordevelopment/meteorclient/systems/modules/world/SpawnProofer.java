@@ -27,9 +27,8 @@ public class SpawnProofer extends Module {
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
         .name("range")
         .description("Range for block placement and rendering")
-        .min(0)
-        .sliderMax(10)
         .defaultValue(3)
+        .min(0)
         .build()
     );
 

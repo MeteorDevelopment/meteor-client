@@ -66,7 +66,7 @@ public class Nuker extends Module {
         .description("Maximum blocks to try to break per tick. Useful when insta mining.")
         .defaultValue(1)
         .min(1)
-        .sliderMax(6)
+        .sliderRange(1, 6)
         .build()
     );
 

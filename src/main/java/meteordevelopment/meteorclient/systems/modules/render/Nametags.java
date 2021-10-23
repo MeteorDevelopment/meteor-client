@@ -101,7 +101,7 @@ public class Nametags extends Module {
         .description("Only render this many nametags.")
         .defaultValue(50)
         .min(1)
-        .sliderMin(1).sliderMax(100)
+        .sliderRange(1, 100)
         .visible(culling::get)
         .build()
     );
@@ -119,8 +119,7 @@ public class Nametags extends Module {
         .name("item-spacing")
         .description("The spacing between items.")
         .defaultValue(2)
-        .min(0).max(10)
-        .sliderMax(5)
+        .range(0, 10)
         .visible(displayItems::get)
         .build()
     );
@@ -153,8 +152,8 @@ public class Nametags extends Module {
         .name("enchant-name-length")
         .description("The length enchantment names are trimmed to.")
         .defaultValue(3)
-        .min(1).max(5)
-        .sliderMin(0).sliderMax(5)
+        .range(1, 5)
+        .sliderRange(1, 5)
         .visible(displayItemEnchants::get)
         .build()
     );
@@ -171,8 +170,8 @@ public class Nametags extends Module {
         .name("enchant-text-scale")
         .description("The scale of the enchantment text.")
         .defaultValue(1)
-        .min(0.1).max(2)
-        .sliderMin(0.1).sliderMax(2)
+        .range(0.1, 2)
+        .sliderRange(0.1, 2)
         .visible(displayItemEnchants::get)
         .build()
     );

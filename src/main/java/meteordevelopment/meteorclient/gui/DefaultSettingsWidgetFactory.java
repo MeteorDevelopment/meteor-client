@@ -152,9 +152,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void intW(WTable table, IntSetting setting) {
-        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.getSliderMin(), setting.getSliderMax(), setting.noSlider)).expandX().widget();
-        edit.min = setting.min;
-        edit.max = setting.max;
+        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
 
         edit.actionOnRelease = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
@@ -164,11 +162,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void doubleW(WTable table, DoubleSetting setting) {
-        WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.getSliderMin(), setting.getSliderMax(), setting.noSlider);
-        edit.min = setting.min;
-        edit.max = setting.max;
-        edit.decimalPlaces = setting.decimalPlaces;
-
+        WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider);
         table.add(edit).expandX();
 
         Runnable action = () -> {

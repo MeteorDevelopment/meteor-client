@@ -63,9 +63,8 @@ public class ElytraFly extends Module {
         .name("replace-durability")
         .description("The durability threshold your elytra will be replaced at.")
         .defaultValue(2)
-        .min(1)
-        .max(Items.ELYTRA.getMaxDamage() - 1)
-        .sliderMax(20)
+        .range(1, Items.ELYTRA.getMaxDamage() - 1)
+        .sliderRange(1, Items.ELYTRA.getMaxDamage() - 1)
         .build()
     );
 
@@ -121,10 +120,8 @@ public class ElytraFly extends Module {
         .name("crash-look-ahead")
         .description("Distance to look ahead when flying.")
         .defaultValue(5)
-        .min(1)
-        .max(15)
+        .range(1, 15)
         .sliderMin(1)
-        .sliderMax(10)
         .visible(noCrash::get)
         .build()
     );

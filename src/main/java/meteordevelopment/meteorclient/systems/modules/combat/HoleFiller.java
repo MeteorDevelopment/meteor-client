@@ -75,7 +75,6 @@ public class HoleFiller extends Module {
         .description("The ticks delay between placement.")
         .defaultValue(1)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 

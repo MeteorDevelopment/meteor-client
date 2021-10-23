@@ -61,8 +61,8 @@ public class Burrow extends Module {
         .name("trigger-height")
         .description("How high you have to jump before a rubberband is triggered.")
         .defaultValue(1.12)
-        .min(0.01)
-        .sliderMax(1.4)
+        .range(0.01, 1.4)
+        .sliderRange(0.01, 1.4)
         .build()
     );
 
@@ -78,9 +78,9 @@ public class Burrow extends Module {
     private final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
         .name("timer")
         .description("Timer override.")
-        .defaultValue(1.00)
+        .defaultValue(1)
         .min(0.01)
-        .sliderMax(10)
+        .sliderRange(0.01, 10)
         .build()
     );
 

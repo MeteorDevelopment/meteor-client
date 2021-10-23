@@ -49,6 +49,7 @@ public class StashFinder extends Module {
         .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
+        .sliderMin(1)
         .build()
     );
 

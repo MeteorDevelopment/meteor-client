@@ -76,7 +76,8 @@ public class Sphere2dMarker extends BaseMarker {
         .name("render-range")
         .description("Rendering range")
         .defaultValue(10)
-        .min(1).sliderMax(20)
+        .min(1)
+        .sliderRange(1, 20)
         .visible(limitRenderRange::get)
         .build()
     );
