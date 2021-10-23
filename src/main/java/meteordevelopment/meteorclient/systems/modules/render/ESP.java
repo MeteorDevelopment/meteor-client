@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
+import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -163,7 +164,7 @@ public class ESP extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (shouldSkip(entity)) continue;
 
-            if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) render(event, entity);
+            if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) drawBoundingBox(event, entity);
             count++;
         }
     }
