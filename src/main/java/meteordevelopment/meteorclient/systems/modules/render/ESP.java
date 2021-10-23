@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.BoxesEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -30,6 +31,7 @@ import net.minecraft.util.math.Box;
 public class ESP extends Module {
     public enum Mode {
         Box,
+        Boxes,
         _2D,
         Shader;
 
@@ -162,12 +164,17 @@ public class ESP extends Module {
         lineColor.a *= a;
         sideColor.a *= a;
 
-        double x = (entity.getX() - entity.prevX) * event.tickDelta;
-        double y = (entity.getY() - entity.prevY) * event.tickDelta;
-        double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
+        if (mode.get() == Mode.Box) {
+            double x = (entity.getX() - entity.prevX) * event.tickDelta;
+            double y = (entity.getY() - entity.prevY) * event.tickDelta;
+            double z = (entity.getZ() - entity.prevZ) * event.tickDelta;
 
-        Box box = entity.getBoundingBox();
-        event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
+            Box box = entity.getBoundingBox();
+            event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
+        }
+        else {
+            BoxesEntityRenderer.render(event, entity, sideColor, lineColor, shapeMode.get());
+        }
 
         lineColor.a = prevLineA;
         sideColor.a = prevSideA;
@@ -187,7 +194,7 @@ public class ESP extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (shouldSkip(entity)) continue;
 
-            if (mode.get() == Mode.Box) render(event, entity);
+            if (mode.get() == Mode.Box || mode.get() == Mode.Boxes) render(event, entity);
             count++;
         }
     }
