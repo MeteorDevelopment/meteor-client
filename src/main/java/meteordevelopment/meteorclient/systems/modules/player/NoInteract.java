@@ -26,7 +26,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class NoInteract extends Module {
@@ -38,7 +37,6 @@ public class NoInteract extends Module {
     private final Setting<List<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-mine")
         .description("Cancels block mining.")
-        .defaultValue(new ArrayList<>())
         .build()
     );
 
@@ -52,7 +50,6 @@ public class NoInteract extends Module {
     private final Setting<List<Block>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-interact")
         .description("Cancels block interaction.")
-        .defaultValue(new ArrayList<>())
         .build()
     );
 
@@ -75,7 +72,6 @@ public class NoInteract extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-hit")
         .description("Cancel entity hitting.")
-        .defaultValue(new Object2BooleanOpenHashMap<>(0))
         .onlyAttackable()
         .build()
     );
@@ -90,7 +86,6 @@ public class NoInteract extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-interact")
         .description("Cancel entity interaction.")
-        .defaultValue(new Object2BooleanOpenHashMap<>(0))
         .onlyAttackable()
         .build()
     );

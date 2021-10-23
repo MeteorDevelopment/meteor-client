@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.block.Block;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Slippy extends Module {
@@ -32,7 +31,7 @@ public class Slippy extends Module {
     public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("ignored blocks")
             .description("Decide which blocks not to slip on")
-            .defaultValue(Collections.emptyList())
+            .defaultValue()
             .build()
     );
 

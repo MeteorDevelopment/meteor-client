@@ -96,6 +96,10 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             super(new ArrayList<>(0));
         }
 
+        public Builder defaultValue(BlockEntityType<?>... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
+        }
+
         @Override
         public StorageBlockListSetting build() {
             return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);

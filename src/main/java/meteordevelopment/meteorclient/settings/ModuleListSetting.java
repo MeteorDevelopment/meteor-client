@@ -91,6 +91,17 @@ public class ModuleListSetting extends Setting<List<Module>> {
             super(new ArrayList<>(0));
         }
 
+        @SafeVarargs
+        public final Builder defaultValue(Class<? extends Module>... defaults) {
+            List<Module> modules = new ArrayList<>();
+
+            for (Class<? extends Module> klass : defaults) {
+                if (Modules.get().get(klass) != null) modules.add(Modules.get().get(klass));
+            }
+
+            return defaultValue(modules);
+        }
+
         @Override
         public ModuleListSetting build() {
             return new ModuleListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);

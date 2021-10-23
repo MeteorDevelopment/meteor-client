@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class WallHack extends Module {

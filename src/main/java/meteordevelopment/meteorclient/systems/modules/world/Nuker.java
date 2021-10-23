@@ -22,18 +22,6 @@ import java.util.Comparator;
 import java.util.List;
 
 public class Nuker extends Module {
-    public enum Mode {
-        All,
-        Flatten,
-        Smash
-    }
-
-    public enum SortMode {
-        None,
-        Closest,
-        Furthest
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
 
@@ -97,7 +85,6 @@ public class Nuker extends Module {
         .name("whitelist")
         .description("The blocks you want to mine.")
         .visible(whitelistEnabled::get)
-        .defaultValue(new ArrayList<>(0))
         .build()
     );
 
@@ -203,5 +190,17 @@ public class Nuker extends Module {
             for (BlockPos.Mutable blockPos : blocks) blockPosPool.free(blockPos);
             blocks.clear();
         });
+    }
+
+    public enum Mode {
+        All,
+        Flatten,
+        Smash
+    }
+
+    public enum SortMode {
+        None,
+        Closest,
+        Furthest
     }
 }

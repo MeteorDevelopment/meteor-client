@@ -21,7 +21,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Surround extends Module {
@@ -87,7 +86,7 @@ public class Surround extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("block")
             .description("What blocks to use for surround.")
-            .defaultValue(Collections.singletonList(Blocks.OBSIDIAN))
+            .defaultValue(Blocks.OBSIDIAN)
             .filter(this::blockFilter)
             .build()
     );

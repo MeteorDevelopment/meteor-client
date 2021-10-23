@@ -24,7 +24,6 @@ public class ItemHighlight extends Module {
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
             .name("items")
             .description("Items to highlight.")
-            .defaultValue(new ArrayList<>())
             .build()
     );
 

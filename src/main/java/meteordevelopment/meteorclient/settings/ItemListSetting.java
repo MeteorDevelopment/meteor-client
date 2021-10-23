@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -90,7 +91,6 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     public static class Builder extends SettingBuilder<Builder, List<Item>, ItemListSetting> {
-        private List<Item> defaultValue;
         private Predicate<Item> filter;
         private boolean bypassFilterWhenSavingAndLoading;
 
@@ -98,9 +98,8 @@ public class ItemListSetting extends Setting<List<Item>> {
             super(new ArrayList<>(0));
         }
 
-        public Builder defaultValue(List<Item> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
+        public Builder defaultValue(Item... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
         public Builder filter(Predicate<Item> filter) {
