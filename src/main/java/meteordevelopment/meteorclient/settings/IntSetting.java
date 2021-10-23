@@ -59,39 +59,13 @@ public class IntSetting extends Setting<Integer> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Integer defaultValue;
-        private Consumer<Integer> onChanged;
-        private Consumer<Setting<Integer>> onModuleActivated;
-        private IVisible visible;
+    public static class Builder extends SettingBuilder<Builder, Integer, IntSetting> {
         private Integer min, max;
         private Integer sliderMin, sliderMax;
         private Boolean noSlider = false;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(int defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Integer> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Integer>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
+        public Builder() {
+            super(0);
         }
 
         public Builder visible(IVisible visible) {
@@ -124,6 +98,7 @@ public class IntSetting extends Setting<Integer> {
             return this;
         }
 
+        @Override
         public IntSetting build() {
             return new IntSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, min, max, sliderMin, sliderMax, noSlider);
         }
