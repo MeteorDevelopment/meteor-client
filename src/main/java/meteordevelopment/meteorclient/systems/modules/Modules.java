@@ -487,6 +487,7 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new Zoom());
         add(new Blur());
+        add(new PopChams());
     }
 
     private void initWorld() {
