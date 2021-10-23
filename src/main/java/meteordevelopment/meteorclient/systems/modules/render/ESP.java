@@ -19,7 +19,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
-import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -54,10 +53,20 @@ public class ESP extends Module {
     );
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
+    );
+
+    public final Setting<Integer> fillOpacity = sgGeneral.add(new IntSetting.Builder()
+        .name("fill-opacity")
+        .description("The opacity of the shape fill.")
+        .visible(() -> shapeMode.get() != ShapeMode.Lines)
+        .defaultValue(80)
+        .min(0).max(255)
+        .sliderMax(255)
+        .build()
     );
 
     public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
@@ -67,15 +76,6 @@ public class ESP extends Module {
             .defaultValue(2)
             .min(1).max(10)
             .sliderMin(1).sliderMax(5)
-            .build()
-    );
-
-    public final Setting<Integer> fillOpacity = sgGeneral.add(new IntSetting.Builder()
-            .name("fill-opacity")
-            .description("The opacity of the shape fill.")
-            .defaultValue(80)
-            .min(0).max(255)
-            .sliderMax(255)
             .build()
     );
 
@@ -89,9 +89,9 @@ public class ESP extends Module {
     );
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entites")
+            .name("entities")
             .description("Select specific entities.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+            .defaultValue(Utils.asO2BMap(EntityType.PLAYER))
             .build()
     );
 
@@ -152,7 +152,23 @@ public class ESP extends Module {
         super(Categories.Render, "esp", "Renders entities through walls.");
     }
 
-    private void render(Render3DEvent event, Entity entity) {
+    // Box
+
+    @EventHandler
+    private void onRender3D(Render3DEvent event) {
+        if (mode.get() == Mode._2D) return;
+
+        count = 0;
+
+        for (Entity entity : mc.world.getEntities()) {
+            if (shouldSkip(entity)) continue;
+
+            if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) render(event, entity);
+            count++;
+        }
+    }
+
+    private void drawBoundingBox(Render3DEvent event, Entity entity) {
         lineColor.set(getColor(entity));
         sideColor.set(lineColor).a(fillOpacity.get());
 
@@ -180,41 +196,7 @@ public class ESP extends Module {
         sideColor.a = prevSideA;
     }
 
-    private boolean shouldSkip(Entity entity) {
-        if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) return true;
-        return !EntityUtils.isInRenderDistance(entity);
-    }
-
-    @EventHandler
-    private void onRender3D(Render3DEvent event) {
-        if (mode.get() == Mode._2D) return;
-
-        count = 0;
-
-        for (Entity entity : mc.world.getEntities()) {
-            if (shouldSkip(entity)) continue;
-
-            if (mode.get() == Mode.Box || mode.get() == Mode.Wireframe) render(event, entity);
-            count++;
-        }
-    }
-
-    private boolean checkCorner(double x, double y, double z, Vec3 min, Vec3 max) {
-        pos.set(x, y, z);
-        if (!NametagUtils.to2D(pos, 1)) return true;
-
-        // Check Min
-        if (pos.x < min.x) min.x = pos.x;
-        if (pos.y < min.y) min.y = pos.y;
-        if (pos.z < min.z) min.z = pos.z;
-
-        // Check Max
-        if (pos.x > max.x) max.x = pos.x;
-        if (pos.y > max.y) max.y = pos.y;
-        if (pos.z > max.z) max.z = pos.z;
-
-        return false;
-    }
+    // 2D
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
@@ -261,12 +243,16 @@ public class ESP extends Module {
             sideColor.a *= a;
 
             // Render
-            if (sideColor.a != 0) Renderer2D.COLOR.quad(pos1.x, pos1.y, pos2.x - pos1.x, pos2.y - pos1.y, sideColor);
+            if (shapeMode.get() != ShapeMode.Lines && sideColor.a > 0) {
+                Renderer2D.COLOR.quad(pos1.x, pos1.y, pos2.x - pos1.x, pos2.y - pos1.y, sideColor);
+            }
 
-            Renderer2D.COLOR.line(pos1.x, pos1.y, pos1.x, pos2.y, lineColor);
-            Renderer2D.COLOR.line(pos2.x, pos1.y, pos2.x, pos2.y, lineColor);
-            Renderer2D.COLOR.line(pos1.x, pos1.y, pos2.x, pos1.y, lineColor);
-            Renderer2D.COLOR.line(pos1.x, pos2.y, pos2.x, pos2.y, lineColor);
+            if (shapeMode.get() != ShapeMode.Sides) {
+                Renderer2D.COLOR.line(pos1.x, pos1.y, pos1.x, pos2.y, lineColor);
+                Renderer2D.COLOR.line(pos2.x, pos1.y, pos2.x, pos2.y, lineColor);
+                Renderer2D.COLOR.line(pos1.x, pos1.y, pos2.x, pos1.y, lineColor);
+                Renderer2D.COLOR.line(pos1.x, pos2.y, pos2.x, pos2.y, lineColor);
+            }
 
             // End
             lineColor.a = prevLineA;
@@ -277,6 +263,38 @@ public class ESP extends Module {
 
         Renderer2D.COLOR.render(null);
     }
+
+    private boolean checkCorner(double x, double y, double z, Vec3 min, Vec3 max) {
+        pos.set(x, y, z);
+        if (!NametagUtils.to2D(pos, 1)) return true;
+
+        // Check Min
+        if (pos.x < min.x) min.x = pos.x;
+        if (pos.y < min.y) min.y = pos.y;
+        if (pos.z < min.z) min.z = pos.z;
+
+        // Check Max
+        if (pos.x > max.x) max.x = pos.x;
+        if (pos.y > max.y) max.y = pos.y;
+        if (pos.z > max.z) max.z = pos.z;
+
+        return false;
+    }
+
+    // Outlines
+
+    public boolean shouldDrawOutline(Entity entity) {
+        return mode.get() == Mode.Shader && isActive() && getOutlineColor(entity) != null;
+    }
+
+    public Color getOutlineColor(Entity entity) {
+        if (!entities.get().getBoolean(entity.getType())) return null;
+        Color color = getColor(entity);
+        double alpha = getFadeAlpha(entity);
+        return lineColor.set(color).a((int) (alpha * 255));
+    }
+
+    // Stuff
 
     private double getFadeAlpha(Entity entity) {
         double dist = PlayerUtils.distanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
@@ -299,17 +317,9 @@ public class ESP extends Module {
         };
     }
 
-    // Outlines
-
-    public boolean shouldDrawOutline(Entity entity) {
-        return mode.get() == Mode.Shader && isActive() && getOutlineColor(entity) != null;
-    }
-
-    public Color getOutlineColor(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return null;
-        Color color = getColor(entity);
-        double alpha = getFadeAlpha(entity);
-        return lineColor.set(color).a((int) (alpha * 255));
+    private boolean shouldSkip(Entity entity) {
+        if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) return true;
+        return !EntityUtils.isInRenderDistance(entity);
     }
 
     @Override

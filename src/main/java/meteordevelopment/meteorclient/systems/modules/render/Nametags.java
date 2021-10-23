@@ -46,7 +46,7 @@ public class Nametags extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to draw nametags on.")
-        .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER, EntityType.ITEM))
+        .defaultValue(Utils.asO2BMap(EntityType.PLAYER, EntityType.ITEM))
         .build()
     );
 
