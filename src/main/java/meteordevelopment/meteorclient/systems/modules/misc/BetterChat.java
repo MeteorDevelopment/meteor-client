@@ -128,7 +128,7 @@ public class BetterChat extends Module {
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
-            .sliderMax(1000)
+            .sliderRange(100, 1000)
             .visible(longerChatHistory::get)
             .build()
     );

@@ -31,7 +31,7 @@ public class CompassHud extends HudElement {
         .description("The scale.")
         .defaultValue(1)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 

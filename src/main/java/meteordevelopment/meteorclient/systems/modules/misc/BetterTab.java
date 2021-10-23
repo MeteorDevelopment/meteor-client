@@ -27,8 +27,7 @@ public class BetterTab extends Module {
             .description("Bypasses the 80 player limit on the tablist.")
             .defaultValue(100)
             .min(1)
-            .sliderMax(1000)
-            .sliderMin(1)
+            .sliderRange(1, 1000)
             .build()
     );
 

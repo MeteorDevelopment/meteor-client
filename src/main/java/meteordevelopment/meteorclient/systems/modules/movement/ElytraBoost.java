@@ -29,33 +29,33 @@ public class ElytraBoost extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> dontConsumeFirework = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-consume")
-            .description("Prevents fireworks from being consumed when using Elytra Boost.")
-            .defaultValue(true)
-            .build()
+        .name("anti-consume")
+        .description("Prevents fireworks from being consumed when using Elytra Boost.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> fireworkLevel = sgGeneral.add(new IntSetting.Builder()
-            .name("firework-duration")
-            .description("The duration of the firework.")
-            .defaultValue(0)
-            .min(0)
-            .max(255)
-            .build()
+        .name("firework-duration")
+        .description("The duration of the firework.")
+        .defaultValue(0)
+        .range(0, 255)
+        .sliderMax(255)
+        .build()
     );
 
     private final Setting<Boolean> playSound = sgGeneral.add(new BoolSetting.Builder()
-            .name("play-sound")
-            .description("Plays the firework sound when a boost is triggered.")
-            .defaultValue(true)
-            .build()
+        .name("play-sound")
+        .description("Plays the firework sound when a boost is triggered.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
-            .name("keybind")
-            .description("The keybind to boost.")
-            .action(this::boost)
-            .build()
+        .name("keybind")
+        .description("The keybind to boost.")
+        .action(this::boost)
+        .build()
     );
 
     private final List<FireworkRocketEntity> fireworks = new ArrayList<>();
@@ -87,6 +87,7 @@ public class ElytraBoost extends Module {
 
     private void boost() {
         if (!Utils.canUpdate()) return;
+
         if (mc.player.isFallFlying() && mc.currentScreen == null) {
             ItemStack itemStack = Items.FIREWORK_ROCKET.getDefaultStack();
             itemStack.getOrCreateSubNbt("Fireworks").putByte("Flight", fireworkLevel.get().byteValue());

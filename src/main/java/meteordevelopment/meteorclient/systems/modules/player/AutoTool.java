@@ -53,8 +53,8 @@ public class AutoTool extends Module {
         .name("anti-break-percentage")
         .description("The durability percentage to stop using a tool.")
         .defaultValue(10)
-        .min(1).max(100)
-        .sliderMax(50)
+        .range(1, 100)
+        .sliderRange(1, 100)
         .visible(antiBreak::get)
         .build()
     );

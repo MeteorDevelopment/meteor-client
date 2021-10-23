@@ -22,8 +22,8 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class StringListSetting extends Setting<List<String>>{
-
     public String newText = "";
+
     public StringListSetting(String name, String description, List<String> defaultValue, Consumer<List<String>> onChanged, Consumer<Setting<List<String>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }

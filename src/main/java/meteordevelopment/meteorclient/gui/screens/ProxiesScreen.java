@@ -159,9 +159,7 @@ public class ProxiesScreen extends WindowScreen {
 
             //   Port
             general.add(theme.label("Port:"));
-            WIntEdit port = general.add(theme.intEdit(proxy.port, 0, 0)).expandX().widget();
-            port.min = 0;
-            port.max = 65535;
+            WIntEdit port = general.add(theme.intEdit(proxy.port, 0, 65535, true)).expandX().widget();
             port.action = () -> proxy.port = port.get();
 
             // Optional

@@ -10,23 +10,25 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import java.util.Locale;
 
 public class WDoubleEdit extends WHorizontalList {
-    public Runnable action;
-    public Runnable actionOnRelease;
+    private double value;
+
+    private final double min, max;
+    private final double sliderMin, sliderMax;
 
     public int decimalPlaces = 3;
     public boolean noSlider = false;
-    public boolean small;
+    public boolean small = false;
 
-    private double value;
-
-    private final double sliderMin, sliderMax;
-    public Double min, max;
+    public Runnable action;
+    public Runnable actionOnRelease;
 
     private WTextBox textBox;
     private WSlider slider;
 
-    public WDoubleEdit(double value, double sliderMin, double sliderMax, boolean noSlider) {
+    public WDoubleEdit(double value, double min, double max, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider) {
         this.value = value;
+        this.min = min;
+        this.max = max;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
@@ -54,8 +56,8 @@ public class WDoubleEdit extends WHorizontalList {
 
             double preValidationValue = value;
 
-            if (min != null && value < min) value = min;
-            else if (max != null && value > max) value = max;
+            if (value < min) value = min;
+            else if (value > max) value = max;
 
             if (value != preValidationValue) textBox.set(valueString());
             if (slider != null) slider.set(value);
@@ -110,8 +112,8 @@ public class WDoubleEdit extends WHorizontalList {
     private void setButton(double v) {
         if (this.value == v) return;
 
-        if (min != null && v < min) this.value = min;
-        else if (max != null && v > max) this.value = max;
+        if (v < min) this.value = min;
+        else if (v > max) this.value = max;
         else this.value = v;
 
         if (this.value == v) {

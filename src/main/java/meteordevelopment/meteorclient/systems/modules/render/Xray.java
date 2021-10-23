@@ -64,13 +64,10 @@ public class Xray extends Module {
         .name("opacity")
         .description("The opacity for all other blocks.")
         .defaultValue(1)
-        .min(1)
-        .max(255)
+        .range(1, 255)
         .sliderMax(255)
         .onChanged(onChanged -> {
-            if(this.isActive()) {
-                mc.worldRenderer.reload();
-            }
+            if (isActive()) mc.worldRenderer.reload();
         })
         .build()
     );

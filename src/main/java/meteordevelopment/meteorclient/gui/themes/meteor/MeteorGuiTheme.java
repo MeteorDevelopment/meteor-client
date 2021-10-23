@@ -49,8 +49,7 @@ public class MeteorGuiTheme extends GuiTheme {
             .description("Scale of the GUI.")
             .defaultValue(1)
             .min(0.75)
-            .sliderMin(0.75)
-            .sliderMax(4)
+            .sliderRange(0.75, 4)
             .onSliderRelease()
             .onChanged(aDouble -> {
                 if (Utils.mc.currentScreen instanceof WidgetScreen) ((WidgetScreen) Utils.mc.currentScreen).invalidate();

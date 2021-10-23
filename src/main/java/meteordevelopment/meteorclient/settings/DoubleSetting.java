@@ -10,15 +10,15 @@ import net.minecraft.nbt.NbtCompound;
 import java.util.function.Consumer;
 
 public class DoubleSetting extends Setting<Double> {
-    public final Double min, max;
-    public final Boolean noSlider;
-    private final Double sliderMin, sliderMax;
-
-    public final int decimalPlaces;
+    public final double min, max;
+    public final double sliderMin, sliderMax;
     public final boolean onSliderRelease;
+    public final int decimalPlaces;
+    public final boolean noSlider;
 
-    private DoubleSetting(String name, String description, Double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, Double min, Double max, Double sliderMin, Double sliderMax, boolean onSliderRelease, int decimalPlaces, boolean noSlider) {
+    private DoubleSetting(String name, String description, double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, double min, double max, double sliderMin, double sliderMax, boolean onSliderRelease, int decimalPlaces, boolean noSlider) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+
         this.min = min;
         this.max = max;
         this.sliderMin = sliderMin;
@@ -39,15 +39,7 @@ public class DoubleSetting extends Setting<Double> {
 
     @Override
     protected boolean isValueValid(Double value) {
-        return (min == null || value >= min) && (max == null || value <= max);
-    }
-
-    public double getSliderMin() {
-        return sliderMin != null ? sliderMin : 0;
-    }
-
-    public double getSliderMax() {
-        return sliderMax != null ? sliderMax : 10;
+        return value >= min && value <= max;
     }
 
     @Override
@@ -65,11 +57,11 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     public static class Builder extends SettingBuilder<Builder, Double, DoubleSetting> {
-        private Double min, max;
-        private Double sliderMin, sliderMax;
-        private boolean onSliderRelease;
-        private int decimalPlaces = 3;
-        private boolean noSlider = false;
+        public double min = Double.NEGATIVE_INFINITY, max = Double.POSITIVE_INFINITY;
+        public double sliderMin = 0, sliderMax = 10;
+        public boolean onSliderRelease = false;
+        public int decimalPlaces = 3;
+        public boolean noSlider = false;
 
         public Builder() {
             super(0D);
@@ -90,13 +82,25 @@ public class DoubleSetting extends Setting<Double> {
             return this;
         }
 
+        public Builder range(double min, double max) {
+            this.min = Math.min(min, max);
+            this.max = Math.max(min, max);
+            return this;
+        }
+
         public Builder sliderMin(double min) {
-            sliderMin = min;
+            sliderMin = Math.max(min, this.min);
             return this;
         }
 
         public Builder sliderMax(double max) {
-            sliderMax = max;
+            sliderMax = Math.min(max, this.max);
+            return this;
+        }
+
+        public Builder sliderRange(double min, double max) {
+            sliderMin = Math.max(min, this.min);
+            sliderMax = Math.min(max, this.max);
             return this;
         }
 
@@ -111,7 +115,7 @@ public class DoubleSetting extends Setting<Double> {
         }
 
         public Builder noSlider() {
-            this.noSlider = false;
+            noSlider = true;
             return this;
         }
 

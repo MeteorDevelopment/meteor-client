@@ -96,8 +96,7 @@ public class BlockListSetting extends Setting<List<Block>> {
         }
 
         public Builder defaultValue(Block... defaults) {
-            this.defaultValue = defaults != null ? Arrays.asList(defaults) : new ArrayList<>();
-            return this;
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
         public Builder filter(Predicate<Block> filter) {

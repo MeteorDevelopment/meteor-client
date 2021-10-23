@@ -35,38 +35,36 @@ public class AutoEat extends Module {
     // General
 
     private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
-            .name("blacklist")
-            .description("Which items to not eat.")
-            .defaultValue(getDefaultBlacklist())
-            .filter(Item::isFood)
-            .build()
+        .name("blacklist")
+        .description("Which items to not eat.")
+        .defaultValue(getDefaultBlacklist())
+        .filter(Item::isFood)
+        .build()
     );
 
     private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-auras")
-            .description("Pauses all auras when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-auras")
+        .description("Pauses all auras when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-baritone")
-            .description("Pause baritone when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-baritone")
+        .description("Pause baritone when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     // Hunger
 
     private final Setting<Integer> hungerThreshold = sgHunger.add(new IntSetting.Builder()
-            .name("hunger-threshold")
-            .description("The level of hunger you eat at.")
-            .defaultValue(16)
-            .min(1)
-            .max(19)
-            .sliderMin(1)
-            .sliderMax(19)
-            .build()
+        .name("hunger-threshold")
+        .description("The level of hunger you eat at.")
+        .defaultValue(16)
+        .range(1, 19)
+        .sliderRange(1, 19)
+        .build()
     );
 
     public boolean eating;
