@@ -84,43 +84,12 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<StatusEffect> defaultValue;
-        private Consumer<List<StatusEffect>> onChanged;
-        private Consumer<Setting<List<StatusEffect>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<StatusEffect>, StatusEffectListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<StatusEffect> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<StatusEffect>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<StatusEffect>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public StatusEffectListSetting build() {
             return new StatusEffectListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

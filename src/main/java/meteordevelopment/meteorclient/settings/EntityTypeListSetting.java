@@ -18,6 +18,7 @@ import net.minecraft.util.registry.Registry;
 
 import java.util.function.Consumer;
 
+// TODO: Change onlyAttackable to a filter
 public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<?>>> {
     public final boolean onlyAttackable;
 
@@ -88,42 +89,11 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Object2BooleanMap<EntityType<?>> defaultValue;
-        private Consumer<Object2BooleanMap<EntityType<?>>> onChanged;
-        private Consumer<Setting<Object2BooleanMap<EntityType<?>>>> onModuleActivated;
-        private IVisible visible;
+    public static class Builder extends SettingBuilder<Builder, Object2BooleanMap<EntityType<?>>, EntityTypeListSetting> {
         private boolean onlyAttackable = false;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(Object2BooleanMap<EntityType<?>> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Object2BooleanMap<EntityType<?>>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Object2BooleanMap<EntityType<?>>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
+        public Builder() {
+            super(new Object2BooleanOpenHashMap<>(0));
         }
 
         public Builder onlyAttackable() {
@@ -131,6 +101,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
             return this;
         }
 
+        @Override
         public EntityTypeListSetting build() {
             return new EntityTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, onlyAttackable);
         }

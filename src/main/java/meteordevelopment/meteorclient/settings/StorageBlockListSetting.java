@@ -91,43 +91,12 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<BlockEntityType<?>> defaultValue;
-        private Consumer<List<BlockEntityType<?>>> onChanged;
-        private Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<BlockEntityType<?>>, StorageBlockListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<BlockEntityType<?>> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<BlockEntityType<?>>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public StorageBlockListSetting build() {
             return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

@@ -86,43 +86,12 @@ public class ModuleListSetting extends Setting<List<Module>> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<Module> defaultValue;
-        private Consumer<List<Module>> onChanged;
-        private Consumer<Setting<List<Module>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<Module>, ModuleListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<Module> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<Module>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<Module>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public ModuleListSetting build() {
             return new ModuleListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

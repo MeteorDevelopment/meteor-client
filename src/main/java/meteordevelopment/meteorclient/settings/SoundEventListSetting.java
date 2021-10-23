@@ -83,43 +83,14 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<SoundEvent> defaultValue;
-        private Consumer<List<SoundEvent>> onChanged;
-        private Consumer<Setting<List<SoundEvent>>> onModuleActivated;
-        private IVisible visible;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+
+    public static class Builder extends SettingBuilder<Builder, List<SoundEvent>, SoundEventListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<SoundEvent> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<SoundEvent>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<SoundEvent>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public SoundEventListSetting build() {
             return new SoundEventListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

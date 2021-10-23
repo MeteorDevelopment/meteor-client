@@ -102,37 +102,11 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Set<Class<? extends Packet<?>>> defaultValue;
-        private Consumer<Set<Class<? extends Packet<?>>>> onChanged;
-        private Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated;
+    public static class Builder extends SettingBuilder<Builder, Set<Class<? extends Packet<?>>>, PacketListSetting> {
         private Predicate<Class<? extends Packet<?>>> filter;
-        private IVisible visible;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(Set<Class<? extends Packet<?>>> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Set<Class<? extends Packet<?>>>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
+        public Builder() {
+            super(new ObjectOpenHashSet<>(0));
         }
 
         public Builder filter(Predicate<Class<? extends Packet<?>>> filter) {
@@ -140,11 +114,7 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
             return this;
         }
 
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public PacketListSetting build() {
             return new PacketListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter, visible);
         }

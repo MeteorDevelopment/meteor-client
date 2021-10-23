@@ -140,4 +140,48 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
 
         return null;
     }
+
+    public abstract static class SettingBuilder<B, V, S> {
+        protected String name = "undefined", description = "";
+        protected V defaultValue;
+        protected IVisible visible;
+        protected Consumer<V> onChanged;
+        protected Consumer<Setting<V>> onModuleActivated;
+
+        protected SettingBuilder(V defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        public B name(String name) {
+            this.name = name;
+            return (B) this;
+        }
+
+        public B description(String description) {
+            this.description = description;
+            return (B) this;
+        }
+
+        public B defaultValue(V defaultValue) {
+            this.defaultValue = defaultValue;
+            return (B) this;
+        }
+
+        public B visible(IVisible visible) {
+            this.visible = visible;
+            return (B) this;
+        }
+
+        public B onChanged(Consumer<V> onChanged) {
+            this.onChanged = onChanged;
+            return (B) this;
+        }
+
+        public B onModuleActivated(Consumer<Setting<V>> onModuleActivated) {
+            this.onModuleActivated = onModuleActivated;
+            return (B) this;
+        }
+
+        public abstract S build();
+    }
 }

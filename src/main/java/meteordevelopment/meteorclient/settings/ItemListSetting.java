@@ -89,42 +89,17 @@ public class ItemListSetting extends Setting<List<Item>> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
+    public static class Builder extends SettingBuilder<Builder, List<Item>, ItemListSetting> {
         private List<Item> defaultValue;
-        private Consumer<List<Item>> onChanged;
-        private Consumer<Setting<List<Item>>> onModuleActivated;
-        private IVisible visible;
         private Predicate<Item> filter;
         private boolean bypassFilterWhenSavingAndLoading;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
         public Builder defaultValue(List<Item> defaultValue) {
             this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<Item>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<Item>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
             return this;
         }
 
@@ -138,6 +113,7 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
+        @Override
         public ItemListSetting build() {
             return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypassFilterWhenSavingAndLoading);
         }

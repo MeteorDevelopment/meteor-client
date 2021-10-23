@@ -64,45 +64,19 @@ public class DoubleSetting extends Setting<Double> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Double defaultValue;
-        private Consumer<Double> onChanged;
-        private Consumer<Setting<Double>> onModuleActivated;
-        private IVisible visible;
+    public static class Builder extends SettingBuilder<Builder, Double, DoubleSetting> {
         private Double min, max;
         private Double sliderMin, sliderMax;
         private boolean onSliderRelease;
         private int decimalPlaces = 3;
         private boolean noSlider = false;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder() {
+            super(0D);
         }
 
         public Builder defaultValue(double defaultValue) {
             this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Double> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Double>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
             return this;
         }
 

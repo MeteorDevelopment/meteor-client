@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -87,36 +88,15 @@ public class BlockListSetting extends Setting<List<Block>> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<Block> defaultValue;
-        private Consumer<List<Block>> onChanged;
-        private Consumer<Setting<List<Block>>> onModuleActivated;
+    public static class Builder extends SettingBuilder<Builder, List<Block>, BlockListSetting> {
         private Predicate<Block> filter;
-        private IVisible visible;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<Block> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<Block>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<Block>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
+        public Builder defaultValue(Block... defaults) {
+            this.defaultValue = defaults != null ? Arrays.asList(defaults) : new ArrayList<>();
             return this;
         }
 
@@ -125,11 +105,7 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public BlockListSetting build() {
             return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter, visible);
         }
