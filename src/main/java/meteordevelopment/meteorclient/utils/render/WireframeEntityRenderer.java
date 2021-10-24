@@ -122,17 +122,45 @@ public class WireframeEntityRenderer {
             matrices.translate(0, -1.5010000467300415, 0);
 
             // Render
-            if (model instanceof BipedEntityModel m) {
+            if (model instanceof AnimalModel m) {
+                if (m.child) {
+                    matrices.push();
+                    float g;
+                    if (m.headScaled) {
+                        g = 1.5F / m.invertedChildHeadScale;
+                        matrices.scale(g, g, g);
+                    }
+
+                    matrices.translate(0.0D, m.childHeadYOffset / 16.0F, m.childHeadZOffset / 16.0F);
+                    if (model instanceof BipedEntityModel mo) render(event.renderer, mo.head);
+                    else m.getHeadParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+                    matrices.pop();
+                    matrices.push();
+                    g = 1.0F / m.invertedChildBodyScale;
+                    matrices.scale(g, g, g);
+                    matrices.translate(0.0D, m.childBodyYOffset / 16.0F, 0.0D);
+                    if (model instanceof BipedEntityModel mo) {
+                        render(event.renderer, mo.body);
+                        render(event.renderer, mo.leftArm);
+                        render(event.renderer, mo.rightArm);
+                        render(event.renderer, mo.leftLeg);
+                        render(event.renderer, mo.rightLeg);
+                    }
+                    else m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+                    matrices.pop();
+                }
+                else {
+                    m.getHeadParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+                    m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+                }
+            }
+            else if (model instanceof BipedEntityModel m) {
                 render(event.renderer, m.head);
                 render(event.renderer, m.body);
                 render(event.renderer, m.leftArm);
                 render(event.renderer, m.rightArm);
                 render(event.renderer, m.leftLeg);
                 render(event.renderer, m.rightLeg);
-            }
-            else if (model instanceof AnimalModel m) {
-                m.getHeadParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
-                m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
             }
             else if (model instanceof SinglePartEntityModel m) {
                 render(event.renderer, m.getPart());
