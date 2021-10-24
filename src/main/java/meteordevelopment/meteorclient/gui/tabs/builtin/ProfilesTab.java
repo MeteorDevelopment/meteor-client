@@ -35,7 +35,7 @@ public class ProfilesTab extends Tab {
     }
 
     @Override
-    protected TabScreen createScreen(GuiTheme theme) {
+    public TabScreen createScreen(GuiTheme theme) {
         return new ProfilesScreen(theme, this);
     }
 

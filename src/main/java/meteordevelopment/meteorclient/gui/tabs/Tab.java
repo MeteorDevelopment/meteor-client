@@ -23,7 +23,7 @@ public abstract class Tab {
         mc.setScreen(screen);
     }
 
-    protected abstract TabScreen createScreen(GuiTheme theme);
+    public abstract TabScreen createScreen(GuiTheme theme);
 
     public abstract boolean isScreen(Screen screen);
 }
