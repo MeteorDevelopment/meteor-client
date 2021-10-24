@@ -21,6 +21,13 @@ Accessible   method  net/minecraft/client/render/entity/PlayerEntityRenderer get
 Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer setupTransforms (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;FFF)V
 Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer scale (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V
 Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer getAnimationProgress (Lnet/minecraft/entity/LivingEntity;F)F
+
+Accessible   field   net/minecraft/client/render/entity/model/AnimalModel headScaled Z
+Accessible   field   net/minecraft/client/render/entity/model/AnimalModel childHeadYOffset F
+Accessible   field   net/minecraft/client/render/entity/model/AnimalModel childHeadZOffset F
+Accessible   field   net/minecraft/client/render/entity/model/AnimalModel invertedChildHeadScale F
+Accessible   field   net/minecraft/client/render/entity/model/AnimalModel invertedChildBodyScale F
+Accessible   field   net/minecraft/client/render/entity/model/AnimalModel childBodyYOffset F
 Accessible   method  net/minecraft/client/render/entity/model/AnimalModel getHeadParts ()Ljava/lang/Iterable;
 Accessible   method  net/minecraft/client/render/entity/model/AnimalModel getBodyParts ()Ljava/lang/Iterable;
 
