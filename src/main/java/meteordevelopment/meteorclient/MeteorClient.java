@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -38,9 +40,6 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
-import net.fabricmc.loader.api.metadata.ModMetadata;
-import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import org.apache.logging.log4j.LogManager;
@@ -49,8 +48,6 @@ import org.lwjgl.glfw.GLFW;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
-import java.util.ArrayList;
-import java.util.List;
 
 public class MeteorClient implements ClientModInitializer {
     public static MinecraftClient mc;
@@ -58,11 +55,6 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
     public static final Logger LOG = LogManager.getLogger();
-
-    public static final List<MeteorAddon> ADDONS = new ArrayList<>();
-    public static MeteorAddon METEOR_ADDON;
-
-    public static Screen screenToOpen;
 
     @Override
     public void onInitializeClient() {
@@ -120,6 +112,8 @@ public class MeteorClient implements ClientModInitializer {
             }
         });
 
+        // Initialise stuff
+        AddonManager.init();
         GL.init();
         Shaders.init();
         Renderer2D.init();
@@ -139,10 +133,10 @@ public class MeteorClient implements ClientModInitializer {
         DamageUtils.init();
         BlockUtils.init();
 
-        // Register categories
+        // Register module categories
         Modules.REGISTERING_CATEGORIES = true;
         Categories.register();
-        ADDONS.forEach(MeteorAddon::onRegisterCategories);
+        AddonManager.ADDONS.forEach(MeteorAddon::onRegisterCategories);
         Modules.REGISTERING_CATEGORIES = false;
 
         Systems.init();
@@ -156,7 +150,7 @@ public class MeteorClient implements ClientModInitializer {
         EVENT_BUS.subscribe(this);
 
         // Call onInitialize for addons
-        ADDONS.forEach(MeteorAddon::onInitialize);
+        AddonManager.ADDONS.forEach(MeteorAddon::onInitialize);
 
         Modules.get().sortModules();
         Systems.load();
