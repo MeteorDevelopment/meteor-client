@@ -95,14 +95,7 @@ public class ProfilesTab extends Tab {
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(Profiles.get().toTag());
-
-            if (clipboard != null) {
-                Profiles.get().fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(Profiles.get());
         }
     }
 

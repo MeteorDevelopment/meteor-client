@@ -240,14 +240,7 @@ public class ConfigTab extends Tab {
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(Config.get().toTag());
-
-            if (clipboard != null) {
-                Config.get().fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(Config.get());
         }
     }
 

@@ -73,6 +73,17 @@ public class NbtUtils {
         }
     }
 
+    public static boolean fromClipboard(System<?> system) {
+        NbtCompound clipboard = fromClipboard(system.toTag());
+
+        if (clipboard != null) {
+            system.fromTag(clipboard);
+            return true;
+        }
+
+        return false;
+    }
+
     public static NbtCompound fromClipboard(NbtCompound schema) {
         try {
             byte[] data = Base64.getDecoder().decode(mc.keyboard.getClipboard());
