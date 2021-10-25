@@ -53,8 +53,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -62,7 +60,6 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
     private static final Random random = new Random();
-    private static final DecimalFormat df;
     public static MinecraftClient mc;
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
@@ -88,9 +85,7 @@ public class Utils {
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
         Timer timer = Modules.get().get(Timer.class);
-        if (timer.isActive()) {
-            length *= Modules.get().get(Timer.class).getMultiplier();
-        }
+        if (timer.isActive()) length *= Modules.get().get(Timer.class).getMultiplier();
 
         return length * 20;
     }
@@ -359,13 +354,13 @@ public class Utils {
     }
 
     public static String getButtonName(int button) {
-        switch (button) {
-            case -1: return "Unknown";
-            case 0:  return "Mouse Left";
-            case 1:  return "Mouse Right";
-            case 2:  return "Mouse Middle";
-            default: return "Mouse " + button;
-        }
+        return switch (button) {
+            case -1 -> "Unknown";
+            case 0 -> "Mouse Left";
+            case 1 -> "Mouse Right";
+            case 2 -> "Mouse Middle";
+            default -> "Mouse " + button;
+        };
     }
 
     public static byte[] readBytes(File file) {

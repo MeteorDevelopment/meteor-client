@@ -28,9 +28,10 @@ import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MeteorGuiTheme extends GuiTheme {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -52,7 +53,7 @@ public class MeteorGuiTheme extends GuiTheme {
             .sliderRange(0.75, 4)
             .onSliderRelease()
             .onChanged(aDouble -> {
-                if (Utils.mc.currentScreen instanceof WidgetScreen) ((WidgetScreen) Utils.mc.currentScreen).invalidate();
+                if (mc.currentScreen instanceof WidgetScreen) ((WidgetScreen) mc.currentScreen).invalidate();
             })
             .build()
     );
@@ -76,7 +77,7 @@ public class MeteorGuiTheme extends GuiTheme {
             .description("Hide HUD when in GUI.")
             .defaultValue(false)
             .onChanged(v -> {
-                if (Utils.mc.currentScreen instanceof WidgetScreen) Utils.mc.options.hudHidden = v;
+                if (mc.currentScreen instanceof WidgetScreen) mc.options.hudHidden = v;
             })
             .build()
     );

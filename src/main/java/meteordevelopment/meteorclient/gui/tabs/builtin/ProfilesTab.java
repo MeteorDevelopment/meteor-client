@@ -21,12 +21,11 @@ import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProfilesTab extends Tab {
 

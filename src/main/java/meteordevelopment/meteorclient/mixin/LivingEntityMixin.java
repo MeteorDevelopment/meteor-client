@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {

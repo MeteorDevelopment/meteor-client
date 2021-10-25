@@ -18,7 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.util.*;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class NbtUtils {
     public static <T extends ISerializable<?>> NbtList listToTag(Iterable<T> list) {

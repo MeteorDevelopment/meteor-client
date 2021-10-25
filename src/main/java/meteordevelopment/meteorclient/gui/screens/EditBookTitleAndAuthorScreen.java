@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EditBookTitleAndAuthorScreen extends WindowScreen {
     private final ItemStack itemStack;

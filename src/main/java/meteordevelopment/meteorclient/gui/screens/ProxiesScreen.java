@@ -25,7 +25,7 @@ import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProxiesScreen extends WindowScreen {
     private final List<WCheckbox> checkboxes = new ArrayList<>();

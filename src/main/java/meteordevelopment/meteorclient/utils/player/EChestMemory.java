@@ -16,7 +16,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.util.collection.DefaultedList;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EChestMemory {
     public static final DefaultedList<ItemStack> ITEMS = DefaultedList.ofSize(27, ItemStack.EMPTY);

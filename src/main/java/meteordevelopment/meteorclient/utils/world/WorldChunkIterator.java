@@ -12,7 +12,7 @@ import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Iterator;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WorldChunkIterator implements Iterator<WorldChunk> {
     private final int px, pz;

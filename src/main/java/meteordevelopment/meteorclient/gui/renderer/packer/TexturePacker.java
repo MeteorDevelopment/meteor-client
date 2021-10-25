@@ -22,7 +22,7 @@ import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TexturePacker {
     private static final int maxWidth = 2048;

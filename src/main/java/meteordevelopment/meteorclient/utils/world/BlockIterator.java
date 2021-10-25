@@ -19,7 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockIterator {
     private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);

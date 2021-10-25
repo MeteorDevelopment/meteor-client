@@ -5,11 +5,8 @@
 
 package meteordevelopment.meteorclient;
 
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
@@ -46,7 +43,6 @@ import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.fabricmc.loader.api.metadata.Person;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
-import net.minecraft.client.gui.screen.Screen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
@@ -56,9 +52,8 @@ import java.lang.invoke.MethodHandles;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
-
 public class MeteorClient implements ClientModInitializer {
+    public static MinecraftClient mc;
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
@@ -129,7 +124,6 @@ public class MeteorClient implements ClientModInitializer {
         Shaders.init();
         Renderer2D.init();
         Outlines.init();
-
         MeteorExecutor.init();
         Capes.init();
         RainbowColors.init();

@@ -37,7 +37,7 @@ import net.minecraft.world.explosion.Explosion;
 
 import java.util.Objects;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
     private static final Vec3d vec3d = new Vec3d(0, 0, 0);

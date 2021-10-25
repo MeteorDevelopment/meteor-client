@@ -38,8 +38,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.WHITE;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class PlayerUtils {
     private static final double diagonal = 1 / Math.sqrt(2);

@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.utils.world;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -28,7 +27,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockUtils {
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
@@ -64,7 +63,7 @@ public class BlockUtils {
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (findItemResult.isOffhand()) {
-            return place(blockPos, Hand.OFF_HAND, Utils.mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
         } else if (findItemResult.isHotbar()) {
             return place(blockPos, Hand.MAIN_HAND, findItemResult.getSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }

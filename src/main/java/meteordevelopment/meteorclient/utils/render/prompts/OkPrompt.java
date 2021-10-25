@@ -18,7 +18,7 @@ import net.minecraft.client.gui.screen.Screen;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class OkPrompt {
     private final GuiTheme theme;

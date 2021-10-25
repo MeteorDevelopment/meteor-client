@@ -50,7 +50,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();

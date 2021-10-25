@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PathFinder {
     private final static int PATH_AHEAD = 3;

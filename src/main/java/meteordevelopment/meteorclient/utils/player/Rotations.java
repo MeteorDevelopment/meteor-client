@@ -21,7 +21,7 @@ import net.minecraft.util.math.Vec3d;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Rotations {
     private static final Pool<Rotation> rotationPool = new Pool<>(Rotation::new);

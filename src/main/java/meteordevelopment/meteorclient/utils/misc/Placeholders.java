@@ -12,8 +12,9 @@ import net.minecraft.SharedConstants;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
+// TODO: Replace with starscript everywhere
 public class Placeholders {
     private static final Pattern pattern = Pattern.compile("(\\{version}|\\{mc_version}|\\{player}|\\{username}|\\{server})");
 

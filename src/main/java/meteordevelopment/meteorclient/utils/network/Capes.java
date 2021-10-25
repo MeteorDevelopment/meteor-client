@@ -15,7 +15,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Capes {
     private static final String CAPE_OWNERS_URL = "https://meteorclient.com/api/capeowners";
