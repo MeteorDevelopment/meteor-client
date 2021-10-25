@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -148,11 +149,11 @@ public class MeteorClient implements ClientModInitializer {
         }
     }
 
+    // Console
+
     @EventHandler
     private void onCharTyped(CharTypedEvent event) {
-        if (mc.currentScreen != null) return;
-        if (!Config.get().openChatOnPrefix) return;
-        if (Config.get().prefix.isBlank()) return;
+        if (mc.currentScreen != null || !Config.get().prefixOpensConsole || Config.get().prefix.isBlank()) return;
 
         if (event.c == Config.get().prefix.charAt(0)) {
             mc.setScreen(new ChatScreen(Config.get().prefix));
