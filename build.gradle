@@ -23,10 +23,6 @@ repositories {
         name = "dblsaiko"
         url = "https://maven.dblsaiko.net/"
     }
-    maven {
-        name = "Terraformers"
-        url = "https://maven.terraformersmc.com/releases/"
-    }
     jcenter()
 }
 
@@ -49,9 +45,6 @@ dependencies {
 	// Baritone integration
     modImplementation "baritone:baritone:${project.baritone_version}"
     include "baritone:baritone:${project.baritone_version}"
-
-    // ModMenu integration
-    modCompileOnly("com.terraformersmc:modmenu:${project.modmenu_version}") { transitive = false }
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"
