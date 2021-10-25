@@ -1,7 +1,7 @@
 plugins {
-	id 'fabric-loom' version '0.8-SNAPSHOT'
-	id 'maven-publish'
-	id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id 'fabric-loom' version '0.9-SNAPSHOT'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
@@ -9,10 +9,6 @@ sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
 archivesBaseName = project.archives_base_name
 version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
 group = project.maven_group
-
-minecraft {
-	accessWidener "src/main/resources/meteor-client.accesswidener"
-}
 
 repositories {
     maven {
@@ -40,7 +36,7 @@ dependencies {
 		shadow id
 	}
 
-	// Minecraft
+	// Fabric
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -63,26 +59,22 @@ dependencies {
     library "club.minnced:java-discord-rpc:${project.discordrpc_version}"
 }
 
+loom {
+    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
+}
+
 shadowJar {
 	configurations = [ project.configurations.shadow ]
 }
 
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-    duplicatesStrategy = DuplicatesStrategy.WARN
-
-    from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-
-		filter { line -> line.replace("@devbuild@", System.getenv("CIRCLE_BUILD_NUM") != null ? System.getenv("CIRCLE_BUILD_NUM") : "") }
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+        filter { line -> line.replace("@devbuild@", System.getenv("CIRCLE_BUILD_NUM") != null ? System.getenv("CIRCLE_BUILD_NUM") : "") }
         filter { line -> line.replace("@mc_version@", project.minecraft_version) }
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
-	}
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {
