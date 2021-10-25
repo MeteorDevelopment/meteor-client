@@ -39,25 +39,19 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = MinecraftClient.class, priority = 1001)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
-    @Shadow public ClientWorld world;
-
-    @Shadow protected abstract void doItemUse();
-
-    @Shadow @Final public Mouse mouse;
-
-    @Shadow @Final private Window window;
-
-    @Shadow public Screen currentScreen;
-
-    @Shadow public abstract Profiler getProfiler();
-
-    @Shadow
-    public abstract boolean isWindowFocused();
-
     @Unique private boolean doItemUseCalled;
     @Unique private boolean rightClick;
     @Unique private long lastTime;
     @Unique private boolean firstFrame;
+
+    @Shadow public ClientWorld world;
+    @Shadow @Final public Mouse mouse;
+    @Shadow @Final private Window window;
+    @Shadow public Screen currentScreen;
+
+    @Shadow protected abstract void doItemUse();
+    @Shadow public abstract Profiler getProfiler();
+    @Shadow public abstract boolean isWindowFocused();
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {

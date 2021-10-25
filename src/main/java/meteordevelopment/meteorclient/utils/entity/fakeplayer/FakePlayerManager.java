@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerManager {
     private static final List<FakePlayerEntity> fakePlayers = new ArrayList<>();

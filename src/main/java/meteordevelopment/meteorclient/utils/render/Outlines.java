@@ -17,7 +17,7 @@ import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.OutlineVertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Outlines {
     public static boolean renderingOutlines;

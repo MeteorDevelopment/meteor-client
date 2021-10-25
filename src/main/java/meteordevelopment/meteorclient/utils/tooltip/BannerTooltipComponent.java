@@ -21,7 +21,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.BannerItem;
 import net.minecraft.item.ItemStack;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BannerTooltipComponent implements MeteorTooltipData, TooltipComponent {
     private final ItemStack banner;

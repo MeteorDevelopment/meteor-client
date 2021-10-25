@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import org.jetbrains.annotations.Nullable;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AccountsScreen extends WindowScreen {
     public AccountsScreen(GuiTheme theme) {

@@ -25,7 +25,5 @@ public class InventoryCommand extends Command {
             MeteorClient.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
             return SINGLE_SUCCESS;
         }));
-
     }
-
 }

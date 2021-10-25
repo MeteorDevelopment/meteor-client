@@ -25,7 +25,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.*;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WireframeEntityRenderer {
     private static final MatrixStack matrices = new MatrixStack();

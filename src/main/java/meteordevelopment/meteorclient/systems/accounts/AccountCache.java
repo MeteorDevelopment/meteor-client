@@ -16,7 +16,7 @@ import net.minecraft.util.Identifier;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AccountCache implements ISerializable<AccountCache> {
     public String username = "";

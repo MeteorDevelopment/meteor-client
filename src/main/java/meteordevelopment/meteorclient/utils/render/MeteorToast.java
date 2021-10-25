@@ -23,7 +23,7 @@ import net.minecraft.text.TextColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MeteorToast implements Toast {
     public static final int TITLE_COLOR = Color.fromRGBA(145, 61, 226, 255);

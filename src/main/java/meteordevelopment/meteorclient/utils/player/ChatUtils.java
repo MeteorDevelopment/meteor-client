@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChatUtils {
     private static final List<Pair<String, Supplier<Text>>> customPrefixes = new ArrayList<>();

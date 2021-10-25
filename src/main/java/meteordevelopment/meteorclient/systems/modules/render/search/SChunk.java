@@ -17,8 +17,8 @@ import net.minecraft.world.chunk.Chunk;
 
 import java.util.List;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getRenderDistance;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class SChunk {
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();

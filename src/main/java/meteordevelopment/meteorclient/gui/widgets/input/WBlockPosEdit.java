@@ -17,8 +17,8 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.canUpdate;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class WBlockPosEdit extends WHorizontalList {
     public Runnable action;
@@ -44,10 +44,9 @@ public class WBlockPosEdit extends WHorizontalList {
         if (canUpdate()) {
             WButton click = add(theme.button("Click")).expandX().widget();
             click.action = () -> {
-                StringBuilder sb = new StringBuilder("Click!\n");
-                sb.append("Right click to pick a new position.\n");
-                sb.append("Left click to cancel.");
-                Modules.get().get(Marker.class).info(sb.toString());
+                String sb = "Click!\n" + "Right click to pick a new position.\n" +
+                    "Left click to cancel.";
+                Modules.get().get(Marker.class).info(sb);
 
                 clicking = true;
                 MeteorClient.EVENT_BUS.subscribe(this);

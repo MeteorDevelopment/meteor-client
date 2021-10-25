@@ -31,7 +31,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(BookScreen.class)
 public class BookScreenMixin extends Screen {
