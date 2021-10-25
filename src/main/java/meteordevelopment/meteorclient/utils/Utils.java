@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftServerAccessor;
@@ -22,11 +23,12 @@ import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
 import meteordevelopment.meteorclient.utils.world.WorldChunkIterator;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
@@ -68,13 +70,18 @@ public class Utils {
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
     public static double frameTime;
+    public static Screen screenToOpen;
 
-    static {
-        df = new DecimalFormat("0");
-        df.setMaximumFractionDigits(340);
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        df.setDecimalFormatSymbols(dfs);
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(Utils.class);
+    }
+
+    @EventHandler
+    private static void onTick(TickEvent.Post event) {
+        if (screenToOpen != null && mc.currentScreen == null) {
+            mc.setScreen(screenToOpen);
+            screenToOpen = null;
+        }
     }
 
     public static double getPlayerSpeed() {
@@ -171,7 +178,7 @@ public class Utils {
     public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
-            if (pause) MeteorClient.screenToOpen = new PeekScreen(itemStack, contents);
+            if (pause) screenToOpen = new PeekScreen(itemStack, contents);
             else mc.setScreen(new PeekScreen(itemStack, contents));
             return true;
         }

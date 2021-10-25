@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
+import meteordevelopment.orbit.EventHandler;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -46,6 +48,13 @@ public class Systems {
         for (System<?> system : systems.values()) {
             if (system != config) system.init();
         }
+
+        MeteorClient.EVENT_BUS.subscribe(Systems.class);
+    }
+
+    @EventHandler
+    private static void onGameLeft(GameLeftEvent event) {
+        save();
     }
 
     private static System<?> add(System<?> system) {

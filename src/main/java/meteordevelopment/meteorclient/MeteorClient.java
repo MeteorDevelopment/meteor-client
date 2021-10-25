@@ -65,46 +65,13 @@ public class MeteorClient implements ClientModInitializer {
 
         LOG.info("Initializing Meteor Client");
 
-        Utils.mc = MinecraftClient.getInstance();
+        // Global minecraft client accessor
+        mc = MinecraftClient.getInstance();
+
+        // Register event handlers
         EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
-        // Meteor pseudo addon
-        {
-            METEOR_ADDON = new MeteorAddon() {
-                @Override
-                public void onInitialize() {}
-            };
-
-            ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
-
-            METEOR_ADDON.name = metadata.getName();
-            METEOR_ADDON.authors = new String[metadata.getAuthors().size()];
-            if (metadata.containsCustomValue("meteor-client:color")) METEOR_ADDON.color.parse(metadata.getCustomValue("meteor-client:color").getAsString());
-
-            int i = 0;
-            for (Person author : metadata.getAuthors()) {
-                METEOR_ADDON.authors[i++] = author.getName();
-            }
-        }
-
-        // Addons
-        for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
-            ModMetadata metadata = entrypoint.getProvider().getMetadata();
-            MeteorAddon addon = entrypoint.getEntrypoint();
-
-            addon.name = metadata.getName();
-            addon.authors = new String[metadata.getAuthors().size()];
-            if (metadata.containsCustomValue("meteor-client:color")) addon.color.parse(metadata.getCustomValue("meteor-client:color").getAsString());
-
-            int i = 0;
-            for (Person author : metadata.getAuthors()) {
-                addon.authors[i++] = author.getName();
-            }
-
-            ADDONS.add(addon);
-        }
-
-        // Initialize
+        // Pre-load
         Systems.addPreLoadTask(() -> {
             if (!Modules.get().getFile().exists()) {
                 Modules.get().get(DiscordPresence.class).toggle();
@@ -114,6 +81,7 @@ public class MeteorClient implements ClientModInitializer {
 
         // Initialise stuff
         AddonManager.init();
+        Utils.init();
         GL.init();
         Shaders.init();
         Renderer2D.init();
@@ -141,12 +109,6 @@ public class MeteorClient implements ClientModInitializer {
 
         Systems.init();
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            OnlinePlayers.leave();
-            Systems.save();
-            GuiThemes.save();
-        }));
-
         EVENT_BUS.subscribe(this);
 
         // Call onInitialize for addons
@@ -160,6 +122,12 @@ public class MeteorClient implements ClientModInitializer {
         GuiThemes.postInit();
         MeteorStarscript.init();
         ChatUtils.init();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            OnlinePlayers.leave();
+            Systems.save();
+            GuiThemes.save();
+        }));
     }
 
     private void openClickGui() {
@@ -167,35 +135,14 @@ public class MeteorClient implements ClientModInitializer {
     }
 
     @EventHandler
-    private void onGameLeft(GameLeftEvent event) {
-        Systems.save();
-    }
-
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        Capes.tick();
-
-        if (screenToOpen != null && mc.currentScreen == null) {
-            mc.setScreen(screenToOpen);
-            screenToOpen = null;
-        }
-
-        if (Utils.canUpdate()) {
-            mc.player.getActiveStatusEffects().values().removeIf(statusEffectInstance -> statusEffectInstance.getDuration() <= 0);
-        }
-    }
-
-    @EventHandler
-    private void onKey(KeyEvent event) {
-        // Click GUI
+    private void onKeyGUI(KeyEvent event) {
         if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
             if (Utils.canOpenClickGUI()) openClickGui();
         }
     }
 
     @EventHandler
-    private void onMouseButton(MouseButtonEvent event) {
-        // Click GUI
+    private void onMouseButtonGUI(MouseButtonEvent event) {
         if (event.action == KeyAction.Press && event.button != GLFW.GLFW_MOUSE_BUTTON_LEFT && KeyBinds.OPEN_CLICK_GUI.matchesMouse(event.button)) {
             if (Utils.canOpenClickGUI()) openClickGui();
         }
