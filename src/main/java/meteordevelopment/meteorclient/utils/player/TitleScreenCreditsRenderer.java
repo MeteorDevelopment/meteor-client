@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import meteordevelopment.meteorclient.MeteorAddon;
-import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 
@@ -23,8 +23,8 @@ public class TitleScreenCreditsRenderer {
     private static final List<Credit> credits = new ArrayList<>();
 
     private static void init() {
-        add(MeteorClient.METEOR_ADDON);
-        for (MeteorAddon addon : MeteorClient.ADDONS) add(addon);
+        add(AddonManager.METEOR);
+        for (MeteorAddon addon : AddonManager.ADDONS) add(addon);
 
         // Sort by width (Meteor always first)
         credits.sort(Comparator.comparingInt(value -> value.sections.get(0).text.equals("Meteor Client ") ? Integer.MIN_VALUE : -value.width));
