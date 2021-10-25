@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.entity.player.PlayerEntity;
@@ -59,24 +62,12 @@ public class Capes {
                 }
             });
         });
+
+        MeteorClient.EVENT_BUS.subscribe(Capes.class);
     }
 
-    public static Identifier get(PlayerEntity player) {
-        String capeName = OWNERS.get(player.getUuid());
-        if (capeName != null) {
-            Cape cape = TEXTURES.get(capeName);
-            if (cape == null) return null;
-
-            if (cape.isDownloaded()) return cape;
-
-            cape.download();
-            return null;
-        }
-
-        return null;
-    }
-
-    public static void tick() {
+    @EventHandler
+    private static void onTick(TickEvent.Post event) {
         synchronized (TO_REGISTER) {
             for (Cape cape : TO_REGISTER) cape.register();
             TO_REGISTER.clear();
@@ -96,6 +87,21 @@ public class Capes {
 
             TO_REMOVE.clear();
         }
+    }
+
+    public static Identifier get(PlayerEntity player) {
+        String capeName = OWNERS.get(player.getUuid());
+        if (capeName != null) {
+            Cape cape = TEXTURES.get(capeName);
+            if (cape == null) return null;
+
+            if (cape.isDownloaded()) return cape;
+
+            cape.download();
+            return null;
+        }
+
+        return null;
     }
 
     private static class Cape extends Identifier {
