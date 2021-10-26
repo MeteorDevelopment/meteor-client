@@ -112,7 +112,7 @@ public class ChatUtils {
         if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
 
-        if (!Config.get().deleteChatCommandsInfo) id = 0;
+        if (!Config.get().deleteChatFeedback) id = 0;
 
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
     }
