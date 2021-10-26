@@ -50,6 +50,7 @@ dependencies {
     library "meteordevelopment:orbit:${project.orbit_version}"
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "club.minnced:java-discord-rpc:${project.discordrpc_version}"
+    library "org.reflections:reflections:${project.reflections_version}"
 }
 
 loom {

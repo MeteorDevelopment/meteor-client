@@ -11,31 +11,18 @@ import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
-import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
-import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
-import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
-import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
-import meteordevelopment.meteorclient.utils.network.Capes;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.utils.player.DamageUtils;
-import meteordevelopment.meteorclient.utils.player.EChestMemory;
-import meteordevelopment.meteorclient.utils.player.Rotations;
-import meteordevelopment.meteorclient.utils.render.Outlines;
-import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
-import meteordevelopment.meteorclient.utils.world.BlockIterator;
-import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
@@ -46,9 +33,14 @@ import net.minecraft.client.gui.screen.ChatScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Set;
 
 public class MeteorClient implements ClientModInitializer {
     public static MinecraftClient mc;
@@ -81,26 +73,7 @@ public class MeteorClient implements ClientModInitializer {
         });
 
         // Pre init
-        AddonManager.init();
-        Utils.init();
-        GL.init();
-        Shaders.init();
-        Renderer2D.init();
-        Outlines.init();
-        MeteorExecutor.init();
-        Capes.init();
-        RainbowColors.init();
-        BlockIterator.init();
-        EChestMemory.init();
-        Rotations.init();
-        Names.init();
-        FakeClientPlayer.init();
-        PostProcessRenderer.init();
-        Tabs.init();
-        GuiThemes.init();
-        Fonts.init();
-        DamageUtils.init();
-        BlockUtils.init();
+        init(InitStage.Pre);
 
         // Register module categories
         Categories.init();
@@ -116,13 +89,8 @@ public class MeteorClient implements ClientModInitializer {
         // Load saves
         Systems.load();
 
-
         // Post init
-        Fonts.load();
-        GuiRenderer.init();
-        GuiThemes.postInit();
-        MeteorStarscript.init();
-        ChatUtils.init();
+        init(InitStage.Post);
 
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -161,6 +129,46 @@ public class MeteorClient implements ClientModInitializer {
         if (event.c == Config.get().prefix.charAt(0)) {
             mc.setScreen(new ChatScreen(Config.get().prefix));
             event.cancel();
+        }
+    }
+
+    // Reflection initialisation
+
+    private static void init(InitStage initStage) {
+        Reflections reflections = new Reflections("meteordevelopment.meteorclient", Scanners.MethodsAnnotated);
+        Set<Method> initTasks = reflections.getMethodsAnnotatedWith(Init.class);
+        if (initTasks == null || initTasks.size() < 1) return;
+
+        for (Method initTask : initTasks) {
+            Init annotation = initTask.getAnnotation(Init.class);
+            if (annotation != null && annotation.stage().equals(initStage)) reflectInit(initTask, annotation);
+        }
+    }
+
+    private static void reflectInit(Method task, Init annotation) {
+        Class<?>[] preTasks = annotation.dependencies();
+
+        try {
+            if (preTasks == null || preTasks.length < 1) {
+                task.invoke(null);
+            }
+            else {
+                for (Class<?> aClass : preTasks) {
+                    Set<Method> preInits = new Reflections(aClass).getMethodsAnnotatedWith(Init.class);
+
+                    for (Method preInit : preInits) {
+                        Init preInitAnnotation = preInit.getAnnotation(Init.class);
+
+                        if (preInitAnnotation != null && preInitAnnotation.stage().equals(annotation.stage())) {
+                            reflectInit(preInit, preInitAnnotation);
+                        }
+                    }
+
+                    task.invoke(null);
+                }
+            }
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            e.printStackTrace();
         }
     }
 }

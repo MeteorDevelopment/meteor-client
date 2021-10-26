@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.world.TickRate;
@@ -35,6 +37,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class MeteorStarscript {
     public static Starscript ss = new Starscript();
 
+    @Init(stage = InitStage.Post)
     public static void init() {
         StandardLib.init(ss);
 

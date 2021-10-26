@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
@@ -61,6 +63,7 @@ public class GuiRenderer {
         return TEXTURE_PACKER.add(id);
     }
 
+    @Init(stage = InitStage.Post)
     public static void init() {
         CIRCLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/circle.png"));
         TRIANGLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/triangle.png"));

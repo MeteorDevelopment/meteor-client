@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.utils.world;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -35,6 +37,7 @@ public class BlockUtils {
     public static boolean breaking;
     private static boolean breakingThisTick;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);
     }

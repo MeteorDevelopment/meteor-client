@@ -72,6 +72,7 @@ public class Utils {
     public static double frameTime;
     public static Screen screenToOpen;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Utils.class);
     }
