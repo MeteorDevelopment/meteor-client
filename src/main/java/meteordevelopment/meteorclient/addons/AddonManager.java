@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.addons;
 
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.EntrypointContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -17,6 +19,7 @@ public class AddonManager {
     public static MeteorAddon METEOR;
     public static final List<MeteorAddon> ADDONS = new ArrayList<>();
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         // Meteor pseudo addon
         {

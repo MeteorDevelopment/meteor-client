@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.mixin.DimensionTypeAccessor;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -30,6 +32,7 @@ public class FakeClientPlayer {
     private static String lastId;
     private static boolean needsNewEntry;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getSession().getProfile()), new ClientWorld.Properties(Difficulty.NORMAL, false, false), World.OVERWORLD, DimensionTypeAccessor.getOverworld(), 1, mc::getProfiler, new WorldRenderer(mc, new BufferBuilderStorage()), false, 0);
     }

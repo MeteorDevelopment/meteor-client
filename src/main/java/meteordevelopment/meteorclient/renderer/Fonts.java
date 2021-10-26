@@ -9,6 +9,8 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 
 import java.io.File;
@@ -26,6 +28,7 @@ public class Fonts {
 
     private static String lastFont = "";
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         FOLDER.mkdirs();
 
@@ -42,6 +45,7 @@ public class Fonts {
         lastFont = DEFAULT_FONT;
     }
 
+    @Init(stage = InitStage.Post)
     public static void load() {
         if (lastFont.equals(Config.get().font)) return;
 
