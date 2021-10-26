@@ -94,7 +94,7 @@ public class Modules extends System<Modules> {
     }
 
     public static void registerCategory(Category category) {
-        if (!REGISTERING_CATEGORIES) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+        if (!Categories.REGISTERING) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
 
         CATEGORIES.add(category);
     }

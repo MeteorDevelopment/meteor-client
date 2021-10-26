@@ -23,15 +23,16 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RainbowColors {
-
-    public static final RainbowColor GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
-
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
     private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
+    public static RainbowColor GLOBAL;
+
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
+
+        GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
     }
 
     public static void addSetting(Setting<SettingColor> setting) {

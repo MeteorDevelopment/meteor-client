@@ -80,7 +80,7 @@ public class MeteorClient implements ClientModInitializer {
             }
         });
 
-        // Initialise stuff
+        // Pre init
         AddonManager.init();
         Utils.init();
         GL.init();
@@ -103,33 +103,37 @@ public class MeteorClient implements ClientModInitializer {
         BlockUtils.init();
 
         // Register module categories
-        Modules.REGISTERING_CATEGORIES = true;
-        Categories.register();
-        AddonManager.ADDONS.forEach(MeteorAddon::onRegisterCategories);
-        Modules.REGISTERING_CATEGORIES = false;
+        Categories.init();
 
+        // Load systems
         Systems.init();
 
         EVENT_BUS.subscribe(this);
 
         // Call onInitialize for addons
         AddonManager.ADDONS.forEach(MeteorAddon::onInitialize);
-
         Modules.get().sortModules();
+
+        // Load saves
         Systems.load();
 
+
+        // Post init
         Fonts.load();
         GuiRenderer.init();
         GuiThemes.postInit();
         MeteorStarscript.init();
         ChatUtils.init();
 
+        // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             OnlinePlayers.leave();
             Systems.save();
             GuiThemes.save();
         }));
     }
+
+    // GUI
 
     private void openClickGui() {
         Tabs.get().get(0).openScreen(GuiThemes.get());
