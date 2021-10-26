@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import net.minecraft.item.Items;
 
 public class Categories {
@@ -15,12 +17,22 @@ public class Categories {
     public static final Category World = new Category("World", Items.GRASS_BLOCK.getDefaultStack());
     public static final Category Misc = new Category("Misc", Items.LAVA_BUCKET.getDefaultStack());
 
-    public static void register() {
+    public static boolean REGISTERING;
+
+    public static void init() {
+        REGISTERING = true;
+
+        // Meteor
         Modules.registerCategory(Combat);
         Modules.registerCategory(Player);
         Modules.registerCategory(Movement);
         Modules.registerCategory(Render);
         Modules.registerCategory(World);
         Modules.registerCategory(Misc);
+
+        // Addons
+        AddonManager.ADDONS.forEach(MeteorAddon::onRegisterCategories);
+
+        REGISTERING = false;
     }
 }
