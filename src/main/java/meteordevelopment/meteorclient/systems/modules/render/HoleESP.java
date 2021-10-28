@@ -57,6 +57,7 @@ public class HoleESP extends Module {
             .description("Minimum hole height required to be rendered.")
             .defaultValue(3)
             .min(1)
+            .sliderMin(1)
             .build()
     );
 

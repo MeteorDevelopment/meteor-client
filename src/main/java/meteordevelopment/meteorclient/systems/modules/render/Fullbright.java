@@ -45,8 +45,7 @@ public class Fullbright extends Module {
         .onChanged(integer -> {
             if (mc.worldRenderer != null) mc.worldRenderer.reload();
         })
-        .min(0)
-        .max(15)
+        .range(0, 15)
         .sliderMax(15)
         .build()
     );

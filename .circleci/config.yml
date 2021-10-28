@@ -28,6 +28,7 @@ jobs:
       - checkout
 
       - run: ./gradlew build
+      - run: ./gradlew publish
 
       - store_artifacts:
           path: build/libs/

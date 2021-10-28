@@ -40,7 +40,7 @@ public class StashFinder extends Module {
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
         .name("storage-blocks")
         .description("Select the storage blocks to search for.")
-        .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+        .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
         .build()
     );
 
@@ -49,6 +49,7 @@ public class StashFinder extends Module {
         .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
+        .sliderMin(1)
         .build()
     );
 

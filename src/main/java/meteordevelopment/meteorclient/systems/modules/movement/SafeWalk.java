@@ -7,14 +7,16 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BlockListSetting;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.util.shape.VoxelShapes;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class SafeWalk extends Module {
@@ -31,7 +33,6 @@ public class SafeWalk extends Module {
         .name("blocks")
         .description("Which blocks to prevent on walking")
         .filter(this::blockFilter)
-        .defaultValue(Arrays.asList())
         .build()
     );
 

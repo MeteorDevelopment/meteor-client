@@ -9,13 +9,15 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
     private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf" };
@@ -26,6 +28,7 @@ public class Fonts {
 
     private static String lastFont = "";
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         FOLDER.mkdirs();
 
@@ -42,6 +45,7 @@ public class Fonts {
         lastFont = DEFAULT_FONT;
     }
 
+    @Init(stage = InitStage.Post)
     public static void load() {
         if (lastFont.equals(Config.get().font)) return;
 

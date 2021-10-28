@@ -50,7 +50,7 @@ public class CombatHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -418,6 +418,7 @@ public class CombatHud extends HudElement {
 
     public static List<Enchantment> getDefaultEnchantments() {
         List<Enchantment> enchantments = new ArrayList<>();
+
         for (Enchantment enchantment : Registry.ENCHANTMENT) {
             enchantments.add(enchantment);
         }

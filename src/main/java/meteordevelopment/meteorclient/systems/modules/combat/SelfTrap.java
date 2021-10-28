@@ -61,8 +61,6 @@ public class SelfTrap extends Module {
             .name("place-delay")
             .description("How many ticks between block placements.")
             .defaultValue(1)
-            .sliderMin(0)
-            .sliderMax(10)
             .build()
     );
 

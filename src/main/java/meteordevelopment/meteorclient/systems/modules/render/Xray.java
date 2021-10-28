@@ -23,7 +23,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class Xray extends Module {
@@ -32,7 +31,7 @@ public class Xray extends Module {
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("whitelist")
         .description("Which blocks to show x-rayed.")
-        .defaultValue(Arrays.asList(
+        .defaultValue(
             Blocks.COAL_ORE,
             Blocks.DEEPSLATE_COAL_ORE,
             Blocks.IRON_ORE,
@@ -52,7 +51,6 @@ public class Xray extends Module {
             Blocks.NETHER_GOLD_ORE,
             Blocks.NETHER_QUARTZ_ORE,
             Blocks.ANCIENT_DEBRIS
-            )
         )
         .onChanged(v -> {
             if (isActive()) mc.worldRenderer.reload();
@@ -64,13 +62,10 @@ public class Xray extends Module {
         .name("opacity")
         .description("The opacity for all other blocks.")
         .defaultValue(1)
-        .min(1)
-        .max(255)
+        .range(1, 255)
         .sliderMax(255)
         .onChanged(onChanged -> {
-            if(this.isActive()) {
-                mc.worldRenderer.reload();
-            }
+            if (isActive()) mc.worldRenderer.reload();
         })
         .build()
     );

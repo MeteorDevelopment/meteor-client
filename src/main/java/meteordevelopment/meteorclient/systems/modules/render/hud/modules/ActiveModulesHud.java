@@ -20,6 +20,12 @@ import java.util.List;
 public class ActiveModulesHud extends HudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
+        .name("hidden-modules")
+        .description("Which modules not to show in the list.")
+        .build()
+    );
+
     private final Setting<Sort> sort = sgGeneral.add(new EnumSetting.Builder<Sort>()
         .name("sort")
         .description("How to sort active modules.")
@@ -61,7 +67,7 @@ public class ActiveModulesHud extends HudElement {
         .description("Outline width")
         .defaultValue(4)
         .min(1)
-        .sliderMin(1).sliderMax(10)
+        .sliderMin(1)
         .visible(outlines::get)
         .build()
     );
@@ -69,8 +75,9 @@ public class ActiveModulesHud extends HudElement {
     private final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("rainbow-speed")
         .description("Rainbow speed of rainbow color mode.")
-        .defaultValue(0.0035)
-        .sliderMax(0.1)
+        .defaultValue(0.05)
+        .sliderMin(0.01)
+        .sliderMax(0.2)
         .decimalPlaces(4)
         .visible(() -> colorMode.get() == ColorMode.Rainbow)
         .build()
@@ -79,7 +86,8 @@ public class ActiveModulesHud extends HudElement {
     private final Setting<Double> rainbowSpread = sgGeneral.add(new DoubleSetting.Builder()
         .name("rainbow-spread")
         .description("Rainbow spread of rainbow color mode.")
-        .defaultValue(0.025)
+        .defaultValue(0.01)
+        .sliderMin(0.001)
         .sliderMax(0.05)
         .decimalPlaces(4)
         .visible(() -> colorMode.get() == ColorMode.Rainbow)
@@ -109,7 +117,7 @@ public class ActiveModulesHud extends HudElement {
         modules.clear();
 
         for (Module module : Modules.get().getActive()) {
-            if (module.isVisible()) modules.add(module);
+            if (!hiddenModules.get().contains(module)) modules.add(module);
         }
 
         modules.sort((o1, o2) -> {

@@ -12,10 +12,7 @@ import meteordevelopment.meteorclient.gui.screens.settings.*;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.widgets.*;
 import meteordevelopment.meteorclient.gui.widgets.containers.*;
-import meteordevelopment.meteorclient.gui.widgets.input.WDoubleEdit;
-import meteordevelopment.meteorclient.gui.widgets.input.WDropdown;
-import meteordevelopment.meteorclient.gui.widgets.input.WIntEdit;
-import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.gui.widgets.input.*;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.settings.*;
@@ -26,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     protected interface Factory {
@@ -64,6 +61,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
+        factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
     }
 
     @Override
@@ -154,9 +152,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void intW(WTable table, IntSetting setting) {
-        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.getSliderMin(), setting.getSliderMax())).expandX().widget();
-        edit.min = setting.min;
-        edit.max = setting.max;
+        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
 
         edit.actionOnRelease = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
@@ -166,11 +162,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void doubleW(WTable table, DoubleSetting setting) {
-        WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.getSliderMin(), setting.getSliderMax());
-        edit.min = setting.min;
-        edit.max = setting.max;
-        edit.decimalPlaces = setting.decimalPlaces;
-
+        WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider);
         table.add(edit).expandX();
 
         Runnable action = () -> {
@@ -188,6 +180,11 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         textBox.action = () -> setting.set(textBox.get());
 
         reset(table, setting, () -> textBox.set(setting.get()));
+    }
+
+    private void stringListW(WTable table, StringListSetting setting) {
+        WTable wtable = table.add(theme.table()).widget();
+        StringListSetting.fillTable(theme, wtable, setting);
     }
 
     private <T extends Enum<?>> void enumW(WTable table, EnumSetting<T> setting) {
@@ -242,6 +239,16 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(table, setting, () -> item.set(setting.get().asItem().getDefaultStack()));
+    }
+
+    private void blockPosW(WTable table, BlockPosSetting setting) {
+        WBlockPosEdit edit = table.add(theme.blockPosEdit(setting.get())).expandX().widget();
+
+        edit.actionOnRelease = () -> {
+            if (!setting.set(edit.get())) edit.set(setting.get());
+        };
+
+        reset(table, setting, () -> edit.set(setting.get()));
     }
 
     private void blockListW(WTable table, BlockListSetting setting) {
@@ -324,11 +331,6 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(list, setting, () -> item.set(setting.get().potion));
-    }
-
-    private void stringListW(WTable table, StringListSetting setting) {
-        WTable wtable = table.add(theme.table()).widget();
-        StringListSetting.fillTable(theme, wtable, setting);
     }
 
     // Other

@@ -36,7 +36,7 @@ public class FakePlayer extends Module {
             .description("The fake player's default health.")
             .defaultValue(20)
             .min(1)
-            .sliderMax(100)
+            .sliderRange(1, 100)
             .build()
     );
 

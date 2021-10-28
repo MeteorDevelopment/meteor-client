@@ -24,10 +24,8 @@ public class BowSpam extends Module {
         .name("charge")
         .description("How long to charge the bow before releasing in ticks.")
         .defaultValue(5)
-        .min(5)
-        .max(20)
-        .sliderMin(5)
-        .sliderMax(20)
+        .range(5, 20)
+        .sliderRange(5, 20)
         .build()
     );
 

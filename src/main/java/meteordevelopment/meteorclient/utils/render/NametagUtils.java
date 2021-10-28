@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.Vec4;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class NametagUtils {
     private static final Vec4 vec4 = new Vec4();

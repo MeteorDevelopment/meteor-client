@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -61,7 +62,8 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
 
         NbtList valueTag = new NbtList();
         for (Enchantment ench : get()) {
-            valueTag.add(NbtString.of(Registry.ENCHANTMENT.getId(ench).toString()));
+            Identifier id = Registry.ENCHANTMENT.getId(ench);
+            if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -74,50 +76,24 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            get().add(Registry.ENCHANTMENT.get(new Identifier(tagI.asString())));
+            Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(tagI.asString()));
+            if (enchantment != null) get().add(enchantment);
         }
 
         changed();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<Enchantment> defaultValue;
-        private Consumer<List<Enchantment>> onChanged;
-        private Consumer<Setting<List<Enchantment>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<Enchantment>, EnchantmentListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder defaultValue(Enchantment... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
-        public Builder defaultValue(List<Enchantment> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<Enchantment>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<Enchantment>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public EnchantmentListSetting build() {
             return new EnchantmentListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

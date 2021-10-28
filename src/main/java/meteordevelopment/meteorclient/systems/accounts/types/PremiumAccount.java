@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.NbtCompound;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PremiumAccount extends Account<PremiumAccount> {
     private String password;

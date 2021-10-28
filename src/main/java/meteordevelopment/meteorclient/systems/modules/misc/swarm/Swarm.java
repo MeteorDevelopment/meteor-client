@@ -19,39 +19,31 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.Util;
 
-/**
- * @author Inclemental
- * rewritten by smaile
- */
 public class Swarm extends Module {
-    public enum Mode {
-        Host,
-        Worker
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("What type of client to run.")
-            .defaultValue(Mode.Host)
-            .build()
+        .name("mode")
+        .description("What type of client to run.")
+        .defaultValue(Mode.Host)
+        .build()
     );
 
     private final Setting<String> ipAddress = sgGeneral.add(new StringSetting.Builder()
-            .name("ip")
-            .description("The IP address of the host server.")
-            .defaultValue("localhost")
-            .visible(() -> mode.get() == Mode.Worker)
-            .build()
+        .name("ip")
+        .description("The IP address of the host server.")
+        .defaultValue("localhost")
+        .visible(() -> mode.get() == Mode.Worker)
+        .build()
     );
 
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
-            .name("port")
-            .description("The port used for connections.")
-            .defaultValue(7777)
-            .sliderMin(1).sliderMax(65535)
-            .build()
+        .name("port")
+        .description("The port used for connections.")
+        .defaultValue(420)
+        .range(1, 65535)
+        .noSlider()
+        .build()
     );
 
     public SwarmHost host;
@@ -140,5 +132,10 @@ public class Swarm extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (isWorker()) worker.tick();
+    }
+
+    public enum Mode {
+        Host,
+        Worker
     }
 }

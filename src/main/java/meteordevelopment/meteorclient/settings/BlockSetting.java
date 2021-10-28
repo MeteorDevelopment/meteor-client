@@ -63,37 +63,11 @@ public class BlockSetting extends Setting<Block> {
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Block defaultValue;
-        private Consumer<Block> onChanged;
-        private Consumer<Setting<Block>> onModuleActivated;
-        private IVisible visible;
+    public static class Builder extends SettingBuilder<Builder, Block, BlockSetting> {
         private Predicate<Block> filter;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(Block defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Block> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Block>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
+        public Builder() {
+            super(null);
         }
 
         public Builder filter(Predicate<Block> filter) {
@@ -101,11 +75,7 @@ public class BlockSetting extends Setting<Block> {
             return this;
         }
 
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public BlockSetting build() {
             return new BlockSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter);
         }

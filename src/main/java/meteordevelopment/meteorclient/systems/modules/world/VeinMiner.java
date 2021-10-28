@@ -30,7 +30,6 @@ import net.minecraft.util.math.Vec3i;
 import net.minecraft.util.shape.VoxelShape;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -57,24 +56,24 @@ public class VeinMiner extends Module {
     private final Setting<List<Block>> blacklist = sgGeneral.add(new BlockListSetting.Builder()
         .name("blacklist")
         .description("Which blocks to ignore.")
-        .defaultValue(Arrays.asList(Blocks.STONE, Blocks.DIRT, Blocks.GRASS))
+        .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS)
         .build()
     );
 
     private final Setting<Integer> depth = sgGeneral.add(new IntSetting.Builder()
-            .name("depth")
-            .description("Amount of iterations used to scan for similar blocks")
-            .defaultValue(3)
-            .min(1)
-            .sliderMax(15)
-            .build()
+        .name("depth")
+        .description("Amount of iterations used to scan for similar blocks")
+        .defaultValue(3)
+        .min(1)
+        .sliderRange(1, 15)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Sends rotation packets to the server when mining.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Sends rotation packets to the server when mining.")
+        .defaultValue(true)
+        .build()
     );
 
     // Render
@@ -87,31 +86,31 @@ public class VeinMiner extends Module {
     );
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-            .name("render")
-            .description("Whether or not to render the block being mined.")
-            .defaultValue(true)
-            .build()
+        .name("render")
+        .description("Whether or not to render the block being mined.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The color of the sides of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 10))
-            .build()
+        .name("side-color")
+        .description("The color of the sides of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 10))
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The color of the lines of the blocks being rendered.")
-            .defaultValue(new SettingColor(204, 0, 0, 255))
-            .build()
+        .name("line-color")
+        .description("The color of the lines of the blocks being rendered.")
+        .defaultValue(new SettingColor(204, 0, 0, 255))
+        .build()
     );
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);

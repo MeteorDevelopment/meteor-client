@@ -56,7 +56,7 @@ public class VoidESP extends Module {
             .description("The minimum hole height to be rendered.")
             .defaultValue(1)
             .min(1)
-            .sliderMax(5)
+            .sliderRange(1, 5)
             .build()
     );
 

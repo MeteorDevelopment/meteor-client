@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package meteordevelopment.meteorclient;
+package meteordevelopment.meteorclient.addons;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
 

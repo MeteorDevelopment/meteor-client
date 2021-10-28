@@ -56,30 +56,22 @@ public class ColorSettingScreen extends WindowScreen {
         WTable rgbaTable = add(theme.table()).expandX().widget();
 
         rgbaTable.add(theme.label("R:"));
-        rItb = rgbaTable.add(theme.intEdit(setting.get().r, 0, 255)).expandX().widget();
-        rItb.min = 0;
-        rItb.max = 255;
+        rItb = rgbaTable.add(theme.intEdit(setting.get().r, 0, 255, 0, 255, false)).expandX().widget();
         rItb.action = this::rgbaChanged;
         rgbaTable.row();
 
         rgbaTable.add(theme.label("G:"));
-        gItb = rgbaTable.add(theme.intEdit(setting.get().g, 0, 255)).expandX().widget();
-        gItb.min = 0;
-        gItb.max = 255;
+        gItb = rgbaTable.add(theme.intEdit(setting.get().g, 0, 255, 0, 255, false)).expandX().widget();
         gItb.action = this::rgbaChanged;
         rgbaTable.row();
 
         rgbaTable.add(theme.label("B:"));
-        bItb = rgbaTable.add(theme.intEdit(setting.get().b, 0, 255)).expandX().widget();
-        bItb.min = 0;
-        bItb.max = 255;
+        bItb = rgbaTable.add(theme.intEdit(setting.get().b, 0, 255, 0, 255, false)).expandX().widget();
         bItb.action = this::rgbaChanged;
         rgbaTable.row();
 
         rgbaTable.add(theme.label("A:"));
-        aItb = rgbaTable.add(theme.intEdit(setting.get().a, 0, 255)).expandX().widget();
-        aItb.min = 0;
-        aItb.max = 255;
+        aItb = rgbaTable.add(theme.intEdit(setting.get().a, 0, 255, 0, 255, false)).expandX().widget();
         aItb.action = this::rgbaChanged;
 
         // Rainbow
