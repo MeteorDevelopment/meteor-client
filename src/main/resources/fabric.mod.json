@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "name": "Meteor Client",
   "id": "meteor-client",
-  "version": "${version}",
+  "version": "0.4.6",
   "description": "Based utility mod.",
   "authors": [
     "MineGame159",
