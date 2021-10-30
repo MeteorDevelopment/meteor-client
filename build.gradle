@@ -23,6 +23,10 @@ repositories {
         name = "dblsaiko"
         url = "https://maven.dblsaiko.net/"
     }
+    maven {
+        name = "jitpack"
+        url = "https://jitpack.io"
+	}
     jcenter()
 }
 
