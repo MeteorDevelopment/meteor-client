@@ -7,7 +7,8 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
-import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.sound.WeightedSoundSet;
@@ -26,6 +27,8 @@ import org.apache.commons.lang3.text.WordUtils;
 import java.util.HashMap;
 import java.util.Map;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class Names {
     private static final Map<StatusEffect, String> statusEffectNames = new HashMap<>(16);
     private static final Map<Item, String> itemNames = new HashMap<>(128);
@@ -35,6 +38,7 @@ public class Names {
     private static final Map<ParticleType<?>, String> particleTypesNames = new HashMap<>(64);
     private static final Map<Identifier, String> soundNames = new HashMap<>(64);
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Names.class);
     }
@@ -77,7 +81,7 @@ public class Names {
 
     public static String getSoundName(Identifier id) {
         return soundNames.computeIfAbsent(id, identifier -> {
-            WeightedSoundSet soundSet = Utils.mc.getSoundManager().get(identifier);
+            WeightedSoundSet soundSet = mc.getSoundManager().get(identifier);
             if (soundSet == null) return identifier.getPath();
 
             Text text = soundSet.getSubtitle();

@@ -3,10 +3,8 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package meteordevelopment.meteorclient;
+package meteordevelopment.meteorclient.utils;
 
-public abstract class MeteorAddon {
-    public abstract void onInitialize();
-
-    public void onRegisterCategories() {}
+public enum InitStage {
+    Pre, Post
 }

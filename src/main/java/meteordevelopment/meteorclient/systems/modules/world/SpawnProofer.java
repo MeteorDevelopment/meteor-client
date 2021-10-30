@@ -27,16 +27,15 @@ public class SpawnProofer extends Module {
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
         .name("range")
         .description("Range for block placement and rendering")
-        .min(0)
-        .sliderMax(10)
         .defaultValue(3)
+        .min(0)
         .build()
     );
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Block to use for spawn proofing")
-        .defaultValue(getDefaultBlocks())
+        .defaultValue(Blocks.TORCH, Blocks.STONE_BUTTON, Blocks.STONE_SLAB)
         .filter(this::filterBlocks)
         .build()
     );
@@ -45,7 +44,7 @@ public class SpawnProofer extends Module {
         .name("delay")
         .description("Delay in ticks between placing blocks")
         .defaultValue(0)
-        .min(0).sliderMax(10)
+        .min(0)
         .build()
     );
 
@@ -92,7 +91,7 @@ public class SpawnProofer extends Module {
         spawns.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
             BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos);
-            
+
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
                     spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
 
@@ -144,16 +143,6 @@ public class SpawnProofer extends Module {
         }
 
         ticksWaited = 0;
-    }
-
-    private List<Block> getDefaultBlocks() {
-        ArrayList<Block> defaultBlocks = new ArrayList<>();
-
-        defaultBlocks.add(Blocks.TORCH);
-        defaultBlocks.add(Blocks.STONE_BUTTON);
-        defaultBlocks.add(Blocks.STONE_SLAB);
-
-        return defaultBlocks;
     }
 
     private boolean filterBlocks(Block block) {

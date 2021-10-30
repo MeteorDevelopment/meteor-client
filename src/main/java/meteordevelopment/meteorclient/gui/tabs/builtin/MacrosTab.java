@@ -21,11 +21,12 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import meteordevelopment.meteorclient.systems.macros.Macros;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.gui.screen.Screen;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MacrosTab extends Tab {
     public MacrosTab() {
@@ -48,14 +49,7 @@ public class MacrosTab extends Tab {
         }
 
         @Override
-        protected void init() {
-            super.init();
-
-            clear();
-            initWidgets();
-        }
-
-        private void initWidgets() {
+        public void initWidgets() {
             // Macros
             if (Macros.get().getAll().size() > 0) {
                 WTable table = add(theme.table()).expandX().widget();
@@ -82,21 +76,36 @@ public class MacrosTab extends Tab {
             WButton create = add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new MacroEditorScreen(theme, null));
         }
+
+        @Override
+        public boolean toClipboard() {
+            return NbtUtils.toClipboard(Macros.get());
+        }
+
+        @Override
+        public boolean fromClipboard() {
+            return NbtUtils.fromClipboard(Macros.get());
+        }
     }
 
     private static class MacroEditorScreen extends WindowScreen {
+        private final boolean isNew;
+
         private final Macro macro;
-        private final boolean isNewMacro;
 
         private WKeybind keybind;
         private boolean binding;
 
         public MacroEditorScreen(GuiTheme theme, Macro m) {
             super(theme, m == null ? "Create Macro" : "Edit Macro");
-            isNewMacro = m == null;
-            this.macro = isNewMacro ? new Macro() : m;
 
-            initWidgets(m);
+            isNew = m == null;
+            macro = isNew ? new Macro() : m;
+        }
+
+        @Override
+        public void initWidgets() {
+            initWidgets(macro);
         }
 
         private void initWidgets(Macro m) {
@@ -112,16 +121,16 @@ public class MacrosTab extends Tab {
             // Messages
             t.add(theme.label("Messages:")).padTop(4).top();
             WTable lines = t.add(theme.table()).widget();
-            fillMessagesTable(lines);
+            initTable(lines);
 
             // Bind
             keybind = add(theme.keybind(macro.keybind)).expandX().widget();
             keybind.actionOnSet = () -> binding = true;
 
             // Apply
-            WButton apply = add(theme.button(isNewMacro ? "Add" : "Apply")).expandX().widget();
+            WButton apply = add(theme.button(isNew ? "Add" : "Apply")).expandX().widget();
             apply.action = () -> {
-                if (isNewMacro) {
+                if (isNew) {
                     if (macro.name != null && !macro.name.isEmpty() && macro.messages.size() > 0 && macro.keybind.isSet()) {
                         Macros.get().add(macro);
                         onClose();
@@ -135,7 +144,7 @@ public class MacrosTab extends Tab {
             enterAction = apply.action;
         }
 
-        private void fillMessagesTable(WTable lines) {
+        private void initTable(WTable lines) {
             if (macro.messages.isEmpty()) macro.addMessage("");
 
             for (int i = 0; i < macro.messages.size(); i++) {

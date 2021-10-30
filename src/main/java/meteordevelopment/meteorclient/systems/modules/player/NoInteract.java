@@ -9,8 +9,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
+import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -18,77 +18,110 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
-import net.minecraft.network.packet.c2s.play.PlayerInteractBlockC2SPacket;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
-    private final SettingGroup sgAntiHit = settings.createGroup("Anti Hit");
+    private final SettingGroup sgEntities = settings.createGroup("Entities");
 
-    private final Setting<BlockInteractMode> blockInteract = sgBlocks.add(new EnumSetting.Builder<BlockInteractMode>()
+    // Blocks
+
+    private final Setting<List<Block>> blockMine = sgBlocks.add(new BlockListSetting.Builder()
+        .name("block-mine")
+        .description("Cancels block mining.")
+        .build()
+    );
+
+    private final Setting<ListMode> blockMineMode = sgBlocks.add(new EnumSetting.Builder<ListMode>()
+        .name("block-mine-mode")
+        .description("List mode to use for block mine.")
+        .defaultValue(ListMode.BlackList)
+        .build()
+    );
+
+    private final Setting<List<Block>> blockInteract = sgBlocks.add(new BlockListSetting.Builder()
         .name("block-interact")
         .description("Cancels block interaction.")
-        .defaultValue(BlockInteractMode.None)
         .build()
     );
 
-    private final Setting<Boolean> onlyCrystals = sgBlocks.add(new BoolSetting.Builder()
-        .name("only-crystals")
-        .description("Only blocks the interactions if the held item is an end crystal.")
-        .defaultValue(false)
-        .visible(() -> blockInteract.get() != BlockInteractMode.None)
+    private final Setting<ListMode> blockInteractMode = sgBlocks.add(new EnumSetting.Builder<ListMode>()
+        .name("block-interact-mode")
+        .description("List mode to use for block interact.")
+        .defaultValue(ListMode.BlackList)
         .build()
     );
 
-    private final Setting<Hand> blockInteractHand = sgBlocks.add(new EnumSetting.Builder<Hand>()
+    private final Setting<HandMode> blockInteractHand = sgBlocks.add(new EnumSetting.Builder<HandMode>()
         .name("block-interact-hand")
-        .description("Only cancels block interaction if the hand used is this value.")
-        .defaultValue(Hand.Mainhand)
-        .visible(() -> blockInteract.get() != BlockInteractMode.None)
+        .description("Cancels block interaction if performed by this hand.")
+        .defaultValue(HandMode.None)
         .build()
     );
 
-    private final Setting<List<Block>> blocks = sgBlocks.add(new BlockListSetting.Builder()
-        .name("block-mining")
-        .description("Will cancel mining these blocks.")
-        .defaultValue(new ArrayList<>())
-        .build()
-    );
+    // Entities
 
-    // Anti Hit
-
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgAntiHit.add(new EntityTypeListSetting.Builder()
-        .name("entities")
-        .description("Will cancel hits on the entities selected.")
-        .defaultValue(new Object2BooleanOpenHashMap<>(0))
+    private final Setting<Object2BooleanMap<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeListSetting.Builder()
+        .name("entity-hit")
+        .description("Cancel entity hitting.")
         .onlyAttackable()
         .build()
     );
 
-    private final Setting<Boolean> friends = sgAntiHit.add(new BoolSetting.Builder()
+    private final Setting<ListMode> entityHitMode = sgEntities.add(new EnumSetting.Builder<ListMode>()
+        .name("entity-hit-mode")
+        .description("List mode to use for entity hit.")
+        .defaultValue(ListMode.BlackList)
+        .build()
+    );
+
+    private final Setting<Object2BooleanMap<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeListSetting.Builder()
+        .name("entity-interact")
+        .description("Cancel entity interaction.")
+        .onlyAttackable()
+        .build()
+    );
+
+    private final Setting<ListMode> entityInteractMode = sgEntities.add(new EnumSetting.Builder<ListMode>()
+        .name("entity-interact-mode")
+        .description("List mode to use for entity interact.")
+        .defaultValue(ListMode.BlackList)
+        .build()
+    );
+
+    private final Setting<HandMode> entityInteractHand = sgEntities.add(new EnumSetting.Builder<HandMode>()
+        .name("entity-interact-hand")
+        .description("Cancels entity interaction if performed by this hand.")
+        .defaultValue(HandMode.None)
+        .build()
+    );
+
+    private final Setting<InteractMode> friends = sgEntities.add(new EnumSetting.Builder<InteractMode>()
         .name("friends")
-        .description("Cancels hits on players you have friended.")
-        .defaultValue(true)
+        .description("Friends cancel mode.")
+        .defaultValue(InteractMode.None)
         .build()
     );
 
-    private final Setting<Boolean> babies = sgAntiHit.add(new BoolSetting.Builder()
+    private final Setting<InteractMode> babies = sgEntities.add(new EnumSetting.Builder<InteractMode>()
         .name("babies")
-        .description("Cancels hits on baby entities.")
-        .defaultValue(true)
+        .description("Baby entity cancel mode.")
+        .defaultValue(InteractMode.None)
         .build()
     );
 
-    private final Setting<Boolean> nametagged = sgAntiHit.add(new BoolSetting.Builder()
+    private final Setting<InteractMode> nametagged = sgEntities.add(new EnumSetting.Builder<InteractMode>()
         .name("nametagged")
-        .description("Cancels hits on nametagged entities.")
-        .defaultValue(false)
+        .description("Nametagged entity cancel mode.")
+        .defaultValue(InteractMode.None)
         .build()
     );
 
@@ -96,71 +129,128 @@ public class NoInteract extends Module {
         super(Categories.Player, "no-interact", "Blocks interactions with certain types of inputs.");
     }
 
-    @EventHandler
-    private void onSendPacket(PacketEvent.Send event) {
-        if (blockInteract.get() == BlockInteractMode.Packet && event.packet instanceof PlayerInteractBlockC2SPacket) {
-            switch (((PlayerInteractBlockC2SPacket) event.packet).getHand()) {
-                case MAIN_HAND -> {
-                    if ((blockInteractHand.get() == Hand.Mainhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
-                }
-                case OFF_HAND -> {
-                    if ((blockInteractHand.get() == Hand.Offhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
-                }
-            }
-        }
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
+        if (!shouldAttackBlock(event.blockPos)) event.cancel();
     }
 
     @EventHandler
     private void onInteractBlock(InteractBlockEvent event) {
-        if (blockInteract.get() == BlockInteractMode.Normal) {
-            switch (event.hand) {
-                case MAIN_HAND -> {
-                    if ((blockInteractHand.get() == Hand.Mainhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getMainHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
-                }
-                case OFF_HAND -> {
-                    if ((blockInteractHand.get() == Hand.Offhand || blockInteractHand.get() == Hand.Both)
-                        && (!onlyCrystals.get() || mc.player.getOffHandStack().getItem() == Items.END_CRYSTAL)) event.cancel();
-                }
-            }
-        }
+        if (!shouldInteractBlock(event.result, event.hand)) event.cancel();
     }
 
     @EventHandler(priority = EventPriority.HIGH)
     private void onAttackEntity(AttackEntityEvent event) {
+        if (!shouldAttackEntity(event.entity)) event.cancel();
+    }
+
+    @EventHandler
+    private void onInteractEntity(InteractEntityEvent event) {
+       if (!shouldInteractEntity(event.entity, event.hand)) event.cancel();
+    }
+
+    private boolean shouldAttackBlock(BlockPos blockPos) {
+        if (blockMineMode.get() == ListMode.WhiteList &&
+            blockMine.get().contains(mc.world.getBlockState(blockPos).getBlock())) {
+            return false;
+        }
+
+        return blockMineMode.get() != ListMode.BlackList ||
+            !blockMine.get().contains(mc.world.getBlockState(blockPos).getBlock());
+    }
+
+    private boolean shouldInteractBlock(BlockHitResult hitResult, Hand hand) {
+        // Hand Interactions
+        if (blockInteractHand.get() == HandMode.Both ||
+            (blockInteractHand.get() == HandMode.Mainhand && hand == Hand.MAIN_HAND) ||
+            (blockInteractHand.get() == HandMode.Offhand && hand == Hand.OFF_HAND)) {
+            return false;
+        }
+
+        // Blocks
+        if (blockInteractMode.get() == ListMode.BlackList &&
+            blockInteract.get().contains(mc.world.getBlockState(hitResult.getBlockPos()).getBlock())) {
+            return false;
+        }
+
+        return blockInteractMode.get() != ListMode.WhiteList ||
+            blockInteract.get().contains(mc.world.getBlockState(hitResult.getBlockPos()).getBlock());
+    }
+
+    private boolean shouldAttackEntity(Entity entity) {
         // Friends
-        if (friends.get() && event.entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) event.entity)) {
-            event.cancel();
+        if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Hit) &&
+            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            return false;
         }
 
         // Babies
-        if (babies.get() && event.entity instanceof AnimalEntity && ((AnimalEntity) event.entity).isBaby()) {
-            event.cancel();
+        if ((babies.get() == InteractMode.Both || babies.get() == InteractMode.Hit) &&
+            entity instanceof AnimalEntity && ((AnimalEntity) entity).isBaby()) {
+            return false;
         }
 
         // NameTagged
-        if (nametagged.get() && event.entity.hasCustomName()) event.cancel();
+        if ((nametagged.get() == InteractMode.Both || nametagged.get() == InteractMode.Hit) && entity.hasCustomName()) return false;
 
         // Entities
-        if (entities.get().getBoolean(event.entity.getType())) event.cancel();
+        if (entityHitMode.get() == ListMode.BlackList &&
+            entityHit.get().getBoolean(entity.getType())) {
+            return false;
+        }
+
+        else return entityHitMode.get() != ListMode.WhiteList ||
+            entityHit.get().getBoolean(entity.getType());
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
-    private void onStartBreakingBlockEvent(StartBreakingBlockEvent event) {
-        if (blocks.get().contains(mc.world.getBlockState(event.blockPos).getBlock())) event.cancel();
+    private boolean shouldInteractEntity(Entity entity, Hand hand) {
+        // Hand Interactions
+        if (entityInteractHand.get() == HandMode.Both ||
+            (entityInteractHand.get() == HandMode.Mainhand && hand == Hand.MAIN_HAND) ||
+            (entityInteractHand.get() == HandMode.Offhand && hand == Hand.OFF_HAND)) {
+            return false;
+        }
+
+        // Friends
+        if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Interact) &&
+            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            return false;
+        }
+
+        // Babies
+        if ((babies.get() == InteractMode.Both || babies.get() == InteractMode.Interact) &&
+            entity instanceof AnimalEntity && ((AnimalEntity) entity).isBaby()) {
+            return false;
+        }
+
+        // NameTagged
+        if ((nametagged.get() == InteractMode.Both || nametagged.get() == InteractMode.Interact) && entity.hasCustomName()) return false;
+
+        // Entities
+        if (entityInteractMode.get() == ListMode.BlackList &&
+            entityInteract.get().getBoolean(entity.getType())) {
+            return false;
+        }
+        else return entityInteractMode.get() != ListMode.WhiteList ||
+            entityInteract.get().getBoolean(entity.getType());
     }
 
-    public enum BlockInteractMode {
-        Normal,
-        Packet,
+    public enum HandMode {
+        Mainhand,
+        Offhand,
+        Both,
         None
     }
 
-    public enum Hand {
-        Mainhand,
-        Offhand,
-        Both
+    public enum ListMode {
+        WhiteList,
+        BlackList
+    }
+
+    public enum InteractMode {
+        Hit,
+        Interact,
+        Both,
+        None
     }
 }

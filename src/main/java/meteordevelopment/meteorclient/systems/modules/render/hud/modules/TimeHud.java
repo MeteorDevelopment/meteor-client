@@ -18,11 +18,11 @@ import java.time.format.FormatStyle;
 public class TimeHud extends DoubleTextHudElement {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<TimeType> timeType = sgGeneral.add(new EnumSetting.Builder<TimeType>()
-            .name("use-time")
-            .description("Which time to use.")
-            .defaultValue(TimeType.World)
-            .build()
+    private final Setting<Type> timeType = sgGeneral.add(new EnumSetting.Builder<Type>()
+        .name("type")
+        .description("Which time to use.")
+        .defaultValue(Type.Game)
+        .build()
     );
 
     public TimeHud(HUD hud) {
@@ -32,13 +32,13 @@ public class TimeHud extends DoubleTextHudElement {
     @Override
     protected String getRight() {
         return switch (timeType.get()) {
-            case World -> isInEditor() ? "00:00" : Utils.getWorldTime();
-            case Local ->  LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
+            case Game -> isInEditor() ? "00:00" : Utils.getWorldTime();
+            case Local -> LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT));
         };
     }
 
-    public enum TimeType {
-        World,
-        Local
+    public enum Type {
+        Local,
+        Game
     }
 }

@@ -189,6 +189,28 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return this;
     }
 
+    public boolean parse(String text) {
+        String[] split = text.split(",");
+        if (split.length != 3 && split.length != 4) return false;
+
+        try {
+            // Not assigned directly because of exception handling
+            int r = Integer.parseInt(split[0]);
+            int g = Integer.parseInt(split[1]);
+            int b = Integer.parseInt(split[2]);
+            int a = split.length == 4 ? Integer.parseInt(split[3]) : this.a;
+
+            this.r = r;
+            this.g = g;
+            this.b = b;
+            this.a = a;
+
+            return true;
+        } catch (NumberFormatException ignored) {
+            return false;
+        }
+    }
+
     @Override
     public Color copy() {
         return new Color(r, g, b, a);

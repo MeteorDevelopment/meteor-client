@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public abstract class WContainer extends WWidget {
     public final List<Cell<?>> cells = new ArrayList<>();
@@ -154,14 +154,14 @@ public abstract class WContainer extends WWidget {
     }
 
     @Override
-    public void mouseScrolled(double amount) {
+    public boolean mouseScrolled(double amount) {
         try {
             for (Cell<?> cell : cells) {
-                if (propagateEvents(cell.widget())) cell.widget().mouseScrolled(amount);
+                if (propagateEvents(cell.widget()) && cell.widget().mouseScrolled(amount)) return true;
             }
         } catch (ConcurrentModificationException ignored) {}
 
-        super.mouseScrolled(amount);
+        return super.mouseScrolled(amount);
     }
 
     @Override

@@ -21,18 +21,10 @@ public class BoundingBox implements ISerializable<BoundingBox> {
 
     public double alignX(double width) {
         return switch (this.x) {
-            case Left   -> 0;
+            case Left -> 0;
             case Center -> this.width / 2.0 - width / 2.0;
-            case Right  -> this.width - width;
+            case Right -> this.width - width;
         };
-    }
-
-    public void setX(int x) {
-        addPos(x - getX(), 0);
-    }
-
-    public void setY(int y) {
-        addPos(0, y - getY());
     }
 
     public void addPos(double deltaX, double deltaY) {
@@ -130,18 +122,26 @@ public class BoundingBox implements ISerializable<BoundingBox> {
 
     public double getX() {
         return switch (x) {
-            case Left   -> xOffset;
+            case Left -> xOffset;
             case Center -> (Utils.getWindowWidth() / 2.0 - width / 2.0 + xOffset);
-            case Right  -> Utils.getWindowWidth() - width + xOffset;
+            case Right -> Utils.getWindowWidth() - width + xOffset;
         };
+    }
+
+    public void setX(int x) {
+        addPos(x - getX(), 0);
     }
 
     public double getY() {
         return switch (y) {
-            case Top    -> yOffset;
+            case Top -> yOffset;
             case Center -> (Utils.getWindowHeight() / 2.0 - height / 2.0 + yOffset);
             case Bottom -> Utils.getWindowHeight() - height + yOffset;
         };
+    }
+
+    public void setY(int y) {
+        addPos(0, y - getY());
     }
 
     public boolean isOver(double x, double y) {

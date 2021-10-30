@@ -38,8 +38,8 @@ public abstract class ClientWorldMixin {
         if (entity != null) MeteorClient.EVENT_BUS.post(EntityAddedEvent.get(entity));
     }
 
-    @Inject(method = "removeEntity", at = @At("TAIL"))
-    private void onFinishRemovingEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo info) {
+    @Inject(method = "removeEntity", at = @At("HEAD"))
+    private void onRemoveEntity(int entityId, Entity.RemovalReason removalReason, CallbackInfo info) {
         if (getEntityById(entityId) != null) MeteorClient.EVENT_BUS.post(EntityRemovedEvent.get(getEntityById(entityId)));
     }
 

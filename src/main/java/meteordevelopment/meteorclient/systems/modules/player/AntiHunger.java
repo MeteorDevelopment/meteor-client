@@ -34,6 +34,12 @@ public class AntiHunger extends Module {
             .build()
     );
 
+    private final Setting<Boolean> waterCheck = sgGeneral.add(new BoolSetting.Builder()
+            .name("water-check")
+            .description("Pauses the module if you are in water")
+            .defaultValue(true)
+            .build());
+
     private boolean lastOnGround;
     private boolean sendOnGroundTruePacket;
     private boolean ignorePacket;
@@ -67,6 +73,10 @@ public class AntiHunger extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (waterCheck.get() && mc.player.isTouchingWater()) {
+            ignorePacket = true;
+            return;
+        }
         if (mc.player.isOnGround() && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
 
         if (mc.player.isOnGround() && sendOnGroundTruePacket && onGround.get()) {

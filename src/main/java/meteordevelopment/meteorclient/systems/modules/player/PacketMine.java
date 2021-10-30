@@ -50,7 +50,6 @@ public class PacketMine extends Module {
         .description("Delay between mining blocks in ticks.")
         .defaultValue(1)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 

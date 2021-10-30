@@ -31,8 +31,7 @@ public class AutoLog extends Module {
             .name("health")
             .description("Automatically disconnects when health is lower or equal to this value.")
             .defaultValue(6)
-            .min(0)
-            .max(20)
+            .range(0, 20)
             .sliderMax(20)
             .build()
     );
@@ -69,8 +68,7 @@ public class AutoLog extends Module {
             .name("range")
             .description("How close a crystal has to be to you before you disconnect.")
             .defaultValue(4)
-            .min(1)
-            .max(10)
+            .range(1, 10)
             .sliderMax(5)
             .visible(crystalLog::get)
             .build()
@@ -114,7 +112,7 @@ public class AutoLog extends Module {
         }
 
         for (Entity entity : mc.world.getEntities()) {
-            if(entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
+            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
                         mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] A non-trusted player appeared in your render distance.")));
                         if (toggleOff.get()) this.toggle();

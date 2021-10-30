@@ -35,38 +35,46 @@ public class AutoEat extends Module {
     // General
 
     private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
-            .name("blacklist")
-            .description("Which items to not eat.")
-            .defaultValue(getDefaultBlacklist())
-            .filter(Item::isFood)
-            .build()
+        .name("blacklist")
+        .description("Which items to not eat.")
+        .defaultValue(
+            Items.ENCHANTED_GOLDEN_APPLE,
+            Items.GOLDEN_APPLE,
+            Items.CHORUS_FRUIT,
+            Items.POISONOUS_POTATO,
+            Items.PUFFERFISH,
+            Items.CHICKEN,
+            Items.ROTTEN_FLESH,
+            Items.SPIDER_EYE,
+            Items.SUSPICIOUS_STEW
+        )
+        .filter(Item::isFood)
+        .build()
     );
 
     private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-auras")
-            .description("Pauses all auras when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-auras")
+        .description("Pauses all auras when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-baritone")
-            .description("Pause baritone when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-baritone")
+        .description("Pause baritone when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     // Hunger
 
     private final Setting<Integer> hungerThreshold = sgHunger.add(new IntSetting.Builder()
-            .name("hunger-threshold")
-            .description("The level of hunger you eat at.")
-            .defaultValue(16)
-            .min(1)
-            .max(19)
-            .sliderMin(1)
-            .sliderMax(19)
-            .build()
+        .name("hunger-threshold")
+        .description("The level of hunger you eat at.")
+        .defaultValue(16)
+        .range(1, 19)
+        .sliderRange(1, 19)
+        .build()
     );
 
     public boolean eating;
@@ -224,21 +232,5 @@ public class AutoEat extends Module {
         }
 
         return slot;
-    }
-
-    private static List<Item> getDefaultBlacklist() {
-        List<Item> l = new ArrayList<>(9);
-
-        l.add(Items.ENCHANTED_GOLDEN_APPLE);
-        l.add(Items.GOLDEN_APPLE);
-        l.add(Items.CHORUS_FRUIT);
-        l.add(Items.POISONOUS_POTATO);
-        l.add(Items.PUFFERFISH);
-        l.add(Items.CHICKEN);
-        l.add(Items.ROTTEN_FLESH);
-        l.add(Items.SPIDER_EYE);
-        l.add(Items.SUSPICIOUS_STEW);
-
-        return l;
     }
 }

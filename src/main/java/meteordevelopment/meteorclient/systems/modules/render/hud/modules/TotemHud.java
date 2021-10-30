@@ -23,7 +23,7 @@ public class TotemHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -43,7 +43,8 @@ public class TotemHud extends HudElement {
 
         if (isInEditor()) {
             RenderUtils.drawItem(Items.TOTEM_OF_UNDYING.getDefaultStack(), (int) x, (int) y, scale.get(), true);
-        } else if (InvUtils.find(Items.TOTEM_OF_UNDYING).getCount() > 0) {
+        }
+        else if (InvUtils.find(Items.TOTEM_OF_UNDYING).getCount() > 0) {
             RenderUtils.drawItem(new ItemStack(Items.TOTEM_OF_UNDYING, InvUtils.find(Items.TOTEM_OF_UNDYING).getCount()), (int) x, (int) y, scale.get(), true);
         }
     }

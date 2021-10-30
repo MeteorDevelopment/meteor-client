@@ -53,8 +53,8 @@ public class AutoTool extends Module {
         .name("anti-break-percentage")
         .description("The durability percentage to stop using a tool.")
         .defaultValue(10)
-        .min(1).max(100)
-        .sliderMax(50)
+        .range(1, 100)
+        .sliderRange(1, 100)
         .visible(antiBreak::get)
         .build()
     );
@@ -139,7 +139,7 @@ public class AutoTool extends Module {
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {
-        return antiBreak.get() && itemStack.getMaxDamage() - itemStack.getDamage() < breakDurability.get();
+        return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {

@@ -11,9 +11,10 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class WAccount extends WHorizontalList {
     public Runnable refreshScreenAction;
@@ -37,7 +38,7 @@ public abstract class WAccount extends WHorizontalList {
 
         // Name
         WLabel name = add(theme.label(account.getUsername())).widget();
-        if (Utils.mc.getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = loggedInColor();
+        if (mc.getSession().getUsername().equalsIgnoreCase(account.getUsername())) name.color = loggedInColor();
 
         // Type
         WLabel label = add(theme.label("(" + account.getType() + ")")).expandCellX().right().widget();

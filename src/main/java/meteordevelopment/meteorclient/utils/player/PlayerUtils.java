@@ -38,8 +38,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.WHITE;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class PlayerUtils {
     private static final double diagonal = 1 / Math.sqrt(2);
@@ -256,14 +256,13 @@ public class PlayerUtils {
     }
 
     public static Dimension getDimension() {
-        switch (mc.world.getRegistryKey().getValue().getPath()) {
-            case "the_nether":
-                return Dimension.Nether;
-            case "the_end":
-                return Dimension.End;
-            default:
-                return Dimension.Overworld;
-        }
+        if (mc.world == null) return Dimension.Overworld;
+
+        return switch (mc.world.getRegistryKey().getValue().getPath()) {
+            case "the_nether" -> Dimension.Nether;
+            case "the_end" -> Dimension.End;
+            default -> Dimension.Overworld;
+        };
     }
 
     public static GameMode getGameMode() {

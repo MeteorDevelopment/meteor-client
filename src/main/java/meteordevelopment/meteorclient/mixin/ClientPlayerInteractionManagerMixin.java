@@ -53,14 +53,14 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         }
     }
 
+    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
+    private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
+        if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
+    }
+
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
     public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         if (MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player.getMainHandStack().isEmpty() ? Hand.OFF_HAND : hand, hitResult)).isCancelled()) cir.setReturnValue(ActionResult.FAIL);
-    }
-
-    @Inject(method = "dropCreativeStack", at = @At("HEAD"), cancellable = true)
-    private void onDropCreativeStack(ItemStack stack, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "attackEntity", at = @At("HEAD"), cancellable = true)
@@ -68,9 +68,14 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         if (MeteorClient.EVENT_BUS.post(AttackEntityEvent.get(target)).isCancelled()) info.cancel();
     }
 
-    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
-    private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
-        if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
+    @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true)
+    private void onInteractEntity(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> info) {
+        if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled()) info.setReturnValue(ActionResult.FAIL);
+    }
+
+    @Inject(method = "dropCreativeStack", at = @At("HEAD"), cancellable = true)
+    private void onDropCreativeStack(ItemStack stack, CallbackInfo info) {
+        if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(stack)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)

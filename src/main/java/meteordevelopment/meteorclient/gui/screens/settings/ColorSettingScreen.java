@@ -29,18 +29,22 @@ public class ColorSettingScreen extends WindowScreen {
 
     private final Setting<SettingColor> setting;
 
-    private final WQuad displayQuad;
+    private WQuad displayQuad;
 
-    private final WBrightnessQuad brightnessQuad;
-    private final WHueQuad hueQuad;
+    private WBrightnessQuad brightnessQuad;
+    private WHueQuad hueQuad;
 
-    private final WIntEdit rItb, gItb, bItb, aItb;
-    private final WCheckbox rainbow;
+    private WIntEdit rItb, gItb, bItb, aItb;
+    private WCheckbox rainbow;
 
     public ColorSettingScreen(GuiTheme theme, Setting<SettingColor> setting) {
         super(theme, "Select Color");
-        this.setting = setting;
 
+        this.setting = setting;
+    }
+
+    @Override
+    public void initWidgets() {
         // Top
         displayQuad = add(theme.quad(setting.get())).expandX().widget();
 
@@ -52,30 +56,22 @@ public class ColorSettingScreen extends WindowScreen {
         WTable rgbaTable = add(theme.table()).expandX().widget();
 
         rgbaTable.add(theme.label("R:"));
-        rItb = rgbaTable.add(theme.intEdit(setting.get().r, 0, 255)).expandX().widget();
-        rItb.min = 0;
-        rItb.max = 255;
+        rItb = rgbaTable.add(theme.intEdit(setting.get().r, 0, 255, 0, 255, false)).expandX().widget();
         rItb.action = this::rgbaChanged;
         rgbaTable.row();
 
         rgbaTable.add(theme.label("G:"));
-        gItb = rgbaTable.add(theme.intEdit(setting.get().g, 0, 255)).expandX().widget();
-        gItb.min = 0;
-        gItb.max = 255;
+        gItb = rgbaTable.add(theme.intEdit(setting.get().g, 0, 255, 0, 255, false)).expandX().widget();
         gItb.action = this::rgbaChanged;
         rgbaTable.row();
 
         rgbaTable.add(theme.label("B:"));
-        bItb = rgbaTable.add(theme.intEdit(setting.get().b, 0, 255)).expandX().widget();
-        bItb.min = 0;
-        bItb.max = 255;
+        bItb = rgbaTable.add(theme.intEdit(setting.get().b, 0, 255, 0, 255, false)).expandX().widget();
         bItb.action = this::rgbaChanged;
         rgbaTable.row();
 
         rgbaTable.add(theme.label("A:"));
-        aItb = rgbaTable.add(theme.intEdit(setting.get().a, 0, 255)).expandX().widget();
-        aItb.min = 0;
-        aItb.max = 255;
+        aItb = rgbaTable.add(theme.intEdit(setting.get().a, 0, 255, 0, 255, false)).expandX().widget();
         aItb.action = this::rgbaChanged;
 
         // Rainbow
@@ -179,38 +175,36 @@ public class ColorSettingScreen extends WindowScreen {
             t = brightnessQuad.value * (1.0 - (brightnessQuad.saturation * (1.0 - ff)));
 
             switch (i) {
-                case 0:
+                case 0 -> {
                     r = brightnessQuad.value;
                     g = t;
                     b = p;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     r = q;
                     g = brightnessQuad.value;
                     b = p;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     r = p;
                     g = brightnessQuad.value;
                     b = t;
-                    break;
-
-                case 3:
+                }
+                case 3 -> {
                     r = p;
                     g = q;
                     b = brightnessQuad.value;
-                    break;
-                case 4:
+                }
+                case 4 -> {
                     r = t;
                     g = p;
                     b = brightnessQuad.value;
-                    break;
-                case 5:
-                default:
+                }
+                default -> {
                     r = brightnessQuad.value;
                     g = p;
                     b = q;
-                    break;
+                }
             }
         }
 
@@ -454,38 +448,37 @@ public class ColorSettingScreen extends WindowScreen {
             double g;
             double b;
 
-            switch(i) {
-                case 0:
+            switch (i) {
+                case 0 -> {
                     r = 1;
                     g = t;
                     b = p;
-                    break;
-                case 1:
+                }
+                case 1 -> {
                     r = q;
                     g = 1;
                     b = p;
-                    break;
-                case 2:
+                }
+                case 2 -> {
                     r = p;
                     g = 1;
                     b = t;
-                    break;
-                case 3:
+                }
+                case 3 -> {
                     r = p;
                     g = q;
                     b = 1;
-                    break;
-                case 4:
+                }
+                case 4 -> {
                     r = t;
                     g = p;
                     b = 1;
-                    break;
-                case 5:
-                default:
+                }
+                default -> {
                     r = 1;
                     g = p;
                     b = q;
-                    break;
+                }
             }
 
             color.r = (int) (r * 255);

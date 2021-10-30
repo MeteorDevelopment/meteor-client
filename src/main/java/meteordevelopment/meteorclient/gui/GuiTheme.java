@@ -30,6 +30,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.math.BlockPos;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -155,11 +156,28 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
         return w(new WTexture(width, height, rotation, texture));
     }
 
-    public WIntEdit intEdit(int value, int sliderMin, int sliderMax) {
-        return w(new WIntEdit(value, sliderMin, sliderMax));
+    public WIntEdit intEdit(int value, int min, int max, int sliderMin, int sliderMax, boolean noSlider) {
+        return w(new WIntEdit(value, min, max, sliderMin, sliderMax, noSlider));
     }
-    public WDoubleEdit doubleEdit(double value, double sliderMin, double sliderMax) {
-        return w(new WDoubleEdit(value, sliderMin, sliderMax));
+    public WIntEdit intEdit(int value, int min, int max, int sliderMin, int sliderMax) {
+        return w(new WIntEdit(value, min, max, sliderMin, sliderMax, false));
+    }
+    public WIntEdit intEdit(int value, int min, int max, boolean noSlider) {
+        return w(new WIntEdit(value, min, max, 0, 0, noSlider));
+    }
+
+    public WDoubleEdit doubleEdit(double value, double min, double max, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider) {
+        return w(new WDoubleEdit(value, min, max, sliderMin, sliderMax, decimalPlaces, noSlider));
+    }
+    public WDoubleEdit doubleEdit(double value, double min, double max, double sliderMin, double sliderMax) {
+        return w(new WDoubleEdit(value, min, max, sliderMin, sliderMax, 3, false));
+    }
+    public WDoubleEdit doubleEdit(double value, double min, double max) {
+        return w(new WDoubleEdit(value, min, max, 0, 10, 3, false));
+    }
+
+    public WBlockPosEdit blockPosEdit(BlockPos value) {
+        return w(new WBlockPosEdit(value));
     }
 
     public WKeybind keybind(Keybind keybind) {

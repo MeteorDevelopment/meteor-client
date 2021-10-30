@@ -81,11 +81,9 @@ public class HighwayBuilder extends Module {
     private final Setting<Integer> width = sgGeneral.add(new IntSetting.Builder()
         .name("width")
         .description("Width of the highway.")
-        .defaultValue(3)
-        .min(1)
-        .max(5)
-        .sliderMin(1)
-        .sliderMax(5)
+        .defaultValue(4)
+        .range(1, 5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -93,10 +91,8 @@ public class HighwayBuilder extends Module {
         .name("height")
         .description("Height of the highway.")
         .defaultValue(3)
-        .min(2)
-        .max(5)
-        .sliderMin(2)
-        .sliderMax(5)
+        .range(2, 5)
+        .sliderRange(2, 5)
         .build()
     );
 
@@ -118,7 +114,7 @@ public class HighwayBuilder extends Module {
         .name("mine-above-railings")
         .description("Mines blocks above railings.")
         .visible(railings::get)
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -132,7 +128,7 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Block>> blocksToPlace = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
-        .defaultValue(List.of(Blocks.OBSIDIAN))
+        .defaultValue(Blocks.OBSIDIAN)
         .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, ZERO)))
         .build()
     );
@@ -140,7 +136,7 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Item>> trashItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
-        .defaultValue(List.of(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT))
+        .defaultValue(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT)
         .build()
     );
 
@@ -160,7 +156,7 @@ public class HighwayBuilder extends Module {
 
     private final Setting<Boolean> disconnectOnToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect-on-toggle")
-        .description("Automatically disconnects when the module is turned off for example for not having enough blocks.")
+        .description("Automatically disconnects when the module is turned off, for example for not having enough blocks.")
         .defaultValue(false)
         .build()
     );
@@ -233,8 +229,8 @@ public class HighwayBuilder extends Module {
     private State state, lastState;
     private IBlockPosProvider blockPosProvider;
 
-    private Vec3d start;
-    private int blocksBroken, blocksPlaced;
+    public Vec3d start;
+    public int blocksBroken, blocksPlaced;
     private final MBlockPos lastBreakingPos = new MBlockPos();
     private boolean displayInfo;
 
@@ -283,12 +279,7 @@ public class HighwayBuilder extends Module {
         toggle();
 
         if (disconnectOnToggle.get()) {
-            MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
-            text.append(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
-            text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
-            text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
-
-            mc.getNetworkHandler().getConnection().disconnect(text);
+            disconnect(message, args);
         }
     }
 
@@ -317,14 +308,14 @@ public class HighwayBuilder extends Module {
             render(event, blockPosProvider.getFront(), mBlockPos -> canMine(mBlockPos, true), true);
             if (floor.get() == Floor.Replace) render(event, blockPosProvider.getFloor(), mBlockPos -> canMine(mBlockPos, false), true);
             if (railings.get()) render(event, blockPosProvider.getRailings(true), mBlockPos -> canMine(mBlockPos, false), true);
-            if (state == State.MineEChestBlockade) render(event, blockPosProvider.getEChestBlockade(), mBlockPos -> canMine(mBlockPos, true), true);
+            if (state == State.MineEChestBlockade) render(event, blockPosProvider.getEChestBlockade(true), mBlockPos -> canMine(mBlockPos, true), true);
         }
 
         if (renderPlace.get()) {
             render(event, blockPosProvider.getLiquids(), mBlockPos -> canPlace(mBlockPos, true), false);
             if (railings.get()) render(event, blockPosProvider.getRailings(false), mBlockPos -> canPlace(mBlockPos, false), false);
             render(event, blockPosProvider.getFloor(), mBlockPos -> canPlace(mBlockPos, false), false);
-            if (state == State.PlaceEChestBlockade) render(event, blockPosProvider.getEChestBlockade(), mBlockPos -> canPlace(mBlockPos, false), false);
+            if (state == State.PlaceEChestBlockade) render(event, blockPosProvider.getEChestBlockade(false), mBlockPos -> canPlace(mBlockPos, false), false);
         }
     }
 
@@ -385,6 +376,21 @@ public class HighwayBuilder extends Module {
 
     private boolean canPlace(MBlockPos pos, boolean liquids) {
         return liquids ? !pos.getState().getFluidState().isEmpty() : pos.getState().isAir();
+    }
+
+    private void disconnect(String message, Object... args) {
+        MutableText text = new LiteralText(String.format("%s[%s%s%s] %s", Formatting.GRAY, Formatting.BLUE, title, Formatting.GRAY, Formatting.RED) + String.format(message, args)).append("\n");
+        text.append(getStatsText());
+
+        mc.getNetworkHandler().getConnection().disconnect(text);
+    }
+
+    public MutableText getStatsText() {
+        MutableText text = new LiteralText(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player.getPos().distanceTo(start)));
+        text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
+        text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
+
+        return text;
     }
 
     private enum State {
@@ -578,14 +584,14 @@ public class HighwayBuilder extends Module {
                 int slot = findBlocksToPlacePrioritizeTrash(b);
                 if (slot == -1) return;
 
-                place(b, b.blockPosProvider.getEChestBlockade(), slot, MineEnderChests);
+                place(b, b.blockPosProvider.getEChestBlockade(false), slot, MineEnderChests);
             }
         },
 
         MineEChestBlockade {
             @Override
             protected void tick(HighwayBuilder b) {
-                mine(b, b.blockPosProvider.getEChestBlockade(), true, Center, Forward);
+                mine(b, b.blockPosProvider.getEChestBlockade(true), true, Center, Forward);
             }
         },
 
@@ -981,7 +987,7 @@ public class HighwayBuilder extends Module {
         MBPIterator getFloor();
         MBPIterator getRailings(boolean mine);
         MBPIterator getLiquids();
-        MBPIterator getEChestBlockade();
+        MBPIterator getEChestBlockade(boolean mine);
     }
 
     private class StraightBlockPosProvider implements IBlockPosProvider {
@@ -1149,15 +1155,16 @@ public class HighwayBuilder extends Module {
         }
 
         @Override
-        public MBPIterator getEChestBlockade() {
+        public MBPIterator getEChestBlockade(boolean mine) {
             return new MBPIterator() {
-                private int i, y;
+                private int i = mine ? -1 : 0, y;
                 private int pi, py;
 
                 private MBlockPos get(int i) {
                     pos.set(mc.player).offset(dir.opposite());
 
                     return switch (i) {
+                        case -1 -> pos;
                         default -> pos.offset(dir.opposite());
                         case 1 -> pos.offset(leftDir);
                         case 2 -> pos.offset(rightDir);
@@ -1439,9 +1446,9 @@ public class HighwayBuilder extends Module {
         }
 
         @Override
-        public MBPIterator getEChestBlockade() {
+        public MBPIterator getEChestBlockade(boolean mine) {
             return new MBPIterator() {
-                private int i, y;
+                private int i = mine ? -1 : 0, y;
                 private int pi, py;
 
                 private MBlockPos get(int i) {
@@ -1450,6 +1457,7 @@ public class HighwayBuilder extends Module {
                     pos.set(mc.player).offset(dir2);
 
                     return switch (i) {
+                        case -1 -> pos;
                         default -> pos.offset(dir2);
                         case 1 -> pos.offset(dir2.rotateLeftSkipOne());
                         case 2 -> pos.offset(dir2.rotateLeftSkipOne().opposite());

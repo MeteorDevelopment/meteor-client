@@ -19,63 +19,60 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class AutoReplenish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> threshold = sgGeneral.add(new IntSetting.Builder()
-            .name("threshold")
-            .description("The threshold of items left this actives at.")
-            .defaultValue(8)
-            .min(1)
-            .sliderMax(63)
-            .build()
+        .name("threshold")
+        .description("The threshold of items left this actives at.")
+        .defaultValue(8)
+        .min(1)
+        .sliderRange(1, 63)
+        .build()
     );
 
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The tick delay to replenish your hotbar.")
-            .defaultValue(1)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("delay")
+        .description("The tick delay to replenish your hotbar.")
+        .defaultValue(1)
+        .min(0)
+        .build()
     );
 
     private final Setting<Boolean> offhand = sgGeneral.add(new BoolSetting.Builder()
-            .name("offhand")
-            .description("Whether or not to refill your offhand with items.")
-            .defaultValue(true)
-            .build()
+        .name("offhand")
+        .description("Whether or not to refill your offhand with items.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> unstackable = sgGeneral.add(new BoolSetting.Builder()
-            .name("unstackable")
-            .description("Replenishes unstackable items.")
-            .defaultValue(true)
-            .build()
+        .name("unstackable")
+        .description("Replenishes unstackable items.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> searchHotbar = sgGeneral.add(new BoolSetting.Builder()
-            .name("search-hotbar")
-            .description("Uses items in your hotbar to replenish if they are the only ones left.")
-            .defaultValue(true)
-            .build()
+        .name("search-hotbar")
+        .description("Uses items in your hotbar to replenish if they are the only ones left.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<List<Item>> excludedItems = sgGeneral.add(new ItemListSetting.Builder()
-            .name("excluded-items")
-            .description("Items that WILL NOT replenish.")
-            .defaultValue(new ArrayList<>())
-            .build()
+        .name("excluded-items")
+        .description("Items that WILL NOT replenish.")
+        .build()
     );
 
     private final ItemStack[] items = new ItemStack[10];
     private boolean prevHadOpenScreen;
     private int tickDelayLeft;
 
-    public AutoReplenish(){
+    public AutoReplenish() {
         super(Categories.Player, "auto-replenish", "Automatically refills items in your hotbar, main hand, or offhand.");
 
         for (int i = 0; i < items.length; i++) items[i] = new ItemStack(Items.AIR);

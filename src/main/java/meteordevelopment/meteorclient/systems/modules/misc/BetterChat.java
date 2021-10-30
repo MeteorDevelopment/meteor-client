@@ -10,7 +10,6 @@ import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
-import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.commands.commands.SayCommand;
@@ -24,11 +23,11 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 public class BetterChat extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -72,13 +71,6 @@ public class BetterChat extends Module {
         .build()
     );
 
-    public final Setting<Boolean> rainbowPrefix = sgGeneral.add(new BoolSetting.Builder()
-        .name("rainbow-prefix")
-        .description("Makes the [Meteor] prefix on chat info rainbow.")
-        .defaultValue(false)
-        .build()
-    );
-
     // Filter
 
     private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
@@ -108,7 +100,6 @@ public class BetterChat extends Module {
     private final Setting<List<String>> regexFilters = sgFilter.add(new StringListSetting.Builder()
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
-        .defaultValue(Collections.emptyList())
         .visible(filterRegex::get)
         .build()
     );
@@ -135,7 +126,7 @@ public class BetterChat extends Module {
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
-            .sliderMax(1000)
+            .sliderRange(100, 1000)
             .visible(longerChatHistory::get)
             .build()
     );
@@ -216,15 +207,26 @@ public class BetterChat extends Module {
     }
 
     @EventHandler
-    private void onMessageRecieve(ReceiveMessageEvent event) {
+    private void onMessageReceive(ReceiveMessageEvent event) {
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
 
-        Text message = event.message;
+        Text message = event.getMessage();
 
         if (filterRegex.get()) {
-            for (String regexFilter : regexFilters.get()) {
-                if (Pattern.compile(regexFilter).matcher(message.getString()).find()) {
+            for (int i = 0; i < regexFilters.get().size(); i++) {
+                Pattern p;
+
+                try {
+                    p = Pattern.compile(regexFilters.get().get(i));
+                }
+                catch (PatternSyntaxException e) {
+                    error("Removing Invalid regex: %s", regexFilters.get().get(i));
+                    regexFilters.get().remove(i);
+                    continue;
+                }
+
+                if (p.matcher(message.getString()).find()) {
                     event.cancel();
                     return;
                 }
@@ -247,6 +249,7 @@ public class BetterChat extends Module {
         for (int i = 0; i < antiSpamDepth.get(); i++) {
             if (antiSpam.get()) {
                 Text antiSpammed = appendAntiSpam(message, i);
+
                 if (antiSpammed != null) {
                     message = antiSpammed;
                     ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
@@ -255,8 +258,7 @@ public class BetterChat extends Module {
             }
         }
 
-        event.cancel();
-        ((IChatHud) mc.inGameHud.getChatHud()).add(message, event.id, mc.inGameHud.getTicks(), false);
+        event.setMessage(message);
     }
 
     private Text appendAntiSpam(Text text, int index) {

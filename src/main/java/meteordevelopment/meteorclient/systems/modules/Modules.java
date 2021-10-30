@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.google.common.collect.Ordering;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -27,10 +28,12 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
+import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.search.Search;
-import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
+import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
@@ -39,7 +42,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
@@ -48,7 +50,7 @@ import org.lwjgl.glfw.GLFW;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
@@ -92,7 +94,7 @@ public class Modules extends System<Modules> {
     }
 
     public static void registerCategory(Category category) {
-        if (!REGISTERING_CATEGORIES) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+        if (!Categories.REGISTERING) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
 
         CATEGORIES.add(category);
     }
@@ -149,35 +151,30 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public List<Pair<Module, Integer>> searchTitles(String text) {
-        List<Pair<Module, Integer>> modules = new ArrayList<>();
+    public Set<Module> searchTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
             int words = Utils.search(module.title, text);
-            if (words > 0) modules.add(new Pair<>(module, words));
+            if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
         }
 
-        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
-        return modules;
+        return modules.keySet();
     }
 
-    public List<Pair<Module, Integer>> searchSettingTitles(String text) {
-        List<Pair<Module, Integer>> modules = new ArrayList<>();
+    public Set<Module> searchSettingTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
                     int words = Utils.search(setting.title, text);
-                    if (words > 0) {
-                        modules.add(new Pair<>(module, words));
-                        break;
-                    }
+                    if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
                 }
             }
         }
 
-        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
-        return modules;
+        return modules.keySet();
     }
 
     void addActive(Module module) {
@@ -267,7 +264,7 @@ public class Modules extends System<Modules> {
     private void onGameJoined(GameJoinedEvent event) {
         synchronized (active) {
             for (Module module : modules) {
-                if (module.isActive()) {
+                if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.subscribe(module);
                     module.onActivate();
                 }
@@ -279,7 +276,7 @@ public class Modules extends System<Modules> {
     private void onGameLeft(GameLeftEvent event) {
         synchronized (active) {
             for (Module module : modules) {
-                if (module.isActive()) {
+                if (module.isActive() && !module.runInMainMenu) {
                     MeteorClient.EVENT_BUS.unsubscribe(module);
                     module.onDeactivate();
                 }
@@ -290,7 +287,7 @@ public class Modules extends System<Modules> {
     public void disableAll() {
         synchronized (active) {
             for (Module module : modules) {
-                if (module.isActive()) module.toggle(Utils.canUpdate());
+                if (module.isActive()) module.toggle();
             }
         }
     }
@@ -463,7 +460,6 @@ public class Modules extends System<Modules> {
         add(new CameraTweaks());
         add(new Chams());
         add(new CityESP());
-        add(new CustomFOV());
         add(new EntityOwner());
         add(new ESP());
         add(new Freecam());
@@ -475,6 +471,7 @@ public class Modules extends System<Modules> {
         add(new ItemHighlight());
         add(new LightOverlay());
         add(new LogoutSpots());
+        add(new Marker());
         add(new Nametags());
         add(new NoRender());
         add(new Search());
@@ -490,6 +487,7 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new Zoom());
         add(new Blur());
+        add(new PopChams());
     }
 
     private void initWorld() {

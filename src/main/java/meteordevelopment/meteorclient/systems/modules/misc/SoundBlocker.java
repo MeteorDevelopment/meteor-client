@@ -14,17 +14,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.sound.SoundEvent;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SoundBlocker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<SoundEvent>> sounds = sgGeneral.add(new SoundEventListSetting.Builder()
-            .name("sounds")
-            .description("Sounds to block.")
-            .defaultValue(new ArrayList<>(0))
-            .build()
+        .name("sounds")
+        .description("Sounds to block.")
+        .build()
     );
 
     public SoundBlocker() {

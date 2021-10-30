@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.accounts.types;
 
-import com.google.gson.Gson;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.Environment;
 import com.mojang.authlib.exceptions.AuthenticationException;
@@ -19,15 +18,13 @@ import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.AccountUtils;
 import net.minecraft.client.util.Session;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> {
     private static final String AUTH = "http://authserver.thealtening.com";
     private static final String ACCOUNT = "https://api.mojang.com";
     private static final String SESSION = "http://sessionserver.thealtening.com";
     private static final String SERVICES = "https://api.minecraftservices.com";
-
-    private static final Gson GSON = new Gson();
 
     public TheAlteningAccount(String token) {
         super(AccountType.TheAltening, token);

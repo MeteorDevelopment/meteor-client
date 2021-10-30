@@ -44,8 +44,7 @@ public class Blur extends Module {
         .description("How large the blur should be.")
         .defaultValue(4)
         .min(1)
-        .sliderMin(1)
-        .sliderMax(32)
+        .sliderRange(1, 32)
         .build()
     );
 

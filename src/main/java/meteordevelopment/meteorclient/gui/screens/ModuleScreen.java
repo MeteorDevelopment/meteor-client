@@ -17,28 +17,33 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
 public class ModuleScreen extends WindowScreen {
     private final Module module;
 
-    private final WContainer settings;
-    private final WKeybind keybind;
+    private WContainer settingsContainer;
+    private WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
         super(theme, module.title);
-        this.module = module;
 
+        this.module = module;
+    }
+
+    @Override
+    public void initWidgets() {
         // Description
         add(theme.label(module.description, getWindowWidth() / 2.0));
 
         // Settings
-        settings = add(theme.verticalList()).expandX().widget();
         if (module.settings.groups.size() > 0) {
-            settings.add(theme.settings(module.settings)).expandX();
+            settingsContainer = add(theme.verticalList()).expandX().widget();
+            settingsContainer.add(theme.settings(module.settings)).expandX();
         }
 
         // Custom widget
@@ -71,14 +76,7 @@ public class ModuleScreen extends WindowScreen {
         bottom.add(theme.label("Active: "));
         WCheckbox active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
-            if (module.isActive() != active.checked) module.toggle(Utils.canUpdate());
-        };
-
-        //   Visible
-        bottom.add(theme.label("Visible: "));
-        WCheckbox visible = bottom.add(theme.checkbox(module.isVisible())).widget();
-        visible.action = () -> {
-            if (module.isVisible() != visible.checked) module.setVisible(visible.checked);
+            if (module.isActive() != active.checked) module.toggle();
         };
     }
 
@@ -86,11 +84,28 @@ public class ModuleScreen extends WindowScreen {
     public void tick() {
         super.tick();
 
-        module.settings.tick(settings, theme);
+        module.settings.tick(settingsContainer, theme);
     }
 
     @EventHandler
     private void onModuleBindChanged(ModuleBindChangedEvent event) {
         keybind.reset();
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(module.title, module.toTag());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(module.toTag());
+
+        if (clipboard != null) {
+            module.fromTag(clipboard);
+            return true;
+        }
+
+        return false;
     }
 }

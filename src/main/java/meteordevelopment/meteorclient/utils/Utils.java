@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftServerAccessor;
@@ -22,11 +23,12 @@ import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
 import meteordevelopment.meteorclient.utils.world.WorldChunkIterator;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
@@ -53,33 +55,34 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
     private static final Random random = new Random();
-    private static final DecimalFormat df;
-    public static MinecraftClient mc;
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static final Color WHITE = new Color(255, 255, 255);
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
+    public static double frameTime;
+    public static Screen screenToOpen;
 
-    static {
-        df = new DecimalFormat("0");
-        df.setMaximumFractionDigits(340);
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        df.setDecimalFormatSymbols(dfs);
+    @Init(stage = InitStage.Pre)
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(Utils.class);
+    }
+
+    @EventHandler
+    private static void onTick(TickEvent.Post event) {
+        if (screenToOpen != null && mc.currentScreen == null) {
+            mc.setScreen(screenToOpen);
+            screenToOpen = null;
+        }
     }
 
     public static double getPlayerSpeed() {
@@ -90,9 +93,7 @@ public class Utils {
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
         Timer timer = Modules.get().get(Timer.class);
-        if (timer.isActive()) {
-            length *= Modules.get().get(Timer.class).getMultiplier();
-        }
+        if (timer.isActive()) length *= Modules.get().get(Timer.class).getMultiplier();
 
         return length * 20;
     }
@@ -178,7 +179,7 @@ public class Utils {
     public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
-            if (pause) MeteorClient.screenToOpen = new PeekScreen(itemStack, contents);
+            if (pause) screenToOpen = new PeekScreen(itemStack, contents);
             else mc.setScreen(new PeekScreen(itemStack, contents));
             return true;
         }
@@ -238,11 +239,15 @@ public class Utils {
     }
 
     public static int search(String text, String filter) {
+        if (filter.isEmpty()) return 1;
+
         int wordsFound = 0;
-        String[] words = filter.split(" ");
+        text = text.toLowerCase(Locale.ROOT);
+        String[] words = filter.toLowerCase(Locale.ROOT).split(" ");
 
         for (String word : words) {
-            if (StringUtils.containsIgnoreCase(text, word)) wordsFound++;
+            if (!text.contains(word)) return 0;
+            wordsFound += StringUtils.countMatches(text, word);
         }
 
         return wordsFound;
@@ -357,13 +362,13 @@ public class Utils {
     }
 
     public static String getButtonName(int button) {
-        switch (button) {
-            case -1: return "Unknown";
-            case 0:  return "Mouse Left";
-            case 1:  return "Mouse Right";
-            case 2:  return "Mouse Middle";
-            default: return "Mouse " + button;
-        }
+        return switch (button) {
+            case -1 -> "Unknown";
+            case 0 -> "Mouse Left";
+            case 1 -> "Mouse Right";
+            case 2 -> "Mouse Middle";
+            default -> "Mouse " + button;
+        };
     }
 
     public static byte[] readBytes(File file) {
@@ -388,10 +393,10 @@ public class Utils {
         return mc != null && mc.world != null && mc.player != null;
     }
 
-    public static boolean isWhitelistedScreen() {
-        if (mc.currentScreen instanceof TitleScreen) return true;
-        else if (mc.currentScreen instanceof MultiplayerScreen) return true;
-        else return mc.currentScreen instanceof SelectWorldScreen;
+    public static boolean canOpenClickGUI() {
+        if (canUpdate()) return mc.currentScreen == null;
+
+        return mc.currentScreen instanceof TitleScreen || mc.currentScreen instanceof MultiplayerScreen || mc.currentScreen instanceof SelectWorldScreen;
     }
 
     public static int random(int min, int max) {
@@ -467,11 +472,35 @@ public class Utils {
         listTag.add(enchTag);
     }
 
+    public static void clearEnchantments(ItemStack itemStack) {
+        NbtCompound nbt = itemStack.getNbt();
+        if (nbt != null) nbt.remove("Enchantments");
+    }
+
+    public static void removeEnchantment(ItemStack itemStack, Enchantment enchantment) {
+        NbtCompound nbt = itemStack.getNbt();
+        if (nbt == null) return;
+
+        if (!nbt.contains("Enchantments", 9)) return;
+        NbtList list = nbt.getList("Enchantments", 10);
+
+        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+
+        for (Iterator<NbtElement> it = list.iterator(); it.hasNext();) {
+            NbtCompound ench = (NbtCompound) it.next();
+
+            if (ench.getString("id").equals(enchId)) {
+                it.remove();
+                break;
+            }
+        }
+    }
+
     @SafeVarargs
-    public static <T> Object2BooleanOpenHashMap<T> asObject2BooleanOpenHashMap(T... checked) {
+    public static <T> Object2BooleanOpenHashMap<T> asO2BMap(T... checked) {
         Map<T, Boolean> map = new HashMap<>();
         for (T item : checked)
             map.put(item, true);
-        return new Object2BooleanOpenHashMap<T>(map);
+        return new Object2BooleanOpenHashMap<>(map);
     }
 }

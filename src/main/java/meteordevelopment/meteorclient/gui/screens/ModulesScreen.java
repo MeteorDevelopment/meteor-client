@@ -17,10 +17,12 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.item.Items;
-import net.minecraft.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
@@ -28,8 +30,11 @@ import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 public class ModulesScreen extends TabScreen {
     public ModulesScreen(GuiTheme theme) {
         super(theme, Tabs.get().get(0));
+    }
 
-        add(createCategoryContainer());
+    @Override
+    public void initWidgets() {
+        add(new WCategoryController());
 
         // Help
         WVerticalList help = add(theme.verticalList()).pad(4).bottom().widget();
@@ -37,13 +42,9 @@ public class ModulesScreen extends TabScreen {
         help.add(theme.label("Right click - Open module settings"));
     }
 
-    protected WCategoryController createCategoryContainer() {
-        return new WCategoryController();
-    }
-
     // Category
 
-    protected void createCategory(WContainer c, Category category) {
+    protected WWindow createCategory(WContainer c, Category category) {
         WWindow w = theme.window(category.name);
         w.id = category.name;
         w.padding = 0;
@@ -61,6 +62,8 @@ public class ModulesScreen extends TabScreen {
         for (Module module : Modules.get().getGroup(category)) {
             w.add(theme.module(module)).expandX().widget().tooltip = module.description;
         }
+
+        return w;
     }
 
     // Search
@@ -68,14 +71,14 @@ public class ModulesScreen extends TabScreen {
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
             // Titles
-            List<Pair<Module, Integer>> modules = Modules.get().searchTitles(text);
+            Set<Module> modules = Modules.get().searchTitles(text);
 
             if (modules.size() > 0) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
-                for (Pair<Module, Integer> pair : modules) {
-                    section.add(theme.module(pair.getLeft())).expandX();
+                for (Module module : modules) {
+                    section.add(theme.module(module)).expandX();
                 }
             }
 
@@ -86,14 +89,14 @@ public class ModulesScreen extends TabScreen {
                 WSection section = w.add(theme.section("Settings")).expandX().widget();
                 section.spacing = 0;
 
-                for (Pair<Module, Integer> pair : modules) {
-                    section.add(theme.module(pair.getLeft())).expandX();
+                for (Module module : modules) {
+                    section.add(theme.module(module)).expandX();
                 }
             }
         }
     }
 
-    protected void createSearch(WContainer c) {
+    protected WWindow createSearch(WContainer c) {
         WWindow w = theme.window("Search");
         w.id = "search";
 
@@ -117,18 +120,35 @@ public class ModulesScreen extends TabScreen {
 
         w.add(l).expandX();
         createSearchW(l, text.get());
+
+        return w;
     }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard(Modules.get());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        return NbtUtils.fromClipboard(Modules.get());
+    }
+
+    @Override
+    public void reload() {}
 
     // Stuff
 
     protected class WCategoryController extends WContainer {
+        public final List<WWindow> windows = new ArrayList<>();
+
         @Override
         public void init() {
             for (Category category : Modules.loopCategories()) {
-                createCategory(this, category);
+                windows.add(createCategory(this, category));
             }
 
-            createSearch(this);
+            windows.add(createSearch(this));
         }
 
         @Override

@@ -125,6 +125,7 @@ public class AutoTrap extends Module {
         .defaultValue(new SettingColor(227, 196, 245))
         .build()
     );
+
     private final List<BlockPos> placePositions = new ArrayList<>();
     private PlayerEntity target;
     private boolean placed;
@@ -190,7 +191,7 @@ public class AutoTrap extends Module {
             boolean isFirst = pos.equals(placePositions.get(placePositions.size() - 1));
 
             Color side = isFirst ? nextSideColor.get() : sideColor.get();
-            Color line = isFirst ? nextSideColor.get() : sideColor.get();
+            Color line = isFirst ? nextLineColor.get() : lineColor.get();
 
             event.renderer.box(pos, side, line, shapeMode.get(), 0);
         }

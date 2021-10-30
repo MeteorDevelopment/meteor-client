@@ -27,23 +27,23 @@ public class InventoryViewerHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 
     private final Setting<Background> background = sgGeneral.add(new EnumSetting.Builder<Background>()
-            .name("background")
-            .description("Background of inventory viewer.")
-            .defaultValue(Background.Texture)
-            .build()
+        .name("background")
+        .description("Background of inventory viewer.")
+        .defaultValue(Background.Texture)
+        .build()
     );
 
     private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
-            .name("background-color")
-            .description("Color of the background.")
-            .defaultValue(new SettingColor(255, 255, 255))
-            .visible(() -> background.get() != Background.None)
-            .build()
+        .name("background-color")
+        .description("Color of the background.")
+        .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> background.get() != Background.None)
+        .build()
     );
 
     private final ItemStack[] editorInv;
@@ -116,7 +116,7 @@ public class InventoryViewerHud extends HudElement {
         Outline(162, 54),
         Flat(162, 54);
 
-        public int width, height;
+        private int width, height;
 
         Background(int width, int height) {
             this.width = width;

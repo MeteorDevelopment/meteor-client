@@ -6,38 +6,44 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
-import meteordevelopment.meteorclient.utils.Utils;
 
 import java.util.Locale;
 
 public class WDoubleEdit extends WHorizontalList {
-    public Runnable action;
-    public Runnable actionOnRelease;
+    private double value;
+
+    private final double min, max;
+    private final double sliderMin, sliderMax;
 
     public int decimalPlaces = 3;
     public boolean noSlider = false;
-    public boolean small;
+    public boolean small = false;
 
-    private double value;
-
-    private final double sliderMin, sliderMax;
-    public Double min, max;
+    public Runnable action;
+    public Runnable actionOnRelease;
 
     private WTextBox textBox;
     private WSlider slider;
 
-    public WDoubleEdit(double value, double sliderMin, double sliderMax) {
+    public WDoubleEdit(double value, double min, double max, double sliderMin, double sliderMax, int decimalPlaces, boolean noSlider) {
         this.value = value;
+        this.min = min;
+        this.max = max;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 
-        if (sliderMin == 0 && sliderMax == 0) noSlider = true;
+        if (noSlider || (sliderMin == 0 && sliderMax == 0)) this.noSlider = true;
      }
 
     @Override
     public void init() {
         textBox = add(theme.textBox(valueString(), this::filter)).minWidth(75).widget();
-        if (!noSlider) slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
+
+        if (noSlider) {
+            add(theme.button("+")).widget().action = () -> setButton(get() + 1);
+            add(theme.button("-")).widget().action = () -> setButton(get() - 1);
+        }
+        else slider = add(theme.slider(value, sliderMin, sliderMax)).minWidth(small ? 200 - 75 - spacing : 200).centerY().expandX().widget();
 
         textBox.actionOnUnfocused = () -> {
             double lastValue = value;
@@ -50,8 +56,8 @@ public class WDoubleEdit extends WHorizontalList {
 
             double preValidationValue = value;
 
-            if (min != null && value < min) value = min;
-            else if (max != null && value > max) value = max;
+            if (value < min) value = min;
+            else if (value > max) value = max;
 
             if (value != preValidationValue) textBox.set(valueString());
             if (slider != null) slider.set(value);
@@ -101,6 +107,22 @@ public class WDoubleEdit extends WHorizontalList {
         }
 
         return good;
+    }
+
+    private void setButton(double v) {
+        if (this.value == v) return;
+
+        if (v < min) this.value = min;
+        else if (v > max) this.value = max;
+        else this.value = v;
+
+        if (this.value == v) {
+            textBox.set(valueString());
+            if (slider != null) slider.set(this.value);
+
+            if (action != null) action.run();
+            if (actionOnRelease != null) actionOnRelease.run();
+        }
     }
 
     public double get() {

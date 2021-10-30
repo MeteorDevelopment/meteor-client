@@ -9,6 +9,8 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
@@ -18,7 +20,7 @@ import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.opengl.GL32C.*;
 
 public class GL {
@@ -27,11 +29,13 @@ public class GL {
     private static final ICapabilityTracker DEPTH = getTracker("DEPTH");
     private static final ICapabilityTracker BLEND = getTracker("BLEND");
     private static final ICapabilityTracker CULL = getTracker("CULL");
+    private static final ICapabilityTracker SCISSOR = getTracker("SCISSOR");
 
-    private static boolean depthSaved, blendSaved, cullSaved;
+    private static boolean depthSaved, blendSaved, cullSaved, scissorSaved;
 
     private static boolean changeBufferRenderer = true;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         if (FabricLoader.getInstance().isModLoaded("canvas")) changeBufferRenderer = false;
     }
@@ -209,12 +213,14 @@ public class GL {
         depthSaved = DEPTH.get();
         blendSaved = BLEND.get();
         cullSaved = CULL.get();
+        scissorSaved = SCISSOR.get();
     }
 
     public static void restoreState() {
         DEPTH.set(depthSaved);
         BLEND.set(blendSaved);
         CULL.set(cullSaved);
+        SCISSOR.set(scissorSaved);
 
         disableLineSmooth();
     }
@@ -239,6 +245,13 @@ public class GL {
     }
     public static void disableCull() {
         GlStateManager._disableCull();
+    }
+
+    public static void enableScissorTest() {
+        GlStateManager._enableScissorTest();
+    }
+    public static void disableScissorTest() {
+        GlStateManager._disableScissorTest();
     }
 
     public static void enableLineSmooth() {

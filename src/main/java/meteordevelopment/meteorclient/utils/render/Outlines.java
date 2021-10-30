@@ -11,13 +11,15 @@ import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
 import meteordevelopment.meteorclient.renderer.Shader;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gl.Framebuffer;
 import net.minecraft.client.gl.SimpleFramebuffer;
 import net.minecraft.client.render.OutlineVertexConsumerProvider;
 import net.minecraft.client.render.WorldRenderer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Outlines {
     public static boolean renderingOutlines;
@@ -28,6 +30,7 @@ public class Outlines {
 
     private static ESP esp;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         outlinesShader = new Shader("outline.vert", "outline.frag");
         outlinesFbo = new SimpleFramebuffer(mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(), false, false);

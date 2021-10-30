@@ -34,7 +34,7 @@ public class OffhandCrash extends Module {
             .description("The amount of swaps measured in ticks.")
             .defaultValue(2000)
             .min(1)
-            .sliderMax(10000)
+            .sliderRange(1, 10000)
             .visible(doCrash::get)
             .build()
     );

@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
@@ -26,7 +28,6 @@ import java.util.Stack;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
-import static org.lwjgl.opengl.GL11.*;
 
 public class GuiRenderer {
     private static final Color WHITE = new Color(255, 255, 255);
@@ -62,6 +63,7 @@ public class GuiRenderer {
         return TEXTURE_PACKER.add(id);
     }
 
+    @Init(stage = InitStage.Post)
     public static void init() {
         CIRCLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/circle.png"));
         TRIANGLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/triangle.png"));
@@ -74,7 +76,8 @@ public class GuiRenderer {
     public void begin(MatrixStack matrices) {
         this.matrices = matrices;
 
-        glEnable(GL_SCISSOR_TEST);
+        GL.enableBlend();
+        GL.enableScissorTest();
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
@@ -86,7 +89,7 @@ public class GuiRenderer {
         for (Runnable task : postTasks) task.run();
         postTasks.clear();
 
-        glDisable(GL_SCISSOR_TEST);
+        GL.disableScissorTest();
     }
 
     private void beginRender() {

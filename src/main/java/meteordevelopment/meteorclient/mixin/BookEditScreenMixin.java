@@ -30,7 +30,7 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(BookEditScreen.class)
 public abstract class BookEditScreenMixin extends Screen {
@@ -46,7 +46,7 @@ public abstract class BookEditScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(4, 4, 70, 20, new LiteralText("Copy"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4, 120, 20, new LiteralText("Copy"), button -> {
             NbtList listTag = new NbtList();
             pages.stream().map(NbtString::of).forEach(listTag::add);
 
@@ -69,7 +69,7 @@ public abstract class BookEditScreenMixin extends Screen {
             }
         }));
 
-        addDrawableChild(new ButtonWidget(4, 4 + 16 + 4, 70, 20, new LiteralText("Paste"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, new LiteralText("Paste"), button -> {
             String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().getHandle());
             if (clipboard == null) return;
 

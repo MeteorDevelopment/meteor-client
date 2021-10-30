@@ -63,13 +63,13 @@ public class SaveMapCommand extends Command {
                 for (int y = 0; y < 128; y++) {
                     int c = state.colors[x + y * 128] & 255;
 
-                    if (c / 4 == 0) image.setPixelColor(x, y, 0);
-                    else image.setPixelColor(x, y, MapColor.COLORS[c / 4].getRenderColor(c & 3));
+                    if (c / 4 == 0) image.setColor(x, y, 0);
+                    else image.setColor(x, y, MapColor.COLORS[c / 4].getRenderColor(c & 3));
                 }
             }
 
             try {
-                image.writeFile(new File(path));
+                image.writeTo(new File(path));
                 image.close();
             } catch (IOException e) {
                 e.printStackTrace();

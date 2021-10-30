@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.UnfocusedCPU;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Placeholders;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
@@ -38,27 +39,24 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = MinecraftClient.class, priority = 1001)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
-    @Shadow public ClientWorld world;
-
-    @Shadow protected abstract void doItemUse();
-
-    @Shadow @Final public Mouse mouse;
-
-    @Shadow @Final private Window window;
-
-    @Shadow public Screen currentScreen;
-
-    @Shadow public abstract Profiler getProfiler();
-
-    @Shadow
-    public abstract boolean isWindowFocused();
-
     @Unique private boolean doItemUseCalled;
     @Unique private boolean rightClick;
+    @Unique private long lastTime;
+    @Unique private boolean firstFrame;
+
+    @Shadow public ClientWorld world;
+    @Shadow @Final public Mouse mouse;
+    @Shadow @Final private Window window;
+    @Shadow public Screen currentScreen;
+
+    @Shadow protected abstract void doItemUse();
+    @Shadow public abstract Profiler getProfiler();
+    @Shadow public abstract boolean isWindowFocused();
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
+        firstFrame = true;
     }
 
     @Inject(at = @At("HEAD"), method = "tick")
@@ -129,6 +127,21 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Inject(method = "getFramerateLimit", at = @At("HEAD"), cancellable = true)
     private void onGetFramerateLimit(CallbackInfoReturnable<Integer> info) {
         if (Modules.get().isActive(UnfocusedCPU.class) && !isWindowFocused()) info.setReturnValue(1);
+    }
+
+    // Time delta
+
+    @Inject(method = "render", at = @At("HEAD"))
+    private void onRender(CallbackInfo info) {
+        long time = System.currentTimeMillis();
+
+        if (firstFrame) {
+            lastTime = time;
+            firstFrame = false;
+        }
+
+        Utils.frameTime = (time - lastTime) / 1000.0;
+        lastTime = time;
     }
 
     // Interface

@@ -26,8 +26,9 @@ import java.util.function.Consumer;
 public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     protected final Setting<?> setting;
     protected final Collection<T> collection;
-    private final WTextBox filter;
+    private final Registry<T> registry;
 
+    private WTextBox filter;
     private String filterText = "";
 
     private WTable table;
@@ -35,9 +36,13 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
     public LeftRightListSettingScreen(GuiTheme theme, String title, Setting<?> setting, Collection<T> collection, Registry<T> registry) {
         super(theme, title);
 
+        this.registry = registry;
         this.setting = setting;
         this.collection = collection;
+    }
 
+    @Override
+    public void initWidgets() {
         // Filter
         filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
