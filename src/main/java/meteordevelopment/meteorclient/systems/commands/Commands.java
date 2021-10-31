@@ -70,6 +70,7 @@ public class Commands extends System<Commands> {
         add(new BindCommand());
         add(new FOVCommand());
         add(new RotationCommand());
+        add(new WaypointCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }
