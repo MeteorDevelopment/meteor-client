@@ -122,9 +122,8 @@ public class Flamethrower extends Module {
         Block bottom = mc.world.getBlockState(entity.getBlockPos().down()).getBlock();
         if (block == Blocks.WATER || bottom == Blocks.WATER || bottom == Blocks.DIRT_PATH) return;
         if (block == Blocks.GRASS)  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
-        LivingEntity animal = (LivingEntity) entity;
 
-        if (putOutFire.get() && animal.getHealth() < 1) {
+        if (putOutFire.get() && entity instanceof LivingEntity animal && animal.getHealth() < 1) {
             mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().west(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().east(), Direction.DOWN);
