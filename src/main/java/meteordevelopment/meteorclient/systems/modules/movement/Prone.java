@@ -14,7 +14,7 @@ public class Prone extends Module {
 
     @EventHandler
     private void onCollisionShape(CollisionShapeEvent event) {
-        if (mc.world == null || mc.player == null) return;
+        if (mc.world == null || mc.player == null || event.pos == null) return;
         if (event.state == null) return;
 
         if (event.pos.getY() != mc.player.getY() + 1) return;
