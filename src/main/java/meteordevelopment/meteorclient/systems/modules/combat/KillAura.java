@@ -92,8 +92,8 @@ public class KillAura extends Module {
         .name("hit-chance")
         .description("The probability of your hits landing.")
         .defaultValue(100)
-        .range(0, 100)
-        .sliderMin(100)
+        .range(1, 100)
+        .sliderRange(1, 100)
         .build()
     );
 
