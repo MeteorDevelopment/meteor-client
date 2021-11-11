@@ -47,7 +47,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     public final Map<String, AbstractTexture> icons = new HashMap<>();
 
-    private List<Waypoint> waypoints = new ArrayList<>();
+    public List<Waypoint> waypoints = new ArrayList<>();
     private final Vec3 pos = new Vec3();
 
     public Waypoints() {
@@ -91,6 +91,16 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         if (waypoints.remove(waypoint)) {
             save();
         }
+    }
+
+    public Waypoint get(String name) {
+        for (Waypoint waypoint : this) {
+            if (waypoint.name.equalsIgnoreCase(name)) {
+                return waypoint;
+            }
+        }
+
+        return null;
     }
 
     @EventHandler
