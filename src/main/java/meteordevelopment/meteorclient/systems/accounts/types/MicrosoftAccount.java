@@ -21,15 +21,6 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
     }
 
     @Override
-    public boolean fetchHead() {
-        try {
-            return cache.makeHead("https://www.mc-heads.net/avatar/" + cache.uuid + "/8");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
     public boolean login() {
         super.login();
 

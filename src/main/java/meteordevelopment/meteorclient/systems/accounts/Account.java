@@ -29,7 +29,12 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
 
     public abstract boolean fetchInfo();
 
-    public abstract boolean fetchHead();
+    public boolean fetchHead() {
+        String url = AccountUtils.getSkinUrl(cache.username);
+        if (url == null) return true;
+
+        return cache.loadHead(url);
+    }
 
     public boolean login() {
         YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
