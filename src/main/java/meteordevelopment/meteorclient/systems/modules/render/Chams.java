@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -22,10 +23,30 @@ public class Chams extends Module {
 
     // Through walls
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
+    public final Setting<Object2BooleanMap<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to show through walls.")
         .defaultValue(EntityType.PLAYER)
+        .build()
+    );
+
+    public final Setting<Shader> shader = sgThroughWalls.add(new EnumSetting.Builder<Shader>()
+        .name("shader")
+        .description("Renders a shader instead of the entities.")
+        .defaultValue(Shader.Liquid1)
+        .onModuleActivated(shaderSetting -> {
+            if (shaderSetting.get() != Shader.None) EntityShaders.initOverlay(shaderSetting.get().shaderName);
+        })
+        .onChanged(value -> {
+            if (value != Shader.None) EntityShaders.initOverlay(value.shaderName);
+        })
+        .build()
+    );
+
+    public final Setting<Boolean> ignoreSelfDepth = sgThroughWalls.add(new BoolSetting.Builder()
+        .name("ignore-self")
+        .description("Ignores yourself drawing the player.")
+        .defaultValue(true)
         .build()
     );
 
@@ -164,6 +185,7 @@ public class Chams extends Module {
     );
 
     // Hand
+
     public final Setting<Boolean> hand = sgHand.add(new BoolSetting.Builder()
         .name("enabled")
         .description("Enables tweaks of hand rendering.")
@@ -192,6 +214,21 @@ public class Chams extends Module {
     }
 
     public boolean shouldRender(Entity entity) {
-        return isActive() && entities.get().getBoolean(entity.getType());
+        return isActive() && !isShader() && entities.get().getBoolean(entity.getType()) && (entity != mc.player || ignoreSelfDepth.get());
+    }
+
+    public boolean isShader() {
+        return isActive() && shader.get() != Shader.None;
+    }
+
+    public enum Shader {
+        Liquid1("liquid"),
+        None(null);
+
+        public final String shaderName;
+
+        Shader(String shaderName) {
+            this.shaderName = shaderName;
+        }
     }
 }

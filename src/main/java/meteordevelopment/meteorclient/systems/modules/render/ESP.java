@@ -34,10 +34,18 @@ public class ESP extends Module {
 
     // General
 
-    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+    public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("Rendering mode.")
         .defaultValue(Mode.Shader)
+        .build()
+    );
+
+    public final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-self")
+        .description("Ignores yourself drawing the shader.")
+        .defaultValue(true)
+        .visible(() -> mode.get() == Mode.Shader)
         .build()
     );
 
@@ -270,7 +278,7 @@ public class ESP extends Module {
         return false;
     }
 
-    // Outlines
+    // EntityShaders
 
     public boolean shouldDrawOutline(Entity entity) {
         return mode.get() == Mode.Shader && isActive() && getOutlineColor(entity) != null;
@@ -317,7 +325,7 @@ public class ESP extends Module {
     }
 
     public boolean isShader() {
-        return mode.get() == Mode.Shader;
+        return isActive() && mode.get() == Mode.Shader;
     }
 
     public enum Mode {
