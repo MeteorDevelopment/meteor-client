@@ -16,11 +16,6 @@ import net.minecraft.client.option.Perspective;
 import org.lwjgl.glfw.GLFW;
 
 public class FreeLook extends Module {
-    public enum Mode {
-        Player,
-        Camera
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgArrows = settings.createGroup("Arrows");
 
@@ -126,5 +121,10 @@ public class FreeLook extends Module {
 
         mc.player.setPitch(Utils.clamp(mc.player.getPitch(), -90, 90));
         cameraPitch = Utils.clamp(cameraPitch, -90, 90);
+    }
+
+    public enum Mode {
+        Player,
+        Camera
     }
 }
