@@ -189,7 +189,7 @@ public class LocateCommand extends Command {
                     NbtList nbt1 = (NbtList) tag.get("Decorations");
                     if (nbt1 != null) {
                         NbtCompound iconNBT = nbt1.getCompound(0);
-                        if (iconNBT == null) {
+                        if (iconNBT != null) {
                             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
                             BaseText text = new LiteralText("Monument located at ");
                             text.append(ChatUtils.formatCoords(coords));
