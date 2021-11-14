@@ -32,7 +32,9 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     @Override
-    public void init() {}
+    public void init() {
+        AccountCache.loadSteveHead();
+    }
 
     public void add(Account<?> account) {
         accounts.add(account);
