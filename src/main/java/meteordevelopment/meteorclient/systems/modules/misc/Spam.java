@@ -81,11 +81,7 @@ public class Spam extends Module {
 
             String text = messages.get().get(i);
             if (antiSpamBypass.get()) {
-                /*
-                 * This has to be lower-case to avoid anti-capital-letter plugin
-                 * Also, set the length to 16 because the max length of player name is 16,
-                 * which means this random text can be utilized to input random (invalid) player names for exploits
-                 */
+                 // This has to be lower-case to avoid anti-capital-letter plugin
                 text += RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
             mc.player.sendChatMessage(text);
