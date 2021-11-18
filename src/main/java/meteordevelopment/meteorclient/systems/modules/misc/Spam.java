@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import org.apache.commons.lang3.RandomStringUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Spam extends Module {
@@ -35,10 +35,16 @@ public class Spam extends Module {
     );
 
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
-        .name("messages")
-        .description("Messages to use for spam.")
-        .build()
+            .name("messages")
+            .description("Messages to use for spam.")
+            .build()
     );
+
+    private final Setting<Boolean> antiSpamBypass = sgGeneral.add(new BoolSetting.Builder()
+            .name("anti-spam-bypass")
+            .description("Add random text at the bottom of the text")
+            .defaultValue(false)
+            .build());
 
     private int messageI, timer;
 
@@ -65,7 +71,16 @@ public class Spam extends Module {
                 i = messageI++;
             }
 
-            mc.player.sendChatMessage(messages.get().get(i));
+            String text = messages.get().get(i);
+            if (antiSpamBypass.get()) {
+                /*
+                 * This has to be lower-case to avoid anti-capital-letter plugin
+                 * Also, set the length to 16 because the max length of player name is 16,
+                 * which means this random text can be utilized to input random (invalid) player names for exploits
+                 */
+                text += RandomStringUtils.randomAlphabetic(16).toLowerCase();
+            }
+            mc.player.sendChatMessage(text);
             timer = delay.get();
         } else {
             timer--;
