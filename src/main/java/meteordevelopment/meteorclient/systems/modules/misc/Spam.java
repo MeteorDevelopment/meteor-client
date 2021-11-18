@@ -46,6 +46,14 @@ public class Spam extends Module {
             .defaultValue(false)
             .build());
 
+    private final Setting<Integer> length = sgGeneral.add(new IntSetting.Builder()
+            .name("length")
+            .description("Text length of Anti Spam Bypass")
+            .defaultValue(16)
+            .sliderRange(1, 256)
+            .visible(antiSpamBypass::get)
+            .build());
+
     private int messageI, timer;
 
     public Spam() {
@@ -78,7 +86,7 @@ public class Spam extends Module {
                  * Also, set the length to 16 because the max length of player name is 16,
                  * which means this random text can be utilized to input random (invalid) player names for exploits
                  */
-                text += RandomStringUtils.randomAlphabetic(16).toLowerCase();
+                text += RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
             mc.player.sendChatMessage(text);
             timer = delay.get();
