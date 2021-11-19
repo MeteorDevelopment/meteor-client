@@ -58,3 +58,6 @@ accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer
 accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer bottom Lnet/minecraft/client/model/ModelPart;
 
 Accessible   field   net/minecraft/client/render/entity/BoatEntityRenderer texturesAndModels Ljava/util/Map;
+
+Accessible   class   net/minecraft/client/render/MapRenderer$MapTexture
+Accessible   field   net/minecraft/client/render/MapRenderer$MapTexture texture Lnet/minecraft/client/texture/NativeImageBackedTexture;
