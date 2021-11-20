@@ -59,7 +59,7 @@ public class SaveMapCommand extends Command {
             String path = getPath();
             if (path == null) throw OOPS.create();
 
-            downloadMap(map, state, path, 128);
+            saveMap(map, state, path, 128);
 
             return SINGLE_SUCCESS;
         }).then(argument("scale", IntegerArgumentType.integer()).executes(context -> {
@@ -72,13 +72,13 @@ public class SaveMapCommand extends Command {
             String path = getPath();
             if (path == null) throw OOPS.create();
 
-            downloadMap(map, state, path, scale);
+            saveMap(map, state, path, scale);
 
             return SINGLE_SUCCESS;
         }));
     }
 
-    private void downloadMap(ItemStack map, MapState state, String path, int scale) {
+    private void saveMap(ItemStack map, MapState state, String path, int scale) {
         //this is horrible code but it somehow works
 
         MapRenderer mapRenderer = mc.gameRenderer.getMapRenderer();
