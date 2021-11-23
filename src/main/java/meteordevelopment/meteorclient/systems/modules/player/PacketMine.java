@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -33,6 +34,7 @@ import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
 
@@ -79,7 +81,7 @@ public class PacketMine extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
-        .description("Whether or not to render the block being mined.")
+        .description("Whether or not to render the blocks being mined.")
         .defaultValue(true)
         .build()
     );
@@ -119,8 +121,33 @@ public class PacketMine extends Module {
         .build()
     );
 
+    private final Setting<Boolean> renderBlockProgress = sgRender.add(new BoolSetting.Builder()
+        .name("render-block-progress")
+        .description("Whether or not to render the progress of the block being mined.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SettingColor> startColor = sgRender.add(new ColorSetting.Builder()
+        .name("start-color")
+        .description("The color for the non-broken block.")
+        .defaultValue(new SettingColor(25, 252, 25, 150))
+        .visible(renderBlockProgress::get)
+        .build()
+    );
+
+    private final Setting<SettingColor> endColor = sgRender.add(new ColorSetting.Builder()
+        .name("end-color")
+        .description("The color for the fully-broken block.")
+        .defaultValue(new SettingColor(255, 25, 25, 150))
+        .visible(renderBlockProgress::get)
+        .build()
+    );
+
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
     private final List<MyBlock> blocks = new ArrayList<>();
+    private final Color cSides = new Color();
+    private final Color cLines = new Color();
 
     private boolean swapped, shouldUpdateSlot;
 
@@ -192,7 +219,59 @@ public class PacketMine extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (render.get()) {
-            for (MyBlock block : blocks) block.render(event);
+            for (MyBlock block : blocks) {
+                if (block.mining && block.progress != Double.POSITIVE_INFINITY && renderBlockProgress.get()) {
+                    VoxelShape shape = block.blockState.getOutlineShape(mc.world, block.blockPos);
+                    if (shape.isEmpty()) return;
+
+                    Box orig = shape.getBoundingBox();
+                    Box box = orig;
+
+                    double progressNormalised = block.progress > 1 ? 1 : block.progress;
+                    double shrinkFactor = 1d - progressNormalised;
+
+                    box = box.shrink(
+                        box.getXLength() * shrinkFactor,
+                        box.getYLength() * shrinkFactor,
+                        box.getZLength() * shrinkFactor
+                    );
+
+                    double xShrink = (orig.getXLength() * shrinkFactor) / 2;
+                    double yShrink = (orig.getYLength() * shrinkFactor) / 2;
+                    double zShrink = (orig.getZLength() * shrinkFactor) / 2;
+
+                    double x1 = block.blockPos.getX() + box.minX + xShrink;
+                    double y1 = block.blockPos.getY() + box.minY + yShrink;
+                    double z1 = block.blockPos.getZ() + box.minZ + zShrink;
+                    double x2 = block.blockPos.getX() + box.maxX + xShrink;
+                    double y2 = block.blockPos.getY() + box.maxY + yShrink;
+                    double z2 = block.blockPos.getZ() + box.maxZ + zShrink;
+
+                    Color c1Sides = startColor.get().copy().a(startColor.get().a / 2);
+                    Color c2Sides = endColor.get().copy().a(endColor.get().a / 2);
+
+                    cSides.set(
+                        (int) Math.round(c1Sides.r + (c2Sides.r - c1Sides.r) * progressNormalised),
+                        (int) Math.round(c1Sides.g + (c2Sides.g - c1Sides.g) * progressNormalised),
+                        (int) Math.round(c1Sides.b + (c2Sides.b - c1Sides.b) * progressNormalised),
+                        (int) Math.round(c1Sides.a + (c2Sides.a - c1Sides.a) * progressNormalised)
+                    );
+
+                    Color c1Lines = startColor.get();
+                    Color c2Lines = endColor.get();
+
+                    cLines.set(
+                        (int) Math.round(c1Lines.r + (c2Lines.r - c1Lines.r) * progressNormalised),
+                        (int) Math.round(c1Lines.g + (c2Lines.g - c1Lines.g) * progressNormalised),
+                        (int) Math.round(c1Lines.b + (c2Lines.b - c1Lines.b) * progressNormalised),
+                        (int) Math.round(c1Lines.a + (c2Lines.a - c1Lines.a) * progressNormalised)
+                    );
+
+                    event.renderer.box(x1, y1, z1, x2, y2, z2, cSides, cLines, shapeMode.get(), 0);
+
+                }
+                else block.render(event);
+            }
         }
     }
 
