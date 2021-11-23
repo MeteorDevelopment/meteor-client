@@ -12,6 +12,8 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.BreakIndicators;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
@@ -120,7 +122,7 @@ public class PacketMine extends Module {
     );
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
-    private final List<MyBlock> blocks = new ArrayList<>();
+    public final List<MyBlock> blocks = new ArrayList<>();
 
     private boolean swapped, shouldUpdateSlot;
 
@@ -192,7 +194,11 @@ public class PacketMine extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (render.get()) {
-            for (MyBlock block : blocks) block.render(event);
+            for (MyBlock block : blocks) {
+                if (Modules.get().get(BreakIndicators.class).isActive() && Modules.get().get(BreakIndicators.class).packetMine.get() && block.mining) {
+                    continue;
+                } else block.render(event);
+            }
         }
     }
 
@@ -241,7 +247,7 @@ public class PacketMine extends Module {
         return speed;
     }
 
-    private class MyBlock {
+    public class MyBlock {
         public BlockPos blockPos;
         public BlockState blockState;
         public Block block;
@@ -250,7 +256,7 @@ public class PacketMine extends Module {
 
         public int timer;
         public boolean mining;
-        private double progress;
+        public double progress;
 
         public MyBlock set(StartBreakingBlockEvent event) {
             this.blockPos = event.blockPos;
