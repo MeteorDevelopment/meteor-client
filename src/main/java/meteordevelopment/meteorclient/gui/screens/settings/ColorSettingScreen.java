@@ -17,8 +17,11 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtInt;
 
 public class ColorSettingScreen extends WindowScreen {
     private static final Color[] HUE_COLORS = { new Color(255, 0, 0), new Color(255, 255, 0), new Color(0, 255, 0), new Color(0, 255, 255), new Color(0, 0, 255), new Color(255, 0, 255), new Color(255, 0, 0) };
@@ -355,6 +358,21 @@ public class ColorSettingScreen extends WindowScreen {
             double s = theme.scale(2);
             renderer.quad(x + handleX - s / 2, y + handleY - s / 2, s, s, WHITE);
         }
+    }
+
+    @Override
+    public boolean toClipboard() {
+        return NbtUtils.toClipboard("Color Setting", setting.get().toTag());
+    }
+
+    @Override
+    public boolean fromClipboard() {
+        NbtCompound clipboard = NbtUtils.fromClipboard(setting.get().toTag());
+        if (clipboard != null) {
+            theme.fromTag(clipboard);
+            return true;
+        }
+        return false;
     }
 
     private class WHueQuad extends WWidget {
