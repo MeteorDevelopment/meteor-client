@@ -33,7 +33,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
     @Override
     public void reset(boolean callbacks) {
         value = new Object2BooleanOpenHashMap<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
             if (!onlyAttackable || EntityUtils.isAttackable(type)) get().put(type, true);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 

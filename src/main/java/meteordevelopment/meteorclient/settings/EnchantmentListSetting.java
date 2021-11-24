@@ -28,7 +28,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -80,7 +80,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
             if (enchantment != null) get().add(enchantment);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 

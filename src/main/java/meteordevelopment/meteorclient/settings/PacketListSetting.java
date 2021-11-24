@@ -33,7 +33,7 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     @Override
     public void reset(boolean callbacks) {
         value = new ObjectOpenHashSet<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -98,7 +98,7 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
             }
         }
 
-        changed();
+        onChanged();
         return get();
     }
 

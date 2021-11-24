@@ -60,14 +60,14 @@ public class StringListSetting extends Setting<List<String>>{
             get().add(tagI.asString());
         }
 
-        changed();
+        onChanged();
         return get();
     }
 
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     public static void fillTable(GuiTheme theme, WTable table, StringListSetting setting) {

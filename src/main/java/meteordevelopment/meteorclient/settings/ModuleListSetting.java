@@ -28,7 +28,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -82,7 +82,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
             if (module != null) get().add(module);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 

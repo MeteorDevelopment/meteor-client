@@ -35,7 +35,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -87,7 +87,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             if (type != null) get().add(type);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 

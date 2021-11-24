@@ -94,7 +94,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         if (!collection.contains(value)) {
             collection.add(value);
 
-            setting.changed();
+            setting.onChanged();
             table.clear();
             initWidgets(registry);
         }
@@ -102,7 +102,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
 
     private void removeValue(Registry<T> registry, T value) {
         if (collection.remove(value)) {
-            setting.changed();
+            setting.onChanged();
             table.clear();
             initWidgets(registry);
         }

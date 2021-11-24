@@ -23,7 +23,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     @Override
     public void reset(boolean callbacks) {
         value = new Object2IntArrayMap<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -74,7 +74,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
             if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key));
         }
 
-        changed();
+        onChanged();
         return get();
     }
 
