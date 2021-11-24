@@ -84,7 +84,7 @@ public class BlockDataSettingScreen extends WindowScreen {
             WButton reset = table.add(theme.button(GuiRenderer.RESET)).widget();
             reset.action = () -> {
                 setting.get().remove(block);
-                setting.changed();
+                setting.onChanged();
 
                 if (blockData != null && blockData.isChanged()) {
                     table.clear();

@@ -22,7 +22,7 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
         if (value == null) value = defaultValue.copy();
         value.set(defaultValue);
 
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override

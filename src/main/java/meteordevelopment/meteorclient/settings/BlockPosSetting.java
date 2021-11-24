@@ -46,7 +46,7 @@ public class BlockPosSetting extends Setting<BlockPos> {
         int[] value = tag.getIntArray("value");
         set(new BlockPos(value[0], value[1], value[2]));
 
-        changed();
+        onChanged();
         return get();
     }
 

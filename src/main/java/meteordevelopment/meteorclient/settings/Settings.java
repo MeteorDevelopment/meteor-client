@@ -113,7 +113,9 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
+
         tag.put("groups", NbtUtils.listToTag(groups));
+
         return tag;
     }
 

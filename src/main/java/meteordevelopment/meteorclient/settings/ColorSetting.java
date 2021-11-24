@@ -34,7 +34,7 @@ public class ColorSetting extends Setting<SettingColor> {
         if (value == null) value = new SettingColor(defaultValue);
         else value.set(defaultValue);
 
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ColorSetting extends Setting<SettingColor> {
     public SettingColor fromTag(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
-        changed();
+        onChanged();
         return get();
     }
 

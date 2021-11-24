@@ -144,7 +144,7 @@ public class ColorSettingScreen extends WindowScreen {
         rainbow = theme.checkbox(setting.get().rainbow);
         rainbow.action = () -> {
             setting.get().rainbow = rainbow.checked;
-            setting.changed();
+            setting.onChanged();
         };
         rainbowList.add(rainbow).expandCellX().right();
 
@@ -208,7 +208,7 @@ public class ColorSettingScreen extends WindowScreen {
         hueQuad.calculateFromSetting(true);
         brightnessQuad.calculateFromColor(setting.get(), true);
 
-        setting.changed();
+        setting.onChanged();
         callAction();
     }
 
@@ -284,7 +284,7 @@ public class ColorSettingScreen extends WindowScreen {
         bItb.set(c.b);
 
         displayQuad.color.set(c);
-        setting.changed();
+        setting.onChanged();
         callAction();
     }
 

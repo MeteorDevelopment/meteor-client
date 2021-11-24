@@ -30,7 +30,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     @Override
     public void reset(boolean callbacks) {
         value = new HashMap<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override

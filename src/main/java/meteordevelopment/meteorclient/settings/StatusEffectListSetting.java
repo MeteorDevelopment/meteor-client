@@ -28,7 +28,7 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
             if (effect != null) get().add(effect);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 

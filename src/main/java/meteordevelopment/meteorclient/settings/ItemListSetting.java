@@ -49,7 +49,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -86,7 +86,7 @@ public class ItemListSetting extends Setting<List<Item>> {
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 
