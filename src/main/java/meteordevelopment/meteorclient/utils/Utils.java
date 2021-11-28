@@ -130,6 +130,16 @@ public class Utils {
         }
     }
 
+    public static boolean hasEnchantments(ItemStack itemStack, Enchantment... enchantments) {
+        if (itemStack.isEmpty()) return false;
+
+        Object2IntMap<Enchantment> itemEnchantments = new Object2IntArrayMap<>();
+        getEnchantments(itemStack, itemEnchantments);
+        for (Enchantment enchantment : enchantments) if (!itemEnchantments.containsKey(enchantment)) return false;
+
+        return true;
+    }
+
     public static int getRenderDistance() {
         return Math.max(mc.options.viewDistance, ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
     }
