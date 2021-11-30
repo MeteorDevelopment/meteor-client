@@ -15,7 +15,7 @@ general:
 jobs:
   build:
     docker:
-      - image: cimg/openjdk:16.0.0
+      - image: cimg/openjdk:17.0.0
 
     working_directory: ~/repo
 
