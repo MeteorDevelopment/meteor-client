@@ -229,7 +229,7 @@ public class Mesh {
             MatrixStack matrixStack = RenderSystem.getModelViewStack();
             matrixStack.push();
 
-            if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
+            if (matrices != null) matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
 
             Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
             matrixStack.translate(0, -cameraPos.y, 0);

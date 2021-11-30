@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.world;
 
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.chunk.WorldChunk;
 
@@ -14,14 +15,14 @@ import java.util.Iterator;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class WorldChunkIterator implements Iterator<WorldChunk> {
+public class ChunkIterator implements Iterator<Chunk> {
     private final int px, pz;
     private final int r;
 
     private int x, z;
     private WorldChunk chunk;
 
-    public WorldChunkIterator() {
+    public ChunkIterator() {
         px = ChunkSectionPos.getSectionCoord(mc.player.getBlockX());
         pz = ChunkSectionPos.getSectionCoord(mc.player.getBlockZ());
         r = Utils.getRenderDistance();

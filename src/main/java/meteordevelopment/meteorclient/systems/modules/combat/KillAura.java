@@ -5,9 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -229,16 +227,18 @@ public class KillAura extends Module {
 
         if (targets.isEmpty()) {
             if (wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                // TODO: Baritone
+                //BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
             }
             return;
         }
         //changed
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+        // TODO: Baritone
+        /*if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
             wasPathing = true;
-        }
+        }*/
 
         Entity primary = targets.get(0);
 

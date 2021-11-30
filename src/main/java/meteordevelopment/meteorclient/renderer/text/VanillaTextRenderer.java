@@ -90,7 +90,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
         RenderSystem.disableDepthTest();
         matrixStack.push();
-        if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
+        if (matrices != null) matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
         matrixStack.scale((float) scale, (float) scale, 1);
         RenderSystem.applyModelViewMatrix();
 

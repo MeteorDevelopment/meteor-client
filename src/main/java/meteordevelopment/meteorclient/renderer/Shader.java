@@ -100,6 +100,6 @@ public class Shader {
 
     public void setDefaults() {
         set("u_Proj", RenderSystem.getProjectionMatrix());
-        set("u_ModelView", RenderSystem.getModelViewStack().peek().getModel());
+        set("u_ModelView", RenderSystem.getModelViewStack().peek().getPositionMatrix());
     }
 }

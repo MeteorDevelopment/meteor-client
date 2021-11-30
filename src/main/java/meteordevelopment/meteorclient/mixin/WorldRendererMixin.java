@@ -46,7 +46,7 @@ public abstract class WorldRendererMixin {
         if (Modules.get().isActive(BlockSelection.class)) info.cancel();
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZIZ)V"), index = 4)
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZZ)V"), index = 3)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
@@ -119,7 +119,7 @@ public abstract class WorldRendererMixin {
 
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferBuilder = tessellator.getBuffer();
-            Matrix4f matrix4f = matrices.peek().getModel();
+            Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
             bufferBuilder.clear();
 

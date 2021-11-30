@@ -151,7 +151,7 @@ public class Flight extends Module {
                 you get when using vanilla fly*/
 
                 mc.player.getAbilities().flying = false;
-                mc.player.flyingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
+                mc.player.airStrafingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
 
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();

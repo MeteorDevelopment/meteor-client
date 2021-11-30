@@ -5,15 +5,13 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.utils.Rotation;
-
 import java.lang.reflect.Field;
 
 public class BaritoneUtils {
     private static Field targetField;
 
-    public static Rotation getTarget() {
+    // TODO: Baritone
+    /*public static Rotation getTarget() {
         findField();
         if (targetField == null) return null;
 
@@ -38,5 +36,5 @@ public class BaritoneUtils {
                 break;
             }
         }
-    }
+    }*/
 }

@@ -111,6 +111,11 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "storage-blocks")), Lifecycle.stable());
         }
 
+        @Override
+        public int size() {
+            return STORAGE_BLOCKS.length;
+        }
+
         @Nullable
         @Override
         public Identifier getId(BlockEntityType<?> entry) {
@@ -140,7 +145,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
+        public Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
             return null;
         }
 

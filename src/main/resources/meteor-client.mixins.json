@@ -36,6 +36,7 @@
     "ChatHudAccessor",
     "ChatHudMixin",
     "ChatScreenMixin",
+    "ChunkAccessor",
     "ChunkOcclusionDataBuilderMixin",
     "ChunkSkyLightProviderMixin",
     "ClientConnectionAccessor",
@@ -146,7 +147,6 @@
     "TridentItemMixin",
     "Vec3dMixin",
     "WorldAccessor",
-    "WorldChunkAccessor",
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin"

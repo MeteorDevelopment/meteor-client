@@ -40,7 +40,7 @@ public class ItemPhysics extends Module {
 
         event.matrixStack.push();
 
-        BakedModel bakedModel = event.itemRenderer.getHeldItemModel(itemStack, event.itemEntity.world, null, 0);
+        BakedModel bakedModel = event.itemRenderer.getModel(itemStack, event.itemEntity.world, null, 0);
         boolean hasDepthInGui = bakedModel.hasDepth();
         int renderCount = getRenderedAmount(itemStack);
         IItemEntity rotator = (IItemEntity) event.itemEntity;
