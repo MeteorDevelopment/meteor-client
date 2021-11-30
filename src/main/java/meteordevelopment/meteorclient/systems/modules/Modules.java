@@ -355,13 +355,13 @@ public class Modules extends System<Modules> {
     private void initCombat() {
         add(new AimAssist());
         add(new AnchorAura());
+//        add(new AntiAnchor());
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
-        add(new AutoExp());
         add(new AutoTotem());
         add(new AutoTrap());
         add(new AutoWeapon());
