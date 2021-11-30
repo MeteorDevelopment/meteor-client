@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -64,9 +63,10 @@ public class Step extends Module {
     @Override
     public void onActivate() {
         prevStepHeight = mc.player.stepHeight;
-        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
+        // TODO: Baritone
+        /*prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
 
-        BaritoneAPI.getSettings().assumeStep.value = true;
+        BaritoneAPI.getSettings().assumeStep.value = true;*/
     }
 
     @EventHandler
@@ -84,7 +84,8 @@ public class Step extends Module {
     @Override
     public void onDeactivate() {
         mc.player.stepHeight = prevStepHeight;
-        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+        // TODO: Baritone
+        //BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
     }
 
     private float getHealth(){

@@ -34,7 +34,8 @@ public class FakeClientPlayer {
 
     @Init(stage = InitStage.Pre)
     public static void init() {
-        world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getSession().getProfile()), new ClientWorld.Properties(Difficulty.NORMAL, false, false), World.OVERWORLD, DimensionTypeAccessor.getOverworld(), 1, mc::getProfiler, new WorldRenderer(mc, new BufferBuilderStorage()), false, 0);
+        // TODO: Maybe we can pass null for telemetry sender because this world instance is never actually gonna send anything
+        world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getSession().getProfile(), mc.createTelemetrySender()), new ClientWorld.Properties(Difficulty.NORMAL, false, false), World.OVERWORLD, DimensionTypeAccessor.getOverworld(), 1, 1, mc::getProfiler, new WorldRenderer(mc, new BufferBuilderStorage()), false, 0);
     }
 
     public static PlayerEntity getPlayer() {

@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.render.SkyProperties;
+import net.minecraft.client.render.DimensionEffects;
 import net.minecraft.util.math.Vec3d;
 
 /**
@@ -159,9 +159,9 @@ public class Ambience extends Module {
         if (mc.worldRenderer != null) mc.worldRenderer.reload();
     }
 
-    public static class Custom extends SkyProperties {
+    public static class Custom extends DimensionEffects {
         public Custom() {
-            super(Float.NaN, true, SkyProperties.SkyType.END, true, false);
+            super(Float.NaN, true, DimensionEffects.SkyType.END, true, false);
         }
 
         @Override

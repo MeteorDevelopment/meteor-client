@@ -376,6 +376,11 @@ public class PacketUtils {
         }
 
         @Override
+        public int size() {
+            return S2C_PACKETS.keySet().size() + C2S_PACKETS.keySet().size();
+        }
+
+        @Override
         public Identifier getId(Class<? extends Packet<?>> entry) {
             return null;
         }
@@ -401,7 +406,7 @@ public class PacketUtils {
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
+        public Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
             return null;
         }
 

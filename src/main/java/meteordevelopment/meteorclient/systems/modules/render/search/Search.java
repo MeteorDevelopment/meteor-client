@@ -27,7 +27,6 @@ import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Iterator;
 import java.util.List;
@@ -96,7 +95,7 @@ public class Search extends Module {
             groups.clear();
         }
 
-        for (WorldChunk chunk : Utils.chunks()) {
+        for (Chunk chunk : Utils.chunks()) {
             searchChunk(chunk, null);
         }
 

@@ -44,7 +44,7 @@ public class MeteorStarscript {
         // General
         ss.set("version", Value.string(Config.get().version != null ? (Config.get().devBuild.isEmpty() ? Config.get().version.toString() : Config.get().version + " " + Config.get().devBuild) : ""));
         ss.set("mc_version", Value.string(SharedConstants.getGameVersion().getName()));
-        ss.set("fps", () -> Value.number(((MinecraftClientAccessor) mc).getFps()));
+        ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
 
         // Player
         ss.set("player", Value.map(new ValueMap()
