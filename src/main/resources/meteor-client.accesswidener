@@ -2,7 +2,6 @@ accessWidener	v1	named
 
 Accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
 Accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
-Accessible   class   net/minecraft/client/world/ClientWorld$BlockParticle
 Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
 Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
 Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
