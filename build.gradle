@@ -42,10 +42,9 @@ dependencies {
     modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") { transitive = false }
     modCompileOnly("io.vram:canvas-fabric-mc118:1.0.+") { transitive = false }
 
-    // TODO: Baritone
 	// Baritone integration
-    /*modImplementation "baritone:baritone:${project.baritone_version}"
-    include "baritone:baritone:${project.baritone_version}"*/
+    modImplementation("baritone:baritone:${project.baritone_version}") { transitive = false }
+    include("baritone:baritone:${project.baritone_version}") { transitive = false }
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"

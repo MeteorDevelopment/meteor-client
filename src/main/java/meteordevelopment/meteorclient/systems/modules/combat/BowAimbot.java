@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -109,20 +110,18 @@ public class BowAimbot extends Module {
         }, priority.get());
 
         if (target == null) {
-            // TODO: Baritone
-            /*if (wasPathing) {
+            if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
                 wasPathing = false;
-            }*/
+            }
             return;
         }
 
         if (mc.options.keyUse.isPressed() && itemInHand()) {
-            // TODO: Baritone
-            /*if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
-            }*/
+            }
             aim(event.tickDelta);
         }
     }
