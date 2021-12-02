@@ -177,8 +177,6 @@ public abstract class WTextBox extends WWidget {
         }
         else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
             setFocused(false);
-
-            if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
         }
 

@@ -117,6 +117,12 @@ public class ModulesScreen extends TabScreen {
             l.clear();
             createSearchW(l, text.get());
         };
+        text.actionOnUnfocused = () -> {
+            Set<Module> modules = Modules.get().searchTitles(text.get());
+            if (modules.size() != 1) return;
+            Module target = modules.iterator().next();
+            target.toggle();
+        };
 
         w.add(l).expandX();
         createSearchW(l, text.get());
