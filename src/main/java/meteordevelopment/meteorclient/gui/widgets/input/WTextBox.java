@@ -21,6 +21,7 @@ import static org.lwjgl.glfw.GLFW.*;
 public abstract class WTextBox extends WWidget {
     public Runnable action;
     public Runnable actionOnUnfocused;
+    public Runnable actionOnEnter;
 
     protected String text;
     protected CharFilter filter;
@@ -177,6 +178,7 @@ public abstract class WTextBox extends WWidget {
         }
         else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
             setFocused(false);
+            if (actionOnEnter != null) actionOnEnter.run();
             return true;
         }
 
