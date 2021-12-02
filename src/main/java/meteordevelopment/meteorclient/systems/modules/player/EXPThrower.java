@@ -127,7 +127,7 @@ public class EXPThrower extends Module {
                 }
                 else {
                     InvUtils.swap(exp.getSlot(), true);
-                    mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                    mc.interactionManager.interactItem(mc.player, mc.world, exp.getHand());
                     InvUtils.swapBack();
                 }
             });
