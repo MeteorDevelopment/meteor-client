@@ -187,6 +187,8 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
                 scale *= maxViewDist / 15;
             }
 
+            scale = Utils.clamp(scale, waypoint.minScale, Integer.MAX_VALUE);
+
             // Setup the rotation
             pos.set(x, y, z);
             if (!NametagUtils.to2D(pos, scale)) continue;

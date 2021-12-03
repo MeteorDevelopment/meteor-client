@@ -96,6 +96,7 @@ public class WaypointsModule extends Module {
             waypoint.name = "Death " + time;
             waypoint.icon = "skull";
             waypoint.scale = 2;
+            waypoint.minScale = 1.5;
             waypoint.x = (int) deathPos.x;
             waypoint.y = (int) deathPos.y + 2;
             waypoint.z = (int) deathPos.z;
@@ -307,6 +308,12 @@ public class WaypointsModule extends Module {
             table.add(theme.label("Scale:"));
             WDoubleEdit scale = table.add(theme.doubleEdit(waypoint.scale, 0, 4, 0, 4)).expandX().widget();
             scale.action = () -> waypoint.scale = scale.get();
+            table.row();
+
+            // Min scale
+            table.add(theme.label("Min Scale:"));
+            WDoubleEdit minScale = table.add(theme.doubleEdit(waypoint.minScale, 0, 4, 0, 4)).expandX().widget();
+            minScale.action = () -> waypoint.minScale = minScale.get();
 
             table.add(theme.horizontalSeparator()).expandX();
             table.row();

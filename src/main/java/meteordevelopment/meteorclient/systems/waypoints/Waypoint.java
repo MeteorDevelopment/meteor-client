@@ -25,6 +25,7 @@ public class Waypoint implements ISerializable<Waypoint> {
     public boolean visible = true;
     public int maxVisibleDistance = 1000;
     public double scale = 1;
+    public double minScale = 0.75;
 
     public boolean overworld, nether, end;
 
@@ -107,6 +108,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         tag.putBoolean("visible", visible);
         tag.putInt("maxVisibleDistance", maxVisibleDistance);
         tag.putDouble("scale", scale);
+        tag.putDouble("minScale", minScale);
 
         tag.putString("dimension", actualDimension.name());
 
@@ -130,6 +132,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         visible = tag.getBoolean("visible");
         maxVisibleDistance = tag.getInt("maxVisibleDistance");
         scale = tag.getDouble("scale");
+        minScale = tag.getDouble("minScale");
 
         actualDimension = Dimension.valueOf(tag.getString("dimension"));
 
