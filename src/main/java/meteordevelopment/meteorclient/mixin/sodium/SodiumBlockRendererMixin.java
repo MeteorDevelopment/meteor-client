@@ -55,7 +55,7 @@ public class SodiumBlockRendererMixin {
                 ci.cancel();
             }
         }
-        else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
+        else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
             whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, xray.opacity.get());
             ci.cancel();
         }

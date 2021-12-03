@@ -39,7 +39,7 @@ public class BlockModelRendererMixin {
             }
 
             rewriteBuffer(vertexConsumer, alpha);
-        } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock())) {
+        } else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
             rewriteBuffer(vertexConsumer, xray.opacity.get());
         }
     }
