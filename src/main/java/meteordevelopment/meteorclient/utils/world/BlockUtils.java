@@ -251,4 +251,14 @@ public class BlockUtils {
         Potential,
         Always
     }
+
+    public static boolean isExposed(BlockPos blockPos) {
+        for (Direction direction : Direction.values()) {
+            BlockState state = mc.world.getBlockState(blockPos.offset(direction));
+            if (!state.isOpaque())
+                return true;
+        }
+        return false;
+    }
+
 }
