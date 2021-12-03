@@ -13,6 +13,7 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractQuadRender
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix3f;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3f;
@@ -53,7 +54,7 @@ public abstract class AbstractQuadRendererMixin {
 
             whBufferQuad(bufferFunc.apply(renderLayer), quad, matrix(), overlay(), normalMatrix(), normalVec, alpha);
             ci.cancel();
-        } else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(blockInfo.blockState.getBlock())) {
+        } else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(blockInfo.blockState.getBlock(), blockInfo.blockPos)) {
             whBufferQuad(bufferFunc.apply(renderLayer), quad, matrix(), overlay(), normalMatrix(), normalVec, xray.opacity.get());
             ci.cancel();
         }
