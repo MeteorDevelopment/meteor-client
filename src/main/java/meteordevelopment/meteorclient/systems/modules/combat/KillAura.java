@@ -313,7 +313,7 @@ public class KillAura extends Module {
 
         if (smartDelay.get()) return mc.player.getAttackCooldownProgress(0.5f) >= 1;
 
-        if (hitDelayTimer >= 0) {
+        if (hitDelayTimer > 0) {
             hitDelayTimer--;
             return false;
         } else {
