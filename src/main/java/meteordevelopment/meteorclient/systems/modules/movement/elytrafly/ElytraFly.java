@@ -208,7 +208,7 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    private ElytraFlightMode currentMode;
+    private ElytraFlightMode currentMode = new Vanilla();
 
     public ElytraFly() {
         super(Categories.Movement, "elytra-fly", "Gives you more control over your elytra.");
