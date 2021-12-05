@@ -88,7 +88,7 @@ public class WDoubleEdit extends WHorizontalList {
         boolean good;
         boolean validate = true;
 
-        if (c == '-' && text.isEmpty()) {
+        if (c == '-' && (text.isEmpty() || (textBox.selectionStart == 0 && textBox.selectionEnd == text.length()))) {
             good = true;
             validate = false;
         }
