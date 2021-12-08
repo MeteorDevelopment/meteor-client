@@ -62,6 +62,13 @@ public class SpawnProofer extends Module {
         .build()
     );
 
+    private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
+            .name("new-mob-spawn-light-level")
+            .description("Use the new (1.18+) mob spawn behavior")
+            .defaultValue(true)
+            .build()
+    );
+
 
     private final Pool<BlockPos.Mutable> spawnPool = new Pool<>(BlockPos.Mutable::new);
     private final List<BlockPos.Mutable> spawns = new ArrayList<>();
@@ -90,7 +97,7 @@ public class SpawnProofer extends Module {
         for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
         spawns.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
-            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos);
+            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get());
 
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
                     spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
