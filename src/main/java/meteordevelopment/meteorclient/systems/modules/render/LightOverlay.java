@@ -61,7 +61,7 @@ public class LightOverlay extends Module {
     );
 
     private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
-            .name("now-mob-spawn-light-level")
+            .name("new-mob-spawn-light-level")
             .description("Use the new (1.18+) mob spawn behavior")
             .defaultValue(true)
             .build()
