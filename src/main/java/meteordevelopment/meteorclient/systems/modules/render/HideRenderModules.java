@@ -13,8 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 
 public class HideRenderModules extends Module {
-    public static final HideRenderModules INSTANCE = new HideRenderModules();
-
     private final SettingGroup sgDefault = settings.getDefaultGroup();
 
     boolean wasTrue = false;
@@ -24,15 +22,9 @@ public class HideRenderModules extends Module {
         .defaultValue(true)
         .build()
     );
-    //TODO use the code from fabricord to hide from OBS only
     public HideRenderModules() {
         super(Categories.Render, "hide-render-modules", "Attempts to stop all meteor rendering");
-    }
-
-    public static void init() {
-        if (INSTANCE.disableOnRestart.get() && INSTANCE.isActive()) {
-            MeteorClient.LOG.info("Disabled hide-ui on restart");
-            INSTANCE.toggle();
-        }
+        if (disableOnRestart.get() && isActive())
+            toggle();
     }
 }

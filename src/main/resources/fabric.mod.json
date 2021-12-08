@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "fabric-api-base",
   "name": "Fabric API Base",
-  "provides": ["meteor-client", "com_github_meteordevelopment_starscript", "com_github_meteordevelopment_orbit"],
+  "provides": ["meteor-client"],
   "version": "${version}",
   "description": "Contains the essentials for Fabric API modules.",
   "authors": [

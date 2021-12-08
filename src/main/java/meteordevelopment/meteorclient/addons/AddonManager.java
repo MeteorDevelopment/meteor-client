@@ -32,7 +32,7 @@ public class AddonManager {
 
             METEOR.name = metadata.getName();
             METEOR.authors = new String[metadata.getAuthors().size()];
-            if (metadata.containsCustomValue("meteor-client:color")) METEOR.color.parse(metadata.getCustomValue("meteor-client:color").getAsString());
+            METEOR.color.parse("145,61,226");
 
             int i = 0;
             for (Person author : metadata.getAuthors()) {

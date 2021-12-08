@@ -26,9 +26,9 @@ import java.util.Map;
 import java.util.Set;
 
 /** When mixins are just not good enough **/
-public class Asm {
+public class Asm implements AsmConfig {
     public static Asm INSTANCE;
-    private final Set<Patch> transformers = new HashMap<>();
+    private final Set<Patch> transformers = new HashSet<>();
 
     public Asm() {
         INSTANCE = this;

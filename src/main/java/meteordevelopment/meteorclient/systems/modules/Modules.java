@@ -487,7 +487,7 @@ public class Modules extends System<Modules> {
         add(new Zoom());
         add(new Blur());
         add(new PopChams());
-        add(HideRenderModules.INSTANCE);
+        add(new HideRenderModules());
     }
 
     private void initWorld() {

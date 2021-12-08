@@ -22,7 +22,7 @@ import java.util.List;
 
 public class Config extends System<Config> {
     // Version
-    public final Version version;
+    public Version version;
     public final String devBuild = "";
 
     // Visual

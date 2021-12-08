@@ -16,13 +16,11 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
-import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
@@ -63,14 +61,6 @@ public class MeteorClient implements ClientModInitializer {
 
         // Register event handlers
         EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
-
-        // Pre-load
-        Systems.addPreLoadTask(() -> {
-            if (!Modules.get().getFile().exists()) {
-                Modules.get().get(DiscordPresence.class).toggle();
-                Utils.addMeteorPvpToServerList();
-            }
-        });
 
         // Pre init
         init(InitStage.Pre);
@@ -116,18 +106,6 @@ public class MeteorClient implements ClientModInitializer {
     private void onMouseButtonGUI(MouseButtonEvent event) {
         if (event.action == KeyAction.Press && event.button != GLFW.GLFW_MOUSE_BUTTON_LEFT && KeyBinds.OPEN_CLICK_GUI.matchesMouse(event.button)) {
             if (Utils.canOpenClickGUI()) openClickGui();
-        }
-    }
-
-    // Console
-
-    @EventHandler
-    private void onCharTyped(CharTypedEvent event) {
-        if (mc.currentScreen != null || !Config.get().prefixOpensConsole || Config.get().prefix.isBlank()) return;
-
-        if (event.c == Config.get().prefix.charAt(0)) {
-            mc.setScreen(new ChatScreen(Config.get().prefix));
-            event.cancel();
         }
     }
 
