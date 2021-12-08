@@ -18,7 +18,9 @@ import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.AccountUtils;
 import net.minecraft.client.util.Session;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import java.util.Optional;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> {
     private static final String AUTH = "http://authserver.thealtening.com";
@@ -47,15 +49,6 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     }
 
     @Override
-    public boolean fetchHead() {
-        try {
-            return cache.makeHead("https://www.mc-heads.net/avatar/" + cache.uuid + "/8");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
     public boolean login() {
         YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
         AccountUtils.setBaseUrl(service, SESSION + "/session/minecraft/");
@@ -66,7 +59,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
         try {
             auth.logIn();
-            setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), "mojang"));
+            setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
             cache.username = auth.getSelectedProfile().getName();
             return true;

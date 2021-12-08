@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class WItem extends WWidget {
     protected ItemStack itemStack;

@@ -29,7 +29,7 @@ public class ContainerViewerHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 

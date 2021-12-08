@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.NbtCompound;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public abstract class Account<T extends Account<?>> implements ISerializable<T> {
     protected AccountType type;
@@ -29,13 +29,18 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
 
     public abstract boolean fetchInfo();
 
-    public abstract boolean fetchHead();
+    public boolean fetchHead() {
+        String url = AccountUtils.getSkinUrl(cache.username);
+        if (url == null) return true;
+
+        return cache.loadHead(url);
+    }
 
     public boolean login() {
         YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
-        AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/");
-        AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/join");
-        AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getSessionHost() + "/session/minecraft/hasJoined");
+        AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/");
+        AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/join");
+        AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/hasJoined");
 
         return true;
     }

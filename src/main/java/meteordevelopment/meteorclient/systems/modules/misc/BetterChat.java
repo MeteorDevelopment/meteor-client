@@ -23,7 +23,6 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -101,7 +100,6 @@ public class BetterChat extends Module {
     private final Setting<List<String>> regexFilters = sgFilter.add(new StringListSetting.Builder()
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
-        .defaultValue(Collections.emptyList())
         .visible(filterRegex::get)
         .build()
     );
@@ -128,7 +126,7 @@ public class BetterChat extends Module {
             .description("The amount of extra chat lines.")
             .defaultValue(1000)
             .min(100)
-            .sliderMax(1000)
+            .sliderRange(100, 1000)
             .visible(longerChatHistory::get)
             .build()
     );

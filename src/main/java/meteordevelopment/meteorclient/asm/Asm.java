@@ -26,10 +26,13 @@ import java.util.Map;
 import java.util.Set;
 
 /** When mixins are just not good enough **/
-public class Asm implements AsmConfig {
-    private final Set<Patch> transformers = new HashSet<>();
+public class Asm {
+    public static Asm INSTANCE;
+    private final Set<Patch> transformers = new HashMap<>();
 
     public Asm() {
+        INSTANCE = this;
+
         add(new GameRendererTransformer());
         add(new CanvasWorldRendererTransformer());
     }

@@ -22,47 +22,44 @@ public class Anchor extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> maxHeight = sgGeneral.add(new IntSetting.Builder()
-            .name("max-height")
-            .description("The maximum height Anchor will work at.")
-            .defaultValue(10)
-            .min(0)
-            .max(255)
-            .sliderMax(20)
-            .build()
+        .name("max-height")
+        .description("The maximum height Anchor will work at.")
+        .defaultValue(10)
+        .range(0, 255)
+        .sliderMax(20)
+        .build()
     );
 
     private final Setting<Integer> minPitch = sgGeneral.add(new IntSetting.Builder()
-            .name("min-pitch")
-            .description("The minimum pitch at which anchor will work.")
-            .defaultValue(-90)
-            .min(-90)
-            .max(90)
-            .sliderMin(-90)
-            .sliderMax(90)
-            .build()
+        .name("min-pitch")
+        .description("The minimum pitch at which anchor will work.")
+        .defaultValue(0)
+        .range(-90, 90)
+        .sliderRange(-90, 90)
+        .build()
     );
 
     private final Setting<Boolean> cancelMove = sgGeneral.add(new BoolSetting.Builder()
-            .name("cancel-jump-in-hole")
-            .description("Prevents you from jumping when Anchor is active and Min Pitch is met.")
-            .defaultValue(false)
-            .build()
+        .name("cancel-jump-in-hole")
+        .description("Prevents you from jumping when Anchor is active and Min Pitch is met.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> pull = sgGeneral.add(new BoolSetting.Builder()
-            .name("pull")
-            .description("The pull strength of Anchor.")
-            .defaultValue(false)
-            .build()
+        .name("pull")
+        .description("The pull strength of Anchor.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Double> pullSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("pull-speed")
-            .description("How fast to pull towards the hole in blocks per second.")
-            .defaultValue(0.3)
-            .min(0)
-            .sliderMax(5)
-            .build()
+        .name("pull-speed")
+        .description("How fast to pull towards the hole in blocks per second.")
+        .defaultValue(0.3)
+        .min(0)
+        .sliderMax(5)
+        .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();

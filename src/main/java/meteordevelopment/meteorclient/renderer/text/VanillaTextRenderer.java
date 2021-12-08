@@ -12,7 +12,7 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class VanillaTextRenderer implements TextRenderer {
     public static final TextRenderer INSTANCE = new VanillaTextRenderer();
@@ -90,7 +90,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
         RenderSystem.disableDepthTest();
         matrixStack.push();
-        if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
+        if (matrices != null) matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
         matrixStack.scale((float) scale, (float) scale, 1);
         RenderSystem.applyModelViewMatrix();
 

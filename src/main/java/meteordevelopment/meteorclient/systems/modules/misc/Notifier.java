@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -35,81 +34,74 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords;
 
 public class Notifier extends Module {
-
-    public enum Event {
-        Spawn,
-        Despawn,
-        Both
-    }
-
     private final SettingGroup sgTotemPops = settings.createGroup("Totem Pops");
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
 
     // Totem Pops
 
     private final Setting<Boolean> totemPops = sgTotemPops.add(new BoolSetting.Builder()
-            .name("totem-pops")
-            .description("Notifies you when a player pops a totem.")
-            .defaultValue(true)
-            .build()
+        .name("totem-pops")
+        .description("Notifies you when a player pops a totem.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> totemsIgnoreOwn = sgTotemPops.add(new BoolSetting.Builder()
-            .name("ignore-own")
-            .description("Notifies you of your own totem pops.")
-            .defaultValue(false)
-            .build()
+        .name("ignore-own")
+        .description("Notifies you of your own totem pops.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> totemsIgnoreFriends = sgTotemPops.add(new BoolSetting.Builder()
-            .name("ignore-friends")
-            .description("Ignores friends totem pops.")
-            .defaultValue(false)
-            .build()
+        .name("ignore-friends")
+        .description("Ignores friends totem pops.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> totemsIgnoreOthers = sgTotemPops.add(new BoolSetting.Builder()
-            .name("ignore-others")
-            .description("Ignores other players totem pops.")
-            .defaultValue(false)
-            .build()
+        .name("ignore-others")
+        .description("Ignores other players totem pops.")
+        .defaultValue(false)
+        .build()
     );
 
     // Visual Range
 
     private final Setting<Boolean> visualRange = sgVisualRange.add(new BoolSetting.Builder()
-            .name("visual-range")
-            .description("Notifies you when an entity enters your render distance.")
-            .defaultValue(false)
-            .build()
+        .name("visual-range")
+        .description("Notifies you when an entity enters your render distance.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Event> event = sgVisualRange.add(new EnumSetting.Builder<Event>()
-            .name("event")
-            .description("When to log the entities.")
-            .defaultValue(Event.Both)
-            .build()
+        .name("event")
+        .description("When to log the entities.")
+        .defaultValue(Event.Both)
+        .build()
     );
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Which entities to nofity about.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
-            .build()
+        .name("entities")
+        .description("Which entities to nofity about.")
+        .defaultValue(EntityType.PLAYER)
+        .build()
     );
 
     private final Setting<Boolean> visualRangeIgnoreFriends = sgVisualRange.add(new BoolSetting.Builder()
-            .name("ignore-friends")
-            .description("Ignores friends.")
-            .defaultValue(true)
-            .build()
+        .name("ignore-friends")
+        .description("Ignores friends.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> visualRangeIgnoreFakes = sgVisualRange.add(new BoolSetting.Builder()
-            .name("ignore-fake-players")
-            .description("Ignores fake players.")
-            .defaultValue(true)
-            .build()
+        .name("ignore-fake-players")
+        .description("Ignores fake players.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
@@ -216,5 +208,11 @@ public class Notifier extends Module {
 
     private int getChatId(Entity entity) {
         return chatIdMap.computeIntIfAbsent(entity.getUuid(), value -> random.nextInt());
+    }
+
+    public enum Event {
+        Spawn,
+        Despawn,
+        Both
     }
 }

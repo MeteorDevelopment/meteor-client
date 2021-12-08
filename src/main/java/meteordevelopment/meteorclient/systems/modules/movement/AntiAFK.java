@@ -39,100 +39,98 @@ public class AntiAFK extends Module {
     // Actions
 
     private final Setting<Boolean> spin = sgActions.add(new BoolSetting.Builder()
-            .name("spin")
-            .description("Spins.")
-            .defaultValue(true)
-            .build()
+        .name("spin")
+        .description("Spins.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<SpinMode> spinMode = sgActions.add(new EnumSetting.Builder<SpinMode>()
-            .name("spin-mode")
-            .description("The method of rotating.")
-            .defaultValue(SpinMode.Server)
-            .visible(spin::get)
-            .build()
+        .name("spin-mode")
+        .description("The method of rotating.")
+        .defaultValue(SpinMode.Server)
+        .visible(spin::get)
+        .build()
     );
 
     private final Setting<Integer> spinSpeed = sgActions.add(new IntSetting.Builder()
-            .name("spin-speed")
-            .description("The speed to spin you.")
-            .defaultValue(7)
-            .visible(spin::get)
-            .build()
+        .name("spin-speed")
+        .description("The speed to spin you.")
+        .defaultValue(7)
+        .visible(spin::get)
+        .build()
     );
 
     private final Setting<Double> pitch = sgActions.add(new DoubleSetting.Builder()
-            .name("pitch")
-            .description("The pitch to set in server mode.")
-            .defaultValue(-90)
-            .min(-90)
-            .max(90)
-            .sliderMin(-90)
-            .sliderMax(90)
-            .visible(() -> spin.get() && spinMode.get() == SpinMode.Server)
-            .build()
+        .name("pitch")
+        .description("The pitch to set in server mode.")
+        .defaultValue(-90)
+        .range(-90, 90)
+        .sliderRange(-90, 90)
+        .visible(() -> spin.get() && spinMode.get() == SpinMode.Server)
+        .build()
     );
 
     private final Setting<Boolean> jump = sgActions.add(new BoolSetting.Builder()
-            .name("jump")
-            .description("Jumps.")
-            .defaultValue(true)
-            .build()
+        .name("jump")
+        .description("Jumps.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> click = sgActions.add(new BoolSetting.Builder()
-            .name("click")
-            .description("Clicks.")
-            .defaultValue(false)
-            .build()
+        .name("click")
+        .description("Clicks.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> disco = sgActions.add(new BoolSetting.Builder()
-            .name("disco")
-            .description("Sneaks and unsneaks quickly.")
-            .defaultValue(false)
-            .build()
+        .name("disco")
+        .description("Sneaks and unsneaks quickly.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> strafe = sgActions.add(new BoolSetting.Builder()
-            .name("strafe")
-            .description("Strafe right and left")
-            .defaultValue(false)
-            .onChanged(aBoolean -> {
-                strafeTimer = 0;
-                direction = false;
+        .name("strafe")
+        .description("Strafe right and left")
+        .defaultValue(false)
+        .onChanged(aBoolean -> {
+            strafeTimer = 0;
+            direction = false;
 
-                if (isActive()) {
-                    mc.options.keyLeft.setPressed(false);
-                    mc.options.keyRight.setPressed(false);
-                }
-            })
-            .build()
+            if (isActive()) {
+                mc.options.keyLeft.setPressed(false);
+                mc.options.keyRight.setPressed(false);
+            }
+        })
+        .build()
     );
 
     // Messages
 
     private final Setting<Boolean> sendMessages = sgMessages.add(new BoolSetting.Builder()
-            .name("send-messages")
-            .description("Sends messages to prevent getting kicked for AFK.")
-            .defaultValue(false)
-            .build()
+        .name("send-messages")
+        .description("Sends messages to prevent getting kicked for AFK.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Integer> delay = sgMessages.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The delay between specified messages in seconds.")
-            .defaultValue(2)
-            .min(0)
-            .sliderMax(20)
-            .build()
+        .name("delay")
+        .description("The delay between specified messages in seconds.")
+        .defaultValue(2)
+        .min(0)
+        .sliderMax(20)
+        .build()
     );
 
     private final Setting<Boolean> randomMessage = sgMessages.add(new BoolSetting.Builder()
-            .name("random")
-            .description("Selects a random message from your message list.")
-            .defaultValue(false)
-            .build()
+        .name("random")
+        .description("Selects a random message from your message list.")
+        .defaultValue(false)
+        .build()
     );
 
     private final List<String> messages = new ArrayList<>();

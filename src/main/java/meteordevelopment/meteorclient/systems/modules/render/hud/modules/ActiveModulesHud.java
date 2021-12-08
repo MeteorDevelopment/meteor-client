@@ -23,7 +23,6 @@ public class ActiveModulesHud extends HudElement {
     private final Setting<List<Module>> hiddenModules = sgGeneral.add(new ModuleListSetting.Builder()
         .name("hidden-modules")
         .description("Which modules not to show in the list.")
-        .defaultValue(new ArrayList<>())
         .build()
     );
 
@@ -68,7 +67,7 @@ public class ActiveModulesHud extends HudElement {
         .description("Outline width")
         .defaultValue(4)
         .min(1)
-        .sliderMin(1).sliderMax(10)
+        .sliderMin(1)
         .visible(outlines::get)
         .build()
     );

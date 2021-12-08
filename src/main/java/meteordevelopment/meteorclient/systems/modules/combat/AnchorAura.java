@@ -88,8 +88,7 @@ public class AnchorAura extends Module {
         .name("place-delay")
         .description("The tick delay between placing anchors.")
         .defaultValue(2)
-        .min(0)
-        .max(20)
+        .range(0, 10)
         .visible(place::get)
         .build()
     );
@@ -126,8 +125,7 @@ public class AnchorAura extends Module {
         .name("break-delay")
         .description("The tick delay between breaking anchors.")
         .defaultValue(10)
-        .min(0)
-        .max(10)
+        .range(0, 10)
         .build()
     );
 

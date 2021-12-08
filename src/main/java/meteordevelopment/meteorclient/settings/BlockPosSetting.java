@@ -46,47 +46,16 @@ public class BlockPosSetting extends Setting<BlockPos> {
         int[] value = tag.getIntArray("value");
         set(new BlockPos(value[0], value[1], value[2]));
 
-        changed();
+        onChanged();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private BlockPos defaultValue = new BlockPos(0, 0, 0);
-        private Consumer<BlockPos> onChanged;
-        private Consumer<Setting<BlockPos>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, BlockPos, BlockPosSetting> {
+        public Builder() {
+            super(new BlockPos(0, 0, 0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(BlockPos defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<BlockPos> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<BlockPos>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public BlockPosSetting build() {
             return new BlockPosSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

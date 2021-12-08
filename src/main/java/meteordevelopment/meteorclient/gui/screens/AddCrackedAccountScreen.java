@@ -32,7 +32,7 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         // Add
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            if (!name.get().isEmpty()) {
+            if (!name.get().isEmpty() && (name.get().length() < 17) && name.get().matches("^[a-zA-Z0-9_]+$")) {
                 CrackedAccount account = new CrackedAccount(name.get());
                 if (!(Accounts.get().exists(account))) {
                     AccountsScreen.addAccount(this, parent, account);

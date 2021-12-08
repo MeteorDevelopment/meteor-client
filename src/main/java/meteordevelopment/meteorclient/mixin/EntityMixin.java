@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.render.Outlines;
+import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin {
@@ -93,7 +93,7 @@ public abstract class EntityMixin {
 
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
     private void onGetTeamColorValue(CallbackInfoReturnable<Integer> info) {
-        if (Outlines.renderingOutlines) {
+        if (EntityShaders.renderingOutlines) {
             info.setReturnValue(Modules.get().get(ESP.class).getColor((Entity) (Object) this).getPacked());
         }
     }

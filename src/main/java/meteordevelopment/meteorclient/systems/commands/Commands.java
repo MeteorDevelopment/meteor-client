@@ -18,7 +18,7 @@ import net.fabricmc.fabric.api.client.command.v1.ClientCommandManager;
 
 import java.util.*;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Commands extends System<Commands> {
     private final CommandDispatcher<CommandSource> DISPATCHER = (CommandDispatcher<CommandSource>)(Object)ClientCommandManager.DISPATCHER;
@@ -68,6 +68,9 @@ public class Commands extends System<Commands> {
         add(new GiveCommand());
         add(new NameHistoryCommand());
         add(new BindCommand());
+        add(new FOVCommand());
+        add(new RotationCommand());
+        add(new WaypointCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }

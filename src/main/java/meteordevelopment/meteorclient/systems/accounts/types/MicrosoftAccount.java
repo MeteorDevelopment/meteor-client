@@ -10,6 +10,8 @@ import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
 import net.minecraft.client.util.Session;
 
+import java.util.Optional;
+
 public class MicrosoftAccount extends Account<MicrosoftAccount> {
     public MicrosoftAccount(String refreshToken) {
         super(AccountType.Microsoft, refreshToken);
@@ -21,22 +23,13 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
     }
 
     @Override
-    public boolean fetchHead() {
-        try {
-            return cache.makeHead("https://www.mc-heads.net/avatar/" + cache.uuid + "/8");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
     public boolean login() {
         super.login();
 
         String token = auth();
         if (token == null) return false;
 
-        setSession(new Session(cache.username, cache.uuid, token, "mojang"));
+        setSession(new Session(cache.username, cache.uuid, token, Optional.empty(), Optional.empty(), Session.AccountType.MSA));
         return true;
     }
 

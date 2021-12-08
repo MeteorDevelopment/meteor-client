@@ -41,7 +41,6 @@ public class BossStack extends Module {
             .description("The spacing reduction between each boss bar.")
             .defaultValue(10)
             .min(0)
-            .sliderMax(10)
             .build()
     );
 

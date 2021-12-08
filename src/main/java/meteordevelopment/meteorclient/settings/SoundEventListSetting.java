@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -27,7 +28,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -79,47 +80,22 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
             if (soundEvent != null) get().add(soundEvent);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<SoundEvent> defaultValue;
-        private Consumer<List<SoundEvent>> onChanged;
-        private Consumer<Setting<List<SoundEvent>>> onModuleActivated;
-        private IVisible visible;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+
+    public static class Builder extends SettingBuilder<Builder, List<SoundEvent>, SoundEventListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder defaultValue(SoundEvent... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
-        public Builder defaultValue(List<SoundEvent> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<SoundEvent>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<SoundEvent>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public SoundEventListSetting build() {
             return new SoundEventListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

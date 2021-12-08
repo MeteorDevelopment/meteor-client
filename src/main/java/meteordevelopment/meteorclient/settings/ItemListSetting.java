@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -48,7 +49,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -85,47 +86,20 @@ public class ItemListSetting extends Setting<List<Item>> {
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<Item> defaultValue;
-        private Consumer<List<Item>> onChanged;
-        private Consumer<Setting<List<Item>>> onModuleActivated;
-        private IVisible visible;
+    public static class Builder extends SettingBuilder<Builder, List<Item>, ItemListSetting> {
         private Predicate<Item> filter;
         private boolean bypassFilterWhenSavingAndLoading;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<Item> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<Item>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<Item>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
+        public Builder defaultValue(Item... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
         public Builder filter(Predicate<Item> filter) {
@@ -138,6 +112,7 @@ public class ItemListSetting extends Setting<List<Item>> {
             return this;
         }
 
+        @Override
         public ItemListSetting build() {
             return new ItemListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter, bypassFilterWhenSavingAndLoading);
         }

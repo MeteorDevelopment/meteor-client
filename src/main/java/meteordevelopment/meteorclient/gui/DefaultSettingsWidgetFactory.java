@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     protected interface Factory {
@@ -152,9 +152,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void intW(WTable table, IntSetting setting) {
-        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.getSliderMin(), setting.getSliderMax(), setting.noSlider)).expandX().widget();
-        edit.min = setting.min;
-        edit.max = setting.max;
+        WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
 
         edit.actionOnRelease = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
@@ -164,11 +162,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void doubleW(WTable table, DoubleSetting setting) {
-        WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.getSliderMin(), setting.getSliderMax(), setting.noSlider);
-        edit.min = setting.min;
-        edit.max = setting.max;
-        edit.decimalPlaces = setting.decimalPlaces;
-
+        WDoubleEdit edit = theme.doubleEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider);
         table.add(edit).expandX();
 
         Runnable action = () -> {
@@ -227,7 +221,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void keybindW(WTable table, KeybindSetting setting) {
         WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefaultValue())).expandX().widget();
-        keybind.action = setting::changed;
+        keybind.action = setting::onChanged;
         setting.widget = keybind;
     }
 

@@ -28,6 +28,7 @@ import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.LiteralText;
 
+import java.util.List;
 import java.util.Random;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -177,7 +178,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
+                    Modules.get().get(InfinityMiner.class).targetBlocks.set(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
                     runInfinityMiner();
                 }
             }
@@ -193,8 +194,8 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).targetBlock.set(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock());
-                    Modules.get().get(InfinityMiner.class).repairBlock.set(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock());
+                    Modules.get().get(InfinityMiner.class).targetBlocks.set(List.of(context.getArgument("target", BlockStateArgument.class).getBlockState().getBlock()));
+                    Modules.get().get(InfinityMiner.class).repairBlocks.set(List.of(context.getArgument("repair", BlockStateArgument.class).getBlockState().getBlock()));
                     runInfinityMiner();
                 }
             }
@@ -354,7 +355,7 @@ public class SwarmCommand extends Command {
     private void runInfinityMiner() {
         InfinityMiner infinityMiner = Modules.get().get(InfinityMiner.class);
         if (infinityMiner.isActive()) infinityMiner.toggle();
-        infinityMiner.smartModuleToggle.set(true);
+//        infinityMiner.smartModuleToggle.set(true);
         if (!infinityMiner.isActive()) infinityMiner.toggle();
     }
 

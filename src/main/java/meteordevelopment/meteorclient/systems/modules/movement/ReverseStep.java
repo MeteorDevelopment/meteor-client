@@ -20,21 +20,19 @@ public class ReverseStep extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> fallSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fall-speed")
-            .description("How fast to fall in blocks per second.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("fall-speed")
+        .description("How fast to fall in blocks per second.")
+        .defaultValue(3)
+        .min(0)
+        .build()
     );
 
     private final Setting<Double> fallDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fall-distance")
-            .description("The maximum fall distance this setting will activate at.")
-            .defaultValue(3)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("fall-distance")
+        .description("The maximum fall distance this setting will activate at.")
+        .defaultValue(3)
+        .min(0)
+        .build()
     );
 
     public ReverseStep() {

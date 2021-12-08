@@ -29,7 +29,7 @@ public class TextRadarHud extends HudElement {
         .description("The max number of players to show.")
         .defaultValue(10)
         .min(1)
-        .sliderMin(1).sliderMax(20)
+        .sliderRange(1, 20)
         .build()
     );
 

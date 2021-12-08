@@ -27,9 +27,10 @@ import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.WorldChunk;
 
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -37,35 +38,41 @@ public class Search extends Module {
     // General
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-            .name("blocks")
-            .description("Blocks to search for.")
-            .defaultValue(new ArrayList<>(0))
-            .onChanged(blocks1 -> {
-                if (isActive() && Utils.canUpdate()) onActivate();
-            })
-            .build()
+        .name("blocks")
+        .description("Blocks to search for.")
+        .onChanged(blocks1 -> {
+            if (isActive() && Utils.canUpdate()) onActivate();
+        })
+        .build()
     );
 
     private final Setting<SBlockData> defaultBlockConfig = sgGeneral.add(new GenericSetting.Builder<SBlockData>()
-            .name("default-block-config")
-            .description("Default block config.")
-            .defaultValue(new SBlockData(ShapeMode.Lines, new SettingColor(0, 255, 200), new SettingColor(0, 255, 200, 25), true, new SettingColor(0, 255, 200, 125)))
-            .build()
+        .name("default-block-config")
+        .description("Default block config.")
+        .defaultValue(
+            new SBlockData(
+                ShapeMode.Lines,
+                new SettingColor(0, 255, 200),
+                new SettingColor(0, 255, 200, 25),
+                true,
+                new SettingColor(0, 255, 200, 125)
+            )
+        )
+        .build()
     );
 
     private final Setting<Map<Block, SBlockData>> blockConfigs = sgGeneral.add(new BlockDataSetting.Builder<SBlockData>()
-            .name("block-configs")
-            .description("Config for each block.")
-            .defaultValue(new HashMap<>(0))
-            .defaultData(defaultBlockConfig)
-            .build()
+        .name("block-configs")
+        .description("Config for each block.")
+        .defaultData(defaultBlockConfig)
+        .build()
     );
 
     private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
-            .name("tracers")
-            .description("Render tracer lines.")
-            .defaultValue(false)
-            .build()
+        .name("tracers")
+        .description("Render tracer lines.")
+        .defaultValue(false)
+        .build()
     );
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
@@ -88,7 +95,7 @@ public class Search extends Module {
             groups.clear();
         }
 
-        for (WorldChunk chunk : Utils.chunks()) {
+        for (Chunk chunk : Utils.chunks()) {
             searchChunk(chunk, null);
         }
 

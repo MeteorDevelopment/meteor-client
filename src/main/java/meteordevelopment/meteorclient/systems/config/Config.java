@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.Version;
-import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.nbt.NbtCompound;
@@ -22,23 +21,35 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Config extends System<Config> {
+    // Version
     public final Version version;
+    public final String devBuild = "";
 
+    // Visual
     public String font = ConfigTab.font.get();
     public boolean customFont = ConfigTab.customFont.get();
+    public double rainbowSpeed = ConfigTab.rainbowSpeed.get();
+
+    // Chat
+    public String prefix = "/";
+    public boolean chatFeedback = ConfigTab.chatFeedback.get();
+    public boolean deleteChatFeedback = ConfigTab.deleteChatFeedback.get();
+
+    // Misc
     public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
-
-    public final String prefix = "/";
-    public boolean chatCommandsInfo = ConfigTab.chatCommandsInfo.get();
-    public boolean deleteChatCommandsInfo = ConfigTab.deleteChatCommandsInfo.get();
-
     public boolean useTeamColor = ConfigTab.useTeamColor.get();
-
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
         super("config");
+    }
 
+    public static Config get() {
+        return Systems.get(Config.class);
+    }
+
+    @Override
+    public void init() {
         ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
 
         String versionString = metadata.getVersion().getFriendlyString();
@@ -47,9 +58,7 @@ public class Config extends System<Config> {
         version = new Version(versionString);
     }
 
-    public static Config get() {
-        return Systems.get(Config.class);
-    }
+    // Serialisation
 
     @Override
     public NbtCompound toTag() {
@@ -58,15 +67,15 @@ public class Config extends System<Config> {
 
         tag.putString("font", font);
         tag.putBoolean("customFont", customFont);
-        tag.putDouble("rainbowSpeed", RainbowColors.GLOBAL.getSpeed());
+        tag.putDouble("rainbowSpeed", ConfigTab.rainbowSpeed.get());
+
+        tag.putBoolean("chatFeedback", chatFeedback);
+        tag.putBoolean("deleteChatFeedback", deleteChatFeedback);
+
         tag.putInt("rotationHoldTicks", rotationHoldTicks);
-
-        tag.putBoolean("chatCommandsInfo", chatCommandsInfo);
-        tag.putBoolean("deleteChatCommandsInfo", deleteChatCommandsInfo);
-
         tag.putBoolean("useTeamColor", useTeamColor);
+        tag.put("dontShowAgainPrompts", listToTag(dontShowAgainPrompts));
 
-        tag.put("dontShowAgainPrompts", listToNbt(dontShowAgainPrompts));
         return tag;
     }
 
@@ -74,42 +83,45 @@ public class Config extends System<Config> {
     public Config fromTag(NbtCompound tag) {
         font = getString(tag, "font", ConfigTab.font);
         customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
-        RainbowColors.GLOBAL.setSpeed(tag.contains("rainbowSpeed") ? tag.getDouble("rainbowSpeed") : ConfigTab.rainbowSpeed.getDefaultValue() / 100);
+        rainbowSpeed = getDouble(tag, "rainbowSpeed", ConfigTab.rainbowSpeed);
+
+        chatFeedback = getBoolean(tag, "chatFeedback", ConfigTab.chatFeedback);
+        deleteChatFeedback = getBoolean(tag, "deleteChatFeedback", ConfigTab.deleteChatFeedback);
+
         rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.rotationHoldTicks);
-
-        chatCommandsInfo = getBoolean(tag, "chatCommandsInfo", ConfigTab.chatCommandsInfo);
-        deleteChatCommandsInfo = getBoolean(tag, "deleteChatCommandsInfo", ConfigTab.deleteChatCommandsInfo);
-
         useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
-
-        dontShowAgainPrompts.clear();
-        for (NbtElement item : tag.getList("dontShowAgainPrompts", NbtElement.STRING_TYPE)) {
-            dontShowAgainPrompts.add(item.asString());
-        }
+        dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
 
         return this;
     }
 
+    // Utils
+
     private boolean getBoolean(NbtCompound tag, String key, Setting<Boolean> setting) {
-        return tag.contains(key) ? tag.getBoolean(key) : setting.get();
+        return tag.contains(key) ? tag.getBoolean(key) : setting.getDefaultValue();
     }
 
     private String getString(NbtCompound tag, String key, Setting<String> setting) {
-        return tag.contains(key) ? tag.getString(key) : setting.get();
+        return tag.contains(key) ? tag.getString(key) : setting.getDefaultValue();
     }
 
     private double getDouble(NbtCompound tag, String key, Setting<Double> setting) {
-        return tag.contains(key) ? tag.getDouble(key) : setting.get();
+        return tag.contains(key) ? tag.getDouble(key) : setting.getDefaultValue();
     }
 
     private int getInt(NbtCompound tag, String key, Setting<Integer> setting) {
-        return tag.contains(key) ? tag.getInt(key) : setting.get();
+        return tag.contains(key) ? tag.getInt(key) : setting.getDefaultValue();
     }
 
-    private NbtList listToNbt(List<String> lst) {
+    private NbtList listToTag(List<String> list) {
         NbtList nbt = new NbtList();
-        for (String item: lst)
-            nbt.add(NbtString.of(item));
+        for (String item : list) nbt.add(NbtString.of(item));
         return nbt;
+    }
+
+    private List<String> listFromTag(NbtCompound tag, String key) {
+        List<String> list = new ArrayList<>();
+        for (NbtElement item : tag.getList(key, 8)) list.add(item.asString());
+        return list;
     }
 }

@@ -55,32 +55,29 @@ public class Flight extends Module {
     // Anti Kick
 
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
-            .name("mode")
-            .description("The mode for anti kick.")
-            .defaultValue(AntiKickMode.Packet)
-            .build()
+        .name("mode")
+        .description("The mode for anti kick.")
+        .defaultValue(AntiKickMode.Packet)
+        .build()
     );
 
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The amount of delay, in ticks, between toggles in normal mode.")
-            .defaultValue(80)
-            .min(1)
-            .max(5000)
-            .sliderMax(200)
-            .visible(() -> antiKickMode.get() == AntiKickMode.Normal)
-            .build()
+        .name("delay")
+        .description("The amount of delay, in ticks, between toggles in normal mode.")
+        .defaultValue(80)
+        .range(1, 5000)
+        .sliderMax(200)
+        .visible(() -> antiKickMode.get() == AntiKickMode.Normal)
+        .build()
     );
 
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
-            .name("off-time")
-            .description("The amount of delay, in ticks, that Flight is toggled off for in normal mode.")
-            .defaultValue(5)
-            .min(1)
-            .max(20)
-            .sliderMax(10)
-            .visible(() -> antiKickMode.get() == AntiKickMode.Normal)
-            .build()
+        .name("off-time")
+        .description("The amount of delay, in ticks, that Flight is toggled off for in normal mode.")
+        .defaultValue(5)
+        .range(1, 20)
+        .visible(() -> antiKickMode.get() == AntiKickMode.Normal)
+        .build()
     );
 
     public Flight() {
@@ -154,7 +151,7 @@ public class Flight extends Module {
                 you get when using vanilla fly*/
 
                 mc.player.getAbilities().flying = false;
-                mc.player.flyingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
+                mc.player.airStrafingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
 
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();

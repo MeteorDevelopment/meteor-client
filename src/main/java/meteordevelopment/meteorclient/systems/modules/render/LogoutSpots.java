@@ -102,7 +102,7 @@ public class LogoutSpots extends Module {
 
     public LogoutSpots() {
         super(Categories.Render, "logout-spots", "Displays a box where another player has logged out at.");
-        lineColor.changed();
+        lineColor.onChanged();
     }
 
     @Override

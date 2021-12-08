@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
+import meteordevelopment.orbit.EventHandler;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -25,14 +27,16 @@ import java.util.Map;
 public class Systems {
     @SuppressWarnings("rawtypes")
     private static final Map<Class<? extends System>, System<?>> systems = new HashMap<>();
-
     private static final List<Runnable> preLoadTasks = new ArrayList<>(1);
-    private static System<?> config;
+
+    public static void addPreLoadTask(Runnable task) {
+        preLoadTasks.add(task);
+    }
 
     public static void init() {
-        config = add(new Config());
-        config.load();
+        System<?> config = add(new Config());
         config.init();
+        config.load();
 
         add(new Modules());
         add(new Commands());
@@ -43,21 +47,27 @@ public class Systems {
         add(new Profiles());
         add(new Proxies());
 
-        for (System<?> system : systems.values()) {
-            if (system != config) system.init();
-        }
+        MeteorClient.EVENT_BUS.subscribe(Systems.class);
     }
 
     private static System<?> add(System<?> system) {
         systems.put(system.getClass(), system);
         MeteorClient.EVENT_BUS.subscribe(system);
+        system.init();
 
         return system;
     }
 
+    // save/load
+
+    @EventHandler
+    private static void onGameLeft(GameLeftEvent event) {
+        save();
+    }
+
     public static void save(File folder) {
-        MeteorClient.LOG.info("Saving");
         long start = java.lang.System.currentTimeMillis();
+        MeteorClient.LOG.info("Saving");
 
         for (System<?> system : systems.values()) system.save(folder);
 
@@ -68,19 +78,12 @@ public class Systems {
         save(null);
     }
 
-    public static void addPreLoadTask(Runnable task) {
-        preLoadTasks.add(task);
-    }
-
     public static void load(File folder) {
-        MeteorClient.LOG.info("Loading");
         long start = java.lang.System.currentTimeMillis();
+        MeteorClient.LOG.info("Loading");
 
         for (Runnable task : preLoadTasks) task.run();
-
-        for (System<?> system : systems.values()) {
-            if (system != config) system.load(folder);
-        }
+        for (System<?> system : systems.values()) system.load(folder);
 
         MeteorClient.LOG.info("Loaded in {} milliseconds", java.lang.System.currentTimeMillis() - start);
     }

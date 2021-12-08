@@ -11,33 +11,48 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import org.apache.commons.lang3.RandomStringUtils;
 
-import java.util.Collections;
 import java.util.List;
 
 public class Spam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("The delay between specified messages in ticks.")
-            .defaultValue(20)
-            .min(0)
-            .sliderMax(200)
-            .build()
-    );
-
-    private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
-            .name("randomise")
-            .description("Selects a random message from your spam message list.")
-            .defaultValue(false)
-            .build()
-    );
-
+    
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to use for spam.")
-        .defaultValue(Collections.emptyList())
+        .build()
+    );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+        .name("delay")
+        .description("The delay between specified messages in ticks.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(200)
+        .build()
+    );
+
+    private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
+        .name("randomise")
+        .description("Selects a random message from your spam message list.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> bypass = sgGeneral.add(new BoolSetting.Builder()
+        .name("bypass")
+        .description("Add random text at the end of the message to try to bypass anti spams.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> length = sgGeneral.add(new IntSetting.Builder()
+        .name("length")
+        .description("Number of characters used to bypass anti spam.")
+        .visible(bypass::get)
+        .defaultValue(16)
+        .sliderRange(1, 256)
         .build()
     );
 
@@ -61,14 +76,21 @@ public class Spam extends Module {
             int i;
             if (random.get()) {
                 i = Utils.random(0, messages.get().size());
-            } else {
+            }
+            else {
                 if (messageI >= messages.get().size()) messageI = 0;
                 i = messageI++;
             }
 
-            mc.player.sendChatMessage(messages.get().get(i));
+            String text = messages.get().get(i);
+            if (bypass.get()) {
+                text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
+            }
+
+            mc.player.sendChatMessage(text);
             timer = delay.get();
-        } else {
+        }
+        else {
             timer--;
         }
     }

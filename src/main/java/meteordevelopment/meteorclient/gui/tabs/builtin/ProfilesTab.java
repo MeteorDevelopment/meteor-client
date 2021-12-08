@@ -21,12 +21,11 @@ import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProfilesTab extends Tab {
 
@@ -35,7 +34,7 @@ public class ProfilesTab extends Tab {
     }
 
     @Override
-    protected TabScreen createScreen(GuiTheme theme) {
+    public TabScreen createScreen(GuiTheme theme) {
         return new ProfilesScreen(theme, this);
     }
 
@@ -95,14 +94,7 @@ public class ProfilesTab extends Tab {
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(Profiles.get().toTag());
-
-            if (clipboard != null) {
-                Profiles.get().fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(Profiles.get());
         }
     }
 

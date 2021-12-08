@@ -185,16 +185,18 @@ public class LocateCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() == Items.FILLED_MAP) {
                 NbtCompound tag = stack.getNbt();
-                NbtList nbt1 = (NbtList) tag.get("Decorations");
-                if (nbt1 != null) {
-                    NbtCompound iconNBT = nbt1.getCompound(0);
-                    if (iconNBT != null) {
-                        Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-                        BaseText text = new LiteralText("Monument located at ");
-                        text.append(ChatUtils.formatCoords(coords));
-                        text.append(".");
-                        info(text);
-                        return SINGLE_SUCCESS;
+                if (tag != null) {
+                    NbtList nbt1 = (NbtList) tag.get("Decorations");
+                    if (nbt1 != null) {
+                        NbtCompound iconNBT = nbt1.getCompound(0);
+                        if (iconNBT != null) {
+                            Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
+                            BaseText text = new LiteralText("Monument located at ");
+                            text.append(ChatUtils.formatCoords(coords));
+                            text.append(".");
+                            info(text);
+                            return SINGLE_SUCCESS;
+                        }
                     }
                 }
             }

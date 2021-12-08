@@ -30,7 +30,10 @@ import net.minecraft.item.Items;
 import net.minecraft.util.math.ChunkPos;
 
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
 
 public class StashFinder extends Module {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
@@ -40,7 +43,7 @@ public class StashFinder extends Module {
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
         .name("storage-blocks")
         .description("Select the storage blocks to search for.")
-        .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+        .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
         .build()
     );
 
@@ -49,6 +52,7 @@ public class StashFinder extends Module {
         .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
+        .sliderMin(1)
         .build()
     );
 

@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public abstract class WContainer extends WWidget {
     public final List<Cell<?>> cells = new ArrayList<>();

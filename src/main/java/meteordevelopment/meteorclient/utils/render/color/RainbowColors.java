@@ -15,23 +15,27 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RainbowColors {
-
-    public static final RainbowColor GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
-
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
     private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
+    public static RainbowColor GLOBAL;
+
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
+
+        GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
     }
 
     public static void addSetting(Setting<SettingColor> setting) {

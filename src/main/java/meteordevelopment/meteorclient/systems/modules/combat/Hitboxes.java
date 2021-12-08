@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 
@@ -22,7 +21,7 @@ public class Hitboxes extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Which entities to target.")
-        .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
+        .defaultValue(EntityType.PLAYER)
         .build()
     );
 

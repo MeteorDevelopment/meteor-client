@@ -23,7 +23,7 @@ public class PlayerModelHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -45,8 +45,8 @@ public class PlayerModelHud extends HudElement {
         .name("custom-yaw")
         .description("Custom yaw for when copy yaw is off.")
         .defaultValue(0)
-        .min(-180).max(180)
-        .sliderMin(-180).sliderMax(180)
+        .range(-180, 180)
+        .sliderRange(-180, 180)
         .visible(() -> !copyYaw.get())
         .build()
     );
@@ -55,8 +55,8 @@ public class PlayerModelHud extends HudElement {
         .name("custom-pitch")
         .description("Custom pitch for when copy pitch is off.")
         .defaultValue(0)
-        .min(-180).max(180)
-        .sliderMin(-180).sliderMax(180)
+        .range(-90, 90)
+        .sliderRange(-90, 90)
         .visible(() -> !copyPitch.get())
         .build()
     );

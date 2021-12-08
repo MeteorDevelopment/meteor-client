@@ -24,7 +24,6 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.nbt.NbtCompound;
 
 public class FriendsTab extends Tab {
     public FriendsTab() {
@@ -125,14 +124,7 @@ public class FriendsTab extends Tab {
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(Friends.get().toTag());
-
-            if (clipboard != null) {
-                Friends.get().fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(Friends.get());
         }
     }
 }

@@ -52,13 +52,13 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     public boolean set(T value) {
         if (!isValueValid(value)) return false;
         this.value = value;
-        changed();
+        onChanged();
         return true;
     }
 
     public void reset(boolean callbacks) {
         value = defaultValue;
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     public void reset() {
@@ -75,15 +75,19 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         if (newValue != null) {
             if (isValueValid(newValue)) {
                 value = newValue;
-                changed();
+                onChanged();
             }
         }
 
         return newValue != null;
     }
 
-    public void changed() {
+    public void onChanged() {
         if (onChanged != null) onChanged.accept(value);
+    }
+
+    public boolean changed() {
+        return !Objects.equals(value, defaultValue);
     }
 
     public void onActivated() {
@@ -139,5 +143,49 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         if (registry.containsId(id)) return registry.get(id);
 
         return null;
+    }
+
+    public abstract static class SettingBuilder<B, V, S> {
+        protected String name = "undefined", description = "";
+        protected V defaultValue;
+        protected IVisible visible;
+        protected Consumer<V> onChanged;
+        protected Consumer<Setting<V>> onModuleActivated;
+
+        protected SettingBuilder(V defaultValue) {
+            this.defaultValue = defaultValue;
+        }
+
+        public B name(String name) {
+            this.name = name;
+            return (B) this;
+        }
+
+        public B description(String description) {
+            this.description = description;
+            return (B) this;
+        }
+
+        public B defaultValue(V defaultValue) {
+            this.defaultValue = defaultValue;
+            return (B) this;
+        }
+
+        public B visible(IVisible visible) {
+            this.visible = visible;
+            return (B) this;
+        }
+
+        public B onChanged(Consumer<V> onChanged) {
+            this.onChanged = onChanged;
+            return (B) this;
+        }
+
+        public B onModuleActivated(Consumer<Setting<V>> onModuleActivated) {
+            this.onModuleActivated = onModuleActivated;
+            return (B) this;
+        }
+
+        public abstract S build();
     }
 }

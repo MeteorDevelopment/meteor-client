@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftServerAccessor;
@@ -21,12 +22,13 @@ import meteordevelopment.meteorclient.utils.player.EChestMemory;
 import meteordevelopment.meteorclient.utils.render.PeekScreen;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockEntityIterator;
-import meteordevelopment.meteorclient.utils.world.WorldChunkIterator;
+import meteordevelopment.meteorclient.utils.world.ChunkIterator;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShulkerBoxBlock;
 import net.minecraft.block.entity.BlockEntity;
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
@@ -44,7 +46,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.registry.Registry;
-import net.minecraft.world.chunk.WorldChunk;
+import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
@@ -53,17 +55,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
     private static final Random random = new Random();
-    private static final DecimalFormat df;
-    public static MinecraftClient mc;
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static final Color WHITE = new Color(255, 255, 255);
@@ -71,13 +70,19 @@ public class Utils {
     public static boolean renderingEntityOutline = false;
     public static int minimumLightLevel;
     public static double frameTime;
+    public static Screen screenToOpen;
 
-    static {
-        df = new DecimalFormat("0");
-        df.setMaximumFractionDigits(340);
-        DecimalFormatSymbols dfs = new DecimalFormatSymbols();
-        dfs.setDecimalSeparator('.');
-        df.setDecimalFormatSymbols(dfs);
+    @Init(stage = InitStage.Pre)
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(Utils.class);
+    }
+
+    @EventHandler
+    private static void onTick(TickEvent.Post event) {
+        if (screenToOpen != null && mc.currentScreen == null) {
+            mc.setScreen(screenToOpen);
+            screenToOpen = null;
+        }
     }
 
     public static double getPlayerSpeed() {
@@ -88,9 +93,7 @@ public class Utils {
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
         Timer timer = Modules.get().get(Timer.class);
-        if (timer.isActive()) {
-            length *= Modules.get().get(Timer.class).getMultiplier();
-        }
+        if (timer.isActive()) length *= Modules.get().get(Timer.class).getMultiplier();
 
         return length * 20;
     }
@@ -105,8 +108,8 @@ public class Utils {
         return String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
     }
 
-    public static Iterable<WorldChunk> chunks() {
-        return WorldChunkIterator::new;
+    public static Iterable<Chunk> chunks() {
+        return ChunkIterator::new;
     }
 
     public static Iterable<BlockEntity> blockEntities() {
@@ -125,6 +128,16 @@ public class Utils {
                 Registry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent((enchantment) -> enchantments.put(enchantment, tag.getInt("lvl")));
             }
         }
+    }
+
+    public static boolean hasEnchantments(ItemStack itemStack, Enchantment... enchantments) {
+        if (itemStack.isEmpty()) return false;
+
+        Object2IntMap<Enchantment> itemEnchantments = new Object2IntArrayMap<>();
+        getEnchantments(itemStack, itemEnchantments);
+        for (Enchantment enchantment : enchantments) if (!itemEnchantments.containsKey(enchantment)) return false;
+
+        return true;
     }
 
     public static int getRenderDistance() {
@@ -156,7 +169,7 @@ public class Utils {
     public static boolean openContainer(ItemStack itemStack, ItemStack[] contents, boolean pause) {
         if (hasItems(itemStack) || itemStack.getItem() == Items.ENDER_CHEST) {
             Utils.getItemsInContainerItem(itemStack, contents);
-            if (pause) MeteorClient.screenToOpen = new PeekScreen(itemStack, contents);
+            if (pause) screenToOpen = new PeekScreen(itemStack, contents);
             else mc.setScreen(new PeekScreen(itemStack, contents));
             return true;
         }
@@ -216,6 +229,8 @@ public class Utils {
     }
 
     public static int search(String text, String filter) {
+        if (filter.isEmpty()) return 1;
+
         int wordsFound = 0;
         text = text.toLowerCase(Locale.ROOT);
         String[] words = filter.toLowerCase(Locale.ROOT).split(" ");
@@ -245,7 +260,7 @@ public class Utils {
     public static String getWorldName() {
         if (mc.isInSingleplayer()) {
             // Singleplayer
-            File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey());
+            File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
             }
@@ -337,13 +352,13 @@ public class Utils {
     }
 
     public static String getButtonName(int button) {
-        switch (button) {
-            case -1: return "Unknown";
-            case 0:  return "Mouse Left";
-            case 1:  return "Mouse Right";
-            case 2:  return "Mouse Middle";
-            default: return "Mouse " + button;
-        }
+        return switch (button) {
+            case -1 -> "Unknown";
+            case 0 -> "Mouse Left";
+            case 1 -> "Mouse Right";
+            case 2 -> "Mouse Middle";
+            default -> "Mouse " + button;
+        };
     }
 
     public static byte[] readBytes(File file) {
@@ -472,7 +487,7 @@ public class Utils {
     }
 
     @SafeVarargs
-    public static <T> Object2BooleanOpenHashMap<T> asObject2BooleanOpenHashMap(T... checked) {
+    public static <T> Object2BooleanOpenHashMap<T> asO2BMap(T... checked) {
         Map<T, Boolean> map = new HashMap<>();
         for (T item : checked)
             map.put(item, true);

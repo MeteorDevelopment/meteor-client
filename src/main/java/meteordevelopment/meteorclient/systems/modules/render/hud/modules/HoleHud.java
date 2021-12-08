@@ -29,7 +29,7 @@ public class HoleHud extends HudElement {
     public final Setting<List<Block>> safe = sgGeneral.add(new BlockListSetting.Builder()
         .name("safe-blocks")
         .description("Which blocks to consider safe.")
-        .defaultValue(List.of(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK))
+        .defaultValue(Blocks.OBSIDIAN, Blocks.BEDROCK, Blocks.CRYING_OBSIDIAN, Blocks.NETHERITE_BLOCK)
         .build()
     );
 
@@ -38,7 +38,7 @@ public class HoleHud extends HudElement {
         .description("The scale.")
         .defaultValue(2)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 

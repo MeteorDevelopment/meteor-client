@@ -35,7 +35,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     @Override
     public void reset(boolean callbacks) {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -87,47 +87,20 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             if (type != null) get().add(type);
         }
 
-        changed();
+        onChanged();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<BlockEntityType<?>> defaultValue;
-        private Consumer<List<BlockEntityType<?>>> onChanged;
-        private Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<BlockEntityType<?>>, StorageBlockListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder defaultValue(BlockEntityType<?>... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
-        public Builder defaultValue(List<BlockEntityType<?>> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<BlockEntityType<?>>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public StorageBlockListSetting build() {
             return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
@@ -136,6 +109,11 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     private static class SRegistry extends Registry<BlockEntityType<?>> {
         public SRegistry() {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "storage-blocks")), Lifecycle.stable());
+        }
+
+        @Override
+        public int size() {
+            return STORAGE_BLOCKS.length;
         }
 
         @Nullable
@@ -167,7 +145,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
+        public Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
             return null;
         }
 

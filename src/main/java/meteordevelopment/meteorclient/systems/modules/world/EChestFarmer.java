@@ -56,7 +56,8 @@ public class EChestFarmer extends Module {
         .description("The amount of obsidian to farm.")
         .defaultValue(64)
         .sliderMax(128)
-        .min(8).max(512)
+        .range(8, 512)
+        .sliderRange(8, 128)
         .visible(selfToggle::get)
         .build()
     );

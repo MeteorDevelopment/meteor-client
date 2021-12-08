@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.entity.effect.StatusEffect;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static net.minecraft.entity.effect.StatusEffects.*;
@@ -25,7 +24,22 @@ public class PotionSaver extends Module {
     private final Setting<List<StatusEffect>> effects = sgGeneral.add(new StatusEffectListSetting.Builder()
         .name("effects")
         .description("The effects to preserve.")
-        .defaultValue(Arrays.asList(STRENGTH, ABSORPTION, RESISTANCE, FIRE_RESISTANCE, SPEED, HASTE, REGENERATION, WATER_BREATHING, SATURATION, LUCK, SLOW_FALLING, DOLPHINS_GRACE, CONDUIT_POWER, HERO_OF_THE_VILLAGE))
+        .defaultValue(
+            STRENGTH,
+            ABSORPTION,
+            RESISTANCE,
+            FIRE_RESISTANCE,
+            SPEED,
+            HASTE,
+            REGENERATION,
+            WATER_BREATHING,
+            SATURATION,
+            LUCK,
+            SLOW_FALLING,
+            DOLPHINS_GRACE,
+            CONDUIT_POWER,
+            HERO_OF_THE_VILLAGE
+        )
         .build()
     );
 

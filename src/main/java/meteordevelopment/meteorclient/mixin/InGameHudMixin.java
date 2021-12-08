@@ -10,12 +10,14 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.HideRenderModules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.client.option.Perspective;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -87,11 +89,21 @@ public abstract class InGameHudMixin {
         if (Modules.get().get(NoRender.class).noSpyglassOverlay()) info.cancel();
     }
 
+    @Redirect(method = "renderCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/Perspective;isFirstPerson()Z"))
+    private boolean alwaysRenderCrosshairInFreecam(Perspective perspective) {
+        if (Modules.get().isActive(Freecam.class)) return true;
+        return perspective.isFirstPerson();
+    }
+
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void onRenderCrosshair(MatrixStack matrices, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noCrosshair()) info.cancel();
     }
 
+    @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"), cancellable = true)
+    private void onRenderHeldItemTooltip(MatrixStack matrices, CallbackInfo info) {
+        if (Modules.get().get(NoRender.class).noHeldItemName()) info.cancel();
+    }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;hasJumpingMount()Z"))
     private boolean onSwitchBar(ClientPlayerEntity player) {
@@ -113,5 +125,4 @@ public abstract class InGameHudMixin {
     private LivingEntity modifyGetHeartCount(LivingEntity entity) {
         return Modules.get().get(HUD.class).mountHud() ? null : entity;
     }
-
 }

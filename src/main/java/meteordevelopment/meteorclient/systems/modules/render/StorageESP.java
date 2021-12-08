@@ -22,7 +22,6 @@ import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class StorageESP extends Module {
@@ -31,7 +30,7 @@ public class StorageESP extends Module {
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
             .name("storage-blocks")
             .description("Select the storage blocks to display.")
-            .defaultValue(Arrays.asList(StorageBlockListSetting.STORAGE_BLOCKS))
+            .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
             .build()
     );
 

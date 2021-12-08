@@ -7,7 +7,8 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
-import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.sound.WeightedSoundSet;
@@ -19,12 +20,14 @@ import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
-import net.minecraft.util.ChatUtil;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.StringHelper;
 import org.apache.commons.lang3.text.WordUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Names {
     private static final Map<StatusEffect, String> statusEffectNames = new HashMap<>(16);
@@ -35,6 +38,7 @@ public class Names {
     private static final Map<ParticleType<?>, String> particleTypesNames = new HashMap<>(64);
     private static final Map<Identifier, String> soundNames = new HashMap<>(64);
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Names.class);
     }
@@ -51,23 +55,23 @@ public class Names {
     }
 
     public static String get(StatusEffect effect) {
-        return statusEffectNames.computeIfAbsent(effect, effect1 -> ChatUtil.stripTextFormat(effect1.getName().getString()));
+        return statusEffectNames.computeIfAbsent(effect, effect1 -> StringHelper.stripTextFormat(effect1.getName().getString()));
     }
 
     public static String get(Item item) {
-        return itemNames.computeIfAbsent(item, item1 -> ChatUtil.stripTextFormat(item1.getName().getString()));
+        return itemNames.computeIfAbsent(item, item1 -> StringHelper.stripTextFormat(item1.getName().getString()));
     }
 
     public static String get(Block block) {
-        return blockNames.computeIfAbsent(block, block1 -> ChatUtil.stripTextFormat(block1.getName().getString()));
+        return blockNames.computeIfAbsent(block, block1 -> StringHelper.stripTextFormat(block1.getName().getString()));
     }
 
     public static String get(Enchantment enchantment) {
-        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> ChatUtil.stripTextFormat(new TranslatableText(enchantment1.getTranslationKey()).getString()));
+        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(new TranslatableText(enchantment1.getTranslationKey()).getString()));
     }
 
     public static String get(EntityType<?> entityType) {
-        return entityTypeNames.computeIfAbsent(entityType, entityType1 -> ChatUtil.stripTextFormat(entityType1.getName().getString()));
+        return entityTypeNames.computeIfAbsent(entityType, entityType1 -> StringHelper.stripTextFormat(entityType1.getName().getString()));
     }
 
     public static String get(ParticleType<?> type) {
@@ -77,13 +81,13 @@ public class Names {
 
     public static String getSoundName(Identifier id) {
         return soundNames.computeIfAbsent(id, identifier -> {
-            WeightedSoundSet soundSet = Utils.mc.getSoundManager().get(identifier);
+            WeightedSoundSet soundSet = mc.getSoundManager().get(identifier);
             if (soundSet == null) return identifier.getPath();
 
             Text text = soundSet.getSubtitle();
             if (text == null) return identifier.getPath();
 
-            return ChatUtil.stripTextFormat(text.getString());
+            return StringHelper.stripTextFormat(text.getString());
         });
     }
 }

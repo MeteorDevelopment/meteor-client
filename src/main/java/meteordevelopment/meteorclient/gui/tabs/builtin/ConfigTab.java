@@ -16,17 +16,19 @@ import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.nbt.NbtCompound;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ConfigTab extends Tab {
     private static final Settings settings = new Settings();
 
-    private static final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private static final SettingGroup sgVisual = settings.createGroup("Visual");
     private static final SettingGroup sgChat = settings.createGroup("Chat");
+    private static final SettingGroup sgMisc = settings.createGroup("Misc");
 
-    public static final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
+    // Visual
+
+    public static final Setting<Boolean> customFont = sgVisual.add(new BoolSetting.Builder()
         .name("custom-font")
         .description("Use a custom font.")
         .defaultValue(true)
@@ -35,7 +37,7 @@ public class ConfigTab extends Tab {
         .build()
     );
 
-    public static final Setting<String> font = sgGeneral.add(new ProvidedStringSetting.Builder()
+    public static final Setting<String> font = sgVisual.add(new ProvidedStringSetting.Builder()
         .name("font")
         .description("Custom font to use (picked from .minecraft/meteor-client/fonts folder).")
         .supplier(Fonts::getAvailableFonts)
@@ -49,19 +51,41 @@ public class ConfigTab extends Tab {
         .build()
     );
 
-    public static final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    public static final Setting<Double> rainbowSpeed = sgVisual.add(new DoubleSetting.Builder()
         .name("rainbow-speed")
         .description("The global rainbow speed.")
-        .min(0).max(10)
-        .sliderMax(5)
         .defaultValue(0.5)
-        .decimalPlaces(2)
+        .range(0, 10)
+        .sliderMax(5)
         .onChanged(value -> RainbowColors.GLOBAL.setSpeed(value / 100))
-        .onModuleActivated(setting -> setting.set(RainbowColors.GLOBAL.getSpeed() * 100))
+        .onModuleActivated(doubleSetting -> doubleSetting.set(Config.get().rainbowSpeed))
         .build()
     );
 
-    public static final Setting<Integer> rotationHoldTicks = sgGeneral.add(new IntSetting.Builder()
+    // Chat
+
+    public static final Setting<Boolean> chatFeedback = sgChat.add(new BoolSetting.Builder()
+        .name("chat-feedback")
+        .description("Sends chat feedback when meteor performs certain actions.")
+        .defaultValue(true)
+        .onChanged(aBoolean -> Config.get().chatFeedback = aBoolean)
+        .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().chatFeedback))
+        .build()
+    );
+
+    public static final Setting<Boolean> deleteChatFeedback = sgChat.add(new BoolSetting.Builder()
+        .name("delete-chat-feedback")
+        .description("Delete previous matching chat feedback to keep chat clear.")
+        .visible(chatFeedback::get)
+        .defaultValue(true)
+        .onChanged(aBoolean -> Config.get().deleteChatFeedback = aBoolean)
+        .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().deleteChatFeedback))
+        .build()
+    );
+
+    // Misc
+
+    public static final Setting<Integer> rotationHoldTicks = sgMisc.add(new IntSetting.Builder()
         .name("rotation-hold")
         .description("Hold long to hold server side rotation when not sending any packets.")
         .defaultValue(4)
@@ -70,26 +94,7 @@ public class ConfigTab extends Tab {
         .build()
     );
 
-    public static final Setting<Boolean> chatCommandsInfo = sgChat.add(new BoolSetting.Builder()
-        .name("chat-commands-info")
-        .description("Sends a chat message when you use chat commands (eg toggling module, changing a setting, etc).")
-        .defaultValue(true)
-        .onChanged(aBoolean -> Config.get().chatCommandsInfo = aBoolean)
-        .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().chatCommandsInfo))
-        .build()
-    );
-
-    public static final Setting<Boolean> deleteChatCommandsInfo = sgChat.add(new BoolSetting.Builder()
-        .name("delete-chat-commands-info")
-        .description("Delete previous chat messages.")
-        .defaultValue(true)
-        .onChanged(aBoolean -> Config.get().deleteChatCommandsInfo = aBoolean)
-        .onModuleActivated(booleanSetting -> booleanSetting.set(Config.get().deleteChatCommandsInfo))
-        .visible(chatCommandsInfo::get)
-        .build()
-    );
-
-    public static final Setting<Boolean> useTeamColor = sgGeneral.add(new BoolSetting.Builder()
+    public static final Setting<Boolean> useTeamColor = sgMisc.add(new BoolSetting.Builder()
         .name("use-team-color")
         .description("Uses player's team color for rendering things like esp and tracers.")
         .defaultValue(true)
@@ -140,14 +145,7 @@ public class ConfigTab extends Tab {
 
         @Override
         public boolean fromClipboard() {
-            NbtCompound clipboard = NbtUtils.fromClipboard(Config.get().toTag());
-
-            if (clipboard != null) {
-                Config.get().fromTag(clipboard);
-                return true;
-            }
-
-            return false;
+            return NbtUtils.fromClipboard(Config.get());
         }
     }
 }

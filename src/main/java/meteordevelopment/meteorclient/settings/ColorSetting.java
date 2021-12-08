@@ -34,7 +34,7 @@ public class ColorSetting extends Setting<SettingColor> {
         if (value == null) value = new SettingColor(defaultValue);
         else value.set(defaultValue);
 
-        if (callbacks) changed();
+        if (callbacks) onChanged();
     }
 
     @Override
@@ -59,47 +59,16 @@ public class ColorSetting extends Setting<SettingColor> {
     public SettingColor fromTag(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
-        changed();
+        onChanged();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private SettingColor defaultValue;
-        private Consumer<SettingColor> onChanged;
-        private Consumer<Setting<SettingColor>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, SettingColor, ColorSetting> {
+        public Builder() {
+            super(new SettingColor());
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(SettingColor defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<SettingColor> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<SettingColor>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public ColorSetting build() {
             return new ColorSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

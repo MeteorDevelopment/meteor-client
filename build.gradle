@@ -1,18 +1,14 @@
 plugins {
-	id 'fabric-loom' version '0.10-SNAPSHOT'
-	id 'maven-publish'
-	id 'com.github.johnrengelman.shadow' version '7.1.0'
+    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_16
+sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
 version = project.mod_version
 group = project.maven_group
-
-loom {
-    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
-}
 
 repositories {
     maven {
@@ -23,7 +19,6 @@ repositories {
         name = "meteor-maven-snapshots"
         url = "https://maven.meteordev.org/snapshots"
     }
-	jcenter()
     maven {
         url "https://gitlab.com/api/v4/projects/25805200/packages/maven"
     }
@@ -31,45 +26,46 @@ repositories {
 
     // For Canvas
     maven {
-        name = "dblsaiko"
-        url = "https://maven.dblsaiko.net/"
+        name = "vram"
+        url = "https://maven.vram.io/"
     }
+    jcenter()
 }
 
 dependencies {
-	def dependency = { id ->
-		implementation id
-		shadow id
+	def library = { id ->
+        modImplementation id
+        include id
 	}
 
-	// Minecraft
+	// Fabric
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
 	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API
-	modImplementation "net.fabricmc.fabric-api:fabric-api:${project.api_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.api_version}"
     shadow(fabricApi.module("fabric-api-base", project.api_version)) {
         transitive = false
     }
 
-	// For XRay compatibility
-	//modImplementation "com.github.CaffeineMC:sodium-fabric:${project.sodium_version}"
-    modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") {
-        transitive = false
-    }
+    // Compat fixes
+    modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") { transitive = false }
+    modCompileOnly("io.vram:canvas-fabric-mc118:1.0.+") { transitive = false }
 
-    // Canvas for compatibility
-    modCompileOnly("grondag:canvas-mc117-1.17:1.0.+") { transitive = false }
+	// Baritone integration
+    library "baritone:baritone:${project.baritone_version}"
 
-	// Baritone (the fork is standalone baritone and the only change is a setting to build it as fabric mod instead of forge one)
-    include modImplementation("baritone:baritone:${project.baritone_version}")
+    // Libraries
+    library "meteordevelopment:orbit:${project.orbit_version}"
+    library "meteordevelopment:starscript:${project.starscript_version}"
+    library "org.reflections:reflections:${project.reflections_version}"
+    library "io.gitlab.jfronny.libjf:libjf-unsafe-v0:${project.jfapi_version}"
+    include "io.gitlab.jfronny.libjf:libjf-base:${project.jfapi_version}"
+}
 
-	// Other dependencies
-	dependency "meteordevelopment:orbit:${project.orbit_version}"
-    dependency "meteordevelopment:starscript:${project.starscript_version}"
-    include modImplementation("io.gitlab.jfronny.libjf:libjf-unsafe-v0:${project.jfapi_version}")
-    include("io.gitlab.jfronny.libjf:libjf-base:${project.jfapi_version}")
+loom {
+    accessWidenerPath = file("src/main/resources/meteor-client.accesswidener")
 }
 
 shadowJar {
@@ -77,20 +73,12 @@ shadowJar {
 }
 
 processResources {
-	inputs.property "version", project.version
+    inputs.property "version", project.version
 
-    duplicatesStrategy = DuplicatesStrategy.WARN
-
-    from(sourceSets.main.resources.srcDirs) {
-		include "fabric.mod.json"
-		expand "version": project.version
-
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
         filter { line -> line.replace("@mc_version@", project.minecraft_version) }
-	}
-
-	from(sourceSets.main.resources.srcDirs) {
-		exclude "fabric.mod.json"
-	}
+    }
 }
 
 tasks.withType(JavaCompile).configureEach {

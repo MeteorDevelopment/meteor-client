@@ -15,6 +15,6 @@ public class FpsHud extends DoubleTextHudElement {
 
     @Override
     protected String getRight() {
-        return Integer.toString(((MinecraftClientAccessor) mc).getFps());
+        return Integer.toString(MinecraftClientAccessor.getFps());
     }
 }
