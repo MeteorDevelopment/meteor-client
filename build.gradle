@@ -60,6 +60,7 @@ dependencies {
     library "meteordevelopment:orbit:${project.orbit_version}"
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "org.reflections:reflections:${project.reflections_version}"
+    include "org.javassist:javassist:3.28.0-GA"
     library "io.gitlab.jfronny.libjf:libjf-unsafe-v0:${project.jfapi_version}"
     include "io.gitlab.jfronny.libjf:libjf-base:${project.jfapi_version}"
     modRuntimeOnly "io.gitlab.jfronny.libjf:libjf-devutil-v0:${project.jfapi_version}"
