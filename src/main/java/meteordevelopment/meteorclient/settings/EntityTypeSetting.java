@@ -46,7 +46,7 @@ public class EntityTypeSetting extends Setting<EntityType<?>> {
 
     @Override
     public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+        NbtCompound tag = saveGeneral();
 
         tag.putString("value", Registry.ENTITY_TYPE.getId(get()).toString());
         return tag;
