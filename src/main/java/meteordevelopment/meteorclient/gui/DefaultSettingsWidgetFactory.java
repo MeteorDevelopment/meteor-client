@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.gui.widgets.input.*;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.misc.Names;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -62,6 +63,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
+        factories.put(EntityTypeSetting.class, (table, setting) -> entityTypeW(table, (EntityTypeSetting) setting));
     }
 
     @Override
@@ -273,6 +275,22 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void itemListW(WTable table, ItemListSetting setting) {
         selectW(table, setting, () -> mc.setScreen(new ItemListSettingScreen(theme, setting)));
+    }
+
+    private void entityTypeW(WTable table, EntityTypeSetting setting) {
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+
+        WButton select = list.add(theme.button("Select")).widget();
+        WLabel label = list.add(theme.label(Names.get(setting.get()))).widget();
+
+        select.action = () -> {
+            EntityTypeSettingScreen screen = new EntityTypeSettingScreen(theme, setting);
+            screen.onClosed(() -> label.set(Names.get(setting.get())));
+
+            mc.setScreen(screen);
+        };
+
+        reset(table, setting, () -> label.set(Names.get(setting.get())));
     }
 
     private void entityTypeListW(WTable table, EntityTypeListSetting setting) {

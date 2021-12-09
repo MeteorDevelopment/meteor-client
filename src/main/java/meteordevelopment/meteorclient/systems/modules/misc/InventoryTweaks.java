@@ -25,6 +25,7 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.InventorySorter;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
@@ -32,7 +33,6 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -41,6 +41,7 @@ public class InventoryTweaks extends Module {
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
     private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
+    private final SettingGroup sgModel = settings.createGroup("Model");
 
     // General
 
@@ -149,6 +150,70 @@ public class InventoryTweaks extends Module {
         .min(0)
         .sliderMax(1000)
         .defaultValue(50)
+        .build()
+    );
+
+    //model
+
+    public final Setting<EntityType<?>> inventoryModelEntity = sgModel.add(new EntityTypeSetting.Builder()
+        .name("inventory-model-entity")
+        .description("Sets the model in your inventory to any entity.")
+        .defaultValue(EntityType.PLAYER)
+        .onlyLiving()
+        .build()
+    );
+
+    public final Setting<Integer> inventoryModelScale = sgModel.add(new IntSetting.Builder()
+        .name("inventory-model-scale")
+        .description("Sets the scale of the model in your inventory.")
+        .defaultValue(30)
+        .min(1)
+        .sliderMin(1)
+        .sliderMax(100)
+        .build()
+    );
+
+    public final Setting<Boolean> followMouse = sgModel.add(new BoolSetting.Builder()
+        .name("follow-mouse")
+        .description("Whether or not the model in your inventory tracks the mouse.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Double> headYaw = sgModel.add(new DoubleSetting.Builder()
+        .name("head-yaw")
+        .description("Sets the yaw of your inventory model.")
+        .defaultValue(180)
+        .sliderMin(0)
+        .sliderMax(360)
+        .visible(() -> !followMouse.get())
+        .build()
+    );
+
+    public final Setting<Double> headPitch = sgModel.add(new DoubleSetting.Builder()
+        .name("head-pitch")
+        .description("Sets the pitch of your inventory model.")
+        .defaultValue(0)
+        .sliderMin(0)
+        .sliderMax(360)
+        .visible(() -> !followMouse.get())
+        .build()
+    );
+
+    public final Setting<Double> bodyYaw = sgModel.add(new DoubleSetting.Builder()
+        .name("body-yaw")
+        .description("Sets the yaw of your inventory model.")
+        .defaultValue(180)
+        .sliderMin(0)
+        .sliderMax(360)
+        .visible(() -> !followMouse.get())
+        .build()
+    );
+
+    public final Setting<Boolean> playerModelHud = sgModel.add(new BoolSetting.Builder()
+        .name("player-model-hud")
+        .description("Whether or not to change the entity in the player model hud element.")
+        .defaultValue(false)
         .build()
     );
 
