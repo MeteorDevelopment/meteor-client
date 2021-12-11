@@ -88,7 +88,7 @@ public class InfinityMiner extends Module {
     private boolean repairing;
 
     public InfinityMiner() {
-        super(Categories.World, "infinity-miner", "Allows you to essentially mine forever.");
+        super(Categories.World, "infinity-miner", "Allows you to essentially mine forever by mining repair blocks when the durability gets low. Needs a mending pickaxe.");
     }
 
     @Override
@@ -129,7 +129,7 @@ public class InfinityMiner extends Module {
         }
 
         if (!findBestPick()) {
-            error("Could not find a usable pickaxe.");
+            error("Could not find a usable mending pickaxe.");
             toggle();
             return;
         }
