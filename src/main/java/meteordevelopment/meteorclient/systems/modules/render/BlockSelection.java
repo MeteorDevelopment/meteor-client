@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import com.ibm.icu.impl.number.RoundingUtils;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -19,6 +20,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
+
+import java.math.RoundingMode;
 
 public class BlockSelection extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -73,7 +76,12 @@ public class BlockSelection extends Module {
     private void onRender(Render3DEvent event) {
         if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result)) return;
 
-        if(hideInside.get() && !mc.world.getBlockState(new BlockPos(mc.player.getEyePos())).isAir()) {
+        BlockPos playerEyePos = new BlockPos(mc.player.getEyePos());
+        int crossX = (int) Math.floor(mc.crosshairTarget.getPos().x);
+        int crossY = (int) Math.floor(mc.crosshairTarget.getPos().y);
+        int crossZ = (int) Math.floor(mc.crosshairTarget.getPos().z);
+
+        if(playerEyePos.getX() == crossX && playerEyePos.getY() == crossY && playerEyePos.getZ() == crossZ) {
             return;
         }
 
