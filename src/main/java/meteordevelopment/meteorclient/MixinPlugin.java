@@ -11,6 +11,7 @@ import net.fabricmc.loader.api.ModContainer;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -44,13 +45,11 @@ public class MixinPlugin implements IMixinConfigPlugin {
             Unsafe unsafe = (Unsafe) unsafeField.get(null);
 
             // Create Asm
-            Asm asm = new Asm();
+            new Asm();
 
             // Change delegate
-            Class<?> klass = asm.createTransformer();
-
-            Object mixinTransformer = unsafe.allocateInstance(klass);
-            mixinTransformer.getClass().getDeclaredField("delegate").set(mixinTransformer, mixinTransformerField.get(delegate));
+            Asm.Transformer mixinTransformer = (Asm.Transformer) unsafe.allocateInstance(Asm.Transformer.class);
+            mixinTransformer.delegate = (IMixinTransformer) mixinTransformerField.get(delegate);
 
             mixinTransformerField.set(delegate, mixinTransformer);
         } catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
