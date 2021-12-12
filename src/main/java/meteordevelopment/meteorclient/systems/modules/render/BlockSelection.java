@@ -17,6 +17,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
 
 public class BlockSelection extends Module {
@@ -57,6 +58,13 @@ public class BlockSelection extends Module {
             .build()
     );
 
+    private final Setting<Boolean> hideInside = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-when-inside-block")
+        .description("Hide selection when inside target block.")
+        .defaultValue(true)
+        .build()
+    );
+
     public BlockSelection() {
         super(Categories.Render, "block-selection", "Modifies how your block selection is rendered.");
     }
@@ -64,6 +72,10 @@ public class BlockSelection extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result)) return;
+
+        if(hideInside.get() && mc.world.getBlockState(new BlockPos(mc.player.getEyePos())).isSolidBlock(mc.world, ((BlockHitResult) mc.crosshairTarget).getBlockPos())) {
+            return;
+        }
 
         BlockPos bp = result.getBlockPos();
         Direction side = result.getSide();
