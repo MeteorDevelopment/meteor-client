@@ -81,7 +81,7 @@ public class BlockSelection extends Module {
         int crossY = (int) Math.floor(mc.crosshairTarget.getPos().y);
         int crossZ = (int) Math.floor(mc.crosshairTarget.getPos().z);
 
-        if(playerEyePos.getX() == crossX && playerEyePos.getY() == crossY && playerEyePos.getZ() == crossZ) {
+        if(hideInside.get() && result.isInsideBlock()) {
             return;
         }
 
