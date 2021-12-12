@@ -73,7 +73,7 @@ public class BlockSelection extends Module {
     private void onRender(Render3DEvent event) {
         if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result)) return;
 
-        if(hideInside.get() && mc.world.getBlockState(new BlockPos(mc.player.getEyePos())).isSolidBlock(mc.world, ((BlockHitResult) mc.crosshairTarget).getBlockPos())) {
+        if(hideInside.get() && !mc.world.getBlockState(new BlockPos(mc.player.getEyePos())).isAir()) {
             return;
         }
 
