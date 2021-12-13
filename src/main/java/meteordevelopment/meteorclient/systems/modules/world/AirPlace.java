@@ -14,13 +14,10 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 
 public class AirPlace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -31,13 +28,6 @@ public class AirPlace extends Module {
     private final Setting<Boolean> render = sgGeneral.add(new BoolSetting.Builder()
         .name("render")
         .description("Renders a block overlay where the obsidian will be placed.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> onlyColliding = sgGeneral.add(new BoolSetting.Builder()
-        .name("collide-check")
-        .description("Only places if there is a block next to it.")
         .defaultValue(true)
         .build()
     );
@@ -90,8 +80,12 @@ public class AirPlace extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        setHitResult();
-        if (hitResult instanceof BlockHitResult && mc.player.getMainHandStack().getItem() instanceof BlockItem && mc.options.keyUse.isPressed()) {
+        double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
+        hitResult = mc.getCameraEntity().raycast(r, 0, false);
+
+        if (!(hitResult instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
+
+        if (mc.options.keyUse.isPressed()) {
             BlockUtils.place(((BlockHitResult) hitResult).getBlockPos(), Hand.MAIN_HAND, mc.player.getInventory().selectedSlot, false, 0, true, true, false);
         }
     }
@@ -104,30 +98,5 @@ public class AirPlace extends Module {
             || !render.get()) return;
 
         event.renderer.box(((BlockHitResult) hitResult).getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-    }
-
-    private void setHitResult() {
-        final double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
-        for (int i = (int) r; i > 0; i -= 1D) {
-            hitResult = mc.getCameraEntity().raycast(Math.min(r, i), 0, false);
-            if (hitResult instanceof BlockHitResult && isValid(((BlockHitResult) hitResult).getBlockPos())) return;
-        }
-        hitResult = null;
-    }
-
-    private boolean isValid(BlockPos pos) {
-        if (pos.equals(mc.player.getBlockPos())) {
-            return false;
-        }
-        if (!onlyColliding.get()) {
-            return true;
-        }
-        for (Direction dir : Direction.values()) {
-            assert mc.world != null;
-            if (mc.world.getBlockState(pos.add(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ())).getMaterial() != Material.AIR) {
-                return true;
-            }
-        }
-        return false;
     }
 }
