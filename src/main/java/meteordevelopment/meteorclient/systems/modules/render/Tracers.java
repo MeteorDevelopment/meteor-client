@@ -43,6 +43,12 @@ public class Tracers extends Module {
         .build()
     );
 
+    private final Setting<Boolean> hideHud = sgAppearance.add(new BoolSetting.Builder()
+        .name("autohide")
+        .description("Hide tracers when game HUD is hidden.")
+        .defaultValue(true)
+        .build());
+
     private final Setting<Boolean> stem = sgAppearance.add(new BoolSetting.Builder()
         .name("stem")
         .description("Draw a line through the center of the tracer target.")
@@ -132,6 +138,7 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
+        if (hideHud.get() && mc.options.hudHidden) return;
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
