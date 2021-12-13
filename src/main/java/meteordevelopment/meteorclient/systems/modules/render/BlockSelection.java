@@ -57,6 +57,13 @@ public class BlockSelection extends Module {
             .build()
     );
 
+    private final Setting<Boolean> hideInside = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-when-inside-block")
+        .description("Hide selection when inside target block.")
+        .defaultValue(true)
+        .build()
+    );
+
     public BlockSelection() {
         super(Categories.Render, "block-selection", "Modifies how your block selection is rendered.");
     }
@@ -64,6 +71,8 @@ public class BlockSelection extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (mc.crosshairTarget == null || !(mc.crosshairTarget instanceof BlockHitResult result)) return;
+
+        if (hideInside.get() && result.isInsideBlock()) return;
 
         BlockPos bp = result.getBlockPos();
         Direction side = result.getSide();
