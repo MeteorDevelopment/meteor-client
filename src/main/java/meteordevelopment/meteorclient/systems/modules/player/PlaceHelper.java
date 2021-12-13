@@ -78,7 +78,7 @@ public class PlaceHelper extends Module {
     private HitResult hitResult;
 
     public PlaceHelper() {
-        super(Categories.Player, "place-helper ", "Helps you place blocks where you normally can't");
+        super(Categories.Player, "place-helper", "Helps you place blocks where you normally can't");
     }
 
     @EventHandler
