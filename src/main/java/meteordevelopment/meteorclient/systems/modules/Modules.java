@@ -384,6 +384,8 @@ public class Modules extends System<Modules> {
     }
 
     private void initPlayer() {
+        add(new AirPlace());
+        add(new PlaceHelper());
         add(new AntiHunger());
         add(new AutoEat());
         add(new AutoFish());
@@ -490,7 +492,6 @@ public class Modules extends System<Modules> {
     }
 
     private void initWorld() {
-        add(new AirPlace());
         add(new Ambience());
         add(new AntiCactus());
         add(new AutoBreed());
