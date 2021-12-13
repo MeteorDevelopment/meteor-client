@@ -109,15 +109,6 @@ public class PlaceHelper extends Module {
     }
 
     private boolean isValid(BlockPos pos) {
-        if (pos.equals(mc.player.getBlockPos())) {
-            return false;
-        }
-        for (Direction dir : Direction.values()) {
-            assert mc.world != null;
-            if (mc.world.getBlockState(pos.add(dir.getOffsetX(), dir.getOffsetY(), dir.getOffsetZ())).getMaterial() != Material.AIR) {
-                return true;
-            }
-        }
-        return false;
+        return !pos.equals(mc.player.getBlockPos()) && BlockUtils.getPlaceSide(pos) != null;
     }
 }
