@@ -39,7 +39,7 @@ public class BlockSetting extends Setting<Block> {
 
     @Override
     public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
+        NbtCompound tag = saveGeneral();
 
         tag.putString("value", Registry.BLOCK.getId(get()).toString());
 
