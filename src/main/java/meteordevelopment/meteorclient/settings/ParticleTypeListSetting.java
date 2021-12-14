@@ -63,7 +63,8 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         NbtList valueTag = new NbtList();
         for (ParticleType<?> particleType : get()) {
-            valueTag.add(NbtString.of(Registry.PARTICLE_TYPE.getId(particleType).toString()));
+            Identifier id = Registry.PARTICLE_TYPE.getId(particleType);
+            if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -76,7 +77,8 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            get().add(Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString())));
+            ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString()));
+            if (particleType != null) get().add(particleType);
         }
 
         onChanged();
