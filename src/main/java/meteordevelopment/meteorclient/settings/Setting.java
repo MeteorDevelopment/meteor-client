@@ -22,13 +22,13 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     private static final List<String> NO_SUGGESTIONS = new ArrayList<>(0);
 
     public final String name, title, description;
+    private final IVisible visible;
 
     protected final T defaultValue;
     protected T value;
 
-    private final Consumer<T> onChanged;
     public final Consumer<Setting<T>> onModuleActivated;
-    private final IVisible visible;
+    private final Consumer<T> onChanged;
 
     public Module module;
     public boolean lastWasVisible;
@@ -38,7 +38,7 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         this.title = Utils.nameToTitle(name);
         this.description = description;
         this.defaultValue = defaultValue;
-        reset(false);
+        this.value = defaultValue;
         this.onChanged = onChanged;
         this.onModuleActivated = onModuleActivated;
         this.visible = visible;
@@ -56,13 +56,9 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return true;
     }
 
-    public void reset(boolean callbacks) {
-        value = defaultValue;
-        if (callbacks) onChanged();
-    }
-
     public void reset() {
-        reset(true);
+        value = defaultValue;
+        onChanged();
     }
 
     public T getDefaultValue() {
@@ -82,12 +78,12 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return newValue != null;
     }
 
-    public void onChanged() {
-        if (onChanged != null) onChanged.accept(value);
+    public boolean wasChanged() {
+        return !Objects.equals(value, defaultValue);
     }
 
-    public boolean changed() {
-        return !Objects.equals(value, defaultValue);
+    public void onChanged() {
+        if (onChanged != null) onChanged.accept(value);
     }
 
     public void onActivated() {
@@ -110,10 +106,26 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return NO_SUGGESTIONS;
     }
 
-    protected NbtCompound saveGeneral() {
+    protected abstract NbtCompound save(NbtCompound tag);
+
+    @Override
+    public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
+
         tag.putString("name", name);
+        save(tag);
+
         return tag;
+    }
+
+    protected abstract T load(NbtCompound tag);
+
+    @Override
+    public T fromTag(NbtCompound tag) {
+        T value = load(tag);
+        onChanged();
+
+        return value;
     }
 
     @Override

@@ -31,9 +31,9 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = new Object2BooleanOpenHashMap<>(defaultValue);
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -62,9 +62,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (EntityType<?> entityType : get().keySet()) {
             if (get().getBoolean(entityType)) {
@@ -77,7 +75,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
     }
 
     @Override
-    public Object2BooleanMap<EntityType<?>> fromTag(NbtCompound tag) {
+    public Object2BooleanMap<EntityType<?>> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -86,7 +84,6 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
             if (!onlyAttackable || EntityUtils.isAttackable(type)) get().put(type, true);
         }
 
-        onChanged();
         return get();
     }
 

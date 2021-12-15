@@ -27,9 +27,9 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -58,9 +58,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (ParticleType<?> particleType : get()) {
             Identifier id = Registry.PARTICLE_TYPE.getId(particleType);
@@ -72,7 +70,7 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public List<ParticleType<?>> fromTag(NbtCompound tag) {
+    public List<ParticleType<?>> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -81,7 +79,6 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
             if (particleType != null) get().add(particleType);
         }
 
-        onChanged();
         return get();
     }
 

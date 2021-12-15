@@ -53,11 +53,11 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         if (value == null) value = defaultValue.copy();
         else value.set(defaultValue);
 
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -75,16 +75,14 @@ public class KeybindSetting extends Setting<Keybind> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         tag.put("value", get().toTag());
 
         return tag;
     }
 
     @Override
-    public Keybind fromTag(NbtCompound tag) {
+    public Keybind load(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
         return get();

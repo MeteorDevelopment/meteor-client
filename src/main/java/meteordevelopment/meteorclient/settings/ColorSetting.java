@@ -30,16 +30,17 @@ public class ColorSetting extends Setting<SettingColor> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         if (value == null) value = new SettingColor(defaultValue);
         else value.set(defaultValue);
 
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
     protected boolean isValueValid(SettingColor value) {
         value.validate();
+
         return true;
     }
 
@@ -49,17 +50,16 @@ public class ColorSetting extends Setting<SettingColor> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    protected NbtCompound save(NbtCompound tag) {
         tag.put("value", get().toTag());
+
         return tag;
     }
 
     @Override
-    public SettingColor fromTag(NbtCompound tag) {
+    public SettingColor load(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
-        onChanged();
         return get();
     }
 

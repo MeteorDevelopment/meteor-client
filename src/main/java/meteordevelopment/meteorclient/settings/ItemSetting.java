@@ -38,16 +38,14 @@ public class ItemSetting extends Setting<Item> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
-
+    public NbtCompound save(NbtCompound tag) {
         tag.putString("value", Registry.ITEM.getId(get()).toString());
 
         return tag;
     }
 
     @Override
-    public Item fromTag(NbtCompound tag) {
+    public Item load(NbtCompound tag) {
         value = Registry.ITEM.get(new Identifier(tag.getString("value")));
 
         if (filter != null && !filter.test(value)) {
@@ -59,7 +57,6 @@ public class ItemSetting extends Setting<Item> {
             }
         }
 
-        onChanged();
         return get();
     }
 

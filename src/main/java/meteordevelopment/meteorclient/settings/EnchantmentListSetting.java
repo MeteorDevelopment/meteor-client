@@ -26,9 +26,9 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -57,9 +57,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Enchantment ench : get()) {
             Identifier id = Registry.ENCHANTMENT.getId(ench);
@@ -71,7 +69,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
     }
 
     @Override
-    public List<Enchantment> fromTag(NbtCompound tag) {
+    public List<Enchantment> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -80,7 +78,6 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
             if (enchantment != null) get().add(enchantment);
         }
 
-        onChanged();
         return get();
     }
 

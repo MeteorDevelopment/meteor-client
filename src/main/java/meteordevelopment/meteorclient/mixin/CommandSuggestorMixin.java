@@ -27,20 +27,14 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(CommandSuggestor.class)
 public abstract class CommandSuggestorMixin {
-
     @Shadow private ParseResults<CommandSource> parse;
-
-    @Shadow @Final private TextFieldWidget textField;
-
-    @Shadow @Final private MinecraftClient client;
-
-    @Shadow private boolean completingSuggestions;
-
+    @Shadow @Final TextFieldWidget textField;
+    @Shadow @Final MinecraftClient client;
+    @Shadow boolean completingSuggestions;
     @Shadow private CompletableFuture<Suggestions> pendingSuggestions;
+    @Shadow CommandSuggestor.SuggestionWindow window;
 
     @Shadow protected abstract void show();
-
-    @Shadow private CommandSuggestor.SuggestionWindow window;
 
     @Inject(method = "refresh",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
