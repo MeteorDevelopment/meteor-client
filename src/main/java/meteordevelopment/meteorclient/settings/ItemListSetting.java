@@ -21,7 +21,7 @@ import java.util.function.Predicate;
 
 public class ItemListSetting extends Setting<List<Item>> {
     public final Predicate<Item> filter;
-    private boolean bypassFilterWhenSavingAndLoading;
+    private final boolean bypassFilterWhenSavingAndLoading;
 
     public ItemListSetting(String name, String description, List<Item> defaultValue, Consumer<List<Item>> onChanged, Consumer<Setting<List<Item>>> onModuleActivated, IVisible visible, Predicate<Item> filter, boolean bypassFilterWhenSavingAndLoading) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
@@ -47,9 +47,9 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -63,9 +63,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Item item : get()) {
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registry.ITEM.getId(item).toString()));
@@ -76,7 +74,7 @@ public class ItemListSetting extends Setting<List<Item>> {
     }
 
     @Override
-    public List<Item> fromTag(NbtCompound tag) {
+    public List<Item> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -86,7 +84,6 @@ public class ItemListSetting extends Setting<List<Item>> {
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }
 
-        onChanged();
         return get();
     }
 

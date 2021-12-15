@@ -18,11 +18,11 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         if (value == null) value = defaultValue.copy();
         value.set(defaultValue);
 
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -36,16 +36,14 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         tag.put("value", get().toTag());
 
         return tag;
     }
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T load(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
         return get();

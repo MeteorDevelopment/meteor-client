@@ -22,9 +22,9 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = defaultValue;
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -33,14 +33,14 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public NbtCompound save(NbtCompound tag) {
         tag.putString("value", get());
+
         return tag;
     }
 
     @Override
-    public String fromTag(NbtCompound tag) {
+    public String load(NbtCompound tag) {
         set(tag.getString("value"));
 
         return get();

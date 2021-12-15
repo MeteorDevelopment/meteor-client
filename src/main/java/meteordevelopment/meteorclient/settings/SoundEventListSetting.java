@@ -26,9 +26,9 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     @Override
@@ -57,9 +57,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (SoundEvent sound : get()) {
             Identifier id = Registry.SOUND_EVENT.getId(sound);
@@ -71,7 +69,7 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     }
 
     @Override
-    public List<SoundEvent> fromTag(NbtCompound tag) {
+    public List<SoundEvent> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -80,7 +78,6 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
             if (soundEvent != null) get().add(soundEvent);
         }
 
-        onChanged();
         return get();
     }
 

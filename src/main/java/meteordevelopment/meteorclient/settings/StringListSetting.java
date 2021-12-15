@@ -39,9 +39,7 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (int i = 0; i < this.value.size(); i++) {
             valueTag.add(i, NbtString.of(get().get(i)));
@@ -52,7 +50,7 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     @Override
-    public List<String> fromTag(NbtCompound tag) {
+    public List<String> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -60,14 +58,13 @@ public class StringListSetting extends Setting<List<String>>{
             get().add(tagI.asString());
         }
 
-        onChanged();
         return get();
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void reset() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
+        onChanged();
     }
 
     public static void fillTable(GuiTheme theme, WTable table, StringListSetting setting) {

@@ -35,6 +35,7 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
 
     public <T> Setting<T> add(Setting<T> setting) {
         settings.add(setting);
+
         return setting;
     }
 
@@ -51,7 +52,7 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
         tag.putBoolean("sectionExpanded", sectionExpanded);
 
         NbtList settingsTag = new NbtList();
-        for (Setting<?> setting : this) if (setting.changed()) settingsTag.add(setting.toTag());
+        for (Setting<?> setting : this) if (setting.wasChanged()) settingsTag.add(setting.toTag());
         tag.put("settings", settingsTag);
 
         return tag;
