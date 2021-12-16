@@ -132,6 +132,7 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
+        if (mc.options.hudHidden) return;
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
