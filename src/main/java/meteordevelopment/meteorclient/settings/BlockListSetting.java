@@ -26,13 +26,11 @@ public class BlockListSetting extends Setting<List<Block>> {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
-        this.value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset() {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        onChanged();
     }
 
     @Override

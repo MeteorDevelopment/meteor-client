@@ -27,13 +27,11 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.onlyAttackable = onlyAttackable;
-        value = new Object2BooleanOpenHashMap<>(defaultValue);
     }
 
     @Override
-    public void reset() {
+    public void resetImpl() {
         value = new Object2BooleanOpenHashMap<>(defaultValue);
-        onChanged();
     }
 
     @Override

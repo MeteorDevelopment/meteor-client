@@ -12,19 +12,11 @@ import java.util.function.Consumer;
 public class StringSetting extends Setting<String> {
     public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = defaultValue;
     }
 
     @Override
     protected String parseImpl(String str) {
         return str;
-    }
-
-    @Override
-    public void reset() {
-        value = defaultValue;
-        onChanged();
     }
 
     @Override

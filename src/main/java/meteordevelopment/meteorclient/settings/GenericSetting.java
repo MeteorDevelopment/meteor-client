@@ -18,11 +18,9 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public void reset() {
+    public void resetImpl() {
         if (value == null) value = defaultValue.copy();
         value.set(defaultValue);
-
-        onChanged();
     }
 
     @Override

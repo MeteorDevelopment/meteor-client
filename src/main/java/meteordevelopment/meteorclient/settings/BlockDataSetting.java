@@ -28,9 +28,8 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public void reset() {
+    public void resetImpl() {
         value = new HashMap<>(defaultValue);
-        onChanged();
     }
 
     @Override
