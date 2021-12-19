@@ -30,11 +30,9 @@ public class ColorSetting extends Setting<SettingColor> {
     }
 
     @Override
-    public void reset() {
+    public void resetImpl() {
         if (value == null) value = new SettingColor(defaultValue);
         else value.set(defaultValue);
-
-        onChanged();
     }
 
     @Override

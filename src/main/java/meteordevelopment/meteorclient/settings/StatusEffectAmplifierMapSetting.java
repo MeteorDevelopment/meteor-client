@@ -21,9 +21,8 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public void reset() {
+    public void resetImpl() {
         value = new Object2IntArrayMap<>(defaultValue);
-        onChanged();
     }
 
     @Override
