@@ -24,7 +24,9 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Blocks;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
@@ -134,6 +136,7 @@ public class NoFall extends Module {
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
                 // Place water
                 FindItemResult waterBucket = InvUtils.findInHotbar(Items.WATER_BUCKET);
+                if (!waterBucket.found() || PlayerUtils.getDimension().equals(Dimension.Nether)) waterBucket = InvUtils.findInHotbar(Items.POWDER_SNOW_BUCKET);
 
                 if (!waterBucket.found()) return;
 
@@ -150,7 +153,7 @@ public class NoFall extends Module {
             }
 
             // Remove water
-            if (placedWater && mc.player.getBlockStateAtPos().getFluidState().getFluid() == Fluids.WATER) {
+            if (placedWater && (mc.player.getBlockStateAtPos().getFluidState().getFluid() == Fluids.WATER || mc.player.getBlockStateAtPos().getBlock() == Blocks.POWDER_SNOW)) {
                 useBucket(InvUtils.findInHotbar(Items.BUCKET), false);
             }
         }
