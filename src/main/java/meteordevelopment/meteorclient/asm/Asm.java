@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -40,10 +41,11 @@ public class Asm implements AsmConfig {
     }
 
     private void add(AsmTransformer transformer) {
+        String n = transformer.targetName.replace('.', '/');
         transformers.add(new Patch() {
             @Override
             public void apply(ClassNode klazz) {
-                if (klazz.name.equals(transformer.targetName.replace('.', '/')))
+                if (klazz.name.equals(n))
                     transformer.transform(klazz);
             }
         });
