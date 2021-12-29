@@ -21,14 +21,11 @@ import java.util.function.Consumer;
 public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     public StatusEffectListSetting(String name, String description, List<StatusEffect> defaultValue, Consumer<List<StatusEffect>> onChanged, Consumer<Setting<List<StatusEffect>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
     }
 
     @Override
@@ -57,9 +54,7 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
 
         for (StatusEffect effect : get()) {
@@ -72,7 +67,7 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     }
 
     @Override
-    public List<StatusEffect> fromTag(NbtCompound tag) {
+    public List<StatusEffect> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -81,7 +76,6 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
             if (effect != null) get().add(effect);
         }
 
-        onChanged();
         return get();
     }
 

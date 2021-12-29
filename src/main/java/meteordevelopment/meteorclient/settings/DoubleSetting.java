@@ -43,14 +43,14 @@ public class DoubleSetting extends Setting<Double> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    protected NbtCompound save(NbtCompound tag) {
         tag.putDouble("value", get());
+
         return tag;
     }
 
     @Override
-    public Double fromTag(NbtCompound tag) {
+    public Double load(NbtCompound tag) {
         set(tag.getDouble("value"));
 
         return get();

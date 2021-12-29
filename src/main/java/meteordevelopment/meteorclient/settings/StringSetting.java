@@ -12,8 +12,6 @@ import java.util.function.Consumer;
 public class StringSetting extends Setting<String> {
     public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = defaultValue;
     }
 
     @Override
@@ -22,25 +20,19 @@ public class StringSetting extends Setting<String> {
     }
 
     @Override
-    public void reset(boolean callbacks) {
-        value = defaultValue;
-        if (callbacks) onChanged();
-    }
-
-    @Override
     protected boolean isValueValid(String value) {
         return true;
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public NbtCompound save(NbtCompound tag) {
         tag.putString("value", get());
+
         return tag;
     }
 
     @Override
-    public String fromTag(NbtCompound tag) {
+    public String load(NbtCompound tag) {
         set(tag.getString("value"));
 
         return get();

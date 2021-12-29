@@ -14,6 +14,9 @@ import net.fabricmc.loader.api.FabricLoader;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.tree.ClassNode;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.asm.mixin.transformer.IMixinTransformer;
+import org.spongepowered.asm.mixin.transformer.ext.IExtensionRegistry;
 import org.spongepowered.asm.transformers.MixinClassWriter;
 
 import java.io.File;
@@ -21,7 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 

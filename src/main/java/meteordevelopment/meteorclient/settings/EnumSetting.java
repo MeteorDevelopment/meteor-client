@@ -50,14 +50,14 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public NbtCompound save(NbtCompound tag) {
         tag.putString("value", get().toString());
+
         return tag;
     }
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T load(NbtCompound tag) {
         parse(tag.getString("value"));
 
         return get();

@@ -28,14 +28,11 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
     }
 
     @Override
@@ -64,9 +61,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (BlockEntityType<?> type : get()) {
             Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(type);
@@ -78,7 +73,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    public List<BlockEntityType<?>> fromTag(NbtCompound tag) {
+    public List<BlockEntityType<?>> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -87,7 +82,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             if (type != null) get().add(type);
         }
 
-        onChanged();
         return get();
     }
 

@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.utils.render.color;
 import net.minecraft.nbt.NbtCompound;
 
 public class SettingColor extends Color {
-
     public boolean rainbow;
 
     public SettingColor() {
@@ -75,5 +74,21 @@ public class SettingColor extends Color {
         super.fromTag(tag);
         rainbow = tag.getBoolean("rainbow");
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        return rainbow == ((SettingColor) o).rainbow;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + (rainbow ? 1 : 0);
+        return result;
     }
 }

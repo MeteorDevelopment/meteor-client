@@ -21,14 +21,11 @@ public class ModuleListSetting extends Setting<List<Module>> {
 
     public ModuleListSetting(String name, String description, List<Module> defaultValue, Consumer<List<Module>> onChanged, Consumer<Setting<List<Module>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) onChanged();
     }
 
     @Override
@@ -62,9 +59,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList modulesTag = new NbtList();
         for (Module module : get()) modulesTag.add(NbtString.of(module.name));
         tag.put("modules", modulesTag);
@@ -73,7 +68,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
     }
 
     @Override
-    public List<Module> fromTag(NbtCompound tag) {
+    public List<Module> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("modules", 8);
@@ -82,7 +77,6 @@ public class ModuleListSetting extends Setting<List<Module>> {
             if (module != null) get().add(module);
         }
 
-        onChanged();
         return get();
     }
 

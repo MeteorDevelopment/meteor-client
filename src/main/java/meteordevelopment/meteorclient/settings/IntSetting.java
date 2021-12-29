@@ -39,14 +39,14 @@ public class IntSetting extends Setting<Integer> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public NbtCompound save(NbtCompound tag) {
         tag.putInt("value", get());
+
         return tag;
     }
 
     @Override
-    public Integer fromTag(NbtCompound tag) {
+    public Integer load(NbtCompound tag) {
         set(tag.getInt("value"));
 
         return get();

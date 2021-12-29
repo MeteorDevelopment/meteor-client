@@ -35,18 +35,17 @@ public class BlockPosSetting extends Setting<BlockPos> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-        tag.putIntArray("value", new int[] { value.getX(), value.getY(), value.getZ() });
+    protected NbtCompound save(NbtCompound tag) {
+        tag.putIntArray("value", new int[] {value.getX(), value.getY(), value.getZ()});
+
         return tag;
     }
 
     @Override
-    public BlockPos fromTag(NbtCompound tag) {
+    protected BlockPos load(NbtCompound tag) {
         int[] value = tag.getIntArray("value");
         set(new BlockPos(value[0], value[1], value[2]));
 
-        onChanged();
         return get();
     }
 

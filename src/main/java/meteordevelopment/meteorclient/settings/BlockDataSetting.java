@@ -28,9 +28,8 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new HashMap<>(defaultValue);
-        if (callbacks) onChanged();
     }
 
     @Override
@@ -44,9 +43,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    protected NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (Block block : get().keySet()) {
             valueTag.put(Registry.BLOCK.getId(block).toString(), get().get(block).toTag());
@@ -57,7 +54,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public Map<Block, T> fromTag(NbtCompound tag) {
+    protected Map<Block, T> load(NbtCompound tag) {
         get().clear();
 
         NbtCompound valueTag = tag.getCompound("value");

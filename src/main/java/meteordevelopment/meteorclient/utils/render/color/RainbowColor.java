@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.utils.render.color;
 
 public class RainbowColor extends Color {
-
     private double speed;
     private static final float[] hsb = new float[3];
 
@@ -46,5 +45,23 @@ public class RainbowColor extends Color {
         this.a = color.a;
         this.speed = color.speed;
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
+
+        return Double.compare(((RainbowColor) o).speed, speed) == 0;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        long temp;
+        temp = Double.doubleToLongBits(speed);
+        result = 31 * result + (int) (temp ^ (temp >>> 32));
+        return result;
     }
 }

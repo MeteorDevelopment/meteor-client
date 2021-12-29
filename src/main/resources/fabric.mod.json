@@ -33,9 +33,9 @@
     "fabric-api:module-lifecycle": "stable"
   },
   "depends": {
-    "java": ">=16",
+    "java": ">=17",
     "minecraft": ">=@mc_version@",
-    "fabricloader": ">=0.12.0"
+    "fabricloader": ">=0.12.12"
   },
   "breaks": {
     "optifabric": "*"

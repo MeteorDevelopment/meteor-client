@@ -21,9 +21,8 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new Object2IntArrayMap<>(defaultValue);
-        if (callbacks) onChanged();
     }
 
     @Override
@@ -51,9 +50,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (StatusEffect statusEffect : get().keySet()) {
             Identifier id = Registry.STATUS_EFFECT.getId(statusEffect);
@@ -65,7 +62,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public Object2IntMap<StatusEffect> fromTag(NbtCompound tag) {
+    public Object2IntMap<StatusEffect> load(NbtCompound tag) {
         get().clear();
 
         NbtCompound valueTag = tag.getCompound("value");
@@ -74,7 +71,6 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
             if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key));
         }
 
-        onChanged();
         return get();
     }
 
