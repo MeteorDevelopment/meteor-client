@@ -1,6 +1,7 @@
 {
   "required": false,
   "package": "meteordevelopment.meteorclient.mixin.canvas",
+  "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "compatibilityLevel": "JAVA_17",
   "client": [
     "CanvasWorldRendererMixin"

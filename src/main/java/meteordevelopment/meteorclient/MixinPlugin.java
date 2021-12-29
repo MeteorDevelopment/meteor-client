@@ -15,12 +15,17 @@ import java.util.List;
 import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
+    private static final String MIXIN_PREFIX = "meteordevelopment.meteorclient.mixin.";
     private boolean isOriginsPresent = false;
+    private boolean isSodiumPresent = false;
+    private boolean isCanvasPresent = false;
 
     @Override
     public void onLoad(String mixinPackage) {
         for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
             if (mod.getMetadata().getId().equals("origins")) isOriginsPresent = true;
+            else if (mod.getMetadata().getId().equals("sodium")) isSodiumPresent = true;
+            else if (mod.getMetadata().getId().equals("canvas")) isCanvasPresent = true;
         }
     }
 
@@ -31,9 +36,13 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
+        if (!mixinClassName.startsWith(MIXIN_PREFIX)) throw new IllegalStateException("Mixin " + mixinClassName + " is not in the mixin package. This shouldn't happen!");
+        if (mixinClassName.endsWith("PlayerEntityRendererMixin"))
             return !isOriginsPresent;
-        }
+        if (mixinClassName.startsWith(MIXIN_PREFIX + "canvas"))
+            return isCanvasPresent;
+        if (mixinClassName.startsWith(MIXIN_PREFIX + "sodium"))
+            return isSodiumPresent;
 
         return true;
     }
