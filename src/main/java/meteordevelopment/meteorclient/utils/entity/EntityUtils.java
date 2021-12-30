@@ -42,7 +42,50 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityUtils {
     public static boolean isAttackable(EntityType<?> type) {
-        return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
+        return type != EntityType.AREA_EFFECT_CLOUD &&
+            type != EntityType.ARROW &&
+            type != EntityType.FALLING_BLOCK &&
+            type != EntityType.FIREWORK_ROCKET &&
+            type != EntityType.ITEM &&
+            type != EntityType.LLAMA_SPIT &&
+            type != EntityType.SPECTRAL_ARROW &&
+            type != EntityType.ENDER_PEARL &&
+            type != EntityType.EXPERIENCE_BOTTLE &&
+            type != EntityType.POTION &&
+            type != EntityType.TRIDENT &&
+            type != EntityType.LIGHTNING_BOLT &&
+            type != EntityType.FISHING_BOBBER &&
+            type != EntityType.EXPERIENCE_ORB &&
+            type != EntityType.EGG;
+    }
+
+    public static boolean isLiving(EntityType<?> type) {
+        return isAttackable(type) &&
+            type != EntityType.BOAT &&
+            type != EntityType.DRAGON_FIREBALL &&
+            type != EntityType.END_CRYSTAL &&
+            type != EntityType.EVOKER_FANGS &&
+            type != EntityType.EYE_OF_ENDER &&
+            type != EntityType.GLOW_ITEM_FRAME &&
+            type != EntityType.ITEM_FRAME &&
+            type != EntityType.FIREBALL &&
+            type != EntityType.LEASH_KNOT &&
+            type != EntityType.LLAMA_SPIT &&
+            type != EntityType.MARKER &&
+            type != EntityType.MINECART &&
+            type != EntityType.CHEST_MINECART &&
+            type != EntityType.COMMAND_BLOCK_MINECART &&
+            type != EntityType.FURNACE_MINECART &&
+            type != EntityType.HOPPER_MINECART &&
+            type != EntityType.SPAWNER_MINECART &&
+            type != EntityType.TNT_MINECART &&
+            type != EntityType.PAINTING &&
+            type != EntityType.TNT &&
+            type != EntityType.SHULKER_BULLET &&
+            type != EntityType.SMALL_FIREBALL &&
+            type != EntityType.SNOWBALL &&
+            type != EntityType.WITHER_SKULL &&
+            type != EntityType.FISHING_BOBBER;
     }
 
     public static float getTotalHealth(PlayerEntity target) {
