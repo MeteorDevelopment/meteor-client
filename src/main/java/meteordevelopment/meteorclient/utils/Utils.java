@@ -35,7 +35,6 @@ import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.option.ServerList;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.entity.attribute.EntityAttribute;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
@@ -505,47 +504,6 @@ public class Utils {
                 break;
             }
         }
-    }
-
-    public static void addAttribute(ItemStack itemStack, EntityAttribute attribute, int level) {
-        NbtCompound tag = itemStack.getOrCreateNbt();
-        NbtList listTag;
-
-        // Get list tag
-        if (!tag.contains("AttributeModifiers", 9)) {
-            listTag = new NbtList();
-            tag.put("AttributeModifiers", listTag);
-        } else {
-            listTag = tag.getList("AttributeModifiers", 10);
-        }
-
-        // Check if item already has the enchantment and modify the level
-        String attrId = Registry.ATTRIBUTE.getId(attribute).toString();
-
-        for (NbtElement _t : listTag) {
-            NbtCompound t = (NbtCompound) _t;
-
-            if (t.getString("AttributeName").equals(attrId)) {
-                t.putInt("Amount", level);
-                return;
-            }
-        }
-
-        // Add the enchantment if it doesn't already have it
-        NbtCompound attrTag = new NbtCompound();
-        int[] uuid  = new int[] {random(1, 2147483647), random(1, 2147483647), random(1, 2147483647), random(1, 2147483647)};
-        attrTag.putString("AttributeName", attrId);
-        attrTag.putString("Name", attrId);
-        attrTag.putInt("Amount", level);
-        attrTag.putShort("Operation", (short) 1);
-        attrTag.putIntArray("UUID", uuid);
-
-        listTag.add(attrTag);
-    }
-
-    public static void clearAttributes(ItemStack itemStack) {
-        NbtCompound nbt = itemStack.getNbt();
-        if (nbt != null) nbt.remove("AttributeModifiers");
     }
 
     @SafeVarargs
