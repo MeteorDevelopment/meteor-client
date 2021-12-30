@@ -35,6 +35,7 @@ public class Commands extends System<Commands> {
 
     @Override
     public void init() {
+        add(new AttributeCommand());
         add(new BaritoneCommand());
         add(new VClipCommand());
         add(new HClipCommand());
