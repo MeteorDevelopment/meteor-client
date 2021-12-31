@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 
 public class AntiVoid extends Module {
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -47,7 +46,9 @@ public class AntiVoid extends Module {
 
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
-        if (mc.player.getY() > 0 || mc.player.getY() < -15) {
+        int minY = mc.world.getBottomY();
+
+        if (mc.player.getY() > minY || mc.player.getY() < minY - 15) {
             if (hasRun && mode.get() == Mode.Flight && Modules.get().isActive(Flight.class)) {
                 Modules.get().get(Flight.class).toggle();
                 hasRun = false;
@@ -56,13 +57,11 @@ public class AntiVoid extends Module {
         }
 
         switch (mode.get()) {
-            case Flight:
+            case Flight -> {
                 if (!Modules.get().isActive(Flight.class)) Modules.get().get(Flight.class).toggle();
                 hasRun = true;
-                break;
-            case Jump:
-                mc.player.jump();
-                break;
+            }
+            case Jump -> mc.player.jump();
         }
     }
 
@@ -70,5 +69,4 @@ public class AntiVoid extends Module {
         Flight,
         Jump
     }
-
 }
