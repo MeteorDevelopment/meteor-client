@@ -23,10 +23,12 @@ import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profiler;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,6 +55,10 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow public abstract Profiler getProfiler();
     @Shadow public abstract boolean isWindowFocused();
 
+    @Shadow
+    @Nullable
+    public ClientPlayerInteractionManager interactionManager;
+
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         MeteorClient.INSTANCE.onInitializeClient();
@@ -68,7 +74,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.EVENT_BUS.post(TickEvent.Pre.get());
         getProfiler().pop();
 
-        if (rightClick && !doItemUseCalled) doItemUse();
+        if (rightClick && !doItemUseCalled && interactionManager != null) doItemUse();
         rightClick = false;
     }
 
