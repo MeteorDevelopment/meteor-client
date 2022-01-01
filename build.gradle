@@ -62,18 +62,13 @@ shadowJar {
 }
 
 processResources {
-    inputs.property "version", project.version
-
     filesMatching("fabric.mod.json") {
         expand "version": project.version
-        filter { line -> line.replace("@devbuild@", System.getenv("CIRCLE_BUILD_NUM") != null ? System.getenv("CIRCLE_BUILD_NUM") : "") }
-        filter { line -> line.replace("@mc_version@", project.minecraft_version) }
     }
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.encoding = "UTF-8"
-    it.options.release = 16
+    it.options.encoding("UTF-8")
 }
 
 jar {

@@ -108,7 +108,6 @@ public class InfinityMiner extends Module {
         toggle();
     }
 
-
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player.getInventory().getEmptySlot() == -1) {
