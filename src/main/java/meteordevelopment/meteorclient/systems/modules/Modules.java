@@ -47,6 +47,7 @@ import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -83,6 +84,17 @@ public class Modules extends System<Modules> {
 
         // This is here because some hud elements depend on modules to be initialised before them
         add(new HUD());
+    }
+
+    @Override
+    public void load(File folder) {
+        for (Module module : modules) {
+            for (SettingGroup group : module.settings) {
+                for (Setting<?> setting : group) setting.reset();
+            }
+        }
+
+        super.load(folder);
     }
 
     public void sortModules() {
