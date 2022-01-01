@@ -41,8 +41,15 @@ public class Spam extends Module {
     );
 
     private final Setting<Boolean> bypass = sgGeneral.add(new BoolSetting.Builder()
-        .name("bypass")
+        .name("random text bypass")
         .description("Add random text at the end of the message to try to bypass anti spams.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> unibypass = sgGeneral.add(new BoolSetting.Builder()
+        .name("unicode bypass")
+        .description("Add random amount of hidden unicode character to the message to try to bypass anti spams.")
         .defaultValue(false)
         .build()
     );
@@ -56,6 +63,7 @@ public class Spam extends Module {
         .build()
     );
 
+    private final String hiddenChr = "\u200c";
     private int messageI, timer;
 
     public Spam() {
@@ -86,8 +94,18 @@ public class Spam extends Module {
             if (bypass.get()) {
                 text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
-
-            mc.player.sendChatMessage(text);
+            
+            if (unibypass.get()) {
+                String uniText;
+                for (String ch: text) {
+                    uniText.append(ch);
+                    if (Utils.random(0,2) == 0)
+                        uniText.append(hiddenChr);
+                }
+                mc.player.sendChatMessage(uniText);
+            } else {
+                mc.player.sendChatMessage(text);
+            }
             timer = delay.get();
         }
         else {
