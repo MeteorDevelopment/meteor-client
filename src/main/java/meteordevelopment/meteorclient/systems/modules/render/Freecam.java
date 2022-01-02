@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.events.entity.TookDamageEvent;
+import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
@@ -284,7 +284,7 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private void onTookDamage(TookDamageEvent event) {
+    private void onDamage(DamageEvent event) {
         if (event.entity.getUuid() == null) return;
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
 

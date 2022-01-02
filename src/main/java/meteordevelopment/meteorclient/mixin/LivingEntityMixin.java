@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
-import meteordevelopment.meteorclient.events.entity.TookDamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.AntiLevitation;
@@ -43,12 +42,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
-    }
-
-    @Inject(method = "damage", at = @At("TAIL"))
-    private void onDamageTail(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(TookDamageEvent.get((LivingEntity) (Object) this, source));
+        if (Utils.canUpdate() && world.isClient) MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
