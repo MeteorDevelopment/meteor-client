@@ -164,14 +164,11 @@ public class Freecam extends Module {
         if (mc.cameraEntity.isInsideWall()) mc.getCameraEntity().noClip = true;
         if (!perspective.isFirstPerson()) mc.options.setPerspective(Perspective.FIRST_PERSON);
 
-        if (mc.currentScreen != null) return;
-
         Vec3d forward = Vec3d.fromPolar(0, yaw);
         Vec3d right = Vec3d.fromPolar(0, yaw + 90);
         double velX = 0;
         double velY = 0;
         double velZ = 0;
-
 
         if (rotate.get()) {
             BlockPos crossHairPos;
@@ -235,24 +232,36 @@ public class Freecam extends Module {
     }
 
     @EventHandler
-    private void onKey(KeyEvent event) {
+    public void onKey(KeyEvent event) {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
 
         boolean cancel = true;
 
         if (mc.options.keyForward.matchesKey(event.key, 0) || mc.options.keyForward.matchesMouse(event.key)) {
             forward = event.action != KeyAction.Release;
-        } else if (mc.options.keyBack.matchesKey(event.key, 0) || mc.options.keyBack.matchesMouse(event.key)) {
+            mc.options.keyForward.setPressed(false);
+        }
+        else if (mc.options.keyBack.matchesKey(event.key, 0) || mc.options.keyBack.matchesMouse(event.key)) {
             backward = event.action != KeyAction.Release;
-        } else if (mc.options.keyRight.matchesKey(event.key, 0) || mc.options.keyRight.matchesMouse(event.key)) {
+            mc.options.keyBack.setPressed(false);
+        }
+        else if (mc.options.keyRight.matchesKey(event.key, 0) || mc.options.keyRight.matchesMouse(event.key)) {
             right = event.action != KeyAction.Release;
-        } else if (mc.options.keyLeft.matchesKey(event.key, 0) || mc.options.keyLeft.matchesMouse(event.key)) {
+            mc.options.keyRight.setPressed(false);
+        }
+        else if (mc.options.keyLeft.matchesKey(event.key, 0) || mc.options.keyLeft.matchesMouse(event.key)) {
             left = event.action != KeyAction.Release;
-        } else if (mc.options.keyJump.matchesKey(event.key, 0) || mc.options.keyJump.matchesMouse(event.key)) {
+            mc.options.keyLeft.setPressed(false);
+        }
+        else if (mc.options.keyJump.matchesKey(event.key, 0) || mc.options.keyJump.matchesMouse(event.key)) {
             up = event.action != KeyAction.Release;
-        } else if (mc.options.keySneak.matchesKey(event.key, 0) || mc.options.keySneak.matchesMouse(event.key)) {
+            mc.options.keyJump.setPressed(false);
+        }
+        else if (mc.options.keySneak.matchesKey(event.key, 0) || mc.options.keySneak.matchesMouse(event.key)) {
             down = event.action != KeyAction.Release;
-        } else {
+            mc.options.keySneak.setPressed(false);
+        }
+        else {
             cancel = false;
         }
 
