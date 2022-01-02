@@ -64,8 +64,7 @@ public class LookingAtHud extends DoubleTextHudElement {
 
             String result;
             if (target instanceof PlayerEntity) result = ((PlayerEntity) target).getGameProfile().getName();
-            else result = target.getEntityName();
-
+            else result = target.getName().getString();
 
             if (position.get()) {
                 result += String.format(" (%d, %d, %d)", target.getBlockX(), target.getBlockY(), target.getBlockZ());
