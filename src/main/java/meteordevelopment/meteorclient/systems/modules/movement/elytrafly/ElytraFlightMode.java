@@ -37,6 +37,15 @@ public class ElytraFlightMode {
     }
 
     public void onTick() {
+        if (elytraFly.autoReplenish.get()) {
+            FindItemResult fireworks = InvUtils.find(Items.FIREWORK_ROCKET);
+            FindItemResult hotbarFireworks = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
+
+            if (!hotbarFireworks.found() && fireworks.found()) {
+                InvUtils.move().from(fireworks.getSlot()).toHotbar(elytraFly.replenishSlot.get() - 1);
+            }
+        }
+
         if (elytraFly.replace.get()) {
             ItemStack chestStack = mc.player.getInventory().getArmorStack(2);
 
