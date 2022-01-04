@@ -18,6 +18,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -234,6 +236,11 @@ public class Freecam extends Module {
     @EventHandler
     public void onKey(KeyEvent event) {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
+
+        // TODO: This is very bad but you all can cope :cope:
+        GUIMove guiMove = Modules.get().get(GUIMove.class);
+        if (mc.currentScreen != null && !guiMove.isActive()) return;
+        if (mc.currentScreen != null && guiMove.isActive() && guiMove.skip()) return;
 
         boolean cancel = true;
 
