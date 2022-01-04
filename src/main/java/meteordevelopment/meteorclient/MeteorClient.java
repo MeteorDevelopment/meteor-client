@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.events.Cancellable;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
@@ -114,18 +114,23 @@ public class MeteorClient implements ClientModInitializer {
     }
 
     @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (mc.currentScreen == null && mc.getOverlay() == null && KeyBinds.OPEN_COMMANDS.wasPressed()) {
+            mc.setScreen(new ChatScreen(Config.get().prefix.get()));
+        }
+    }
+
+    @EventHandler
     private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Press) {
-            if (KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) openGui();
-            else if (KeyBinds.OPEN_COMMANDS.matchesKey(event.key, 0)) openCommands(event);
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) {
+            openGui();
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press) {
-            if (KeyBinds.OPEN_GUI.matchesMouse(event.button)) openGui();
-            else if (KeyBinds.OPEN_COMMANDS.matchesMouse(event.button)) openCommands(event);
+        if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.button)) {
+            openGui();
         }
     }
 
@@ -133,10 +138,6 @@ public class MeteorClient implements ClientModInitializer {
         if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
-    private void openCommands(Cancellable event) {
-        mc.setScreen(new ChatScreen(Config.get().prefix.get()));
-        event.cancel();
-    }
 
     // Reflection initialisation
 
