@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.renderer.GuiDebugRenderer;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
-import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
@@ -71,7 +70,7 @@ public abstract class WidgetScreen extends Screen {
         if (parent != null) {
             animProgress = 1;
 
-            if (this instanceof TabScreen && parent instanceof TabScreen && !(this instanceof HudTab.HudScreen)) {
+            if (this instanceof TabScreen && parent instanceof TabScreen) {
                 parent = ((TabScreen) parent).parent;
             }
         }
