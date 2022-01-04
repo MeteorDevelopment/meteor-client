@@ -254,6 +254,6 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     private void copyIcon(File file) {
-        StreamUtils.copy(Waypoints.class.getResourceAsStream("/assets/meteor-client/textures/icons/waypoints/" + file.getName()), file);
+        StreamUtils.copy(Waypoints.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/textures/icons/waypoints/" + file.getName()), file);
     }
 }

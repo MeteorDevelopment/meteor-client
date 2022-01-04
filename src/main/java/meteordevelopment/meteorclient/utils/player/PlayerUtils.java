@@ -48,8 +48,14 @@ public class PlayerUtils {
     private static final Color color = new Color();
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
-        if (Friends.get().isFriend(entity)) return color.set(Friends.get().color).a(defaultColor.a);
-        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor) return color.set(color).a(defaultColor.a);
+        if (Friends.get().isFriend(entity)) {
+            return color.set(Friends.get().color).a(defaultColor.a);
+        }
+
+        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor.get()) {
+            return color.set(color).a(defaultColor.a);
+        }
+
         return defaultColor;
     }
 

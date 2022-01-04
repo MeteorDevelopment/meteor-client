@@ -403,7 +403,7 @@ public class Utils {
         return mc != null && mc.world != null && mc.player != null;
     }
 
-    public static boolean canOpenClickGUI() {
+    public static boolean canOpenGui() {
         if (canUpdate()) return mc.currentScreen == null;
 
         return mc.currentScreen instanceof TitleScreen || mc.currentScreen instanceof MultiplayerScreen || mc.currentScreen instanceof SelectWorldScreen;

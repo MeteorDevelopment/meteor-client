@@ -9,10 +9,10 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.gui.tabs.builtin.ConfigTab;
 import meteordevelopment.meteorclient.settings.ColorSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Init;
@@ -31,11 +31,11 @@ public class RainbowColors {
 
     public static RainbowColor GLOBAL;
 
-    @Init(stage = InitStage.Pre)
+    @Init(stage = InitStage.Post)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
 
-        GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
+        GLOBAL = new RainbowColor().setSpeed(Config.get().rainbowSpeed.get() / 100);
     }
 
     public static void addSetting(Setting<SettingColor> setting) {

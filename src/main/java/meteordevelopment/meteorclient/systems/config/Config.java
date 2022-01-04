@@ -5,13 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.config;
 
-import meteordevelopment.meteorclient.gui.tabs.builtin.ConfigTab;
-import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.renderer.Fonts;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.utils.misc.Version;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.ModMetadata;
+import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -20,29 +19,117 @@ import net.minecraft.nbt.NbtString;
 import java.util.ArrayList;
 import java.util.List;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 public class Config extends System<Config> {
-    // Version
-    public Version version;
-    public String devBuild;
+    public final Settings settings = new Settings();
+
+    private final SettingGroup sgVisual = settings.createGroup("Visual");
+    private final SettingGroup sgChat = settings.createGroup("Chat");
+    private final SettingGroup sgMisc = settings.createGroup("Misc");
 
     // Visual
-    public String font = ConfigTab.font.get();
-    public boolean customFont = ConfigTab.customFont.get();
-    public double rainbowSpeed = ConfigTab.rainbowSpeed.get();
-    public boolean titleScreenCredits = ConfigTab.titleScreenCredits.get();
-    public boolean titleScreenSplashes = ConfigTab.titleScreenSplashes.get();
-    public boolean customWindowTitle = ConfigTab.customWindowTitle.get();
-    public String customWindowTitleText = ConfigTab.customWindowTitleText.get();
+
+    public final Setting<Boolean> customFont = sgVisual.add(new BoolSetting.Builder()
+        .name("custom-font")
+        .description("Use a custom font.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<String> font = sgVisual.add(new ProvidedStringSetting.Builder()
+        .name("font")
+        .description("Custom font to use (picked from .minecraft/" + MeteorClient.MOD_ID + "/fonts folder).")
+        .visible(customFont::get)
+        .supplier(Fonts::getAvailableFonts)
+        .defaultValue(Fonts.DEFAULT_FONT)
+        .onChanged(s -> Fonts.load())
+        .build()
+    );
+
+    public final Setting<Double> rainbowSpeed = sgVisual.add(new DoubleSetting.Builder()
+        .name("rainbow-speed")
+        .description("The global rainbow speed.")
+        .defaultValue(0.5)
+        .range(0, 10)
+        .sliderMax(5)
+        .onModuleActivated(setting -> setting.set(RainbowColors.GLOBAL.getSpeed() * 100))
+        .onChanged(value -> RainbowColors.GLOBAL.setSpeed(value / 100))
+        .build()
+    );
+
+    public final Setting<Boolean> titleScreenCredits = sgVisual.add(new BoolSetting.Builder()
+        .name("title-screen-credits")
+        .description("Show Meteor credits on title screen")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> titleScreenSplashes = sgVisual.add(new BoolSetting.Builder()
+        .name("title-screen-splashes")
+        .description("Show Meteor splash texts on title screen")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> customWindowTitle = sgVisual.add(new BoolSetting.Builder()
+        .name("custom-window-title")
+        .description("Show custom text in the window title.")
+        .defaultValue(false)
+        .onModuleActivated(setting -> mc.updateWindowTitle())
+        .onChanged(value -> mc.updateWindowTitle())
+        .build()
+    );
+
+    public final Setting<String> customWindowTitleText = sgVisual.add(new StringSetting.Builder()
+        .name("window-title-text")
+        .description("The text it displays in the window title.")
+        .visible(customWindowTitle::get)
+        .defaultValue("Minecraft {mc_version} - Meteor Client {version}")
+        .onChanged(value -> mc.updateWindowTitle())
+        .build()
+    );
 
     // Chat
-    public String prefix = ConfigTab.prefix.get();
-    public boolean prefixOpensConsole = ConfigTab.prefixOpensConsole.get();
-    public boolean chatFeedback = ConfigTab.chatFeedback.get();
-    public boolean deleteChatFeedback = ConfigTab.deleteChatFeedback.get();
+
+    public final Setting<String> prefix = sgChat.add(new StringSetting.Builder()
+        .name("prefix")
+        .description("Prefix.")
+        .defaultValue(".")
+        .build()
+    );
+
+    public final Setting<Boolean> chatFeedback = sgChat.add(new BoolSetting.Builder()
+        .name("chat-feedback")
+        .description("Sends chat feedback when meteor performs certain actions.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> deleteChatFeedback = sgChat.add(new BoolSetting.Builder()
+        .name("delete-chat-feedback")
+        .description("Delete previous matching chat feedback to keep chat clear.")
+        .visible(chatFeedback::get)
+        .defaultValue(true)
+        .build()
+    );
 
     // Misc
-    public int rotationHoldTicks = ConfigTab.rotationHoldTicks.get();
-    public boolean useTeamColor = ConfigTab.useTeamColor.get();
+
+    public final Setting<Integer> rotationHoldTicks = sgMisc.add(new IntSetting.Builder()
+        .name("rotation-hold")
+        .description("Hold long to hold server side rotation when not sending any packets.")
+        .defaultValue(4)
+        .build()
+    );
+
+    public final Setting<Boolean> useTeamColor = sgMisc.add(new BoolSetting.Builder()
+        .name("use-team-color")
+        .description("Uses player's team color for rendering things like esp and tracers.")
+        .defaultValue(true)
+        .build()
+    );
+
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
@@ -54,39 +141,11 @@ public class Config extends System<Config> {
     }
 
     @Override
-    public void init() {
-        ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
-
-        String versionString = metadata.getVersion().getFriendlyString();
-        if (versionString.contains("-")) versionString = versionString.split("-")[0];
-
-        version = new Version(versionString);
-        devBuild = metadata.getCustomValue("meteor-client:devbuild").getAsString();
-    }
-
-    // Serialisation
-
-    @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-        tag.putString("version", version.toString());
 
-        tag.putString("font", font);
-        tag.putBoolean("customFont", customFont);
-        tag.putDouble("rainbowSpeed", ConfigTab.rainbowSpeed.get());
-
-        tag.putString("prefix", prefix);
-        tag.putBoolean("prefixOpensConsole", prefixOpensConsole);
-        tag.putBoolean("chatFeedback", chatFeedback);
-        tag.putBoolean("deleteChatFeedback", deleteChatFeedback);
-
-        tag.putBoolean("titleScreenCredits", titleScreenCredits);
-        tag.putBoolean("titleScreenSplashes", titleScreenSplashes);
-        tag.putBoolean("customWindowTitle", customWindowTitle);
-        tag.putString("customWindowTitleText", customWindowTitleText);
-
-        tag.putInt("rotationHoldTicks", rotationHoldTicks);
-        tag.putBoolean("useTeamColor", useTeamColor);
+        tag.putString("version", MeteorClient.version.toString());
+        tag.put("settings", settings.toTag());
         tag.put("dontShowAgainPrompts", listToTag(dontShowAgainPrompts));
 
         return tag;
@@ -94,43 +153,10 @@ public class Config extends System<Config> {
 
     @Override
     public Config fromTag(NbtCompound tag) {
-        font = getString(tag, "font", ConfigTab.font);
-        customFont = getBoolean(tag, "customFont", ConfigTab.customFont);
-        rainbowSpeed = getDouble(tag, "rainbowSpeed", ConfigTab.rainbowSpeed);
-
-        prefix = getString(tag, "prefix", ConfigTab.prefix);
-        prefixOpensConsole = getBoolean(tag, "prefixOpensConsole", ConfigTab.prefixOpensConsole);
-        chatFeedback = getBoolean(tag, "chatFeedback", ConfigTab.chatFeedback);
-        deleteChatFeedback = getBoolean(tag, "deleteChatFeedback", ConfigTab.deleteChatFeedback);
-
-        titleScreenCredits = getBoolean(tag, "titleScreenCredits", ConfigTab.titleScreenCredits);
-        titleScreenSplashes = getBoolean(tag, "titleScreenSplashes", ConfigTab.titleScreenSplashes);
-        customWindowTitle = getBoolean(tag, "customWindowTitle", ConfigTab.customWindowTitle);
-        customWindowTitleText = getString(tag, "customWindowTitleText", ConfigTab.customWindowTitleText);
-
-        rotationHoldTicks = getInt(tag, "rotationHoldTicks", ConfigTab.rotationHoldTicks);
-        useTeamColor = getBoolean(tag, "useTeamColor", ConfigTab.useTeamColor);
-        dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
+        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
+        if (tag.contains("don'tShowAgainPrompts")) dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
 
         return this;
-    }
-
-    // Utils
-
-    private boolean getBoolean(NbtCompound tag, String key, Setting<Boolean> setting) {
-        return tag.contains(key) ? tag.getBoolean(key) : setting.getDefaultValue();
-    }
-
-    private String getString(NbtCompound tag, String key, Setting<String> setting) {
-        return tag.contains(key) ? tag.getString(key) : setting.getDefaultValue();
-    }
-
-    private double getDouble(NbtCompound tag, String key, Setting<Double> setting) {
-        return tag.contains(key) ? tag.getDouble(key) : setting.getDefaultValue();
-    }
-
-    private int getInt(NbtCompound tag, String key, Setting<Integer> setting) {
-        return tag.contains(key) ? tag.getInt(key) : setting.getDefaultValue();
     }
 
     private NbtList listToTag(List<String> list) {
