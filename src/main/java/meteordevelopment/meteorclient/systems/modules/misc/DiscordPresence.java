@@ -10,6 +10,7 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import club.minnced.discord.rpc.DiscordEventHandlers;
 import club.minnced.discord.rpc.DiscordRPC;
 import club.minnced.discord.rpc.DiscordRichPresence;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
@@ -17,7 +18,6 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -129,8 +129,8 @@ public class DiscordPresence extends Module {
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
 
         rpc.largeImageKey = "meteor_client";
-        String largeText = "Meteor Client " + Config.get().version;
-        if (!Config.get().devBuild.isEmpty()) largeText += " Dev Build: " + Config.get().devBuild;
+        String largeText = "Meteor Client " + MeteorClient.version;
+        if (!MeteorClient.devBuild.isEmpty()) largeText += " Dev Build: " + MeteorClient.devBuild;
         rpc.largeImageText = largeText;
 
         currentSmallImage = SmallImage.Snail;
@@ -238,7 +238,7 @@ public class DiscordPresence extends Module {
         }
         else {
             if (!lastWasInMainMenu) {
-                rpc.details = "Meteor Client " + (Config.get().devBuild.isEmpty() ? Config.get().version : Config.get().version + " " + Config.get().devBuild);
+                rpc.details = "Meteor Client " + (MeteorClient.devBuild.isEmpty() ? MeteorClient.version : MeteorClient.version + " " + MeteorClient.devBuild);
 
                 if (mc.currentScreen instanceof TitleScreen) rpc.state = "Looking at title screen";
                 else if (mc.currentScreen instanceof SelectWorldScreen) rpc.state = "Selecting world";

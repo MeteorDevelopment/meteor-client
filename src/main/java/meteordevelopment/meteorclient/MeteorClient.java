@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
-import meteordevelopment.meteorclient.events.meteor.CharTypedEvent;
+import meteordevelopment.meteorclient.events.Cancellable;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
@@ -28,11 +29,11 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.lwjgl.glfw.GLFW;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -43,11 +44,17 @@ import java.lang.reflect.Method;
 import java.util.Set;
 
 public class MeteorClient implements ClientModInitializer {
+    public static final String MOD_ID = "meteor-client";
+    private static final ModMetadata MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata();
+
     public static MinecraftClient mc;
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
-    public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), "meteor-client");
+    public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), MOD_ID);
     public static final Logger LOG = LogManager.getLogger();
+
+    public static Version version;
+    public static String devBuild;
 
     @Override
     public void onInitializeClient() {
@@ -57,6 +64,12 @@ public class MeteorClient implements ClientModInitializer {
         }
 
         LOG.info("Initializing Meteor Client");
+
+        String versionString = MOD_META.getVersion().getFriendlyString();
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
+
+        version = new Version(versionString);
+        devBuild = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
 
         // Global minecraft client accessor
         mc = MinecraftClient.getInstance();
@@ -100,36 +113,29 @@ public class MeteorClient implements ClientModInitializer {
         }));
     }
 
-    // GUI
-
-    private void openClickGui() {
-        Tabs.get().get(0).openScreen(GuiThemes.get());
-    }
-
     @EventHandler
-    private void onKeyGUI(KeyEvent event) {
-        if (event.action == KeyAction.Press && KeyBinds.OPEN_CLICK_GUI.matchesKey(event.key, 0)) {
-            if (Utils.canOpenClickGUI()) openClickGui();
+    private void onKey(KeyEvent event) {
+        if (event.action == KeyAction.Press) {
+            if (KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) openGui();
+            else if (KeyBinds.OPEN_COMMANDS.matchesKey(event.key, 0)) openCommands(event);
         }
     }
 
     @EventHandler
-    private void onMouseButtonGUI(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && event.button != GLFW.GLFW_MOUSE_BUTTON_LEFT && KeyBinds.OPEN_CLICK_GUI.matchesMouse(event.button)) {
-            if (Utils.canOpenClickGUI()) openClickGui();
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action == KeyAction.Press) {
+            if (KeyBinds.OPEN_GUI.matchesMouse(event.button)) openGui();
+            else if (KeyBinds.OPEN_COMMANDS.matchesMouse(event.button)) openCommands(event);
         }
     }
 
-    // Console
+    private void openGui() {
+        if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
+    }
 
-    @EventHandler
-    private void onCharTyped(CharTypedEvent event) {
-        if (mc.currentScreen != null || !Config.get().prefixOpensConsole || Config.get().prefix.isBlank()) return;
-
-        if (event.c == Config.get().prefix.charAt(0)) {
-            mc.setScreen(new ChatScreen(Config.get().prefix));
-            event.cancel();
-        }
+    private void openCommands(Cancellable event) {
+        mc.setScreen(new ChatScreen(Config.get().prefix.get()));
+        event.cancel();
     }
 
     // Reflection initialisation
@@ -167,7 +173,8 @@ public class MeteorClient implements ClientModInitializer {
                     task.invoke(null);
                 }
             }
-        } catch (IllegalAccessException | InvocationTargetException e) {
+        }
+        catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }

@@ -15,7 +15,8 @@ import java.util.Map;
 public class KeyBinds {
     private static final String CATEGORY = "Meteor Client";
 
-    public static KeyBinding OPEN_CLICK_GUI = new KeyBinding("key.meteor-client.open-click-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY);
+    public static KeyBinding OPEN_GUI = new KeyBinding("key.meteor-client.open-gui", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_RIGHT_SHIFT, CATEGORY);
+    public static KeyBinding OPEN_COMMANDS = new KeyBinding("key.meteor-client.open-commands", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_PERIOD, CATEGORY);
 
     public static KeyBinding[] apply(KeyBinding[] binds) {
         // Add category
@@ -29,10 +30,11 @@ public class KeyBinds {
         categories.put(CATEGORY, highest + 1);
 
         // Add key binding
-        KeyBinding[] newBinds = new KeyBinding[binds.length + 1];
+        KeyBinding[] newBinds = new KeyBinding[binds.length + 2];
 
         System.arraycopy(binds, 0, newBinds, 0, binds.length);
-        newBinds[binds.length] = OPEN_CLICK_GUI;
+        newBinds[binds.length] = OPEN_GUI;
+        newBinds[binds.length + 1] = OPEN_COMMANDS;
 
         return newBinds;
     }

@@ -58,7 +58,7 @@ public class Shader {
 
     private String read(String path) {
         try {
-            return IOUtils.toString(mc.getResourceManager().getResource(new Identifier("meteor-client", "shaders/" + path)).getInputStream(), StandardCharsets.UTF_8);
+            return IOUtils.toString(mc.getResourceManager().getResource(new Identifier(MeteorClient.MOD_ID, "shaders/" + path)).getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
