@@ -154,6 +154,7 @@ public class Offhand extends Module {
         EGap(Items.ENCHANTED_GOLDEN_APPLE),
         Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
+        Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD);
 
         net.minecraft.item.Item item;

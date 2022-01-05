@@ -18,5 +18,4 @@ public class ParticleEvent extends Cancellable {
         INSTANCE.particle = particle;
         return INSTANCE;
     }
-
 }

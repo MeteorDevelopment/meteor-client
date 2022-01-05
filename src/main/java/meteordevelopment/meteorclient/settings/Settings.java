@@ -42,6 +42,14 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         return null;
     }
 
+    public void reset() {
+        for (SettingGroup group : groups) {
+            for (Setting<?> setting : group) {
+                setting.reset();
+            }
+        }
+    }
+
     public SettingGroup getGroup(String name) {
         for (SettingGroup sg : this) {
             if (sg.name.equals(name)) return sg;

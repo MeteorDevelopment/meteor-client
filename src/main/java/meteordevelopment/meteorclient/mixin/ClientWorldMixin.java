@@ -64,7 +64,7 @@ public abstract class ClientWorldMixin {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customSkyColor.get()) {
-            info.setReturnValue(ambience.skyColor.get().getVec3d());
+            info.setReturnValue(ambience.skyColor().getVec3d());
         }
     }
 
