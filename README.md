@@ -8,8 +8,6 @@
 <p align="center">A Minecraft Fabric Utility Mod for the latest Minecraft release.</p>
 
 <div align="center">
-    <a href="https://ko-fi.com/meteordev"><img src="https://ko-fi.com/img/githubbutton_sm.svg" alt="Ko-Fi"/></a>
-    <br>
     <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
     <br><br>
     <img src="https://img.shields.io/github/last-commit/MeteorDevelopment/meteor-client" alt="GitHub last commit"/>
@@ -41,7 +39,7 @@ Bug reports and suggestions should be made in this repo's [issue tracker](https:
 ## Donations
 All of our work is completely free and non-profit, therefore we are very grateful for all donations made to help support us running our community. All of the money made through donations is used to pay for our servers, none of it is taken for profit.
 
-Donations can be made to our [paypal](https://www.paypal.me/MineGame159), the minimum amount to get donator benefits is 5$.
+Donations can be made to our [paypal](https://meteorclient.com/donations), the minimum amount to get donator benefits is 5$.
 You will be rewarded with a role on our discord, an in-game cape and extra kit + a colored name on our pvp server (`pvp.meteorclient.com`).
 Make sure to include your **discord tag** and **Minecraft ign** so we can give you your rewards.
 
@@ -55,6 +53,7 @@ This project is licensed under the [GNU General Public License v3.0](https://www
 
 If you use **ANY** code from the source:
 - You must disclose the source code of your modified work, and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source and/or obfuscated application.
+- You must state clearly and obviously to all end users that you are using code from this project.
 - Your application must also be licensed under the same license.
 
 
