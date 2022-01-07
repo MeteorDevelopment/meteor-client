@@ -91,8 +91,13 @@ public class CustomTextRenderer implements TextRenderer {
 
         double width;
         if (shadow) {
+            int preShadowA = SHADOW_COLOR.a;
+            SHADOW_COLOR.a = (int) (color.a / 255.0 * preShadowA);
+
             width = font.render(mesh, text, x + 1, y + 1, SHADOW_COLOR, scale);
             font.render(mesh, text, x, y, color, scale);
+
+            SHADOW_COLOR.a = preShadowA;
         }
         else {
             width = font.render(mesh, text, x, y, color, scale);
