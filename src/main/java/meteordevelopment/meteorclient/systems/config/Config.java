@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -53,8 +52,6 @@ public class Config extends System<Config> {
         .defaultValue(0.5)
         .range(0, 10)
         .sliderMax(5)
-        .onModuleActivated(setting -> setting.set(RainbowColors.GLOBAL.getSpeed() * 100))
-        .onChanged(value -> RainbowColors.GLOBAL.setSpeed(value / 100))
         .build()
     );
 
