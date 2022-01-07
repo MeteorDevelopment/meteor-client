@@ -25,7 +25,7 @@ public class NametagUtils {
     private static Matrix4f projection;
     private static double windowScale;
 
-    private static double scale;
+    public static double scale;
 
     public static void onRender(MatrixStack matrices, Matrix4f projection) {
         model = matrices.peek().getPositionMatrix().copy();
