@@ -202,8 +202,8 @@ public class Burrow extends Module {
 
         FindItemResult block = getItem();
 
-        if (!(mc.player.getInventory().getStack(block.getSlot()).getItem() instanceof BlockItem)) return;
-        InvUtils.swap(block.getSlot(), true);
+        if (!(mc.player.getInventory().getStack(block.slot()).getItem() instanceof BlockItem)) return;
+        InvUtils.swap(block.slot(), true);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
