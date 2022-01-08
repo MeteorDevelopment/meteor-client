@@ -67,7 +67,7 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || ((CreativeInventoryScreenAccessor) mc.currentScreen).getSelectedTab() != ItemGroup.INVENTORY.getIndex()) return -1;
+        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != ItemGroup.INVENTORY.getIndex()) return -1;
         return survivalInventory(i);
     }
 
