@@ -49,7 +49,6 @@ public class Commands extends System<Commands> {
         add(new LocateCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
-        add(new PanicCommand());
         add(new PeekCommand());
         add(new ProfilesCommand());
         add(new ReloadCommand());
