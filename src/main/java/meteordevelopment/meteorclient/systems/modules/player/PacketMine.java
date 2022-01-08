@@ -181,8 +181,8 @@ public class PacketMine extends Module {
             for (MyBlock block : blocks) {
                 if (block.isReady()) {
                     FindItemResult slot = InvUtils.findFastestTool(block.blockState);
-                    if (!slot.found() || mc.player.getInventory().selectedSlot == slot.getSlot()) continue;
-                    mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.getSlot()));
+                    if (!slot.found() || mc.player.getInventory().selectedSlot == slot.slot()) continue;
+                    mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.slot()));
                     swapped = true;
                     shouldUpdateSlot = true;
                     break;

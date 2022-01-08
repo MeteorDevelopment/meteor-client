@@ -82,7 +82,7 @@ public class AutoTotem extends Module {
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onTick(TickEvent.Pre event) {
         FindItemResult result = InvUtils.find(Items.TOTEM_OF_UNDYING);
-        totems = result.getCount();
+        totems = result.count();
 
         if (totems <= 0) locked = false;
         else if (ticks >= delay.get()) {
@@ -92,7 +92,7 @@ public class AutoTotem extends Module {
             locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
 
             if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
-                InvUtils.move().from(result.getSlot()).toOffhand();
+                InvUtils.move().from(result.slot()).toOffhand();
             }
 
             ticks = 0;
