@@ -160,17 +160,47 @@ public class Nuker extends Module {
 
     // Rendering
 
-
-    private final Setting<Boolean> enableRender = sgRender.add(new BoolSetting.Builder()
-        .name("Render")
-        .description("Enable rendering bounding box for cubes.")
+    // Bounding box
+    private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
+        .name("Bounding box")
+        .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+    private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("nuke-block-mode")
-        .description("How the shapes are rendered.")
+        .description("How the shape for the bounding box is rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
+    );
+
+    private final Setting<SettingColor> sideColorBox = sgRender.add(new ColorSetting.Builder()
+        .name("side-color")
+        .description("The side color of the bounding box.")
+        .defaultValue(new SettingColor(16,106,144, 100))
+        .build()
+    );
+
+    private final Setting<SettingColor> lineColorBox = sgRender.add(new ColorSetting.Builder()
+        .name("line-color")
+        .description("The line color of the bounding box.")
+        .defaultValue(new SettingColor(16,106,144, 255))
+        .build()
+    );
+
+    // Broken blocks
+
+    private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
+        .name("Broken blocks")
+        .description("Enable rendering bounding box for Cube and Uniform Cube.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<ShapeMode> shapeModeBreak = sgRender.add(new EnumSetting.Builder<ShapeMode>()
+        .name("nuke-block-mode")
+        .description("How the shapes for broken blocks are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
@@ -195,8 +225,6 @@ public class Nuker extends Module {
 
     private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private final List<RenderBlock> renderBlocks = new ArrayList<>();
-
-
 
     private boolean firstBlock;
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
@@ -233,14 +261,17 @@ public class Nuker extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (enableRender.get()){
+        if (enableRenderBreaking.get()){
+            // Broken block
             renderBlocks.sort(Comparator.comparingInt(o -> -o.ticks));
-            renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeMode.get()));
+            renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeModeBreak.get()));
+        }
 
+        if (enableRenderBounding.get()){
             // Render bounding box if cube and should break stuff
             if (shape.get() != Shape.Sphere && mode.get() != Mode.Smash) {
                 box = new Box(pos1, pos2);
-                event.renderer.box(box, new SettingColor(16,106,144, 100), new SettingColor(16,106,144, 255), ShapeMode.Both, 0);
+                event.renderer.box(box, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
             }
         }
 
@@ -277,12 +308,10 @@ public class Nuker extends Module {
             pos2.set(pX_ + r-1, pY + r, pZ + r); // up
         } else {
             int direction = Math.round((mc.player.getRotationClient().y % 360) / 90);
-//                direction = direction < 0? 360+direction: direction;
-//                direction = Math.round(direction / 90);
             direction = (direction == 4 || direction == -4)? 0: direction;
             direction = direction == -2? 2: direction == -1? 3: direction == -3? 1: direction; // stupid java not doing modulo shit
 
-            // 1
+            // direction == 1
             pos1.set(pX_ - (range_forward.get()), Math.ceil(pY) - range_down.get(), pZ_ - range_right.get()); // down
             pos2.set(pX_ + range_back.get()+1, Math.ceil(pY + range_up.get() + 1), pZ_ + range_left.get()+1); // up
 
@@ -306,8 +335,6 @@ public class Nuker extends Module {
             // get largest horizontal
             maxh = 1 + Math.max(Math.max(Math.max(range_back.get(),range_right.get()),range_forward.get()),range_left.get());
             maxv = 1 + Math.max(range_up.get(), range_down.get());
-
-
         }
 
         if (mode.get() == Mode.Flatten){
@@ -422,12 +449,13 @@ public class Nuker extends Module {
 
 
     public static double maxDist(double x1, double y1, double z1, double x2, double y2, double z2) {
-        // Gets the furthest away X, Y or Z distance
+        // Gets the largest X, Y or Z difference, manhattan style
         double dX = Math.ceil(Math.abs(x2 - x1));
         double dY = Math.ceil(Math.abs(y2 - y1));
         double dZ = Math.ceil(Math.abs(z2 - z1));
         return Math.max(Math.max(dX, dY), dZ);
     }
+
     public static class RenderBlock {
         public BlockPos.Mutable pos = new BlockPos.Mutable();
         public int ticks;
