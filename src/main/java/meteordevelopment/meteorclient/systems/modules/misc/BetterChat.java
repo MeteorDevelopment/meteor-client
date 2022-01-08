@@ -37,24 +37,24 @@ public class BetterChat extends Module {
     private final SettingGroup sgSuffix = settings.createGroup("Suffix");
 
     private final Setting<Boolean> annoy = sgGeneral.add(new BoolSetting.Builder()
-            .name("annoy")
-            .description("Makes your messages aNnOyInG.")
-            .defaultValue(false)
-            .build()
+        .name("annoy")
+        .description("Makes your messages aNnOyInG.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> fancy = sgGeneral.add(new BoolSetting.Builder()
-            .name("fancy-chat")
-            .description("Makes your messages ғᴀɴᴄʏ!")
-            .defaultValue(false)
-            .build()
+        .name("fancy-chat")
+        .description("Makes your messages ғᴀɴᴄʏ!")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> timestamps = sgGeneral.add(new BoolSetting.Builder()
-            .name("timestamps")
-            .description("Adds client side time stamps to the beginning of chat messages.")
-            .defaultValue(false)
-            .build()
+        .name("timestamps")
+        .description("Adds client side time stamps to the beginning of chat messages.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> playerHeads = sgGeneral.add(new BoolSetting.Builder()
@@ -74,10 +74,10 @@ public class BetterChat extends Module {
     // Filter
 
     private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
-            .name("anti-spam")
-            .description("Blocks duplicate messages from filling your chat.")
-            .defaultValue(true)
-            .build()
+        .name("anti-spam")
+        .description("Blocks duplicate messages from filling your chat.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> antiSpamDepth = sgFilter.add(new IntSetting.Builder()
@@ -108,91 +108,91 @@ public class BetterChat extends Module {
     // Longer chat
 
     private final Setting<Boolean> infiniteChatBox = sgLongerChat.add(new BoolSetting.Builder()
-            .name("infinite-chat-box")
-            .description("Lets you type infinitely long messages.")
-            .defaultValue(true)
-            .build()
+        .name("infinite-chat-box")
+        .description("Lets you type infinitely long messages.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> longerChatHistory = sgLongerChat.add(new BoolSetting.Builder()
-            .name("longer-chat-history")
-            .description("Extends chat length.")
-            .defaultValue(true)
-            .build()
+        .name("longer-chat-history")
+        .description("Extends chat length.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> longerChatLines = sgLongerChat.add(new IntSetting.Builder()
-            .name("extra-lines")
-            .description("The amount of extra chat lines.")
-            .defaultValue(1000)
-            .min(100)
-            .sliderRange(100, 1000)
-            .visible(longerChatHistory::get)
-            .build()
+        .name("extra-lines")
+        .description("The amount of extra chat lines.")
+        .defaultValue(1000)
+        .min(100)
+        .sliderRange(100, 1000)
+        .visible(longerChatHistory::get)
+        .build()
     );
 
     // Prefix
 
     private final Setting<Boolean> prefix = sgPrefix.add(new BoolSetting.Builder()
-            .name("prefix")
-            .description("Adds a prefix to your chat messages.")
-            .defaultValue(false)
-            .build()
+        .name("prefix")
+        .description("Adds a prefix to your chat messages.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> prefixRandom = sgPrefix.add(new BoolSetting.Builder()
-            .name("random")
-            .description("Uses a random number as your prefix.")
-            .defaultValue(false)
-            .build()
+        .name("random")
+        .description("Uses a random number as your prefix.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<String> prefixText = sgPrefix.add(new StringSetting.Builder()
-            .name("text")
-            .description("The text to add as your prefix.")
-            .defaultValue("> ")
-            .visible(() -> !prefixRandom.get())
-            .build()
+        .name("text")
+        .description("The text to add as your prefix.")
+        .defaultValue("> ")
+        .visible(() -> !prefixRandom.get())
+        .build()
     );
 
     private final Setting<Boolean> prefixSmallCaps = sgPrefix.add(new BoolSetting.Builder()
-            .name("small-caps")
-            .description("Uses small caps in the prefix.")
-            .defaultValue(false)
-            .visible(() -> !prefixRandom.get())
-            .build()
+        .name("small-caps")
+        .description("Uses small caps in the prefix.")
+        .defaultValue(false)
+        .visible(() -> !prefixRandom.get())
+        .build()
     );
 
     // Suffix
 
     private final Setting<Boolean> suffix = sgSuffix.add(new BoolSetting.Builder()
-            .name("suffix")
-            .description("Adds a suffix to your chat messages.")
-            .defaultValue(false)
-            .build()
+        .name("suffix")
+        .description("Adds a suffix to your chat messages.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> suffixRandom = sgSuffix.add(new BoolSetting.Builder()
-            .name("random")
-            .description("Uses a random number as your suffix.")
-            .defaultValue(false)
-            .build()
+        .name("random")
+        .description("Uses a random number as your suffix.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<String> suffixText = sgSuffix.add(new StringSetting.Builder()
-            .name("text")
-            .description("The text to add as your suffix.")
-            .defaultValue(" | meteor on crack!")
-            .visible(() -> !suffixRandom.get())
-            .build()
+        .name("text")
+        .description("The text to add as your suffix.")
+        .defaultValue(" | meteor on crack!")
+        .visible(() -> !suffixRandom.get())
+        .build()
     );
 
     private final Setting<Boolean> suffixSmallCaps = sgSuffix.add(new BoolSetting.Builder()
-            .name("small-caps")
-            .description("Uses small caps in the suffix.")
-            .defaultValue(true)
-            .visible(() -> !suffixRandom.get())
-            .build()
+        .name("small-caps")
+        .description("Uses small caps in the suffix.")
+        .defaultValue(true)
+        .visible(() -> !suffixRandom.get())
+        .build()
     );
 
     private final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
