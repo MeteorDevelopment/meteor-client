@@ -38,7 +38,6 @@ public class Commands extends System<Commands> {
         add(new BaritoneCommand());
         add(new VClipCommand());
         add(new HClipCommand());
-        add(new ClearChatCommand());
         add(new DismountCommand());
         add(new DamageCommand());
         add(new DropCommand());
