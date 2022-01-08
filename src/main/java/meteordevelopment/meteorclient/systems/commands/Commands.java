@@ -117,5 +117,4 @@ public class Commands extends System<Commands> {
     public <T extends Command> T get(Class<T> klass) {
         return (T) commandInstances.get(klass);
     }
-
 }
