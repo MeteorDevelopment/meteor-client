@@ -149,9 +149,12 @@ public class HUD extends System<HUD> {
 
     @EventHandler
     public void onRender(Render2DEvent event) {
-        if (mc.options.debugEnabled || mc.options.hudHidden) return;
-
-        render(event.tickDelta, hudElement -> isEditorScreen() || (hudElement.active && active));
+        if (isEditorScreen()) {
+            render(event.tickDelta, hudElement -> true);
+        }
+        else if (active && !mc.options.hudHidden && !mc.options.debugEnabled) {
+            render(event.tickDelta, hudElement -> hudElement.active);
+        }
     }
 
     public void render(float delta, Predicate<HudElement> shouldRender) {
