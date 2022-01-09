@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -13,9 +12,9 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
-import meteordevelopment.meteorclient.systems.modules.render.hud.modules.HudElement;
+import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.systems.hud.HUD;
+import meteordevelopment.meteorclient.systems.hud.modules.HudElement;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.nbt.NbtCompound;
@@ -23,7 +22,7 @@ import net.minecraft.nbt.NbtCompound;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 
 public class HudElementScreen extends WindowScreen {
-    private final HudElement element;
+    public final HudElement element;
     private WContainer settings;
 
     public HudElementScreen(GuiTheme theme, HudElement element) {
@@ -72,7 +71,9 @@ public class HudElementScreen extends WindowScreen {
 
     @Override
     protected void onRenderBefore(float delta) {
-        if (!Utils.canUpdate()) Modules.get().get(HUD.class).onRender(Render2DEvent.get(0, 0, delta));
+        if (!Utils.canUpdate()) {
+            Systems.get(HUD.class).render(delta, hudElement -> true);
+        }
     }
 
     @Override

@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -24,7 +24,7 @@ public class CrashReportMixin {
         if (Modules.get() != null) {
             sb.append("\n\n");
             sb.append("-- Meteor Client --\n");
-            sb.append("Version: ").append(Config.get().version).append("\n");
+            sb.append("Version: ").append(MeteorClient.version).append("\n");
 
             for (Category category : Modules.loopCategories()) {
                 List<Module> modules = Modules.get().getGroup(category);
@@ -41,7 +41,7 @@ public class CrashReportMixin {
                     sb.append("[").append(category).append("]:").append("\n");
 
                     for (Module module : modules) {
-                        if (module instanceof Module && module.isActive()) {
+                        if (module != null && module.isActive()) {
                             sb.append(module.title).append(" (").append(module.name).append(")\n");
                         }
                     }

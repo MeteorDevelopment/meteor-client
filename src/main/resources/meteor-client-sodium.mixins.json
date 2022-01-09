@@ -3,6 +3,7 @@
   "package": "meteordevelopment.meteorclient.mixin.sodium",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "compatibilityLevel": "JAVA_17",
+  "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
     "LightDataAccessMixin",
     "SodiumBlockOcculsionCacheMixin",

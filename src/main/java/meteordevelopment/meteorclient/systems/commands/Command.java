@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+
 public abstract class Command {
     protected static MinecraftClient mc;
 
@@ -52,6 +54,10 @@ public abstract class Command {
 
     public void register(CommandDispatcher<CommandSource> dispatcher, String name) {
         LiteralArgumentBuilder<CommandSource> builder = literal(name);
+        builder.then(literal("help").executes(context -> {
+            info(description);
+            return SINGLE_SUCCESS;
+        }));
         build(builder);
         dispatcher.register(literal("m").then(builder));
         dispatcher.register(literal("meteor").then(builder));
@@ -72,7 +78,7 @@ public abstract class Command {
     }
 
     public String toString() {
-        return Config.get().prefix + name;
+        return Config.get().prefix.get() + name;
     }
 
     public String toString(String... args) {

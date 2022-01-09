@@ -56,6 +56,8 @@ public class KeybindSetting extends Setting<Keybind> {
     public void resetImpl() {
         if (value == null) value = defaultValue.copy();
         else value.set(defaultValue);
+
+        if (widget != null) widget.reset();
     }
 
     @Override
