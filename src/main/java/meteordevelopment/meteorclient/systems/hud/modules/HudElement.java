@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.hud.modules;
 
-import meteordevelopment.meteorclient.gui.screens.HudEditorScreen;
-import meteordevelopment.meteorclient.gui.screens.HudElementScreen;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.hud.BoundingBox;
 import meteordevelopment.meteorclient.systems.hud.HUD;
@@ -57,7 +55,7 @@ public abstract class HudElement implements ISerializable<HudElement> {
     public abstract void render(HudRenderer renderer);
 
     protected boolean isInEditor() {
-        return (mc.currentScreen instanceof HudEditorScreen || mc.currentScreen instanceof HudElementScreen || !Utils.canUpdate());
+        return HUD.isEditorScreen() || !Utils.canUpdate();
     }
 
     @Override
@@ -76,7 +74,7 @@ public abstract class HudElement implements ISerializable<HudElement> {
     public HudElement fromTag(NbtCompound tag) {
         active = tag.contains("active") ? tag.getBoolean("active") : defaultActive;
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
-        box.fromTag(tag.getCompound("box"));
+        if (tag.contains("box")) box.fromTag(tag.getCompound("box"));
 
         return this;
     }

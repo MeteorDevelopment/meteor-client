@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -269,21 +268,16 @@ public class HudEditorScreen extends WidgetScreen {
 
     @Override
     public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+        if (!Utils.canUpdate()) renderBackground(matrices);
+
         double s = mc.getWindow().getScaleFactor();
 
         mouseX *= s;
         mouseY *= s;
 
-        if (!Utils.canUpdate()) {
-            renderBackground(matrices);
+        Utils.unscaledProjection();
 
-            Utils.unscaledProjection();
-            hud.onRender(Render2DEvent.get(0, 0, delta));
-        }
-        else {
-            Utils.unscaledProjection();
-            if (!hud.active) hud.onRender(Render2DEvent.get(0, 0, delta));
-        }
+        if (!Utils.canUpdate()) hud.render(delta, hudElement -> true);
 
         Renderer2D.COLOR.begin();
 

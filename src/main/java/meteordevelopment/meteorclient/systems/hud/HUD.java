@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.gui.screens.HudElementScreen;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.hud.modules.*;
+import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.AlignmentX;
 import meteordevelopment.meteorclient.utils.render.AlignmentY;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -21,6 +22,7 @@ import net.minecraft.nbt.NbtList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -149,10 +151,14 @@ public class HUD extends System<HUD> {
     public void onRender(Render2DEvent event) {
         if (mc.options.debugEnabled || mc.options.hudHidden) return;
 
-        RENDERER.begin(scale.get(), event.frameTime, false);
+        render(event.tickDelta, hudElement -> isEditorScreen() || (hudElement.active && active));
+    }
+
+    public void render(float delta, Predicate<HudElement> shouldRender) {
+        RENDERER.begin(scale.get(), delta, false);
 
         for (HudElement element : elements) {
-            if (element.active || mc.currentScreen instanceof HudEditorScreen || (mc.currentScreen instanceof HudElementScreen && ((HudElementScreen) mc.currentScreen).element == element)) {
+            if (shouldRender.test(element)) {
                 element.update(RENDERER);
                 element.render(RENDERER);
             }
@@ -161,17 +167,17 @@ public class HUD extends System<HUD> {
         RENDERER.end();
     }
 
+    public static boolean isEditorScreen() {
+        return mc.currentScreen instanceof HudEditorScreen || mc.currentScreen instanceof HudElementScreen;
+    }
+
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
         tag.putBoolean("active", active);
-
         tag.put("settings", settings.toTag());
-
-        NbtList modulesTag = new NbtList();
-        for (HudElement module : elements) modulesTag.add(module.toTag());
-        tag.put("modules", modulesTag);
+        tag.put("elements", NbtUtils.listToTag(elements));
 
         return tag;
     }
@@ -179,18 +185,16 @@ public class HUD extends System<HUD> {
     @Override
     public HUD fromTag(NbtCompound tag) {
         if (tag.contains("active")) active = tag.getBoolean("active");
-
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
+        if (tag.contains("elements")) {
+            NbtList elementsTag = tag.getList("elements", 10);
 
-        if (tag.contains("modules")) {
-            NbtList modulesTag = tag.getList("modules", 10);
+            for (NbtElement t : elementsTag) {
+                NbtCompound elementTag = (NbtCompound) t;
 
-            for (NbtElement t : modulesTag) {
-                NbtCompound moduleTag = (NbtCompound) t;
-
-                for (HudElement module : elements) {
-                    if (module.name.equals(moduleTag.getString("name"))) {
-                        module.fromTag(moduleTag);
+                for (HudElement element : elements) {
+                    if (element.name.equals(elementTag.getString("name"))) {
+                        element.fromTag(elementTag);
                         break;
                     }
                 }
