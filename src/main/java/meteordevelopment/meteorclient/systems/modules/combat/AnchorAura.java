@@ -144,6 +144,12 @@ public class AnchorAura extends Module {
         .sliderMax(5)
         .build()
     );
+    
+    private final Setting<Boolean> antiStuck = sgBreak.add(new BoolSetting.Builder()
+        .name("anti-stuck")
+        .defaultValue(false)
+        .build()
+    );
 
     // Pause
 
@@ -222,7 +228,8 @@ public class AnchorAura extends Module {
         .visible(renderBreak::get)
         .build()
     );
-
+    
+    private boolean mineInterferingBlock;
     private int placeDelayLeft;
     private int breakDelayLeft;
     private PlayerEntity target;
@@ -233,6 +240,7 @@ public class AnchorAura extends Module {
 
     @Override
     public void onActivate() {
+        mineInterferingBlock = false;
         placeDelayLeft = 0;
         breakDelayLeft = 0;
         target = null;
@@ -268,6 +276,22 @@ public class AnchorAura extends Module {
                 } else breakAnchor(breakPos, anchor, glowStone);
             }
         }
+        
+        //Anti stuck
+         if (antiStuck.get() && !mineInterferingBlock) {
+            if (findBreakPos(target.getBlockPos()) == null && findPlacePos(target.getBlockPos()) == null && target.getBlockPos().up(2).equals(Blocks.GLOWSTONE)) {
+                FindItemResult pick = InvUtils.find(itemStack -> itemStack.getItem() instanceof PickaxeItem);
+                if (pick.found()) {
+                    InvUtils.swap(pick.getSlot(), false);
+                    BlockUtils.breakBlock(target.getBlockPos().up(2), true);
+                    mineInterferringBlock = true;
+                    return;
+                }
+            }
+        }
+        
+       if (sentAntiStuck && !target.getBlockPos().up(2).equals(Blocks.GLOWSTONE) sentAntiStuck = false;
+
 
         if (placeDelayLeft >= placeDelay.get() && place.get()) {
             BlockPos placePos = findPlacePos(target.getBlockPos());
