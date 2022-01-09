@@ -12,11 +12,11 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.command.CommandSource;
 
+import java.util.ArrayList;
+
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ToggleCommand extends Command {
-
-
     public ToggleCommand() {
         super("toggle", "Toggles a module.", "t");
     }
@@ -24,27 +24,23 @@ public class ToggleCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder
-            .then(literal("all")
+            .executes(context -> {
+                new ArrayList<>(Modules.get().getAll()).forEach(Module::toggle);
+                return SINGLE_SUCCESS;
+            })
+            .then(literal("on")
                 .executes(context -> {
-                    for (Module module : Modules.get().getAll()) module.toggle();
+                    new ArrayList<>(Modules.get().getAll()).forEach(module -> {
+                        if (!module.isActive()) module.toggle();
+                    });
                     return SINGLE_SUCCESS;
                 })
-                .then(literal("on")
-                    .executes(context -> {
-                        for (Module module : Modules.get().getAll()) {
-                            if (!module.isActive()) module.toggle();
-                        }
-                        return SINGLE_SUCCESS;
-                    })
-                )
-                .then(literal("off")
-                    .executes(context -> {
-                        for (Module module : Modules.get().getActive()) {
-                            module.toggle();
-                        }
-                        return SINGLE_SUCCESS;
-                    })
-                )
+            )
+            .then(literal("off")
+                .executes(context -> {
+                    new ArrayList<>(Modules.get().getActive()).forEach(Module::toggle);
+                    return SINGLE_SUCCESS;
+                })
             )
             .then(argument("module", ModuleArgumentType.module())
                 .executes(context -> {
