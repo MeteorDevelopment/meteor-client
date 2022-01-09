@@ -27,39 +27,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
     public void onLoad(String mixinPackage) {
         if (loaded) return;
 
-        try {
-            // Get class loader
-            ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-            Class<?> classLoaderClass = classLoader.getClass();
-
-            // Get delegate
-            Field delegateField = classLoaderClass.getDeclaredField("delegate");
-            delegateField.setAccessible(true);
-            Object delegate = delegateField.get(classLoader);
-            Class<?> delegateClass = delegate.getClass();
-
-            // Get mixinTransformer field
-            Field mixinTransformerField = delegateClass.getDeclaredField("mixinTransformer");
-            mixinTransformerField.setAccessible(true);
-
-            // Get unsafe
-            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafeField.setAccessible(true);
-            Unsafe unsafe = (Unsafe) unsafeField.get(null);
-
-            // Create Asm
-            Asm.init();
-
-            // Change delegate
-            Asm.Transformer mixinTransformer = (Asm.Transformer) unsafe.allocateInstance(Asm.Transformer.class);
-            mixinTransformer.delegate = (IMixinTransformer) mixinTransformerField.get(delegate);
-
-            mixinTransformerField.set(delegate, mixinTransformer);
-        }
-        catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
-            e.printStackTrace();
-        }
-
         isOriginsPresent = FabricLoader.getInstance().isModLoaded("origins");
         isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
         isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");

@@ -10,7 +10,7 @@ You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-clie
 - Pretend to be fabric-api-base
 - Remove discord presence, capes, player count, meteor PVP adding
 - Add module to disable custom rendering
-- Use FAPI resource loader and client commands instead of custom systems (requires FAPI now)
+- Use FAPI resource loader, client commands and keybinds instead of custom systems (requires FAPI now)
 - Merge round-ui (#619)
 - Remove credit/spash/title/prefix customization
 - Merge keywords in search (#1600)

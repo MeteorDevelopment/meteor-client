@@ -57,7 +57,7 @@ public class Config extends System<Config> {
 
     // Chat
 
-    public final Setting<String> prefix = new StringSetting.Builder().defaultValue("/").build();
+    public final Setting<String> prefix = new StringSetting.StringSettingImmutable.Builder().defaultValue("/").build();
 
     public final Setting<Boolean> chatFeedback = sgChat.add(new BoolSetting.Builder()
         .name("chat-feedback")

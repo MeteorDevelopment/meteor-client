@@ -48,4 +48,38 @@ public class StringSetting extends Setting<String> {
             return new StringSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
     }
+
+    public static class StringSettingImmutable extends StringSetting {
+        public StringSettingImmutable(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible) {
+            super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+        }
+
+        @Override
+        public String load(NbtCompound tag) {
+            return defaultValue;
+        }
+
+        @Override
+        public NbtCompound save(NbtCompound tag) {
+            value = defaultValue;
+            return super.save(tag);
+        }
+
+        @Override
+        public void onChanged() {
+            super.onChanged();
+            value = defaultValue;
+        }
+
+        public static class Builder extends SettingBuilder<StringSettingImmutable.Builder, String, StringSettingImmutable> {
+            public Builder() {
+                super(null);
+            }
+
+            @Override
+            public StringSettingImmutable build() {
+                return new StringSettingImmutable(name, description, defaultValue, onChanged, onModuleActivated, visible);
+            }
+        }
+    }
 }
