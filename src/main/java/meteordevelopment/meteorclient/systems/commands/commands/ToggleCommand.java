@@ -24,23 +24,21 @@ public class ToggleCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder
-            .executes(context -> {
-                new ArrayList<>(Modules.get().getAll()).forEach(Module::toggle);
-                return SINGLE_SUCCESS;
-            })
-            .then(literal("on")
-                .executes(context -> {
-                    new ArrayList<>(Modules.get().getAll()).forEach(module -> {
-                        if (!module.isActive()) module.toggle();
-                    });
-                    return SINGLE_SUCCESS;
-                })
-            )
-            .then(literal("off")
-                .executes(context -> {
-                    new ArrayList<>(Modules.get().getActive()).forEach(Module::toggle);
-                    return SINGLE_SUCCESS;
-                })
+            .then(literal("all")
+                .then(literal("on")
+                    .executes(context -> {
+                        new ArrayList<>(Modules.get().getAll()).forEach(module -> {
+                            if (!module.isActive()) module.toggle();
+                        });
+                        return SINGLE_SUCCESS;
+                    })
+                )
+                .then(literal("off")
+                    .executes(context -> {
+                        new ArrayList<>(Modules.get().getActive()).forEach(Module::toggle);
+                        return SINGLE_SUCCESS;
+                    })
+                )
             )
             .then(argument("module", ModuleArgumentType.module())
                 .executes(context -> {
