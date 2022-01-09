@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.hud.InGameHud;
@@ -105,22 +104,22 @@ public abstract class InGameHudMixin {
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;hasJumpingMount()Z"))
     private boolean onSwitchBar(ClientPlayerEntity player) {
-        if (!Modules.get().get(HUD.class).mountHud() || !client.interactionManager.hasExperienceBar()) return player.hasJumpingMount();
+        if (!Modules.get().get(NoRender.class).noMountHiding() || !client.interactionManager.hasExperienceBar()) return player.hasJumpingMount();
         return player.hasJumpingMount() && client.options.keyJump.isPressed() || player.getMountJumpStrength() > 0;
     }
 
     @ModifyConstant(method = "renderMountHealth", constant = @Constant(intValue = 39))
     private int onRenderMountHelath(int yOffset) {
-        return Modules.get().get(HUD.class).mountHud() && client.interactionManager.hasStatusBars() ? yOffset + 10 : yOffset;
+        return Modules.get().get(NoRender.class).noMountHiding() && client.interactionManager.hasStatusBars() ? yOffset + 10 : yOffset;
     }
 
     @ModifyVariable(method = "renderStatusBars", at = @At(value = "STORE", ordinal = 1), ordinal = 10)
     private int onRenderStatusBars(int y) {
-        return Modules.get().get(HUD.class).mountHud() && client.player.hasJumpingMount() ? y - 10 : y;
+        return Modules.get().get(NoRender.class).noMountHiding() && client.player.hasJumpingMount() ? y - 10 : y;
     }
 
     @ModifyArg(method = "renderStatusBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;getHeartCount(Lnet/minecraft/entity/LivingEntity;)I", ordinal = 0))
     private LivingEntity modifyGetHeartCount(LivingEntity entity) {
-        return Modules.get().get(HUD.class).mountHud() ? null : entity;
+        return Modules.get().get(NoRender.class).noMountHiding() ? null : entity;
     }
 }

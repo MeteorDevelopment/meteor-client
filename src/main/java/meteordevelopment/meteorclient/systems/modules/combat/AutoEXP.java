@@ -109,7 +109,7 @@ public class AutoEXP extends Module {
             if (exp.found()) {
                 if (!exp.isHotbar() && !exp.isOffhand()) {
                     if (!replenish.get()) return;
-                    InvUtils.move().from(exp.getSlot()).toHotbar(slot.get() - 1);
+                    InvUtils.move().from(exp.slot()).toHotbar(slot.get() - 1);
                 }
 
                 Rotations.rotate(mc.player.getYaw(), 90, () -> {
@@ -117,7 +117,7 @@ public class AutoEXP extends Module {
                         mc.interactionManager.interactItem(mc.player, mc.world, exp.getHand());
                     }
                     else {
-                        InvUtils.swap(exp.getSlot(), true);
+                        InvUtils.swap(exp.slot(), true);
                         mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                         InvUtils.swapBack();
                     }

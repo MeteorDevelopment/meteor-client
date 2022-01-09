@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.systems.waypoints;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import meteordevelopment.meteorclient.utils.misc.Vec3;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.texture.AbstractTexture;
@@ -90,6 +92,23 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     public void nextIcon() {
         icon = getIcon(findIconIndex() + 1);
+    }
+
+    public Vec3 getCoords() {
+        double x = this.x;
+        double y = this.y;
+        double z = this.z;
+
+        if (actualDimension == Dimension.Overworld && PlayerUtils.getDimension() == Dimension.Nether) {
+            x = x / 8f;
+            z = z / 8f;
+        }
+        else if (actualDimension == Dimension.Nether && PlayerUtils.getDimension() == Dimension.Overworld) {
+            x = x * 8;
+            z = z * 8;
+        }
+
+        return new Vec3(x, y, z);
     }
 
     @Override

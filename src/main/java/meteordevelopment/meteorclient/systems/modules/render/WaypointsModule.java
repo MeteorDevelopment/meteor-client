@@ -37,7 +37,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.BaseText;
 import net.minecraft.text.LiteralText;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
@@ -49,7 +48,17 @@ import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
 
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
+
+    public final Setting<Integer> textRenderDistance = sgGeneral.add(new IntSetting.Builder()
+        .name("text-render-distance")
+        .description("Maximum distance from the center of the screen at which text will be rendered.")
+        .defaultValue(100)
+        .min(0)
+        .sliderMax(200)
+        .build()
+    );
 
     private final Setting<Integer> maxDeathPositions = sgDeathPosition.add(new IntSetting.Builder()
         .name("max-death-positions")
@@ -193,9 +202,7 @@ public class WaypointsModule extends Module {
                     if (mc.player == null || mc.world == null) return;
                     IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                     if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
-                    Vec3d vec = Waypoints.get().getCoords(waypoint);
-                    BlockPos pos = new BlockPos(vec.x, vec.y, vec.z);
-                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(pos));
+                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(waypoint.getCoords().toBlockPos()));
                 };
             }
 
@@ -262,7 +269,7 @@ public class WaypointsModule extends Module {
 
             // X
             table.add(theme.label("X:"));
-            WIntEdit x = theme.intEdit(waypoint.x, 0, Integer.MAX_VALUE, true);
+            WIntEdit x = theme.intEdit(waypoint.x, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
             x.noSlider = true;
             x.action = () -> waypoint.x = x.get();
             table.add(x).expandX();
@@ -283,7 +290,7 @@ public class WaypointsModule extends Module {
 
             // Z
             table.add(theme.label("Z:"));
-            WIntEdit z = theme.intEdit(waypoint.z, 0, Integer.MAX_VALUE, true);
+            WIntEdit z = theme.intEdit(waypoint.z, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
             z.action = () -> waypoint.z = z.get();
             table.add(z).expandX();
             table.row();
@@ -307,6 +314,7 @@ public class WaypointsModule extends Module {
             table.add(theme.label("Scale:"));
             WDoubleEdit scale = table.add(theme.doubleEdit(waypoint.scale, 0, 4, 0, 4)).expandX().widget();
             scale.action = () -> waypoint.scale = scale.get();
+            table.row();
 
             table.add(theme.horizontalSeparator()).expandX();
             table.row();

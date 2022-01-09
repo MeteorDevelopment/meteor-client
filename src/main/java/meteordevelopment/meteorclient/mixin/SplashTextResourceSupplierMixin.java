@@ -25,7 +25,7 @@ public class SplashTextResourceSupplierMixin {
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
     private void onApply(CallbackInfoReturnable<String> cir) {
-        if (Config.get() == null || !Config.get().titleScreenSplashes) return;
+        if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
 
         if (override) cir.setReturnValue(meteorSplashes.get(random.nextInt(meteorSplashes.size())));
         override = !override;

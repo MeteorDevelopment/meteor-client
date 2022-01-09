@@ -29,7 +29,7 @@ public class EXPThrower extends Module {
                 mc.interactionManager.interactItem(mc.player, mc.world, exp.getHand());
             }
             else {
-                InvUtils.swap(exp.getSlot(), true);
+                InvUtils.swap(exp.slot(), true);
                 mc.interactionManager.interactItem(mc.player, mc.world, exp.getHand());
                 InvUtils.swapBack();
             }

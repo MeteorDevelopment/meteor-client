@@ -63,7 +63,7 @@ public class Quiver extends Module {
         mc.options.keyUse.setPressed(false);
         mc.interactionManager.stopUsingItem(mc.player);
 
-        InvUtils.swap(bow.getSlot(), true);
+        InvUtils.swap(bow.slot(), true);
 
         arrowSlots.clear();
 

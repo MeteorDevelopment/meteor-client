@@ -82,7 +82,7 @@ public class AutoShearer extends Module {
             if (findNewShears) {
                 FindItemResult shears = InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
 
-                if (InvUtils.swap(shears.getSlot(), true)) foundShears = true;
+                if (InvUtils.swap(shears.slot(), true)) foundShears = true;
             }
 
             if (foundShears) {

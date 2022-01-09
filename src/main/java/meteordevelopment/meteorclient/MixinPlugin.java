@@ -19,11 +19,20 @@ import java.util.List;
 import java.util.Set;
 
 public class MixinPlugin implements IMixinConfigPlugin {
-    private boolean isResourceLoaderPresent = false;
-    private boolean isOriginsPresent = false;
+    private static final String mixinPackage = "meteordevelopment.meteorclient.mixin";
+
+    private static boolean loaded;
+
+    private static boolean isResourceLoaderPresent;
+    private static boolean isOriginsPresent;
+    private static boolean isIndigoPresent;
+    private static boolean isSodiumPresent;
+    private static boolean isCanvasPresent;
 
     @Override
     public void onLoad(String mixinPackage) {
+        if (loaded) return;
+
         try {
             // Get class loader
             ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
@@ -45,21 +54,28 @@ public class MixinPlugin implements IMixinConfigPlugin {
             Unsafe unsafe = (Unsafe) unsafeField.get(null);
 
             // Create Asm
-            new Asm();
+            Asm.init();
 
             // Change delegate
             Asm.Transformer mixinTransformer = (Asm.Transformer) unsafe.allocateInstance(Asm.Transformer.class);
             mixinTransformer.delegate = (IMixinTransformer) mixinTransformerField.get(delegate);
 
             mixinTransformerField.set(delegate, mixinTransformer);
-        } catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
+        }
+        catch (NoSuchFieldException | IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }
 
         for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-            if (mod.getMetadata().getId().startsWith("fabric-resource-loader")) isResourceLoaderPresent = true;
-            else if (mod.getMetadata().getId().equals("origins")) isOriginsPresent = true;
+            isResourceLoaderPresent = isResourceLoaderPresent || mod.getMetadata().getId().startsWith("fabric-resource-loader");
+            isIndigoPresent = isIndigoPresent || mod.getMetadata().getId().startsWith("fabric-renderer-indigo");
         }
+
+        isOriginsPresent = FabricLoader.getInstance().isModLoaded("origins");
+        isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
+        isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");
+
+        loaded = true;
     }
 
     @Override
@@ -69,19 +85,31 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if (mixinClassName.endsWith("NamespaceResourceManagerMixin") || mixinClassName.endsWith("ReloadableResourceManagerImplMixin")) {
+        if (!mixinClassName.startsWith(mixinPackage)) {
+            throw new RuntimeException("Mixin " + mixinClassName + " is not in the mixin package");
+        }
+        else if (mixinClassName.endsWith("NamespaceResourceManagerMixin") || mixinClassName.endsWith("ReloadableResourceManagerImplMixin")) {
             return !isResourceLoaderPresent;
         }
         else if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
             return !isOriginsPresent;
         }
+        else if (mixinClassName.startsWith(mixinPackage + ".sodium")) {
+            return isSodiumPresent;
+        }
+        else if (mixinClassName.startsWith(mixinPackage + ".indigo")) {
+            return isIndigoPresent;
+        }
+        else if (mixinClassName.startsWith(mixinPackage + ".canvas")) {
+            return isCanvasPresent;
+        }
+
 
         return true;
     }
 
     @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-    }
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {}
 
     @Override
     public List<String> getMixins() {
@@ -89,10 +117,8 @@ public class MixinPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 
     @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {}
 }
