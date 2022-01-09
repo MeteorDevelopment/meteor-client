@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -72,7 +71,9 @@ public class HudElementScreen extends WindowScreen {
 
     @Override
     protected void onRenderBefore(float delta) {
-        if (!Utils.canUpdate()) Systems.get(HUD.class).onRender(Render2DEvent.get(0, 0, delta));
+        if (!Utils.canUpdate()) {
+            Systems.get(HUD.class).render(delta, hudElement -> true);
+        }
     }
 
     @Override
