@@ -21,20 +21,19 @@ import java.util.*;
 
 public class Blink extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgRender = settings.createGroup("Render");
 
     public Blink() {
         super(Categories.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
     }
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> render = sgGeneral.add(new BoolSetting.Builder()
         .name("render trail")
         .description("Renders the path you went while using blink.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> player = sgRender.add(new BoolSetting.Builder()
+    private final Setting<Boolean> player = sgGeneral.add(new BoolSetting.Builder()
         .name("fake player")
         .description("Renders a fake player at the position visible for everybody else.")
         .defaultValue(true)
@@ -42,7 +41,7 @@ public class Blink extends Module {
         .build()
     );
 
-    private final Setting<SettingColor> color = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
         .name("trail color")
         .description("The color of the trail.")
         .defaultValue(new SettingColor(255, 0, 0))
@@ -50,7 +49,7 @@ public class Blink extends Module {
         .build()
     );
 
-    private final Setting<Integer> maxSections = sgRender.add(new IntSetting.Builder()
+    private final Setting<Integer> maxSections = sgGeneral.add(new IntSetting.Builder()
         .name("max-sections")
         .description("The maximum number of sections.")
         .defaultValue(1000)
@@ -62,7 +61,7 @@ public class Blink extends Module {
         .build()
     );
 
-    private final Setting<Double> sectionLength = sgRender.add(new DoubleSetting.Builder()
+    private final Setting<Double> sectionLength = sgGeneral.add(new DoubleSetting.Builder()
         .name("section-length")
         .description("The section length in blocks.")
         .defaultValue(0.5)
