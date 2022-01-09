@@ -58,6 +58,8 @@ public abstract class WidgetScreen extends Screen {
 
     private boolean firstInit = true;
 
+    private boolean prevHudHidden;
+
     public WidgetScreen(GuiTheme theme, String title) {
         super(new LiteralText(title));
 
@@ -91,7 +93,10 @@ public abstract class WidgetScreen extends Screen {
     @Override
     protected void init() {
         MeteorClient.EVENT_BUS.subscribe(this);
+
+        prevHudHidden = mc.options.hudHidden;
         if (theme.hideHUD()) mc.options.hudHidden = true;
+
         closed = false;
 
         if (firstInit) {
@@ -300,7 +305,7 @@ public abstract class WidgetScreen extends Screen {
             boolean preOnClose = onClose;
             onClose = true;
 
-            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = false;
+            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = prevHudHidden;
 
             removed();
 
