@@ -36,7 +36,7 @@ public class Fonts {
         for (String font : BUILTIN_FONTS) {
             File file = new File(FOLDER, font);
             if (!file.exists()) {
-                StreamUtils.copy(Fonts.class.getResourceAsStream("/assets/meteor-client/fonts/" + font), file);
+                StreamUtils.copy(Fonts.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/fonts/" + font), file);
             }
         }
 
@@ -47,28 +47,28 @@ public class Fonts {
 
     @Init(stage = InitStage.Post)
     public static void load() {
-        if (lastFont.equals(Config.get().font)) return;
+        if (lastFont.equals(Config.get().font.get())) return;
 
         File file = new File(FOLDER, Config.get().font + ".ttf");
         if (!file.exists()) {
-            Config.get().font = DEFAULT_FONT;
+            Config.get().font.set(DEFAULT_FONT);
             file = new File(FOLDER, Config.get().font + ".ttf");
         }
 
         try {
             CUSTOM_FONT = new CustomTextRenderer(file);
         } catch (Exception ignored) {
-            Config.get().font = DEFAULT_FONT;
+            Config.get().font.set(DEFAULT_FONT);
             file = new File(FOLDER, Config.get().font + ".ttf");
 
             CUSTOM_FONT = new CustomTextRenderer(file);
         }
 
-        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont) {
+        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont.get()) {
             ((WidgetScreen) mc.currentScreen).invalidate();
         }
 
-        lastFont = Config.get().font;
+        lastFont = Config.get().font.get();
     }
 
     public static String[] getAvailableFonts() {

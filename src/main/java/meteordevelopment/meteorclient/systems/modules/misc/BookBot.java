@@ -167,7 +167,7 @@ public class BookBot extends Module {
 
         // Move the book into hand
         if (!writableBook.isMainHand()) {
-            InvUtils.move().from(writableBook.getSlot()).toHotbar(mc.player.getInventory().selectedSlot);
+            InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().selectedSlot);
             return;
         }
 

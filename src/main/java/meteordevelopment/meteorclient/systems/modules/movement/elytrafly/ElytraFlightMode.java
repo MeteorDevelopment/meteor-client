@@ -37,6 +37,15 @@ public class ElytraFlightMode {
     }
 
     public void onTick() {
+        if (elytraFly.autoReplenish.get()) {
+            FindItemResult fireworks = InvUtils.find(Items.FIREWORK_ROCKET);
+            FindItemResult hotbarFireworks = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
+
+            if (!hotbarFireworks.found() && fireworks.found()) {
+                InvUtils.move().from(fireworks.slot()).toHotbar(elytraFly.replenishSlot.get() - 1);
+            }
+        }
+
         if (elytraFly.replace.get()) {
             ItemStack chestStack = mc.player.getInventory().getArmorStack(2);
 
@@ -44,7 +53,7 @@ public class ElytraFlightMode {
                 if (chestStack.getMaxDamage() - chestStack.getDamage() <= elytraFly.replaceDurability.get()) {
                     FindItemResult elytra = InvUtils.find(stack -> stack.getMaxDamage() - stack.getDamage() > elytraFly.replaceDurability.get() && stack.getItem() == Items.ELYTRA);
 
-                    InvUtils.move().from(elytra.getSlot()).toArmor(2);
+                    InvUtils.move().from(elytra.slot()).toArmor(2);
                 }
             }
         }
@@ -105,7 +114,7 @@ public class ElytraFlightMode {
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
                     mc.player.swingHand(Hand.OFF_HAND);
                 } else {
-                    InvUtils.swap(itemResult.getSlot(), true);
+                    InvUtils.swap(itemResult.slot(), true);
 
                     mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
                     mc.player.swingHand(Hand.MAIN_HAND);

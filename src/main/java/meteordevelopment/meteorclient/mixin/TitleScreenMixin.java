@@ -42,11 +42,11 @@ public class TitleScreenMixin extends Screen {
 
                 Version latestVer = new Version(res);
 
-                if (latestVer.isHigherThan(Config.get().version)) {
+                if (latestVer.isHigherThan(MeteorClient.version)) {
                     YesNoPrompt.create()
                         .title("New Update")
                         .message("A new version of Meteor has been released.")
-                        .message("Your version: %s", Config.get().version)
+                        .message("Your version: %s", MeteorClient.version)
                         .message("Latest version: %s", latestVer)
                         .message("Do you want to update?")
                         .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
@@ -65,6 +65,6 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        if (Config.get().titleScreenCredits) TitleScreenCreditsRenderer.render(matrices);
+        if (Config.get().titleScreenCredits.get()) TitleScreenCreditsRenderer.render(matrices);
     }
 }

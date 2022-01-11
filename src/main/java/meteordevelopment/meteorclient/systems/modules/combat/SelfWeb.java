@@ -18,11 +18,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 
 public class SelfWeb extends Module {
-
-    public enum Mode {
-        Normal,
-        Smart
-    }
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -89,5 +84,10 @@ public class SelfWeb extends Module {
         }
 
         if (turnOff.get()) toggle();
+    }
+
+    public enum Mode {
+        Normal,
+        Smart
     }
 }
