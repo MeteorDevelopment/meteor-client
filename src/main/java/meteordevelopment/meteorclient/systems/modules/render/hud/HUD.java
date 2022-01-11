@@ -100,6 +100,7 @@ public class HUD extends Module {
         topLeft.add(new FpsHud(this));
         topLeft.add(new PingHud(this));
         topLeft.add(new TpsHud(this));
+        topLeft.add(new MSPTHud(this));
         topLeft.add(new SpeedHud(this));
         topLeft.add(new BiomeHud(this));
         topLeft.add(new TimeHud(this));

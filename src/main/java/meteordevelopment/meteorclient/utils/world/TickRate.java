@@ -47,6 +47,14 @@ public class TickRate {
         timeGameJoined = timeLastTimeUpdate = System.currentTimeMillis();
     }
 
+    public float getMSPT(){
+        // Millisecond per tick, get latest 'timeElapsed' from onReceivePacket
+        if (!Utils.canUpdate()) return 0;
+        if (System.currentTimeMillis() - timeGameJoined < 4000) return 50;
+
+        return (float) (Math.pow(tickRates[Math.floorMod(nextIndex-1, 20)], -1)*1000.0f);
+    }
+
     public float getTickRate() {
         if (!Utils.canUpdate()) return 0;
         if (System.currentTimeMillis() - timeGameJoined < 4000) return 20;
