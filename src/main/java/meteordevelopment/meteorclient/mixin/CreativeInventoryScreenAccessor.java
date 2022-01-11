@@ -12,5 +12,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(CreativeInventoryScreen.class)
 public interface CreativeInventoryScreenAccessor {
     @Accessor("selectedTab")
-    int getSelectedTab();
+    static int getSelectedTab() {
+        return 0;
+    }
 }

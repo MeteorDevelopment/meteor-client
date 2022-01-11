@@ -93,7 +93,7 @@ public class MiddleClickExtra extends Module {
             return;
         }
 
-        InvUtils.swap(result.getSlot(), true);
+        InvUtils.swap(result.slot(), true);
 
         switch (mode.get().type) {
             case Immediate -> {

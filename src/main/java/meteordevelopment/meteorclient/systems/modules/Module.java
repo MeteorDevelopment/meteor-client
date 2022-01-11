@@ -84,7 +84,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatFeedback) {
+        if (Config.get().chatFeedback.get()) {
             ChatUtils.forceNextPrefixClass(getClass());
             ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }

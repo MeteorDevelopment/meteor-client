@@ -113,7 +113,7 @@ public class Offhand extends Module {
 
             // Swap to offhand
             else if ((isClicking || !rightClick.get()) && !autoTotem.isLocked() && !item.isOffhand()) {
-                InvUtils.move().from(item.getSlot()).toOffhand();
+                InvUtils.move().from(item.slot()).toOffhand();
                 sentMessage = false;
             }
         }
@@ -124,11 +124,11 @@ public class Offhand extends Module {
                 FindItemResult totem = InvUtils.find(itemStack -> itemStack.getItem() == Items.TOTEM_OF_UNDYING, hotbar.get() ? 0 : 9, 35);
 
                 if (totem.found() && !totem.isOffhand()) {
-                    InvUtils.move().from(totem.getSlot()).toOffhand();
+                    InvUtils.move().from(totem.slot()).toOffhand();
                 }
             } else {
                 FindItemResult empty = InvUtils.find(ItemStack::isEmpty, hotbar.get() ? 0 : 9, 35);
-                if (empty.found()) InvUtils.move().fromOffhand().to(empty.getSlot());
+                if (empty.found()) InvUtils.move().fromOffhand().to(empty.slot());
             }
         }
     }
@@ -154,6 +154,7 @@ public class Offhand extends Module {
         EGap(Items.ENCHANTED_GOLDEN_APPLE),
         Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
+        Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD);
 
         net.minecraft.item.Item item;

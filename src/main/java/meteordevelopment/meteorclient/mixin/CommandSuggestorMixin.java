@@ -41,7 +41,7 @@ public abstract class CommandSuggestorMixin {
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
     public void onRefresh(CallbackInfo ci, String string, StringReader reader) {
-        String prefix = Config.get().prefix;
+        String prefix = Config.get().prefix.get();
         int length = prefix.length();
         if (reader.canRead(length) && reader.getString().startsWith(prefix, reader.getCursor())) {
             reader.setCursor(reader.getCursor() + length);

@@ -224,8 +224,8 @@ public class BedAura extends Module {
         if (autoMove.get()) {
             FindItemResult bed = InvUtils.find(itemStack -> itemStack.getItem() instanceof BedItem);
 
-            if (bed.found() && bed.getSlot() != autoMoveSlot.get() - 1) {
-                InvUtils.move().from(bed.getSlot()).toHotbar(autoMoveSlot.get() - 1);
+            if (bed.found() && bed.slot() != autoMoveSlot.get() - 1) {
+                InvUtils.move().from(bed.slot()).toHotbar(autoMoveSlot.get() - 1);
             }
         }
 

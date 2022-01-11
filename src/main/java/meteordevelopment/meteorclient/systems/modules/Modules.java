@@ -27,7 +27,6 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.search.Search;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -81,9 +80,6 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
-
-        // This is here because some hud elements depend on modules to be initialised before them
-        add(new HUD());
     }
 
     @Override

@@ -8,11 +8,12 @@ package meteordevelopment.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.ModuleArgumentType;
+import meteordevelopment.meteorclient.systems.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 
@@ -35,12 +36,12 @@ public class ResetCommand extends Command {
                 }))
                 .then(literal("all").executes(context -> {
                     Modules.get().getAll().forEach(module -> module.settings.forEach(group -> group.forEach(Setting::reset)));
-                    ChatUtils.info("Modules", "Reset all module's settings");
+                    ChatUtils.info("Modules", "Reset all module settings");
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("gui").executes(context -> {
             GuiThemes.get().clearWindowConfigs();
-            ChatUtils.info("The ClickGUI positioning has been reset.");
+            ChatUtils.info("Reset GUI positioning.");
             return SINGLE_SUCCESS;
         })).then(literal("bind")
                 .then(argument("module", ModuleArgumentType.module()).executes(context -> {
@@ -53,12 +54,12 @@ public class ResetCommand extends Command {
                 }))
                 .then(literal("all").executes(context -> {
                     Modules.get().getAll().forEach(module -> module.keybind.set(true, -1));
-                    ChatUtils.info("Modules", "Reset all binds");
+                    ChatUtils.info("Modules", "Reset all binds.");
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("hud").executes(context -> {
-            Modules.get().get(HUD.class).reset.run();
-            Modules.get().get(HUD.class).info("Reset HUD elements.");
+            Systems.get(HUD.class).reset.run();
+            ChatUtils.info("HUD", "Reset all elements.");
             return SINGLE_SUCCESS;
         }));
     }
