@@ -3,9 +3,9 @@
  * Copyright (c) 2022 Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render.hud.modules;
+package meteordevelopment.meteorclient.systems.hud.modules;
 
-import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
+import meteordevelopment.meteorclient.systems.hud.HUD;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 
 public class MSPTHud extends DoubleTextHudElement {
