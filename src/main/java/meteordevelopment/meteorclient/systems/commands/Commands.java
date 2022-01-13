@@ -69,6 +69,7 @@ public class Commands extends System<Commands> {
         add(new FOVCommand());
         add(new RotationCommand());
         add(new WaypointCommand());
+        add(new ServerCrashCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }
