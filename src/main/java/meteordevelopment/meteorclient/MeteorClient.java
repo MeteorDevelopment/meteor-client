@@ -41,7 +41,8 @@ import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
@@ -144,38 +145,30 @@ public class MeteorClient implements ClientModInitializer {
     private static void init(InitStage initStage) {
         Reflections reflections = new Reflections("meteordevelopment.meteorclient", Scanners.MethodsAnnotated);
         Set<Method> initTasks = reflections.getMethodsAnnotatedWith(Init.class);
-        if (initTasks == null || initTasks.size() < 1) return;
+        if (initTasks == null) return;
+        Map<Class<?>, List<Method>> byClass = initTasks.stream()
+            .collect(Collectors.groupingBy(Method::getDeclaringClass));
+        Set<Method> left = new HashSet<>(initTasks);
 
-        for (Method initTask : initTasks) {
-            Init annotation = initTask.getAnnotation(Init.class);
-            if (annotation != null && annotation.stage().equals(initStage)) reflectInit(initTask, annotation);
+        for (Method m; (m = left.stream().findAny().orElse(null)) != null;) {
+            reflectInit(m, initStage, left, byClass);
         }
     }
 
-    private static void reflectInit(Method task, Init annotation) {
-        Class<?>[] preTasks = annotation.dependencies();
-
-        try {
-            if (preTasks == null || preTasks.length < 1) {
-                task.invoke(null);
-            }
-            else {
-                for (Class<?> aClass : preTasks) {
-                    Set<Method> preInits = new Reflections(aClass).getMethodsAnnotatedWith(Init.class);
-
-                    for (Method preInit : preInits) {
-                        Init preInitAnnotation = preInit.getAnnotation(Init.class);
-
-                        if (preInitAnnotation != null && preInitAnnotation.stage().equals(annotation.stage())) {
-                            reflectInit(preInit, preInitAnnotation);
-                        }
-                    }
-
-                    task.invoke(null);
+    private static void reflectInit(Method task, InitStage initStage, Set<Method> left, Map<Class<?>, List<Method>> byClass) {
+        left.remove(task);
+        Init init = task.getAnnotation(Init.class);
+        if (!init.stage().equals(initStage)) return;
+        for (Class<?> clazz : init.dependencies()) {
+            for (Method m : byClass.getOrDefault(clazz, Collections.emptyList())) {
+                if (left.contains(m)) {
+                    reflectInit(m, initStage, left, byClass);
                 }
             }
         }
-        catch (IllegalAccessException | InvocationTargetException e) {
+        try {
+            task.invoke(null);
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
     }
