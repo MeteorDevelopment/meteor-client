@@ -47,15 +47,14 @@ import java.util.stream.Collectors;
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
     private static final ModMetadata MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata();
+    public final static Version VERSION;
+    public final static String DEV_BUILD;
 
     public static MinecraftClient mc;
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), MOD_ID);
     public static final Logger LOG = LogManager.getLogger();
-
-    public static Version version;
-    public static String devBuild;
 
     @Override
     public void onInitializeClient() {
@@ -66,12 +65,6 @@ public class MeteorClient implements ClientModInitializer {
 
         LOG.info("Initializing Meteor Client");
 
-        String versionString = MOD_META.getVersion().getFriendlyString();
-        if (versionString.contains("-")) versionString = versionString.split("-")[0];
-
-        version = new Version(versionString);
-        devBuild = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
-
         // Global minecraft client accessor
         mc = MinecraftClient.getInstance();
 
@@ -80,9 +73,10 @@ public class MeteorClient implements ClientModInitializer {
 
         // Pre-load
         Systems.addPreLoadTask(() -> {
-            if (!Modules.get().getFile().exists()) {
+            if (!FOLDER.exists()) {
+                FOLDER.getParentFile().mkdirs();
+                FOLDER.mkdir();
                 Modules.get().get(DiscordPresence.class).toggle();
-                Utils.addMeteorPvpToServerList();
             }
         });
 
@@ -171,5 +165,13 @@ public class MeteorClient implements ClientModInitializer {
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    static {
+        String versionString = MOD_META.getVersion().getFriendlyString();
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
+
+        VERSION = new Version(versionString);
+        DEV_BUILD = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
     }
 }

@@ -141,7 +141,7 @@ public class Config extends System<Config> {
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
-        tag.putString("version", MeteorClient.version.toString());
+        tag.putString("version", MeteorClient.VERSION.toString());
         tag.put("settings", settings.toTag());
         tag.put("dontShowAgainPrompts", listToTag(dontShowAgainPrompts));
 
