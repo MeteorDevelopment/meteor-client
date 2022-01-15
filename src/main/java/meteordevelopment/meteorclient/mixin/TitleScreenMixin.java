@@ -42,11 +42,11 @@ public class TitleScreenMixin extends Screen {
 
                 Version latestVer = new Version(res);
 
-                if (latestVer.isHigherThan(MeteorClient.version)) {
+                if (latestVer.isHigherThan(MeteorClient.VERSION)) {
                     YesNoPrompt.create()
                         .title("New Update")
                         .message("A new version of Meteor has been released.")
-                        .message("Your version: %s", MeteorClient.version)
+                        .message("Your version: %s", MeteorClient.VERSION)
                         .message("Latest version: %s", latestVer)
                         .message("Do you want to update?")
                         .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))

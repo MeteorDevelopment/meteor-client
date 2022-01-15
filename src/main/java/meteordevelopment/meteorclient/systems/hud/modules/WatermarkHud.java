@@ -15,10 +15,10 @@ public class WatermarkHud extends DoubleTextHudElement {
 
     @Override
     protected String getRight() {
-        if (MeteorClient.devBuild.isEmpty()) {
-            return MeteorClient.version.toString();
+        if (MeteorClient.DEV_BUILD.isEmpty()) {
+            return MeteorClient.VERSION.toString();
         }
 
-        return MeteorClient.version + " " + MeteorClient.devBuild;
+        return MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD;
     }
 }

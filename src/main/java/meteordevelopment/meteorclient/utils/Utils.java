@@ -32,8 +32,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.option.ServerList;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
@@ -142,26 +140,6 @@ public class Utils {
 
     public static int getRenderDistance() {
         return Math.max(mc.options.viewDistance, ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
-    }
-
-    public static void addMeteorPvpToServerList() {
-        ServerList servers = new ServerList(mc);
-        servers.loadFile();
-
-        boolean contains = false;
-        for (int i = 0; i < servers.size(); i++) {
-            ServerInfo server = servers.get(i);
-
-            if (server.address.contains("pvp.meteorclient.com")) {
-                contains = true;
-                break;
-            }
-        }
-
-        if (!contains) {
-            servers.add(new ServerInfo("Meteor Pvp", "pvp.meteorclient.com", false));
-            servers.saveFile();
-        }
     }
 
     public static int getWindowWidth() {

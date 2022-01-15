@@ -129,8 +129,8 @@ public class DiscordPresence extends Module {
         rpc.startTimestamp = System.currentTimeMillis() / 1000L;
 
         rpc.largeImageKey = "meteor_client";
-        String largeText = "Meteor Client " + MeteorClient.version;
-        if (!MeteorClient.devBuild.isEmpty()) largeText += " Dev Build: " + MeteorClient.devBuild;
+        String largeText = "Meteor Client " + MeteorClient.VERSION;
+        if (!MeteorClient.DEV_BUILD.isEmpty()) largeText += " Dev Build: " + MeteorClient.DEV_BUILD;
         rpc.largeImageText = largeText;
 
         currentSmallImage = SmallImage.Snail;
@@ -238,7 +238,7 @@ public class DiscordPresence extends Module {
         }
         else {
             if (!lastWasInMainMenu) {
-                rpc.details = "Meteor Client " + (MeteorClient.devBuild.isEmpty() ? MeteorClient.version : MeteorClient.version + " " + MeteorClient.devBuild);
+                rpc.details = "Meteor Client " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD);
 
                 if (mc.currentScreen instanceof TitleScreen) rpc.state = "Looking at title screen";
                 else if (mc.currentScreen instanceof SelectWorldScreen) rpc.state = "Selecting world";
