@@ -8,7 +8,7 @@ You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-clie
 - JiJ for compat
 - Utilize LibJF for ASM
 - Pretend to be fabric-api-base
-- Remove discord presence, capes, player count, meteor PVP adding
+- Remove discord presence, capes, player count
 - Add module to disable custom rendering
 - Use FAPI resource loader, client commands and keybinds instead of custom systems (requires FAPI now)
 - Merge round-ui (#619)
