@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
 import me.jellysquid.mods.sodium.client.model.light.data.QuadLightData;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadColorProvider;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
-import me.jellysquid.mods.sodium.client.model.quad.blender.BiomeColorBlender;
+import me.jellysquid.mods.sodium.client.model.quad.blender.ColorBlender;
+import me.jellysquid.mods.sodium.client.model.quad.blender.ColorSampler;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadOrientation;
 import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadWinding;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
-    @Shadow @Final private BiomeColorBlender biomeColorBlender;
+    @Shadow @Final private ColorBlender colorBlender;
 
     @Inject(method = "renderQuad", at = @At(value = "HEAD"), cancellable = true)
-    private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo ci) {
+    private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo ci) {
         WallHack wallHack = Modules.get().get(WallHack.class);
         Xray xray = Modules.get().get(Xray.class);
 
@@ -51,27 +51,27 @@ public class SodiumBlockRendererMixin {
                     alpha = wallHack.opacity.get();
                 }
 
-                whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, alpha);
+                whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorSampler, bakedQuad, light, model, alpha);
                 ci.cancel();
             }
         }
-        else if(xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorProvider, bakedQuad, light, model, xray.opacity.get());
+        else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
+            whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorSampler, bakedQuad, light, model, xray.opacity.get());
             ci.cancel();
         }
     }
 
-    //https://github.com/CaffeineMC/sodium-fabric/blob/8b3015efe85be9336a150ff7c26085ea3d2d43d0/src/main/java/me/jellysquid/mods/sodium/client/render/pipeline/BlockRenderer.java#L119
-    //Copied from Sodium, for now, can't think of a better way, because of the nature of the locals, and for loop.
-    //Mixin seems to freak out when I try to do this the "right" way - Wala (sobbing)
-    private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ModelQuadColorProvider<BlockState> colorProvider, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, int alpha) {
+    // https://github.com/CaffeineMC/sodium-fabric/blob/8b3015efe85be9336a150ff7c26085ea3d2d43d0/src/main/java/me/jellysquid/mods/sodium/client/render/pipeline/BlockRenderer.java#L119
+    // Copied from Sodium, for now, can't think of a better way, because of the nature of the locals, and for loop.
+    // Mixin seems to freak out when I try to do this the "right" way - Wala (sobbing)
+    private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, int alpha) {
         ModelQuadView src = (ModelQuadView) bakedQuad;
         ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br);
 
         int[] colors = null;
 
         if (bakedQuad.hasColor()) {
-            colors = this.biomeColorBlender.getColors(world, pos, src, colorProvider, state);
+            colors = this.colorBlender.getColors(world, pos, src, colorSampler, state);
         }
 
         int vertexStart = vertices.getVertexCount();

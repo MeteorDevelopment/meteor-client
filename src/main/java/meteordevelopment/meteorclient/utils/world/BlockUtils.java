@@ -253,15 +253,13 @@ public class BlockUtils {
         Always
     }
 
-    private static BlockPos.Mutable exposedPos = new BlockPos.Mutable();
+    private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
+
     public static boolean isExposed(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
-            exposedPos.set(blockPos, direction.getVector());
-            BlockState state = mc.world.getBlockState(exposedPos);
-            if (!state.isOpaque())
-                return true;
+            if (!mc.world.getBlockState(EXPOSED_POS.get().set(blockPos, direction)).isOpaque()) return true;
         }
+
         return false;
     }
-
 }
