@@ -23,7 +23,6 @@ repositories {
         name = "vram"
         url = "https://maven.vram.io//"
     }
-    jcenter()
 }
 
 dependencies {
