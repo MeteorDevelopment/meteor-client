@@ -5,8 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import baritone.api.BaritoneAPI;
+import baritone.api.pathing.goals.Goal;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -45,6 +49,19 @@ public class MeteorStarscript {
         ss.set("version", Value.string(MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : ""));
         ss.set("mc_version", Value.string(SharedConstants.getGameVersion().getName()));
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
+
+        // Meteor
+        ss.set("meteor", Value.map(new ValueMap()
+            .set("modules", () -> Value.number(Modules.get().getAll().size()))
+            .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
+            .set("is_module_active", Value.function(MeteorStarscript::isModuleActive))
+        ));
+
+        // Baritone
+        ss.set("baritone", Value.map(new ValueMap()
+            .set("is_pathing", () -> Value.bool(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()))
+            .set("distance_to_goal", MeteorStarscript::baritoneDistanceToGoal)
+        ));
 
         // Player
         ss.set("player", Value.map(new ValueMap()
@@ -99,6 +116,13 @@ public class MeteorStarscript {
 
     // Functions
 
+    private static Value isModuleActive(Starscript ss, int argCount) {
+        if (argCount != 1) ss.error("meteor.is_module_active() requires 1 argument, got %d.", argCount);
+
+        Module module = Modules.get().get(ss.popString("First argument to meteor.is_module_active() needs to be a string."));
+        return Value.bool(module != null && module.isActive());
+    }
+
     private static Value getItem(Starscript ss, int argCount) {
         if (argCount != 1) ss.error("player.get_item() requires 1 argument, got %d.", argCount);
 
@@ -126,6 +150,11 @@ public class MeteorStarscript {
     }
 
     // Other
+
+    private static Value baritoneDistanceToGoal() {
+        Goal goal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().getGoal();
+        return Value.number((goal != null && mc.player != null) ? goal.heuristic(mc.player.getBlockPos()) : 0);
+    }
 
     private static Value playerPosString() {
         if (mc.player == null) return Value.string("X: 0 Y: 0 Z: 0");
