@@ -7,9 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 //Created by squidoodly
 
-import club.minnced.discord.rpc.DiscordEventHandlers;
-import club.minnced.discord.rpc.DiscordRPC;
-import club.minnced.discord.rpc.DiscordRichPresence;
+import meteordevelopment.DiscordIPC;
+import meteordevelopment.RichPresence;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -103,8 +102,7 @@ public class DiscordPresence extends Module {
         .build()
     );
 
-    private static final DiscordRichPresence rpc = new DiscordRichPresence();
-    private static final DiscordRPC instance = DiscordRPC.INSTANCE;
+    private static final RichPresence rpc = new RichPresence();
     private SmallImage currentSmallImage;
     private int ticks;
     private boolean forceUpdate, lastWasInMainMenu;
@@ -123,15 +121,13 @@ public class DiscordPresence extends Module {
 
     @Override
     public void onActivate() {
-        DiscordEventHandlers handlers = new DiscordEventHandlers();
-        instance.Discord_Initialize("835240968533049424", handlers, true, null);
+        DiscordIPC.start(835240968533049424L, null);
 
-        rpc.startTimestamp = System.currentTimeMillis() / 1000L;
+        rpc.setStart(System.currentTimeMillis() / 1000L);
 
-        rpc.largeImageKey = "meteor_client";
         String largeText = "Meteor Client " + MeteorClient.VERSION;
         if (!MeteorClient.DEV_BUILD.isEmpty()) largeText += " Dev Build: " + MeteorClient.DEV_BUILD;
-        rpc.largeImageText = largeText;
+        rpc.setLargeImage("meteor_client", largeText);
 
         currentSmallImage = SmallImage.Snail;
 
@@ -149,8 +145,7 @@ public class DiscordPresence extends Module {
 
     @Override
     public void onDeactivate() {
-        instance.Discord_ClearPresence();
-        instance.Discord_Shutdown();
+        DiscordIPC.stop();
     }
 
     private void recompile(List<String> messages, List<Script> scripts) {
@@ -206,7 +201,7 @@ public class DiscordPresence extends Module {
                     }
 
                     try {
-                        rpc.details = MeteorStarscript.ss.run(line1Scripts.get(i));
+                        rpc.setDetails(MeteorStarscript.ss.run(line1Scripts.get(i)));
                     } catch (StarscriptError e) {
                         ChatUtils.error("Starscript", e.getMessage());
                     }
@@ -226,7 +221,7 @@ public class DiscordPresence extends Module {
                     }
 
                     try {
-                        rpc.state = MeteorStarscript.ss.run(line2Scripts.get(i));
+                        rpc.setState(MeteorStarscript.ss.run(line2Scripts.get(i)));
                     } catch (StarscriptError e) {
                         ChatUtils.error("Starscript", e.getMessage());
                     }
@@ -238,27 +233,27 @@ public class DiscordPresence extends Module {
         }
         else {
             if (!lastWasInMainMenu) {
-                rpc.details = "Meteor Client " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD);
+                rpc.setDetails("Meteor Client " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD));
 
-                if (mc.currentScreen instanceof TitleScreen) rpc.state = "Looking at title screen";
-                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.state = "Selecting world";
-                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.state = "Creating world";
-                else if (mc.currentScreen instanceof EditWorldScreen) rpc.state = "Editing world";
-                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.state = "Loading world";
-                else if (mc.currentScreen instanceof SaveLevelScreen) rpc.state = "Saving world";
-                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.state = "Selecting server";
-                else if (mc.currentScreen instanceof AddServerScreen) rpc.state = "Adding server";
-                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.state = "Connecting to server";
-                else if (mc.currentScreen instanceof WidgetScreen) rpc.state = "Browsing Meteor's GUI";
-                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.state = "Changing options";
-                else if (mc.currentScreen instanceof CreditsScreen) rpc.state = "Reading credits";
-                else if (mc.currentScreen instanceof RealmsScreen) rpc.state = "Browsing Realms";
+                if (mc.currentScreen instanceof TitleScreen) rpc.setState("Looking at title screen");
+                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Selecting world");
+                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Creating world");
+                else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
+                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
+                else if (mc.currentScreen instanceof SaveLevelScreen) rpc.setState("Saving world");
+                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
+                else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
+                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Connecting to server");
+                else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
+                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.setState("Changing options");
+                else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Reading credits");
+                else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
                 else {
                     String className = mc.currentScreen.getClass().getName();
 
-                    if (className.startsWith("com.terraformersmc.modmenu.gui")) rpc.state = "Browsing mods";
-                    else if (className.startsWith("me.jellysquid.mods.sodium.client")) rpc.state = "Changing options";
-                    else rpc.state = "In main menu";
+                    if (className.startsWith("com.terraformersmc.modmenu.gui")) rpc.setState("Browsing mods");
+                    else if (className.startsWith("me.jellysquid.mods.sodium.client")) rpc.setState("Changing options");
+                    else rpc.setState("In main menu");
                 }
 
                 update = true;
@@ -266,11 +261,9 @@ public class DiscordPresence extends Module {
         }
 
         // Update
-        if (update) instance.Discord_UpdatePresence(rpc);
+        if (update) DiscordIPC.setActivity(rpc);
         forceUpdate = false;
         lastWasInMainMenu = !Utils.canUpdate();
-
-        instance.Discord_RunCallbacks();
     }
 
     @EventHandler
@@ -298,8 +291,7 @@ public class DiscordPresence extends Module {
         }
 
         void apply() {
-            rpc.smallImageKey = key;
-            rpc.smallImageText = text;
+            rpc.setSmallImage(key, text);
         }
 
         SmallImage next() {
