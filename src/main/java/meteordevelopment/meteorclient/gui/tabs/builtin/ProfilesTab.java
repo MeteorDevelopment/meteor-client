@@ -247,7 +247,7 @@ public class ProfilesTab extends Tab {
         }
 
         private boolean nameFilter(String text, char character) {
-            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '-' || character == '.';
+            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' || character == '.' || character == ' ';
         }
 
         private boolean ipFilter(String text, char character) {
