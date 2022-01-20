@@ -40,7 +40,11 @@ public class GameRendererTransformer extends AsmTransformer {
                 method.instructions.remove(insn);
                 injectionCount++;
             }
-            else if (insn instanceof FieldInsnNode in && fovField.equals(in)) {
+            else if (
+                (insn instanceof FieldInsnNode in1 && fovField.equals(in1))
+                ||
+                (insn instanceof MethodInsnNode in2 && in2.owner.equals(klass.name) && in2.name.startsWith("redirect") && in2.name.endsWith("getFov")) // Wi Zoom compatibility
+            ) {
                 InsnList insns = new InsnList();
 
                 insns.add(new VarInsnNode(Opcodes.DSTORE, method.maxLocals));
