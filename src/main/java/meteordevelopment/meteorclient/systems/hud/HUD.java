@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.gui.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.gui.screens.HudElementScreen;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
+import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.hud.modules.*;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.AlignmentX;
@@ -134,6 +135,10 @@ public class HUD extends System<HUD> {
         align();
     }
 
+    public static HUD get() {
+        return Systems.get(HUD.class);
+    }
+
     private void align() {
         RENDERER.begin(scale.get(), 0, true);
 
@@ -187,6 +192,8 @@ public class HUD extends System<HUD> {
 
     @Override
     public HUD fromTag(NbtCompound tag) {
+        settings.reset();
+
         if (tag.contains("active")) active = tag.getBoolean("active");
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
         if (tag.contains("elements")) {
