@@ -7,10 +7,12 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -26,6 +28,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -133,6 +136,23 @@ public class MeteorClient implements ClientModInitializer {
         if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
+    // Hide HUD
+
+    private boolean wasWidgetScreen, wasHudHiddenRoot;
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onOpenScreen(OpenScreenEvent event) {
+        boolean hideHud = GuiThemes.get().hideHUD();
+
+        if (hideHud) {
+            if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
+
+            if (event.screen instanceof WidgetScreen) mc.options.hudHidden = true;
+            else if (!wasHudHiddenRoot) mc.options.hudHidden = false;
+        }
+
+        wasWidgetScreen = event.screen instanceof WidgetScreen;
+    }
 
     // Reflection initialisation
 
