@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.hud.modules.*;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.AlignmentX;
 import meteordevelopment.meteorclient.utils.render.AlignmentY;
@@ -32,6 +33,8 @@ public class HUD extends System<HUD> {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEditor = settings.createGroup("Editor");
+
+    public boolean active;
 
     // General
 
@@ -58,6 +61,14 @@ public class HUD extends System<HUD> {
         .build()
     );
 
+    private final Setting<Keybind> toggleKeybind = sgGeneral.add(new KeybindSetting.Builder()
+        .name("toggle-keybind")
+        .description("Keybind used to toggle HUD.")
+        .defaultValue(Keybind.none())
+        .action(() -> active = !active)
+        .build()
+    );
+
     // Editor
 
     public final Setting<Integer> snappingRange = sgEditor.add(new IntSetting.Builder()
@@ -71,8 +82,6 @@ public class HUD extends System<HUD> {
 
     public final List<HudElement> elements = new ArrayList<>();
     public final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
-
-    public boolean active;
 
     public final Runnable reset = () -> {
         align();
