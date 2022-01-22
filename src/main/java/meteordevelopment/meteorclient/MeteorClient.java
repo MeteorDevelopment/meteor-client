@@ -7,10 +7,12 @@ package meteordevelopment.meteorclient;
 
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -24,6 +26,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -39,20 +42,20 @@ import java.io.File;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
     private static final ModMetadata MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata();
+    public final static Version VERSION;
+    public final static String DEV_BUILD = "";
 
     public static MinecraftClient mc;
     public static MeteorClient INSTANCE;
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), MOD_ID);
     public static final Logger LOG = LogManager.getLogger();
-
-    public static Version version;
-    public static String devBuild = "";
 
     @Override
     public void onInitializeClient() {
@@ -63,16 +66,19 @@ public class MeteorClient implements ClientModInitializer {
 
         LOG.info("Initializing Meteor Client");
 
-        String versionString = MOD_META.getVersion().getFriendlyString();
-        if (versionString.contains("-")) versionString = versionString.split("-")[0];
-
-        version = new Version(versionString);
-
         // Global minecraft client accessor
         mc = MinecraftClient.getInstance();
 
         // Register event handlers
         EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+
+        // Pre-load
+        Systems.addPreLoadTask(() -> {
+            if (!FOLDER.exists()) {
+                FOLDER.getParentFile().mkdirs();
+                FOLDER.mkdir();
+            }
+        });
 
         // Pre init
         init(InitStage.Pre);
@@ -119,45 +125,61 @@ public class MeteorClient implements ClientModInitializer {
         if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
+    // Hide HUD
+
+    private boolean wasWidgetScreen, wasHudHiddenRoot;
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onOpenScreen(OpenScreenEvent event) {
+        boolean hideHud = GuiThemes.get().hideHUD();
+
+        if (hideHud) {
+            if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
+
+            if (event.screen instanceof WidgetScreen) mc.options.hudHidden = true;
+            else if (!wasHudHiddenRoot) mc.options.hudHidden = false;
+        }
+
+        wasWidgetScreen = event.screen instanceof WidgetScreen;
+    }
 
     // Reflection initialisation
 
     private static void init(InitStage initStage) {
         Reflections reflections = new Reflections("meteordevelopment.meteorclient", Scanners.MethodsAnnotated);
         Set<Method> initTasks = reflections.getMethodsAnnotatedWith(Init.class);
-        if (initTasks == null || initTasks.size() < 1) return;
+        if (initTasks == null) return;
+        Map<Class<?>, List<Method>> byClass = initTasks.stream()
+            .collect(Collectors.groupingBy(Method::getDeclaringClass));
+        Set<Method> left = new HashSet<>(initTasks);
 
-        for (Method initTask : initTasks) {
-            Init annotation = initTask.getAnnotation(Init.class);
-            if (annotation != null && annotation.stage().equals(initStage)) reflectInit(initTask, annotation);
+        for (Method m; (m = left.stream().findAny().orElse(null)) != null;) {
+            reflectInit(m, initStage, left, byClass);
         }
     }
 
-    private static void reflectInit(Method task, Init annotation) {
-        Class<?>[] preTasks = annotation.dependencies();
-
-        try {
-            if (preTasks == null || preTasks.length < 1) {
-                task.invoke(null);
-            }
-            else {
-                for (Class<?> aClass : preTasks) {
-                    Set<Method> preInits = new Reflections(aClass).getMethodsAnnotatedWith(Init.class);
-
-                    for (Method preInit : preInits) {
-                        Init preInitAnnotation = preInit.getAnnotation(Init.class);
-
-                        if (preInitAnnotation != null && preInitAnnotation.stage().equals(annotation.stage())) {
-                            reflectInit(preInit, preInitAnnotation);
-                        }
-                    }
-
-                    task.invoke(null);
+    private static void reflectInit(Method task, InitStage initStage, Set<Method> left, Map<Class<?>, List<Method>> byClass) {
+        left.remove(task);
+        Init init = task.getAnnotation(Init.class);
+        if (!init.stage().equals(initStage)) return;
+        for (Class<?> clazz : init.dependencies()) {
+            for (Method m : byClass.getOrDefault(clazz, Collections.emptyList())) {
+                if (left.contains(m)) {
+                    reflectInit(m, initStage, left, byClass);
                 }
             }
         }
-        catch (IllegalAccessException | InvocationTargetException e) {
+        try {
+            task.invoke(null);
+        } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
+    }
+
+    static {
+        String versionString = MOD_META.getVersion().getFriendlyString();
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
+
+        VERSION = new Version(versionString);
     }
 }

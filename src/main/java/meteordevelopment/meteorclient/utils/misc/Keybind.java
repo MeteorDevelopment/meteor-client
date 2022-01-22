@@ -9,6 +9,8 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.nbt.NbtCompound;
 
+import java.util.Objects;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
@@ -83,6 +85,19 @@ public class Keybind implements ISerializable<Keybind>, ICopyable<Keybind> {
     public String toString() {
         if (value == -1) return "None";
         return isKey ? Utils.getKeyName(value) : Utils.getButtonName(value);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Keybind keybind = (Keybind) o;
+        return isKey == keybind.isKey && value == keybind.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(isKey, value);
     }
 
     // Serialization

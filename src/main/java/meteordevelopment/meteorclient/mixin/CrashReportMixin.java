@@ -24,11 +24,12 @@ public class CrashReportMixin {
         if (Modules.get() != null) {
             sb.append("\n\n");
             sb.append("-- Meteor Client --\n");
-            sb.append("Version: ").append(MeteorClient.version).append("\n");
+            sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
 
             for (Category category : Modules.loopCategories()) {
                 List<Module> modules = Modules.get().getGroup(category);
                 boolean active = false;
+
                 for (Module module : modules) {
                     if (module != null && module.isActive()) {
                         active = true;
@@ -42,7 +43,7 @@ public class CrashReportMixin {
 
                     for (Module module : modules) {
                         if (module != null && module.isActive()) {
-                            sb.append(module.title).append(" (").append(module.name).append(")\n");
+                            sb.append(module.name).append("\n");
                         }
                     }
                 }

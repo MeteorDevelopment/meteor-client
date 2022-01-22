@@ -10,9 +10,11 @@ import meteordevelopment.meteorclient.gui.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.gui.screens.HudElementScreen;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
+import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.HideRenderModules;
 import meteordevelopment.meteorclient.systems.hud.modules.*;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.AlignmentX;
 import meteordevelopment.meteorclient.utils.render.AlignmentY;
@@ -33,6 +35,8 @@ public class HUD extends System<HUD> {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEditor = settings.createGroup("Editor");
+
+    public boolean active;
 
     // General
 
@@ -59,6 +63,14 @@ public class HUD extends System<HUD> {
         .build()
     );
 
+    private final Setting<Keybind> toggleKeybind = sgGeneral.add(new KeybindSetting.Builder()
+        .name("toggle-keybind")
+        .description("Keybind used to toggle HUD.")
+        .defaultValue(Keybind.none())
+        .action(() -> active = !active)
+        .build()
+    );
+
     // Editor
 
     public final Setting<Integer> snappingRange = sgEditor.add(new IntSetting.Builder()
@@ -72,8 +84,6 @@ public class HUD extends System<HUD> {
 
     public final List<HudElement> elements = new ArrayList<>();
     public final HudElementLayer topLeft, topCenter, topRight, bottomLeft, bottomCenter, bottomRight;
-
-    public boolean active;
 
     public final Runnable reset = () -> {
         align();
@@ -136,6 +146,10 @@ public class HUD extends System<HUD> {
         align();
     }
 
+    public static HUD get() {
+        return Systems.get(HUD.class);
+    }
+
     private void align() {
         RENDERER.begin(scale.get(), 0, true);
 
@@ -189,6 +203,8 @@ public class HUD extends System<HUD> {
 
     @Override
     public HUD fromTag(NbtCompound tag) {
+        settings.reset();
+
         if (tag.contains("active")) active = tag.getBoolean("active");
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
         if (tag.contains("elements")) {

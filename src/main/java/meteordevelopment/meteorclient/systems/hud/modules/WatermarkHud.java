@@ -15,6 +15,6 @@ public class WatermarkHud extends DoubleTextHudElement {
 
     @Override
     protected String getRight() {
-        return MeteorClient.version.toString();
+        return MeteorClient.VERSION.toString();
     }
 }
