@@ -47,7 +47,7 @@ public class ModulesCommand extends Command {
         tooltip.append(new LiteralText(module.description).formatted(Formatting.WHITE));
 
         BaseText finalModule = new LiteralText(module.title);
-        if (module != Modules.get().getList().get(Modules.get().getList().size() - 1)) finalModule.append(new LiteralText(", ").formatted(Formatting.GRAY));
+        if (!module.equals(Modules.get().getGroup(module.category).get(Modules.get().getGroup(module.category).size() - 1))) finalModule.append(new LiteralText(", ").formatted(Formatting.GRAY));
         finalModule.setStyle(finalModule.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip)));
 
         return finalModule;
