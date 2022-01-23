@@ -15,6 +15,7 @@ You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-clie
 - Remove credit/spash/title/prefix customization
 - Merge keywords in search (#1600)
 - Use browser user agent in Http Utils instead of "Meteor Client"
+- Add default target entities to KillAura and BowAimbot
 
 ## Credits
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  

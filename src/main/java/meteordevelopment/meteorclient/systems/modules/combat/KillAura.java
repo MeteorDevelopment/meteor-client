@@ -109,6 +109,7 @@ public class KillAura extends Module {
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
+        .defaultEnemies()
         .build()
     );
 

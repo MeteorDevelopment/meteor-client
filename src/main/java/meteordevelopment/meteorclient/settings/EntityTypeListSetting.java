@@ -10,6 +10,8 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnGroup;
+import net.minecraft.entity.mob.Angerable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -17,6 +19,8 @@ import net.minecraft.nbt.NbtString;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 // TODO: Change onlyAttackable to a filter
@@ -98,6 +102,22 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
         public Builder onlyAttackable() {
             onlyAttackable = true;
+            return this;
+        }
+
+        public Builder defaultEnemies() {
+            Map<EntityType<?>, Boolean> map = new HashMap<>();
+            for (EntityType<?> type : Registry.ENTITY_TYPE) {
+                if (EntityUtils.isAttackable(type))
+                    if (type == EntityType.PLAYER
+                        || (type.getSpawnGroup().equals(SpawnGroup.MONSTER)
+                            && type != EntityType.ENDERMAN
+                            && type != EntityType.PIGLIN
+                            && type != EntityType.ZOMBIFIED_PIGLIN
+                    ))
+                        map.put(type, true);
+            }
+            defaultValue(new Object2BooleanOpenHashMap<>(map));
             return this;
         }
 

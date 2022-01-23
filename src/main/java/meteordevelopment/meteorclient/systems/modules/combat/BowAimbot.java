@@ -45,6 +45,7 @@ public class BowAimbot extends Module {
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
+        .defaultEnemies()
         .build()
     );
 
