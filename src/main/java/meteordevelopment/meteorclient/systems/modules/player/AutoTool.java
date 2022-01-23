@@ -22,6 +22,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.MiningToolItem;
 import net.minecraft.item.ShearsItem;
 import net.minecraft.item.ToolItem;
 
@@ -64,7 +65,7 @@ public class AutoTool extends Module {
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
         .description("Switches your hand to whatever was selected when releasing your attack key.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -128,7 +129,7 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if (bestSlot != -1 && bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack)) || shouldStopUsing(currentStack)) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -149,7 +150,7 @@ public class AutoTool extends Module {
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
-        if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+        if (!good.test(itemStack) || !isTool(itemStack) || !(itemStack.getItem() instanceof MiningToolItem mti) || !mti.isSuitableFor(state)) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
