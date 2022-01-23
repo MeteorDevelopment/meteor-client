@@ -129,7 +129,7 @@ public class HandView extends Module {
     public final Setting<Integer> swingSpeed = sgSwing.add(new IntSetting.Builder()
         .name("swing-speed")
         .description("The swing speed of your hands. (higher = slower swing)")
-        .defaultValue(0)
+        .defaultValue(6)
         .range(0, 20)
         .sliderMax(20)
         .build()
