@@ -91,7 +91,7 @@ public abstract class WidgetScreen extends Screen {
     @Override
     protected void init() {
         MeteorClient.EVENT_BUS.subscribe(this);
-        if (theme.hideHUD()) mc.options.hudHidden = true;
+
         closed = false;
 
         if (firstInit) {
@@ -299,8 +299,6 @@ public abstract class WidgetScreen extends Screen {
         if (!locked) {
             boolean preOnClose = onClose;
             onClose = true;
-
-            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = false;
 
             removed();
 

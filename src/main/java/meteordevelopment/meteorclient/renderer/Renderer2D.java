@@ -28,7 +28,7 @@ public class Renderer2D {
         lines = new ShaderMesh(Shaders.POS_COLOR, DrawMode.Lines, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
     }
 
-    @Init(stage = InitStage.Pre)
+    @Init(stage = InitStage.Pre, dependencies = Shaders.class)
     public static void init() {
         COLOR = new Renderer2D(false);
         TEXTURE = new Renderer2D(true);

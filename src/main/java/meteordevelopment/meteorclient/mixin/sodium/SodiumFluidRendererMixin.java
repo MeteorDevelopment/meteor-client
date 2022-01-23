@@ -6,8 +6,8 @@
 package meteordevelopment.meteorclient.mixin.sodium;
 
 import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
-import me.jellysquid.mods.sodium.client.model.quad.ModelQuadColorProvider;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.model.quad.blender.ColorSampler;
 import me.jellysquid.mods.sodium.client.render.pipeline.FluidRenderer;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -28,13 +28,13 @@ import java.util.Arrays;
 
 @Mixin(value = FluidRenderer.class, remap = false)
 public class SodiumFluidRendererMixin {
-    @Final @Shadow(remap = false) private int[] quadColors;
+    @Final @Shadow private int[] quadColors;
 
     /**
      * @author Walaryne
      */
-    @Inject(method = "calculateQuadColors", at = @At("TAIL"), cancellable = true, remap = false)
-    private void onCalculateQuadColors(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, ModelQuadColorProvider<FluidState> handler, FluidState fluidState, CallbackInfo info) {
+    @Inject(method = "calculateQuadColors", at = @At("TAIL"), remap = false)
+    private void onCalculateQuadColors(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, ColorSampler<FluidState> colorSampler, FluidState fluidState, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
         if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {

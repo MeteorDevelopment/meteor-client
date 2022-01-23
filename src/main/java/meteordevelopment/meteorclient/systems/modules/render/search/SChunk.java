@@ -49,17 +49,23 @@ public class SChunk {
     }
 
     public void remove(BlockPos blockPos) {
-        SBlock block = blocks.remove(SBlock.getKey(blockPos));
-        if (block != null) block.group.remove(block);
+        if (blocks != null) {
+            SBlock block = blocks.remove(SBlock.getKey(blockPos));
+            if (block != null) block.group.remove(block);
+        }
     }
 
     public void update() {
-        for (SBlock block : blocks.values()) block.update();
+        if (blocks != null) {
+            for (SBlock block : blocks.values()) block.update();
+        }
     }
 
     public void update(int x, int y, int z) {
-        SBlock block = blocks.get(SBlock.getKey(x, y, z));
-        if (block != null) block.update();
+        if (blocks != null) {
+            SBlock block = blocks.get(SBlock.getKey(x, y, z));
+            if (block != null) block.update();
+        }
     }
 
     public int size() {
@@ -75,7 +81,9 @@ public class SChunk {
     }
 
     public void render(Render3DEvent event) {
-        for (SBlock block : blocks.values()) block.render(event);
+        if (blocks != null) {
+            for (SBlock block : blocks.values()) block.render(event);
+        }
     }
 
 

@@ -38,7 +38,6 @@ public class Commands extends System<Commands> {
         add(new BaritoneCommand());
         add(new VClipCommand());
         add(new HClipCommand());
-        add(new ClearChatCommand());
         add(new DismountCommand());
         add(new DamageCommand());
         add(new DropCommand());
@@ -50,7 +49,6 @@ public class Commands extends System<Commands> {
         add(new LocateCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
-        add(new PanicCommand());
         add(new PeekCommand());
         add(new ProfilesCommand());
         add(new ReloadCommand());
@@ -119,5 +117,4 @@ public class Commands extends System<Commands> {
     public <T extends Command> T get(Class<T> klass) {
         return (T) commandInstances.get(klass);
     }
-
 }

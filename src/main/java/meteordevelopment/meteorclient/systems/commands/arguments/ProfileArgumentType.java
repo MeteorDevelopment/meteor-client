@@ -35,7 +35,8 @@ public class ProfileArgumentType implements ArgumentType<String> {
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
-        String argument = reader.readString();
+        String argument = reader.getRemaining();
+        reader.setCursor(reader.getTotalLength());
 
         if (Profiles.get().get(argument) == null) throw NO_SUCH_PROFILE.create(argument);
         return argument;

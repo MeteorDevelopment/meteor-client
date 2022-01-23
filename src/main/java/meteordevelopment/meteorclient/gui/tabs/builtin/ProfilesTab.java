@@ -183,6 +183,12 @@ public class ProfilesTab extends Tab {
             waypointsBool.action = () -> newProfile.waypoints = waypointsBool.checked;
             table.row();
 
+            // HUD
+            table.add(theme.label("HUD:"));
+            WCheckbox hudBool = table.add(theme.checkbox(ogProfile.hud)).widget();
+            hudBool.action = () -> newProfile.hud = hudBool.checked;
+            table.row();
+
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
 
@@ -247,7 +253,7 @@ public class ProfilesTab extends Tab {
         }
 
         private boolean nameFilter(String text, char character) {
-            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '-' || character == '.';
+            return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' || character == '.' || character == ' ';
         }
 
         private boolean ipFilter(String text, char character) {

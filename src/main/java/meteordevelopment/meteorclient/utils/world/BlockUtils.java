@@ -68,7 +68,7 @@ public class BlockUtils {
         if (findItemResult.isOffhand()) {
             return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
         } else if (findItemResult.isHotbar()) {
-            return place(blockPos, Hand.MAIN_HAND, findItemResult.getSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }
         return false;
     }
@@ -253,15 +253,13 @@ public class BlockUtils {
         Always
     }
 
-    private static BlockPos.Mutable exposedPos = new BlockPos.Mutable();
+    private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
+
     public static boolean isExposed(BlockPos blockPos) {
         for (Direction direction : Direction.values()) {
-            exposedPos.set(blockPos, direction.getVector());
-            BlockState state = mc.world.getBlockState(exposedPos);
-            if (!state.isOpaque())
-                return true;
+            if (!mc.world.getBlockState(EXPOSED_POS.get().set(blockPos, direction)).isOpaque()) return true;
         }
+
         return false;
     }
-
 }

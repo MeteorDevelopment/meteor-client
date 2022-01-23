@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -122,6 +123,15 @@ public class HandView extends Module {
         .defaultValue(0)
         .range(0, 1)
         .sliderMax(1)
+        .build()
+    );
+
+    public final Setting<Integer> swingSpeed = sgSwing.add(new IntSetting.Builder()
+        .name("swing-speed")
+        .description("The swing speed of your hands. (higher = slower swing)")
+        .defaultValue(6)
+        .range(0, 20)
+        .sliderMax(20)
         .build()
     );
 
