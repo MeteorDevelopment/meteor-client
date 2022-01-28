@@ -55,9 +55,15 @@ public class BedAura extends Module {
         .defaultValue(false)
         .build()
     );
-
+    
+    private final Setting<Boolean> breakBurrow = sgGeneral.add(new BoolSetting.Builder()
+        .name("break-burrow")
+        .description("Breaks target's burrow.")
+        .defaultValue(true)
+        .build()
+    );
+    
     // Targeting
-
     private final Setting<Double> targetRange = sgTargeting.add(new DoubleSetting.Builder()
         .name("target-range")
         .description("The range at which players can be targeted.")
@@ -231,6 +237,11 @@ public class BedAura extends Module {
 
         if (breakPos == null) {
             placePos = findPlace(target);
+        }
+        
+        //BreakBurrow
+         if (breakBurrow.get() && !target.getBlockPos().add(0, 0, 0).equals(Blocks.AIR)) {
+            BlockUtils.breakBlock(target.getBlockPos().add(0, 0, 0), true);
         }
 
         // Place bed
