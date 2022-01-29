@@ -1,7 +1,7 @@
 # Meteor Client
 Look [upstream](https://github.com/MeteorDevelopment/meteor-client) for a proper description.
 
-You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-client/actions)
+You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-client/actions) or [Releases](https://github.com/JFronny/meteor-client/releases)
 
 ## Changes
 - Use GitHub Actions for CI -> no dev build numbers
