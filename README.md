@@ -11,11 +11,12 @@ You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-clie
 - Remove discord presence, capes, player count
 - Add module to disable custom rendering
 - Use FAPI resource loader, client commands and keybinds instead of custom systems (requires FAPI now)
-- Merge round-ui (#619)
+- Add optional UI rounding + relevant API additions ([#619](https://github.com/MeteorDevelopment/meteor-client/pull/619))
 - Remove credit/spash/title/prefix customization
-- Merge keywords in search (#1600)
+- Add keywords to modules for discoverability ([#1600](https://github.com/MeteorDevelopment/meteor-client/pull/1600))
 - Use browser user agent in Http Utils instead of "Meteor Client"
 - Add default target entities to KillAura and BowAimbot
+- KillAura: ignore passive targets ([#1589](https://github.com/MeteorDevelopment/meteor-client/pull/1589))
 
 ## Credits
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
