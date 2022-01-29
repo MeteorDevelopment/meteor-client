@@ -247,7 +247,8 @@ public class Modules extends System<Modules> {
             for (Module module : moduleInstances.values()) {
                 if (module.keybind.matches(isKey, value) && (isPress || module.toggleOnBindRelease)) {
                     module.toggle();
-                    module.sendToggledMsg();
+                    if (module.toggleChatFeedback)
+                        module.sendToggledMsg();
                 }
             }
         }
@@ -262,7 +263,8 @@ public class Modules extends System<Modules> {
         for (Module module : moduleInstances.values()) {
             if (module.toggleOnBindRelease && module.isActive()) {
                 module.toggle();
-                module.sendToggledMsg();
+                if (module.toggleChatFeedback)
+                    module.sendToggledMsg();
             }
         }
     }

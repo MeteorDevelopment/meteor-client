@@ -43,6 +43,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public final Keybind keybind = Keybind.none();
     public boolean toggleOnBindRelease = false;
+    public boolean toggleChatFeedback = true;
 
     public Module(Category category, String name, String description) {
         this.mc = MinecraftClient.getInstance();
@@ -126,6 +127,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         tag.putString("name", name);
         tag.put("keybind", keybind.toTag());
         tag.putBoolean("toggleOnKeyRelease", toggleOnBindRelease);
+        tag.putBoolean("toggleChatFeedback", toggleChatFeedback);
         tag.put("settings", settings.toTag());
 
         tag.putBoolean("active", active);
@@ -140,6 +142,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         else keybind.fromTag(tag.getCompound("keybind"));
 
         toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease");
+        toggleChatFeedback = tag.getBoolean("toggleChatFeedback");
 
         // Settings
         NbtElement settingsTag = tag.get("settings");
