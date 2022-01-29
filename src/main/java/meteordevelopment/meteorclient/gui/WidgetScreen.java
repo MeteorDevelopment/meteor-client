@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.renderer.GuiDebugRenderer;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
-import meteordevelopment.meteorclient.gui.tabs.builtin.HudTab;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
@@ -29,7 +28,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import static meteordevelopment.meteorclient.utils.Utils.*;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
+import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
 import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class WidgetScreen extends Screen {
@@ -69,7 +70,7 @@ public abstract class WidgetScreen extends Screen {
         if (parent != null) {
             animProgress = 1;
 
-            if (this instanceof TabScreen && parent instanceof TabScreen && !(this instanceof HudTab.HudScreen)) {
+            if (this instanceof TabScreen && parent instanceof TabScreen) {
                 parent = ((TabScreen) parent).parent;
             }
         }
@@ -90,7 +91,7 @@ public abstract class WidgetScreen extends Screen {
     @Override
     protected void init() {
         MeteorClient.EVENT_BUS.subscribe(this);
-        if (theme.hideHUD()) mc.options.hudHidden = true;
+
         closed = false;
 
         if (firstInit) {
@@ -299,8 +300,6 @@ public abstract class WidgetScreen extends Screen {
             boolean preOnClose = onClose;
             onClose = true;
 
-            if (theme.hideHUD() && !(parent instanceof WidgetScreen)) mc.options.hudHidden = false;
-
             removed();
 
             onClose = preOnClose;
@@ -362,7 +361,7 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean isPauseScreen() {
+    public boolean shouldPause() {
         return false;
     }
 

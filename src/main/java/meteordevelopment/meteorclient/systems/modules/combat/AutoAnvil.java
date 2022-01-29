@@ -50,16 +50,16 @@ public class AutoAnvil extends Module {
         .name("height")
         .description("The height to place anvils at.")
         .defaultValue(2)
-        .min(0).max(5)
-        .sliderMin(0).sliderMax(5)
+        .range(0, 5)
+        .sliderMax(5)
         .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("The delay in between anvil placements.")
-        .min(0)
         .defaultValue(10)
+        .min(0)
         .sliderMax(50)
         .build()
     );
@@ -71,8 +71,8 @@ public class AutoAnvil extends Module {
         .build()
     );
 
-    private final Setting<Boolean> multiplace = sgGeneral.add(new BoolSetting.Builder()
-        .name("multiplace")
+    private final Setting<Boolean> multiPlace = sgGeneral.add(new BoolSetting.Builder()
+        .name("multi-place")
         .description("Places multiple anvils at once..")
         .defaultValue(true)
         .build()
@@ -144,7 +144,7 @@ public class AutoAnvil extends Module {
                     }
                 }
 
-                if (BlockUtils.place(blockPos, anvil, rotate.get(), 0) && !multiplace.get()) break;
+                if (BlockUtils.place(blockPos, anvil, rotate.get(), 0) && !multiPlace.get()) break;
             }
         } else {
             timer++;

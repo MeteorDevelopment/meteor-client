@@ -28,9 +28,8 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new HashMap<>(defaultValue);
-        if (callbacks) changed();
     }
 
     @Override
@@ -44,9 +43,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    protected NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (Block block : get().keySet()) {
             valueTag.put(Registry.BLOCK.getId(block).toString(), get().get(block).toTag());
@@ -57,7 +54,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
     }
 
     @Override
-    public Map<Block, T> fromTag(NbtCompound tag) {
+    protected Map<Block, T> load(NbtCompound tag) {
         get().clear();
 
         NbtCompound valueTag = tag.getCompound("value");
@@ -68,37 +65,11 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
         return get();
     }
 
-    public static class Builder<T extends ICopyable<T> & ISerializable<T> & IChangeable & IBlockData<T>> {
-        private String name = "undefined", description = "";
-        private Map<Block, T> defaultValue;
-        private Consumer<Map<Block, T>> onChanged;
-        private Consumer<Setting<Map<Block, T>>> onModuleActivated;
+    public static class Builder<T extends ICopyable<T> & ISerializable<T> & IChangeable & IBlockData<T>> extends SettingBuilder<Builder<T>, Map<Block, T>, BlockDataSetting<T>> {
         private IGetter<T> defaultData;
-        private IVisible visible;
 
-        public Builder<T> name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder<T> description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder<T> defaultValue(Map<Block, T> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder<T> onChanged(Consumer<Map<Block, T>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder<T> onModuleActivated(Consumer<Setting<Map<Block, T>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
+        public Builder() {
+            super(new HashMap<>(0));
         }
 
         public Builder<T> defaultData(IGetter<T> defaultData) {
@@ -106,11 +77,7 @@ public class BlockDataSetting<T extends ICopyable<T> & ISerializable<T> & IChang
             return this;
         }
 
-        public Builder<T> visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public BlockDataSetting<T> build() {
             return new BlockDataSetting<>(name, description, defaultValue, onChanged, onModuleActivated, defaultData, visible);
         }

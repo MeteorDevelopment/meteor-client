@@ -18,11 +18,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.Items;
 
 public class SelfWeb extends Module {
-
-    public enum Mode {
-        Normal,
-        Smart
-    }
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -37,7 +32,7 @@ public class SelfWeb extends Module {
             .description("How far away the player has to be from you to place webs. Requires Mode to Smart.")
             .defaultValue(3)
             .min(1)
-            .sliderMax(7)
+            .sliderRange(1, 7)
             .visible(() -> mode.get() == Mode.Smart)
             .build()
     );
@@ -89,5 +84,10 @@ public class SelfWeb extends Module {
         }
 
         if (turnOff.get()) toggle();
+    }
+
+    public enum Mode {
+        Normal,
+        Smart
     }
 }

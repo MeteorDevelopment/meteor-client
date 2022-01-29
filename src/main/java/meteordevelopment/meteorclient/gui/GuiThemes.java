@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.gui;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 
@@ -24,10 +26,12 @@ public class GuiThemes {
     private static final List<GuiTheme> themes = new ArrayList<>();
     private static GuiTheme theme;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         add(new MeteorGuiTheme());
     }
 
+    @Init(stage = InitStage.Post)
     public static void postInit() {
         if (FILE.exists()) {
             try {

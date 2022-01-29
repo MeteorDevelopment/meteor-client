@@ -266,8 +266,22 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return r + " " + g + " " + b + " " + a;
     }
 
-    public boolean equals(Color color) {
-        if (color == null) return false;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Color color = (Color) o;
+
         return r == color.r && g == color.g && b == color.b && a == color.a;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = r;
+        result = 31 * result + g;
+        result = 31 * result + b;
+        result = 31 * result + a;
+        return result;
     }
 }

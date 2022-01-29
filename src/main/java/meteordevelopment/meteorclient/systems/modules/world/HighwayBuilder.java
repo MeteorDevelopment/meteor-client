@@ -82,10 +82,8 @@ public class HighwayBuilder extends Module {
         .name("width")
         .description("Width of the highway.")
         .defaultValue(4)
-        .min(1)
-        .max(5)
-        .sliderMin(1)
-        .sliderMax(5)
+        .range(1, 5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -93,10 +91,8 @@ public class HighwayBuilder extends Module {
         .name("height")
         .description("Height of the highway.")
         .defaultValue(3)
-        .min(2)
-        .max(5)
-        .sliderMin(2)
-        .sliderMax(5)
+        .range(2, 5)
+        .sliderRange(2, 5)
         .build()
     );
 
@@ -132,7 +128,7 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Block>> blocksToPlace = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
-        .defaultValue(List.of(Blocks.OBSIDIAN))
+        .defaultValue(Blocks.OBSIDIAN)
         .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, ZERO)))
         .build()
     );
@@ -140,7 +136,7 @@ public class HighwayBuilder extends Module {
     private final Setting<List<Item>> trashItems = sgGeneral.add(new ItemListSetting.Builder()
         .name("trash-items")
         .description("Items that are considered trash and can be thrown out.")
-        .defaultValue(List.of(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT))
+        .defaultValue(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GLOWSTONE_DUST, Items.BLACKSTONE, Items.BASALT)
         .build()
     );
 

@@ -8,7 +8,8 @@ package meteordevelopment.meteorclient.utils.world;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -28,7 +29,7 @@ import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockUtils {
     private static final Vec3d hitPos = new Vec3d(0, 0, 0);
@@ -36,6 +37,7 @@ public class BlockUtils {
     public static boolean breaking;
     private static boolean breakingThisTick;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(BlockUtils.class);
     }
@@ -64,9 +66,9 @@ public class BlockUtils {
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (findItemResult.isOffhand()) {
-            return place(blockPos, Hand.OFF_HAND, Utils.mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
         } else if (findItemResult.isHotbar()) {
-            return place(blockPos, Hand.MAIN_HAND, findItemResult.getSlot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
+            return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }
         return false;
     }
@@ -224,7 +226,8 @@ public class BlockUtils {
             || block instanceof TrapdoorBlock;
     }
 
-    public static MobSpawn isValidMobSpawn(BlockPos blockPos) {
+    public static MobSpawn isValidMobSpawn(BlockPos blockPos, boolean newMobSpawnLightLevel) {
+        int spawnLightLimit = newMobSpawnLightLevel ? 0 : 7;
         if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock) ||
             mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
 
@@ -233,8 +236,8 @@ public class BlockUtils {
             if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
-        if (mc.world.getLightLevel(blockPos, 0) <= 7) return MobSpawn.Potential;
-        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= 7) return MobSpawn.Always;
+        if (mc.world.getLightLevel(blockPos, 0) <= spawnLightLimit) return MobSpawn.Potential;
+        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= spawnLightLimit) return MobSpawn.Always;
 
         return MobSpawn.Never;
     }
@@ -248,5 +251,15 @@ public class BlockUtils {
         Never,
         Potential,
         Always
+    }
+
+    private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
+
+    public static boolean isExposed(BlockPos blockPos) {
+        for (Direction direction : Direction.values()) {
+            if (!mc.world.getBlockState(EXPOSED_POS.get().set(blockPos, direction)).isOpaque()) return true;
+        }
+
+        return false;
     }
 }

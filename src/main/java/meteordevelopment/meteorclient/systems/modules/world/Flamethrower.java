@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
@@ -73,9 +72,13 @@ public class Flamethrower extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Entities to cook.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(
-                EntityType.PIG, EntityType.COW, EntityType.SHEEP,
-                EntityType.CHICKEN, EntityType.RABBIT))
+            .defaultValue(
+                EntityType.PIG,
+                EntityType.COW,
+                EntityType.SHEEP,
+                EntityType.CHICKEN,
+                EntityType.RABBIT
+            )
             .build()
     );
 
@@ -119,9 +122,8 @@ public class Flamethrower extends Module {
         Block bottom = mc.world.getBlockState(entity.getBlockPos().down()).getBlock();
         if (block == Blocks.WATER || bottom == Blocks.WATER || bottom == Blocks.DIRT_PATH) return;
         if (block == Blocks.GRASS)  mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
-        LivingEntity animal = (LivingEntity) entity;
 
-        if (putOutFire.get() && animal.getHealth() < 1) {
+        if (putOutFire.get() && entity instanceof LivingEntity animal && animal.getHealth() < 1) {
             mc.interactionManager.attackBlock(entity.getBlockPos(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().west(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().east(), Direction.DOWN);
@@ -152,7 +154,7 @@ public class Flamethrower extends Module {
 
         boolean foundFlintAndSteel = !findNewFlintAndSteel;
         if (findNewFlintAndSteel) {
-            foundFlintAndSteel = InvUtils.swap(InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL).getSlot(), true);
+            foundFlintAndSteel = InvUtils.swap(InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL).slot(), true);
         }
         return foundFlintAndSteel;
     }

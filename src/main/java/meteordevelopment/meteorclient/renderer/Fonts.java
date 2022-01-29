@@ -9,13 +9,15 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
     private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf" };
@@ -26,6 +28,7 @@ public class Fonts {
 
     private static String lastFont = "";
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         FOLDER.mkdirs();
 
@@ -33,7 +36,7 @@ public class Fonts {
         for (String font : BUILTIN_FONTS) {
             File file = new File(FOLDER, font);
             if (!file.exists()) {
-                StreamUtils.copy(Fonts.class.getResourceAsStream("/assets/meteor-client/fonts/" + font), file);
+                StreamUtils.copy(Fonts.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/fonts/" + font), file);
             }
         }
 
@@ -42,29 +45,30 @@ public class Fonts {
         lastFont = DEFAULT_FONT;
     }
 
+    @Init(stage = InitStage.Post)
     public static void load() {
-        if (lastFont.equals(Config.get().font)) return;
+        if (lastFont.equals(Config.get().font.get())) return;
 
         File file = new File(FOLDER, Config.get().font + ".ttf");
         if (!file.exists()) {
-            Config.get().font = DEFAULT_FONT;
+            Config.get().font.set(DEFAULT_FONT);
             file = new File(FOLDER, Config.get().font + ".ttf");
         }
 
         try {
             CUSTOM_FONT = new CustomTextRenderer(file);
         } catch (Exception ignored) {
-            Config.get().font = DEFAULT_FONT;
+            Config.get().font.set(DEFAULT_FONT);
             file = new File(FOLDER, Config.get().font + ".ttf");
 
             CUSTOM_FONT = new CustomTextRenderer(file);
         }
 
-        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont) {
+        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont.get()) {
             ((WidgetScreen) mc.currentScreen).invalidate();
         }
 
-        lastFont = Config.get().font;
+        lastFont = Config.get().font.get();
     }
 
     public static String[] getAvailableFonts() {

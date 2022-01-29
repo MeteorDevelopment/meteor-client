@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.google.common.collect.Ordering;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -26,12 +27,12 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.render.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.search.Search;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
@@ -40,22 +41,21 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.Pair;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
+import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
     public static final ModuleRegistry REGISTRY = new ModuleRegistry();
 
     private static final List<Category> CATEGORIES = new ArrayList<>();
-    public static boolean REGISTERING_CATEGORIES;
 
     private final List<Module> modules = new ArrayList<>();
     private final Map<Class<? extends Module>, Module> moduleInstances = new HashMap<>();
@@ -80,9 +80,17 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
+    }
 
-        // This is here because some hud elements depend on modules to be initialised before them
-        add(new HUD());
+    @Override
+    public void load(File folder) {
+        for (Module module : modules) {
+            for (SettingGroup group : module.settings) {
+                for (Setting<?> setting : group) setting.reset();
+            }
+        }
+
+        super.load(folder);
     }
 
     public void sortModules() {
@@ -93,7 +101,7 @@ public class Modules extends System<Modules> {
     }
 
     public static void registerCategory(Category category) {
-        if (!REGISTERING_CATEGORIES) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+        if (!Categories.REGISTERING) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
 
         CATEGORIES.add(category);
     }
@@ -150,35 +158,30 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public List<Pair<Module, Integer>> searchTitles(String text) {
-        List<Pair<Module, Integer>> modules = new ArrayList<>();
+    public Set<Module> searchTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
             int words = Utils.search(module.title, text);
-            if (words > 0) modules.add(new Pair<>(module, words));
+            if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
         }
 
-        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
-        return modules;
+        return modules.keySet();
     }
 
-    public List<Pair<Module, Integer>> searchSettingTitles(String text) {
-        List<Pair<Module, Integer>> modules = new ArrayList<>();
+    public Set<Module> searchSettingTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
 
         for (Module module : this.moduleInstances.values()) {
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
                     int words = Utils.search(setting.title, text);
-                    if (words > 0) {
-                        modules.add(new Pair<>(module, words));
-                        break;
-                    }
+                    if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
                 }
             }
         }
 
-        modules.sort(Comparator.comparingInt(value -> -value.getRight()));
-        return modules;
+        return modules.keySet();
     }
 
     void addActive(Module module) {
@@ -366,6 +369,7 @@ public class Modules extends System<Modules> {
         add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
+        add(new AutoEXP());
         add(new AutoTotem());
         add(new AutoTrap());
         add(new AutoWeapon());
@@ -384,7 +388,6 @@ public class Modules extends System<Modules> {
         add(new SelfAnvil());
         add(new SelfTrap());
         add(new SelfWeb());
-//        add(new SmartSurround());
         add(new Surround());
     }
 
@@ -464,7 +467,6 @@ public class Modules extends System<Modules> {
         add(new CameraTweaks());
         add(new Chams());
         add(new CityESP());
-        add(new CustomFOV());
         add(new EntityOwner());
         add(new ESP());
         add(new Freecam());
@@ -492,6 +494,7 @@ public class Modules extends System<Modules> {
         add(new Xray());
         add(new Zoom());
         add(new Blur());
+        add(new PopChams());
     }
 
     private void initWorld() {
@@ -540,7 +543,6 @@ public class Modules extends System<Modules> {
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
-        add(new TPSSync());
         add(new VanillaSpoof());
         add(new InventoryTweaks());
     }
@@ -548,6 +550,11 @@ public class Modules extends System<Modules> {
     public static class ModuleRegistry extends Registry<Module> {
         public ModuleRegistry() {
             super(RegistryKey.ofRegistry(new Identifier("meteor-client", "modules")), Lifecycle.stable());
+        }
+
+        @Override
+        public int size() {
+            return Modules.get().getAll().size();
         }
 
         @Override
@@ -576,7 +583,7 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(Module object) {
+        public Lifecycle getEntryLifecycle(Module object) {
             return null;
         }
 

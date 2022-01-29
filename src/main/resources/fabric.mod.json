@@ -32,12 +32,18 @@
   ],
   "accessWidener": "meteor-client.accesswidener",
   "custom": {
-    "meteor-client:devbuild": "@devbuild@",
-    "meteor-client:color": "145,61,226"
+    "meteor-client:devbuild": "${devbuild}",
+    "meteor-client:color": "145,61,226",
+    "modmenu": {
+      "links": {
+        "modmenu.discord": "https://meteorclient.com/discord"
+      }
+    }
   },
   "depends": {
-    "java": ">=16",
-    "minecraft": ">=@mc_version@"
+    "java": ">=17",
+    "minecraft": ">=1.18",
+    "fabricloader": ">=0.12.11"
   },
   "breaks": {
     "optifabric": "*"

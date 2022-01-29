@@ -14,7 +14,7 @@ import org.lwjgl.BufferUtils;
 
 import java.nio.ByteBuffer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.opengl.GL32C.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
@@ -229,7 +229,7 @@ public class Mesh {
             MatrixStack matrixStack = RenderSystem.getModelViewStack();
             matrixStack.push();
 
-            if (matrices != null) matrixStack.method_34425(matrices.peek().getModel());
+            if (matrices != null) matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
 
             Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
             matrixStack.translate(0, -cameraPos.y, 0);

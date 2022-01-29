@@ -5,6 +5,11 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,7 +20,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Capes {
     private static final String CAPE_OWNERS_URL = "https://meteorclient.com/api/capeowners";
@@ -29,6 +34,7 @@ public class Capes {
     private static final List<Cape> TO_RETRY = new ArrayList<>();
     private static final List<Cape> TO_REMOVE = new ArrayList<>();
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         OWNERS.clear();
         URLS.clear();
@@ -59,24 +65,12 @@ public class Capes {
                 }
             });
         });
+
+        MeteorClient.EVENT_BUS.subscribe(Capes.class);
     }
 
-    public static Identifier get(PlayerEntity player) {
-        String capeName = OWNERS.get(player.getUuid());
-        if (capeName != null) {
-            Cape cape = TEXTURES.get(capeName);
-            if (cape == null) return null;
-
-            if (cape.isDownloaded()) return cape;
-
-            cape.download();
-            return null;
-        }
-
-        return null;
-    }
-
-    public static void tick() {
+    @EventHandler
+    private static void onTick(TickEvent.Post event) {
         synchronized (TO_REGISTER) {
             for (Cape cape : TO_REGISTER) cape.register();
             TO_REGISTER.clear();
@@ -96,6 +90,21 @@ public class Capes {
 
             TO_REMOVE.clear();
         }
+    }
+
+    public static Identifier get(PlayerEntity player) {
+        String capeName = OWNERS.get(player.getUuid());
+        if (capeName != null) {
+            Cape cape = TEXTURES.get(capeName);
+            if (cape == null) return null;
+
+            if (cape.isDownloaded()) return cape;
+
+            cape.download();
+            return null;
+        }
+
+        return null;
     }
 
     private static class Cape extends Identifier {

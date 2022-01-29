@@ -61,8 +61,8 @@ public class Burrow extends Module {
         .name("trigger-height")
         .description("How high you have to jump before a rubberband is triggered.")
         .defaultValue(1.12)
-        .min(0.01)
-        .sliderMax(1.4)
+        .range(0.01, 1.4)
+        .sliderRange(0.01, 1.4)
         .build()
     );
 
@@ -78,9 +78,9 @@ public class Burrow extends Module {
     private final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
         .name("timer")
         .description("Timer override.")
-        .defaultValue(1.00)
+        .defaultValue(1)
         .min(0.01)
-        .sliderMax(10)
+        .sliderRange(0.01, 10)
         .build()
     );
 
@@ -202,8 +202,8 @@ public class Burrow extends Module {
 
         FindItemResult block = getItem();
 
-        if (!(mc.player.getInventory().getStack(block.getSlot()).getItem() instanceof BlockItem)) return;
-        InvUtils.swap(block.getSlot(), true);
+        if (!(mc.player.getInventory().getStack(block.slot()).getItem() instanceof BlockItem)) return;
+        InvUtils.swap(block.slot(), true);
 
         mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(blockPos), Direction.UP, blockPos, false));
         mc.player.networkHandler.sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));

@@ -27,16 +27,15 @@ public class SpawnProofer extends Module {
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
         .name("range")
         .description("Range for block placement and rendering")
-        .min(0)
-        .sliderMax(10)
         .defaultValue(3)
+        .min(0)
         .build()
     );
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Block to use for spawn proofing")
-        .defaultValue(getDefaultBlocks())
+        .defaultValue(Blocks.TORCH, Blocks.STONE_BUTTON, Blocks.STONE_SLAB)
         .filter(this::filterBlocks)
         .build()
     );
@@ -45,7 +44,7 @@ public class SpawnProofer extends Module {
         .name("delay")
         .description("Delay in ticks between placing blocks")
         .defaultValue(0)
-        .min(0).sliderMax(10)
+        .min(0)
         .build()
     );
 
@@ -61,6 +60,13 @@ public class SpawnProofer extends Module {
         .description("Which spawn types should be spawn proofed.")
         .defaultValue(Mode.Both)
         .build()
+    );
+
+    private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
+            .name("new-mob-spawn-light-level")
+            .description("Use the new (1.18+) mob spawn behavior")
+            .defaultValue(true)
+            .build()
     );
 
 
@@ -91,8 +97,8 @@ public class SpawnProofer extends Module {
         for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
         spawns.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
-            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos);
-            
+            BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get());
+
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
                     spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
 
@@ -120,7 +126,7 @@ public class SpawnProofer extends Module {
         } else {
 
             // Check if light source
-            if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.getSlot()).getItem()))) {
+            if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
@@ -144,16 +150,6 @@ public class SpawnProofer extends Module {
         }
 
         ticksWaited = 0;
-    }
-
-    private List<Block> getDefaultBlocks() {
-        ArrayList<Block> defaultBlocks = new ArrayList<>();
-
-        defaultBlocks.add(Blocks.TORCH);
-        defaultBlocks.add(Blocks.STONE_BUTTON);
-        defaultBlocks.add(Blocks.STONE_SLAB);
-
-        return defaultBlocks;
     }
 
     private boolean filterBlocks(Block block) {

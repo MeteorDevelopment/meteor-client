@@ -13,7 +13,6 @@ import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
@@ -46,13 +45,13 @@ public class ContainerTooltipComponent implements TooltipComponent, MeteorToolti
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
 
         // Background
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
         RenderSystem.setShaderTexture(0, TEXTURE_CONTAINER_BACKGROUND);
-        DrawableHelper.drawTexture(matrices, x, y, z, 0, 0, 176, 67, 67, 176);
+        DrawableHelper.drawTexture(matrices, x, y, z, 0, 0, 176, 67, 176, 67);
 
         //Contents
         int row = 0;

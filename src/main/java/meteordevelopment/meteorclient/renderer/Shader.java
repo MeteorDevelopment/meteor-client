@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.opengl.GL32C.*;
 
 public class Shader {
@@ -58,7 +58,7 @@ public class Shader {
 
     private String read(String path) {
         try {
-            return IOUtils.toString(mc.getResourceManager().getResource(new Identifier("meteor-client", "shaders/" + path)).getInputStream(), StandardCharsets.UTF_8);
+            return IOUtils.toString(mc.getResourceManager().getResource(new Identifier(MeteorClient.MOD_ID, "shaders/" + path)).getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -100,6 +100,6 @@ public class Shader {
 
     public void setDefaults() {
         set("u_Proj", RenderSystem.getProjectionMatrix());
-        set("u_ModelView", RenderSystem.getModelViewStack().peek().getModel());
+        set("u_ModelView", RenderSystem.getModelViewStack().peek().getPositionMatrix());
     }
 }

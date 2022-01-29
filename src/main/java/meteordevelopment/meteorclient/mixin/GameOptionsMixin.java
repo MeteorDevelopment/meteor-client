@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ChangePerspectiveEvent;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.GameOptions;
@@ -37,5 +39,7 @@ public class GameOptionsMixin {
         ChangePerspectiveEvent event = MeteorClient.EVENT_BUS.post(ChangePerspectiveEvent.get(perspective));
 
         if (event.isCancelled()) info.cancel();
+
+        if (Modules.get().isActive(Freecam.class)) info.cancel();
     }
 }

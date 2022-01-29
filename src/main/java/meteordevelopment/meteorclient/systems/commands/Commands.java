@@ -17,7 +17,7 @@ import net.minecraft.command.CommandSource;
 
 import java.util.*;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Commands extends System<Commands> {
     private final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
@@ -38,7 +38,6 @@ public class Commands extends System<Commands> {
         add(new BaritoneCommand());
         add(new VClipCommand());
         add(new HClipCommand());
-        add(new ClearChatCommand());
         add(new DismountCommand());
         add(new DamageCommand());
         add(new DropCommand());
@@ -50,7 +49,6 @@ public class Commands extends System<Commands> {
         add(new LocateCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
-        add(new PanicCommand());
         add(new PeekCommand());
         add(new ProfilesCommand());
         add(new ReloadCommand());
@@ -68,6 +66,9 @@ public class Commands extends System<Commands> {
         add(new GiveCommand());
         add(new NameHistoryCommand());
         add(new BindCommand());
+        add(new FOVCommand());
+        add(new RotationCommand());
+        add(new WaypointCommand());
 
         commands.sort(Comparator.comparing(Command::getName));
     }
@@ -116,5 +117,4 @@ public class Commands extends System<Commands> {
     public <T extends Command> T get(Class<T> klass) {
         return (T) commandInstances.get(klass);
     }
-
 }

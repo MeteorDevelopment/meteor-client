@@ -31,6 +31,7 @@ import net.minecraft.world.RaycastContext;
 
 public class ElytraFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgInventory = settings.createGroup("Inventory");
     private final SettingGroup sgAutopilot = settings.createGroup("Autopilot");
 
     // General
@@ -49,23 +50,6 @@ public class ElytraFly extends Module {
         .description("Automatically takes off when you hold jump without needing to double jump.")
         .defaultValue(false)
         .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
-        .build()
-    );
-
-    public final Setting<Boolean> replace = sgGeneral.add(new BoolSetting.Builder()
-        .name("elytra-replace")
-        .description("Replaces broken elytra with a new elytra.")
-        .defaultValue(false)
-        .build()
-    );
-
-    public final Setting<Integer> replaceDurability = sgGeneral.add(new IntSetting.Builder()
-        .name("replace-durability")
-        .description("The durability threshold your elytra will be replaced at.")
-        .defaultValue(2)
-        .min(1)
-        .max(Items.ELYTRA.getMaxDamage() - 1)
-        .sliderMax(20)
         .build()
     );
 
@@ -121,18 +105,9 @@ public class ElytraFly extends Module {
         .name("crash-look-ahead")
         .description("Distance to look ahead when flying.")
         .defaultValue(5)
-        .min(1)
-        .max(15)
+        .range(1, 15)
         .sliderMin(1)
-        .sliderMax(10)
         .visible(noCrash::get)
-        .build()
-    );
-
-    public final Setting<ChestSwapMode> chestSwap = sgGeneral.add(new EnumSetting.Builder<ChestSwapMode>()
-        .name("chest-swap")
-        .description("Enables ChestSwap when toggling this module.")
-        .defaultValue(ChestSwapMode.Never)
         .build()
     );
 
@@ -170,6 +145,49 @@ public class ElytraFly extends Module {
         .min(0)
         .sliderMax(6)
         .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    // Inventory
+
+    public final Setting<Boolean> replace = sgInventory.add(new BoolSetting.Builder()
+        .name("elytra-replace")
+        .description("Replaces broken elytra with a new elytra.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer> replaceDurability = sgInventory.add(new IntSetting.Builder()
+        .name("replace-durability")
+        .description("The durability threshold your elytra will be replaced at.")
+        .defaultValue(2)
+        .range(1, Items.ELYTRA.getMaxDamage() - 1)
+        .sliderRange(1, Items.ELYTRA.getMaxDamage() - 1)
+        .visible(replace::get)
+        .build()
+    );
+
+    public final Setting<ChestSwapMode> chestSwap = sgInventory.add(new EnumSetting.Builder<ChestSwapMode>()
+        .name("chest-swap")
+        .description("Enables ChestSwap when toggling this module.")
+        .defaultValue(ChestSwapMode.Never)
+        .build()
+    );
+
+    public final Setting<Boolean> autoReplenish = sgInventory.add(new BoolSetting.Builder()
+        .name("replenish-fireworks")
+        .description("Moves fireworks into a selected hotbar slot.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer> replenishSlot = sgInventory.add(new IntSetting.Builder()
+        .name("replenish-slot")
+        .description("The slot auto move moves fireworks to.")
+        .defaultValue(9)
+        .range(1, 9)
+        .sliderRange(1, 9)
+        .visible(autoReplenish::get)
         .build()
     );
 
@@ -211,7 +229,7 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    private ElytraFlightMode currentMode;
+    private ElytraFlightMode currentMode = new Vanilla();
 
     public ElytraFly() {
         super(Categories.Movement, "elytra-fly", "Gives you more control over your elytra.");

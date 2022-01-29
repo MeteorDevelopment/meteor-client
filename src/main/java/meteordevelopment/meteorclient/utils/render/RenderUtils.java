@@ -16,7 +16,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3f;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
     public static Vec3d center;
@@ -50,9 +50,9 @@ public class RenderUtils {
             MatrixStack bobViewMatrices = new MatrixStack();
 
             bobView(bobViewMatrices);
-            bobViewMatrices.peek().getModel().invert();
+            bobViewMatrices.peek().getPositionMatrix().invert();
 
-            pos = ((IMatrix4f) (Object) bobViewMatrices.peek().getModel()).mul(pos);
+            pos = ((IMatrix4f) (Object) bobViewMatrices.peek().getPositionMatrix()).mul(pos);
         }
 
         center = new Vec3d(pos.x, -pos.y, pos.z)

@@ -18,11 +18,9 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         if (value == null) value = defaultValue.copy();
         value.set(defaultValue);
-
-        if (callbacks) changed();
     }
 
     @Override
@@ -36,58 +34,25 @@ public class GenericSetting<T extends ICopyable<T> & ISerializable<T> & IScreenF
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         tag.put("value", get().toTag());
 
         return tag;
     }
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T load(NbtCompound tag) {
         get().fromTag(tag.getCompound("value"));
 
         return get();
     }
 
-    public static class Builder<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> {
-        private String name = "undefined", description = "";
-        private T defaultValue;
-        private Consumer<T> onChanged;
-        private Consumer<Setting<T>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder<T> name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder<T extends ICopyable<T> & ISerializable<T> & IScreenFactory> extends SettingBuilder<Builder<T>, T, GenericSetting<T>> {
+        public Builder() {
+            super(null);
         }
 
-        public Builder<T> description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder<T> defaultValue(T defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder<T> onChanged(Consumer<T> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder<T> onModuleActivated(Consumer<Setting<T>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public GenericSetting<T> build() {
             return new GenericSetting<>(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

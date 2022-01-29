@@ -60,6 +60,13 @@ public class LightOverlay extends Module {
             .build()
     );
 
+    private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
+            .name("new-mob-spawn-light-level")
+            .description("Use the new (1.18+) mob spawn behavior")
+            .defaultValue(true)
+            .build()
+    );
+
     // Colors
 
     private final Setting<SettingColor> color = sgColors.add(new ColorSetting.Builder()
@@ -93,7 +100,7 @@ public class LightOverlay extends Module {
         crosses.clear();
 
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-            switch (BlockUtils.isValidMobSpawn(blockPos)) {
+            switch (BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get())) {
                 case Never:
                     break;
                 case Potential:

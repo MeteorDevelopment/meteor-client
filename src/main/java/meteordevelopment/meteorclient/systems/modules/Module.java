@@ -20,10 +20,11 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public abstract class Module implements ISerializable<Module> {
+public abstract class Module implements ISerializable<Module>, Comparable<Module> {
     protected final MinecraftClient mc;
 
     public final Category category;
@@ -83,7 +84,7 @@ public abstract class Module implements ISerializable<Module> {
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatCommandsInfo) {
+        if (Config.get().chatFeedback.get()) {
             ChatUtils.forceNextPrefixClass(getClass());
             ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
@@ -161,5 +162,10 @@ public abstract class Module implements ISerializable<Module> {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public int compareTo(@NotNull Module o) {
+        return name.compareTo(o.name);
     }
 }

@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -31,97 +30,97 @@ public class Tracers extends Module {
     // General
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entites")
-            .description("Select specific entities.")
-            .defaultValue(Utils.asObject2BooleanOpenHashMap(EntityType.PLAYER))
-            .build()
+        .name("entites")
+        .description("Select specific entities.")
+        .defaultValue(EntityType.PLAYER)
+        .build()
     );
 
     private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
-            .name("target")
-            .description("What part of the entity to target.")
-            .defaultValue(Target.Body)
-            .build()
+        .name("target")
+        .description("What part of the entity to target.")
+        .defaultValue(Target.Body)
+        .build()
     );
 
     private final Setting<Boolean> stem = sgAppearance.add(new BoolSetting.Builder()
-            .name("stem")
-            .description("Draw a line through the center of the tracer target.")
-            .defaultValue(true)
-            .build()
+        .name("stem")
+        .description("Draw a line through the center of the tracer target.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> maxDist = sgAppearance.add(new IntSetting.Builder()
-            .name("max-distance")
-            .description("Maximum distance for tracers to show.")
-            .defaultValue(256)
-            .min(0)
-            .sliderMax(256)
-            .build()
+        .name("max-distance")
+        .description("Maximum distance for tracers to show.")
+        .defaultValue(256)
+        .min(0)
+        .sliderMax(256)
+        .build()
     );
 
     public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
-            .name("show-invisible")
-            .description("Shows invisibile entities.")
-            .defaultValue(true)
-            .build()
+        .name("show-invisible")
+        .description("Shows invisibile entities.")
+        .defaultValue(true)
+        .build()
     );
 
     // Colors
 
     public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
-            .name("distance-colors")
-            .description("Changes the color of tracers depending on distance.")
-            .defaultValue(false)
-            .build()
+        .name("distance-colors")
+        .description("Changes the color of tracers depending on distance.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
-            .name("players-colors")
-            .description("The player's color.")
-            .defaultValue(new SettingColor(205, 205, 205, 127))
-            .visible(() -> !distance.get())
-            .build()
+        .name("players-colors")
+        .description("The player's color.")
+        .defaultValue(new SettingColor(205, 205, 205, 127))
+        .visible(() -> !distance.get())
+        .build()
     );
 
     private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
-            .name("animals-color")
-            .description("The animal's color.")
-            .defaultValue(new SettingColor(145, 255, 145, 127))
-            .visible(() -> !distance.get())
-            .build()
+        .name("animals-color")
+        .description("The animal's color.")
+        .defaultValue(new SettingColor(145, 255, 145, 127))
+        .visible(() -> !distance.get())
+        .build()
     );
 
     private final Setting<SettingColor> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
-            .name("water-animals-color")
-            .description("The water animal's color.")
-            .defaultValue(new SettingColor(145, 145, 255, 127))
-            .visible(() -> !distance.get())
-            .build()
+        .name("water-animals-color")
+        .description("The water animal's color.")
+        .defaultValue(new SettingColor(145, 145, 255, 127))
+        .visible(() -> !distance.get())
+        .build()
     );
 
     private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
-            .name("monsters-color")
-            .description("The monster's color.")
-            .defaultValue(new SettingColor(255, 145, 145, 127))
-            .visible(() -> !distance.get())
-            .build()
+        .name("monsters-color")
+        .description("The monster's color.")
+        .defaultValue(new SettingColor(255, 145, 145, 127))
+        .visible(() -> !distance.get())
+        .build()
     );
 
     private final Setting<SettingColor> ambientColor = sgColors.add(new ColorSetting.Builder()
-            .name("ambient-color")
-            .description("The ambient color.")
-            .defaultValue(new SettingColor(75, 75, 75, 127))
-            .visible(() -> !distance.get())
-            .build()
+        .name("ambient-color")
+        .description("The ambient color.")
+        .defaultValue(new SettingColor(75, 75, 75, 127))
+        .visible(() -> !distance.get())
+        .build()
     );
 
     private final Setting<SettingColor> miscColor = sgColors.add(new ColorSetting.Builder()
-            .name("misc-color")
-            .description("The misc color.")
-            .defaultValue(new SettingColor(145, 145, 145, 127))
-            .visible(() -> !distance.get())
-            .build()
+        .name("misc-color")
+        .description("The misc color.")
+        .defaultValue(new SettingColor(145, 145, 145, 127))
+        .visible(() -> !distance.get())
+        .build()
     );
 
     private int count;
@@ -133,6 +132,7 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
+        if (mc.options.hudHidden) return;
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {

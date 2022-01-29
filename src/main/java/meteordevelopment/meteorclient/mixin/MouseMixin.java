@@ -26,7 +26,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 
@@ -56,16 +55,12 @@ public class MouseMixin {
             Camera camera = client.gameRenderer.getCamera();
             ((ICamera) camera).setRot(camera.getYaw() + cursorDeltaX * 0.15, camera.getPitch() + cursorDeltaY * 0.15);
         }
-        else if (!freeLook.cameraMode()) player.changeLookDirection(cursorDeltaX, cursorDeltaY);
-    }
+        else if (freeLook.cameraMode()) {
+            freeLook.cameraYaw += cursorDeltaX / freeLook.sensitivity.get().floatValue();
+            freeLook.cameraPitch += cursorDeltaY / freeLook.sensitivity.get().floatValue();
 
-    @Inject(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/tutorial/TutorialManager;onUpdateMouse(DD)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void perspectiveUpdatePitchYaw(CallbackInfo info, double adjustedSens, double x, double y, int invert) {
-        FreeLook freeLook = Modules.get().get(FreeLook.class);
-        if (freeLook.cameraMode()) {
-            freeLook.cameraYaw += x / freeLook.sensitivity.get().floatValue();
-            freeLook.cameraPitch += (y * invert) / freeLook.sensitivity.get().floatValue();
             if (Math.abs(freeLook.cameraPitch) > 90.0F) freeLook.cameraPitch = freeLook.cameraPitch > 0.0F ? 90.0F : -90.0F;
         }
+        else player.changeLookDirection(cursorDeltaX, cursorDeltaY);
     }
 }

@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -26,7 +27,7 @@ public class HandView extends Module {
         .name("x")
         .description("The X scale of your hands.")
         .defaultValue(1)
-        .sliderMin(0).sliderMax(5)
+        .sliderMax(5)
         .build()
     );
 
@@ -34,7 +35,7 @@ public class HandView extends Module {
         .name("y")
         .description("The Y scale of your hands.")
         .defaultValue(1)
-        .sliderMin(0).sliderMax(5)
+        .sliderMax(5)
         .build()
     );
 
@@ -42,7 +43,7 @@ public class HandView extends Module {
         .name("z")
         .description("The Z scale of your hands.")
         .defaultValue(1)
-        .sliderMin(0).sliderMax(5)
+        .sliderMax(5)
         .build()
     );
 
@@ -52,7 +53,7 @@ public class HandView extends Module {
         .name("x")
         .description("The X position offset of your hands.")
         .defaultValue(0)
-        .sliderMin(-3).sliderMax(3)
+        .sliderRange(-3, 3)
         .build()
     );
 
@@ -60,7 +61,7 @@ public class HandView extends Module {
         .name("y")
         .description("The Y position offset of your hands.")
         .defaultValue(0)
-        .sliderMin(-3).sliderMax(3)
+        .sliderRange(-3, 3)
         .build()
     );
 
@@ -68,7 +69,7 @@ public class HandView extends Module {
         .name("z")
         .description("The Z position offset of your hands.")
         .defaultValue(0)
-        .sliderMin(-3).sliderMax(3)
+        .sliderRange(-3, 3)
         .build()
     );
 
@@ -78,7 +79,7 @@ public class HandView extends Module {
         .name("x")
         .description("The X orientation of your hands.")
         .defaultValue(0)
-        .sliderMin(-1).sliderMax(1)
+        .sliderRange(-1, 1)
         .build()
     );
 
@@ -86,7 +87,7 @@ public class HandView extends Module {
         .name("y")
         .description("The Y orientation of your hands.")
         .defaultValue(0)
-        .sliderMin(-1).sliderMax(1)
+        .sliderRange(-1, 1)
         .build()
     );
 
@@ -94,7 +95,7 @@ public class HandView extends Module {
         .name("z")
         .description("The Z orientation of your hands.")
         .defaultValue(0)
-        .sliderMin(-1).sliderMax(1)
+        .sliderRange(-1, 1)
         .build()
     );
 
@@ -111,8 +112,8 @@ public class HandView extends Module {
         .name("main-progress")
         .description("The swing progress of your main hand.")
         .defaultValue(0)
-        .min(0).max(1)
-        .sliderMin(0).sliderMax(1)
+        .range(0, 1)
+        .sliderMax(1)
         .build()
     );
 
@@ -120,8 +121,17 @@ public class HandView extends Module {
         .name("offhand-progress")
         .description("The swing progress of your offhand.")
         .defaultValue(0)
-        .min(0).max(1)
-        .sliderMin(0).sliderMax(1)
+        .range(0, 1)
+        .sliderMax(1)
+        .build()
+    );
+
+    public final Setting<Integer> swingSpeed = sgSwing.add(new IntSetting.Builder()
+        .name("swing-speed")
+        .description("The swing speed of your hands. (higher = slower swing)")
+        .defaultValue(6)
+        .range(0, 20)
+        .sliderMax(20)
         .build()
     );
 

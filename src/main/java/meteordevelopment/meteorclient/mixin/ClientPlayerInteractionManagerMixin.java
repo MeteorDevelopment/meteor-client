@@ -70,7 +70,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "interactEntity", at = @At("HEAD"), cancellable = true)
     private void onInteractEntity(PlayerEntity player, Entity entity, Hand hand, CallbackInfoReturnable<ActionResult> info) {
-        if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled()) info.cancel();
+        if (MeteorClient.EVENT_BUS.post(InteractEntityEvent.get(entity, hand)).isCancelled()) info.setReturnValue(ActionResult.FAIL);
     }
 
     @Inject(method = "dropCreativeStack", at = @At("HEAD"), cancellable = true)

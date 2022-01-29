@@ -1,7 +1,7 @@
 {
   "required": true,
   "package": "meteordevelopment.meteorclient.mixin",
-  "compatibilityLevel": "JAVA_16",
+  "compatibilityLevel": "JAVA_17",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
     "AbstractBlockAccessor",
@@ -36,6 +36,7 @@
     "ChatHudAccessor",
     "ChatHudMixin",
     "ChatScreenMixin",
+    "ChunkAccessor",
     "ChunkOcclusionDataBuilderMixin",
     "ChunkSkyLightProviderMixin",
     "ClientConnectionAccessor",
@@ -100,6 +101,7 @@
     "LivingEntityMixin",
     "LivingEntityRendererMixin",
     "LlamaEntityMixin",
+    "MapRendererAccessor",
     "MapRendererMixin",
     "Matrix4fMixin",
     "MinecraftClientAccessor",
@@ -145,7 +147,6 @@
     "TridentItemMixin",
     "Vec3dMixin",
     "WorldAccessor",
-    "WorldChunkAccessor",
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin"

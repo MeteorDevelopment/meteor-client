@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.settings;
 
 import com.mojang.serialization.Lifecycle;
+import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -22,20 +23,17 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
-    public static final BlockEntityType<?>[] STORAGE_BLOCKS = { BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE };
+    public static final BlockEntityType<?>[] STORAGE_BLOCKS = { BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE, BlockEntityType.CAMPFIRE };
 
     public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();
 
     public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
     }
 
     @Override
@@ -64,9 +62,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (BlockEntityType<?> type : get()) {
             Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(type);
@@ -78,7 +74,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     }
 
     @Override
-    public List<BlockEntityType<?>> fromTag(NbtCompound tag) {
+    public List<BlockEntityType<?>> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -87,47 +83,19 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
             if (type != null) get().add(type);
         }
 
-        changed();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<BlockEntityType<?>> defaultValue;
-        private Consumer<List<BlockEntityType<?>>> onChanged;
-        private Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<BlockEntityType<?>>, StorageBlockListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder defaultValue(BlockEntityType<?>... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
-        public Builder defaultValue(List<BlockEntityType<?>> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<BlockEntityType<?>>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public StorageBlockListSetting build() {
             return new StorageBlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }
@@ -135,7 +103,12 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     private static class SRegistry extends Registry<BlockEntityType<?>> {
         public SRegistry() {
-            super(RegistryKey.ofRegistry(new Identifier("meteor-client", "storage-blocks")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(new Identifier(MeteorClient.MOD_ID, "storage-blocks")), Lifecycle.stable());
+        }
+
+        @Override
+        public int size() {
+            return STORAGE_BLOCKS.length;
         }
 
         @Nullable
@@ -167,7 +140,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
+        public Lifecycle getEntryLifecycle(BlockEntityType<?> object) {
             return null;
         }
 

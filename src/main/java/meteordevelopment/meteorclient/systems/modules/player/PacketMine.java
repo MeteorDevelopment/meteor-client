@@ -12,6 +12,8 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.BreakIndicators;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
@@ -50,7 +52,6 @@ public class PacketMine extends Module {
         .description("Delay between mining blocks in ticks.")
         .defaultValue(1)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 
@@ -121,7 +122,7 @@ public class PacketMine extends Module {
     );
 
     private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
-    private final List<MyBlock> blocks = new ArrayList<>();
+    public final List<MyBlock> blocks = new ArrayList<>();
 
     private boolean swapped, shouldUpdateSlot;
 
@@ -180,8 +181,8 @@ public class PacketMine extends Module {
             for (MyBlock block : blocks) {
                 if (block.isReady()) {
                     FindItemResult slot = InvUtils.findFastestTool(block.blockState);
-                    if (!slot.found() || mc.player.getInventory().selectedSlot == slot.getSlot()) continue;
-                    mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.getSlot()));
+                    if (!slot.found() || mc.player.getInventory().selectedSlot == slot.slot()) continue;
+                    mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slot.slot()));
                     swapped = true;
                     shouldUpdateSlot = true;
                     break;
@@ -193,7 +194,11 @@ public class PacketMine extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (render.get()) {
-            for (MyBlock block : blocks) block.render(event);
+            for (MyBlock block : blocks) {
+                if (Modules.get().get(BreakIndicators.class).isActive() && Modules.get().get(BreakIndicators.class).packetMine.get() && block.mining) {
+                    continue;
+                } else block.render(event);
+            }
         }
     }
 
@@ -221,21 +226,12 @@ public class PacketMine extends Module {
         }
 
         if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
-            float k;
-            switch(mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
-                case 0:
-                    k = 0.3F;
-                    break;
-                case 1:
-                    k = 0.09F;
-                    break;
-                case 2:
-                    k = 0.0027F;
-                    break;
-                case 3:
-                default:
-                    k = 8.1E-4F;
-            }
+            float k = switch (mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+                case 0 -> 0.3F;
+                case 1 -> 0.09F;
+                case 2 -> 0.0027F;
+                default -> 8.1E-4F;
+            };
 
             speed *= k;
         }
@@ -251,7 +247,7 @@ public class PacketMine extends Module {
         return speed;
     }
 
-    private class MyBlock {
+    public class MyBlock {
         public BlockPos blockPos;
         public BlockState blockState;
         public Block block;
@@ -260,7 +256,7 @@ public class PacketMine extends Module {
 
         public int timer;
         public boolean mining;
-        private double progress;
+        public double progress;
 
         public MyBlock set(StartBreakingBlockEvent event) {
             this.blockPos = event.blockPos;

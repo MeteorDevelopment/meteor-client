@@ -9,27 +9,29 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.gui.tabs.builtin.ConfigTab;
 import meteordevelopment.meteorclient.settings.ColorSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
 import meteordevelopment.orbit.EventHandler;
 
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RainbowColors {
-
-    public static final RainbowColor GLOBAL = new RainbowColor().setSpeed(ConfigTab.rainbowSpeed.get() / 100);
-
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
     private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
+    public static final RainbowColor GLOBAL = new RainbowColor();
+
+    @Init(stage = InitStage.Post)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
     }
@@ -52,6 +54,7 @@ public class RainbowColors {
 
     @EventHandler
     private static void onTick(TickEvent.Post event) {
+        GLOBAL.setSpeed(Config.get().rainbowSpeed.get() / 100);
         GLOBAL.getNext();
 
         for (Setting<SettingColor> setting : colorSettings) {

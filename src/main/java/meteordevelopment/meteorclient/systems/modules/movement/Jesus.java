@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import baritone.api.BaritoneAPI;
+import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
@@ -86,8 +87,8 @@ public class Jesus extends Module {
         .name("dip-fall-height")
         .description("The fall height at which you will go into the water.")
         .defaultValue(4)
-        .min(1).max(255)
-        .sliderMin(3).sliderMax(20)
+        .range(1, 255)
+        .sliderRange(3, 20)
         .visible(() -> waterMode.get() == Mode.Solid && dipOnFallWater.get())
         .build()
     );
@@ -129,8 +130,8 @@ public class Jesus extends Module {
         .name("dip-fall-height")
         .description("The fall height at which you will go into the lava.")
         .defaultValue(4)
-        .min(1).max(255)
-        .sliderMin(3).sliderMax(20)
+        .range(1, 255)
+        .sliderRange(3, 20)
         .visible(() -> lavaMode.get() == Mode.Solid && dipOnFallLava.get())
         .build()
     );
@@ -295,8 +296,9 @@ public class Jesus extends Module {
         boolean foundLiquid = false;
         boolean foundSolid = false;
 
-        List<Box> blockCollisions = mc.world
-            .getBlockCollisions(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0))
+
+
+        List<Box> blockCollisions = Streams.stream(mc.world.getBlockCollisions(mc.player, mc.player.getBoundingBox().offset(0, -0.5, 0)))
             .map(VoxelShape::getBoundingBox)
             .collect(Collectors.toCollection(ArrayList::new));
 

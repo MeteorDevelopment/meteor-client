@@ -15,20 +15,18 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     public ParticleTypeListSetting(String name, String description, List<ParticleType<?>> defaultValue, Consumer<List<ParticleType<?>>> onChanged, Consumer<Setting<List<ParticleType<?>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
-
-        value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
     }
 
     @Override
@@ -57,12 +55,11 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (ParticleType<?> particleType : get()) {
-            valueTag.add(NbtString.of(Registry.PARTICLE_TYPE.getId(particleType).toString()));
+            Identifier id = Registry.PARTICLE_TYPE.getId(particleType);
+            if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
 
@@ -70,55 +67,28 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     }
 
     @Override
-    public List<ParticleType<?>> fromTag(NbtCompound tag) {
+    public List<ParticleType<?>> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            get().add(Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString())));
+            ParticleType<?> particleType = Registry.PARTICLE_TYPE.get(new Identifier(tagI.asString()));
+            if (particleType != null) get().add(particleType);
         }
 
-        changed();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<ParticleType<?>> defaultValue;
-        private Consumer<List<ParticleType<?>>> onChanged;
-        private Consumer<Setting<List<ParticleType<?>>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, List<ParticleType<?>>, ParticleTypeListSetting> {
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
+        public Builder defaultValue(ParticleType<?>... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
-        public Builder defaultValue(List<ParticleType<?>> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<ParticleType<?>>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<ParticleType<?>>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public ParticleTypeListSetting build() {
             return new ParticleTypeListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

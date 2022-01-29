@@ -14,13 +14,12 @@ import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.ItemRenderer;
-import net.minecraft.client.texture.TextureManager;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.map.MapState;
 import net.minecraft.util.Identifier;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
@@ -48,7 +47,7 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z, TextureManager textureManager) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
 
         // Background

@@ -5,9 +5,12 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import meteordevelopment.meteorclient.MeteorClient;
+import baritone.api.BaritoneAPI;
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
@@ -18,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChatUtils {
     private static final List<Pair<String, Supplier<Text>>> customPrefixes = new ArrayList<>();
@@ -26,11 +29,12 @@ public class ChatUtils {
 
     private static Text PREFIX;
 
+    @Init(stage = InitStage.Post)
     public static void init() {
         PREFIX = new LiteralText("")
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
-            .append(new LiteralText("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(MeteorClient.METEOR_ADDON.color.getPacked()))))
+            .append(new LiteralText("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(AddonManager.METEOR.color.getPacked()))))
             .append("] ");
     }
 
@@ -112,7 +116,7 @@ public class ChatUtils {
         if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
 
-        if (!Config.get().deleteChatCommandsInfo) id = 0;
+        if (!Config.get().deleteChatFeedback.get()) id = 0;
 
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
     }
@@ -187,7 +191,7 @@ public class ChatUtils {
                 .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
                         ClickEvent.Action.RUN_COMMAND,
-                        String.format("%sb goto %d %d %d", Config.get().prefix, (int) pos.x, (int) pos.y, (int) pos.z)
+                        String.format("%sgoto %d %d %d", BaritoneAPI.getSettings().prefix.value, (int) pos.x, (int) pos.y, (int) pos.z)
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,

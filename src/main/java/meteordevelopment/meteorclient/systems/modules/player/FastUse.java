@@ -37,7 +37,6 @@ public class FastUse extends Module {
         .name("items")
         .description("Which items should fast place work on in \"Some\" mode.")
         .visible(() -> mode.get() == Mode.Some)
-        .defaultValue(new ArrayList<>(0))
         .build()
     );
 
@@ -54,7 +53,6 @@ public class FastUse extends Module {
         .description("Fast-use cooldown in ticks.")
         .defaultValue(0)
         .min(0)
-        .sliderMin(0)
         .sliderMax(4)
         .build()
     );

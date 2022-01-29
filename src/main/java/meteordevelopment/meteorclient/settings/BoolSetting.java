@@ -37,56 +37,25 @@ public class BoolSetting extends Setting<Boolean> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public NbtCompound save(NbtCompound tag) {
         tag.putBoolean("value", get());
+
         return tag;
     }
 
     @Override
-    public Boolean fromTag(NbtCompound tag) {
+    public Boolean load(NbtCompound tag) {
         set(tag.getBoolean("value"));
 
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Boolean defaultValue;
-        private Consumer<Boolean> onChanged;
-        private Consumer<Setting<Boolean>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, Boolean, BoolSetting> {
+        public Builder() {
+            super(false);
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(boolean defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Boolean> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Boolean>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public BoolSetting build() {
             return new BoolSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

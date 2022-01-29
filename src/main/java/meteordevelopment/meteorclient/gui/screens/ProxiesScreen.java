@@ -21,15 +21,15 @@ import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.systems.proxies.ProxyType;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import net.minecraft.nbt.NbtCompound;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProxiesScreen extends WindowScreen {
     private final List<WCheckbox> checkboxes = new ArrayList<>();
+    private boolean dirty;
 
     public ProxiesScreen(GuiTheme theme) {
         super(theme, "Proxies");
@@ -37,6 +37,16 @@ public class ProxiesScreen extends WindowScreen {
 
     protected void openEditProxyScreen(Proxy proxy) {
         mc.setScreen(new EditProxyScreen(theme, proxy));
+    }
+
+    @Override
+    protected void init() {
+        super.init();
+
+        if (dirty) {
+            reload();
+            dirty = false;
+        }
     }
 
     @Override
@@ -102,17 +112,10 @@ public class ProxiesScreen extends WindowScreen {
 
     @Override
     public boolean fromClipboard() {
-        NbtCompound clipboard = NbtUtils.fromClipboard(Proxies.get().toTag());
-
-        if (clipboard != null) {
-            Proxies.get().fromTag(clipboard);
-            return true;
-        }
-
-        return false;
+        return NbtUtils.fromClipboard(Proxies.get());
     }
 
-    protected static class EditProxyScreen extends WindowScreen {
+    protected class EditProxyScreen extends WindowScreen {
         private final boolean isNew;
         private final Proxy proxy;
 
@@ -148,9 +151,7 @@ public class ProxiesScreen extends WindowScreen {
 
             //   Port
             general.add(theme.label("Port:"));
-            WIntEdit port = general.add(theme.intEdit(proxy.port, 0, 0)).expandX().widget();
-            port.min = 0;
-            port.max = 65535;
+            WIntEdit port = general.add(theme.intEdit(proxy.port, 0, 65535, true)).expandX().widget();
             port.action = () -> proxy.port = port.get();
 
             // Optional
@@ -174,6 +175,7 @@ public class ProxiesScreen extends WindowScreen {
             WButton addSave = add(theme.button(isNew ? "Add" : "Save")).expandX().widget();
             addSave.action = () -> {
                 if (proxy.resolveAddress() && (!isNew || Proxies.get().add(proxy))) {
+                    dirty = true;
                     onClose();
                 }
             };

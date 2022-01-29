@@ -33,8 +33,7 @@ public class ArrowDodge extends Module {
         .name("arrow-lookahead")
         .description("How many steps into the future should be taken into consideration when deciding the direction")
         .defaultValue(500)
-        .min(1)
-        .max(750)
+        .range(1, 750)
         .build()
     );
 
@@ -50,7 +49,7 @@ public class ArrowDodge extends Module {
         .description("How fast should you be when dodging arrow")
         .defaultValue(1)
         .min(0.01)
-        .sliderMax(5)
+        .sliderRange(0.01, 5)
         .build()
     );
 

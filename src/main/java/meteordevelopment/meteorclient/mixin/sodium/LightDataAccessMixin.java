@@ -38,7 +38,7 @@ public class LightDataAccessMixin {
     private int compute_modifyAO(int light) {
         if (xray.isActive()) {
             BlockState state = world.getBlockState(pos);
-            if (!xray.isBlocked(state.getBlock())) return FULL_LIGHT;
+            if (!xray.isBlocked(state.getBlock(), pos)) return FULL_LIGHT;
         }
 
         return light;

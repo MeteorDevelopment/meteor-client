@@ -116,8 +116,7 @@ public class CrystalAura extends Module {
         .name("max-damage")
         .description("Maximum damage crystals can deal to yourself.")
         .defaultValue(6)
-        .min(0)
-        .max(36)
+        .range(0, 36)
         .sliderMax(36)
         .build()
     );
@@ -148,10 +147,7 @@ public class CrystalAura extends Module {
         .name("yaw-steps")
         .description("Maximum number of degrees its allowed to rotate in one tick.")
         .defaultValue(180)
-        .min(1)
-        .max(180)
-        .sliderMin(1)
-        .sliderMax(180)
+        .range(1, 180)
         .visible(rotate::get)
         .build()
     );
@@ -177,7 +173,6 @@ public class CrystalAura extends Module {
         .description("The delay in ticks to wait to place a crystal after it's exploded.")
         .defaultValue(0)
         .min(0)
-        .sliderMin(0)
         .sliderMax(20)
         .build()
     );
@@ -283,7 +278,6 @@ public class CrystalAura extends Module {
         .description("The delay in ticks to wait to break a crystal after it's placed.")
         .defaultValue(0)
         .min(0)
-        .sliderMin(0)
         .sliderMax(20)
         .build()
     );
@@ -300,7 +294,6 @@ public class CrystalAura extends Module {
         .description("The delay in ticks to wait to break a crystal after switching hotbar slot.")
         .defaultValue(0)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 
@@ -351,7 +344,7 @@ public class CrystalAura extends Module {
         .description("Maximum hits to do per second.")
         .defaultValue(25)
         .min(1)
-        .sliderMax(30)
+        .sliderRange(1, 30)
         .build()
     );
 
@@ -432,7 +425,7 @@ public class CrystalAura extends Module {
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .description("The line color of the block overlay.")
-        .defaultValue(new SettingColor(255, 255, 255, 255))
+        .defaultValue(new SettingColor(255, 255, 255))
         .build()
     );
 
@@ -730,7 +723,7 @@ public class CrystalAura extends Module {
                 // Check if the item in your hand is already valid
                 if (!isValidWeaknessItem(mc.player.getMainHandStack())) {
                     // Find valid item to break with
-                    if (!InvUtils.swap(InvUtils.findInHotbar(this::isValidWeaknessItem).getSlot(), false)) return;
+                    if (!InvUtils.swap(InvUtils.findInHotbar(this::isValidWeaknessItem).slot(), false)) return;
 
                     switchTimer = 1;
                     return;
@@ -929,7 +922,7 @@ public class CrystalAura extends Module {
 
         int prevSlot = mc.player.getInventory().selectedSlot;
 
-        if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) InvUtils.swap(item.getSlot(), false);
+        if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) InvUtils.swap(item.slot(), false);
 
         Hand hand = item.getHand();
         if (hand == null) return;

@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.render.Outlines;
+import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.gl.Framebuffer;
@@ -46,37 +46,45 @@ public abstract class WorldRendererMixin {
         if (Modules.get().isActive(BlockSelection.class)) info.cancel();
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZIZ)V"), index = 4)
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;setupTerrain(Lnet/minecraft/client/render/Camera;Lnet/minecraft/client/render/Frustum;ZZ)V"), index = 3)
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
 
-    // Outlines
+    // EntityShaders
 
     @Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
         Utils.minimumLightLevel = Modules.get().get(Fullbright.class).getMinimumLightLevel();
 
-        Outlines.beginRender();
+        EntityShaders.beginRender();
     }
 
-    @Inject(method = "renderEntity", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderEntity", at = @At("HEAD"))
     private void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
-        if (vertexConsumers == Outlines.vertexConsumerProvider) return;
-
-        ESP esp = Modules.get().get(ESP.class);
-
-        Color color = esp.getOutlineColor(entity);
-
-        if (esp.shouldDrawOutline(entity)) {
+        if (EntityShaders.shouldDrawOverlay(entity) && vertexConsumers != EntityShaders.overlayVertexConsumerProvider  && vertexConsumers != EntityShaders.outlinesVertexConsumerProvider) {
             Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
-            this.entityOutlinesFramebuffer = Outlines.outlinesFbo;
-            Utils.renderingEntityOutline = true;
+            this.entityOutlinesFramebuffer = EntityShaders.overlayFramebuffer;
 
-            Outlines.vertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+            EntityShaders.overlayVertexConsumerProvider.setColor(0, 0, 0, 100);
 
             GlStateManager._disableDepthTest();
-            renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, Outlines.vertexConsumerProvider);
+            renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, EntityShaders.overlayVertexConsumerProvider);
+            GlStateManager._enableDepthTest();
+
+            this.entityOutlinesFramebuffer = prevBuffer;
+        }
+
+        if (EntityShaders.shouldDrawOutline(entity) && vertexConsumers != EntityShaders.outlinesVertexConsumerProvider && vertexConsumers != EntityShaders.overlayVertexConsumerProvider) {
+            Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
+            this.entityOutlinesFramebuffer = EntityShaders.outlinesFramebuffer;
+            Utils.renderingEntityOutline = true;
+
+            Color color = Modules.get().get(ESP.class).getOutlineColor(entity);
+            EntityShaders.outlinesVertexConsumerProvider.setColor(color.r, color.g, color.b, color.a);
+
+            GlStateManager._disableDepthTest();
+            renderEntity(entity, cameraX, cameraY, cameraZ, tickDelta, matrices, EntityShaders.outlinesVertexConsumerProvider);
             GlStateManager._enableDepthTest();
 
             Utils.renderingEntityOutline = false;
@@ -86,12 +94,12 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V"))
     private void onRender(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
-        Outlines.endRender();
+        EntityShaders.endRender();
     }
 
     @Inject(method = "onResized", at = @At("HEAD"))
     private void onResized(int i, int j, CallbackInfo info) {
-        Outlines.onResized(i, j);
+        EntityShaders.onResized(i, j);
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/EntityRenderDispatcher;shouldRender(Lnet/minecraft/entity/Entity;Lnet/minecraft/client/render/Frustum;DDD)Z"))
@@ -106,12 +114,12 @@ public abstract class WorldRendererMixin {
     private void onRenderEndSkyDraw(MatrixStack matrices, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.endSky.get() && ambience.customSkyColor.get()) {
-            Color customEndSkyColor = ambience.skyColor.get();
+        if (ambience.isActive() && ambience.endSky.get() && ambience.customSkyColor.get()) {
+            Color customEndSkyColor = ambience.skyColor();
 
             Tessellator tessellator = Tessellator.getInstance();
             BufferBuilder bufferBuilder = tessellator.getBuffer();
-            Matrix4f matrix4f = matrices.peek().getModel();
+            Matrix4f matrix4f = matrices.peek().getPositionMatrix();
 
             bufferBuilder.clear();
 

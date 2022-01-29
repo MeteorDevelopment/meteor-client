@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.Vec4;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class NametagUtils {
     private static final Vec4 vec4 = new Vec4();
@@ -25,10 +25,10 @@ public class NametagUtils {
     private static Matrix4f projection;
     private static double windowScale;
 
-    private static double scale;
+    public static double scale;
 
     public static void onRender(MatrixStack matrices, Matrix4f projection) {
-        model = matrices.peek().getModel().copy();
+        model = matrices.peek().getPositionMatrix().copy();
         NametagUtils.projection = projection;
 
         camera.set(mc.gameRenderer.getCamera().getPos());

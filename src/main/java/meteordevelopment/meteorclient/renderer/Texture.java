@@ -12,6 +12,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 import static org.lwjgl.opengl.GL11C.*;
+import static org.lwjgl.opengl.GL12C.GL_CLAMP_TO_EDGE;
 
 public class Texture {
     public int width, height;
@@ -27,13 +28,15 @@ public class Texture {
         }
     }
 
+    public Texture() {}
+
     private void upload(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
         ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data);
 
-        upload(width, height, buffer, format, filterMin, filterMag);
+        upload(width, height, buffer, format, filterMin, filterMag, false);
     }
 
-    private void upload(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag) {
+    public void upload(int width, int height, ByteBuffer buffer, Format format, Filter filterMin, Filter filterMag, boolean wrapClamp) {
         this.width = width;
         this.height = height;
 
@@ -45,21 +48,33 @@ public class Texture {
         bind();
         GL.defaultPixelStore();
 
-        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapClamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapClamp ? GL_CLAMP_TO_EDGE : GL_REPEAT);
         GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMin.toOpenGL());
         GL.textureParam(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMag.toOpenGL());
 
         ((Buffer) buffer).rewind();
         GL.textureImage2D(GL_TEXTURE_2D, 0, format.toOpenGL(), width, height, 0, format.toOpenGL(), GL_UNSIGNED_BYTE, buffer);
+
+        if (filterMin == Filter.LinearMipmapLinear || filterMag == Filter.LinearMipmapLinear) {
+            GL.generateMipmap(GL_TEXTURE_2D);
+        }
     }
 
     public boolean isValid() {
         return valid;
     }
 
+    public void bind(int slot) {
+        GL.bindTexture(id, slot);
+    }
     public void bind() {
-        GL.bindTexture(id);
+        bind(0);
+    }
+
+    public void dispose() {
+        GL.deleteTexture(id);
+        valid = false;
     }
 
     public enum Format {
@@ -78,10 +93,15 @@ public class Texture {
 
     public enum Filter {
         Nearest,
-        Linear;
+        Linear,
+        LinearMipmapLinear;
 
         public int toOpenGL() {
-            return this == Nearest ? GL_NEAREST : GL_LINEAR;
+            return switch (this) {
+                case Nearest -> GL_NEAREST;
+                case Linear -> GL_LINEAR;
+                case LinearMipmapLinear -> GL_LINEAR_MIPMAP_LINEAR;
+            };
         }
     }
 }

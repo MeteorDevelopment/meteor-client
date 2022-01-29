@@ -35,7 +35,6 @@ public class AutoTotem extends Module {
         .description("The ticks between slot movements.")
         .defaultValue(0)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 
@@ -43,7 +42,7 @@ public class AutoTotem extends Module {
         .name("health")
         .description("The health to hold a totem at.")
         .defaultValue(10)
-        .min(0).max(36)
+        .range(0, 36)
         .sliderMax(36)
         .visible(() -> mode.get() == Mode.Smart)
         .build()
@@ -83,7 +82,7 @@ public class AutoTotem extends Module {
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onTick(TickEvent.Pre event) {
         FindItemResult result = InvUtils.find(Items.TOTEM_OF_UNDYING);
-        totems = result.getCount();
+        totems = result.count();
 
         if (totems <= 0) locked = false;
         else if (ticks >= delay.get()) {
@@ -93,7 +92,7 @@ public class AutoTotem extends Module {
             locked = mode.get() == Mode.Strict || (mode.get() == Mode.Smart && (low || ely));
 
             if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
-                InvUtils.move().from(result.getSlot()).toOffhand();
+                InvUtils.move().from(result.slot()).toOffhand();
             }
 
             ticks = 0;

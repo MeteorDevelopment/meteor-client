@@ -18,7 +18,9 @@ import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.NbtCompound;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import java.util.Optional;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PremiumAccount extends Account<PremiumAccount> {
     private String password;
@@ -45,15 +47,6 @@ public class PremiumAccount extends Account<PremiumAccount> {
     }
 
     @Override
-    public boolean fetchHead() {
-        try {
-            return cache.makeHead("https://www.mc-heads.net/avatar/" + cache.uuid + "/8");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
     public boolean login() {
         super.login();
 
@@ -61,7 +54,7 @@ public class PremiumAccount extends Account<PremiumAccount> {
 
         try {
             auth.logIn();
-            setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), "mojang"));
+            setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
             cache.username = auth.getSelectedProfile().getName();
             return true;

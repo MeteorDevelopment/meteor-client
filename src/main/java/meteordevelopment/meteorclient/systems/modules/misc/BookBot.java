@@ -65,8 +65,8 @@ public class BookBot extends Module {
         .name("pages")
         .description("The number of pages to write per book.")
         .defaultValue(50)
-        .min(1).max(100)
-        .sliderMax(100)
+        .range(1, 100)
+        .sliderRange(1, 100)
         .visible(() -> mode.get() != Mode.File)
         .build()
     );
@@ -91,7 +91,7 @@ public class BookBot extends Module {
         .description("The amount of delay between writing books.")
         .defaultValue(20)
         .min(1)
-        .sliderMin(1).sliderMax(200)
+        .sliderRange(1, 200)
         .build()
     );
 
@@ -167,7 +167,7 @@ public class BookBot extends Module {
 
         // Move the book into hand
         if (!writableBook.isMainHand()) {
-            InvUtils.move().from(writableBook.getSlot()).toHotbar(mc.player.getInventory().selectedSlot);
+            InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().selectedSlot);
             return;
         }
 

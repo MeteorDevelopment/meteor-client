@@ -17,7 +17,7 @@ import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.screen.*;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class SlotUtils {
     public static final int HOTBAR_START = 0;
@@ -67,7 +67,7 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || ((CreativeInventoryScreenAccessor) mc.currentScreen).getSelectedTab() != ItemGroup.INVENTORY.getIndex()) return -1;
+        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != ItemGroup.INVENTORY.getIndex()) return -1;
         return survivalInventory(i);
     }
 

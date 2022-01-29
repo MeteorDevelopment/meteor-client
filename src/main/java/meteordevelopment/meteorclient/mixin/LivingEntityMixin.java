@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
-import meteordevelopment.meteorclient.events.entity.TookDamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.AntiLevitation;
@@ -27,13 +26,15 @@ import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin extends Entity {
@@ -43,12 +44,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
-    }
-
-    @Inject(method = "damage", at = @At("TAIL"))
-    private void onDamageTail(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate()) MeteorClient.EVENT_BUS.post(TookDamageEvent.get((LivingEntity) (Object) this, source));
+        if (Utils.canUpdate() && world.isClient) MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source));
     }
 
     @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
@@ -94,5 +90,10 @@ public abstract class LivingEntityMixin extends Entity {
             return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
         }
         return hand;
+    }
+
+    @ModifyConstant(method = "getHandSwingDuration", constant = @Constant(intValue = 6))
+    private int getHandSwingDuration(int constant) {
+        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
     }
 }

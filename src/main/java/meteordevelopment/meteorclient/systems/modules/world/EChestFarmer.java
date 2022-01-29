@@ -56,7 +56,8 @@ public class EChestFarmer extends Module {
         .description("The amount of obsidian to farm.")
         .defaultValue(64)
         .sliderMax(128)
-        .min(8).max(512)
+        .range(8, 512)
+        .sliderRange(8, 128)
         .visible(selfToggle::get)
         .build()
     );
@@ -110,7 +111,7 @@ public class EChestFarmer extends Module {
     @Override
     public void onActivate() {
         target = null;
-        startCount = InvUtils.find(Items.OBSIDIAN).getCount();
+        startCount = InvUtils.find(Items.OBSIDIAN).count();
         prevSlot = mc.player.getInventory().selectedSlot;
     }
 
@@ -142,7 +143,7 @@ public class EChestFarmer extends Module {
         }
 
         // Toggle if obby amount reached
-        if (selfToggle.get() && InvUtils.find(Items.OBSIDIAN).getCount() - (ignoreExisting.get() ? startCount : 0) >= amount.get()) {
+        if (selfToggle.get() && InvUtils.find(Items.OBSIDIAN).count() - (ignoreExisting.get() ? startCount : 0) >= amount.get()) {
             InvUtils.swapBack();
             toggle();
             return;

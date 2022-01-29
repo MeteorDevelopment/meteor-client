@@ -13,21 +13,26 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
-    public FakePlayerEntity(String name, float health, boolean copyInv) {
+    public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
         super(mc.world, new GameProfile(UUID.randomUUID(), name));
 
-        copyPositionAndRotation(mc.player);
+        copyPositionAndRotation(player);
 
-        headYaw = mc.player.headYaw;
-        bodyYaw = mc.player.bodyYaw;
+        prevYaw = getYaw();
+        prevPitch = getPitch();
+        headYaw = player.headYaw;
+        prevHeadYaw = headYaw;
+        bodyYaw = player.bodyYaw;
+        prevBodyYaw = bodyYaw;
 
-        Byte playerModel = mc.player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
+        Byte playerModel = player.getDataTracker().get(PlayerEntity.PLAYER_MODEL_PARTS);
         dataTracker.set(PlayerEntity.PLAYER_MODEL_PARTS, playerModel);
 
-        getAttributes().setFrom(mc.player.getAttributes());
+        getAttributes().setFrom(player.getAttributes());
+        setPose(player.getPose());
 
         capeX = getX();
         capeY = getY();
@@ -40,11 +45,10 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
             setAbsorptionAmount(health - 20);
         }
 
-        if (copyInv) getInventory().clone(mc.player.getInventory());
-
-        spawn();
+        if (copyInv) getInventory().clone(player.getInventory());
     }
-    private void spawn() {
+
+    public void spawn() {
         unsetRemoved();
         mc.world.addEntity(getId(), this);
     }

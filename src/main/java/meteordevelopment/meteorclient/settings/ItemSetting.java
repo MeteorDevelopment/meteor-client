@@ -38,16 +38,14 @@ public class ItemSetting extends Setting<Item> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
-
+    public NbtCompound save(NbtCompound tag) {
         tag.putString("value", Registry.ITEM.getId(get()).toString());
 
         return tag;
     }
 
     @Override
-    public Item fromTag(NbtCompound tag) {
+    public Item load(NbtCompound tag) {
         value = Registry.ITEM.get(new Identifier(tag.getString("value")));
 
         if (filter != null && !filter.test(value)) {
@@ -59,41 +57,14 @@ public class ItemSetting extends Setting<Item> {
             }
         }
 
-        changed();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Item defaultValue;
-        private Consumer<Item> onChanged;
-        private Consumer<Setting<Item>> onModuleActivated;
-        private IVisible visible;
+    public static class Builder extends SettingBuilder<Builder, Item, ItemSetting> {
         private Predicate<Item> filter;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
-        }
-
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(Item defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Item> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Item>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
+        public Builder() {
+            super(null);
         }
 
         public Builder filter(Predicate<Item> filter) {
@@ -101,11 +72,7 @@ public class ItemSetting extends Setting<Item> {
             return this;
         }
 
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public ItemSetting build() {
             return new ItemSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, filter);
         }

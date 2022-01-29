@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
-//Created by squidoodly 18/04/2020
-
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;

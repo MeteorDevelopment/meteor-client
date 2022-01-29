@@ -92,7 +92,6 @@ public class LongJump extends Module {
         .defaultValue(1)
         .min(0.01)
         .sliderMin(0.01)
-        .sliderMax(10)
         .build()
     );
 

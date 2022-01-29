@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -29,7 +28,6 @@ public class AutoNametag extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
             .name("entities")
             .description("Which entities to nametag.")
-            .defaultValue(new Object2BooleanOpenHashMap<>(0))
             .build()
     );
 
@@ -88,7 +86,7 @@ public class AutoNametag extends Module {
             if (PlayerUtils.distanceTo(entity) > range.get()) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
             if (entity.hasCustomName()) {
-                return renametag.get() && entity.getCustomName() != mc.player.getInventory().getStack(findNametag.getSlot()).getName();
+                return renametag.get() && entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
             }
             return false;
         }, priority.get());
@@ -97,7 +95,7 @@ public class AutoNametag extends Module {
 
 
         // Swapping slots
-        InvUtils.swap(findNametag.getSlot(), true);
+        InvUtils.swap(findNametag.slot(), true);
 
         offHand = findNametag.isOffhand();
 

@@ -38,8 +38,8 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.WHITE;
-import static meteordevelopment.meteorclient.utils.Utils.mc;
 
 public class PlayerUtils {
     private static final double diagonal = 1 / Math.sqrt(2);
@@ -48,8 +48,14 @@ public class PlayerUtils {
     private static final Color color = new Color();
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
-        if (Friends.get().isFriend(entity)) return color.set(Friends.get().color).a(defaultColor.a);
-        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor) return color.set(color).a(defaultColor.a);
+        if (Friends.get().isFriend(entity)) {
+            return color.set(Friends.get().color).a(defaultColor.a);
+        }
+
+        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor.get()) {
+            return color.set(color).a(defaultColor.a);
+        }
+
         return defaultColor;
     }
 
@@ -157,7 +163,7 @@ public class PlayerUtils {
 
             BlockState state = mc.world.getBlockState(blockPos.offset(direction));
 
-            if (state.getBlock() != Blocks.BEDROCK && state.getBlock() != Blocks.OBSIDIAN) {
+            if (state.getBlock().getBlastResistance() < 600) {
                 if (!doubles || direction == Direction.DOWN) return false;
 
                 air++;
@@ -167,7 +173,7 @@ public class PlayerUtils {
 
                     BlockState blockState1 = mc.world.getBlockState(blockPos.offset(direction).offset(dir));
 
-                    if (blockState1.getBlock() != Blocks.BEDROCK && blockState1.getBlock() != Blocks.OBSIDIAN) {
+                    if (blockState1.getBlock().getBlastResistance() < 600) {
                         return false;
                     }
                 }

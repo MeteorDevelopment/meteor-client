@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.opengl.GL32C.*;
 
 public class Framebuffer {

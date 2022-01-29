@@ -50,56 +50,25 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
+    public NbtCompound save(NbtCompound tag) {
         tag.putString("value", get().toString());
+
         return tag;
     }
 
     @Override
-    public T fromTag(NbtCompound tag) {
+    public T load(NbtCompound tag) {
         parse(tag.getString("value"));
 
         return get();
     }
 
-    public static class Builder<T extends Enum<?>> {
-        protected String name = "undefined", description = "";
-        protected T defaultValue;
-        protected Consumer<T> onChanged;
-        protected Consumer<Setting<T>> onModuleActivated;
-        protected IVisible visible;
-
-        public Builder<T> name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder<T extends Enum<?>> extends SettingBuilder<Builder<T>, T, EnumSetting<T>> {
+        public Builder() {
+            super(null);
         }
 
-        public Builder<T> description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder<T> defaultValue(T defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder<T> onChanged(Consumer<T> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder<T> onModuleActivated(Consumer<Setting<T>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder<T> visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public EnumSetting<T> build() {
             return new EnumSetting<>(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

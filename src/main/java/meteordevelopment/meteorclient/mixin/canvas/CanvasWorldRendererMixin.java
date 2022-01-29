@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BlockSelection;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.render.Outlines;
+import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.render.LightmapTextureManager;
@@ -34,12 +34,12 @@ public class CanvasWorldRendererMixin {
     private void onRenderHead(MatrixStack viewMatrixStack, float tickDelta, long frameStartNanos, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f projectionMatrix, CallbackInfo info) {
         Utils.minimumLightLevel = Modules.get().get(Fullbright.class).getMinimumLightLevel();
 
-        Outlines.beginRender();
+        EntityShaders.beginRender();
     }
 
     // Injected through ASM because mixins are fucking retarded and don't work outside of development environment for this one injection
     /*@Inject(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/OutlineVertexConsumerProvider;draw()V", shift = At.Shift.AFTER))
     private void onRenderOutlines(CallbackInfo info) {
-        Outlines.endRender();
+        EntityShaders.endRender();
     }*/
 }

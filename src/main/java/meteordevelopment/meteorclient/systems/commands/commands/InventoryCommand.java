@@ -6,9 +6,9 @@
 package meteordevelopment.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.PlayerArgumentType;
+import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.command.CommandSource;
 
@@ -22,10 +22,8 @@ public class InventoryCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
-            MeteorClient.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
+            Utils.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
             return SINGLE_SUCCESS;
         }));
-
     }
-
 }

@@ -21,9 +21,8 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new Object2IntArrayMap<>(defaultValue);
-        if (callbacks) changed();
     }
 
     @Override
@@ -51,9 +50,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    public NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (StatusEffect statusEffect : get().keySet()) {
             Identifier id = Registry.STATUS_EFFECT.getId(statusEffect);
@@ -65,7 +62,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     }
 
     @Override
-    public Object2IntMap<StatusEffect> fromTag(NbtCompound tag) {
+    public Object2IntMap<StatusEffect> load(NbtCompound tag) {
         get().clear();
 
         NbtCompound valueTag = tag.getCompound("value");
@@ -74,47 +71,15 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
             if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key));
         }
 
-        changed();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private Object2IntMap<StatusEffect> defaultValue;
-        private Consumer<Object2IntMap<StatusEffect>> onChanged;
-        private Consumer<Setting<Object2IntMap<StatusEffect>>> onModuleActivated;
-        private IVisible visible;
-
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+    public static class Builder extends SettingBuilder<Builder, Object2IntMap<StatusEffect>, StatusEffectAmplifierMapSetting> {
+        public Builder() {
+            super(new Object2IntArrayMap<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(Object2IntMap<StatusEffect> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<Object2IntMap<StatusEffect>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<Object2IntMap<StatusEffect>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
-        }
-
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public StatusEffectAmplifierMapSetting build() {
             return new StatusEffectAmplifierMapSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
         }

@@ -14,6 +14,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -25,13 +26,11 @@ public class BlockListSetting extends Setting<List<Block>> {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
-        this.value = new ArrayList<>(defaultValue);
     }
 
     @Override
-    public void reset(boolean callbacks) {
+    public void resetImpl() {
         value = new ArrayList<>(defaultValue);
-        if (callbacks) changed();
     }
 
     @Override
@@ -60,9 +59,7 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = saveGeneral();
-
+    protected NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Block block : get()) {
             valueTag.add(NbtString.of(Registry.BLOCK.getId(block).toString()));
@@ -73,7 +70,7 @@ public class BlockListSetting extends Setting<List<Block>> {
     }
 
     @Override
-    public List<Block> fromTag(NbtCompound tag) {
+    protected List<Block> load(NbtCompound tag) {
         get().clear();
 
         NbtList valueTag = tag.getList("value", 8);
@@ -83,41 +80,18 @@ public class BlockListSetting extends Setting<List<Block>> {
             if (filter == null || filter.test(block)) get().add(block);
         }
 
-        changed();
         return get();
     }
 
-    public static class Builder {
-        private String name = "undefined", description = "";
-        private List<Block> defaultValue;
-        private Consumer<List<Block>> onChanged;
-        private Consumer<Setting<List<Block>>> onModuleActivated;
+    public static class Builder extends SettingBuilder<Builder, List<Block>, BlockListSetting> {
         private Predicate<Block> filter;
-        private IVisible visible;
 
-        public Builder name(String name) {
-            this.name = name;
-            return this;
+        public Builder() {
+            super(new ArrayList<>(0));
         }
 
-        public Builder description(String description) {
-            this.description = description;
-            return this;
-        }
-
-        public Builder defaultValue(List<Block> defaultValue) {
-            this.defaultValue = defaultValue;
-            return this;
-        }
-
-        public Builder onChanged(Consumer<List<Block>> onChanged) {
-            this.onChanged = onChanged;
-            return this;
-        }
-
-        public Builder onModuleActivated(Consumer<Setting<List<Block>>> onModuleActivated) {
-            this.onModuleActivated = onModuleActivated;
-            return this;
+        public Builder defaultValue(Block... defaults) {
+            return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
         public Builder filter(Predicate<Block> filter) {
@@ -125,11 +99,7 @@ public class BlockListSetting extends Setting<List<Block>> {
             return this;
         }
 
-        public Builder visible(IVisible visible) {
-            this.visible = visible;
-            return this;
-        }
-
+        @Override
         public BlockListSetting build() {
             return new BlockListSetting(name, description, defaultValue, onChanged, onModuleActivated, filter, visible);
         }

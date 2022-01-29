@@ -19,7 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TargetUtils {
     private static final List<Entity> ENTITIES = new ArrayList<>();
@@ -38,11 +38,11 @@ public class TargetUtils {
         targetList.clear();
 
         for (Entity entity : mc.world.getEntities()) {
-            if (isGood.test(entity)) targetList.add(entity);
+            if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 
         for (Entity entity : FakePlayerManager.getPlayers()) {
-            if (isGood.test(entity)) targetList.add(entity);
+            if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 
         targetList.sort((e1, e2) -> sort(e1, e2, sortPriority));

@@ -88,8 +88,7 @@ public class AnchorAura extends Module {
         .name("place-delay")
         .description("The tick delay between placing anchors.")
         .defaultValue(2)
-        .min(0)
-        .max(20)
+        .range(0, 10)
         .visible(place::get)
         .build()
     );
@@ -126,8 +125,7 @@ public class AnchorAura extends Module {
         .name("break-delay")
         .description("The tick delay between breaking anchors.")
         .defaultValue(10)
-        .min(0)
-        .max(10)
+        .range(0, 10)
         .build()
     );
 
@@ -366,14 +364,14 @@ public class AnchorAura extends Module {
         if (glowStone.isOffhand()) {
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
         } else {
-            InvUtils.swap(glowStone.getSlot(), true);
+            InvUtils.swap(glowStone.slot(), true);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
         }
 
         if (anchor.isOffhand()) {
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
         } else {
-            InvUtils.swap(anchor.getSlot(), true);
+            InvUtils.swap(anchor.slot(), true);
             mc.interactionManager.interactBlock(mc.player, mc.world, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
         }
 

@@ -18,15 +18,22 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.UnfocusedCPU;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.Placeholders;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
+import meteordevelopment.starscript.Script;
+import meteordevelopment.starscript.compiler.Compiler;
+import meteordevelopment.starscript.compiler.Parser;
+import meteordevelopment.starscript.utils.Error;
+import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.profiler.Profiler;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,25 +46,23 @@ import java.util.concurrent.CompletableFuture;
 
 @Mixin(value = MinecraftClient.class, priority = 1001)
 public abstract class MinecraftClientMixin implements IMinecraftClient {
-    @Shadow public ClientWorld world;
-
-    @Shadow protected abstract void doItemUse();
-
-    @Shadow @Final public Mouse mouse;
-
-    @Shadow @Final private Window window;
-
-    @Shadow public Screen currentScreen;
-
-    @Shadow public abstract Profiler getProfiler();
-
-    @Shadow
-    public abstract boolean isWindowFocused();
-
     @Unique private boolean doItemUseCalled;
     @Unique private boolean rightClick;
     @Unique private long lastTime;
     @Unique private boolean firstFrame;
+
+    @Shadow public ClientWorld world;
+    @Shadow @Final public Mouse mouse;
+    @Shadow @Final private Window window;
+    @Shadow public Screen currentScreen;
+
+    @Shadow protected abstract void doItemUse();
+    @Shadow public abstract Profiler getProfiler();
+    @Shadow public abstract boolean isWindowFocused();
+
+    @Shadow
+    @Nullable
+    public ClientPlayerInteractionManager interactionManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -74,7 +79,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         MeteorClient.EVENT_BUS.post(TickEvent.Pre.get());
         getProfiler().pop();
 
-        if (rightClick && !doItemUseCalled) doItemUse();
+        if (rightClick && !doItemUseCalled && interactionManager != null) doItemUse();
         rightClick = false;
     }
 
@@ -115,14 +120,31 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @ModifyVariable(method = "reloadResources(Z)Ljava/util/concurrent/CompletableFuture;", at = @At("STORE"), ordinal = 0)
     private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
         completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
+
         return completableFuture;
     }
 
     @ModifyArg(method = "updateWindowTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;setTitle(Ljava/lang/String;)V"))
     private String setTitle(String original) {
-        if (Config.get() == null || !Config.get().customWindowTitle) return original;
+        if (Config.get() == null || !Config.get().customWindowTitle.get()) return original;
 
-        return Placeholders.apply(Config.get().customWindowTitleText);
+        String customTitle = Config.get().customWindowTitleText.get();
+        Parser.Result result = Parser.parse(customTitle);
+
+        if (result.hasErrors()) {
+            for (Error error : result.errors) MeteorStarscript.printChatError(error);
+        }
+        else {
+            Script script = Compiler.compile(result);
+
+            try {
+                customTitle = MeteorStarscript.ss.run(script);
+            } catch (StarscriptError e) {
+                MeteorStarscript.printChatError(e);
+            }
+        }
+
+        return customTitle;
     }
 
     @Inject(method = "onResolutionChanged", at = @At("TAIL"))

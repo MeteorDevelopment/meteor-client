@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -102,9 +101,8 @@ public class KillAura extends Module {
         .name("hit-chance")
         .description("The probability of your hits landing.")
         .defaultValue(100)
-        .min(0)
-        .max(100)
-        .sliderMax(100)
+        .range(1, 100)
+        .sliderRange(1, 100)
         .build()
     );
 
@@ -120,7 +118,6 @@ public class KillAura extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
-        .defaultValue(new Object2BooleanOpenHashMap<>(0))
         .onlyAttackable()
         .build()
     );
@@ -155,7 +152,7 @@ public class KillAura extends Module {
         .description("How many entities to target at once.")
         .defaultValue(1)
         .min(1)
-        .sliderMin(1).sliderMax(5)
+        .sliderRange(1, 5)
         .build()
     );
 
@@ -215,12 +212,11 @@ public class KillAura extends Module {
         .description("How many ticks to wait before hitting an entity after switching hotbar slots.")
         .defaultValue(0)
         .min(0)
-        .sliderMax(10)
         .build()
     );
 
     private final List<Entity> targets = new ArrayList<>();
-    private int hitDelayTimer, randomDelayTimer, switchTimer;
+    private int hitDelayTimer, switchTimer;
     private boolean wasPathing;
 
     public KillAura() {
@@ -230,7 +226,6 @@ public class KillAura extends Module {
     @Override
     public void onDeactivate() {
         hitDelayTimer = 0;
-        randomDelayTimer = 0;
         targets.clear();
     }
 
@@ -281,7 +276,7 @@ public class KillAura extends Module {
                 };
             });
 
-            InvUtils.swap(weaponResult.getSlot(), false);
+            InvUtils.swap(weaponResult.slot(), false);
         }
 
         if (!itemInHand()) return;
@@ -331,26 +326,16 @@ public class KillAura extends Module {
             return false;
         }
 
-
         if (smartDelay.get()) return mc.player.getAttackCooldownProgress(0.5f) >= 1;
 
-        if (hitDelayTimer >= 0) {
+        if (hitDelayTimer > 0) {
             hitDelayTimer--;
             return false;
         } else {
             hitDelayTimer = hitDelay.get();
+            if (randomDelayEnabled.get()) hitDelayTimer += Math.round(Math.random() * randomDelayMax.get());
+            return true;
         }
-
-        if (randomDelayEnabled.get()) {
-            if (randomDelayTimer > 0) {
-                randomDelayTimer--;
-                return false;
-            } else {
-                randomDelayTimer = (int) Math.round(Math.random() * randomDelayMax.get());
-            }
-        }
-
-        return true;
     }
 
     private void attack(Entity target) {

@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.utils.world;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.Init;
+import meteordevelopment.meteorclient.utils.InitStage;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
@@ -19,7 +21,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-import static meteordevelopment.meteorclient.utils.Utils.mc;
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockIterator {
     private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);
@@ -32,6 +34,7 @@ public class BlockIterator {
 
     private static boolean disableCurrent;
 
+    @Init(stage = InitStage.Pre)
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(BlockIterator.class);
     }
