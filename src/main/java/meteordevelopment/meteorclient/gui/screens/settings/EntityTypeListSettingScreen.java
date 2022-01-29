@@ -72,7 +72,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
             if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE -> hasAnimal++;
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> hasWaterAnimal++;
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> hasWaterAnimal++;
                     case MONSTER -> hasMonster++;
                     case AMBIENT -> hasAmbient++;
                     case MISC -> hasMisc++;
@@ -139,7 +139,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                         animalsE.add(entityType);
                         addEntityType(animalsT, animalsC, entityType);
                     }
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> {
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
                         waterAnimalsE.add(entityType);
                         addEntityType(waterAnimalsT, waterAnimalsC, entityType);
                     }
@@ -231,7 +231,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                         if (hasAnimal == 0) tableCheckbox.checked = true;
                         hasAnimal++;
                     }
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> {
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
                         if (hasWaterAnimal == 0) tableCheckbox.checked = true;
                         hasWaterAnimal++;
                     }
@@ -255,7 +255,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                             hasAnimal--;
                             if (hasAnimal == 0) tableCheckbox.checked = false;
                         }
-                        case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> {
+                        case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
                             hasWaterAnimal--;
                             if (hasWaterAnimal == 0) tableCheckbox.checked = false;
                         }
