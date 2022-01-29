@@ -27,3 +27,11 @@ jobs:
         with:
           name: build-artifacts
           path: build/libs
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          automatic_release_tag: "latest-1.18"
+          prerelease: false
+          title: "1.18 Build"
+          files: |
+            ./build/libs/*.jar
