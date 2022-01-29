@@ -53,16 +53,28 @@ public class VeinMiner extends Module {
 
     // General
 
-    private final Setting<List<Block>> blacklist = sgGeneral.add(new BlockListSetting.Builder()
-        .name("blacklist")
-        .description("Which blocks to ignore.")
+    private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blocks")
+        .description("Which blocks to select.")
         .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS)
         .build()
     );
 
+    private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
+        .name("mode")
+        .description("Selection mode.")
+        .defaultValue(ListMode.Whitelist)
+        .build()
+    );
+
+    public enum ListMode {
+        Whitelist,
+        Blacklist
+    }
+
     private final Setting<Integer> depth = sgGeneral.add(new IntSetting.Builder()
         .name("depth")
-        .description("Amount of iterations used to scan for similar blocks")
+        .description("Amount of iterations used to scan for similar blocks.")
         .defaultValue(3)
         .min(1)
         .sliderRange(1, 15)
@@ -139,7 +151,14 @@ public class VeinMiner extends Module {
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         BlockState state = mc.world.getBlockState(event.blockPos);
-        if (state.getHardness(mc.world, event.blockPos) < 0 || blacklist.get().contains(state.getBlock())) return;
+
+        if (mode.get() == ListMode.Whitelist) {
+            if (!selectedBlocks.get().contains(state.getBlock()))
+                return;
+        } else {
+            if (state.getHardness(mc.world, event.blockPos) < 0 || selectedBlocks.get().contains(state.getBlock()))
+                return;
+        }
 
         foundBlockPositions.clear();
 
