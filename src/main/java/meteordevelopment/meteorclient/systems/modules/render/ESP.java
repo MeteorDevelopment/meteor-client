@@ -307,7 +307,7 @@ public class ESP extends Module {
 
         return switch (entity.getType().getSpawnGroup()) {
             case CREATURE                                                  -> animalsColor.get();
-            case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE -> waterAnimalsColor.get();
+            case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
             case MONSTER                                                   -> monstersColor.get();
             case AMBIENT                                                   -> ambientColor.get();
             default                                                        -> miscColor.get();
