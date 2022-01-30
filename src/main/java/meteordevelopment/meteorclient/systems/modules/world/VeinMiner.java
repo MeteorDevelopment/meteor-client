@@ -152,13 +152,12 @@ public class VeinMiner extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         BlockState state = mc.world.getBlockState(event.blockPos);
 
-        if (mode.get() == ListMode.Whitelist) {
-            if (!selectedBlocks.get().contains(state.getBlock()))
-                return;
-        } else {
-            if (state.getHardness(mc.world, event.blockPos) < 0 || selectedBlocks.get().contains(state.getBlock()))
-                return;
-        }
+        if (state.getHardness(mc.world, event.blockPos) < 0)
+            return;
+        if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
+            return;
+        if (mode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
+            return;
 
         foundBlockPositions.clear();
 
@@ -258,5 +257,10 @@ public class VeinMiner extends Module {
                 mineNearbyBlocks(item, neighbour, dir, depth-1);
             }
         }
+    }
+
+    @Override
+    public String getInfoString() {
+        return mode.get().toString() + " (" + selectedBlocks.get().size() + ")";
     }
 }
