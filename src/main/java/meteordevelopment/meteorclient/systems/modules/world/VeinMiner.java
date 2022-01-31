@@ -133,8 +133,8 @@ public class VeinMiner extends Module {
     private final List<MyBlock> blocks = new ArrayList<>();
     private final List<BlockPos> foundBlockPositions = new ArrayList<>();
 
-    private int tick;
-    
+    private int tick = 0;
+
     public VeinMiner() {
         super(Categories.World, "vein-miner", "Mines all nearby blocks with this type");
     }
@@ -177,15 +177,16 @@ public class VeinMiner extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (tick < delay.get()) {
-            tick++;
-            return;
-        }
-
-        tick = 0;
         blocks.removeIf(MyBlock::shouldRemove);
 
-        if (!blocks.isEmpty()) blocks.get(0).mine();
+        if (!blocks.isEmpty()) {
+            if (tick < delay.get() && !blocks.get(0).mining) {
+                tick++;
+                return;
+            }
+            tick = 0;
+            blocks.get(0).mine();
+        }
     }
 
     @EventHandler
