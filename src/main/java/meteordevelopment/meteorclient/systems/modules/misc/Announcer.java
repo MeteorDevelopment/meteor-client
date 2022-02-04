@@ -98,8 +98,8 @@ public class Announcer extends Module {
     private class Moving extends Feature {
         private final Setting<String> msg = sg.add(new StringSetting.Builder()
                 .name("移动-消息")
-                .description("The chat message for moving a certain amount of blocks.")
-                .defaultValue("I just moved {dist} blocks!")
+                .description("移动一定数量的方块的聊天消息.")
+                .defaultValue("我刚刚移动了 {dist} 块!")
                 .build()
         );
 
