@@ -30,7 +30,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class ProfilesTab extends Tab {
 
     public ProfilesTab() {
-        super("Profiles");
+        super("简介");
     }
 
     @Override
@@ -58,11 +58,11 @@ public class ProfilesTab extends Tab {
                 table.add(theme.label(profile.name)).expandCellX();
 
                 // Save
-                WButton save = table.add(theme.button("Save")).widget();
+                WButton save = table.add(theme.button("保存")).widget();
                 save.action = profile::save;
 
                 // Load
-                WButton load = table.add(theme.button("Load")).widget();
+                WButton load = table.add(theme.button("加载")).widget();
                 load.action = profile::load;
 
                 // Edit
@@ -83,7 +83,7 @@ public class ProfilesTab extends Tab {
             table.row();
 
             // Create
-            WButton create = table.add(theme.button("Create")).expandX().widget();
+            WButton create = table.add(theme.button("创建")).expandX().widget();
             create.action = () -> mc.setScreen(new EditProfileScreen(theme, null, this::reload));
         }
 
@@ -105,7 +105,7 @@ public class ProfilesTab extends Tab {
         private final Runnable action;
 
         public EditProfileScreen(GuiTheme theme, Profile profile, Runnable action) {
-            super(theme, profile == null ? "New Profile" : "Edit Profile");
+            super(theme, profile == null ? "新的配置文件" : "编辑个人资料");
 
             this.isNew = profile == null;
             this.newProfile = new Profile();
@@ -124,7 +124,7 @@ public class ProfilesTab extends Tab {
             WTable table = add(theme.table()).expandX().widget();
 
             // Name
-            table.add(theme.label("Name:"));
+            table.add(theme.label("名字:"));
             WTextBox nameInput = table.add(theme.textBox(ogProfile.name, this::nameFilter)).minWidth(400).expandX().widget();
             nameInput.action = () -> newProfile.name = nameInput.get();
             table.row();
