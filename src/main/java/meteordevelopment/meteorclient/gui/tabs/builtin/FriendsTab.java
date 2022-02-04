@@ -50,7 +50,7 @@ public class FriendsTab extends Tab {
 
             sgGeneral.add(new ColorSetting.Builder()
                     .name("color")
-                    .description("The color used to show friends.")
+                    .description("用来显示朋友的颜色.")
                     .defaultValue(new SettingColor(0, 255, 180))
                     .onChanged(Friends.get().color::set)
                     .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().color))
@@ -59,7 +59,7 @@ public class FriendsTab extends Tab {
 
             sgGeneral.add(new BoolSetting.Builder()
                     .name("attack")
-                    .description("Whether to attack friends.")
+                    .description("是否攻击好友.")
                     .defaultValue(false)
                     .onChanged(aBoolean -> Friends.get().attack = aBoolean)
                     .onModuleActivated(booleanSetting -> booleanSetting.set(Friends.get().attack))
