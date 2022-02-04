@@ -53,17 +53,17 @@ public class HudTab extends Tab {
 
             add(theme.horizontalSeparator()).expandX();
 
-            WButton openEditor = add(theme.button("Edit")).expandX().widget();
+            WButton openEditor = add(theme.button("编辑")).expandX().widget();
             openEditor.action = () -> mc.setScreen(new HudEditorScreen(theme, this));
 
-            WButton resetHud = add(theme.button("Reset")).expandX().widget();
+            WButton resetHud = add(theme.button("重启")).expandX().widget();
             resetHud.action = hud.reset;
 
             add(theme.horizontalSeparator()).expandX();
 
             WHorizontalList bottom = add(theme.horizontalList()).expandX().widget();
 
-            bottom.add(theme.label("Active: "));
+            bottom.add(theme.label("积极的: "));
             WCheckbox active = bottom.add(theme.checkbox(hud.active)).expandCellX().widget();
             active.action = () -> hud.active = active.checked;
 
@@ -73,7 +73,7 @@ public class HudTab extends Tab {
 
         @Override
         public boolean toClipboard() {
-            return NbtUtils.toClipboard("hud-settings", hud.settings.toTag());
+            return NbtUtils.toClipboard("hud-设置", hud.settings.toTag());
         }
 
         @Override
