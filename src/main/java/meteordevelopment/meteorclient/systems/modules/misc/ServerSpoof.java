@@ -86,7 +86,6 @@ public class ServerSpoof extends Module {
             msg.append(link);
             msg.append(".");
             info(msg);
-            event.cancel();
         }
     }
 }
