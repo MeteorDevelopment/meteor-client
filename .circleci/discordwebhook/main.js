@@ -18,10 +18,10 @@ axios
         let success = true
         let description = ""
 
-        description += "**Branch:** " + branch
-        description += "\n**Status:** " + (success ? "success" : "failure")
+        description += "**分支:** " + branch
+        description += "\n**地位:** " + (success ? "success" : "failure")
 
-        let changes = "\n\n**Changes:**"
+        let changes = "\n\n**变化:**"
         let hasChanges = false
         for (let i in res.data.commits) {
             let commit = res.data.commits[i]
@@ -32,11 +32,11 @@ axios
         if (hasChanges) description += changes
 
         if (success) {
-            description += "\n\n**Download:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
+            description += "\n\n**下载:** [meteor-client-" + version + "-" + build + "](" + downloadUrl + ")"
         }
 
         const webhook = {
-            username: "Dev Builds",
+            username: "开发构建",
             avatar_url: "https://meteorclient.com/icon.png",
             embeds: [
                 {
