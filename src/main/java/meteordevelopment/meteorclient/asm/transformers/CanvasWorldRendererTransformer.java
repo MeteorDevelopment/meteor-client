@@ -20,7 +20,7 @@ public class CanvasWorldRendererTransformer extends AsmTransformer {
     public CanvasWorldRendererTransformer() {
         super("grondag.canvas.render.world.CanvasWorldRenderer");
 
-        renderWorldMethod = new MethodInfo(null, "renderWorld", null, false);
+        renderWorldMethod = new MethodInfo(null, "渲染世界", null, false);
 
         // OutlineVertexConsumerProvider.draw()
         drawMethod = new MethodInfo("net/minecraft/class_4618", "method_23285", new Descriptor("V"), true);
