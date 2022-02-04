@@ -23,15 +23,15 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class Config extends System<Config> {
     public final Settings settings = new Settings();
 
-    private final SettingGroup sgVisual = settings.createGroup("Visual");
-    private final SettingGroup sgChat = settings.createGroup("Chat");
-    private final SettingGroup sgMisc = settings.createGroup("Misc");
+    private final SettingGroup sgVisual = settings.createGroup("视觉的");
+    private final SettingGroup sgChat = settings.createGroup("聊天");
+    private final SettingGroup sgMisc = settings.createGroup("杂项");
 
     // Visual
 
     public final Setting<Boolean> customFont = sgVisual.add(new BoolSetting.Builder()
-        .name("custom-font")
-        .description("Use a custom font.")
+        .name("自定义字体")
+        .description("使用自定义字体.")
         .defaultValue(true)
         .build()
     );
