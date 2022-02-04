@@ -23,7 +23,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AccountsScreen extends WindowScreen {
     public AccountsScreen(GuiTheme theme) {
-        super(theme, "Accounts");
+        super(theme, "账户");
     }
 
     @Override
