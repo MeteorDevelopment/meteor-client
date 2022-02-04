@@ -283,7 +283,7 @@ public class Utils {
 
     public static String getKeyName(int key) {
         switch (key) {
-            case GLFW_KEY_UNKNOWN: return "Unknown";
+            case GLFW_KEY_UNKNOWN: return "未知";
             case GLFW_KEY_ESCAPE: return "Esc";
             case GLFW_KEY_GRAVE_ACCENT: return "Grave Accent";
             case GLFW_KEY_WORLD_1: return "World 1";
