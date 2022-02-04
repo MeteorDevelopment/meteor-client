@@ -32,7 +32,7 @@ public class ProxiesScreen extends WindowScreen {
     private boolean dirty;
 
     public ProxiesScreen(GuiTheme theme) {
-        super(theme, "Proxies");
+        super(theme, "代理");
     }
 
     protected void openEditProxyScreen(Proxy proxy) {
@@ -101,7 +101,7 @@ public class ProxiesScreen extends WindowScreen {
         }
 
         // New
-        WButton newBtn = add(theme.button("New")).expandX().widget();
+        WButton newBtn = add(theme.button("添加")).expandX().widget();
         newBtn.action = () -> openEditProxyScreen(null);
     }
 
@@ -120,7 +120,7 @@ public class ProxiesScreen extends WindowScreen {
         private final Proxy proxy;
 
         public EditProxyScreen(GuiTheme theme, Proxy p) {
-            super(theme, p == null ? "New Proxy" : "Edit Proxy");
+            super(theme, p == null ? "新代理" : "编辑代理");
 
             isNew = p == null;
             proxy = isNew ? new Proxy() : p;
@@ -132,13 +132,13 @@ public class ProxiesScreen extends WindowScreen {
             WTable general = add(theme.table()).expandX().widget();
 
             //   Name
-            general.add(theme.label("Proxy Name:"));
+            general.add(theme.label("代理名称:"));
             WTextBox name = general.add(theme.textBox(proxy.name)).expandX().widget();
             name.action = () -> proxy.name = name.get();
             general.row();
 
             //   Type
-            general.add(theme.label("Type:"));
+            general.add(theme.label("类型:"));
             WDropdown<ProxyType> type = general.add(theme.dropdown(proxy.type)).widget();
             type.action = () -> proxy.type = type.get();
             general.row();
@@ -150,29 +150,29 @@ public class ProxiesScreen extends WindowScreen {
             general.row();
 
             //   Port
-            general.add(theme.label("Port:"));
+            general.add(theme.label("端口:"));
             WIntEdit port = general.add(theme.intEdit(proxy.port, 0, 65535, true)).expandX().widget();
             port.action = () -> proxy.port = port.get();
 
             // Optional
-            add(theme.horizontalSeparator("Optional")).expandX().widget();
+            add(theme.horizontalSeparator("自选的")).expandX().widget();
             WTable optional = add(theme.table()).expandX().widget();
 
             //   Username
-            optional.add(theme.label("Username:"));
+            optional.add(theme.label("用户名:"));
             WTextBox username = optional.add(theme.textBox(proxy.username)).expandX().widget();
             username.action = () -> proxy.username = username.get();
             optional.row();
 
             //   Password
-            optional.add(theme.label("Password:"));
+            optional.add(theme.label("密码:"));
             WTextBox password = optional.add(theme.textBox(proxy.password)).expandX().widget();
             password.action = () -> proxy.password = password.get();
 
             // Add / Save
             add(theme.horizontalSeparator()).expandX();
 
-            WButton addSave = add(theme.button(isNew ? "Add" : "Save")).expandX().widget();
+            WButton addSave = add(theme.button(isNew ? "添加" : "保存")).expandX().widget();
             addSave.action = () -> {
                 if (proxy.resolveAddress() && (!isNew || Proxies.get().add(proxy))) {
                     dirty = true;
