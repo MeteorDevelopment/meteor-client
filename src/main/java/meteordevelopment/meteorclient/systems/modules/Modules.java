@@ -360,7 +360,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initCombat() {
-        add(new AimAssist());
+        add(new AimAssist(Nametags="自动瞄准"));
         add(new AnchorAura());
 //        add(new AntiAnchor());
         add(new AntiAnvil());
