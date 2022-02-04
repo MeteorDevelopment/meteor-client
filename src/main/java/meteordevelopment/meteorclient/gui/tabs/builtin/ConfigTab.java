@@ -17,7 +17,7 @@ import net.minecraft.client.gui.screen.Screen;
 
 public class ConfigTab extends Tab {
     public ConfigTab() {
-        super("Config");
+        super("配置");
     }
 
     @Override
@@ -44,27 +44,27 @@ public class ConfigTab extends Tab {
 
                 if (prefix.isBlank()) {
                     YesNoPrompt.create(theme, this.parent)
-                        .title("Empty command prefix")
-                        .message("You have set your command prefix to nothing.")
-                        .message("This WILL prevent you from sending chat messages.")
-                        .message("Do you want to reset your prefix back to '.'?")
+                        .title("空命令前缀")
+                        .message("您已将命令前缀设置为空.")
+                        .message("这将阻止您发送聊天消息.")
+                        .message("是否要将前缀重置为“.”?")
                         .onYes(() -> Config.get().prefix.set("."))
-                        .id("empty-command-prefix")
+                        .id("空命令前缀")
                         .show();
                 }
                 else if (prefix.equals("/")) {
                     YesNoPrompt.create(theme, this.parent)
-                        .title("Potential prefix conflict")
-                        .message("You have set your command prefix to '/', which is used by minecraft.")
-                        .message("This can cause conflict issues between meteor and minecraft commands.")
-                        .message("Do you want to reset your prefix to '.'?")
+                        .title("潜在的前缀冲突")
+                        .message("您已将命令前缀设置为 minecraft 使用的“/”.")
+                        .message("这可能会导致流星和我的世界命令之间的冲突问题.")
+                        .message("是否要将前缀重置为“.”?")
                         .onYes(() -> Config.get().prefix.set("."))
-                        .id("minecraft-prefix-conflict")
+                        .id("我的世界前缀冲突")
                         .show();
                 }
                 else if (prefix.length() > 7) {
                     YesNoPrompt.create(theme, this.parent)
-                        .title("Long command prefix")
+                        .title("长命令前缀")
                         .message("You have set your command prefix to a very long string.")
                         .message("This means that in order to execute any command, you will need to type %s followed by the command you want to run.", prefix)
                         .message("Do you want to reset your prefix back to '.'?")
