@@ -32,10 +32,10 @@ public class BaritoneTab extends Tab {
 
         settings = new Settings();
 
-        SettingGroup sgBool = settings.createGroup("Checkboxes");
-        SettingGroup sgDouble = settings.createGroup("Numbers");
-        SettingGroup sgInt = settings.createGroup("Whole Numbers");
-        SettingGroup sgColor = settings.createGroup("Colors");
+        SettingGroup sgBool = settings.createGroup("复选框");
+        SettingGroup sgDouble = settings.createGroup("数值");
+        SettingGroup sgInt = settings.createGroup("整体数值");
+        SettingGroup sgColor = settings.createGroup("颜色");
 
         try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
