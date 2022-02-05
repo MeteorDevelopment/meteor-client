@@ -67,12 +67,12 @@ public class ModuleScreen extends WindowScreen {
         WCheckbox tobrC = tobr.add(theme.checkbox(module.toggleOnBindRelease)).widget();
         tobrC.action = () -> module.toggleOnBindRelease = tobrC.checked;
 
-        // Toggle chat feedback
-        WHorizontalList tcf = section.add(theme.horizontalList()).widget();
+        // Chat feedback
+        WHorizontalList cf = section.add(theme.horizontalList()).widget();
 
-        tcf.add(theme.label("Chat feedback: "));
-        WCheckbox tcfC = tcf.add(theme.checkbox(module.toggleChatFeedback)).widget();
-        tcfC.action = () -> module.toggleChatFeedback = tcfC.checked;
+        cf.add(theme.label("Chat Feedback: "));
+        WCheckbox cfC = cf.add(theme.checkbox(module.chatFeedback)).widget();
+        cfC.action = () -> module.chatFeedback = cfC.checked;
 
         add(theme.horizontalSeparator()).expandX();
 
