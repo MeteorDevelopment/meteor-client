@@ -53,6 +53,13 @@ public class Zoom extends Module {
             .build()
     );
 
+    private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-hands")
+        .description("Whether or not to render your hands.")
+        .defaultValue(false)
+        .build()
+    );
+
     private boolean enabled;
     private boolean preCinematic;
     private double preMouseSensitivity;
@@ -136,5 +143,9 @@ public class Zoom extends Module {
     private double value() {
         double delta = time < 0.5 ? 4 * time * time * time : 1 - Math.pow(-2 * time + 2, 3) / 2; // Ease in out cubic
         return MathHelper.lerp(delta, 1, value);
+    }
+
+    public boolean renderHands() {
+        return !isActive() || renderHands.get();
     }
 }
