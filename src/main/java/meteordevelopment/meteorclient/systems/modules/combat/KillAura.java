@@ -29,9 +29,11 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
@@ -74,9 +76,22 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> randomTeleport = sgGeneral.add(new BoolSetting.Builder()
         .name("random-teleport")
-        .description("Randomly teleport around the target")
+        .description("Randomly teleport around the target.")
         .defaultValue(false)
         .visible(() -> !onlyWhenLook.get())
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreShield = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-shield")
+        .description("Attacks only if the blow is not blocked by a shield.")
+        .defaultValue(true)
+        .build()
+    );
+    private final Setting<Boolean> noRightClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-right-click")
+        .description("Does not attack if the right mouse button is pressed (Using a shield, you eat food or drink a potion).")
+        .defaultValue(true)
         .build()
     );
 
@@ -293,14 +308,30 @@ public class KillAura extends Module {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (PlayerUtils.distanceTo(entity) > range.get()) return false;
+        if (noRightClick.get() && mc.options.keyUse.isPressed()) return false;
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
         if (entity instanceof PlayerEntity) {
             if (((PlayerEntity) entity).isCreative()) return false;
             if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
+            if (ignoreShield.get() && shieldCheck((PlayerEntity)entity)) return false;
         }
         return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
+    }
+    public boolean shieldCheck (PlayerEntity player) { // Minecraft shield checking
+        if (player.isBlocking()) {
+            Vec3d persistentProjectileEntity = mc.player.getPos();
+            if (persistentProjectileEntity != null) {
+                Vec3d vec3d = player.getRotationVec(1.0F);
+                Vec3d vec3d2 = persistentProjectileEntity.relativize(player.getPos()).normalize();
+                vec3d2 = new Vec3d(vec3d2.x, 0.0D, vec3d2.z);
+                if (vec3d2.dotProduct(vec3d) < 0.0D) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private boolean delayCheck() {
@@ -329,7 +360,6 @@ public class KillAura extends Module {
     }
 
     private void hitEntity(Entity target) {
-
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
