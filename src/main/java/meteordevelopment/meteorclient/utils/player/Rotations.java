@@ -37,6 +37,7 @@ public class Rotations {
     private static Rotation lastRotation;
     private static int lastRotationTimer;
     private static boolean sentLastRotation;
+    public static boolean rotating = false;
 
     @Init(stage = InitStage.Pre)
     public static void init() {
@@ -82,6 +83,7 @@ public class Rotations {
         sentLastRotation = false;
 
         if (!rotations.isEmpty()) {
+            rotating = true;
             resetLastRotation();
 
             Rotation rotation = rotations.get(i);
@@ -93,6 +95,7 @@ public class Rotations {
         } else if (lastRotation != null) {
             if (lastRotationTimer >= Config.get().rotationHoldTicks.get()) {
                 resetLastRotation();
+                rotating = false;
             } else {
                 setupMovementPacketRotation(lastRotation);
                 sentLastRotation = true;
