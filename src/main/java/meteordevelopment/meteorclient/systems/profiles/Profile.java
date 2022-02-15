@@ -31,6 +31,7 @@ public class Profile implements ISerializable<Profile> {
     public boolean onLaunch = false;
     public List<String> loadOnJoinIps = new ArrayList<>();
     public boolean accounts = false, config = true, friends = false, macros = true, modules = true, waypoints = false, hud = false;
+    public boolean autosave = false;
 
     public void load(System<?> system) {
         File folder = new File(Profiles.FOLDER, name);
@@ -94,6 +95,8 @@ public class Profile implements ISerializable<Profile> {
         tag.putBoolean("waypoints", waypoints);
         tag.putBoolean("hud", hud);
 
+        tag.putBoolean("autosave", autosave);
+
         loadOnJoinIps.removeIf(String::isEmpty);
 
         NbtList ipsTag = new NbtList();
@@ -115,6 +118,8 @@ public class Profile implements ISerializable<Profile> {
         modules = tag.contains("modules") && tag.getBoolean("modules");
         waypoints = tag.contains("waypoints") && tag.getBoolean("waypoints");
         hud = tag.contains("hud") && tag.getBoolean("hud");
+
+        autosave = tag.contains("autosave") && tag.getBoolean("autosave");
 
         loadOnJoinIps.clear();
 
@@ -139,6 +144,8 @@ public class Profile implements ISerializable<Profile> {
         this.modules = profile.modules;
         this.waypoints = profile.waypoints;
         this.hud = profile.hud;
+
+        this.autosave = profile.autosave;
 
         return this;
     }

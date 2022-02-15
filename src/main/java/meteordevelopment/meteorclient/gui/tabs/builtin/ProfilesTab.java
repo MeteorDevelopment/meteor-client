@@ -189,6 +189,12 @@ public class ProfilesTab extends Tab {
             hudBool.action = () -> newProfile.hud = hudBool.checked;
             table.row();
 
+            // Autosave
+            table.add(theme.label("Autosave:"));
+            WCheckbox autosaveBool = table.add(theme.checkbox(ogProfile.autosave)).widget();
+            autosaveBool.action = () -> newProfile.autosave = autosaveBool.checked;
+            table.row();
+
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
 

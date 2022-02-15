@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.profiles;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -80,6 +81,15 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
         for (Profile profile : this) {
             if (profile.loadOnJoinIps.contains(Utils.getWorldName())) {
                 profile.load();
+            }
+        }
+    }
+
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        for (Profile profile : this) {
+            if (profile.autosave && profile.loadOnJoinIps.contains(Utils.getWorldName())) {
+                profile.save();
             }
         }
     }
