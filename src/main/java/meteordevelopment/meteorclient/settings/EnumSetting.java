@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+@SuppressWarnings("unchecked")
 public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     private T[] values;
 

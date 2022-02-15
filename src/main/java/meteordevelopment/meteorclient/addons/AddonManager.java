@@ -28,7 +28,7 @@ public class AddonManager {
                 public void onInitialize() {}
             };
 
-            ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
+            ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").orElseThrow().getMetadata();
 
             METEOR.name = metadata.getName();
             METEOR.authors = new String[metadata.getAuthors().size()];

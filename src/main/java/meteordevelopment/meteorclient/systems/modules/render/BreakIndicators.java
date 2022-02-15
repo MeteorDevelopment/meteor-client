@@ -89,7 +89,6 @@ public class BreakIndicators extends Module {
             if (shape.isEmpty()) return;
 
             Box orig = shape.getBoundingBox();
-            Box box = orig;
 
             double shrinkFactor = (9 - (stage + 1)) / 9d;
             if (ownBreakingPos != null && ownBreakingStage > 0 && ownBreakingPos.equals(pos)) {
@@ -98,7 +97,7 @@ public class BreakIndicators extends Module {
 
             double progress = 1d - shrinkFactor;
 
-            renderBlock(event, box, orig, pos, shrinkFactor, progress);
+            renderBlock(event, orig, orig, pos, shrinkFactor, progress);
         });
     }
 
@@ -109,13 +108,12 @@ public class BreakIndicators extends Module {
                 if (shape.isEmpty()) return;
 
                 Box orig = shape.getBoundingBox();
-                Box box = orig;
 
                 double progressNormalised = block.progress > 1 ? 1 : block.progress;
                 double shrinkFactor = 1d - progressNormalised;
                 BlockPos pos = block.blockPos;
 
-                renderBlock(event, box, orig, pos, shrinkFactor, progressNormalised);
+                renderBlock(event, orig, orig, pos, shrinkFactor, progressNormalised);
             }
         }
     }

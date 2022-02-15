@@ -78,7 +78,6 @@ public class SafeWalk extends Module {
         if (block instanceof AbstractRailBlock) return true;
         if (block instanceof TrapdoorBlock) return true;
         if (block instanceof PowderSnowBlock) return true;
-        if (block instanceof AbstractCauldronBlock) return true;
-        return false;
+        return block instanceof AbstractCauldronBlock;
     }
 }

@@ -37,6 +37,7 @@ public class WireframeEntityRenderer {
     private static Color sideColor, lineColor;
     private static ShapeMode shapeMode;
 
+    @SuppressWarnings("unchecked")
     public static void render(Render3DEvent event, Entity entity, double scale, Color sideColor, Color lineColor, ShapeMode shapeMode) {
         WireframeEntityRenderer.sideColor = sideColor;
         WireframeEntityRenderer.lineColor = lineColor;
@@ -226,7 +227,6 @@ public class WireframeEntityRenderer {
                         render(event.renderer, m.leftFrontLeg);
                         render(event.renderer, m.rightFrontLeg);
                         render(event.renderer, m.tail);
-                        matrices.pop();
                     }
                     else {
                         matrices.push();
@@ -244,8 +244,8 @@ public class WireframeEntityRenderer {
                         render(event.renderer, m.leftEar);
                         render(event.renderer, m.tail);
                         render(event.renderer, m.nose);
-                        matrices.pop();
                     }
+                    matrices.pop();
                 }
             }
         }

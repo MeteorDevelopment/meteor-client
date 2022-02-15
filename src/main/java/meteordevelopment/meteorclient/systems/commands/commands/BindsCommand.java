@@ -32,8 +32,7 @@ public class BindsCommand extends Command {
         builder.executes(context -> {
             // Modules
             List<Module> modules = Modules.get().getAll().stream()
-                    .filter(module -> module.keybind.isSet())
-                    .collect(Collectors.toList());
+                .filter(module -> module.keybind.isSet()).toList();
 
             ChatUtils.info("--- Bound Modules ((highlight)%d(default)) ---", modules.size());
 

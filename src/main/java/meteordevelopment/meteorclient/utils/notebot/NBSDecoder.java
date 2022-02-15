@@ -39,8 +39,6 @@ public class NBSDecoder {
             short length = readShort(dis);
             if (length != 0) return parseClassic(dis, decodeFile, length);
             else return parseOpenNBS(dis, decodeFile);
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getStackTrace());
         } catch (IOException e) {
             LOG.error(e.getStackTrace());
         }
@@ -48,7 +46,7 @@ public class NBSDecoder {
     }
 
     private static Song parseClassic(DataInputStream dis, File decodeFile, short length) throws IOException {
-        HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
+        HashMap<Integer, Layer> layerHashMap = new HashMap<>();
         short songHeight = readShort(dis);
         String title = readString(dis);
         String author = readString(dis);
@@ -95,7 +93,7 @@ public class NBSDecoder {
     }
 
     private static Song parseOpenNBS(DataInputStream dis, File decodeFile) throws IOException {
-        HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
+        HashMap<Integer, Layer> layerHashMap = new HashMap<>();
         byte version = dis.readByte();
         if (version != 5) return null;
         dis.readByte(); //vanillaInstrumentCount

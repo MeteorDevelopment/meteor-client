@@ -112,15 +112,9 @@ public class WaypointsModule extends Module {
             waypoint.actualDimension = PlayerUtils.getDimension();
 
             switch (waypoint.actualDimension) {
-                case Overworld:
-                    waypoint.overworld = true;
-                    break;
-                case Nether:
-                    waypoint.nether = true;
-                    break;
-                case End:
-                    waypoint.end = true;
-                    break;
+                case Overworld -> waypoint.overworld = true;
+                case Nether -> waypoint.nether = true;
+                case End -> waypoint.end = true;
             }
 
             Waypoints.get().add(waypoint);

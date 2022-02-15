@@ -225,5 +225,5 @@ public class InventorySorter {
         }
     }
 
-    private static record Action(int from, int to) {}
+    private record Action(int from, int to) {}
 }

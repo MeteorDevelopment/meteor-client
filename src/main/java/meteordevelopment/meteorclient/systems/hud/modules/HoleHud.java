@@ -103,7 +103,7 @@ public class HoleHud extends HudElement {
         Front(0),
         Back(180);
 
-        int offset;
+        final int offset;
 
         Facing(int offset) {
             this.offset = offset;

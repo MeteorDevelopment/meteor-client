@@ -34,7 +34,8 @@ import java.util.List;
 import java.util.Map;
 
 public class AutoGap extends Module {
-    private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends Module>[] AURAS = (Class<? extends Module>[]) new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPotions = settings.createGroup("Potions");

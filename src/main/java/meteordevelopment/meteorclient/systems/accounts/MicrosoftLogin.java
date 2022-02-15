@@ -131,7 +131,7 @@ public class MicrosoftLogin {
         public void handle(HttpExchange req) throws IOException {
             if (req.getRequestMethod().equals("GET")) {
                 // Login
-                List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8.name());
+                List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
 
                 boolean ok = false;
 

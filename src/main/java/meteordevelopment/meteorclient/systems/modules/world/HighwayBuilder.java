@@ -62,7 +62,8 @@ public class HighwayBuilder extends Module {
         Place(false, true),
         Both(true, true);
 
-        public boolean mine, place;
+        public final boolean mine;
+        public final boolean place;
 
         Rotation(boolean mine, boolean place) {
             this.mine = mine;

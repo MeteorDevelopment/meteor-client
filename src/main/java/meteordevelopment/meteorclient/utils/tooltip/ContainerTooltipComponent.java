@@ -18,16 +18,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
-public class ContainerTooltipComponent implements TooltipComponent, MeteorTooltipData {
+public record ContainerTooltipComponent(DefaultedList<ItemStack> items,
+                                        Color color) implements TooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "textures/container.png");
-
-    private final DefaultedList<ItemStack> items;
-    private final Color color;
-
-    public ContainerTooltipComponent(DefaultedList<ItemStack> items, Color color) {
-        this.items = items;
-        this.color = color;
-    }
 
     @Override
     public TooltipComponent getComponent() {

@@ -39,8 +39,8 @@ import java.util.regex.Pattern;
 public abstract class ChatHudMixin implements IChatHud {
     private static final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private static final Pattern METEOR_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Meteor\\]");
-    private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Baritone\\]");
+    private static final Pattern METEOR_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Meteor]");
+    private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Baritone]");
     private static final Identifier METEOR_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/meteor.png");
     private static final Identifier BARITONE_CHAT_ICON = new Identifier("meteor-client", "textures/icons/chat/baritone.png");
 
@@ -68,7 +68,7 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     @Redirect(method = "addMessage(Lnet/minecraft/text/Text;IIZ)V", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    private int addMessageListSizeProxy(List<ChatHudLine> list) {
+    private int addMessageListSizeProxy(List<ChatHudLine<?>> list) {
         BetterChat betterChat = Modules.get().get(BetterChat.class);
         return betterChat.isLongerChat() && betterChat.getChatLength() > 100 ? 1 : list.size();
     }

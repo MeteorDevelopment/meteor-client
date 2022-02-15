@@ -144,7 +144,7 @@ public class Flight extends Module {
         if (mc.player.getYaw() != lastYaw) mc.player.setYaw(lastYaw);
 
         switch (mode.get()) {
-            case Velocity:
+            case Velocity -> {
 
                  /*TODO: deal with underwater movement, find a way to "spoof" not being in water
                 also, all of the multiplication below is to get the speed to roughly match the speed
@@ -152,20 +152,20 @@ public class Flight extends Module {
 
                 mc.player.getAbilities().flying = false;
                 mc.player.airStrafingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
-
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();
-
-                if (mc.options.keyJump.isPressed()) mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
-                if (mc.options.keySneak.isPressed()) mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
-                break;
-            case Abilities:
+                if (mc.options.keyJump.isPressed())
+                    mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+                if (mc.options.keySneak.isPressed())
+                    mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+            }
+            case Abilities -> {
                 if (mc.player.isSpectator()) return;
                 mc.player.getAbilities().setFlySpeed(speed.get().floatValue());
                 mc.player.getAbilities().flying = true;
                 if (mc.player.getAbilities().creativeMode) return;
                 mc.player.getAbilities().allowFlying = true;
-                break;
+            }
         }
     }
 
@@ -177,9 +177,8 @@ public class Flight extends Module {
      */
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket) || antiKickMode.get() != AntiKickMode.Packet) return;
+        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || antiKickMode.get() != AntiKickMode.Packet) return;
 
-        PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
         long currentTime = System.currentTimeMillis();
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {

@@ -106,8 +106,6 @@ public abstract class WView extends WVerticalList {
             double preScroll = scroll;
             double mouseDelta = mouseY - lastMouseY;
 
-            //scroll += Math.round(theme.scale(mouseDelta + mouseDelta * ((height / actualHeight) * 0.7627725)));
-            //scroll += Math.round(theme.scale(mouseDelta * (1 / (height / actualHeight))));
             scroll += Math.round(mouseDelta * ((actualHeight - handleHeight() / 2) / height)); // TODO: Someone improve this
             scroll = Utils.clamp(scroll, 0, actualHeight - height);
 

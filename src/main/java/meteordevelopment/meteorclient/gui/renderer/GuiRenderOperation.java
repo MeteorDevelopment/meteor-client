@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui.renderer;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 
+@SuppressWarnings("unchecked")
 public abstract class GuiRenderOperation<T extends GuiRenderOperation<T>> {
     protected double x, y;
     protected Color color;

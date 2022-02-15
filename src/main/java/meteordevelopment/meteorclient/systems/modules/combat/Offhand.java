@@ -157,7 +157,7 @@ public class Offhand extends Module {
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD);
 
-        net.minecraft.item.Item item;
+        final net.minecraft.item.Item item;
 
         Item(net.minecraft.item.Item item) {
             this.item = item;

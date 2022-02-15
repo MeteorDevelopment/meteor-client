@@ -177,8 +177,7 @@ public class ServerCommand extends Command {
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
         try {
-            if (event.packet instanceof CommandSuggestionsS2CPacket) {
-                CommandSuggestionsS2CPacket packet = (CommandSuggestionsS2CPacket) event.packet;
+            if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
                 List<String> plugins = new ArrayList<>();
                 Suggestions matches = packet.getSuggestions();
 

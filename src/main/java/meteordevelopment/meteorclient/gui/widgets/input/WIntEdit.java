@@ -99,8 +99,7 @@ public class WIntEdit extends WHorizontalList {
         if (this.value == v) return;
 
         if (v < min) this.value = min;
-        else if (v > max) this.value = max;
-        else this.value = v;
+        else this.value = Math.min(v, max);
 
         if (this.value == v) {
             textBox.set(Integer.toString(this.value));

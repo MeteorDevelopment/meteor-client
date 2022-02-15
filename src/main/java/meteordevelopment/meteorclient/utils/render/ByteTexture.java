@@ -10,7 +10,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.resource.ResourceManager;
 import org.lwjgl.BufferUtils;
 
-import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
@@ -61,7 +60,7 @@ public class ByteTexture extends AbstractTexture {
     }
 
     @Override
-    public void load(ResourceManager manager) throws IOException {}
+    public void load(ResourceManager manager) {}
 
     public enum Format {
         A,

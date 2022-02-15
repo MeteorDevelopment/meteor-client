@@ -140,8 +140,8 @@ public class Speed extends Module {
 
     private void onSpeedModeChanged(SpeedModes mode) {
         switch (mode) {
-            case Vanilla:   currentMode = new Vanilla(); break;
-            case Strafe:    currentMode = new Strafe(); break;
+            case Vanilla -> currentMode = new Vanilla();
+            case Strafe -> currentMode = new Strafe();
         }
     }
 

@@ -78,6 +78,7 @@ public class BlockDataSettingScreen extends WindowScreen {
                 T data = blockData;
                 if (data == null) data = (T) setting.defaultData.get().copy();
 
+                //noinspection unchecked
                 mc.setScreen(data.createScreen(theme, block, (BlockDataSetting<T>) setting));
             };
 

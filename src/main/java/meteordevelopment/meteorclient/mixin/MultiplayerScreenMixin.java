@@ -42,13 +42,9 @@ public class MultiplayerScreenMixin extends Screen {
         loggedInAs = "Logged in as ";
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
-        addDrawableChild(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> {
-            client.setScreen(GuiThemes.get().accountsScreen());
-        }));
+        addDrawableChild(new ButtonWidget(this.width - 75 - 3, 3, 75, 20, new LiteralText("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen())));
 
-        addDrawableChild(new ButtonWidget(this.width - 75 - 3 - 75 - 2, 3, 75, 20, new LiteralText("Proxies"), button -> {
-            client.setScreen(GuiThemes.get().proxiesScreen());
-        }));
+        addDrawableChild(new ButtonWidget(this.width - 75 - 3 - 75 - 2, 3, 75, 20, new LiteralText("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen())));
     }
 
     @Inject(method = "render", at = @At("TAIL"))

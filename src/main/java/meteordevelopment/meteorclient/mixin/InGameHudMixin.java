@@ -20,6 +20,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -121,5 +122,14 @@ public abstract class InGameHudMixin {
     @ModifyArg(method = "renderStatusBars", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;getHeartCount(Lnet/minecraft/entity/LivingEntity;)I", ordinal = 0))
     private LivingEntity modifyGetHeartCount(LivingEntity entity) {
         return Modules.get().get(NoRender.class).noMountHiding() ? null : entity;
+    }
+
+    @ModifyVariable(method="addChatMessage",at=@At("HEAD"),index = 2, argsOnly = true)
+    Text real(Text value) {
+        /*String test = "\u002a\u002fString search = "testtest123";
+        String a = value.getString();
+        while(a.contains(search)) a.replace(search, "<censored>");
+        /**/
+        return value;
     }
 }

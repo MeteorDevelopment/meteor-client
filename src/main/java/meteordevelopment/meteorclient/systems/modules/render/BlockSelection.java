@@ -99,9 +99,7 @@ public class BlockSelection extends Module {
         else {
             if (advanced.get()) {
                 if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Lines) {
-                    shape.forEachEdge((minX, minY, minZ, maxX, maxY, maxZ) -> {
-                        event.renderer.line(bp.getX() + minX, bp.getY() + minY, bp.getZ() + minZ, bp.getX() + maxX, bp.getY() + maxY, bp.getZ() + maxZ, lineColor.get());
-                    });
+                    shape.forEachEdge((minX, minY, minZ, maxX, maxY, maxZ) -> event.renderer.line(bp.getX() + minX, bp.getY() + minY, bp.getZ() + minZ, bp.getX() + maxX, bp.getY() + maxY, bp.getZ() + maxZ, lineColor.get()));
                 }
 
                 if (shapeMode.get() == ShapeMode.Both || shapeMode.get() == ShapeMode.Sides) {

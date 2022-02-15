@@ -27,7 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AutoEat extends Module {
-    private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    @SuppressWarnings("unchecked")
+    private static final Class<? extends Module>[] AURAS = (Class<? extends Module>[]) new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgHunger = settings.createGroup("Hunger");

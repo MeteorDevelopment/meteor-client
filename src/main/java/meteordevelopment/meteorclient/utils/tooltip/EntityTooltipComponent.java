@@ -23,12 +23,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 // Thanks to
 // https://github.com/Queerbric/Inspecio/blob/1.17/src/main/java/io/github/queerbric/inspecio/tooltip/EntityTooltipComponent.java
-public class EntityTooltipComponent implements MeteorTooltipData, TooltipComponent {
-    protected final Entity entity;
-
-    public EntityTooltipComponent(Entity entity) {
-        this.entity = entity;
-    }
+public record EntityTooltipComponent(
+    Entity entity) implements MeteorTooltipData, TooltipComponent {
 
     @Override
     public TooltipComponent getComponent() {

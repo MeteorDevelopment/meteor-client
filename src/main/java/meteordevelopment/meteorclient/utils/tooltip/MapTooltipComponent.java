@@ -21,13 +21,8 @@ import net.minecraft.util.Identifier;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData {
+public record MapTooltipComponent(int mapId) implements TooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_MAP_BACKGROUND = new Identifier("textures/map/map_background.png");
-    private final int mapId;
-
-    public MapTooltipComponent(int mapId) {
-        this.mapId = mapId;
-    }
 
     @Override
     public int getHeight() {

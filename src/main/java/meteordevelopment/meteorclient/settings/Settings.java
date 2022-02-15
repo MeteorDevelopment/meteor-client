@@ -76,6 +76,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         return createGroup(name, true);
     }
 
+    @SuppressWarnings("unchecked")
     public void registerColorSettings(Module module) {
         for (SettingGroup group : this) {
             for (Setting<?> setting : group) {
@@ -88,6 +89,7 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void unregisterColorSettings() {
         for (SettingGroup group : this) {
             for (Setting<?> setting : group) {

@@ -138,8 +138,6 @@ public class NotebotUtils {
 
     public static boolean isValidInstrumentNbsFile(byte type, InstrumentType instrument) {
         switch (instrument) {
-            case Any:
-                return true;
 
             case NotDrums: {
                 if (type == 2) return false; //basedrum
@@ -180,8 +178,6 @@ public class NotebotUtils {
 
     public static boolean isValidIntrumentTextFile(int type, InstrumentType instrument) {
         switch (instrument) {
-            case Any:
-                return true;
 
             case NotDrums: {
                 if (type == 1)
@@ -230,33 +226,20 @@ public class NotebotUtils {
     }
 
     public static SoundEvent getInstrumentSound(InstrumentType instrument) {
-        switch (instrument) {
-            case Bass:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BASS;
-            case Bells:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BELL;
-            case Flute:
-                return SoundEvents.BLOCK_NOTE_BLOCK_FLUTE;
-            case Chimes:
-                return SoundEvents.BLOCK_NOTE_BLOCK_CHIME;
-            case Guitar:
-                return SoundEvents.BLOCK_NOTE_BLOCK_GUITAR;
-            case Xylophone:
-                return SoundEvents.BLOCK_NOTE_BLOCK_XYLOPHONE;
-            case IronXylophone:
-                return SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE;
-            case CowBell:
-                return SoundEvents.BLOCK_NOTE_BLOCK_COW_BELL;
-            case Didgeridoo:
-                return SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO;
-            case Bit:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BIT;
-            case Banjo:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BANJO;
-            case Pling:
-                return SoundEvents.BLOCK_NOTE_BLOCK_PLING;
-            default:
-                return SoundEvents.BLOCK_NOTE_BLOCK_HARP;
-        }
+        return switch (instrument) {
+            case Bass -> SoundEvents.BLOCK_NOTE_BLOCK_BASS;
+            case Bells -> SoundEvents.BLOCK_NOTE_BLOCK_BELL;
+            case Flute -> SoundEvents.BLOCK_NOTE_BLOCK_FLUTE;
+            case Chimes -> SoundEvents.BLOCK_NOTE_BLOCK_CHIME;
+            case Guitar -> SoundEvents.BLOCK_NOTE_BLOCK_GUITAR;
+            case Xylophone -> SoundEvents.BLOCK_NOTE_BLOCK_XYLOPHONE;
+            case IronXylophone -> SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE;
+            case CowBell -> SoundEvents.BLOCK_NOTE_BLOCK_COW_BELL;
+            case Didgeridoo -> SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO;
+            case Bit -> SoundEvents.BLOCK_NOTE_BLOCK_BIT;
+            case Banjo -> SoundEvents.BLOCK_NOTE_BLOCK_BANJO;
+            case Pling -> SoundEvents.BLOCK_NOTE_BLOCK_PLING;
+            default -> SoundEvents.BLOCK_NOTE_BLOCK_HARP;
+        };
     }
 }

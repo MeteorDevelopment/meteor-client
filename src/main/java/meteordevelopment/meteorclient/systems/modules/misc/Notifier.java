@@ -167,9 +167,8 @@ public class Notifier extends Module {
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
         if (!totemPops.get()) return;
-        if (!(event.packet instanceof EntityStatusS2CPacket)) return;
+        if (!(event.packet instanceof EntityStatusS2CPacket p)) return;
 
-        EntityStatusS2CPacket p = (EntityStatusS2CPacket) event.packet;
         if (p.getStatus() != 35) return;
 
         Entity entity = p.getEntity(mc.world);

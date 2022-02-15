@@ -286,9 +286,7 @@ public class Surround extends Module {
 
             for (Entity crystal : mc.world.getOtherEntities(null, box, entityPredicate)) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getPitch(crystal), Rotations.getYaw(crystal), () -> {
-                        mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking()));
-                    });
+                    Rotations.rotate(Rotations.getPitch(crystal), Rotations.getYaw(crystal), () -> mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking())));
                 }
                 else {
                     mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking()));

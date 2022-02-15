@@ -107,10 +107,7 @@ public class SaveMapCommand extends Command {
         ItemStack map = getMap();
         if (map == null) return null;
 
-        MapState state = FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
-        if (state == null) return null;
-
-        return state;
+        return FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
     }
 
     private String getPath() {

@@ -39,7 +39,7 @@ public class SpectateCommand extends Command {
         }));
     }
 
-    private class StaticListener {
+    private static class StaticListener {
         @EventHandler
         private void onKey(KeyEvent event) {
             if (mc.options.keySneak.matchesKey(event.key, 0) || mc.options.keySneak.matchesMouse(event.key)) {

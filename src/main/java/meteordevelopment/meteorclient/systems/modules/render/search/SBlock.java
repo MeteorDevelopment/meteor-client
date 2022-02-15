@@ -58,16 +58,16 @@ public class SBlock {
     }
 
     public SBlock getSideBlock(int side) {
-        switch (side) {
-            case FO: return search.getBlock(x, y, z + 1);
-            case BA: return search.getBlock(x, y, z - 1);
-            case LE: return search.getBlock(x - 1, y, z);
-            case RI: return search.getBlock(x + 1, y, z);
-            case TO: return search.getBlock(x, y + 1, z);
-            case BO: return search.getBlock(x, y - 1, z);
-        }
+        return switch (side) {
+            case FO -> search.getBlock(x, y, z + 1);
+            case BA -> search.getBlock(x, y, z - 1);
+            case LE -> search.getBlock(x - 1, y, z);
+            case RI -> search.getBlock(x + 1, y, z);
+            case TO -> search.getBlock(x, y + 1, z);
+            case BO -> search.getBlock(x, y - 1, z);
+            default -> null;
+        };
 
-        return null;
     }
 
     private void assignGroup() {

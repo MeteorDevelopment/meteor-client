@@ -16,14 +16,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
-
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PathFinder {
     private final static int PATH_AHEAD = 3;
     private final static int QUAD_1 = 1, QUAD_2 = 2, SOUTH = 0, NORTH = 180;
-    private final ArrayList<PathBlock> path = new ArrayList<>(PATH_AHEAD);
     private Entity target;
     private PathBlock currentPathBlock;
 
@@ -70,7 +67,7 @@ public class PathFinder {
         if (target == null || mc.player == null) return Integer.MAX_VALUE;
         Vec3d tPos = target.getPos();
         Vec3d pPos = mc.player.getPos();
-        int yaw = 0;
+        int yaw;
         int direction = getDirection();
         double tan = (tPos.z - pPos.z) / (tPos.x - pPos.x);
         if (direction == QUAD_1)
@@ -145,7 +142,6 @@ public class PathFinder {
             } else {
                 if (mc.options.keyForward.isPressed())
                     mc.options.keyForward.setPressed(false);
-                path.clear();
                 currentPathBlock = null;
             }
         }
@@ -159,7 +155,6 @@ public class PathFinder {
 
     public void disable() {
         target = null;
-        path.clear();
         if (mc.options.keyForward.isPressed()) mc.options.keyForward.setPressed(false);
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }

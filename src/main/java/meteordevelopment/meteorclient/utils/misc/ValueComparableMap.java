@@ -16,7 +16,7 @@ public class ValueComparableMap<K extends Comparable<K>, V> extends TreeMap<K, V
     private final Map<K, V> valueMap;
 
     public ValueComparableMap(final Ordering<? super V> partialValueOrdering) {
-        this(partialValueOrdering, new HashMap<K,V>());
+        this(partialValueOrdering, new HashMap<>());
     }
 
     private ValueComparableMap(Ordering<? super V> partialValueOrdering, HashMap<K, V> valueMap) {

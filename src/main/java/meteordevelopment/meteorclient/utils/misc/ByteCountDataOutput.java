@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.utils.misc;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.DataOutput;
-import java.io.IOException;
 
 public class ByteCountDataOutput implements DataOutput {
     public static final ByteCountDataOutput INSTANCE = new ByteCountDataOutput();
@@ -24,17 +23,17 @@ public class ByteCountDataOutput implements DataOutput {
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b) {
         count++;
     }
 
     @Override
-    public void write(byte[] b) throws IOException {
+    public void write(byte[] b) {
         count += b.length;
     }
 
     @Override
-    public void write(byte @NotNull [] b, int off, int len) throws IOException {
+    public void write(byte @NotNull [] b, int off, int len) {
         count += len;
     }
 

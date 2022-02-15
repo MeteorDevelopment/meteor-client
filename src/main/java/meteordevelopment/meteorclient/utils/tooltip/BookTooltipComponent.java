@@ -16,14 +16,8 @@ import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
-public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData {
+public record BookTooltipComponent(Text page) implements TooltipComponent, MeteorTooltipData {
     private static final Identifier TEXTURE_BOOK_BACKGROUND = new Identifier("textures/gui/book.png");
-
-    private final Text page;
-
-    public BookTooltipComponent(Text page) {
-        this.page = page;
-    }
 
     @Override
     public TooltipComponent getComponent() {

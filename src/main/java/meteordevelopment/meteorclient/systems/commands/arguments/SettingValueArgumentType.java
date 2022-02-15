@@ -23,7 +23,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
     }
 
     @Override
-    public String parse(StringReader reader) throws CommandSyntaxException {
+    public String parse(StringReader reader) {
         String text = reader.getRemaining();
         reader.setCursor(reader.getTotalLength());
         return text;

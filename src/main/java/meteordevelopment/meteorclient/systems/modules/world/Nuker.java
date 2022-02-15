@@ -232,8 +232,8 @@ public class Nuker extends Module {
     private int timer;
     private int noBlockTimer;
 
-    private BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
-    private BlockPos.Mutable pos2 = new BlockPos.Mutable();
+    private final BlockPos.Mutable pos1 = new BlockPos.Mutable(); // Rendering for cubes
+    private final BlockPos.Mutable pos2 = new BlockPos.Mutable();
     private Box box;
     int maxh = 0;
     int maxv = 0;

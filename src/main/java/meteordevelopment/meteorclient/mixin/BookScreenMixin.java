@@ -79,8 +79,6 @@ public class BookScreenMixin extends Screen {
         ItemStack book = itemStack; // Fuck you Java
         Hand hand2 = hand; // Honestly
 
-        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, new LiteralText("Edit title & author"), button -> {
-            mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
-        }));
+        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, new LiteralText("Edit title & author"), button -> mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2))));
     }
 }

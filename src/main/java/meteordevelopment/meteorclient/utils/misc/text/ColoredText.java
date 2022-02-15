@@ -12,14 +12,7 @@ import java.util.Objects;
 /**
  * Encapsulates a string and the color it should have. See {@link TextUtils}
  */
-public class ColoredText {
-    private final String text;
-    private final Color color;
-
-    public ColoredText(String text, Color color) {
-        this.text = text;
-        this.color = color;
-    }
+public record ColoredText(String text, Color color) {
 
     public String getText() {
         return text;
