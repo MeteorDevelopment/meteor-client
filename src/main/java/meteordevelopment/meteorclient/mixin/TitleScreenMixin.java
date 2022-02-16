@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.google.gson.JsonParser;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -37,10 +38,10 @@ public class TitleScreenMixin extends Screen {
             MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
             MeteorExecutor.execute(() -> {
-                String res = Http.get("https://meteorclient.com/api/version").sendString();
+                String res = Http.get("https://meteorclient.com/api/stats").sendString();
                 if (res == null) return;
 
-                Version latestVer = new Version(res);
+                Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());
 
                 if (latestVer.isHigherThan(MeteorClient.VERSION)) {
                     YesNoPrompt.create()
@@ -55,6 +56,7 @@ public class TitleScreenMixin extends Screen {
                             .message("Using old versions of Meteor is not recommended")
                             .message("and could report in issues.")
                             .id("new-update-no")
+                            .onOk(this::onClose)
                             .show())
                         .id("new-update")
                         .show();
