@@ -12,11 +12,15 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 public abstract class WindowScreen extends WidgetScreen {
     protected final WWindow window;
 
-    public WindowScreen(GuiTheme theme, String title) {
+    public WindowScreen(GuiTheme theme, WWidget icon, String title) {
         super(theme, title);
 
-        window = super.add(theme.window(title)).center().widget();
+        window = super.add(theme.window(icon, title)).center().widget();
         window.view.scrollOnlyWhenMouseOver = false;
+    }
+
+    public WindowScreen(GuiTheme theme, String title) {
+        this(theme, null, title);
     }
 
     @Override
