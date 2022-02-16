@@ -33,4 +33,9 @@ public abstract class WLabel extends WWidget {
     public String get() {
         return text;
     }
+
+    public WLabel color(Color color) {
+        this.color = color;
+        return this;
+    }
 }
