@@ -77,6 +77,6 @@ public class ProxiesImportScreen extends WindowScreen {
         }
         add(theme.horizontalSeparator()).expandX();
         WButton btnBack = add(theme.button("Back")).expandX().widget();
-        btnBack.action = () -> MeteorClient.mc.setScreen(parent);
+        btnBack.action = this::onClose;
     }
 }
