@@ -23,7 +23,7 @@ public class Proxy implements ISerializable<Proxy> {
     public boolean enabled = false;
 
     public boolean resolveAddress() {
-        if(port < 0 || port > 65535) return false;
+        if (port <= 0 || port > 65535 || address == null || address.isEmpty()) return false;
         InetSocketAddress socketAddress = new InetSocketAddress(address, port);
         return !socketAddress.isUnresolved();
     }

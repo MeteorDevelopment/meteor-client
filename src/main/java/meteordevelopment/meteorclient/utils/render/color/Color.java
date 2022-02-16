@@ -10,7 +10,36 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.Vec3d;
 
+@SuppressWarnings("unused")
 public class Color implements ICopyable<Color>, ISerializable<Color> {
+
+    public static final Color white = new Color(java.awt.Color.WHITE);
+    public static final Color WHITE = white;
+    public static final Color lightGray = new Color(java.awt.Color.LIGHT_GRAY);
+    public static final Color LIGHT_GRAY = lightGray;
+    public static final Color gray = new Color(java.awt.Color.GRAY);
+    public static final Color GRAY = gray;
+    public static final Color darkGray = new Color(java.awt.Color.DARK_GRAY);
+    public static final Color DARK_GRAY = darkGray;
+    public static final Color black = new Color(java.awt.Color.BLACK);
+    public static final Color BLACK = black;
+    public static final Color red = new Color(java.awt.Color.RED);
+    public static final Color RED = red;
+    public static final Color pink = new Color(java.awt.Color.PINK);
+    public static final Color PINK = pink;
+    public static final Color orange = new Color(java.awt.Color.ORANGE);
+    public static final Color ORANGE = orange;
+    public static final Color yellow = new Color(java.awt.Color.YELLOW);
+    public static final Color YELLOW = yellow;
+    public static final Color green = new Color(java.awt.Color.GREEN);
+    public static final Color GREEN = green;
+    public static final Color magenta = new Color(java.awt.Color.MAGENTA);
+    public static final Color MAGENTA = magenta;
+    public static final Color cyan = new Color(java.awt.Color.CYAN);
+    public static final Color CYAN = cyan;
+    public static final Color blue = new Color(java.awt.Color.BLUE);
+    public static final Color BLUE = blue;
+
     public int r, g, b, a;
 
     public Color() {
