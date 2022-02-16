@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
+import meteordevelopment.meteorclient.gui.widgets.input.WIntEdit;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
@@ -147,6 +148,26 @@ public class ProfilesTab extends Tab {
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
 
+            // Leave Save
+            table.add(theme.label("Save on Leave:"));
+            WCheckbox leaveSaveBool = table.add(theme.checkbox(ogProfile.saveOnLeave)).widget();
+            leaveSaveBool.action = () -> newProfile.saveOnLeave = leaveSaveBool.checked;
+            table.row();
+
+            // Interval
+            table.add(theme.label("Save on Interval"));
+            WCheckbox intervalSaveBool = table.add(theme.checkbox(ogProfile.saveOnInterval)).widget();
+            intervalSaveBool.action = () -> newProfile.saveOnInterval = intervalSaveBool.checked;
+            table.row();
+
+            table.add(theme.label("Interval Delay"));
+            WIntEdit intervalSaveInt = table.add(theme.intEdit(ogProfile.saveInterval, 2, 360, false)).widget();
+            intervalSaveInt.action = () -> newProfile.saveInterval = intervalSaveInt.get();
+            table.row();
+
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
+
             // Accounts
             table.add(theme.label("Accounts:"));
             WCheckbox accountsBool = table.add(theme.checkbox(ogProfile.accounts)).widget();
@@ -187,12 +208,6 @@ public class ProfilesTab extends Tab {
             table.add(theme.label("HUD:"));
             WCheckbox hudBool = table.add(theme.checkbox(ogProfile.hud)).widget();
             hudBool.action = () -> newProfile.hud = hudBool.checked;
-            table.row();
-
-            // Autosave
-            table.add(theme.label("Autosave:"));
-            WCheckbox autosaveBool = table.add(theme.checkbox(ogProfile.autosave)).widget();
-            autosaveBool.action = () -> newProfile.autosave = autosaveBool.checked;
             table.row();
 
             table.add(theme.horizontalSeparator()).expandX();

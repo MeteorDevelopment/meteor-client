@@ -31,7 +31,8 @@ public class Profile implements ISerializable<Profile> {
     public boolean onLaunch = false;
     public List<String> loadOnJoinIps = new ArrayList<>();
     public boolean accounts = false, config = true, friends = false, macros = true, modules = true, waypoints = false, hud = false;
-    public boolean autosave = false;
+    public boolean saveOnLeave = false, saveOnInterval = false;
+    public int saveInterval = 60, timer;
 
     public void load(System<?> system) {
         File folder = new File(Profiles.FOLDER, name);
@@ -87,6 +88,10 @@ public class Profile implements ISerializable<Profile> {
         tag.putString("name", name);
         tag.putBoolean("onLaunch", onLaunch);
 
+        tag.putBoolean("saveOnLeave", saveOnLeave);
+        tag.putBoolean("saveOnInterval", saveOnInterval);
+        tag.putInt("saveInterval", saveInterval);
+
         tag.putBoolean("accounts", accounts);
         tag.putBoolean("config", config);
         tag.putBoolean("friends", friends);
@@ -94,8 +99,6 @@ public class Profile implements ISerializable<Profile> {
         tag.putBoolean("modules", modules);
         tag.putBoolean("waypoints", waypoints);
         tag.putBoolean("hud", hud);
-
-        tag.putBoolean("autosave", autosave);
 
         loadOnJoinIps.removeIf(String::isEmpty);
 
@@ -119,7 +122,9 @@ public class Profile implements ISerializable<Profile> {
         waypoints = tag.contains("waypoints") && tag.getBoolean("waypoints");
         hud = tag.contains("hud") && tag.getBoolean("hud");
 
-        autosave = tag.contains("autosave") && tag.getBoolean("autosave");
+        saveOnLeave = tag.contains("saveOnLeave") && tag.getBoolean("saveOnLeave");
+        saveOnInterval = tag.contains("saveOnInterval") && tag.getBoolean("saveOnInterval");
+        saveInterval = tag.contains("saveInterval") ? tag.getInt("saveInterval") : 60;
 
         loadOnJoinIps.clear();
 
@@ -137,6 +142,10 @@ public class Profile implements ISerializable<Profile> {
         this.onLaunch = profile.onLaunch;
         this.loadOnJoinIps = profile.loadOnJoinIps;
 
+        this.saveOnLeave = profile.saveOnLeave;
+        this.saveOnInterval = profile.saveOnInterval;
+        this.saveInterval = profile.saveInterval;
+
         this.accounts = profile.accounts;
         this.config = profile.config;
         this.friends = profile.friends;
@@ -144,9 +153,6 @@ public class Profile implements ISerializable<Profile> {
         this.modules = profile.modules;
         this.waypoints = profile.waypoints;
         this.hud = profile.hud;
-
-        this.autosave = profile.autosave;
-
         return this;
     }
 
