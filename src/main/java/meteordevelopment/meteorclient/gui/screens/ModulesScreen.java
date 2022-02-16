@@ -124,6 +124,47 @@ public class ModulesScreen extends TabScreen {
         return w;
     }
 
+    // Favorites
+
+    protected void createFavoriteW(WContainer w) {
+        List<Module> modules = Modules.get().getFavorites();
+
+        if (modules.size() > 0) {
+            for (Module module : modules) {
+                w.add(theme.module(module)).expandX();
+            }
+        }
+    }
+
+    private WVerticalList favoritesList;
+
+    protected void refreshFavorites() {
+        favoritesList.clear();
+        createFavoriteW(favoritesList);
+    }
+
+    protected WWindow createFavorites(WContainer c) {
+        WWindow w = theme.window("Favorites");
+        w.id = "favorites";
+
+        if (theme.categoryIcons()) {
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(Items.NETHER_STAR.getDefaultStack())).pad(2);
+        }
+
+        c.add(w);
+        w.view.scrollOnlyWhenMouseOver = true;
+        w.view.hasScrollBar = false;
+        w.view.maxHeight -= 20;
+
+        WVerticalList l = theme.verticalList();
+        favoritesList = l;
+
+        w.add(l).expandX();
+        createFavoriteW(l);
+
+        return w;
+    }
+
     @Override
     public boolean toClipboard() {
         return NbtUtils.toClipboard(Modules.get());
@@ -148,6 +189,7 @@ public class ModulesScreen extends TabScreen {
                 windows.add(createCategory(this, category));
             }
 
+            windows.add(createFavorites(this));
             windows.add(createSearch(this));
         }
 

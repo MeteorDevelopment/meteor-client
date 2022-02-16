@@ -74,6 +74,16 @@ public class ModuleScreen extends WindowScreen {
         WCheckbox cfC = cf.add(theme.checkbox(module.chatFeedback)).widget();
         cfC.action = () -> module.chatFeedback = cfC.checked;
 
+        // Favorite
+        WHorizontalList fav = section.add(theme.horizontalList()).widget();
+
+        fav.add(theme.label("Favorite: "));
+        WCheckbox favC = fav.add(theme.checkbox(module.favorite)).widget();
+        favC.action = () -> {
+            module.favorite = favC.checked;
+            if (parent instanceof ModulesScreen p) p.refreshFavorites();
+        };
+
         add(theme.horizontalSeparator()).expandX();
 
         // Bottom

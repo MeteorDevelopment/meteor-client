@@ -152,6 +152,14 @@ public class Modules extends System<Modules> {
         return moduleInstances.values().size();
     }
 
+    public List<Module> getFavorites() {
+        List<Module> favorites = new ArrayList<>();
+        for (Module module : modules) {
+            if (module.favorite) favorites.add(module);
+        }
+        return favorites;
+    }
+
     public List<Module> getActive() {
         synchronized (active) {
             return active;
