@@ -77,6 +77,13 @@ public class AutoEat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> avoidOvereating = sgHunger.add(new BoolSetting.Builder()
+        .name("avoid-overeating")
+        .description("Avoid eating foods that would bring your hunger over full.")
+        .defaultValue(false)
+        .build()
+    );
+
     public boolean eating;
     private int slot, prevSlot;
 
@@ -213,17 +220,19 @@ public class AutoEat extends Module {
     private int findSlot() {
         int slot = -1;
         int bestHunger = -1;
+        int foodLevel = mc.player.getHungerManager().getFoodLevel();
 
         for (int i = 0; i < 9; i++) {
             // Skip if item isn't food
             Item item = mc.player.getInventory().getStack(i).getItem();
             if (!item.isFood()) continue;
+            // Skip if item is in blacklist
+            if (blacklist.get().contains(item)) continue;
+            if (avoidOvereating.get() && item.getFoodComponent().getHunger() + foodLevel > 20) continue;
 
             // Check if hunger value is better
             int hunger = item.getFoodComponent().getHunger();
             if (hunger > bestHunger) {
-                // Skip if item is in blacklist
-                if (blacklist.get().contains(item)) continue;
 
                 // Select the current item
                 slot = i;
