@@ -261,7 +261,7 @@ public class KillAura extends Module {
                 return switch (weapon.get()) {
                     case Axe -> item instanceof AxeItem;
                     case Sword -> item instanceof SwordItem;
-                    case Both -> item instanceof AxeItem || item instanceof SwordItem;
+                    case Both, Best -> item instanceof AxeItem || item instanceof SwordItem;
                     default -> true;
                 };
             });
@@ -362,6 +362,7 @@ public class KillAura extends Module {
         Sword,
         Axe,
         Both,
+        Best,
         Any
     }
 
