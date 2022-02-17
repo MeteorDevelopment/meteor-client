@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.profiles;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -80,6 +82,28 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
         for (Profile profile : this) {
             if (profile.loadOnJoinIps.contains(Utils.getWorldName())) {
                 profile.load();
+            }
+        }
+    }
+
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        for (Profile profile : this) {
+            if (profile.saveOnLeave && profile.loadOnJoinIps.contains(Utils.getWorldName())) {
+                profile.save();
+            }
+        }
+    }
+
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        for (Profile profile : this) {
+            if (profile.saveOnInterval && profile.loadOnJoinIps.contains(Utils.getWorldName())) {
+                profile.timer--;
+                if (profile.timer <= 0) {
+                    profile.timer = profile.saveInterval * 20;
+                    profile.save();
+                }
             }
         }
     }
