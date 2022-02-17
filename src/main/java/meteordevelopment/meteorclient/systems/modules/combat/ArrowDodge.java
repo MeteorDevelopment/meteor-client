@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -12,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.projectile.PersistentProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -34,6 +36,12 @@ public class ArrowDodge extends Module {
         .description("How many steps into the future should be taken into consideration when deciding the direction")
         .defaultValue(500)
         .range(1, 750)
+        .build()
+    );
+
+    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("ignore-projectiles")
+        .description("Won't dodge these projectiles")
         .build()
     );
 
@@ -85,6 +93,7 @@ public class ArrowDodge extends Module {
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
             if (e instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor) e).getInGround()) continue;
+            if (entities.get().getBoolean(e.getType())) continue;
 
             List<Box> futureArrowHitboxes = new ArrayList<>();
 
