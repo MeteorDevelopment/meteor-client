@@ -153,7 +153,7 @@ public class ServerCommand extends Command {
 
         info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
 
-        info("Day: %lld", mc.world.getTimeOfDay() / 24000L);
+        info("Day: %d", mc.world.getTimeOfDay() / 24000L);
         
         info("Permission level: %s", formatPerms());
     }
@@ -227,7 +227,7 @@ public class ServerCommand extends Command {
 
     public String formatPerms() {
 		int p = 5;
-		while (mc.player.hasPermissionLevel(p + 1) && p > 0) p--;
+		while (!mc.player.hasPermissionLevel(p + 1) && p > 0) p--;
 
 		return switch (p) {
 			case 0 -> "0 (No Perms)";
