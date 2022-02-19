@@ -168,12 +168,8 @@ public class AntiAFK extends Module {
             if (spin.get()) {
                 prevYaw += spinSpeed.get();
                 switch (spinMode.get()) {
-                    case Client:
-                        mc.player.setYaw(prevYaw);
-                        break;
-                    case Server:
-                        Rotations.rotate(prevYaw, pitch.get(), -15, null);
-                        break;
+                    case Client -> mc.player.setYaw(prevYaw);
+                    case Server -> Rotations.rotate(prevYaw, pitch.get(), -15, null);
                 }
             }
 

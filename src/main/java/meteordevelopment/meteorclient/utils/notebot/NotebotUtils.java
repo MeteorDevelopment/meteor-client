@@ -18,6 +18,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class NotebotUtils {
     public static boolean isValidInstrument(BlockPos pos, InstrumentType instrument) {
+        BlockState block = mc.world.getBlockState(pos.down());
         switch (instrument) {
             case Any:
                 return true;
@@ -34,7 +35,6 @@ public class NotebotUtils {
                         return false;
                     else return instr != Instrument.COW_BELL;
                 } else {
-                    BlockState block = mc.world.getBlockState(pos.down());
                     if (block.getMaterial() == Material.AGGREGATE)
                         return false;
                     else if (block.getMaterial() == Material.GLASS)
@@ -50,7 +50,6 @@ public class NotebotUtils {
                 if (state.getBlock() == Blocks.NOTE_BLOCK) {
                     return (state.get(NoteBlock.INSTRUMENT) == Instrument.HARP);
                 } else {
-                    BlockState block = mc.world.getBlockState(pos.down());
                     if (block.getMaterial() == Material.WOOD)
                         return false;
                     else if (block.getMaterial() == Material.AGGREGATE)
@@ -83,51 +82,39 @@ public class NotebotUtils {
                 }
             }
             case Banjo: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.HAY_BLOCK);
             }
             case Bass: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getMaterial() == Material.WOOD);
             }
             case Bells: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.GOLD_BLOCK);
             }
             case Bit: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.EMERALD_BLOCK);
             }
             case Chimes: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.PACKED_ICE);
             }
             case CowBell: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.SOUL_SAND);
             }
             case Didgeridoo: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.PUMPKIN);
             }
             case Flute: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.CLAY);
             }
             case Guitar: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getMaterial() == Material.WOOL);
             }
             case IronXylophone: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.IRON_BLOCK);
             }
             case Pling: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.GLOWSTONE);
             }
             case Xylophone: {
-                BlockState block = mc.world.getBlockState(pos.down());
                 return (block.getBlock() == Blocks.BONE_BLOCK);
             }
             default:
@@ -230,33 +217,20 @@ public class NotebotUtils {
     }
 
     public static SoundEvent getInstrumentSound(InstrumentType instrument) {
-        switch (instrument) {
-            case Bass:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BASS;
-            case Bells:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BELL;
-            case Flute:
-                return SoundEvents.BLOCK_NOTE_BLOCK_FLUTE;
-            case Chimes:
-                return SoundEvents.BLOCK_NOTE_BLOCK_CHIME;
-            case Guitar:
-                return SoundEvents.BLOCK_NOTE_BLOCK_GUITAR;
-            case Xylophone:
-                return SoundEvents.BLOCK_NOTE_BLOCK_XYLOPHONE;
-            case IronXylophone:
-                return SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE;
-            case CowBell:
-                return SoundEvents.BLOCK_NOTE_BLOCK_COW_BELL;
-            case Didgeridoo:
-                return SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO;
-            case Bit:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BIT;
-            case Banjo:
-                return SoundEvents.BLOCK_NOTE_BLOCK_BANJO;
-            case Pling:
-                return SoundEvents.BLOCK_NOTE_BLOCK_PLING;
-            default:
-                return SoundEvents.BLOCK_NOTE_BLOCK_HARP;
-        }
+        return switch (instrument) {
+            case Bass -> SoundEvents.BLOCK_NOTE_BLOCK_BASS;
+            case Bells -> SoundEvents.BLOCK_NOTE_BLOCK_BELL;
+            case Flute -> SoundEvents.BLOCK_NOTE_BLOCK_FLUTE;
+            case Chimes -> SoundEvents.BLOCK_NOTE_BLOCK_CHIME;
+            case Guitar -> SoundEvents.BLOCK_NOTE_BLOCK_GUITAR;
+            case Xylophone -> SoundEvents.BLOCK_NOTE_BLOCK_XYLOPHONE;
+            case IronXylophone -> SoundEvents.BLOCK_NOTE_BLOCK_IRON_XYLOPHONE;
+            case CowBell -> SoundEvents.BLOCK_NOTE_BLOCK_COW_BELL;
+            case Didgeridoo -> SoundEvents.BLOCK_NOTE_BLOCK_DIDGERIDOO;
+            case Bit -> SoundEvents.BLOCK_NOTE_BLOCK_BIT;
+            case Banjo -> SoundEvents.BLOCK_NOTE_BLOCK_BANJO;
+            case Pling -> SoundEvents.BLOCK_NOTE_BLOCK_PLING;
+            default -> SoundEvents.BLOCK_NOTE_BLOCK_HARP;
+        };
     }
 }
