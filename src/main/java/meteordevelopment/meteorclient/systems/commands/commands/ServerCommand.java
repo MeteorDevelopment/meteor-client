@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
@@ -152,15 +151,11 @@ public class ServerCommand extends Command {
 
         info("Protocol version: %d", server.protocolVersion);
 
-        info("Difficulty: %s", mc.world.getDifficulty().getTranslatableName().getString());
+        info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
 
-        ClientCommandSource cmdSource = mc.getNetworkHandler().getCommandSource();
-        int permission_level = 5;
-        while (permission_level > 0) {
-            if (cmdSource.hasPermissionLevel(permission_level)) break;
-            permission_level--;
-        }
-        info("Permission level: %d", permission_level);
+        info("Day: %d", mc.world.getTimeOfDay() / 24000L);
+        
+        info("Permission level: %s", formatPerms());
     }
 
     @EventHandler
@@ -177,8 +172,7 @@ public class ServerCommand extends Command {
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
         try {
-            if (event.packet instanceof CommandSuggestionsS2CPacket) {
-                CommandSuggestionsS2CPacket packet = (CommandSuggestionsS2CPacket) event.packet;
+            if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
                 List<String> plugins = new ArrayList<>();
                 Suggestions matches = packet.getSuggestions();
 
@@ -230,4 +224,18 @@ public class ServerCommand extends Command {
 
         return String.format("(highlight)%s(default)", name);
     }
+
+    public String formatPerms() {
+		int p = 5;
+		while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
+
+		return switch (p) {
+			case 0 -> "0 (No Perms)";
+			case 1 -> "1 (No Perms)";
+			case 2 -> "2 (Player Command Access)";
+			case 3 -> "3 (Server Command Access)";
+			case 4 -> "4 (Operator)";
+			default -> p + " (Unknown)";
+		};
+	}
 }
