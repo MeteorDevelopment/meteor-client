@@ -18,7 +18,6 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.block.entity.BannerBlockEntityRenderer;
 import net.minecraft.client.render.model.ModelLoader;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -75,7 +74,7 @@ public class BannerBlockEntityRendererMixin {
         matrixStack.push();
         BlockState blockState = bannerBlockEntity.getCachedState();
         matrixStack.translate(0.5D, -0.1666666716337204D, 0.5D);
-        float h = -((Direction)blockState.get(WallBannerBlock.FACING)).asRotation();
+        float h = -blockState.get(WallBannerBlock.FACING).asRotation();
         matrixStack.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(h));
         matrixStack.translate(0.0D, -0.3125D, -0.4375D);
         matrixStack.push();
