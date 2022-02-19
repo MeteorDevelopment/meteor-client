@@ -227,7 +227,7 @@ public class ServerCommand extends Command {
 
     public String formatPerms() {
 		int p = 5;
-		while (!mc.player.hasPermissionLevel(p + 1) && p > 0) p--;
+		while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
 
 		return switch (p) {
 			case 0 -> "0 (No Perms)";
