@@ -155,12 +155,12 @@ public class ProfilesTab extends Tab {
             table.row();
 
             // Interval
-            table.add(theme.label("Save on Interval"));
+            table.add(theme.label("Save on Interval:"));
             WCheckbox intervalSaveBool = table.add(theme.checkbox(ogProfile.saveOnInterval)).widget();
             intervalSaveBool.action = () -> newProfile.saveOnInterval = intervalSaveBool.checked;
             table.row();
 
-            table.add(theme.label("Interval Delay"));
+            table.add(theme.label("Interval Delay:"));
             WIntEdit intervalSaveInt = table.add(theme.intEdit(ogProfile.saveInterval, 2, 360, false)).widget();
             intervalSaveInt.action = () -> newProfile.saveInterval = intervalSaveInt.get();
             table.row();

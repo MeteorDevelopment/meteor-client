@@ -79,7 +79,7 @@ public class AutoEat extends Module {
 
     private final Setting<Boolean> avoidOvereating = sgHunger.add(new BoolSetting.Builder()
         .name("avoid-overeating")
-        .description("Avoid eating foods that would bring your hunger over full.")
+        .description("Avoid eating foods that would overshoot your hunger level over the hunger bar.")
         .defaultValue(false)
         .build()
     );
