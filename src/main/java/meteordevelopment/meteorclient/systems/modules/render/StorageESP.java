@@ -24,13 +24,10 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.entity.*;
 import net.minecraft.block.enums.ChestType;
-import net.minecraft.client.util.math.MatrixStack;
 
 import java.util.List;
 
 public class StorageESP extends Module {
-    private static final MatrixStack MATRICES = new MatrixStack();
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -178,8 +175,26 @@ public class StorageESP extends Module {
             getBlockEntityColor(blockEntity);
 
             if (render) {
-                if (mode.get() == Mode.Box) renderBox(event, blockEntity);
-                else renderShader(event, blockEntity);
+                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
+                double a = 1;
+                if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
+
+                int prevLineA = lineColor.a;
+                int prevSideA = sideColor.a;
+
+                lineColor.a *= a;
+                sideColor.a *= a;
+
+                if (tracers.get() && a >= 0.075) {
+                    event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
+                }
+
+                if (mode.get() == Mode.Box && a >= 0.075) renderBox(event, blockEntity);
+
+                lineColor.a = prevLineA;
+                sideColor.a = prevSideA;
+
+                if (mode.get() == Mode.Shader) renderShader(event, blockEntity);
 
                 count++;
             }
@@ -216,26 +231,7 @@ public class StorageESP extends Module {
             if (Dir.isNot(excludeDir, Dir.SOUTH)) z2 -= a;
         }
 
-        double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
-        double a = 1;
-        if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
-
-        int prevLineA = lineColor.a;
-        int prevSideA = sideColor.a;
-
-        lineColor.a *= a;
-        sideColor.a *= a;
-
-        if (a >= 0.075) {
-            event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), excludeDir);
-        }
-
-        if (tracers.get()) {
-            event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5, lineColor);
-        }
-
-        lineColor.a = prevLineA;
-        sideColor.a = prevSideA;
+        event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), excludeDir);
     }
 
     private void renderShader(Render3DEvent event, BlockEntity blockEntity) {
