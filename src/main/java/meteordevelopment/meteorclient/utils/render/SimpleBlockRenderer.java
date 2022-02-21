@@ -7,11 +7,12 @@ package meteordevelopment.meteorclient.utils.render;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.client.render.*;
+import net.minecraft.client.render.block.entity.BlockEntityRenderer;
 import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -21,9 +22,19 @@ import java.util.Random;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class SimpleBlockModelRenderer {
+public class SimpleBlockRenderer {
+    private static final MatrixStack MATRICES = new MatrixStack();
     private static final Direction[] DIRECTIONS = Direction.values();
     private static final Random RANDOM = new Random();
+
+    public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
+        SimpleBlockRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);
+
+        vertexConsumerProvider.setOffset(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
+        BlockEntityRenderer<BlockEntity> renderer = mc.getBlockEntityRenderDispatcher().get(blockEntity);
+        if (renderer != null && blockEntity.hasWorld() && blockEntity.getType().supports(blockEntity.getCachedState())) renderer.render(blockEntity, tickDelta, MATRICES, vertexConsumerProvider, LightmapTextureManager.MAX_LIGHT_COORDINATE, OverlayTexture.DEFAULT_UV);
+        vertexConsumerProvider.setOffset(0, 0, 0);
+    }
 
     public static void render(BlockPos pos, BlockState state, VertexConsumerProvider consumerProvider) {
         if (state.getRenderType() != BlockRenderType.MODEL) return;
