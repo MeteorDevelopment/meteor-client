@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
@@ -59,7 +60,7 @@ public class Nuker extends Module {
 
 
     private final Setting<Integer> range_up = sgGeneral.add(new IntSetting.Builder()
-        .name("Up")
+        .name("up")
         .description("The break range.")
         .defaultValue(1)
         .min(0)
@@ -119,6 +120,13 @@ public class Nuker extends Module {
         .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Rotate towards the block you are trying to mine")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
         .name("max-blocks-per-tick")
         .description("Maximum blocks to try to break per tick. Useful when insta mining.")
@@ -162,7 +170,7 @@ public class Nuker extends Module {
 
     // Bounding box
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
-        .name("Bounding box")
+        .name("bounding-box")
         .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
@@ -192,7 +200,7 @@ public class Nuker extends Module {
     // Broken blocks
 
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
-        .name("Broken blocks")
+        .name("broken-blocks")
         .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
@@ -412,6 +420,7 @@ public class Nuker extends Module {
                 boolean canInstaMine = BlockUtils.canInstaBreak(block);
 
                 BlockUtils.breakBlock(block, swingHand.get());
+                if (rotate.get() && count == 0) Rotations.rotate(Rotations.getYaw(block), Rotations.getPitch(block));
                 renderBlocks.add(renderBlockPool.get().set(block));
 
                 lastBlockPos.set(block);
