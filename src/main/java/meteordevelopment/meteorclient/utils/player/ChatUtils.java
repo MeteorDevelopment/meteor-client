@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.addons.AddonManager;
-import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.gui.hud.ChatHudAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;

@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
-import meteordevelopment.meteorclient.mixin.ChunkAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.world.chunk.ChunkAccessor;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;

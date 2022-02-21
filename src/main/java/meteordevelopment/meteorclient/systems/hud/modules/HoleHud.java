@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud.modules;
 
-import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.render.WorldRendererAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.settings.BlockListSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;

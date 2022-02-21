@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.entity;
 
-import meteordevelopment.meteorclient.mixin.CrossbowItemAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.item.CrossbowItemAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MissHitResult;

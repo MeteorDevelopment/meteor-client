@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.SignEditScreenAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.gui.screen.ingame.SignEditScreenAccessor;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;

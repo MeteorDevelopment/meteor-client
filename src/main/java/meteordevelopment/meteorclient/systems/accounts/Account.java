@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.accounts;
 
 import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.util.Session;

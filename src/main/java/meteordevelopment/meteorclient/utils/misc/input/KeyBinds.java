@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.misc.input;
 
-import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.option.KeyBindingAccessor;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;

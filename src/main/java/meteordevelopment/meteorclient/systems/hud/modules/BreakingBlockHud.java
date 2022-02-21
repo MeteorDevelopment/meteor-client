@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud.modules;
 
-import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.network.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.systems.hud.HUD;
 
 public class BreakingBlockHud extends DoubleTextHudElement {

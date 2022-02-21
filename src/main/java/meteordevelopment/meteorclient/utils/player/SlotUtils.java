@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
-import meteordevelopment.meteorclient.mixin.HorseScreenHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.gui.screen.ingame.CreativeInventoryScreenAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.screen.HorseScreenHandlerAccessor;
 import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.mob.ZombieHorseEntity;

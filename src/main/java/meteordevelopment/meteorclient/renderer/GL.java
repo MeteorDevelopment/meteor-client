@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.renderer;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
-import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.render.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;

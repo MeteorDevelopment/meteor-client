@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import meteordevelopment.meteorclient.mixin.MapRendererAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.render.MapRendererAccessor;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import net.minecraft.client.render.MapRenderer;
 import net.minecraft.command.CommandSource;
@@ -107,10 +107,7 @@ public class SaveMapCommand extends Command {
         ItemStack map = getMap();
         if (map == null) return null;
 
-        MapState state = FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
-        if (state == null) return null;
-
-        return state;
+        return FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
     }
 
     private String getPath() {

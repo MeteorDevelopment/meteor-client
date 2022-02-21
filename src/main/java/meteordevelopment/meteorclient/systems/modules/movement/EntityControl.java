@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 //Created by squidoodly 10/07/2020
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.network.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IHorseBaseEntity;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
