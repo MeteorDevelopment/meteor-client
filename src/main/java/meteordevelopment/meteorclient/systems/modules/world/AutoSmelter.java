@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import meteordevelopment.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.screen.AbstractFurnaceScreenHandlerAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.settings.Setting;

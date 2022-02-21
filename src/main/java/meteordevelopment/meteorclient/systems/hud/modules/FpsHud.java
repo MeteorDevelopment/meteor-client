@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud.modules;
 
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.systems.hud.HUD;
 
 public class FpsHud extends DoubleTextHudElement {

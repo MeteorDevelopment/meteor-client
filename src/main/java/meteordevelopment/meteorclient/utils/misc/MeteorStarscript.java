@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.utils.misc;
 import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.client.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Init;

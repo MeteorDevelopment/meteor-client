@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
-import meteordevelopment.meteorclient.mixin.DimensionTypeAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.world.dimension.DimensionTypeAccessor;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;
 import net.minecraft.client.network.ClientPlayNetworkHandler;

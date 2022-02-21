@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import io.netty.buffer.Unpooled;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
+import meteordevelopment.meteorclient.mixin.minecraft.network.packet.c2s.CustomPayloadC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
