@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import meteordevelopment.meteorclient.utils.render.MeshVertexConsumerProvider;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
-import meteordevelopment.meteorclient.utils.render.SimpleBlockModelRenderer;
+import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dir;
@@ -240,12 +240,7 @@ public class StorageESP extends Module {
 
     private void renderShader(Render3DEvent event, BlockEntity blockEntity) {
         vertexConsumerProvider.setColor(lineColor);
-
-        SimpleBlockModelRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);
-
-        vertexConsumerProvider.setOffset(blockEntity.getPos().getX(), blockEntity.getPos().getY(), blockEntity.getPos().getZ());
-        mc.getBlockEntityRenderDispatcher().render(blockEntity, event.tickDelta, MATRICES, vertexConsumerProvider);
-        vertexConsumerProvider.setOffset(0, 0, 0);
+        SimpleBlockRenderer.renderWithBlockEntity(blockEntity, event.tickDelta, vertexConsumerProvider);
     }
 
     @Override
