@@ -15,8 +15,14 @@ public class BreakingBlockHud extends DoubleTextHudElement {
 
     @Override
     protected String getRight() {
-        if (isInEditor()) return "0%";
+        if (isInEditor()) {
+            visible = false;
+            return "0%";
+        }
 
-        return String.format("%.0f%%", ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress() * 100);
+        float breakingProgress = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress();
+
+        visible = breakingProgress > 0;
+        return String.format("%.0f%%", breakingProgress * 100);
     }
 }
