@@ -16,7 +16,6 @@ You can get a build from [GitHub Actions](https://github.com/JFronny/meteor-clie
 - Add keywords to modules for discoverability ([#1600](https://github.com/MeteorDevelopment/meteor-client/pull/1600))
 - Use browser user agent in Http Utils instead of "Meteor Client"
 - Add default target entities to KillAura and BowAimbot
-- KillAura: ignore passive targets ([#1589](https://github.com/MeteorDevelopment/meteor-client/pull/1589))
 
 ## Credits
 [Cabaletta](https://github.com/cabaletta) for [Baritone](https://github.com/cabaletta/baritone)  
