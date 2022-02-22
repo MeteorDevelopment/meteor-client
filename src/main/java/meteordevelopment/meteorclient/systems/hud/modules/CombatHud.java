@@ -26,10 +26,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BedItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
@@ -41,6 +38,7 @@ import java.util.Map;
 public class CombatHud extends HudElement {
     private static final Color GREEN = new Color(15, 255, 15);
     private static final Color RED = new Color(255, 15, 15);
+    private static final Color YELLOW = new Color(255, 150, 15);
     private static final Color BLACK = new Color(0, 0, 0, 255);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -248,7 +246,8 @@ public class CombatHud extends HudElement {
                 for (int position = 3; position >= 0; position--) {
                     ItemStack itemStack = getItem(position);
 
-                    if (!itemStack.isEmpty()) naked = false;
+                    if (!itemStack.isEmpty()
+                        && itemStack.getItem() != Items.PLAYER_HEAD) naked = false;
                 }
 
                 if (naked) {
@@ -270,6 +269,27 @@ public class CombatHud extends HudElement {
                     if (threat) {
                         friendText = "Threat";
                         friendColor = RED;
+                    } else {
+                        int score = 0;
+
+                        for (int position = 3; position >= 0; position--) {
+                            ItemStack itemStack = getItem(position);
+
+                            if (!itemStack.isEmpty()
+                                && itemStack.getItem() instanceof ArmorItem armor) {
+                                score += armor.getProtection();
+                                score += armor.getToughness();
+                                // TODO: Check for enchantments
+                            }
+                        }
+
+                        if (score < 20) {
+                            friendText = "Vulnerable";
+                            friendColor = YELLOW;
+                        } else {
+                            friendText = "Geared";
+                            friendColor = RED;
+                        }
                     }
                 }
             }
