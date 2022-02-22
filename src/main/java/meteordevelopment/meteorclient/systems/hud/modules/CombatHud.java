@@ -279,7 +279,6 @@ public class CombatHud extends HudElement {
                                 && itemStack.getItem() instanceof ArmorItem armor) {
                                 score += armor.getProtection();
                                 score += armor.getToughness();
-                                // TODO: Check for enchantments
                             }
                         }
 

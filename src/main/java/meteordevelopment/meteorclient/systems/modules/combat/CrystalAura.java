@@ -680,38 +680,6 @@ public class CrystalAura extends Module {
         if (crystal != null) doBreak(crystal);
     }
 
-    private double getBreakDamage(Entity entity, boolean checkCrystalAge) {
-        if (!(entity instanceof EndCrystalEntity)) return 0;
-
-        // Check only break own
-        if (onlyBreakOwn.get() && !placedCrystals.contains(entity.getId())) return 0;
-
-        // Check if it should already be removed
-        if (removed.contains(entity.getId())) return 0;
-
-        // Check attempted breaks
-        if (attemptedBreaks.get(entity.getId()) > breakAttempts.get()) return 0;
-
-        // Check crystal age
-        if (checkCrystalAge && entity.age < ticksExisted.get()) return 0;
-
-        // Check range
-        if (isOutOfRange(entity.getPos(), entity.getBlockPos(), false)) return 0;
-
-        // Check damage to self and anti suicide
-        blockPos.set(entity.getBlockPos()).move(0, -1, 0);
-        double selfDamage = DamageUtils.crystalDamage(mc.player, entity.getPos(), predictMovement.get(), blockPos, ignoreTerrain.get());
-        if (selfDamage > maxDamage.get() || (antiSuicide.get() && selfDamage >= EntityUtils.getTotalHealth(mc.player))) return 0;
-
-        // Check damage to targets and face place
-        double damage = getDamageToTargets(entity.getPos(), blockPos, true, false);
-        boolean facePlaced = (facePlace.get() && shouldFacePlace(entity.getBlockPos()) || forceFacePlace.get().isPressed());
-
-        if (!facePlaced && damage < minDamage.get()) return 0;
-
-        return damage;
-    }
-
     private void doBreak(Entity crystal) {
         // Anti weakness
         if (antiWeakness.get()) {
@@ -763,6 +731,38 @@ public class CrystalAura extends Module {
             breakRenderPos.set(crystal.getBlockPos().down());
             breakRenderTimer = renderBreakTime.get();
         }
+    }
+
+    private double getBreakDamage(Entity entity, boolean checkCrystalAge) {
+        if (!(entity instanceof EndCrystalEntity)) return 0;
+
+        // Check only break own
+        if (onlyBreakOwn.get() && !placedCrystals.contains(entity.getId())) return 0;
+
+        // Check if it should already be removed
+        if (removed.contains(entity.getId())) return 0;
+
+        // Check attempted breaks
+        if (attemptedBreaks.get(entity.getId()) > breakAttempts.get()) return 0;
+
+        // Check crystal age
+        if (checkCrystalAge && entity.age < ticksExisted.get()) return 0;
+
+        // Check range
+        if (isOutOfRange(entity.getPos(), entity.getBlockPos(), false)) return 0;
+
+        // Check damage to self and anti suicide
+        blockPos.set(entity.getBlockPos()).move(0, -1, 0);
+        double selfDamage = DamageUtils.crystalDamage(mc.player, entity.getPos(), predictMovement.get(), blockPos, ignoreTerrain.get());
+        if (selfDamage > maxDamage.get() || (antiSuicide.get() && selfDamage >= EntityUtils.getTotalHealth(mc.player))) return 0;
+
+        // Check damage to targets and face place
+        double damage = getDamageToTargets(entity.getPos(), blockPos, true, false);
+        boolean facePlaced = (facePlace.get() && shouldFacePlace(entity.getBlockPos()) || forceFacePlace.get().isPressed());
+
+        if (!facePlaced && damage < minDamage.get()) return 0;
+
+        return damage;
     }
 
     private boolean isValidWeaknessItem(ItemStack itemStack) {
