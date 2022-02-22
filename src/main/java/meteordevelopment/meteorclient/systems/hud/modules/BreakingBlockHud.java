@@ -29,7 +29,7 @@ public class BreakingBlockHud extends DoubleTextHudElement {
     protected String getRight() {
         if (isInEditor()) {
             visible = true;
-            return "42%";
+            return "0%";
         }
 
         float breakingProgress = ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress();
