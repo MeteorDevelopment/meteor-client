@@ -160,9 +160,9 @@ public class Cell<T extends WWidget> {
             widget.width = width;
         } else {
             switch (alignX) {
-                case Left:   widget.x = x; break;
-                case Center: widget.x = x + width / 2 - widget.width / 2; break;
-                case Right:  widget.x = x + width - widget.width; break;
+                case Left -> widget.x = x;
+                case Center -> widget.x = x + width / 2 - widget.width / 2;
+                case Right -> widget.x = x + width - widget.width;
             }
         }
 
@@ -171,9 +171,9 @@ public class Cell<T extends WWidget> {
             widget.height = height;
         } else {
             switch (alignY) {
-                case Top:    widget.y = y + s(marginTop); break;
-                case Center: widget.y = y + height / 2 - widget.height / 2; break;
-                case Bottom: widget.y = y + height - widget.height; break;
+                case Top -> widget.y = y + s(marginTop);
+                case Center -> widget.y = y + height / 2 - widget.height / 2;
+                case Bottom -> widget.y = y + height - widget.height;
             }
         }
     }

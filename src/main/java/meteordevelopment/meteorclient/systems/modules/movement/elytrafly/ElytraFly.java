@@ -326,12 +326,12 @@ public class ElytraFly extends Module {
 
     private void onModeChanged(ElytraFlightModes mode) {
         switch (mode) {
-            case Vanilla:   currentMode = new Vanilla(); break;
-            case Packet:    currentMode = new Packet(); break;
-            case Pitch40:
+            case Vanilla -> currentMode = new Vanilla();
+            case Packet -> currentMode = new Packet();
+            case Pitch40 -> {
                 currentMode = new Pitch40();
                 autoPilot.set(false); // Pitch 40 is an autopilot of its own
-                break;
+            }
         }
     }
 

@@ -32,10 +32,10 @@ public class Sneak extends Module {
     }
 
     public boolean doPacket() {
-        return isActive() && !Modules.get().isActive(Freecam.class) && mode.get() == Mode.Packet;
+        return isActive() && !mc.player.getAbilities().flying && mode.get() == Mode.Packet;
     }
 
     public boolean doVanilla() {
-        return isActive() && !Modules.get().isActive(Freecam.class) && mode.get() == Mode.Vanilla;
+        return isActive() && !mc.player.getAbilities().flying && mode.get() == Mode.Vanilla;
     }
 }

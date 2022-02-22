@@ -40,6 +40,10 @@ public abstract class WContainer extends WWidget {
         }
     }
 
+    public void remove(Cell<?> cell) {
+        if (cells.remove(cell)) invalidate();
+    }
+
     @Override
     public void move(double deltaX, double deltaY) {
         super.move(deltaX, deltaY);
