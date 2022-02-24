@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -68,6 +69,13 @@ public class ArrowDodge extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreOwn = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-own")
+        .description("Ignore your own projectiles.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final List<Vec3d> possibleMoveDirections = Arrays.asList(
         new Vec3d(1, 0, 1),
         new Vec3d(0, 0, 1),
@@ -94,6 +102,7 @@ public class ArrowDodge extends Module {
             if (!(e instanceof ProjectileEntity)) continue;
             if (e instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor) e).getInGround()) continue;
             if (entities.get().getBoolean(e.getType())) continue;
+            if (ignoreOwn.get() && ((ProjectileEntityAccessor) e).getOwnerUuid().equals(mc.player.getUuid())) continue;
 
             List<Box> futureArrowHitboxes = new ArrayList<>();
 
