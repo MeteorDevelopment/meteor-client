@@ -97,7 +97,7 @@ public class BreakIndicators extends Module {
         blocks.values().forEach(info -> {
             BlockPos pos = info.getPos();
             int stage = info.getStage();
-            if (pos == ownBreakingPos) return;
+            if (pos.equals(ownBreakingPos)) return;
 
             BlockState state = mc.world.getBlockState(pos);
             VoxelShape shape = state.getOutlineShape(mc.world, pos);
