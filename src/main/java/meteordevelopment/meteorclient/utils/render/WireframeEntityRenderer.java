@@ -34,6 +34,7 @@ public class WireframeEntityRenderer {
     private static final Vector4f pos3 = new Vector4f();
     private static final Vector4f pos4 = new Vector4f();
 
+    private static double offsetX, offsetY, offsetZ;
     private static Color sideColor, lineColor;
     private static ShapeMode shapeMode;
 
@@ -42,12 +43,11 @@ public class WireframeEntityRenderer {
         WireframeEntityRenderer.lineColor = lineColor;
         WireframeEntityRenderer.shapeMode = shapeMode;
 
-        double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX());
-        double y = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY());
-        double z = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ());
+        offsetX = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX());
+        offsetY = MathHelper.lerp(event.tickDelta, entity.lastRenderY, entity.getY());
+        offsetZ = MathHelper.lerp(event.tickDelta, entity.lastRenderZ, entity.getZ());
 
         matrices.push();
-        matrices.translate(x, y, z);
         matrices.scale((float) scale, (float) scale, (float) scale);
 
         EntityRenderer<?> entityRenderer = mc.getEntityRenderDispatcher().getRenderer(entity);
@@ -335,13 +335,13 @@ public class WireframeEntityRenderer {
         matrices.push();
         part.rotate(matrices);
 
-        for (ModelPart.Cuboid cuboid : part.cuboids) render(renderer, cuboid);
+        for (ModelPart.Cuboid cuboid : part.cuboids) render(renderer, cuboid, offsetX, offsetY, offsetZ);
         for (ModelPart child : part.children.values()) render(renderer, child);
 
         matrices.pop();
     }
 
-    private static void render(Renderer3D renderer, ModelPart.Cuboid cuboid) {
+    private static void render(Renderer3D renderer, ModelPart.Cuboid cuboid, double offsetX, double offsetY, double offsetZ) {
         Matrix4f matrix = matrices.peek().getPositionMatrix();
 
         for (ModelPart.Quad quad : cuboid.sides) {
@@ -361,18 +361,18 @@ public class WireframeEntityRenderer {
             // Render
             if (shapeMode.sides()) {
                 renderer.triangles.quad(
-                    renderer.triangles.vec3(pos1.getX(), pos1.getY(), pos1.getZ()).color(sideColor).next(),
-                    renderer.triangles.vec3(pos2.getX(), pos2.getY(), pos2.getZ()).color(sideColor).next(),
-                    renderer.triangles.vec3(pos3.getX(), pos3.getY(), pos3.getZ()).color(sideColor).next(),
-                    renderer.triangles.vec3(pos4.getX(), pos4.getY(), pos4.getZ()).color(sideColor).next()
+                    renderer.triangles.vec3(offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ()).color(sideColor).next(),
+                    renderer.triangles.vec3(offsetX + pos2.getX(), offsetY + pos2.getY(), offsetZ + pos2.getZ()).color(sideColor).next(),
+                    renderer.triangles.vec3(offsetX + pos3.getX(), offsetY + pos3.getY(), offsetZ + pos3.getZ()).color(sideColor).next(),
+                    renderer.triangles.vec3(offsetX + pos4.getX(), offsetY + pos4.getY(), offsetZ + pos4.getZ()).color(sideColor).next()
                 );
             }
 
             if (shapeMode.lines()) {
-                renderer.line(pos1.getX(), pos1.getY(), pos1.getZ(), pos2.getX(), pos2.getY(), pos2.getZ(), lineColor);
-                renderer.line(pos2.getX(), pos2.getY(), pos2.getZ(), pos3.getX(), pos3.getY(), pos3.getZ(), lineColor);
-                renderer.line(pos3.getX(), pos3.getY(), pos3.getZ(), pos4.getX(), pos4.getY(), pos4.getZ(), lineColor);
-                renderer.line(pos1.getX(), pos1.getY(), pos1.getZ(), pos1.getX(), pos1.getY(), pos1.getZ(), lineColor);
+                renderer.line(offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ(), offsetX + pos2.getX(), offsetY + pos2.getY(), offsetZ + pos2.getZ(), lineColor);
+                renderer.line(offsetX + pos2.getX(), offsetY + pos2.getY(), offsetZ + pos2.getZ(), offsetX + pos3.getX(), offsetY + pos3.getY(), offsetZ + pos3.getZ(), lineColor);
+                renderer.line(offsetX + pos3.getX(), offsetY + pos3.getY(), offsetZ + pos3.getZ(), offsetX + pos4.getX(), offsetY + pos4.getY(), offsetZ + pos4.getZ(), lineColor);
+                renderer.line(offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ(), offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ(), lineColor);
             }
         }
     }

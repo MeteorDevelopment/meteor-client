@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.mixin.WorldRendererAccessor;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
 import meteordevelopment.meteorclient.renderer.Shader;
+import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
@@ -104,27 +105,37 @@ public class EntityShaders {
         }
 
         // Outline
-        if (esp != null && esp.isShader()) {
-            wra.setEntityOutlinesFramebuffer(outlinesFramebuffer);
-            outlinesVertexConsumerProvider.draw();
-            wra.setEntityOutlinesFramebuffer(fbo);
-
-            mc.getFramebuffer().beginWrite(false);
-
-            GL.bindTexture(outlinesFramebuffer.getColorAttachment());
-
-            outlinesShader.bind();
-            outlinesShader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
-            outlinesShader.set("u_Texture", 0);
-            outlinesShader.set("u_Width", esp.outlineWidth.get());
-            outlinesShader.set("u_FillOpacity", esp.fillOpacity.get().floatValue() / 255.0);
-            outlinesShader.set("u_ShapeMode", esp.shapeMode.get().ordinal());
-            PostProcessRenderer.render();
-        }
+        if (esp != null && esp.isShader()) renderOutlines(outlinesVertexConsumerProvider::draw, true, esp.outlineWidth.get(), esp.fillOpacity.get().floatValue(), esp.shapeMode.get());
     }
 
     public static void onResized(int width, int height) {
         if (overlayFramebuffer != null) overlayFramebuffer.resize(width, height, false);
         if (outlinesFramebuffer != null) outlinesFramebuffer.resize(width, height, false);
+    }
+
+    public static void renderOutlines(Runnable draw, boolean entities, int width, float fillOpacity, ShapeMode shapeMode) {
+        WorldRenderer worldRenderer = mc.worldRenderer;
+        WorldRendererAccessor wra = (WorldRendererAccessor) worldRenderer;
+        Framebuffer fbo = worldRenderer.getEntityOutlinesFramebuffer();
+
+        if (entities) wra.setEntityOutlinesFramebuffer(outlinesFramebuffer);
+        else {
+            outlinesFramebuffer.clear(false);
+            outlinesFramebuffer.beginWrite(false);
+        }
+        draw.run();
+        if (entities) wra.setEntityOutlinesFramebuffer(fbo);
+
+        mc.getFramebuffer().beginWrite(false);
+
+        GL.bindTexture(outlinesFramebuffer.getColorAttachment());
+
+        outlinesShader.bind();
+        outlinesShader.set("u_Size", mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight());
+        outlinesShader.set("u_Texture", 0);
+        outlinesShader.set("u_Width", width);
+        outlinesShader.set("u_FillOpacity", fillOpacity / 255.0);
+        outlinesShader.set("u_ShapeMode", shapeMode.ordinal());
+        PostProcessRenderer.render();
     }
 }

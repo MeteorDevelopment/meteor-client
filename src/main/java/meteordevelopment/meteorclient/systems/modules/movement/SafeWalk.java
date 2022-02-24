@@ -67,18 +67,19 @@ public class SafeWalk extends Module {
     }
 
     private boolean blockFilter(Block block) {
-        if (block instanceof AbstractFireBlock) return true;
-        if (block instanceof AbstractPressurePlateBlock) return true;
-        if (block instanceof TripwireBlock) return true;
-        if (block instanceof TripwireHookBlock) return true;
-        if (block instanceof CobwebBlock) return true;
-        if (block instanceof CampfireBlock) return true;
-        if (block instanceof SweetBerryBushBlock) return true;
-        if (block instanceof CactusBlock) return true;
-        if (block instanceof AbstractRailBlock) return true;
-        if (block instanceof TrapdoorBlock) return true;
-        if (block instanceof PowderSnowBlock) return true;
-        if (block instanceof AbstractCauldronBlock) return true;
-        return false;
+        return (block instanceof AbstractFireBlock 
+            || block instanceof AbstractPressurePlateBlock 
+            || block instanceof TripwireBlock 
+            || block instanceof TripwireHookBlock 
+            || block instanceof CobwebBlock 
+            || block instanceof CampfireBlock 
+            || block instanceof SweetBerryBushBlock 
+            || block instanceof CactusBlock 
+            || block instanceof AbstractRailBlock 
+            || block instanceof TrapdoorBlock 
+            || block instanceof PowderSnowBlock 
+            || block instanceof AbstractCauldronBlock 
+            || block instanceof HoneyBlock
+        );
     }
 }

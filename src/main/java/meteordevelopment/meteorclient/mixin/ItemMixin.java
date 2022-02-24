@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
-import meteordevelopment.meteorclient.utils.tooltip.MapTooltipComponent;
 import net.minecraft.client.item.TooltipData;
 import net.minecraft.item.*;
 import org.spongepowered.asm.mixin.Mixin;
