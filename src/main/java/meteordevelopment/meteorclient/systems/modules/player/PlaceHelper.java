@@ -3,7 +3,7 @@
  * Copyright (c) 2021 Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.world;
+package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -14,12 +14,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Direction;
 
-public class AirPlace extends Module {
+public class PlaceHelper extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRange = settings.createGroup("Range");
 
@@ -74,18 +77,14 @@ public class AirPlace extends Module {
 
     private HitResult hitResult;
 
-    public AirPlace() {
-        super(Categories.Player, "air-place", "Places a block where your crosshair is pointing at.");
+    public PlaceHelper() {
+        super(Categories.Player, "place-helper", "Helps you place blocks where you normally can't");
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
-        hitResult = mc.getCameraEntity().raycast(r, 0, false);
-
-        if (!(hitResult instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
-
-        if (mc.options.keyUse.isPressed()) {
+        setHitResult();
+        if (hitResult instanceof BlockHitResult && mc.player.getMainHandStack().getItem() instanceof BlockItem && mc.options.keyUse.isPressed()) {
             BlockUtils.place(((BlockHitResult) hitResult).getBlockPos(), Hand.MAIN_HAND, mc.player.getInventory().selectedSlot, false, 0, true, true, false);
         }
     }
@@ -98,5 +97,18 @@ public class AirPlace extends Module {
             || !render.get()) return;
 
         event.renderer.box(((BlockHitResult) hitResult).getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+    }
+
+    private void setHitResult() {
+        final double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
+        for (int i = (int) r; i > 0; i -= 1D) {
+            hitResult = mc.getCameraEntity().raycast(Math.min(r, i), 0, false);
+            if (hitResult instanceof BlockHitResult && isValid(((BlockHitResult) hitResult).getBlockPos())) return;
+        }
+        hitResult = null;
+    }
+
+    private boolean isValid(BlockPos pos) {
+        return !pos.equals(mc.player.getBlockPos()) && BlockUtils.getPlaceSide(pos) != null;
     }
 }
