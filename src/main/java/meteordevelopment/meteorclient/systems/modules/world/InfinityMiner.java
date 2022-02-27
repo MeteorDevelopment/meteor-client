@@ -204,7 +204,8 @@ public class InfinityMiner extends Module {
         ItemStack itemStack = mc.player.getMainHandStack();
         toolPercantage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
         return !(toolPercantage > startMining.get() || (toolPercantage > startRepairing.get() && !repairing));
-
+    }
+    
     private boolean filter(Block block) {
         return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
     }
