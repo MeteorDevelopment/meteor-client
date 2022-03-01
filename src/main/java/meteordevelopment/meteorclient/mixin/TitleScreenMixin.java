@@ -56,7 +56,7 @@ public class TitleScreenMixin extends Screen {
                             .message("Using old versions of Meteor is not recommended")
                             .message("and could report in issues.")
                             .id("new-update-no")
-                            .onOk(this::onClose)
+                            .onOk(this::close)
                             .show())
                         .id("new-update")
                         .show();

@@ -152,7 +152,7 @@ public class ColorSettingScreen extends WindowScreen {
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
         WButton backButton = bottomList.add(theme.button("Back")).expandX().widget();
-        backButton.action = this::onClose;
+        backButton.action = this::close;
 
         WButton resetButton = bottomList.add(theme.button(GuiRenderer.RESET)).widget();
         resetButton.action = () -> {

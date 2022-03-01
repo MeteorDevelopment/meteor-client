@@ -60,14 +60,14 @@ public class AutoClicker extends Module {
     @Override
     public void onActivate() {
         timer = 0;
-        mc.options.keyAttack.setPressed(false);
-        mc.options.keyUse.setPressed(false);
+        mc.options.attackKey.setPressed(false);
+        mc.options.useKey.setPressed(false);
     }
 
     @Override
     public void onDeactivate() {
-        mc.options.keyAttack.setPressed(false);
-        mc.options.keyUse.setPressed(false);
+        mc.options.attackKey.setPressed(false);
+        mc.options.useKey.setPressed(false);
     }
 
     @EventHandler
@@ -75,8 +75,8 @@ public class AutoClicker extends Module {
         switch (mode.get()) {
             case Hold:
                 switch (button.get()) {
-                    case Left -> mc.options.keyAttack.setPressed(true);
-                    case Right -> mc.options.keyUse.setPressed(true);
+                    case Left -> mc.options.attackKey.setPressed(true);
+                    case Right -> mc.options.useKey.setPressed(true);
                 }
                 break;
             case Press:

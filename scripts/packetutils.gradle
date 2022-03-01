@@ -7,6 +7,11 @@ final packetRegistryClass = """
         }
 
         @Override
+        public int size() {
+            return S2C_PACKETS.keySet().size() + C2S_PACKETS.keySet().size();
+        }
+
+        @Override
         public Identifier getId(Class<? extends Packet<?>> entry) {
             return null;
         }
@@ -32,7 +37,7 @@ final packetRegistryClass = """
         }
 
         @Override
-        protected Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
+        public Lifecycle getEntryLifecycle(Class<? extends Packet<?>> object) {
             return null;
         }
 
@@ -43,11 +48,6 @@ final packetRegistryClass = """
 
         @Override
         public Set<Identifier> getIds() {
-            return null;
-        }
-
-        @Override
-        public Set<Map.Entry<RegistryKey<Class<? extends Packet<?>>>, Class<? extends Packet<?>>>> getEntries() {
             return null;
         }
 
@@ -68,34 +68,90 @@ final packetRegistryClass = """
         }
 
         @Override
-        public Class<? extends Packet<?>> getRandom(Random random) {
+        public boolean contains(RegistryKey<Class<? extends Packet<?>>> key) {
+            return false;
+        }
+
+        @Override
+        public Set<Map.Entry<RegistryKey<Class<? extends Packet<?>>>, Class<? extends Packet<?>>>> getEntrySet() {
             return null;
         }
 
         @Override
-        public boolean contains(RegistryKey<Class<? extends Packet<?>>> key) {
+        public Optional<RegistryEntry<Class<? extends Packet<?>>>> getRandom(Random random) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Registry<Class<? extends Packet<?>>> freeze() {
+            return null;
+        }
+
+        @Override
+        public RegistryEntry<Class<? extends Packet<?>>> getOrCreateEntry(RegistryKey<Class<? extends Packet<?>>> key) {
+            return null;
+        }
+
+        @Override
+        public RegistryEntry.Reference<Class<? extends Packet<?>>> createEntry(Class<? extends Packet<?>> value) {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntry<Class<? extends Packet<?>>>> getEntry(int rawId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<RegistryEntry<Class<? extends Packet<?>>>> getEntry(RegistryKey<Class<? extends Packet<?>>> key) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Stream<RegistryEntry.Reference<Class<? extends Packet<?>>>> streamEntries() {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntryList.Named<Class<? extends Packet<?>>>> getEntryList(TagKey<Class<? extends Packet<?>>> tag) {
+            return Optional.empty();
+        }
+
+        @Override
+        public RegistryEntryList.Named<Class<? extends Packet<?>>> getOrCreateEntryList(TagKey<Class<? extends Packet<?>>> tag) {
+            return null;
+        }
+
+        @Override
+        public Stream<Pair<TagKey<Class<? extends Packet<?>>>, RegistryEntryList.Named<Class<? extends Packet<?>>>>> streamTagsAndEntries() {
+            return null;
+        }
+
+        @Override
+        public Stream<TagKey<Class<? extends Packet<?>>>> streamTags() {
+            return null;
+        }
+
+        @Override
+        public boolean containsTag(TagKey<Class<? extends Packet<?>>> tag) {
             return false;
         }
+
+        @Override
+        public void clearTags() {}
+
+        @Override
+        public void populateTags(Map<TagKey<Class<? extends Packet<?>>>, List<RegistryEntry<Class<? extends Packet<?>>>>> tagEntries) {}
     }
 """
 
 task generatePacketUtils() {
     doLast {
-        // Get minecraft jar file
-        def mc = ""
-        def dir = new File(System.getProperty("user.home"), ".gradle/caches/fabric-loom/${project.minecraft_version}-mapped-net.fabricmc.yarn-${project.yarn_version}-v2")
-        for (def file in dir.listFiles()) {
-            if (file.name.contains("minecraft") && file.name.contains("mapped") && file.name.endsWith((String) project.yarn_version + "-v2.jar")) {
-                mc = file.absolutePath
-                break
-            }
-        }
-
         // Get packets
         def s2cPackets = []
         def c2sPackets = []
 
-        def file = new JarFile(mc)
+        def file = new JarFile(new File(System.getProperty("user.dir"), ".gradle/loom-cache/${project.minecraft_version}/net.fabricmc.yarn.${project.minecraft_version.replace('.', '_')}.${project.yarn_mappings}-v2/minecraft-project-@-mapped.jar"))
         for (entry in file.entries()) {
             if (entry.name.endsWith("S2CPacket.class")) s2cPackets << entry.name.substring(0, entry.name.length() - 6)
             else if (entry.name.endsWith("C2SPacket.class")) c2sPackets << entry.name.substring(0, entry.name.length() - 6)
@@ -113,13 +169,18 @@ task generatePacketUtils() {
 
         //   Write imports
         writer << "import com.google.common.collect.Iterators;\n"
+        writer << "import com.mojang.datafixers.util.Pair;\n"
         writer << "import com.mojang.serialization.Lifecycle;\n"
         writer << "import net.minecraft.network.Packet;\n"
+        writer << "import net.minecraft.tag.TagKey;\n"
         writer << "import net.minecraft.util.Identifier;\n"
         writer << "import net.minecraft.util.registry.Registry;\n"
+        writer << "import net.minecraft.util.registry.RegistryEntry;\n"
+        writer << "import net.minecraft.util.registry.RegistryEntryList;\n"
         writer << "import net.minecraft.util.registry.RegistryKey;\n"
         writer << "import org.jetbrains.annotations.NotNull;\n"
         writer << "import java.util.*;\n"
+        writer << "import java.util.stream.Stream;\n"
 
         //   Write class
         writer << "\npublic class PacketUtils {\n"

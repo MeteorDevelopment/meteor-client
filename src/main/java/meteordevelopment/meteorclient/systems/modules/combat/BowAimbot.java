@@ -117,7 +117,7 @@ public class BowAimbot extends Module {
             return;
         }
 
-        if (mc.options.keyUse.isPressed() && itemInHand()) {
+        if (mc.options.useKey.isPressed() && itemInHand()) {
             if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
                 wasPathing = true;
