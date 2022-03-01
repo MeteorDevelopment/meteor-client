@@ -140,11 +140,11 @@ public class PathFinder {
                 if (mc.player.getPos().distanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .1)
                     currentPathBlock = getNextPathBlock();
                 lookAtDestination(currentPathBlock);
-                if (!mc.options.keyForward.isPressed())
-                    mc.options.keyForward.setPressed(true);
+                if (!mc.options.forwardKey.isPressed())
+                    mc.options.forwardKey.setPressed(true);
             } else {
-                if (mc.options.keyForward.isPressed())
-                    mc.options.keyForward.setPressed(false);
+                if (mc.options.forwardKey.isPressed())
+                    mc.options.forwardKey.setPressed(false);
                 path.clear();
                 currentPathBlock = null;
             }
@@ -160,7 +160,7 @@ public class PathFinder {
     public void disable() {
         target = null;
         path.clear();
-        if (mc.options.keyForward.isPressed()) mc.options.keyForward.setPressed(false);
+        if (mc.options.forwardKey.isPressed()) mc.options.forwardKey.setPressed(false);
         MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 

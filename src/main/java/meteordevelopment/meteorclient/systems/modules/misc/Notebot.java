@@ -123,7 +123,7 @@ public class Notebot extends Module {
             for (int x = -5; x < 5; x++) {
                 if (y != 0 || x != 0) {
                     BlockPos pos = new BlockPos(x, 0, y);
-                    if (pos.getSquaredDistance(0, 0, 0, true) < (4.3 * 4.3) - 0.5) {
+                    if (pos.getSquaredDistance(0, 0, 0) < (4.3 * 4.3) - 0.5) {
                         possibleBlockPos.add(pos);
                     }
                 }
@@ -449,7 +449,7 @@ public class Notebot extends Module {
                     if (mc.world.getBlockState(pos).getBlock() != Blocks.NOTE_BLOCK) continue;
                     float reach = mc.interactionManager.getReachDistance();
                     reach = reach * reach; //^2
-                    if (pos.getSquaredDistance(mc.player.getPos(), false) > reach) continue;
+                    if (pos.getSquaredDistance(mc.player.getPos()) > reach) continue;
                     if (!isValidScanSpot(pos) || !NotebotUtils.isValidInstrument(pos, instrument.get())) continue;
                     scannedNoteblocks.add(pos);
                 }

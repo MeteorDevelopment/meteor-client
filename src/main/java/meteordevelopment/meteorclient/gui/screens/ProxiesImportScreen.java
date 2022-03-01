@@ -5,11 +5,8 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.WindowScreen;
-import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
@@ -77,6 +74,6 @@ public class ProxiesImportScreen extends WindowScreen {
         }
         add(theme.horizontalSeparator()).expandX();
         WButton btnBack = add(theme.button("Back")).expandX().widget();
-        btnBack.action = this::onClose;
+        btnBack.action = this::close;
     }
 }

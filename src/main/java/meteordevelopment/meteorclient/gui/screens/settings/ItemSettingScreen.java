@@ -58,7 +58,7 @@ public class ItemSettingScreen extends WindowScreen {
             WButton select = table.add(theme.button("Select")).expandCellX().right().widget();
             select.action = () -> {
                 setting.set(item);
-                onClose();
+                close();
             };
 
             table.row();

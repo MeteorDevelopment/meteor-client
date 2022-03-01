@@ -42,8 +42,8 @@
   },
   "depends": {
     "java": ">=17",
-    "minecraft": ">=1.18",
-    "fabricloader": ">=0.12.11"
+    "minecraft": ">=1.18.2",
+    "fabricloader": ">=0.12.12"
   },
   "breaks": {
     "optifabric": "*"

@@ -69,7 +69,7 @@ public class AccountsScreen extends WindowScreen {
 
                 if (screen != null) {
                     screen.locked = false;
-                    screen.onClose();
+                    screen.close();
                 }
 
                 parent.reload();
