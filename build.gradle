@@ -27,8 +27,8 @@ repositories {
 
 dependencies {
 	def library = { id ->
-		implementation id
-		shadow id
+		implementation(id) { exclude group: "org.slf4j" }
+		shadow(id) { exclude group: "org.slf4j" }
 	}
 
 	// Fabric

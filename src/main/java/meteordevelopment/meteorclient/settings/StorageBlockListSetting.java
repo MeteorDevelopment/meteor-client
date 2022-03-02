@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.settings;
 
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
+import it.unimi.dsi.fastutil.objects.ObjectIterators;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
@@ -19,7 +20,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.util.registry.RegistryKey;
-import org.apache.logging.log4j.core.util.ObjectArrayIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -178,7 +178,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         @NotNull
         @Override
         public Iterator<BlockEntityType<?>> iterator() {
-            return new ObjectArrayIterator<>(STORAGE_BLOCKS);
+            return ObjectIterators.wrap(STORAGE_BLOCKS);
         }
 
         @Override

@@ -5,11 +5,10 @@
 
 package meteordevelopment.meteorclient.utils.notebot;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.notebot.nbs.Layer;
 import meteordevelopment.meteorclient.utils.notebot.nbs.Note;
 import meteordevelopment.meteorclient.utils.notebot.nbs.Song;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.HashMap;
@@ -17,9 +16,6 @@ import java.util.HashMap;
 //https://github.com/xxmicloxx/NoteBlockAPI/blob/master/src/main/java/com/xxmicloxx/NoteBlockAPI/NBSDecoder.java
 
 public class NBSDecoder {
-
-    public static final Logger LOG = LogManager.getLogger();
-
     public static Song parse(File decodeFile) {
         try {
             return parse(new FileInputStream(decodeFile), decodeFile);
@@ -39,11 +35,10 @@ public class NBSDecoder {
             short length = readShort(dis);
             if (length != 0) return parseClassic(dis, decodeFile, length);
             else return parseOpenNBS(dis, decodeFile);
-        } catch (FileNotFoundException e) {
-            LOG.error(e.getStackTrace());
         } catch (IOException e) {
-            LOG.error(e.getStackTrace());
+            MeteorClient.LOG.error("", e);
         }
+
         return null;
     }
 

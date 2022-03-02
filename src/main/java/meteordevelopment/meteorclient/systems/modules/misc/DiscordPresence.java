@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 //Created by squidoodly
 
-import meteordevelopment.DiscordIPC;
-import meteordevelopment.RichPresence;
+import meteordevelopment.discordipc.DiscordIPC;
+import meteordevelopment.discordipc.RichPresence;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
