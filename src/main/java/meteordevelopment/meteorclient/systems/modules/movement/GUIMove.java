@@ -47,7 +47,7 @@ public class GUIMove extends Module {
             .description("Allows you to jump while in GUIs.")
             .defaultValue(true)
             .onChanged(aBoolean -> {
-                if (isActive() && !aBoolean) set(mc.options.keyJump, false);
+                if (isActive() && !aBoolean) set(mc.options.jumpKey, false);
             })
             .build()
     );
@@ -57,7 +57,7 @@ public class GUIMove extends Module {
             .description("Allows you to sneak while in GUIs.")
             .defaultValue(true)
             .onChanged(aBoolean -> {
-                if (isActive() && !aBoolean) set(mc.options.keySneak, false);
+                if (isActive() && !aBoolean) set(mc.options.sneakKey, false);
             })
             .build()
     );
@@ -67,7 +67,7 @@ public class GUIMove extends Module {
             .description("Allows you to sprint while in GUIs.")
             .defaultValue(true)
             .onChanged(aBoolean -> {
-                if (isActive() && !aBoolean) set(mc.options.keySprint, false);
+                if (isActive() && !aBoolean) set(mc.options.sprintKey, false);
             })
             .build()
     );
@@ -93,14 +93,14 @@ public class GUIMove extends Module {
 
     @Override
     public void onDeactivate() {
-        set(mc.options.keyForward, false);
-        set(mc.options.keyBack, false);
-        set(mc.options.keyLeft, false);
-        set(mc.options.keyRight, false);
+        set(mc.options.forwardKey, false);
+        set(mc.options.backKey, false);
+        set(mc.options.leftKey, false);
+        set(mc.options.rightKey, false);
 
-        if (jump.get()) set(mc.options.keyJump, false);
-        if (sneak.get()) set(mc.options.keySneak, false);
-        if (sprint.get()) set(mc.options.keySprint, false);
+        if (jump.get()) set(mc.options.jumpKey, false);
+        if (sneak.get()) set(mc.options.sneakKey, false);
+        if (sprint.get()) set(mc.options.sprintKey, false);
     }
 
     @EventHandler
@@ -109,14 +109,14 @@ public class GUIMove extends Module {
         if (screens.get() == Screens.GUI && !(mc.currentScreen instanceof WidgetScreen)) return;
         if (screens.get() == Screens.Inventory && mc.currentScreen instanceof WidgetScreen) return;
 
-        set(mc.options.keyForward, Input.isPressed(mc.options.keyForward));
-        set(mc.options.keyBack, Input.isPressed(mc.options.keyBack));
-        set(mc.options.keyLeft, Input.isPressed(mc.options.keyLeft));
-        set(mc.options.keyRight, Input.isPressed(mc.options.keyRight));
+        set(mc.options.forwardKey, Input.isPressed(mc.options.forwardKey));
+        set(mc.options.backKey, Input.isPressed(mc.options.backKey));
+        set(mc.options.leftKey, Input.isPressed(mc.options.leftKey));
+        set(mc.options.rightKey, Input.isPressed(mc.options.rightKey));
 
-        if (jump.get()) set(mc.options.keyJump, Input.isPressed(mc.options.keyJump));
-        if (sneak.get()) set(mc.options.keySneak, Input.isPressed(mc.options.keySneak));
-        if (sprint.get()) set(mc.options.keySprint, Input.isPressed(mc.options.keySprint));
+        if (jump.get()) set(mc.options.jumpKey, Input.isPressed(mc.options.jumpKey));
+        if (sneak.get()) set(mc.options.sneakKey, Input.isPressed(mc.options.sneakKey));
+        if (sprint.get()) set(mc.options.sprintKey, Input.isPressed(mc.options.sprintKey));
 
         if (arrowsRotate.get()) {
             float yaw = mc.player.getYaw();

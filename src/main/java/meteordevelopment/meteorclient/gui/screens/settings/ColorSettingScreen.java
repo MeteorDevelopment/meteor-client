@@ -152,7 +152,7 @@ public class ColorSettingScreen extends WindowScreen {
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
         WButton backButton = bottomList.add(theme.button("Back")).expandX().widget();
-        backButton.action = this::onClose;
+        backButton.action = this::close;
 
         WButton resetButton = bottomList.add(theme.button(GuiRenderer.RESET)).widget();
         resetButton.action = () -> {
@@ -296,8 +296,6 @@ public class ColorSettingScreen extends WindowScreen {
         boolean dragging;
         double lastMouseX, lastMouseY;
 
-        boolean calculateHandlePosOnLayout;
-
         double fixedHeight = -1;
 
         @Override
@@ -319,30 +317,14 @@ public class ColorSettingScreen extends WindowScreen {
             double delta = max - min;
 
             value = max / 255;
-            if(delta == 0){
-                saturation = 0;
-            }else {
-                saturation = delta / max;
-            }
+
+            if (delta == 0) saturation = 0;
+            else saturation = delta / max;
 
             if (calculateNow) {
                 handleX = saturation * width;
                 handleY = (1 - value) * height;
-            } else {
-                calculateHandlePosOnLayout = true;
             }
-        }
-
-        @Override
-        protected void onCalculateWidgetPositions() {
-            if (calculateHandlePosOnLayout) {
-                handleX = saturation * width;
-                handleY = (1 - value) * height;
-
-                calculateHandlePosOnLayout = false;
-            }
-
-            super.onCalculateWidgetPositions();
         }
 
         @Override
@@ -410,6 +392,9 @@ public class ColorSettingScreen extends WindowScreen {
             if (height != width) {
                 fixedHeight = width;
                 invalidate();
+
+                handleX = saturation * width;
+                handleY = (1 - value) * fixedHeight;
             }
 
             hueQuad.calculateColor();

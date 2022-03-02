@@ -52,7 +52,7 @@ public class EditBookTitleAndAuthorScreen extends WindowScreen {
 
             mc.getNetworkHandler().sendPacket(new BookUpdateC2SPacket(hand == Hand.MAIN_HAND ? mc.player.getInventory().selectedSlot : 40, pages, Optional.of(title.get())));
 
-            onClose();
+            close();
         };
     }
 }

@@ -397,9 +397,9 @@ public class Utils {
     }
 
     public static void leftClick() {
-        mc.options.keyAttack.setPressed(true);
+        mc.options.attackKey.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
-        mc.options.keyAttack.setPressed(false);
+        mc.options.attackKey.setPressed(false);
     }
 
     public static void rightClick() {

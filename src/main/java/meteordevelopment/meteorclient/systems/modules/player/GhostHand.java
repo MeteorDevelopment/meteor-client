@@ -29,7 +29,7 @@ public class GhostHand extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (!mc.options.keyUse.isPressed() || mc.player.isSneaking()) return;
+        if (!mc.options.useKey.isPressed() || mc.player.isSneaking()) return;
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
             if (new BlockPos(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos()).equals(blockEntity.getPos())) return;

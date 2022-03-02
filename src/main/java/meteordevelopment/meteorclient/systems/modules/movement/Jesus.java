@@ -203,10 +203,10 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
-        if ((event.fluid == Fluids.WATER || event.fluid == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
+        if ((event.fluidState.getFluid() == Fluids.WATER || event.fluidState.getFluid() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
         }
-        else if ((event.fluid == Fluids.LAVA || event.fluid == Fluids.FLOWING_LAVA) && lavaShouldBeSolid()) {
+        else if ((event.fluidState.getFluid() == Fluids.LAVA || event.fluidState.getFluid() == Fluids.FLOWING_LAVA) && lavaShouldBeSolid()) {
             event.walkOnFluid = true;
         }
     }
@@ -270,7 +270,7 @@ public class Jesus extends Module {
 
         if (dipIfBurning.get() && mc.player.isOnFire()) return false;
 
-        if (dipOnSneakWater.get() && mc.options.keySneak.isPressed()) return false;
+        if (dipOnSneakWater.get() && mc.options.sneakKey.isPressed()) return false;
         if (dipOnFallWater.get() && mc.player.fallDistance > dipFallHeightWater.get()) return false;
 
         return waterMode.get() == Mode.Solid;
@@ -281,7 +281,7 @@ public class Jesus extends Module {
 
         if (!lavaIsSafe() && lavaMode.get() == Mode.Solid) return true;
 
-        if (dipOnSneakLava.get() && mc.options.keySneak.isPressed()) return false;
+        if (dipOnSneakLava.get() && mc.options.sneakKey.isPressed()) return false;
         if (dipOnFallLava.get() && mc.player.fallDistance > dipFallHeightLava.get()) return false;
 
         return lavaMode.get() == Mode.Solid;

@@ -133,7 +133,7 @@ public class Velocity extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (!sinking.get()) return;
-        if (mc.options.keyJump.isPressed() || mc.options.keySneak.isPressed()) return;
+        if (mc.options.jumpKey.isPressed() || mc.options.sneakKey.isPressed()) return;
 
         if ((mc.player.isTouchingWater() || mc.player.isInLava()) && mc.player.getVelocity().y < 0) {
             ((IVec3d) mc.player.getVelocity()).setY(0);

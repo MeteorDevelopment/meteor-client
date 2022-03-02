@@ -33,7 +33,7 @@ repositories {
 
 dependencies {
 	def library = { id ->
-        modImplementation id
+        modImplementation(id) { exclude group: "org.slf4j" }
         include id
 	}
 
