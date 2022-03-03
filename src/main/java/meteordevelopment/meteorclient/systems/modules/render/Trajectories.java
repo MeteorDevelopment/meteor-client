@@ -67,6 +67,14 @@ public class Trajectories extends Module {
         .build()
     );
 
+    public final Setting<Integer> simulationSteps = sgGeneral.add(new IntSetting.Builder()
+        .name("simulation-steps")
+        .description("How many steps to simulate projectiles. Zero for no limit")
+        .defaultValue(500)
+        .sliderMax(5000)
+        .build()
+    );
+
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
@@ -192,16 +200,30 @@ public class Trajectories extends Module {
         public void calculate() {
             addPoint();
 
-            while (true) {
-                HitResult result = simulator.tick();
-
-                if (result != null) {
-                    processHitResult(result);
-                    break;
+            if (simulationSteps.get() == 0) {
+                while (true) {
+                    HitResult result = simulator.tick();
+    
+                    if (result != null) {
+                        processHitResult(result);
+                        break;
+                    }
+    
+                    addPoint();
                 }
-
-                addPoint();
+            } else {
+                for (int i = 0; i < simulationSteps.get(); i++) {
+                    HitResult result = simulator.tick();
+    
+                    if (result != null) {
+                        processHitResult(result);
+                        break;
+                    }
+    
+                    addPoint();
+                }
             }
+            
         }
 
         private void addPoint() {
