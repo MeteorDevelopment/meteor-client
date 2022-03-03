@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.thrown.*;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -200,28 +199,15 @@ public class Trajectories extends Module {
         public void calculate() {
             addPoint();
 
-            if (simulationSteps.get() == 0) {
-                while (true) {
-                    HitResult result = simulator.tick();
-    
-                    if (result != null) {
-                        processHitResult(result);
-                        break;
-                    }
-    
-                    addPoint();
+            for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
+                HitResult result = simulator.tick();
+
+                if (result != null) {
+                    processHitResult(result);
+                    break;
                 }
-            } else {
-                for (int i = 0; i < simulationSteps.get(); i++) {
-                    HitResult result = simulator.tick();
-    
-                    if (result != null) {
-                        processHitResult(result);
-                        break;
-                    }
-    
-                    addPoint();
-                }
+
+                addPoint();
             }
             
         }

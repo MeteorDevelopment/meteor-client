@@ -14,11 +14,13 @@ import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.orbit.EventHandler;
+
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShapes;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -68,6 +70,13 @@ public class ArrowDodge extends Module {
         .build()
     );
 
+    private final Setting<Boolean> allProjectiles = sgGeneral.add(new BoolSetting.Builder()
+        .name("all-projectiles")
+        .description("Dodge all projectiles, not only arrows.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> ignoreOwn = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-own")
         .description("Ignore your own projectiles.")
@@ -104,41 +113,36 @@ public class ArrowDodge extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Vec3 point: points) vec3s.free(point);
+        for (Vec3 point : points) vec3s.free(point);
         points.clear();
-        mc.world.getEntities().forEach(e -> {
-            if (!(e instanceof ProjectileEntity)) return;
-            if (ignoreOwn.get() && ((ProjectileEntityAccessor) e).getOwnerUuid().equals(mc.player.getUuid())) return;
-            if (!simulator.set(e, accurate.get(), 0.5D)) return;
-            if (simulationSteps.get() == 0) {
-                while (true) {
-                    points.add(vec3s.get().set(simulator.pos));
-                    if (simulator.tick() != null) break;
-                }
-            } else {
-                for (int i = 0; i < simulationSteps.get(); i++) {
-                    points.add(vec3s.get().set(simulator.pos));
-                    if (simulator.tick() != null) break;
-                }
+
+        for (Entity e : mc.world.getEntities()) {
+            if (!(e instanceof ProjectileEntity)) continue;
+            if (!allProjectiles.get() && !(e instanceof ArrowEntity)) continue;
+            if (ignoreOwn.get() && ((ProjectileEntityAccessor) e).getOwnerUuid().equals(mc.player.getUuid())) continue;
+            if (!simulator.set(e, accurate.get(), 0.5D)) continue;
+            for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
+                points.add(vec3s.get().set(simulator.pos));
+                if (simulator.tick() != null) break;
             }
-            
-        });
+        }
 
         if (isValid(Vec3d.ZERO, false)) return; // no need to move
 
-        boolean didMove = false;
         double speed = moveSpeed.get();
-        while (!didMove) {
+        for (int i = 0; i < 500; i++) { // its not a while loop so it doesn't freeze if something is wrong
+            boolean didMove = false;
             Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
             for (Vec3d direction : possibleMoveDirections) {
                 Vec3d velocity = direction.multiply(speed);
-                if (isValid(velocity, groundCheck.get())) {
+                if (isValid(velocity, true)) {
                     move(velocity);
                     didMove = true;
                     break;
                 }
             }
-            speed *= moveSpeed.get(); // move further
+            if (didMove) break;
+            speed += moveSpeed.get(); // move further
         }
 
     }
@@ -170,8 +174,16 @@ public class ArrowDodge extends Module {
 
         if (checkGround) {
             BlockPos blockPos = mc.player.getBlockPos().add(velocity.x, velocity.y, velocity.z);
-            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos) != VoxelShapes.empty()) return false;
-            return mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.empty();
+
+            // check if target pos is air
+            if (!mc.world.getBlockState(blockPos).getCollisionShape(mc.world, blockPos).isEmpty()) return false;
+            else if (!mc.world.getBlockState(blockPos.up()).getCollisionShape(mc.world, blockPos.up()).isEmpty()) return false;
+
+            if (groundCheck.get()) {
+                // check if ground under target is solid
+                return !mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()).isEmpty();
+            }
+                
         }
 
         return true;
