@@ -47,7 +47,7 @@ public class ArrowDodge extends Module {
 
     private final Setting<Double> distanceCheck = sgMovement.add(new DoubleSetting.Builder()
         .name("distance-check")
-        .description("How fast should you be when dodging arrow")
+        .description("How far should an arrow be from the player to be considered not hitting.")
         .defaultValue(1)
         .min(0.01)
         .sliderRange(0.01, 5)
