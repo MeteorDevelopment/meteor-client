@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class ArrowDodge extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -119,7 +120,10 @@ public class ArrowDodge extends Module {
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
             if (!allProjectiles.get() && !(e instanceof ArrowEntity)) continue;
-            if (ignoreOwn.get() && ((ProjectileEntityAccessor) e).getOwnerUuid().equals(mc.player.getUuid())) continue;
+            if (ignoreOwn.get()) {
+                UUID owner = ((ProjectileEntityAccessor) e).getOwnerUuid();
+                if (owner != null && owner.equals(mc.player.getUuid())) continue;
+            }
             if (!simulator.set(e, accurate.get(), 0.5D)) continue;
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
                 points.add(vec3s.get().set(simulator.pos));
