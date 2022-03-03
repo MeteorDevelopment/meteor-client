@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.entity.projectile.thrown.*;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -64,6 +63,14 @@ public class Trajectories extends Module {
         .name("accurate")
         .description("Whether or not to calculate more accurate.")
         .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer> simulationSteps = sgGeneral.add(new IntSetting.Builder()
+        .name("simulation-steps")
+        .description("How many steps to simulate projectiles. Zero for no limit")
+        .defaultValue(500)
+        .sliderMax(5000)
         .build()
     );
 
@@ -192,7 +199,7 @@ public class Trajectories extends Module {
         public void calculate() {
             addPoint();
 
-            while (true) {
+            for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
                 HitResult result = simulator.tick();
 
                 if (result != null) {
@@ -202,6 +209,7 @@ public class Trajectories extends Module {
 
                 addPoint();
             }
+            
         }
 
         private void addPoint() {
