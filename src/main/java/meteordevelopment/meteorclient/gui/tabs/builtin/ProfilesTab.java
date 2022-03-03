@@ -230,7 +230,7 @@ public class ProfilesTab extends Tab {
                     Profiles.get().save();
                 }
 
-                onClose();
+                close();
             };
 
             enterAction = save.action;

@@ -197,7 +197,7 @@ public class ProxiesScreen extends WindowScreen {
             addSave.action = () -> {
                 if (proxy.resolveAddress() && (!isNew || Proxies.get().add(proxy))) {
                     dirty = true;
-                    onClose();
+                    close();
                 }
             };
 

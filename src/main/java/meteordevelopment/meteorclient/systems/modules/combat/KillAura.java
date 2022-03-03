@@ -252,7 +252,7 @@ public class KillAura extends Module {
 
         if (rotation.get() == RotationMode.Always) rotate(primary, null);
 
-        if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return;
+        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
 
         if (onlyWhenLook.get()) {
             primary = mc.targetedEntity;

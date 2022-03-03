@@ -72,7 +72,7 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
             true,
             BannerBlockEntity.getPatternsFromNbt(
                 ((BannerItem) this.banner.getItem()).getColor(),
-                BannerBlockEntity.getPatternListTag(this.banner)
+                BannerBlockEntity.getPatternListNbt(this.banner)
             )
         );
         matrices.pop();

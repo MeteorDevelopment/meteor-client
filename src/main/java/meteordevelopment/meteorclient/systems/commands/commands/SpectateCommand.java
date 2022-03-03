@@ -39,10 +39,10 @@ public class SpectateCommand extends Command {
         }));
     }
 
-    private class StaticListener {
+    private static class StaticListener {
         @EventHandler
         private void onKey(KeyEvent event) {
-            if (mc.options.keySneak.matchesKey(event.key, 0) || mc.options.keySneak.matchesMouse(event.key)) {
+            if (mc.options.sneakKey.matchesKey(event.key, 0) || mc.options.sneakKey.matchesMouse(event.key)) {
                 mc.setCameraEntity(mc.player);
                 event.cancel();
                 MeteorClient.EVENT_BUS.unsubscribe(this);

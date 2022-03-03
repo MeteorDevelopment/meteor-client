@@ -147,7 +147,7 @@ public class LongJump extends Module {
         Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
         switch (jumpMode.get()) {
             case Vanilla -> {
-                if (PlayerUtils.isMoving() && mc.options.keyJump.isPressed()) {
+                if (PlayerUtils.isMoving() && mc.options.jumpKey.isPressed()) {
                     double dir = getDir();
 
                     double xDir = Math.cos(Math.toRadians(dir + 90));
@@ -175,7 +175,7 @@ public class LongJump extends Module {
                 double zDist = mc.player.getZ() - mc.player.prevZ;
                 double lastDist = Math.sqrt((xDist * xDist) + (zDist * zDist));
 
-                if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.keyJump.isPressed()) && !mc.player.isInLava() && !mc.player.isTouchingWater()) {
+                if (PlayerUtils.isMoving() && (!onJump.get() || mc.options.jumpKey.isPressed()) && !mc.player.isInLava() && !mc.player.isTouchingWater()) {
                     if (stage == 0) moveSpeed = getMoveSpeed() * burstInitialSpeed.get();
                     else if (stage == 1) {
                          ((IVec3d) event.movement).setY(0.42);

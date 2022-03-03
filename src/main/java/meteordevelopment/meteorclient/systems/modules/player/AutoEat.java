@@ -205,7 +205,7 @@ public class AutoEat extends Module {
     }
 
     private void setPressed(boolean pressed) {
-        mc.options.keyUse.setPressed(pressed);
+        mc.options.useKey.setPressed(pressed);
     }
 
     private void changeSlot(int slot) {
