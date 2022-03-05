@@ -5,40 +5,24 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.event.events.TickEvent;
-import baritone.api.pathing.goals.Goal;
-import baritone.api.pathing.movement.IMovement;
-import baritone.api.utils.BetterBlockPos;
-import meteordevelopment.meteorclient.events.entity.LivingEntityMoveEvent;
-import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
-import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
-import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
-import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.Material;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.entity.MovementType;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
-import net.minecraft.network.packet.s2c.play.UnloadChunkS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.*;
 
@@ -51,7 +35,7 @@ public class XrayBruteforce extends Module {
 
     private final Setting<Boolean> save_blocks = sgGeneral.add(new BoolSetting.Builder()
         .name("save-scanned")
-        .description("Save scanned blocks.")
+        .description("Save scanned blocks to memory.")
         .defaultValue(true)
         .onChanged(onChanged ->
         {
