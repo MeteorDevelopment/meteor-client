@@ -526,6 +526,7 @@ public class Modules extends System<Modules> {
         add(new Timer());
         add(new VeinMiner());
         add(new HighwayBuilder());
+        add(new XrayBruteforce());
     }
 
     private void initMisc() {
