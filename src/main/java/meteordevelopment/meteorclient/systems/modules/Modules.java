@@ -500,6 +500,7 @@ public class Modules extends System<Modules> {
         add(new Zoom());
         add(new Blur());
         add(new PopChams());
+        add(new TunnelESP());
     }
 
     private void initWorld() {

@@ -5,6 +5,7 @@ Accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explos
 Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
 Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
 Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
+Accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMap
 
 Accessible   method  net/minecraft/text/TextColor <init> (I)V
 
