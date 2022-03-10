@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -20,6 +21,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.render.color.SettingBooleanColor;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -28,9 +30,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 
+import java.util.Objects;
+
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
 
@@ -85,54 +88,17 @@ public class ESP extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<SettingColor> defaultColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("default-color")
+        .description("The colors of entities without a custom one.")
+        .defaultValue(new SettingColor(255, 255, 255, 255))
+        .build()
+    );
+
+    private final Setting<Object2ObjectMap<EntityType<?>, SettingBooleanColor>> entities = sgGeneral.add(new EntityColorListSetting.Builder()
         .name("entities")
-        .description("Select specific entities.")
-        .defaultValue(EntityType.PLAYER)
-        .build()
-    );
-
-    // Colors
-
-    private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
-        .name("players-color")
-        .description("The other player's color.")
-        .defaultValue(new SettingColor(255, 255, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> animalsColor = sgColors.add(new ColorSetting.Builder()
-        .name("animals-color")
-        .description("The animal's color.")
-        .defaultValue(new SettingColor(25, 255, 25, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> waterAnimalsColor = sgColors.add(new ColorSetting.Builder()
-        .name("water-animals-color")
-        .description("The water animal's color.")
-        .defaultValue(new SettingColor(25, 25, 255, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> monstersColor = sgColors.add(new ColorSetting.Builder()
-        .name("monsters-color")
-        .description("The monster's color.")
-        .defaultValue(new SettingColor(255, 25, 25, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> ambientColor = sgColors.add(new ColorSetting.Builder()
-        .name("ambient-color")
-        .description("The ambient's color.")
-        .defaultValue(new SettingColor(25, 25, 25, 255))
-        .build()
-    );
-
-    private final Setting<SettingColor> miscColor = sgColors.add(new ColorSetting.Builder()
-        .name("misc-color")
-        .description("The misc color.")
-        .defaultValue(new SettingColor(175, 175, 175, 255))
+        .description("Select the colors of specific entities.")
+        .defaultValue(new Object2ObjectOpenHashMap<>(0))
         .build()
     );
 
@@ -285,7 +251,7 @@ public class ESP extends Module {
     }
 
     public Color getOutlineColor(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return null;
+        if (!entities.get().containsKey(entity.getType()) || !entities.get().get(entity.getType()).isActive()) return null;
         Color color = getColor(entity);
         double alpha = getFadeAlpha(entity);
         return lineColor.set(color).a((int) (alpha * 255));
@@ -303,19 +269,16 @@ public class ESP extends Module {
     }
 
     public Color getColor(Entity entity) {
-        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), defaultColorIfNull(EntityType.PLAYER));
+        return defaultColorIfNull(entity.getType());
+    }
 
-        return switch (entity.getType().getSpawnGroup()) {
-            case CREATURE                                                  -> animalsColor.get();
-            case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-            case MONSTER                                                   -> monstersColor.get();
-            case AMBIENT                                                   -> ambientColor.get();
-            default                                                        -> miscColor.get();
-        };
+    public Color defaultColorIfNull(EntityType<?> entity) {
+        return entities.get().containsKey(entity) ? Objects.requireNonNullElse(entities.get().get(entity).getColor(), defaultColor.get()) : defaultColor.get();
     }
 
     private boolean shouldSkip(Entity entity) {
-        if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) return true;
+        if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || (entities.get().get(entity.getType()) != null && !entities.get().get(entity.getType()).isActive())) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 

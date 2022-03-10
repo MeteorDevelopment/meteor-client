@@ -50,6 +50,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(ItemSetting.class, (table, setting) -> itemW(table, (ItemSetting) setting));
         factories.put(ItemListSetting.class, (table, setting) -> itemListW(table, (ItemListSetting) setting));
         factories.put(EntityTypeListSetting.class, (table, setting) -> entityTypeListW(table, (EntityTypeListSetting) setting));
+        factories.put(EntityColorListSetting.class, (table, setting) -> entityColorListW(table, (EntityColorListSetting) setting));
         factories.put(EnchantmentListSetting.class, (table, setting) -> enchantmentListW(table, (EnchantmentListSetting) setting));
         factories.put(ModuleListSetting.class, (table, setting) -> moduleListW(table, (ModuleListSetting) setting));
         factories.put(PacketListSetting.class, (table, setting) -> packetListW(table, (PacketListSetting) setting));
@@ -277,6 +278,10 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void entityTypeListW(WTable table, EntityTypeListSetting setting) {
         selectW(table, setting, () -> mc.setScreen(new EntityTypeListSettingScreen(theme, setting)));
+    }
+
+    private void entityColorListW(WTable table, EntityColorListSetting setting) {
+        selectW(table, setting, () -> mc.setScreen(new EntityColorListSettingScreen(theme, setting)));
     }
 
     private void enchantmentListW(WTable table, EnchantmentListSetting setting) {
