@@ -1,53 +1,48 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * Copyright (c) 2022 Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.world;
 
-import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.util.math.ChunkSectionPos;
+import meteordevelopment.meteorclient.mixin.ClientChunkManagerAccessor;
+import meteordevelopment.meteorclient.mixin.ClientChunkMapAccessor;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.ChunkStatus;
-import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.Iterator;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChunkIterator implements Iterator<Chunk> {
-    private final int px, pz;
-    private final int r;
+    private final ClientChunkMapAccessor map = (ClientChunkMapAccessor) (Object) ((ClientChunkManagerAccessor) mc.world.getChunkManager()).getChunks();
+    private final boolean onlyWithLoadedNeighbours;
 
-    private int x, z;
-    private WorldChunk chunk;
+    private int i = 0;
+    private Chunk chunk;
 
-    public ChunkIterator() {
-        px = ChunkSectionPos.getSectionCoord(mc.player.getBlockX());
-        pz = ChunkSectionPos.getSectionCoord(mc.player.getBlockZ());
-        r = Utils.getRenderDistance();
+    public ChunkIterator(boolean onlyWithLoadedNeighbours) {
+        this.onlyWithLoadedNeighbours = onlyWithLoadedNeighbours;
 
-        x = px - r;
-        z = pz - r;
-
-        nextChunk();
+        getNext();
     }
 
-    private void nextChunk() {
+    private Chunk getNext() {
+        Chunk prev = chunk;
         chunk = null;
 
-        while (true) {
-            z++;
-            if (z > pz + r) {
-                z = pz - r;
-                x++;
-            }
-
-            if (x > px + r || z > pz + r) break;
-
-            chunk = (WorldChunk) mc.world.getChunk(x, z, ChunkStatus.FULL, false);
-            if (chunk != null) break;
+        while (i < map.getChunks().length()) {
+            chunk = map.getChunks().get(i++);
+            if (chunk != null && (!onlyWithLoadedNeighbours || isInRadius(chunk))) break;
         }
+
+        return prev;
+    }
+
+    private boolean isInRadius(Chunk chunk) {
+        int x = chunk.getPos().x;
+        int z = chunk.getPos().z;
+
+        return mc.world.getChunkManager().isChunkLoaded(x + 1, z) && mc.world.getChunkManager().isChunkLoaded(x - 1, z) && mc.world.getChunkManager().isChunkLoaded(x, z + 1) && mc.world.getChunkManager().isChunkLoaded(x, z - 1);
     }
 
     @Override
@@ -56,11 +51,7 @@ public class ChunkIterator implements Iterator<Chunk> {
     }
 
     @Override
-    public WorldChunk next() {
-        WorldChunk chunk = this.chunk;
-
-        nextChunk();
-
-        return chunk;
+    public Chunk next() {
+        return getNext();
     }
 }

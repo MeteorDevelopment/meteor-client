@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -37,17 +38,39 @@ public class Trajectories extends Module {
     // General
 
     private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
-            .name("items")
-            .description("Items to display trajectories for.")
-            .defaultValue(getDefaultItems())
-            .filter(this::itemFilter)
-            .build()
+        .name("items")
+        .description("Items to display trajectories for.")
+        .defaultValue(getDefaultItems())
+        .filter(this::itemFilter)
+        .build()
     );
 
     private final Setting<Boolean> otherPlayers = sgGeneral.add(new BoolSetting.Builder()
         .name("other-players")
         .description("Calculates trajectories for other players.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> firedProjectiles = sgGeneral.add(new BoolSetting.Builder()
+        .name("fired-projectiles")
+        .description("Calculates trajectories for already fired projectiles.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> accurate = sgGeneral.add(new BoolSetting.Builder()
+        .name("accurate")
+        .description("Whether or not to calculate more accurate.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Integer> simulationSteps = sgGeneral.add(new IntSetting.Builder()
+        .name("simulation-steps")
+        .description("How many steps to simulate projectiles. Zero for no limit")
+        .defaultValue(500)
+        .sliderMax(5000)
         .build()
     );
 
@@ -118,16 +141,24 @@ public class Trajectories extends Module {
         if (!items.get().contains(itemStack.getItem())) return;
 
         // Calculate paths
-        if (!simulator.set(player, itemStack, 0, false, tickDelta)) return;
+        if (!simulator.set(player, itemStack, 0, accurate.get(), tickDelta)) return;
         getEmptyPath().calculate();
 
         if (itemStack.getItem() instanceof CrossbowItem && EnchantmentHelper.getLevel(Enchantments.MULTISHOT, itemStack) > 0) {
-            if (!simulator.set(player, itemStack, -10, false, tickDelta)) return;
+            if (!simulator.set(player, itemStack, -10, accurate.get(), tickDelta)) return;
             getEmptyPath().calculate();
 
-            if (!simulator.set(player, itemStack, 10, false, tickDelta)) return;
+            if (!simulator.set(player, itemStack, 10, accurate.get(), tickDelta)) return;
             getEmptyPath().calculate();
         }
+    }
+
+    private void calculateFiredPath(Entity entity, double tickDelta) {
+        for (Path path : paths) path.clear();
+
+        // Calculate paths
+        if (!simulator.set(entity, accurate.get(), tickDelta)) return;
+        getEmptyPath().calculate();
     }
 
     @EventHandler
@@ -137,6 +168,15 @@ public class Trajectories extends Module {
 
             calculatePath(player, event.tickDelta);
             for (Path path : paths) path.render(event);
+        }
+
+        if (firedProjectiles.get()) {
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity instanceof ProjectileEntity) {
+                    calculateFiredPath(entity, event.tickDelta);
+                    for (Path path : paths) path.render(event);
+                }
+            }
         }
     }
 
@@ -159,7 +199,7 @@ public class Trajectories extends Module {
         public void calculate() {
             addPoint();
 
-            while (true) {
+            for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
                 HitResult result = simulator.tick();
 
                 if (result != null) {
@@ -169,6 +209,7 @@ public class Trajectories extends Module {
 
                 addPoint();
             }
+            
         }
 
         private void addPoint() {
