@@ -20,15 +20,22 @@ import static org.lwjgl.system.MemoryUtil.*;
 
 public class Mesh {
     public enum Attrib {
-        Float(1),
-        Vec2(2),
-        Vec3(3),
-        Color(4);
+        Float(1, 4, false),
+        Vec2(2, 4, false),
+        Vec3(3, 4, false),
+        Color(4, 1, true);
 
-        public final int size;
+        public final int count, size;
+        public final boolean normalized;
 
-        Attrib(int size) {
-            this.size = size;
+        Attrib(int count, int componentSize, boolean normalized) {
+            this.count = count;
+            this.size = count * componentSize;
+            this.normalized = normalized;
+        }
+
+        public int getType() {
+            return this == Color ? GL_UNSIGNED_BYTE : GL_FLOAT;
         }
     }
 
@@ -41,8 +48,7 @@ public class Mesh {
     private final int vao, vbo, ibo;
 
     private ByteBuffer vertices;
-    private long verticesPointer;
-    private int vertexComponentCount;
+    private long verticesPointerStart, verticesPointer;
 
     private ByteBuffer indices;
     private long indicesPointer;
@@ -55,13 +61,13 @@ public class Mesh {
 
     public Mesh(DrawMode drawMode, Attrib... attributes) {
         int stride = 0;
-        for (Attrib attribute : attributes) stride += attribute.size * 4;
+        for (Attrib attribute : attributes) stride += attribute.size;
 
         this.drawMode = drawMode;
         this.primitiveVerticesSize = stride * drawMode.indicesCount;
 
         vertices = BufferUtils.createByteBuffer(primitiveVerticesSize * 256 * 4);
-        verticesPointer = memAddress0(vertices);
+        verticesPointerStart = memAddress0(vertices);
 
         indices = BufferUtils.createByteBuffer(drawMode.indicesCount * 512 * 4);
         indicesPointer = memAddress0(indices);
@@ -77,12 +83,12 @@ public class Mesh {
 
         int offset = 0;
         for (int i = 0; i < attributes.length; i++) {
-            int attribute = attributes[i].size;
+            Attrib attrib = attributes[i];
 
             GL.enableVertexAttribute(i);
-            GL.vertexAttribute(i, attribute, GL_FLOAT, false, stride, offset);
+            GL.vertexAttribute(i, attrib.count, attrib.getType(), attrib.normalized, stride, offset);
 
-            offset += attribute * 4;
+            offset += attrib.size;
         }
 
         GL.bindVertexArray(0);
@@ -93,7 +99,7 @@ public class Mesh {
     public void begin() {
         if (building) throw new IllegalStateException("Mesh.end() called while already building.");
 
-        vertexComponentCount = 0;
+        verticesPointer = verticesPointerStart;
         vertexI = 0;
         indicesCount = 0;
 
@@ -113,35 +119,35 @@ public class Mesh {
     }
 
     public Mesh vec3(double x, double y, double z) {
-        long p = verticesPointer + vertexComponentCount * 4L;
+        long p = verticesPointer;
 
         memPutFloat(p, (float) (x - cameraX));
         memPutFloat(p + 4, (float) y);
         memPutFloat(p + 8, (float) (z - cameraZ));
 
-        vertexComponentCount += 3;
+        verticesPointer += 12;
         return this;
     }
 
     public Mesh vec2(double x, double y) {
-        long p = verticesPointer + vertexComponentCount * 4L;
+        long p = verticesPointer;
 
         memPutFloat(p, (float) x);
         memPutFloat(p + 4, (float) y);
 
-        vertexComponentCount += 2;
+        verticesPointer += 8;
         return this;
     }
 
     public Mesh color(Color c) {
-        long p = verticesPointer + vertexComponentCount * 4L;
+        long p = verticesPointer;
 
-        memPutFloat(p, c.r / 255f);
-        memPutFloat(p + 4, c.g / 255f);
-        memPutFloat(p + 8, c.b / 255f);
-        memPutFloat(p + 12, c.a / 255f * (float) alpha);
+        memPutByte(p, (byte) c.r);
+        memPutByte(p + 1, (byte) c.g);
+        memPutByte(p + 2, (byte) c.b);
+        memPutByte(p + 3, (byte) (c.a * (float) alpha));
 
-        vertexComponentCount += 4;
+        verticesPointer += 4;
         return this;
     }
 
@@ -177,14 +183,17 @@ public class Mesh {
     public void growIfNeeded() {
         // Vertices
         if ((vertexI + 1) * primitiveVerticesSize >= vertices.capacity()) {
+            int offset = getVerticesOffset();
+
             int newSize = vertices.capacity() * 2;
             if (newSize % primitiveVerticesSize != 0) newSize += newSize % primitiveVerticesSize;
 
             ByteBuffer newVertices = BufferUtils.createByteBuffer(newSize);
-            memCopy(memAddress0(vertices), memAddress0(newVertices), vertexComponentCount * 4L);
+            memCopy(memAddress0(vertices), memAddress0(newVertices), offset);
 
             vertices = newVertices;
-            verticesPointer = memAddress0(vertices);
+            verticesPointerStart = memAddress0(vertices);
+            verticesPointer = verticesPointerStart + offset;
         }
 
         // Indices
@@ -205,7 +214,7 @@ public class Mesh {
 
         if (indicesCount > 0) {
             GL.bindVertexBuffer(vbo);
-            GL.bufferData(GL_ARRAY_BUFFER, vertices.limit(vertexComponentCount * 4), GL_DYNAMIC_DRAW);
+            GL.bufferData(GL_ARRAY_BUFFER, vertices.limit(getVerticesOffset()), GL_DYNAMIC_DRAW);
             GL.bindVertexBuffer(0);
 
             GL.bindIndexBuffer(ibo);
@@ -270,4 +279,8 @@ public class Mesh {
     }
 
     protected void beforeRender() {}
+
+    private int getVerticesOffset() {
+        return (int) (verticesPointer - verticesPointerStart);
+    }
 }
