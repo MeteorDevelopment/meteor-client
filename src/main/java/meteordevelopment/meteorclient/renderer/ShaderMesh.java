@@ -10,7 +10,6 @@ public class ShaderMesh extends Mesh {
 
     public ShaderMesh(Shader shader, DrawMode drawMode, Attrib... attributes) {
         super(drawMode, attributes);
-        if (shader == null) throw new NullPointerException("Expected shader to be non-null");
 
         this.shader = shader;
     }
