@@ -15,16 +15,14 @@ import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(PlayerListHud.class)
 public class PlayerListHudMixin {
-
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", ordinal = 0), index = 1)
     private int modifyCount(int count) {
         BetterTab module = Modules.get().get(BetterTab.class);
@@ -46,11 +44,8 @@ public class PlayerListHudMixin {
         return module.isActive() && module.accurateLatency.get() ? width + 30 : width;
     }
 
-    @Shadow
-    protected void renderLatencyIcon(MatrixStack matrices, int width, int x, int y, PlayerListEntry entry) {}
-
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/PlayerListHud;renderLatencyIcon(Lnet/minecraft/client/util/math/MatrixStack;IIILnet/minecraft/client/network/PlayerListEntry;)V"))
-    protected void renderLatencyIcon(PlayerListHud self, MatrixStack matrices, int width, int x, int y, PlayerListEntry entry) {
+    @Inject(method = "renderLatencyIcon", at = @At("HEAD"), cancellable = true)
+    private void onRenderLatencyIcon(MatrixStack matrices, int width, int x, int y, PlayerListEntry entry, CallbackInfo info) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
         if (betterTab.isActive() && betterTab.accurateLatency.get()) {
@@ -61,9 +56,8 @@ public class PlayerListHudMixin {
             int color = latency < 150 ? 0x00E970 : latency < 300 ? 0xE7D020 : 0xD74238;
             String text = latency + "ms";
             textRenderer.drawWithShadow(matrices, text, (float) x + width - textRenderer.getWidth(text), (float) y, color);
-        } else {
-            renderLatencyIcon(matrices, width, x, y, entry);
+
+            info.cancel();
         }
     }
-
 }
