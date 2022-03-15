@@ -43,8 +43,12 @@ public class PotionSpoof extends Module {
 
     @Override
     public void onDeactivate() {
-        //status effects get synchronised on the client again after a few seconds
-        if (clearEffects.get()) mc.player.getStatusEffects().forEach(effect -> mc.player.removeStatusEffect(effect.getEffectType()));
+        if (!clearEffects.get() || !Utils.canUpdate()) return;
+
+        for (StatusEffect effect : potions.get().keySet()) {
+            if (potions.get().getInt(effect) <= 0) continue;
+            if (mc.player.hasStatusEffect(effect)) mc.player.removeStatusEffect(effect);
+        }
     }
 
     @EventHandler
