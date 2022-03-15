@@ -211,7 +211,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).autoLogOut.set(BoolArgumentType.getBool(context, "logout"));
+                    Modules.get().get(InfinityMiner.class).logOut.set(BoolArgumentType.getBool(context, "logout"));
                 }
             }
             else {
@@ -225,7 +225,7 @@ public class SwarmCommand extends Command {
                 if (swarm.isHost()) {
                     swarm.host.sendMessage(context.getInput());
                 } else if (swarm.isWorker()) {
-                    Modules.get().get(InfinityMiner.class).autoWalkHome.set(BoolArgumentType.getBool(context, "walkhome"));
+                    Modules.get().get(InfinityMiner.class).walkHome.set(BoolArgumentType.getBool(context, "walkhome"));
                 }
             } else {
                 throw SWARM_NOT_ACTIVE.create();

@@ -85,7 +85,7 @@ public class AirPlace extends Module {
 
         if (!(hitResult instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)) return;
 
-        if (mc.options.keyUse.isPressed()) {
+        if (mc.options.useKey.isPressed()) {
             BlockUtils.place(((BlockHitResult) hitResult).getBlockPos(), Hand.MAIN_HAND, mc.player.getInventory().selectedSlot, false, 0, true, true, false);
         }
     }

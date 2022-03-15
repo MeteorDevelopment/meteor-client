@@ -28,9 +28,9 @@ public abstract class BrewingStandScreenMixin extends HandledScreen<BrewingStand
     }
 
     @Override
-    public void onClose() {
+    public void close() {
         if (Modules.get().isActive(AutoBrewer.class)) Modules.get().get(AutoBrewer.class).onBrewingStandClose();
 
-        super.onClose();
+        super.close();
     }
 }

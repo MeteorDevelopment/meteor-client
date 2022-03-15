@@ -246,7 +246,7 @@ public class ElytraFly extends Module {
 
     @Override
     public void onDeactivate() {
-        if (autoPilot.get()) mc.options.keyForward.setPressed(false);
+        if (autoPilot.get()) mc.options.forwardKey.setPressed(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             Modules.get().get(ChestSwap.class).swap();
@@ -299,7 +299,7 @@ public class ElytraFly extends Module {
             currentMode.onPlayerMove();
         } else {
             if (currentMode.lastForwardPressed) {
-                mc.options.keyForward.setPressed(false);
+                mc.options.forwardKey.setPressed(false);
                 currentMode.lastForwardPressed = false;
             }
         }

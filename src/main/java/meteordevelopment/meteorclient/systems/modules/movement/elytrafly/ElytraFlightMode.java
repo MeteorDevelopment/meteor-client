@@ -74,7 +74,7 @@ public class ElytraFlightMode {
     public void autoTakeoff() {
         if (incrementJumpTimer) jumpTimer++;
 
-        boolean jumpPressed = mc.options.keyJump.isPressed();
+        boolean jumpPressed = mc.options.jumpKey.isPressed();
 
         if (elytraFly.autoTakeOff.get() && jumpPressed) {
             if (!lastJumpPressed && !mc.player.isFallFlying()) {
@@ -99,7 +99,7 @@ public class ElytraFlightMode {
         if (!mc.player.isFallFlying()) return;
 
         if (elytraFly.autoPilot.get() && mc.player.getY() > elytraFly.autoPilotMinimumHeight.get()) {
-            mc.options.keyForward.setPressed(true);
+            mc.options.forwardKey.setPressed(true);
             lastForwardPressed = true;
         }
 
@@ -130,21 +130,21 @@ public class ElytraFlightMode {
         boolean a = false;
         boolean b = false;
 
-        if (mc.options.keyForward.isPressed()) {
+        if (mc.options.forwardKey.isPressed()) {
             velX += forward.x * elytraFly.horizontalSpeed.get() * 10;
             velZ += forward.z * elytraFly.horizontalSpeed.get() * 10;
             a = true;
-        } else if (mc.options.keyBack.isPressed()) {
+        } else if (mc.options.backKey.isPressed()) {
             velX -= forward.x * elytraFly.horizontalSpeed.get() * 10;
             velZ -= forward.z * elytraFly.horizontalSpeed.get() * 10;
             a = true;
         }
 
-        if (mc.options.keyRight.isPressed()) {
+        if (mc.options.rightKey.isPressed()) {
             velX += right.x * elytraFly.horizontalSpeed.get() * 10;
             velZ += right.z * elytraFly.horizontalSpeed.get() * 10;
             b = true;
-        } else if (mc.options.keyLeft.isPressed()) {
+        } else if (mc.options.leftKey.isPressed()) {
             velX -= right.x * elytraFly.horizontalSpeed.get() * 10;
             velZ -= right.z * elytraFly.horizontalSpeed.get() * 10;
             b = true;
@@ -158,8 +158,8 @@ public class ElytraFlightMode {
     }
 
     public void handleVerticalSpeed(PlayerMoveEvent event) {
-        if (mc.options.keyJump.isPressed()) velY += 0.5 * elytraFly.verticalSpeed.get();
-        else if (mc.options.keySneak.isPressed()) velY -= 0.5 * elytraFly.verticalSpeed.get();
+        if (mc.options.jumpKey.isPressed()) velY += 0.5 * elytraFly.verticalSpeed.get();
+        else if (mc.options.sneakKey.isPressed()) velY -= 0.5 * elytraFly.verticalSpeed.get();
     }
 
     public void handleFallMultiplier() {

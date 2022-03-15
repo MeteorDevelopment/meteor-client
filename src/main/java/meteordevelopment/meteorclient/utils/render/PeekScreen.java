@@ -50,7 +50,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     @Override
     public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            this.onClose();
+            this.close();
             return true;
         }
         return false;
@@ -59,7 +59,7 @@ public class PeekScreen extends ShulkerBoxScreen {
     @Override
     public boolean keyReleased(int keyCode, int scanCode, int modifiers) {
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
-            this.onClose();
+            this.close();
             return true;
         }
         return false;

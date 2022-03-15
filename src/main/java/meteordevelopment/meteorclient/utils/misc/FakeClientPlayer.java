@@ -18,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.text.LiteralText;
+import net.minecraft.util.registry.RegistryEntry;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.World;
@@ -35,7 +36,7 @@ public class FakeClientPlayer {
     @Init(stage = InitStage.Pre)
     public static void init() {
         // TODO: Maybe we can pass null for telemetry sender because this world instance is never actually gonna send anything
-        world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getSession().getProfile(), mc.createTelemetrySender()), new ClientWorld.Properties(Difficulty.NORMAL, false, false), World.OVERWORLD, DimensionTypeAccessor.getOverworld(), 1, 1, mc::getProfiler, new WorldRenderer(mc, new BufferBuilderStorage()), false, 0);
+        world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getSession().getProfile(), mc.createTelemetrySender()), new ClientWorld.Properties(Difficulty.NORMAL, false, false), World.OVERWORLD, RegistryEntry.of(DimensionTypeAccessor.getOverworld()), 1, 1, mc::getProfiler, new WorldRenderer(mc, new BufferBuilderStorage()), false, 0);
     }
 
     public static PlayerEntity getPlayer() {

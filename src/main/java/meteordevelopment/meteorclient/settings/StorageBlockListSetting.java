@@ -5,22 +5,27 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
+import it.unimi.dsi.fastutil.objects.ObjectIterators;
 import meteordevelopment.meteorclient.MeteorClient;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.util.registry.RegistryKey;
-import org.apache.logging.log4j.core.util.ObjectArrayIterator;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
     public static final BlockEntityType<?>[] STORAGE_BLOCKS = { BlockEntityType.FURNACE, BlockEntityType.CHEST, BlockEntityType.TRAPPED_CHEST, BlockEntityType.ENDER_CHEST, BlockEntityType.DISPENSER, BlockEntityType.DROPPER, BlockEntityType.HOPPER, BlockEntityType.SHULKER_BOX, BlockEntityType.BARREL, BlockEntityType.SMOKER, BlockEntityType.BLAST_FURNACE, BlockEntityType.CAMPFIRE };
@@ -155,8 +160,8 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         }
 
         @Override
-        public Set<Map.Entry<RegistryKey<BlockEntityType<?>>, BlockEntityType<?>>> getEntries() {
-            return null;
+        public BlockEntityType<?> getOrThrow(int index) {
+            return super.getOrThrow(index);
         }
 
         @Override
@@ -173,18 +178,87 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
         @NotNull
         @Override
         public Iterator<BlockEntityType<?>> iterator() {
-            return new ObjectArrayIterator<>(STORAGE_BLOCKS);
-        }
-
-        @Nullable
-        @Override
-        public BlockEntityType<?> getRandom(Random random) {
-            return null;
+            return ObjectIterators.wrap(STORAGE_BLOCKS);
         }
 
         @Override
         public boolean contains(RegistryKey<BlockEntityType<?>> key) {
             return false;
+        }
+
+        @Override
+        public Set<Map.Entry<RegistryKey<BlockEntityType<?>>, BlockEntityType<?>>> getEntrySet() {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntry<BlockEntityType<?>>> getRandom(Random random) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Registry<BlockEntityType<?>> freeze() {
+            return null;
+        }
+
+        @Override
+        public RegistryEntry<BlockEntityType<?>> getOrCreateEntry(RegistryKey<BlockEntityType<?>> key) {
+            return null;
+        }
+
+        @Override
+        public RegistryEntry.Reference<BlockEntityType<?>> createEntry(BlockEntityType<?> value) {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntry<BlockEntityType<?>>> getEntry(int rawId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<RegistryEntry<BlockEntityType<?>>> getEntry(RegistryKey<BlockEntityType<?>> key) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Stream<RegistryEntry.Reference<BlockEntityType<?>>> streamEntries() {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntryList.Named<BlockEntityType<?>>> getEntryList(TagKey<BlockEntityType<?>> tag) {
+            return Optional.empty();
+        }
+
+        @Override
+        public RegistryEntryList.Named<BlockEntityType<?>> getOrCreateEntryList(TagKey<BlockEntityType<?>> tag) {
+            return null;
+        }
+
+        @Override
+        public Stream<Pair<TagKey<BlockEntityType<?>>, RegistryEntryList.Named<BlockEntityType<?>>>> streamTagsAndEntries() {
+            return null;
+        }
+
+        @Override
+        public Stream<TagKey<BlockEntityType<?>>> streamTags() {
+            return null;
+        }
+
+        @Override
+        public boolean containsTag(TagKey<BlockEntityType<?>> tag) {
+            return false;
+        }
+
+        @Override
+        public void clearTags() {
+
+        }
+
+        @Override
+        public void populateTags(Map<TagKey<BlockEntityType<?>>, List<RegistryEntry<BlockEntityType<?>>>> tagEntries) {
+
         }
     }
 }

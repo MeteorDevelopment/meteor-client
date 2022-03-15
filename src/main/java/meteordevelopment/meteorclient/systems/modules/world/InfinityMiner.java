@@ -1,6 +1,6 @@
 /*
  * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * Copyright (c) 2022 Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.world;
@@ -9,7 +9,8 @@ import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
 import baritone.api.Settings;
 import baritone.api.pathing.goals.GoalBlock;
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import baritone.api.process.ICustomGoalProcess;
+import baritone.api.process.IMineProcess;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -33,13 +34,15 @@ import java.util.function.Predicate;
 
 public class InfinityMiner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgExtras = settings.createGroup("Extras");
+    private final SettingGroup sgWhenFull = settings.createGroup("When Full");
+
+    // General
 
     public final Setting<List<Block>> targetBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("target-blocks")
         .description("The target blocks to mine.")
         .defaultValue(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE)
-        .filter(this::filter)
+        .filter(this::filterBlocks)
         .build()
     );
 
@@ -47,7 +50,7 @@ public class InfinityMiner extends Module {
         .name("repair-blocks")
         .description("The repair blocks to mine.")
         .defaultValue(Blocks.COAL_ORE, Blocks.REDSTONE_ORE, Blocks.NETHER_QUARTZ_ORE)
-        .filter(this::filter)
+        .filter(this::filterBlocks)
         .build()
     );
 
@@ -59,6 +62,7 @@ public class InfinityMiner extends Module {
         .sliderRange(1, 99)
         .build()
     );
+
 
     public final Setting<Double> startMining = sgGeneral.add(new DoubleSetting.Builder()
         .name("start-mining")
@@ -76,14 +80,14 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<Boolean> autoWalkHome = sgExtras.add(new BoolSetting.Builder()
+    public final Setting<Boolean> walkHome = sgWhenFull.add(new BoolSetting.Builder()
         .name("walk-home")
         .description("Will walk 'home' when your inventory is full.")
         .defaultValue(false)
         .build()
     );
 
-    public final Setting<Boolean> autoLogOut = sgExtras.add(new BoolSetting.Builder()
+    public final Setting<Boolean> logOut = sgWhenFull.add(new BoolSetting.Builder()
         .name("log-out")
         .description("Logs out when your inventory is full. Will walk home FIRST if walk home is enabled.")
         .defaultValue(false)
@@ -94,6 +98,8 @@ public class InfinityMiner extends Module {
     private final Settings baritoneSettings = BaritoneAPI.getSettings();
 
     private final BlockPos.Mutable homePos = new BlockPos.Mutable();
+
+    private boolean prevMineScanDroppedItems;
     private boolean repairing;
     private double toolPercantage;
 
@@ -103,41 +109,36 @@ public class InfinityMiner extends Module {
 
     @Override
     public void onActivate() {
+        prevMineScanDroppedItems = baritoneSettings.mineScanDroppedItems.value;
+        baritoneSettings.mineScanDroppedItems.value = true;
+
         homePos.set(mc.player.getBlockPos());
+        repairing = false;
     }
 
     @Override
     public void onDeactivate() {
         baritone.getPathingBehavior().cancelEverything();
-        baritoneSettings.mineScanDroppedItems.value = true;
-    }
-
-    @EventHandler
-    private void onGameDisconnect(GameLeftEvent event) {
-        baritone.getPathingBehavior().cancelEverything();
-        toggle();
+        baritoneSettings.mineScanDroppedItems.value = prevMineScanDroppedItems;
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (mc.player.getInventory().getEmptySlot() == -1) {
-            switch (whenFull.get()) {
-                case Disconnect -> mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is full.")));
-                case Home -> {
-                    if (!baritone.getPathingBehavior().isPathing() || !baritone.getPathingBehavior().getGoal().isInGoal(homePos)) {
-                        info("Walking home.");
-                        baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
-                    }
-                    else if (mc.player.getBlockPos().equals(homePos)) {
-                        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is full.")));
-                    }
+            if (walkHome.get()) {
+                if (isBaritoneNotWalking()) {
+                    info("Walking home.");
+                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
                 }
+                else if (mc.player.getBlockPos().equals(homePos)) logOut();
             }
+            else if (logOut.get()) logOut();
+            else toggle();
 
             return;
         }
 
-        if (!findBestPick()) {
+        if (!findPickaxe()) {
             error("Could not find a usable mending pickaxe.");
             toggle();
             return;
@@ -153,29 +154,31 @@ public class InfinityMiner extends Module {
             if (!needsRepair()) {
                 warning("Finished repairing, going back to mining.");
                 repairing = false;
-                baritone.getPathingBehavior().cancelEverything();
-                baritone.getMineProcess().mine(getTargetBlocks());
+                mineTargetBlocks();
                 return;
             }
 
-            if (baritoneSettings.mineScanDroppedItems.value) baritoneSettings.mineScanDroppedItems.value = false;
-            baritone.getMineProcess().mine(getRepairBlocks());
+            if (isBaritoneNotMining()) mineRepairBlocks();
         }
         else {
             if (needsRepair()) {
                 warning("Pickaxe needs repair, beginning repair process");
                 repairing = true;
-                baritone.getPathingBehavior().cancelEverything();
-                baritone.getMineProcess().mine(getRepairBlocks());
+                mineRepairBlocks();
                 return;
             }
 
-            if (!baritoneSettings.mineScanDroppedItems.value) baritoneSettings.mineScanDroppedItems.value = true;
-            baritone.getMineProcess().mine(getTargetBlocks());
+            if (isBaritoneNotMining()) mineTargetBlocks();
         }
     }
 
-    private boolean findBestPick() {
+   private boolean needsRepair() {
+        ItemStack itemStack = mc.player.getMainHandStack();
+        toolPercantage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
+        return !(toolPercantage > startMining.get() || (toolPercantage > startRepairing.get() && !repairing));
+    }
+
+    private boolean findPickaxe() {
         Predicate<ItemStack> pickaxePredicate = (stack -> stack.getItem() instanceof PickaxeItem
             && Utils.hasEnchantments(stack, Enchantments.MENDING)
             && !Utils.hasEnchantments(stack, Enchantments.SILK_TOUCH));
@@ -190,33 +193,37 @@ public class InfinityMiner extends Module {
     private boolean checkThresholds() {
     	return startRepairing.get() < startMining.get();
     }
-    private Block[] getTargetBlocks() {
+  
+    private void mineTargetBlocks() {
+
         Block[] array = new Block[targetBlocks.get().size()];
-        return targetBlocks.get().toArray(array);
+
+        baritone.getPathingBehavior().cancelEverything();
+        baritone.getMineProcess().mine(targetBlocks.get().toArray(array));
     }
 
-    private Block[] getRepairBlocks() {
+    private void mineRepairBlocks() {
         Block[] array = new Block[repairBlocks.get().size()];
-        return repairBlocks.get().toArray(array);
+
+        baritone.getPathingBehavior().cancelEverything();
+        baritone.getMineProcess().mine(repairBlocks.get().toArray(array));
     }
 
-    private boolean needsRepair() {
-        ItemStack itemStack = mc.player.getMainHandStack();
-        toolPercantage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
-        return !(toolPercantage > startMining.get() || (toolPercantage > startRepairing.get() && !repairing));
+    private void logOut() {
+        toggle();
+        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is full.")));
     }
-    
-    private boolean filter(Block block) {
+
+    private boolean isBaritoneNotMining() {
+        return !(baritone.getPathingControlManager().mostRecentInControl().orElse(null) instanceof IMineProcess);
+
+    }
+
+    private boolean isBaritoneNotWalking() {
+        return !(baritone.getPathingControlManager().mostRecentInControl().orElse(null) instanceof ICustomGoalProcess);
+    }
+
+    private boolean filterBlocks(Block block) {
         return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
-    }
-
-    public enum Mode {
-        Target,
-        Repair
-    }
-
-    public enum WhenFull {
-        Home,
-        Disconnect
     }
 }
