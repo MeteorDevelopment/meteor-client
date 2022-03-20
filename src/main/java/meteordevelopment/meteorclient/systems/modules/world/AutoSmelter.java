@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import meteordevelopment.meteorclient.mixin.AbstractFurnaceScreenHandlerAccessor;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -92,7 +91,7 @@ public class AutoSmelter extends Module {
 
         for (int i = 3; i < c.slots.size(); i++) {
             ItemStack item = c.slots.get(i).getStack();
-            if (!((AbstractFurnaceScreenHandlerAccessor) c).isSmeltable(item)) continue;
+            if (!c.isSmeltable(item)) continue;
             if (!smeltableItems.get().contains(item.getItem())) continue;
             if (!smeltableItemFilter(item.getItem())) continue;
 

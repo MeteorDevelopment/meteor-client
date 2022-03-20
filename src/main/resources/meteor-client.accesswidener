@@ -61,3 +61,5 @@ Accessible   field   net/minecraft/client/render/entity/BoatEntityRenderer textu
 
 Accessible   class   net/minecraft/client/render/MapRenderer$MapTexture
 Accessible   field   net/minecraft/client/render/MapRenderer$MapTexture texture Lnet/minecraft/client/texture/NativeImageBackedTexture;
+
+Accessible   method  net/minecraft/screen/AbstractFurnaceScreenHandler isSmeltable (Lnet/minecraft/item/ItemStack;)Z

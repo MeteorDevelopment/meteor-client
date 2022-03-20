@@ -8,7 +8,6 @@
     "AbstractBlockMixin",
     "AbstractButtonWidgetAccessor",
     "AbstractClientPlayerEntityMixin",
-    "AbstractFurnaceScreenHandlerAccessor",
     "AbstractFurnaceScreenMixin",
     "ArmorFeatureRendererMixin",
     "BackgroundRendererMixin",
