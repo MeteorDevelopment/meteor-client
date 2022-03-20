@@ -33,14 +33,6 @@ import java.util.UUID;
 public class ArrowDodge extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMovement = settings.createGroup("Movement");
-
-    private final Setting<Integer> arrowLookahead = sgGeneral.add(new IntSetting.Builder()
-        .name("arrow-lookahead")
-        .description("How many steps into the future should be taken into consideration when deciding the direction")
-        .defaultValue(500)
-        .range(1, 750)
-        .build()
-    );
   
     private final Setting<MoveType> moveType = sgMovement.add(new EnumSetting.Builder<MoveType>()
         .name("move-type")
@@ -129,17 +121,8 @@ public class ArrowDodge extends Module {
 
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
-            if (e instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor) e).getInGround()) continue;
             if (!entities.get().getBoolean(e.getType())) continue;
-            if (ignoreOwn.get() && ((ProjectileEntityAccessor) e).getOwnerUuid().equals(mc.player.getUuid())) continue;
-
-            List<Box> futureArrowHitboxes = new ArrayList<>();
-
-            for (int i = 0; i < arrowLookahead.get(); i++) {
-                Vec3d nextPos = e.getPos().add(e.getVelocity().multiply(i / 5.0f));
-                futureArrowHitboxes.add(new Box(
-                    nextPos.subtract(e.getBoundingBox().getXLength() / 2, 0, e.getBoundingBox().getZLength() / 2),
-                    nextPos.add(e.getBoundingBox().getXLength() / 2, e.getBoundingBox().getYLength(), e.getBoundingBox().getZLength() / 2)));
+            
             if (ignoreOwn.get()) {
                 UUID owner = ((ProjectileEntityAccessor) e).getOwnerUuid();
                 if (owner != null && owner.equals(mc.player.getUuid())) continue;
