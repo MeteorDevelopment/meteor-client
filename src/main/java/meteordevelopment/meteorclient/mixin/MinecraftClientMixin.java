@@ -88,6 +88,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         getProfiler().push("meteor-client_post_update");
         MeteorClient.EVENT_BUS.post(TickEvent.Post.get());
         getProfiler().pop();
+
+        if (!Utils.canUpdate())
+            Utils.unscaledProjection();
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))
