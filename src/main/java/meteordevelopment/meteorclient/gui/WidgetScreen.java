@@ -45,7 +45,7 @@ public abstract class WidgetScreen extends Screen {
 
     protected final GuiTheme theme;
 
-    public boolean locked;
+    public boolean locked, lockedAllowClose;
     private boolean closed;
     private boolean onClose;
     private boolean debug;
@@ -296,7 +296,7 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public void close() {
-        if (!locked) {
+        if (!locked || lockedAllowClose) {
             boolean preOnClose = onClose;
             onClose = true;
 
@@ -308,7 +308,7 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public void removed() {
-        if (!closed) {
+        if (!closed || lockedAllowClose) {
             closed = true;
             onClosed();
 
@@ -357,7 +357,7 @@ public abstract class WidgetScreen extends Screen {
 
     @Override
     public boolean shouldCloseOnEsc() {
-        return !locked;
+        return !locked || lockedAllowClose;
     }
 
     @Override
