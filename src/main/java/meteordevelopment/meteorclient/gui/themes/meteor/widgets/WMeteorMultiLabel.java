@@ -18,10 +18,10 @@ public class WMeteorMultiLabel extends WMultiLabel implements MeteorWidget {
     @Override
     protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         double h = theme.textHeight(title);
-        Color color = theme().textColor.get();
+        Color defaultColor = theme().textColor.get();
 
         for (int i = 0; i < lines.size(); i++) {
-            renderer.text(lines.get(i), x, y + h * i, color, false);
+            renderer.text(lines.get(i), x, y + h * i, color != null ? color : defaultColor, false);
         }
     }
 }

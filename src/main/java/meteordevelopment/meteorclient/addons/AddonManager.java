@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.addons;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.Init;
 import meteordevelopment.meteorclient.utils.InitStage;
 import net.fabricmc.loader.api.FabricLoader;
@@ -26,6 +27,22 @@ public class AddonManager {
             METEOR = new MeteorAddon() {
                 @Override
                 public void onInitialize() {}
+
+                @Override
+                public String getWebsite() {
+                    return "https://meteorclient.com";
+                }
+
+                @Override
+                public GithubRepo getRepo() {
+                    return new GithubRepo("MeteorDevelopment", "meteor-client");
+                }
+
+                @Override
+                public String getCommit() {
+                    String commit = MeteorClient.MOD_META.getCustomValue("meteor-client:commit").getAsString();
+                    return commit.isEmpty() ? null : commit;
+                }
             };
 
             ModMetadata metadata = FabricLoader.getInstance().getModContainer("meteor-client").get().getMetadata();
