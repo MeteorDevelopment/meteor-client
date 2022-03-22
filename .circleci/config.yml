@@ -27,7 +27,7 @@ jobs:
     steps:
       - checkout
 
-      - run: ./gradlew build -Pcommit=<< pipeline.git.base_revision >>
+      - run: ./gradlew build -Pcommit=<< pipeline.git.revision >>
       - run: ./gradlew publish
 
       - store_artifacts:
