@@ -124,7 +124,7 @@ public class ProjectileEntitySimulator {
         } else if (entity instanceof ThrownEntity) {
             set(entity, 0.5, 0.05, 0.8, accurate, tickDelta);
         } else if (entity instanceof WitherSkullEntity || entity instanceof FireballEntity || entity instanceof DragonFireballEntity) {
-            set(entity, 0.95, 0.1, 0.8, accurate, tickDelta);
+            set(entity, 0.95, 0, 0.8, accurate, tickDelta);
         }
         else {
             return false;
