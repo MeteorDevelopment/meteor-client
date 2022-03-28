@@ -5,6 +5,7 @@
 
 const axios = require("axios").default
 const FormData = require("form-data")
+const fs = require("fs")
 
 const branch = process.argv[2]
 const version = process.argv[3]
