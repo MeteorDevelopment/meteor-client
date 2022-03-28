@@ -13,8 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.MissHitResult;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.*;
-import  net.minecraft.entity.projectile.thrown.*;
-import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.entity.projectile.thrown.*;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
@@ -179,8 +178,8 @@ public class ProjectileEntitySimulator {
         velocity.multiply(isTouchingWater() ? waterDrag : airDrag);
         velocity.subtract(0, gravity, 0);
 
-        // Check if below 0
-        if (pos.y < 0) return MissHitResult.INSTANCE;
+        // Check if below world
+        if (pos.y < mc.world.getBottomY()) return MissHitResult.INSTANCE;
 
         // Check if chunk is loaded
         int chunkX = (int) (pos.x / 16);
