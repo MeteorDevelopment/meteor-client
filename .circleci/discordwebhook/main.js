@@ -16,7 +16,7 @@ const downloadUrl = "https://meteorclient.com/download?devBuild=" + build
 
 // Upload file
 let form = new FormData()
-form.append("file", fs.createReadStream("build/libs/meteor-client-" + version + "-" + build + ".jar"))
+form.append("file", fs.createReadStream("../../build/libs/meteor-client-" + version + "-" + build + ".jar"))
 
 axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
     headers: {
