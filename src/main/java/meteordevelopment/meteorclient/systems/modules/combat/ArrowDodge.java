@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -17,8 +16,7 @@ import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.orbit.EventHandler;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.projectile.PersistentProjectileEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
@@ -33,7 +31,7 @@ import java.util.UUID;
 public class ArrowDodge extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgMovement = settings.createGroup("Movement");
-  
+
     private final Setting<MoveType> moveType = sgMovement.add(new EnumSetting.Builder<MoveType>()
         .name("move-type")
         .description("The way you are moved by this module")
@@ -73,10 +71,10 @@ public class ArrowDodge extends Module {
         .build()
     );
 
-   private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-        .name("target-projectiles")
-        .description("Only dodge these projectiles")
-        .defaultValue(EntityType.ARROW)
+    private final Setting<Boolean> allProjectiles = sgGeneral.add(new BoolSetting.Builder()
+        .name("all-projectiles")
+        .description("Dodge all projectiles, not only arrows.")
+        .defaultValue(false)
         .build()
     );
 
@@ -94,7 +92,7 @@ public class ArrowDodge extends Module {
         .sliderMax(5000)
         .build()
     );
-    
+
     private final List<Vec3d> possibleMoveDirections = Arrays.asList(
         new Vec3d(1, 0, 1),
         new Vec3d(0, 0, 1),
@@ -121,8 +119,7 @@ public class ArrowDodge extends Module {
 
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
-            if (!entities.get().getBoolean(e.getType())) continue;
-            
+            if (!allProjectiles.get() && !(e instanceof ArrowEntity)) continue;
             if (ignoreOwn.get()) {
                 UUID owner = ((ProjectileEntityAccessor) e).getOwnerUuid();
                 if (owner != null && owner.equals(mc.player.getUuid())) continue;
@@ -190,7 +187,7 @@ public class ArrowDodge extends Module {
                 // check if ground under target is solid
                 return !mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()).isEmpty();
             }
-                
+
         }
 
         return true;

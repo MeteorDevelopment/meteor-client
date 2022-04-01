@@ -182,6 +182,13 @@ public class Nametags extends Module {
         .build()
     );
 
+    private final Setting<Boolean> displayName = sgPlayers.add(new BoolSetting.Builder()
+        .name("name")
+        .description("Shows the player's name.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> displayPing = sgPlayers.add(new BoolSetting.Builder()
         .name("ping")
         .description("Shows the player's ping.")
@@ -355,9 +362,10 @@ public class Nametags extends Module {
         double healthWidth = text.getWidth(healthText, true);
         double pingWidth = text.getWidth(pingText, true);
         double distWidth = text.getWidth(distText, true);
-        double width = nameWidth + healthWidth;
+        double width = healthWidth;
 
         if (displayGameMode.get()) width += gmWidth;
+        if (displayName.get()) width += nameWidth;
         if (displayPing.get()) width += pingWidth;
         if (displayDistance.get()) width += distWidth;
 
@@ -372,7 +380,7 @@ public class Nametags extends Module {
         double hY = -heightDown;
 
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, GOLD, true);
-        hX = text.render(name, hX, hY, nameColor, true);
+        if (displayName.get()) hX = text.render(name, hX, hY, nameColor, true);
 
         hX = text.render(healthText, hX, hY, healthColor, true);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, BLUE, true);
