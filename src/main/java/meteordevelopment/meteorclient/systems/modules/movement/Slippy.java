@@ -29,7 +29,7 @@ public class Slippy extends Module {
     );
 
     public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-            .name("ignored blocks")
+            .name("ignored-blocks")
             .description("Decide which blocks not to slip on")
             .defaultValue()
             .build()
