@@ -64,8 +64,16 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
-        .description("Only attacks when hold left click.")
+        .description("Only attacks when holding a mouse button.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<ClickButton> clickButton = sgGeneral.add(new EnumSetting.Builder<ClickButton>()
+        .name("click-button")
+        .description("What button to use for only on click.")
+        .defaultValue(ClickButton.Left)
+        .visible(onlyOnClick::get)
         .build()
     );
 
@@ -253,7 +261,11 @@ public class KillAura extends Module {
 
         if (rotation.get() == RotationMode.Always) rotate(primary, null);
 
-        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
+        //if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
+        if (onlyOnClick.get()) {
+            if (clickButton.get() == ClickButton.Left && !mc.options.attackKey.isPressed()) return;
+            if (clickButton.get() == ClickButton.Right && !mc.options.useKey.isPressed()) return;
+        }
 
         if (onlyWhenLook.get()) {
             primary = mc.targetedEntity;
@@ -388,5 +400,10 @@ public class KillAura extends Module {
         Always,
         OnHit,
         None
+    }
+
+    public enum ClickButton {
+        Left,
+        Right
     }
 }
