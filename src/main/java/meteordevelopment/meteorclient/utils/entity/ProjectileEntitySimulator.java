@@ -13,8 +13,7 @@ import meteordevelopment.meteorclient.utils.misc.MissHitResult;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.*;
-import  net.minecraft.entity.projectile.thrown.*;
-import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.entity.projectile.thrown.*;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
@@ -125,7 +124,7 @@ public class ProjectileEntitySimulator {
         } else if (entity instanceof ThrownEntity) {
             set(entity, 0.5, 0.05, 0.8, accurate, tickDelta);
         } else if (entity instanceof WitherSkullEntity || entity instanceof FireballEntity || entity instanceof DragonFireballEntity) {
-            set(entity, 0.95, 0.1, 0.8, accurate, tickDelta);
+            set(entity, 0.95, 0, 0.8, accurate, tickDelta);
         }
         else {
             return false;
@@ -179,8 +178,8 @@ public class ProjectileEntitySimulator {
         velocity.multiply(isTouchingWater() ? waterDrag : airDrag);
         velocity.subtract(0, gravity, 0);
 
-        // Check if below 0
-        if (pos.y < 0) return MissHitResult.INSTANCE;
+        // Check if below world
+        if (pos.y < mc.world.getBottomY()) return MissHitResult.INSTANCE;
 
         // Check if chunk is loaded
         int chunkX = (int) (pos.x / 16);

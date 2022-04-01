@@ -37,7 +37,7 @@ jobs:
           install-yarn: true
 
       - run:
-          name: Discord webhook
+          name: Upload file & Discord webhook
           command: |
             cd .circleci/discordwebhook
             yarn install
