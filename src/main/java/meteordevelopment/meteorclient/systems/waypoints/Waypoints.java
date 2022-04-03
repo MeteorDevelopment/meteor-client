@@ -43,9 +43,9 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     private static final Color TEXT = new Color(255, 255, 255);
 
-    public final ConcurrentHashMap<String, AbstractTexture> icons = new ConcurrentHashMap<>();
+    public final Map<String, AbstractTexture> icons = new ConcurrentHashMap<>();
 
-    public ConcurrentHashMap<String, Waypoint> waypoints = new ConcurrentHashMap<>();
+    public Map<String, Waypoint> waypoints = new ConcurrentHashMap<>();
 
     public Waypoints() {
         super(null);
