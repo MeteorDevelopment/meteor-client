@@ -49,7 +49,7 @@ public abstract class System<T> implements ISerializable<T> {
         }
     }
 
-    public synchronized void save() {
+    public void save() {
         save(null);
     }
 
