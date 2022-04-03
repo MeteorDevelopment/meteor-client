@@ -50,6 +50,9 @@ dependencies {
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "meteordevelopment:discord-ipc:${project.discordipc_version}"
     library "org.reflections:reflections:${project.reflections_version}"
+
+    // Launch sub project
+    shadow project(":launch")
 }
 
 loom {
