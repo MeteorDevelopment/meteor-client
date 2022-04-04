@@ -23,7 +23,8 @@ public class SpeedMine extends Module {
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .defaultValue(Mode.Normal)
+            .description("How to speed up your mining.")                                        
+            .defaultValue(Mode.Haste2)
             .build()
     );
     public final Setting<Double> modifier = sgGeneral.add(new DoubleSetting.Builder()
