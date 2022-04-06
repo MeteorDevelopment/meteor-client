@@ -7,10 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -24,8 +21,16 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.LiteralText;
 
+import java.util.List;
+
 public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<List<String>> lastRemarks = sgGeneral.add(new StringListSetting.Builder()
+            .name("final-remarks")
+            .description("Messages to send before you disconnect.")
+            .build()
+    );
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
             .name("health")
@@ -99,6 +104,7 @@ public class AutoLog extends Module {
             return;
         }
         if (mc.player.getHealth() <= health.get()) {
+            sendLastRemarks();
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was lower than " + health.get() + ".")));
             if(smartToggle.get()) {
                 this.toggle();
@@ -107,6 +113,7 @@ public class AutoLog extends Module {
         }
 
         if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
+            sendLastRemarks();
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Health was going to be lower than " + health.get() + ".")));
             if (toggleOff.get()) this.toggle();
         }
@@ -114,21 +121,30 @@ public class AutoLog extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
                 if (onlyTrusted.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
+                        sendLastRemarks(); 
                         mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] A non-trusted player appeared in your render distance.")));
                         if (toggleOff.get()) this.toggle();
                         break;
                 }
                 if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
                         > mc.player.getHealth() + mc.player.getAbsorptionAmount()) {
+                    sendLastRemarks();
                     mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] Anti-32k measures.")));
                     if (toggleOff.get()) this.toggle();
                     break;
                 }
             }
             if (entity instanceof EndCrystalEntity && mc.player.distanceTo(entity) < range.get() && crystalLog.get()) {
+                sendLastRemarks();
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(new LiteralText("[AutoLog] End Crystal appeared within specified range.")));
                 if (toggleOff.get()) this.toggle();
             }
+        }
+    }
+    
+    private void sendLastRemarks() {
+        for (String lm : lastRemarks.get()) {
+            mc.player.sendChatMessage(lm);
         }
     }
 
