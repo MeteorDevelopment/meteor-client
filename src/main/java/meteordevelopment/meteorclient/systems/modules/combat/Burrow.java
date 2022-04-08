@@ -182,7 +182,7 @@ public class Burrow extends Module {
     @EventHandler
     private void onKey(KeyEvent event) {
         if (instant.get() && !shouldBurrow) {
-            if (event.action == KeyAction.Press && mc.options.keyJump.matchesKey(event.key, 0)) {
+            if (event.action == KeyAction.Press && mc.options.jumpKey.matchesKey(event.key, 0)) {
                 shouldBurrow = true;
             }
             blockPos.set(mc.player.getBlockPos());

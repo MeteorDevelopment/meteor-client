@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.ModuleArgumentType;
+import meteordevelopment.meteorclient.systems.hud.HUD;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.command.CommandSource;
@@ -30,12 +31,14 @@ public class ToggleCommand extends Command {
                         new ArrayList<>(Modules.get().getAll()).forEach(module -> {
                             if (!module.isActive()) module.toggle();
                         });
+                        HUD.get().active = true;
                         return SINGLE_SUCCESS;
                     })
                 )
                 .then(literal("off")
                     .executes(context -> {
                         new ArrayList<>(Modules.get().getActive()).forEach(Module::toggle);
+                        HUD.get().active = false;
                         return SINGLE_SUCCESS;
                     })
                 )

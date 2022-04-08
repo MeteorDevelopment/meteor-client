@@ -94,6 +94,8 @@ public class HUD extends System<HUD> {
     public HUD() {
         super("hud");
 
+        settings.registerColorSettings(null);
+
         // Top Left
         topLeft = new HudElementLayer(RENDERER, elements, AlignmentX.Left, AlignmentY.Top, 2, 2);
         topLeft.add(new LogoHud(this));

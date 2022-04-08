@@ -25,6 +25,10 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Tameable;
+import net.minecraft.entity.mob.EndermanEntity;
+import net.minecraft.entity.mob.MobEntity;
+import net.minecraft.entity.mob.PhantomEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
@@ -69,6 +73,13 @@ public class KillAura extends Module {
         .name("only-when-look")
         .description("Only attacks when you are looking at the entity.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> ignorePassive = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-passive")
+        .description("Only attacks angry piglins and enderman.")
+        .defaultValue(true)
         .build()
     );
 
@@ -242,7 +253,7 @@ public class KillAura extends Module {
 
         if (rotation.get() == RotationMode.Always) rotate(primary, null);
 
-        if (onlyOnClick.get() && !mc.options.keyAttack.isPressed()) return;
+        if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
 
         if (onlyWhenLook.get()) {
             primary = mc.targetedEntity;
@@ -296,6 +307,13 @@ public class KillAura extends Module {
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
+        if (ignorePassive.get()) {
+            if (entity instanceof EndermanEntity enderman && !enderman.isAngry()) return false;
+            if (entity instanceof Tameable tameable
+                && tameable.getOwnerUuid() != null
+                && tameable.getOwnerUuid().equals(mc.player.getUuid())) return false;
+            if (entity instanceof MobEntity mob && !mob.isAttacking() && !(entity instanceof PhantomEntity)) return false; // Phantoms don't seem to set the attacking property
+        }
         if (entity instanceof PlayerEntity) {
             if (((PlayerEntity) entity).isCreative()) return false;
             if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;

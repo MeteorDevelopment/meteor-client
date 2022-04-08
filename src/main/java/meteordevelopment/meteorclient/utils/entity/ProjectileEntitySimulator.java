@@ -6,12 +6,14 @@
 package meteordevelopment.meteorclient.utils.entity;
 
 import meteordevelopment.meteorclient.mixin.CrossbowItemAccessor;
+import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MissHitResult;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.projectile.ProjectileUtil;
+import net.minecraft.entity.projectile.*;
+import net.minecraft.entity.projectile.thrown.*;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
@@ -106,6 +108,46 @@ public class ProjectileEntitySimulator {
         this.waterDrag = waterDrag;
     }
 
+    public boolean set(Entity entity, boolean accurate, double tickDelta) {
+        // skip entities in ground
+        if (entity instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor) entity).getInGround()) return false;
+
+        if (entity instanceof ArrowEntity arrow) {
+            // im not sure if arrow.getVelocity().length() is correct but it works ¯\_(ツ)_/¯
+            set(entity, arrow.getVelocity().length(), 0.05000000074505806, 0.6, accurate, tickDelta);
+        } else if (entity instanceof EnderPearlEntity || entity instanceof SnowballEntity || entity instanceof EggEntity) {
+            set(entity, 1.5, 0.03, 0.8, accurate, tickDelta);
+        } else if (entity instanceof TridentEntity) {
+            set(entity, 2.5, 0.05000000074505806, 0.99, accurate, tickDelta);
+        } else if (entity instanceof ExperienceBottleEntity) {
+            set(entity, 0.7,  0.07, 0.8, accurate, tickDelta);
+        } else if (entity instanceof ThrownEntity) {
+            set(entity, 0.5, 0.05, 0.8, accurate, tickDelta);
+        } else if (entity instanceof WitherSkullEntity || entity instanceof FireballEntity || entity instanceof DragonFireballEntity) {
+            set(entity, 0.95, 0, 0.8, accurate, tickDelta);
+        }
+        else {
+            return false;
+        }
+
+        return true;
+    }
+
+    public void set(Entity entity, double speed, double gravity, double waterDrag, boolean accurate, double tickDelta) {
+        pos.set(entity, tickDelta);
+
+        velocity.set(entity.getVelocity()).normalize().multiply(speed);
+
+        if (accurate) {
+            Vec3d vel = entity.getVelocity();
+            velocity.add(vel.x, entity.isOnGround() ? 0.0D : vel.y, vel.z);
+        }
+
+        this.gravity = gravity;
+        this.airDrag = 0.99;
+        this.waterDrag = waterDrag;
+    }
+
     public void setFishingBobber(Entity user, double tickDelta) {
         double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.getYaw());
         double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.getPitch());
@@ -136,8 +178,8 @@ public class ProjectileEntitySimulator {
         velocity.multiply(isTouchingWater() ? waterDrag : airDrag);
         velocity.subtract(0, gravity, 0);
 
-        // Check if below 0
-        if (pos.y < 0) return MissHitResult.INSTANCE;
+        // Check if below world
+        if (pos.y < mc.world.getBottomY()) return MissHitResult.INSTANCE;
 
         // Check if chunk is loaded
         int chunkX = (int) (pos.x / 16);

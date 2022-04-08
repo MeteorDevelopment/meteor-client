@@ -4,6 +4,8 @@
  */
 
 const axios = require("axios").default
+const FormData = require("form-data")
+const fs = require("fs")
 
 const branch = process.argv[2]
 const version = process.argv[3]
@@ -12,6 +14,18 @@ const compareUrl = process.argv[5]
 
 const downloadUrl = "https://meteorclient.com/download?devBuild=" + build
 
+// Upload file
+let form = new FormData()
+form.append("file", fs.createReadStream("../../build/libs/meteor-client-" + version + "-" + build + ".jar"))
+
+axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
+    headers: {
+        ...form.getHeaders(),
+        "Authorization": process.env.server_token
+    }
+})
+
+// Discord webhook
 axios
     .get(compareUrl)
     .then(res => {

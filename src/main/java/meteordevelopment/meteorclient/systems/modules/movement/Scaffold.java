@@ -131,7 +131,7 @@ public class Scaffold extends Module {
 
     @Override
     public void onActivate() {
-        lastWasSneaking = mc.options.keySneak.isPressed();
+        lastWasSneaking = mc.options.sneakKey.isPressed();
         if (lastWasSneaking) lastSneakingY = mc.player.getY();
 
         for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
@@ -206,7 +206,7 @@ public class Scaffold extends Module {
         if (item.getHand() == null && !autoSwitch.get()) return;
 
         // Move down if shifting
-        if (mc.options.keySneak.isPressed() && !mc.options.keyJump.isPressed()) {
+        if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed()) {
             if (lastSneakingY - mc.player.getY() < 0.1) {
                 lastWasSneaking = false;
                 return;
@@ -216,7 +216,7 @@ public class Scaffold extends Module {
         }
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
-        if (mc.options.keyJump.isPressed() && !mc.options.keySneak.isPressed() && fastTower.get()) {
+        if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
             mc.player.setVelocity(0, 0.42f, 0);
         }
 
@@ -225,7 +225,7 @@ public class Scaffold extends Module {
             renderBlocks.add(renderBlockPool.get().set(bp));
 
             // Move player down so they are on top of the placed block ready to jump again
-            if (mc.options.keyJump.isPressed() && !mc.options.keySneak.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir() && fastTower.get()) {
+            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir() && fastTower.get()) {
                 mc.player.setVelocity(0, -0.28f, 0);
             }
         }

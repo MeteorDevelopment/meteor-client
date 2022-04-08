@@ -31,19 +31,19 @@ public class Packet extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (mc.player.getInventory().getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.keySneak.isPressed()) return;
+        if (mc.player.getInventory().getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed()) return;
 
-        if (mc.options.keyForward.isPressed()) {
+        if (mc.options.forwardKey.isPressed()) {
             vec3d.add(0, 0, elytraFly.horizontalSpeed.get());
             vec3d.rotateY(-(float) Math.toRadians(mc.player.getYaw()));
-        } else if (mc.options.keyBack.isPressed()) {
+        } else if (mc.options.backKey.isPressed()) {
             vec3d.add(0, 0, elytraFly.horizontalSpeed.get());
             vec3d.rotateY((float) Math.toRadians(mc.player.getYaw()));
         }
 
-        if (mc.options.keyJump.isPressed()) {
+        if (mc.options.jumpKey.isPressed()) {
             vec3d.add(0, elytraFly.verticalSpeed.get(), 0);
-        } else if (!mc.options.keyJump.isPressed()) {
+        } else if (!mc.options.jumpKey.isPressed()) {
             vec3d.add(0, -elytraFly.verticalSpeed.get(), 0);
         }
 

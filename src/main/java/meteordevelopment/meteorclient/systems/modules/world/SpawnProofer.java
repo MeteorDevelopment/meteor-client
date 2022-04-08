@@ -119,6 +119,11 @@ public class SpawnProofer extends Module {
 
         // Find slot
         FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        if (!block.found()) {
+            error("Found none of the chosen blocks in hotbar");
+            toggle();
+            return;
+        }
 
         // Place blocks
         if (delay.get() == 0) {

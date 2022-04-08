@@ -14,9 +14,6 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(WorldRenderer.class)
 public interface WorldRendererAccessor {
-    @Accessor("entityOutlinesFramebuffer")
-    Framebuffer getEntityOutlinesFramebuffer();
-
     @Accessor
     void setEntityOutlinesFramebuffer(Framebuffer framebuffer);
 

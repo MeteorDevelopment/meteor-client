@@ -17,7 +17,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class WTable extends WContainer {
-    public double spacing = 3;
+    public double horizontalSpacing = 3;
+    public double verticalSpacing = 3;
 
     private final List<List<Cell<?>>> rows = new ArrayList<>();
     private int rowI;
@@ -70,8 +71,12 @@ public class WTable extends WContainer {
         rowI = 0;
     }
 
-    protected double spacing() {
-        return theme.scale(spacing);
+    protected double horizontalSpacing() {
+        return theme.scale(horizontalSpacing);
+    }
+
+    protected double verticalSpacing() {
+        return theme.scale(verticalSpacing);
     }
 
     @Override
@@ -93,7 +98,7 @@ public class WTable extends WContainer {
             // Loop over cells in the row
             for (int cellI = 0; cellI < row.size(); cellI++) {
                 // Calculate row width
-                if (cellI > 0) rowWidth += spacing();
+                if (cellI > 0) rowWidth += horizontalSpacing();
                 rowWidth += columnWidths.getDouble(cellI);
             }
 
@@ -102,7 +107,7 @@ public class WTable extends WContainer {
             width = Math.max(width, rowWidth);
 
             // Calculate height
-            if (rowI > 0) height += spacing();
+            if (rowI > 0) height += verticalSpacing();
             height += rowHeights.getDouble(rowI);
         }
     }
@@ -115,7 +120,7 @@ public class WTable extends WContainer {
         for (int rowI = 0; rowI < rows.size(); rowI++) {
             List<Cell<?>> row = rows.get(rowI);
 
-            if (rowI > 0) y += spacing();
+            if (rowI > 0) y += verticalSpacing();
 
             double x = this.x;
             double rowHeight = rowHeights.getDouble(rowI);
@@ -126,7 +131,7 @@ public class WTable extends WContainer {
             for (int cellI = 0; cellI < row.size(); cellI++) {
                 Cell<?> cell = row.get(cellI);
 
-                if (cellI > 0) x += spacing();
+                if (cellI > 0) x += horizontalSpacing();
                 double columnWidth = columnWidths.getDouble(cellI);
 
                 cell.x = x;

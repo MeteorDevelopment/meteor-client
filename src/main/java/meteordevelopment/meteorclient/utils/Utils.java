@@ -48,6 +48,7 @@ import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.SystemUtils;
+import org.jetbrains.annotations.Range;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -106,8 +107,12 @@ public class Utils {
         return String.format("%02d:%02d", ticks / 1000, (int) (ticks % 1000 / 1000.0 * 60));
     }
 
+    public static Iterable<Chunk> chunks(boolean onlyWithLoadedNeighbours) {
+        return () -> new ChunkIterator(onlyWithLoadedNeighbours);
+    }
+
     public static Iterable<Chunk> chunks() {
-        return ChunkIterator::new;
+        return chunks(false);
     }
 
     public static Iterable<BlockEntity> blockEntities() {
@@ -180,6 +185,7 @@ public class Utils {
             for (int i = 0; i < EChestMemory.ITEMS.size(); i++) {
                 items[i] = EChestMemory.ITEMS.get(i);
             }
+
             return;
         }
 
@@ -188,10 +194,13 @@ public class Utils {
 
         if (nbt != null && nbt.contains("BlockEntityTag")) {
             NbtCompound nbt2 = nbt.getCompound("BlockEntityTag");
+
             if (nbt2.contains("Items")) {
                 NbtList nbt3 = (NbtList) nbt2.get("Items");
+
                 for (int i = 0; i < nbt3.size(); i++) {
-                    items[nbt3.getCompound(i).getByte("Slot")] = ItemStack.fromNbt(nbt3.getCompound(i));
+                    int slot = nbt3.getCompound(i).getByte("Slot"); // Apparently shulker boxes can store more than 27 items, good job Mojang
+                    if (slot >= 0 && slot < items.length) items[slot] = ItemStack.fromNbt(nbt3.getCompound(i));
                 }
             }
         }
@@ -396,9 +405,9 @@ public class Utils {
     }
 
     public static void leftClick() {
-        mc.options.keyAttack.setPressed(true);
+        mc.options.attackKey.setPressed(true);
         ((MinecraftClientAccessor) mc).leftClick();
-        mc.options.keyAttack.setPressed(false);
+        mc.options.attackKey.setPressed(false);
     }
 
     public static void rightClick() {
@@ -490,5 +499,13 @@ public class Utils {
         for (T item : checked)
             map.put(item, true);
         return new Object2BooleanOpenHashMap<>(map);
+    }
+
+    public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {
+        return new Color(
+            (int) (first.r * (1 - v) + second.r * v),
+            (int) (first.g * (1 - v) + second.g * v),
+            (int) (first.b * (1 - v) + second.b * v)
+        );
     }
 }

@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.events.entity.player;
 
-import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 
 public class CanWalkOnFluidEvent {
     private static final CanWalkOnFluidEvent INSTANCE = new CanWalkOnFluidEvent();
 
-    public Fluid fluid;
+    public FluidState fluidState;
     public boolean walkOnFluid;
 
-    public static CanWalkOnFluidEvent get(Fluid fluid) {
-        INSTANCE.fluid = fluid;
+    public static CanWalkOnFluidEvent get(FluidState fluid) {
+        INSTANCE.fluidState = fluid;
         INSTANCE.walkOnFluid = false;
         return INSTANCE;
     }

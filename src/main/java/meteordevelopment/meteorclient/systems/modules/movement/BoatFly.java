@@ -72,8 +72,8 @@ public class BoatFly extends Module {
         double velZ = vel.getZ();
 
         // Vertical movement
-        if (mc.options.keyJump.isPressed()) velY += verticalSpeed.get() / 20;
-        if (mc.options.keySprint.isPressed()) velY -= verticalSpeed.get() / 20;
+        if (mc.options.jumpKey.isPressed()) velY += verticalSpeed.get() / 20;
+        if (mc.options.sprintKey.isPressed()) velY -= verticalSpeed.get() / 20;
         else velY -= fallSpeed.get() / 20;
 
         // Apply velocity

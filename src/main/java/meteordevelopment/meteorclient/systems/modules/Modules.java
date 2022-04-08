@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules;
 
 import com.google.common.collect.Ordering;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -40,8 +41,11 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import net.minecraft.util.registry.RegistryEntry;
+import net.minecraft.util.registry.RegistryEntryList;
 import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
@@ -49,6 +53,7 @@ import org.lwjgl.glfw.GLFW;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Stream;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -495,6 +500,7 @@ public class Modules extends System<Modules> {
         add(new Zoom());
         add(new Blur());
         add(new PopChams());
+        add(new TunnelESP());
     }
 
     private void initWorld() {
@@ -543,7 +549,7 @@ public class Modules extends System<Modules> {
         add(new PacketCanceller());
         add(new SoundBlocker());
         add(new Spam());
-        add(new VanillaSpoof());
+        add(new ServerSpoof());
         add(new InventoryTweaks());
     }
 
@@ -596,12 +602,6 @@ public class Modules extends System<Modules> {
         public Set<Identifier> getIds() {
             return null;
         }
-
-        @Override
-        public Set<Map.Entry<RegistryKey<Module>, Module>> getEntries() {
-            return null;
-        }
-
         @Override
         public boolean containsId(Identifier id) {
             return false;
@@ -618,15 +618,84 @@ public class Modules extends System<Modules> {
             return new ModuleIterator();
         }
 
-        @org.jetbrains.annotations.Nullable
         @Override
-        public Module getRandom(Random random) {
+        public boolean contains(RegistryKey<Module> key) {
+            return false;
+        }
+
+        @Override
+        public Set<Map.Entry<RegistryKey<Module>, Module>> getEntrySet() {
             return null;
         }
 
         @Override
-        public boolean contains(RegistryKey<Module> key) {
+        public Optional<RegistryEntry<Module>> getRandom(Random random) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Registry<Module> freeze() {
+            return null;
+        }
+
+        @Override
+        public RegistryEntry<Module> getOrCreateEntry(RegistryKey<Module> key) {
+            return null;
+        }
+
+        @Override
+        public RegistryEntry.Reference<Module> createEntry(Module value) {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntry<Module>> getEntry(int rawId) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<RegistryEntry<Module>> getEntry(RegistryKey<Module> key) {
+            return Optional.empty();
+        }
+
+        @Override
+        public Stream<RegistryEntry.Reference<Module>> streamEntries() {
+            return null;
+        }
+
+        @Override
+        public Optional<RegistryEntryList.Named<Module>> getEntryList(TagKey<Module> tag) {
+            return Optional.empty();
+        }
+
+        @Override
+        public RegistryEntryList.Named<Module> getOrCreateEntryList(TagKey<Module> tag) {
+            return null;
+        }
+
+        @Override
+        public Stream<Pair<TagKey<Module>, RegistryEntryList.Named<Module>>> streamTagsAndEntries() {
+            return null;
+        }
+
+        @Override
+        public Stream<TagKey<Module>> streamTags() {
+            return null;
+        }
+
+        @Override
+        public boolean containsTag(TagKey<Module> tag) {
             return false;
+        }
+
+        @Override
+        public void clearTags() {
+
+        }
+
+        @Override
+        public void populateTags(Map<TagKey<Module>, List<RegistryEntry<Module>>> tagEntries) {
+
         }
 
         private static class ModuleIterator implements Iterator<Module> {
@@ -643,5 +712,4 @@ public class Modules extends System<Modules> {
             }
         }
     }
-
 }

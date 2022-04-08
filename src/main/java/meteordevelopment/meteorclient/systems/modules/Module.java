@@ -43,6 +43,8 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public final Keybind keybind = Keybind.none();
     public boolean toggleOnBindRelease = false;
+    public boolean chatFeedback = true;
+    public boolean favorite = false;
 
     public Module(Category category, String name, String description) {
         this.mc = MinecraftClient.getInstance();
@@ -84,7 +86,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     }
 
     public void sendToggledMsg() {
-        if (Config.get().chatFeedback.get()) {
+        if (Config.get().chatFeedback.get() && chatFeedback) {
             ChatUtils.forceNextPrefixClass(getClass());
             ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
         }
@@ -126,6 +128,8 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         tag.putString("name", name);
         tag.put("keybind", keybind.toTag());
         tag.putBoolean("toggleOnKeyRelease", toggleOnBindRelease);
+        tag.putBoolean("chatFeedback", chatFeedback);
+        tag.putBoolean("favorite", favorite);
         tag.put("settings", settings.toTag());
 
         tag.putBoolean("active", active);
@@ -140,6 +144,8 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
         else keybind.fromTag(tag.getCompound("keybind"));
 
         toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease");
+        chatFeedback = !tag.contains("chatFeedback") || tag.getBoolean("chatFeedback");
+        favorite = tag.getBoolean("favorite");
 
         // Settings
         NbtElement settingsTag = tag.get("settings");

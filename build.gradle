@@ -27,8 +27,8 @@ repositories {
 
 dependencies {
 	def library = { id ->
-		implementation id
-		shadow id
+		implementation(id) { exclude group: "org.slf4j" }
+		shadow(id) { exclude group: "org.slf4j" }
 	}
 
 	// Fabric
@@ -50,6 +50,9 @@ dependencies {
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "meteordevelopment:discord-ipc:${project.discordipc_version}"
     library "org.reflections:reflections:${project.reflections_version}"
+
+    // Launch sub project
+    shadow project(":launch")
 }
 
 loom {
@@ -62,7 +65,9 @@ shadowJar {
 
 processResources {
     filesMatching("fabric.mod.json") {
-        expand "version": project.version, "devbuild": System.getenv("CIRCLE_BUILD_NUM") != null ? System.getenv("CIRCLE_BUILD_NUM") : ""
+        expand "version": project.version,
+               "devbuild": System.getenv("CIRCLE_BUILD_NUM") ?: "",
+               "commit": project.findProperty("commit") ?: ""
     }
 }
 

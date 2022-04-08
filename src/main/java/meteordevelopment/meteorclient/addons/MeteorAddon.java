@@ -20,4 +20,16 @@ public abstract class MeteorAddon {
     public abstract void onInitialize();
 
     public void onRegisterCategories() {}
+
+    public String getWebsite() {
+        return null;
+    }
+
+    public GithubRepo getRepo() {
+        return null;
+    }
+
+    public String getCommit() {
+        return null;
+    }
 }

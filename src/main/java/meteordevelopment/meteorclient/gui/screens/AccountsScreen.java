@@ -38,7 +38,6 @@ public class AccountsScreen extends WindowScreen {
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
         addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme, this)));
-        addButton(l, "Premium", () -> mc.setScreen(new AddPremiumAccountScreen(theme, this)));
         addButton(l, "Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme, this)));
         addButton(l, "Microsoft", () -> {
             locked = true;
@@ -69,7 +68,7 @@ public class AccountsScreen extends WindowScreen {
 
                 if (screen != null) {
                     screen.locked = false;
-                    screen.onClose();
+                    screen.close();
                 }
 
                 parent.reload();

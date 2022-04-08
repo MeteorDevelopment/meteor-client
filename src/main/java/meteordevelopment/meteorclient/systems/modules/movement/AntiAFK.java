@@ -101,8 +101,8 @@ public class AntiAFK extends Module {
             direction = false;
 
             if (isActive()) {
-                mc.options.keyLeft.setPressed(false);
-                mc.options.keyRight.setPressed(false);
+                mc.options.leftKey.setPressed(false);
+                mc.options.rightKey.setPressed(false);
             }
         })
         .build()
@@ -156,8 +156,8 @@ public class AntiAFK extends Module {
     @Override
     public void onDeactivate() {
         if (strafe.get()) {
-            mc.options.keyLeft.setPressed(false);
-            mc.options.keyRight.setPressed(false);
+            mc.options.leftKey.setPressed(false);
+            mc.options.rightKey.setPressed(false);
         }
     }
 
@@ -168,29 +168,25 @@ public class AntiAFK extends Module {
             if (spin.get()) {
                 prevYaw += spinSpeed.get();
                 switch (spinMode.get()) {
-                    case Client:
-                        mc.player.setYaw(prevYaw);
-                        break;
-                    case Server:
-                        Rotations.rotate(prevYaw, pitch.get(), -15, null);
-                        break;
+                    case Client -> mc.player.setYaw(prevYaw);
+                    case Server -> Rotations.rotate(prevYaw, pitch.get(), -15, null);
                 }
             }
 
             //Jump
-            if (jump.get() && mc.options.keyJump.isPressed()) mc.options.keyJump.setPressed(false);
-            if (jump.get() && mc.options.keySneak.isPressed()) mc.options.keySneak.setPressed(false);
-            else if (jump.get() && random.nextInt(99) + 1 == 50) mc.options.keyJump.setPressed(true);
+            if (jump.get() && mc.options.jumpKey.isPressed()) mc.options.jumpKey.setPressed(false);
+            if (jump.get() && mc.options.sneakKey.isPressed()) mc.options.sneakKey.setPressed(false);
+            else if (jump.get() && random.nextInt(99) + 1 == 50) mc.options.jumpKey.setPressed(true);
 
             //Click
             if (click.get() && random.nextInt(99) + 1 == 45) {
-                mc.options.keyAttack.setPressed(true);
+                mc.options.attackKey.setPressed(true);
                 Utils.leftClick();
-                mc.options.keyAttack.setPressed(false);
+                mc.options.attackKey.setPressed(false);
             }
 
             //Disco
-            if (disco.get() && random.nextInt(24) + 1 == 15) mc.options.keySneak.setPressed(true);
+            if (disco.get() && random.nextInt(24) + 1 == 15) mc.options.sneakKey.setPressed(true);
 
             //Spam
             if (sendMessages.get() && !messages.isEmpty())
@@ -212,8 +208,8 @@ public class AntiAFK extends Module {
 
             //Strafe
             if (strafe.get() && strafeTimer == 20) {
-                mc.options.keyLeft.setPressed(!direction);
-                mc.options.keyRight.setPressed(direction);
+                mc.options.leftKey.setPressed(!direction);
+                mc.options.rightKey.setPressed(direction);
                 direction = !direction;
                 strafeTimer = 0;
             } else

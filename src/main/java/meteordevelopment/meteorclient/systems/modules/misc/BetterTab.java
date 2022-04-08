@@ -15,6 +15,8 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
+import net.minecraft.text.BaseText;
+import net.minecraft.world.GameMode;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
@@ -60,6 +62,13 @@ public class BetterTab extends Module {
         .build()
     );
 
+    private final Setting<Boolean> gamemode = sgGeneral.add(new BoolSetting.Builder()
+            .name("gamemode")
+            .description("Display gamemode next to the nick.")
+            .defaultValue(false)
+            .build()
+    );
+
 
     public BetterTab() {
         super(Categories.Misc, "better-tab", "Various improvements to the tab list.");
@@ -88,6 +97,23 @@ public class BetterTab extends Module {
             }
 
             name = new LiteralText(nameString).setStyle(name.getStyle().withColor(new TextColor(color.getPacked())));
+        }
+
+        if (gamemode.get()) {
+            GameMode gm = playerListEntry.getGameMode();
+            String gmText = "?";
+            if (gm != null) {
+                gmText = switch (gm) {
+                    case SPECTATOR -> "Sp";
+                    case SURVIVAL -> "S";
+                    case CREATIVE -> "C";
+                    case ADVENTURE -> "A";
+                };
+            }
+            BaseText text = new LiteralText("");
+            text.append(name);
+            text.append(" [" + gmText + "]");
+            name = text;
         }
 
         return name;

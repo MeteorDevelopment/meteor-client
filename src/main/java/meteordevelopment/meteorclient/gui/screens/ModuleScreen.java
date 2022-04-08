@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WFavorite;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -30,7 +31,8 @@ public class ModuleScreen extends WindowScreen {
     private WKeybind keybind;
 
     public ModuleScreen(GuiTheme theme, Module module) {
-        super(theme, module.title);
+        super(theme, theme.favorite(module.favorite), module.title);
+        ((WFavorite) window.icon).action = () -> module.favorite = ((WFavorite) window.icon).checked;
 
         this.module = module;
     }
@@ -66,6 +68,13 @@ public class ModuleScreen extends WindowScreen {
         tobr.add(theme.label("Toggle on bind release: "));
         WCheckbox tobrC = tobr.add(theme.checkbox(module.toggleOnBindRelease)).widget();
         tobrC.action = () -> module.toggleOnBindRelease = tobrC.checked;
+
+        // Chat feedback
+        WHorizontalList cf = section.add(theme.horizontalList()).widget();
+
+        cf.add(theme.label("Chat Feedback: "));
+        WCheckbox cfC = cf.add(theme.checkbox(module.chatFeedback)).widget();
+        cfC.action = () -> module.chatFeedback = cfC.checked;
 
         add(theme.horizontalSeparator()).expandX();
 

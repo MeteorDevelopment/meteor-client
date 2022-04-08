@@ -133,6 +133,8 @@ public class StashFinder extends Module {
                 }
             }
         }
+
+        ChunkDataEvent.returnChunkDataEvent(event);
     }
 
     @Override

@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.StatusEffectInstanceAccessor;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
@@ -17,6 +18,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.network.packet.c2s.play.UpdatePlayerAbilitiesC2SPacket;
 
 public class PotionSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -28,8 +30,25 @@ public class PotionSpoof extends Module {
             .build()
     );
 
+    private final Setting<Boolean> clearEffects = sgGeneral.add(new BoolSetting.Builder()
+        .name("clear-effects")
+        .description("Clears effects on module disable.")
+        .defaultValue(true)
+        .build()
+    );
+
     public PotionSpoof() {
         super(Categories.Player, "potion-spoof", "Spoofs specified potion effects for you. SOME effects DO NOT work.");
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (!clearEffects.get() || !Utils.canUpdate()) return;
+
+        for (StatusEffect effect : potions.get().keySet()) {
+            if (potions.get().getInt(effect) <= 0) continue;
+            if (mc.player.hasStatusEffect(effect)) mc.player.removeStatusEffect(effect);
+        }
     }
 
     @EventHandler

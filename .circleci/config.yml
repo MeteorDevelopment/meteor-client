@@ -27,7 +27,7 @@ jobs:
     steps:
       - checkout
 
-      - run: ./gradlew build
+      - run: ./gradlew build -Pcommit=<< pipeline.git.revision >>
       - run: ./gradlew publish
 
       - store_artifacts:
@@ -37,7 +37,7 @@ jobs:
           install-yarn: true
 
       - run:
-          name: Discord webhook
+          name: Upload file & Discord webhook
           command: |
             cd .circleci/discordwebhook
             yarn install
