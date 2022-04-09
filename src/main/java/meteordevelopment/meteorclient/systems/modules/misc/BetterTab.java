@@ -69,6 +69,14 @@ public class BetterTab extends Module {
             .build()
     );
 
+    private final Setting<Boolean> fullGamemodeName = sgGeneral.add(new BoolSetting.Builder()
+        .name("full gamemode name")
+        .description("Shows the full gamemode name instead of \"S\", \"C\", etc.")
+        .defaultValue(false)
+        .visible(gamemode::get)
+        .build()
+    );
+
 
     public BetterTab() {
         super(Categories.Misc, "better-tab", "Various improvements to the tab list.");
@@ -104,10 +112,10 @@ public class BetterTab extends Module {
             String gmText = "?";
             if (gm != null) {
                 gmText = switch (gm) {
-                    case SPECTATOR -> "Sp";
-                    case SURVIVAL -> "S";
-                    case CREATIVE -> "C";
-                    case ADVENTURE -> "A";
+                    case SPECTATOR -> fullGamemodeName.get() ? "Spectator" : "Sp";
+                    case SURVIVAL  -> fullGamemodeName.get() ? "Survival"  : "S";
+                    case CREATIVE  -> fullGamemodeName.get() ? "Creative"  : "C";
+                    case ADVENTURE -> fullGamemodeName.get() ? "Adventure" : "A";
                 };
             }
             BaseText text = new LiteralText("");
