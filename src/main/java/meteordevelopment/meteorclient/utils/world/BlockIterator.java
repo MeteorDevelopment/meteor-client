@@ -43,9 +43,9 @@ public class BlockIterator {
     private static void onTick(TickEvent.Pre event) {
         if (!Utils.canUpdate()) return;
 
-        int px = (int) mc.player.getX();
-        int py = (int) mc.player.getY();
-        int pz = (int) mc.player.getZ();
+        int px = mc.player.getBlockX();
+        int py = mc.player.getBlockY();
+        int pz = mc.player.getBlockZ();
 
         for (int x = px - hRadius; x <= px + hRadius; x++) {
             for (int z = pz - hRadius; z <= pz + hRadius; z++) {
