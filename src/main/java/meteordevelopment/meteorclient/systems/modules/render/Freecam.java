@@ -295,9 +295,20 @@ public class Freecam extends Module {
         if (event.entity.getUuid() == null) return;
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
 
-        if (autoDisableOnDamage.get() || (autoDisableOnDeath.get() && event.entity.getHealth() <= 0)) {
+        if (autoDisableOnDamage.get()) {
             toggle();
-            info("Auto toggled because you took damage or died.");
+            info("Auto toggled because you took damage.");
+        }
+    }
+    
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event)  {
+        if (event.packet instanceof DeathMessageS2CPacket packet) {
+            Entity entity = mc.world.getEntityById(packet.getEntityId());
+            if (entity == mc.player && autoDisableOnDeath.get()) {
+                toggle();
+                info("Auto toggled because you died.");
+            }
         }
     }
 
