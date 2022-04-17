@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
+import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
@@ -52,8 +53,7 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                NbtCompound tag = s.getArgument("nbt_data", NbtCompound.class);
-                stack.setNbt(tag);
+                stack.setNbt(s.getArgument("nbt_data", NbtCompound.class));
                 setStack(stack);
             }
 
@@ -123,6 +123,17 @@ public class NbtCommand extends Command {
                 text.append(new LiteralText(" data copied!"));
 
                 info(text);
+            }
+
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("paste").executes(s -> {
+            ItemStack stack = mc.player.getInventory().getMainHandStack();
+
+            if (validBasic(stack)) {
+                stack.setNbt(new CompoundNbtTagArgumentType().parse(new StringReader(mc.keyboard.getClipboard())));
+                setStack(stack);
             }
 
             return SINGLE_SUCCESS;
