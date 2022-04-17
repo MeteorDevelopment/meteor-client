@@ -50,6 +50,11 @@ public class ChatUtils {
         customPrefixes.add(new Pair<>(packageName, supplier));
     }
 
+    /** The package name must match exactly to the one provided through {@link #registerCustomPrefix(String, Supplier)}. */
+    public static void unregisterCustomPrefix(String packageName) {
+        customPrefixes.removeIf(pair -> pair.getLeft().equals(packageName));
+    }
+
     public static void forceNextPrefixClass(Class<?> klass) {
         forcedPrefixClassName = klass.getName();
     }
