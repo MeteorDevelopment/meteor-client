@@ -24,6 +24,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
         return new CompoundNbtTagArgumentType();
     }
 
+    @Override
     public NbtCompound parse(StringReader reader) throws CommandSyntaxException {
         reader.skipWhitespace();
         if (!reader.canRead()) {
@@ -54,6 +55,7 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
         return context.getArgument(name, NbtCompound.class);
     }
 
+    @Override
     public Collection<String> getExamples() {
         return EXAMPLES;
     }
