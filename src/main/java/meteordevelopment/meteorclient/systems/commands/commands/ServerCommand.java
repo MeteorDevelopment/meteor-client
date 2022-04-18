@@ -62,6 +62,7 @@ public class ServerCommand extends Command {
 
         builder.then(literal("plugins").executes(ctx -> {
             ticks = 0;
+            plugins.clear();
             MeteorClient.EVENT_BUS.subscribe(this);
             info("Please wait around 5 seconds...");
             (new Thread(() -> {
