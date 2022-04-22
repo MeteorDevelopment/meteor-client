@@ -89,20 +89,11 @@ public class NoFall extends Module {
             || ((IPlayerMoveC2SPacket) event.packet).getTag() == 1337) return;
 
 
-        if ((mc.player.isFallFlying() || Modules.get().isActive(Flight.class)) && mc.player.getVelocity().y < 1) {
-            BlockHitResult result = mc.world.raycast(new RaycastContext(
-                mc.player.getPos(),
-                mc.player.getPos().subtract(0, 0.5, 0),
-                RaycastContext.ShapeType.OUTLINE,
-                RaycastContext.FluidHandling.NONE,
-                mc.player)
-            );
-
-            if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-            }
-        }
-        else {
+        if (!Modules.get().isActive(Flight.class)) {
+            if (mc.player.isFallFlying()) return;
+            if (mc.player.getVelocity().y > -0.5) return;
+            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
+        } else {
             ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         }
     }
