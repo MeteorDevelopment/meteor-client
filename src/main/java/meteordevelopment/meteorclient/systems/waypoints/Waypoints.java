@@ -88,7 +88,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     public void remove(Waypoint waypoint) {
-        Waypoint removed = waypoints.remove(waypoint.name);
+        Waypoint removed = waypoints.remove(waypoint.name.toLowerCase(Locale.ROOT));
         if (removed != null) {
             save();
         }
