@@ -114,8 +114,8 @@ public class SpawnProofer extends Module {
             ticksWaited++;
             return;
         }
-        if (spawns.isEmpty()) return;
 
+        if (spawns.isEmpty()) return;
 
         // Find slot
         FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
@@ -128,14 +128,15 @@ public class SpawnProofer extends Module {
         // Place blocks
         if (delay.get() == 0) {
             for (BlockPos blockPos : spawns) BlockUtils.place(blockPos, block, rotate.get(), -50, false);
-        } else {
-
+        }
+        else {
             // Check if light source
             if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
                 BlockPos.Mutable selectedBlockPos = spawns.get(0);
+
                 for (BlockPos blockPos : spawns) {
                     int lightLevel = mc.world.getLightLevel(blockPos);
                     if (lightLevel < lowestLightLevel) {
@@ -145,13 +146,10 @@ public class SpawnProofer extends Module {
                 }
 
                 BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
-
-            } else {
-
-                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
-
             }
-
+            else {
+                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
+            }
         }
 
         ticksWaited = 0;
@@ -166,7 +164,8 @@ public class SpawnProofer extends Module {
             block instanceof SlabBlock ||
             block instanceof AbstractPressurePlateBlock ||
             block instanceof TransparentBlock ||
-            block instanceof TripwireBlock;
+            block instanceof TripwireBlock ||
+            block instanceof CarpetBlock;
     }
 
     private boolean isLightSource(Block block) {
