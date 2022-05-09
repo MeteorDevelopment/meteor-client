@@ -25,6 +25,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Blocks;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Items;
@@ -118,6 +119,36 @@ public class NoFall extends Module {
 
                 ((IVec3d) mc.player.getVelocity()).setY(preY);
             });
+        }
+
+
+        // PowderSnow mode
+        if (mode.get() == Mode.PowderSnow) {
+            if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
+                // Place water
+                FindItemResult powderBucket = InvUtils.findInHotbar(Items.POWDER_SNOW_BUCKET);
+
+                if (!powderBucket.found()) return;
+
+                // Center player
+                if (anchor.get()) PlayerUtils.centerPlayer();
+
+                // Check if there is a block within 5 blocks
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 3.5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+
+                // Place Snow
+                if (result != null && result.getType() == HitResult.Type.BLOCK) {
+                    //useBucket(powderBucket, true);
+                    //useBucket(InvUtils.findInHotbar(Items.POWDER_SNOW_BUCKET), true);
+                    BlockUtils.place(mc.player.getBlockPos().down(), InvUtils.findInHotbar(Items.POWDER_SNOW_BUCKET), false, 0, true);
+                    placedWater = true;
+                }
+            }
+
+            // Remove Snow
+            if (placedWater && mc.player.getBlockStateAtPos().getBlock() == Blocks.POWDER_SNOW) {
+                useBucket(InvUtils.findInHotbar(Items.BUCKET), false);
+            }
         }
 
         // Bucket mode
