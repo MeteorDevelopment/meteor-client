@@ -97,7 +97,7 @@ public class SelfTrap extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Renders a block overlay where the obsidian will be placed.")
+            .description("Renders a block overlay where the blocks will be placed.")
             .defaultValue(true)
             .build()
     );
@@ -128,7 +128,7 @@ public class SelfTrap extends Module {
     private int delay;
 
     public SelfTrap(){
-        super(Categories.Combat, "self-trap", "Places obsidian above your head.");
+        super(Categories.Combat, "self-trap", "Places blocks above your head.");
     }
 
     @Override
