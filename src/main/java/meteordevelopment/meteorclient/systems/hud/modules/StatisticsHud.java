@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.hud.modules;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.CustomStatSetting;
+import meteordevelopment.meteorclient.settings.CustomStatListSetting;
 import meteordevelopment.meteorclient.systems.hud.HUD;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
@@ -17,15 +17,18 @@ import net.minecraft.stat.Stats;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket.Mode.REQUEST_STATS;
 
-public class StatisticsHud extends DoubleTextHudElement  {
+public class StatisticsHud extends HudElement  {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Stat<Identifier>> sIdentifier = sgGeneral.add(new CustomStatSetting.Builder()
-        .name("stat")
-        .description("Statistic that you want to display")
-        .defaultValue(Stats.CUSTOM.getOrCreateStat(Stats.OPEN_ENDERCHEST))
+    private final Setting<List<Identifier>> sIdentifier = sgGeneral.add(new CustomStatListSetting.Builder()
+        .name("stats")
+        .description("Statistics that you want to display")
+        .defaultValue(Arrays.asList(Stats.OPEN_ENDERCHEST, Stats.JUMP))
         .onChanged(this::updateIdentifier)
         .build()
     );
@@ -39,17 +42,33 @@ public class StatisticsHud extends DoubleTextHudElement  {
     );
 
     private Long lastRequested = System.currentTimeMillis();
+    private String cachedStats = "";
 
     public StatisticsHud(HUD hud) {
-        super(hud, "statistics", "Displays selected in-game statistics.", "");
-        setLeft(genLeft());
+        super(hud, "statistics", "Displays selected in-game statistics.", true);
     }
-
-    public String genLeft() {
-        return new TranslatableText("stat." + sIdentifier.get().getValue().toString().replace(':', '.')).getString() + ": ";
+    public void updateIdentifier(List<Identifier> i) {
+        cachedStats = genStats(i);
     }
-    public void updateIdentifier(Stat<Identifier> i) {
-        setLeft(genLeft());
+    private String genStats(List<Identifier> l) {
+        if(mc.player == null) {
+            return "";
+        }
+        StringBuilder r = new StringBuilder();
+        for (Identifier i : l) {
+            if(i == null) {
+                r.append("Initializing: null");
+                continue;
+            }
+            Stat<Identifier> s = Stats.CUSTOM.getOrCreateStat(i);
+            String a = new TranslatableText("stat." + s.getValue().toString().replace(':', '.')).getString() + ": " + s.format(mc.player.getStatHandler().getStat(s));
+            if(!r.toString().equals("")) {
+                r.append(a);
+            } else {
+                r.append("\n").append(a);
+            }
+        }
+        return r.toString();
     }
 
     @Override
@@ -58,17 +77,24 @@ public class StatisticsHud extends DoubleTextHudElement  {
             mc.getNetworkHandler().sendPacket(new ClientStatusC2SPacket(REQUEST_STATS));
             lastRequested = System.currentTimeMillis();
         }
-        super.update(renderer);
+        List<Identifier> l = sIdentifier.get();
+        if(l.size() == 0) {
+            cachedStats = "No statistics selected";
+            box.height = renderer.textHeight();
+        } else if(isInEditor()) {
+            cachedStats = "Times coped: 69420";
+            box.height = renderer.textHeight();
+        } else {
+            cachedStats = genStats(l);
+            box.height = renderer.textHeight()*l.size();
+        }
+        box.width = renderer.textWidth(cachedStats);
     }
-
     @Override
-    protected String getRight() {
-        if(mc.player != null) {
-            return sIdentifier.get().format(mc.player.getStatHandler().getStat(sIdentifier.get()));
+    public void render(HudRenderer renderer) {
+        String[] values = cachedStats.split("\n");
+        for (int i = 0;  i < values.length; i++) {
+            renderer.text(values[i], box.getX(), box.getY() + renderer.textHeight()*i, hud.primaryColor.get());
         }
-        if(isInEditor()) {
-            return "69420";
-        }
-        return "No data";
     }
 }

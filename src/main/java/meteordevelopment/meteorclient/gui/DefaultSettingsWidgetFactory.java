@@ -62,6 +62,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
+        factories.put(CustomStatListSetting.class, (table, setting) -> customStatW(table, (CustomStatListSetting) setting));
     }
 
     @Override
@@ -309,6 +310,10 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void storageBlockListW(WTable table, StorageBlockListSetting setting) {
         selectW(table, setting, () -> mc.setScreen(new StorageBlockListSettingScreen(theme, setting)));
+    }
+
+    private void customStatW(WTable table, CustomStatListSetting setting) {
+        selectW(table, setting, () -> mc.setScreen(new CustomStatListSettingScreen(theme, setting)));
     }
 
     private void blockDataW(WTable table, BlockDataSetting<?> setting) {
