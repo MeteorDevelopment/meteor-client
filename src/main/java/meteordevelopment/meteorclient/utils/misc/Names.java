@@ -18,6 +18,7 @@ import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
+import net.minecraft.stat.Stat;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
@@ -37,6 +38,7 @@ public class Names {
     private static final Map<EntityType<?>, String> entityTypeNames = new HashMap<>(64);
     private static final Map<ParticleType<?>, String> particleTypesNames = new HashMap<>(64);
     private static final Map<Identifier, String> soundNames = new HashMap<>(64);
+    private static final Map<Identifier, String> statNames = new HashMap<>(8);
 
     @Init(stage = InitStage.Pre)
     public static void init() {
@@ -89,5 +91,13 @@ public class Names {
 
             return StringHelper.stripTextFormat(text.getString());
         });
+    }
+
+    public static String get(Stat<Identifier> s) {
+        return getStatName(s.getValue());
+    }
+
+    public static String getStatName(Identifier s) {
+        return statNames.computeIfAbsent(s, stat -> new TranslatableText("stat." + stat.toString().replace(':', '.')).getString());
     }
 }

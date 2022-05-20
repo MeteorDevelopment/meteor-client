@@ -5,16 +5,12 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import net.minecraft.block.Block;
 import net.minecraft.nbt.*;
-import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class CustomStatListSetting extends Setting<List<Identifier>> {
