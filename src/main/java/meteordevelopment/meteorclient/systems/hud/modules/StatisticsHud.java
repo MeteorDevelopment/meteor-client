@@ -20,6 +20,7 @@ import net.minecraft.network.packet.s2c.play.StatisticsS2CPacket;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 import java.util.*;
 
@@ -62,26 +63,22 @@ public class StatisticsHud extends HudElement  {
         }
     }
     private void genStats(List<Identifier> l) {
-        if (mc.player == null) {
-            return;
-        }
         for (Identifier i : l) {
             if (i == null) {
                 cachedStats.add("Null stat?!");
                 continue;
             }
-            if (!Stats.CUSTOM.hasStat(i)) {
-                if(Stats.CUSTOM.getRegistry().containsId(i)) {
-                    cachedStats.add(String.format("Stat [%s] not initialized but present in registry. (%s)\n", i, Stats.CUSTOM.getRegistry().getId(i)));
+            if (mc.player != null) {
+                if (!Stats.CUSTOM.hasStat(i)) {
+//                    Stat<Identifier> s = Stats.CUSTOM.getOrCreateStat(i); will cause null pointer exception
+                    cachedStats.add(Names.getStatName(i) + ": " + mc.player.getStatHandler().getStat(Stats.CUSTOM, i) + " ?");
                 } else {
-                    cachedStats.add(String.format("Stat [%s] not initialized and NOT present in registry.\n", i));
+                    Stat<Identifier> s = Stats.CUSTOM.getOrCreateStat(i);
+                    cachedStats.add(Names.getStatName(i) + ": " + s.format(mc.player.getStatHandler().getStat(s)));
                 }
-                continue;
+            } else {
+                cachedStats.add(Names.getStatName(i) + ": ??");
             }
-            Stat<Identifier> s = Stats.CUSTOM.getOrCreateStat(i);
-//            String label = labelsCache.computeIfAbsent(s, identifierStat -> new TranslatableText("stat." + identifierStat.getValue().toString().replace(':', '.')).getString());
-            cachedStats.add(Names.get(s) + ": " + s.format(mc.player.getStatHandler().getStat(s)));
-            MeteorClient.LOG.info("Updated: {}", i);
         }
     }
 
@@ -106,7 +103,7 @@ public class StatisticsHud extends HudElement  {
     @Override
     public void render(HudRenderer renderer) {
         if(cachedStats.size() == 0) {
-            renderer.text("0 cached stats?", box.getX(), box.getY(), hud.primaryColor.get());
+            renderer.text("No stats initialized.", box.getX(), box.getY(), hud.primaryColor.get());
             return;
         }
         renderer.text(String.format("Stats: (%d)", cachedStats.size()), box.getX(), box.getY(), hud.primaryColor.get());
