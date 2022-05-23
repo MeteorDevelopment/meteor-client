@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.notebot.NBSDecoder;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.nbs.Layer;
@@ -59,6 +60,7 @@ public class Notebot extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render", false);
+
     private final Setting<Integer> tickDelay = sgGeneral.add(new IntSetting.Builder()
         .name("tick-delay")
         .description("The delay when loading a song.")
@@ -67,42 +69,49 @@ public class Notebot extends Module {
         .sliderMax(20)
         .build()
     );
+
     private final Setting<NotebotUtils.InstrumentType> instrument = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.InstrumentType>()
         .name("instrument")
         .description("Select which instrument will be played")
         .defaultValue(NotebotUtils.InstrumentType.NotDrums)
         .build()
     );
+
     private final Setting<Boolean> polyphonic = sgGeneral.add(new BoolSetting.Builder()
         .name("polyphonic")
         .description("Whether or not to allow multiple notes to be played at the same time")
         .defaultValue(true)
         .build()
     );
+
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
         .name("render")
         .description("Whether or not to render the outline around the noteblocks.")
         .defaultValue(true)
         .build()
     );
+
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
     );
+
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
         .name("side-color")
         .description("The color of the sides of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 10))
         .build()
     );
+
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
         .name("line-color")
         .description("The color of the lines of the blocks being rendered.")
         .defaultValue(new SettingColor(204, 0, 0, 255))
         .build()
     );
+
     private final List<BlockPos> possibleBlockPos = new ArrayList<>();
     private final List<ImmutablePair<Integer, Integer>> song = new ArrayList<>();
     private final List<Integer> uniqueNotes = new ArrayList<>();
@@ -116,6 +125,8 @@ public class Notebot extends Module {
     private int ticks = 0;
     private boolean noSongsFound = true;
     private WLabel status;
+
+
     public Notebot() {
         super(Categories.Misc, "notebot", "Plays noteblock nicely");
 
@@ -267,17 +278,14 @@ public class Notebot extends Module {
         return table;
     }
 
-    private String getStatus() {
+
+    public String getStatus() {
         if (!this.isActive()) return "Module disabled.";
         if (song.isEmpty()) return "No song loaded.";
         if (isPlaying) return String.format("Playing song. %d/%d", currentIndex, song.size());
         if (stage == Stage.Playing || stage == Stage.Preview) return "Ready to play.";
         if (stage == Stage.SetUp || stage == Stage.Tune) return "Setting up the noteblocks.";
         else return String.format("Stage: %s.", stage.toString());
-    }
-
-    public void printStatus() {
-        info(getStatus());
     }
 
     private String getFileLabel(Path file) {
@@ -572,8 +580,9 @@ public class Notebot extends Module {
             stage = Stage.SetUp;
             return true;
         }
+
         mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(
-            mc.player.getPos(), rayTraceCheck(pos), pos, true)));
+            Utils.vec3d(pos), rayTraceCheck(pos), pos, true)));
         mc.player.swingHand(Hand.MAIN_HAND);
         return true;
     }

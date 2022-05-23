@@ -49,7 +49,7 @@ public class NotebotCommand extends Command {
 
         builder.then(literal("status").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
-            notebot.printStatus();
+            info(notebot.getStatus());
             return SINGLE_SUCCESS;
         }));
 
