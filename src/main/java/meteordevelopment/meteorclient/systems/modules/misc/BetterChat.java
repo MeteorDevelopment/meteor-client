@@ -52,7 +52,7 @@ public class BetterChat extends Module {
 
     private final Setting<Boolean> timestamps = sgGeneral.add(new BoolSetting.Builder()
         .name("timestamps")
-        .description("Adds client side time stamps to the beginning of chat messages.")
+        .description("Adds client-side time stamps to the beginning of chat messages.")
         .defaultValue(false)
         .build()
     );
