@@ -389,7 +389,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> renderSwing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Renders hand swinging client side.")
+        .description("Renders hand swinging client-side.")
         .defaultValue(true)
         .build()
     );
