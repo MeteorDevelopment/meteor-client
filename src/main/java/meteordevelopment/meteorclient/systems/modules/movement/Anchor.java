@@ -25,7 +25,7 @@ public class Anchor extends Module {
         .name("max-height")
         .description("The maximum height Anchor will work at.")
         .defaultValue(10)
-        .range(0, 255)
+        .range(0, 383)
         .sliderMax(20)
         .build()
     );
