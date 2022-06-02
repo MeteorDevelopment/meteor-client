@@ -18,10 +18,11 @@ import net.minecraft.util.math.Vec3f;
 
 public class HandView extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgMainHand = settings.createGroup("Main Hand");
-    private final SettingGroup sgOffHand = settings.createGroup("Off Hand");
-    private final SettingGroup sgArm = settings.createGroup("Arm");
-    private final SettingGroup sgSwing = settings.createGroup("Swing");
+    private final SettingGroup sgMainHand = settings.createGroup("Main Hand", false);
+    private final SettingGroup sgOffHand = settings.createGroup("Off Hand", false);
+    private final SettingGroup sgArm = settings.createGroup("Arm", false);
+    private final SettingGroup sgRotating = settings.createGroup("Rotating", false);
+    private final SettingGroup sgSwing = settings.createGroup("Swing", false);
 
     //general
     private final Setting<Boolean> followRotations = sgGeneral.add(new BoolSetting.Builder()
@@ -64,6 +65,20 @@ public class HandView extends Module {
     private final Setting<Double> rotationYArm = sgArm.add(new DoubleSetting.Builder().name("arm-rotation-y").description("The Y orientation of your arm.").defaultValue(0).sliderRange(-180, 180).build());
     private final Setting<Double> rotationZArm = sgArm.add(new DoubleSetting.Builder().name("arm-rotation-z").description("The Z orientation of your arm.").defaultValue(0).sliderRange(-180, 180).build());
 
+    //rotating
+    private final Setting<Boolean> rotateMainhandX = sgRotating.add(new BoolSetting.Builder().name("rotate-mainhand-x").description("Whether to rotate the X orientation").defaultValue(false).build());
+    private final Setting<Boolean> rotateMainhandY = sgRotating.add(new BoolSetting.Builder().name("rotate-mainhand-y").description("Whether to rotate the Y orientation").defaultValue(false).build());
+    private final Setting<Boolean> rotateMainhandZ = sgRotating.add(new BoolSetting.Builder().name("rotate-mainhand-z").description("Whether to rotate the Z orientation").defaultValue(false).build());
+    private final Setting<Boolean> rotateOffhandX = sgRotating.add(new BoolSetting.Builder().name("rotate-offhand-x").description("Whether to rotate the X orientation").defaultValue(false).build());
+    private final Setting<Boolean> rotateOffhandY = sgRotating.add(new BoolSetting.Builder().name("rotate-offhand-y").description("Whether to rotate the Y orientation").defaultValue(false).build());
+    private final Setting<Boolean> rotateOffhandZ = sgRotating.add(new BoolSetting.Builder().name("rotate-offhand-z").description("Whether to rotate the Z orientation").defaultValue(false).build());
+    private final Setting<Double> rotateMainhandXSpeed = sgRotating.add(new DoubleSetting.Builder().name("mainhand-x-rotation-speed").description("The speed of the mainhand X rotation.").defaultValue(0.5).sliderRange(0, 3).build());
+    private final Setting<Double> rotateMainhandYSpeed = sgRotating.add(new DoubleSetting.Builder().name("mainhand-y-rotation-speed").description("The speed of the mainhand Y rotation.").defaultValue(0.5).sliderRange(0, 3).build());
+    private final Setting<Double> rotateMainhandZSpeed = sgRotating.add(new DoubleSetting.Builder().name("mainhand-z-rotation-speed").description("The speed of the mainhand Z rotation.").defaultValue(0.5).sliderRange(0, 3).build());
+    private final Setting<Double> rotateOffhandXSpeed = sgRotating.add(new DoubleSetting.Builder().name("offhand-x-rotation-speed").description("The speed of the offhand X rotation.").defaultValue(0.5).sliderRange(0, 3).build());
+    private final Setting<Double> rotateOffhandYSpeed = sgRotating.add(new DoubleSetting.Builder().name("offhand-y-rotation-speed").description("The speed of the offhand Y rotation.").defaultValue(0.5).sliderRange(0, 3).build());
+    private final Setting<Double> rotateOffhandZSpeed = sgRotating.add(new DoubleSetting.Builder().name("offhand-z-rotation-speed").description("The speed of the offhand Z rotation.").defaultValue(0.5).sliderRange(0, 3).build());
+
     // Swing
     public final Setting<SwingMode> swingMode = sgSwing.add(new EnumSetting.Builder<SwingMode>().name("mode").description("Modifies your client & server hand swinging.").defaultValue(SwingMode.None).build());
     public final Setting<Double> mainSwing = sgSwing.add(new DoubleSetting.Builder().name("main-progress").description("The swing progress of your main hand.").defaultValue(0).range(0, 1).sliderMax(1).build());
@@ -78,16 +93,28 @@ public class HandView extends Module {
     @EventHandler
     private void onHeldItemRender(HeldItemRendererEvent event) {
         if (!isActive()) return;
+
         if (event.hand == Hand.MAIN_HAND) {
             event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationXMain.get().floatValue()));
             event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYMain.get().floatValue()));
             event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationZMain.get().floatValue()));
+
+            if (rotateMainhandX.get()) event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(getRotationDegrees(rotateMainhandXSpeed.get())));
+            if (rotateMainhandY.get()) event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(getRotationDegrees(rotateMainhandYSpeed.get())));
+            if (rotateMainhandZ.get()) event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(getRotationDegrees(rotateMainhandZSpeed.get())));
+
             event.matrix.scale(scaleXMain.get().floatValue(), scaleYMain.get().floatValue(), scaleZMain.get().floatValue());
             event.matrix.translate(posXMain.get().floatValue(), posYMain.get().floatValue(), posZMain.get().floatValue());
+
         } else {
             event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationXOff.get().floatValue()));
             event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYOff.get().floatValue()));
             event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationZOff.get().floatValue()));
+
+            if (rotateOffhandX.get()) event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(getRotationDegrees(rotateOffhandXSpeed.get())));
+            if (rotateOffhandY.get()) event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(getRotationDegrees(rotateOffhandYSpeed.get())));
+            if (rotateOffhandZ.get()) event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(getRotationDegrees(rotateOffhandZSpeed.get())));
+
             event.matrix.scale(scaleXOff.get().floatValue(), scaleYOff.get().floatValue(), scaleZOff.get().floatValue());
             event.matrix.translate(posXOff.get().floatValue(), posYOff.get().floatValue(), posZOff.get().floatValue());
         }
@@ -110,6 +137,12 @@ public class HandView extends Module {
     private void applyServerRotations(MatrixStack matrix) {
         matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(mc.player.getPitch() - Rotations.serverPitch));
         matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(mc.player.getYaw() - Rotations.serverYaw));
+    }
+
+    private float getRotationDegrees(double speed) {
+        double stage = (mc.player.age % (20 / speed)) / (20 / speed); // how far along during the period the rotation is
+        double frameExtra = (1 / (20 / speed)) * mc.getTickDelta(); // how much more rotation to add due to the tick delta
+        return (float) (mc.isPaused() ? stage * 360 : (stage + frameExtra) * 360);
     }
 
     public enum SwingMode {
