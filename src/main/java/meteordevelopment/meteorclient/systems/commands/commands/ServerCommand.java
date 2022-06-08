@@ -29,11 +29,7 @@ import net.minecraft.util.Formatting;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -170,7 +166,7 @@ public class ServerCommand extends Command {
         info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
 
         info("Day: %d", mc.world.getTimeOfDay() / 24000L);
-        
+
         info("Permission level: %s", formatPerms());
     }
 
@@ -201,19 +197,19 @@ public class ServerCommand extends Command {
     private void onReadPacket(PacketEvent.Receive event) {
         try {
             if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
-                
+
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches == null) {
                     error("Invalid Packet.");
                     return;
                 }
-                
+
                 for (Suggestion suggestion : matches.getList()) {
                     String[] command = suggestion.getText().split(":");
                     if (command.length > 1) {
                         String pluginName = command[0].replace("/", "");
-        
+
                         if (!plugins.contains(pluginName)) {
                             plugins.add(pluginName);
                         }
