@@ -6,7 +6,7 @@ orbs:
 parameters:
   version:
     type: string
-    default: 0.4.9
+    default: 0.5.0
 
 general:
   branches:
