@@ -19,10 +19,10 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
 import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.StringUtils;
@@ -73,14 +73,14 @@ public class ServerSpoof extends Module {
             if (!isActive() || !resourcePack.get()) return;
             if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
             event.cancel();
-            BaseText msg = new LiteralText("This server has ");
+            MutableText msg = Text.literal("This server has ");
             msg.append(packet.isRequired() ? "a required " : "an optional ");
-            BaseText link = new LiteralText("resource pack");
+            MutableText link = Text.literal("resource pack");
             link.setStyle(link.getStyle()
                 .withColor(Formatting.BLUE)
                 .withUnderline(true)
                 .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new LiteralText("Click to download")))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
             );
             msg.append(link);
             msg.append(".");

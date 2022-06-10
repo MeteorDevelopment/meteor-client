@@ -14,7 +14,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +37,7 @@ public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry
     }
 
     private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(o ->
-            new LiteralText("Player list entry with name " + o + " doesn't exist."));
+            Text.literal("Player list entry with name " + o + " doesn't exist."));
 
     public static PlayerListEntryArgumentType playerListEntry() {
         return new PlayerListEntryArgumentType();

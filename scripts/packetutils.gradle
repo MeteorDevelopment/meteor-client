@@ -142,6 +142,16 @@ final packetRegistryClass = """
 
         @Override
         public void populateTags(Map<TagKey<Class<? extends Packet<?>>>, List<RegistryEntry<Class<? extends Packet<?>>>>> tagEntries) {}
+
+        @Override
+        public DataResult<RegistryEntry<Class<? extends Packet<?>>>> getOrCreateEntryDataResult(RegistryKey<Class<? extends Packet<?>>> key) {
+            return null;
+        }
+
+        @Override
+        public Set<RegistryKey<Class<? extends Packet<?>>>> getKeys() {
+            return null;
+        }
     }
 """
 
@@ -151,7 +161,7 @@ task generatePacketUtils() {
         def s2cPackets = []
         def c2sPackets = []
 
-        def file = new JarFile(new File(System.getProperty("user.dir"), ".gradle/loom-cache/${project.minecraft_version}/net.fabricmc.yarn.${project.minecraft_version.replace('.', '_')}.${project.yarn_mappings}-v2/minecraft-project-@-mapped.jar"))
+        def file = new JarFile(new File(System.getProperty("user.dir"), ".gradle/loom-cache/${project.minecraft_version}/net.fabricmc.yarn.${project.minecraft_version.replace('.', '_')}.${project.yarn_mappings}-v2/minecraft-project-@-merged-named.jar"))
         for (entry in file.entries()) {
             if (entry.name.endsWith("S2CPacket.class")) s2cPackets << entry.name.substring(0, entry.name.length() - 6)
             else if (entry.name.endsWith("C2SPacket.class")) c2sPackets << entry.name.substring(0, entry.name.length() - 6)
@@ -179,6 +189,8 @@ task generatePacketUtils() {
         writer << "import net.minecraft.util.registry.RegistryEntryList;\n"
         writer << "import net.minecraft.util.registry.RegistryKey;\n"
         writer << "import org.jetbrains.annotations.NotNull;\n"
+        writer << "import net.minecraft.util.math.random.Random;\n"
+        writer << "import com.mojang.serialization.DataResult;\n"
         writer << "import java.util.*;\n"
         writer << "import java.util.stream.Stream;\n"
 
