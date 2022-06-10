@@ -362,11 +362,11 @@ public class WaypointsModule extends Module {
     }
 
     private Integer getMaxHeight() {
-        return mc.world.getDimension().getHeight() - Math.abs(getMinHeight()) - 1;
+        return mc.world.getDimension().height() - Math.abs(getMinHeight()) - 1;
     }
 
     private Integer getMinHeight() {
-        return mc.world.getDimension().getMinimumY();
+        return mc.world.getDimension().minY();
     }
 
     private static class WIcon extends WWidget {
