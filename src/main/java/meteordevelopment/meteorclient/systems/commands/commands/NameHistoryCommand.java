@@ -51,8 +51,8 @@ public class NameHistoryCommand extends Command {
                 }
 
                 String name = lookUpTarget.getProfile().getName();
-                BaseText initial = new LiteralText(name);
-                initial.append(new LiteralText(name.endsWith("s") ? "'" : "'s"));
+                MutableText initial = Text.literal(name);
+                initial.append(Text.literal(name.endsWith("s") ? "'" : "'s"));
 
                 Color nameColor = PlayerUtils.getPlayerColor(mc.world.getPlayerByUuid(uuid), Utils.WHITE);
 
@@ -65,25 +65,25 @@ public class NameHistoryCommand extends Command {
                         )
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
-                                new LiteralText("View on NameMC")
+                                Text.literal("View on NameMC")
                                         .formatted(Formatting.YELLOW)
                                         .formatted(Formatting.ITALIC)
                         ))
                 );
 
-                info(initial.append(new LiteralText(" Username History:").formatted(Formatting.GRAY)));
+                info(initial.append(Text.literal(" Username History:").formatted(Formatting.GRAY)));
 
                 for (NameHistoryObject nameHistoryObject : nameHistoryObjects) {
-                    BaseText nameText = new LiteralText(nameHistoryObject.name);
+                    MutableText nameText = Text.literal(nameHistoryObject.name);
                     nameText.formatted(Formatting.AQUA);
 
                     if (nameHistoryObject.changedToAt != 0L) {
-                        BaseText changed = new LiteralText("Changed at: ");
+                        MutableText changed = Text.literal("Changed at: ");
                         changed.formatted(Formatting.GRAY);
 
                         Date date = new Date(nameHistoryObject.changedToAt);
                         DateFormat formatter = new SimpleDateFormat("hh:mm:ss, dd/MM/yyyy");
-                        changed.append(new LiteralText(formatter.format(date)).formatted(Formatting.WHITE));
+                        changed.append(Text.literal(formatter.format(date)).formatted(Formatting.WHITE));
 
                         nameText.setStyle(nameText.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, changed)));
                     }

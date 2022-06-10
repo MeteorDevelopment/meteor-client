@@ -31,10 +31,10 @@ public class ChatUtils {
 
     @Init(stage = InitStage.Post)
     public static void init() {
-        PREFIX = new LiteralText("")
+        PREFIX = Text.literal("")
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
-            .append(new LiteralText("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(AddonManager.METEOR.color.getPacked()))))
+            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(AddonManager.METEOR.color.getPacked()))))
             .append("] ");
     }
 
@@ -108,7 +108,7 @@ public class ChatUtils {
     }
 
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
-        BaseText message = new LiteralText(messageContent);
+        MutableText message = Text.literal(messageContent);
         message.setStyle(message.getStyle().withFormatting(messageColor));
         sendMsg(id, prefixTitle, prefixColor, message);
     }
@@ -116,7 +116,7 @@ public class ChatUtils {
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Text msg) {
         if (mc.world == null) return;
 
-        BaseText message = new LiteralText("");
+        MutableText message = Text.literal("");
         message.append(getPrefix());
         if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
@@ -126,13 +126,13 @@ public class ChatUtils {
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
     }
 
-    private static BaseText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
-        BaseText prefix = new LiteralText("");
+    private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
+        MutableText prefix = Text.literal("");
         prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
 
         prefix.append("[");
 
-        BaseText moduleTitle = new LiteralText(prefixTitle);
+        MutableText moduleTitle = Text.literal(prefixTitle);
         moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(prefixColor));
         prefix.append(moduleTitle);
 
@@ -188,10 +188,10 @@ public class ChatUtils {
         return msg;
     }
 
-    public static BaseText formatCoords(Vec3d pos) {
+    public static MutableText formatCoords(Vec3d pos) {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
         coordsString = formatMsg(coordsString, Formatting.GRAY);
-        BaseText coordsText = new LiteralText(coordsString);
+        MutableText coordsText = Text.literal(coordsString);
         coordsText.setStyle(coordsText.getStyle()
                 .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
@@ -200,7 +200,7 @@ public class ChatUtils {
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
-                        new LiteralText("Set as Baritone goal")
+                        Text.literal("Set as Baritone goal")
                 ))
         );
         return coordsText;

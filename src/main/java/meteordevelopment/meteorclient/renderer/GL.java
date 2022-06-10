@@ -35,6 +35,9 @@ public class GL {
 
     private static boolean changeBufferRenderer = true;
 
+    public static int CURRENT_IBO;
+    private static int prevIbo;
+
     @Init(stage = InitStage.Pre)
     public static void init() {
         if (FabricLoader.getInstance().isModLoaded("canvas")) changeBufferRenderer = false;
@@ -80,17 +83,16 @@ public class GL {
 
     public static void bindVertexArray(int vao) {
         GlStateManager._glBindVertexArray(vao);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexArray(vao);
+        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexBuffer(null);
     }
 
     public static void bindVertexBuffer(int vbo) {
         GlStateManager._glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexBuffer(vbo);
     }
 
     public static void bindIndexBuffer(int ibo) {
-        GlStateManager._glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentElementBuffer(ibo);
+        if (ibo != 0) prevIbo = CURRENT_IBO;
+        GlStateManager._glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo != 0 ? ibo : prevIbo);
     }
 
     public static void bindFramebuffer(int fbo) {

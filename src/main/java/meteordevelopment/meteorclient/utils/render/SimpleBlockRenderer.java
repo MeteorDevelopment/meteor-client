@@ -16,16 +16,16 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.random.Random;
 
 import java.util.List;
-import java.util.Random;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class SimpleBlockRenderer {
     private static final MatrixStack MATRICES = new MatrixStack();
     private static final Direction[] DIRECTIONS = Direction.values();
-    private static final Random RANDOM = new Random();
+    private static final Random RANDOM = Random.create();
 
     public static void renderWithBlockEntity(BlockEntity blockEntity, float tickDelta, IVertexConsumerProvider vertexConsumerProvider) {
         SimpleBlockRenderer.render(blockEntity.getPos(), blockEntity.getCachedState(), vertexConsumerProvider);

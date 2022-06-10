@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.systems.modules.world.Nuker;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
-import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -26,7 +25,6 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,13 +51,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         }
     }
 
-    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "attackBlock", at = @At("HEAD"))
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
         if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
-    public void interactBlock(ClientPlayerEntity player, ClientWorld world, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
+    public void interactBlock(ClientPlayerEntity player, Hand hand, BlockHitResult hitResult, CallbackInfoReturnable<ActionResult> cir) {
         if (MeteorClient.EVENT_BUS.post(InteractBlockEvent.get(player.getMainHandStack().isEmpty() ? Hand.OFF_HAND : hand, hitResult)).isCancelled()) cir.setReturnValue(ActionResult.FAIL);
     }
 
@@ -101,7 +99,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     }
 
     @Inject(method = "interactItem", at = @At("HEAD"), cancellable = true)
-    private void onInteractItem(PlayerEntity player, World world, Hand hand, CallbackInfoReturnable<ActionResult> info) {
+    private void onInteractItem(PlayerEntity player, Hand hand, CallbackInfoReturnable<ActionResult> info) {
         InteractItemEvent event = MeteorClient.EVENT_BUS.post(InteractItemEvent.get(hand));
         if (event.toReturn != null) info.setReturnValue(event.toReturn);
     }

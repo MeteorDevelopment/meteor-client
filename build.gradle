@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
@@ -23,6 +23,7 @@ repositories {
         name = "vram"
         url = "https://maven.vram.io//"
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -42,14 +43,17 @@ dependencies {
     modCompileOnly("io.vram:canvas-fabric-mc118:1.0.+") { transitive = false }
 
 	// Baritone integration
-    modImplementation "baritone:baritone:${project.baritone_version}"
-    include "baritone:baritone:${project.baritone_version}"
+    modImplementation "baritone:fabric:${project.baritone_version}"
+    include "baritone:fabric:${project.baritone_version}"
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "meteordevelopment:discord-ipc:${project.discordipc_version}"
     library "org.reflections:reflections:${project.reflections_version}"
+
+    implementation("io.netty:netty-handler-proxy:4.1.77.Final") { transitive = false }
+    shadow("io.netty:netty-handler-proxy:4.1.77.Final") { transitive = false }
 
     // Launch sub project
     shadow project(":launch")

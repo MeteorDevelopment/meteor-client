@@ -14,7 +14,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
@@ -37,7 +37,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
     }
 
     private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(o ->
-            new LiteralText("Player with name " + o + " doesn't exist."));
+            Text.literal("Player with name " + o + " doesn't exist."));
 
     public static PlayerArgumentType player() {
         return new PlayerArgumentType();

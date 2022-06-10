@@ -35,8 +35,8 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
@@ -93,7 +93,7 @@ public class WaypointsModule extends Module {
     public void addDeath(Vec3d deathPos) {
         String time = dateFormat.format(new Date());
         if (dpChat.get()) {
-            BaseText text = new LiteralText("Died at ");
+            MutableText text = Text.literal("Died at ");
             text.append(formatCoords(deathPos));
             text.append(String.format(" on %s.", time));
             info(text);
