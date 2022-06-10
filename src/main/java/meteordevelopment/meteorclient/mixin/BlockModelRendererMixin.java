@@ -51,7 +51,7 @@ public class BlockModelRendererMixin {
             int prevOffset = bufferBuilderAccessor.getElementOffset();
 
             if (prevOffset > 0) {
-                int i = bufferBuilderAccessor.getVertexFormat().getVertexSize();
+                int i = bufferBuilderAccessor.getVertexFormat().getVertexSizeInteger();
 
                 for (int l = 1; l <= 4; l++) {
                     bufferBuilderAccessor.setElementOffset(prevOffset - i * l);
