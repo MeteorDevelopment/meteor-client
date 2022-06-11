@@ -86,7 +86,7 @@ public class NbtUtils {
 
     public static NbtCompound fromClipboard(NbtCompound schema) {
         try {
-            byte[] data = Base64.getDecoder().decode(mc.keyboard.getClipboard());
+            byte[] data = Base64.getDecoder().decode(mc.keyboard.getClipboard().trim());
             ByteArrayInputStream bis = new ByteArrayInputStream(data);
 
             NbtCompound pasted = NbtIo.readCompressed(new DataInputStream(bis));

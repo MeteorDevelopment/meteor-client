@@ -13,12 +13,11 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
-import net.minecraft.text.BaseText;
-import net.minecraft.world.GameMode;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
+import net.minecraft.world.GameMode;
 
 public class BetterTab extends Module {
 
@@ -79,13 +78,13 @@ public class BetterTab extends Module {
         Color color = null;
 
         name = playerListEntry.getDisplayName();
-        if (name == null) name = new LiteralText(playerListEntry.getProfile().getName());
+        if (name == null) name = Text.literal(playerListEntry.getProfile().getName());
 
         if (playerListEntry.getProfile().getId().toString().equals(mc.player.getGameProfile().getId().toString()) && self.get()) {
             color = selfColor.get();
         }
-        else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getName()) != null) {
-            Friend friend = Friends.get().get(playerListEntry.getProfile().getName());
+        else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getId()) != null) {
+            Friend friend = Friends.get().get(playerListEntry.getProfile().getId());
             if (friend != null) color = Friends.get().color;
         }
 
@@ -96,7 +95,7 @@ public class BetterTab extends Module {
                 if (format.isColor()) nameString = nameString.replace(format.toString(), "");
             }
 
-            name = new LiteralText(nameString).setStyle(name.getStyle().withColor(new TextColor(color.getPacked())));
+            name = Text.literal(nameString).setStyle(name.getStyle().withColor(new TextColor(color.getPacked())));
         }
 
         if (gamemode.get()) {
@@ -110,7 +109,7 @@ public class BetterTab extends Module {
                     case ADVENTURE -> "A";
                 };
             }
-            BaseText text = new LiteralText("");
+            MutableText text = Text.literal("");
             text.append(name);
             text.append(" [" + gmText + "]");
             name = text;

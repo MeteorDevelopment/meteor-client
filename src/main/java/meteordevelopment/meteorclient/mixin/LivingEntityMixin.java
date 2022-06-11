@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
@@ -71,7 +72,7 @@ public abstract class LivingEntityMixin extends Entity {
     }
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
-    private void onEquipStack(ItemStack stack, CallbackInfo info) {
+    private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo info) {
         if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
             info.cancel();
         }
@@ -89,6 +90,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @ModifyConstant(method = "getHandSwingDuration", constant = @Constant(intValue = 6))
     private int getHandSwingDuration(int constant) {
+        if ((Object) this != mc.player) return constant;
         return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
     }
 }

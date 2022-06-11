@@ -76,9 +76,9 @@ public class Zoom extends Module {
     public void onActivate() {
         if (!enabled) {
             preCinematic = mc.options.smoothCameraEnabled;
-            preMouseSensitivity = mc.options.mouseSensitivity;
+            preMouseSensitivity = mc.options.getMouseSensitivity().getValue();
             value = zoom.get();
-            lastFov = mc.options.fov;
+            lastFov = mc.options.getFov().getValue();
             time = 0.001;
 
             MeteorClient.EVENT_BUS.subscribe(this);
@@ -88,7 +88,7 @@ public class Zoom extends Module {
 
     public void onStop() {
         mc.options.smoothCameraEnabled = preCinematic;
-        mc.options.mouseSensitivity = preMouseSensitivity;
+        mc.options.getMouseSensitivity().setValue(preMouseSensitivity);
 
         mc.worldRenderer.scheduleTerrainUpdate();
     }
@@ -98,7 +98,7 @@ public class Zoom extends Module {
         mc.options.smoothCameraEnabled = cinematic.get();
 
         if (!cinematic.get()) {
-            mc.options.mouseSensitivity = preMouseSensitivity / Math.max(value() * 0.5, 1);
+            mc.options.getMouseSensitivity().setValue(preMouseSensitivity / Math.max(value() * 0.5, 1));
         }
 
         if (time == 0) {

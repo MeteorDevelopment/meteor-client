@@ -240,7 +240,6 @@ public class DiscordPresence extends Module {
                 else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Creating world");
                 else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
                 else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
-                else if (mc.currentScreen instanceof SaveLevelScreen) rpc.setState("Saving world");
                 else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
                 else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
                 else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Connecting to server");

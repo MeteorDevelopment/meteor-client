@@ -76,7 +76,7 @@ public class TextUtils {
             return;
 
         // Do actions here
-        String textString = text.asString();
+        String textString = text.getString();
 
         TextColor mcTextColor = text.getStyle().getColor();
 

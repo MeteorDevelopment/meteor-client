@@ -203,7 +203,7 @@ public class BedAura extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         // Check if beds can explode here
-        if (mc.world.getDimension().isBedWorking()) {
+        if (mc.world.getDimension().bedWorks()) {
             error("You can't blow up beds in this dimension, disabling.");
             toggle();
             return;
@@ -324,7 +324,7 @@ public class BedAura extends Module {
         boolean wasSneaking = mc.player.isSneaking();
         if (wasSneaking) mc.player.setSneaking(false);
 
-        mc.interactionManager.interactBlock(mc.player, mc.world, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, pos, false));
+        mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, pos, false));
 
         mc.player.setSneaking(wasSneaking);
     }
