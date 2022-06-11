@@ -99,6 +99,7 @@
     "KeyBindingAccessor",
     "KeyboardInputMixin",
     "KeyboardMixin",
+    "LightmapTextureManagerMixin",
     "LightningEntityRendererMixin",
     "LivingEntityAccessor",
     "LivingEntityMixin",

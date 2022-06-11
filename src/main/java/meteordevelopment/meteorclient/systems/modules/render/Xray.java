@@ -59,8 +59,8 @@ public class Xray extends Module {
     public final Setting<Integer> opacity = sgGeneral.add(new IntSetting.Builder()
         .name("opacity")
         .description("The opacity for all other blocks.")
-        .defaultValue(1)
-        .range(1, 255)
+        .defaultValue(25)
+        .range(0, 255)
         .sliderMax(255)
         .onChanged(onChanged -> {
             if (isActive()) mc.worldRenderer.reload();
@@ -83,15 +83,11 @@ public class Xray extends Module {
 
     @Override
     public void onActivate() {
-        Fullbright.enable();
-
         mc.worldRenderer.reload();
     }
 
     @Override
     public void onDeactivate() {
-        Fullbright.disable();
-
         mc.worldRenderer.reload();
     }
 
