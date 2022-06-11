@@ -8,8 +8,6 @@ package meteordevelopment.meteorclient.mixin.canvas;
 import grondag.canvas.render.world.CanvasWorldRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BlockSelection;
-import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import net.minecraft.client.render.Camera;
 import net.minecraft.client.render.GameRenderer;
@@ -32,8 +30,6 @@ public class CanvasWorldRendererMixin {
 
     @Inject(method = "renderWorld", at = @At("HEAD"))
     private void onRenderHead(MatrixStack viewMatrixStack, float tickDelta, long frameStartNanos, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f projectionMatrix, CallbackInfo info) {
-        Utils.minimumLightLevel = Modules.get().get(Fullbright.class).getMinimumLightLevel();
-
         EntityShaders.beginRender();
     }
 
