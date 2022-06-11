@@ -36,12 +36,12 @@ public class MiddleClickFriend extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null && mc.targetedEntity != null && mc.targetedEntity instanceof PlayerEntity) {
-            if (!Friends.get().isFriend((PlayerEntity) mc.targetedEntity)) {
-                Friends.get().add(new Friend((PlayerEntity) mc.targetedEntity));
-                if (message.get()) mc.player.sendChatMessage("/msg " + mc.targetedEntity.getEntityName() + " I just friended you on Meteor.");
+        if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null && mc.targetedEntity != null && mc.targetedEntity instanceof PlayerEntity player) {
+            if (!Friends.get().isFriend(player)) {
+                Friends.get().add(new Friend(player));
+                if (message.get()) mc.player.sendChatMessage("/msg " + player.getEntityName() + " I just friended you on Meteor.");
             } else {
-                Friends.get().remove(Friends.get().get((PlayerEntity) mc.targetedEntity));
+                Friends.get().remove(Friends.get().get(player));
             }
         }
     }
