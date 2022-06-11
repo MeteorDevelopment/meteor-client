@@ -21,9 +21,13 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.network.PlayerListEntry;
+
+import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FriendsTab extends Tab {
     public FriendsTab() {
@@ -90,7 +94,21 @@ public class FriendsTab extends Tab {
             add.action = () -> {
                 String name = nameW.get().trim();
 
-                if (Friends.get().add(new Friend(name))) {
+                Friend friend = null;
+                if (Utils.canUpdate() && mc.getNetworkHandler() != null) {
+                    for (PlayerListEntry playerListEntry : mc.getNetworkHandler().getPlayerList()) {
+                        if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
+                            friend = new Friend(playerListEntry);
+                            break;
+                        }
+                    }
+                }
+
+                if (friend == null) {
+                    friend = Friends.get().getFromName(name);
+                }
+
+                if (friend != null && Friends.get().add(friend)) {
                     nameW.set("");
 
                     table.clear();
@@ -103,6 +121,8 @@ public class FriendsTab extends Tab {
 
         private void initTable(WTable table) {
             for (Friend friend : Friends.get()) {
+                friend.refresh();
+
                 table.add(theme.label(friend.name));
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
