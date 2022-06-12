@@ -5,19 +5,22 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import meteordevelopment.meteorclient.events.game.GameLeftEvent;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.DisconnectedScreen;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.util.List;
 
 public class Spam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    
+
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to use for spam.")
@@ -30,6 +33,21 @@ public class Spam extends Module {
         .defaultValue(20)
         .min(0)
         .sliderMax(200)
+        .build()
+    );
+
+    private final Setting<Boolean> disableOnLeave = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-on-leave")
+        .description("Disables spam when you leave a server.")
+        .defaultValue(true)
+        .build()
+    );
+
+
+    private final Setting<Boolean> disableOnDisconnect = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-on-disconnect")
+        .description("Disables spam when you are disconnected from a server.")
+        .defaultValue(true)
         .build()
     );
 
@@ -66,6 +84,18 @@ public class Spam extends Module {
     public void onActivate() {
         timer = delay.get();
         messageI = 0;
+    }
+
+    @EventHandler
+    private void onScreenOpen(OpenScreenEvent event) {
+        if (disableOnDisconnect.get() && event.screen instanceof DisconnectedScreen) {
+            toggle();
+        }
+    }
+
+    @EventHandler
+    private void onGameLeft(GameLeftEvent event) {
+        if (disableOnLeave.get()) toggle();
     }
 
     @EventHandler
