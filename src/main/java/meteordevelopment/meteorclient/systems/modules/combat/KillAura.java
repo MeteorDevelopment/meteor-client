@@ -115,6 +115,14 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreTamed = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-tamed")
+        .description("Will avoid attacking mobs you tamed.")
+        .defaultValue(false)
+        .build()
+    );
+
+
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
@@ -306,14 +314,16 @@ public class KillAura extends Module {
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
-        if (ignorePassive.get()) {
-            if (entity instanceof EndermanEntity enderman && !enderman.isAngryAt(mc.player)) return false;
-            if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAngryAt(mc.player)) return false;
-            if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
+        if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
                 && tameable.getOwnerUuid() != null
                 && tameable.getOwnerUuid().equals(mc.player.getUuid())
             ) return false;
+        }
+        if (ignorePassive.get()) {
+            if (entity instanceof EndermanEntity enderman && !enderman.isAngryAt(mc.player)) return false;
+            if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAngryAt(mc.player)) return false;
+            if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity) {
             if (((PlayerEntity) entity).isCreative()) return false;
