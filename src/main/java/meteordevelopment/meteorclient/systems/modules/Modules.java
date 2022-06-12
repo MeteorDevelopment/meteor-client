@@ -533,7 +533,6 @@ public class Modules extends System<Modules> {
 
     private void initMisc() {
         add(new Swarm());
-        add(new Announcer());
         add(new AntiPacketKick());
         add(new AutoClicker());
         add(new AutoLog());
