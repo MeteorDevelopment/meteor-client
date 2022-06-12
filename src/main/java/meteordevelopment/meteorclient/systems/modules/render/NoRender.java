@@ -297,6 +297,12 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noNametags = sgEntity.add(new BoolSetting.Builder()
+        .name("nametags")
+        .description("Disables rendering of entity nametags")
+        .defaultValue(false)
+        .build()
+    );
 
     public NoRender() {
         super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
@@ -465,6 +471,10 @@ public class NoRender extends Module {
 
     public boolean noDeadEntities() {
         return isActive() && noDeadEntities.get();
+    }
+
+    public boolean noNametags() {
+        return isActive() && noNametags.get();
     }
 
     public enum BannerRenderMode {
