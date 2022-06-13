@@ -76,8 +76,6 @@ public class FontUtils {
     public static void collectFonts(List<FontFamily> fontList, File dir) {
         if (!dir.exists() || !dir.isDirectory()) return;
 
-        MeteorClient.LOG.info("Searching for fonts in {}.", dir.getAbsolutePath());
-
         File[] files = dir.listFiles((file) -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
         if (files == null) return;
 
