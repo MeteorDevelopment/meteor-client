@@ -51,8 +51,8 @@ public class Fonts {
 
         DEFAULT_FONT = getFamily(DEFAULT_FONT_FAMILY).get(FontFace.Type.Regular);
 
-        FontFace config = Config.get().font.get();
-        load(config != null ? config : DEFAULT_FONT);
+        Config config = Config.get();
+        load(config != null ? config.font.get() : DEFAULT_FONT);
     }
 
     public static void load(FontFace fontFace) {
