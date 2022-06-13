@@ -500,8 +500,6 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        boolean customFont = Config.get().customFont.get();
-
         hX = text.render(name, hX, hY, names.get(), shadow);
         if (itemCount.get()) text.render(count, hX, hY, GOLD, shadow);
         text.end();
@@ -542,8 +540,6 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        boolean customFont = Config.get().customFont.get();
-
         hX = text.render(nameText, hX, hY, names.get(), shadow);
         text.render(healthText, hX, hY, healthColor, shadow);
         text.end();
@@ -567,8 +563,6 @@ public class Nametags extends Module {
         text.beginBig();
         double hX = -widthHalf;
         double hY = -heightDown;
-
-        boolean customFont = Config.get().customFont.get();
 
         text.render(fuseText, hX, hY, names.get(), shadow);
         text.end();

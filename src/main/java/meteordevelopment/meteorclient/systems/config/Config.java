@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.config;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.Fonts;
+import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
@@ -36,13 +37,11 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<String> font = sgVisual.add(new ProvidedStringSetting.Builder()
+    public final Setting<FontFace> font = sgVisual.add(new FontFaceSetting.Builder()
         .name("font")
-        .description("Custom font to use (picked from .minecraft/" + MeteorClient.MOD_ID + "/fonts folder).")
+        .description("Custom font to use.")
         .visible(customFont::get)
-        .supplier(Fonts::getAvailableFonts)
-        .defaultValue(Fonts.DEFAULT_FONT)
-        .onChanged(s -> Fonts.load())
+        .onChanged(Fonts::load)
         .build()
     );
 
@@ -151,7 +150,7 @@ public class Config extends System<Config> {
     @Override
     public Config fromTag(NbtCompound tag) {
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
-        if (tag.contains("don'tShowAgainPrompts")) dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
+        if (tag.contains("dontShowAgainPrompts")) dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
 
         return this;
     }
