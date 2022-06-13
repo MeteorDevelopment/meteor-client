@@ -51,7 +51,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Range;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -367,9 +366,8 @@ public class Utils {
         };
     }
 
-    public static byte[] readBytes(File file) {
+    public static byte[] readBytes(InputStream in) {
         try {
-            InputStream in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             byte[] buffer = new byte[256];
