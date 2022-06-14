@@ -26,7 +26,7 @@ import static meteordevelopment.meteorclient.utils.render.FontUtils.copyBuiltin;
 public class Fonts {
     private static final String[] BUILTIN_FONTS = { "JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation" };
 
-    public static String DEFAULT_FONT_FAMILY = "JetBrains Mono";
+    public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
 
     public static final List<FontFamily> FONT_FAMILIES = new ArrayList<>();
@@ -34,7 +34,7 @@ public class Fonts {
 
     @Init(stage = InitStage.Pre, dependencies = Shaders.class)
     public static void refresh() {
-        File target = FontUtils.getUFontDir();
+        File target = FontUtils.getDir(FontUtils.getUFontDirs());
         for (String builtinFont : BUILTIN_FONTS) {
             copyBuiltin(builtinFont, target);
         }
@@ -42,7 +42,13 @@ public class Fonts {
         FONT_FAMILIES.clear();
 
         for (String fontPath : FontUtils.getSearchPaths()) {
-            FontUtils.collectFonts(FONT_FAMILIES, new File(fontPath));
+            File file = new File(fontPath);
+
+            if (fontPath.endsWith(BUILTIN_FONTS[0] + ".ttf")) {
+                DEFAULT_FONT_FAMILY = FontUtils.getFontInfo(file).family();
+            }
+
+            FontUtils.collectFonts(FONT_FAMILIES, file);
         }
 
         FONT_FAMILIES.sort(Comparator.comparing(FontFamily::getName));
