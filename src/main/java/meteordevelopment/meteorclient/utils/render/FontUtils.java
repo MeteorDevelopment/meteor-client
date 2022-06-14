@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
@@ -48,8 +49,13 @@ public class FontUtils {
         Set<String> paths = new HashSet<>();
         paths.add(System.getProperty("java.home") + "/lib/fonts");
 
-        for (File dir : getUFontDirs()) paths.add(dir.getAbsolutePath());
-        for (File dir : getSFontDirs()) paths.add(dir.getAbsolutePath());
+        for (File dir : getUFontDirs()) {
+            if (dir.exists()) paths.add(dir.getAbsolutePath());
+        }
+
+        for (File dir : getSFontDirs()) {
+            if (dir.exists()) paths.add(dir.getAbsolutePath());
+        }
 
         return paths;
     }
@@ -79,7 +85,7 @@ public class FontUtils {
         return dirs.get(0);
     }
 
-    public static void collectFonts(List<FontFamily> fontList, File dir) {
+    public static void collectFonts(List<FontFamily> fontList, File dir, Consumer<File> consumer) {
         if (!dir.exists() || !dir.isDirectory()) return;
 
         File[] files = dir.listFiles((file) -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
@@ -87,12 +93,14 @@ public class FontUtils {
 
         for (File file : files) {
             if (file.isDirectory()) {
-                collectFonts(fontList, file);
+                collectFonts(fontList, file, consumer);
                 continue;
             }
 
             FontInfo fontInfo = FontUtils.getFontInfo(file);
             if (fontInfo != null) {
+                consumer.accept(file);
+
                 FontFamily family = Fonts.getFamily(fontInfo.family());
                 if (family == null) {
                     family = new FontFamily(fontInfo.family());

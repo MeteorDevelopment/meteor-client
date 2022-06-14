@@ -42,13 +42,11 @@ public class Fonts {
         FONT_FAMILIES.clear();
 
         for (String fontPath : FontUtils.getSearchPaths()) {
-            File file = new File(fontPath);
-
-            if (fontPath.endsWith(BUILTIN_FONTS[0] + ".ttf")) {
-                DEFAULT_FONT_FAMILY = FontUtils.getFontInfo(file).family();
-            }
-
-            FontUtils.collectFonts(FONT_FAMILIES, file);
+            FontUtils.collectFonts(FONT_FAMILIES, new File(fontPath), file -> {
+                if (file.getAbsolutePath().endsWith(BUILTIN_FONTS[0] + ".ttf")) {
+                    DEFAULT_FONT_FAMILY = FontUtils.getFontInfo(file).family();
+                }
+            });
         }
 
         FONT_FAMILIES.sort(Comparator.comparing(FontFamily::getName));
