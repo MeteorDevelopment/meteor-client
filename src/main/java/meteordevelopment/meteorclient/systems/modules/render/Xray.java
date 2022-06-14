@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
@@ -117,6 +118,25 @@ public class Xray extends Module {
     }
 
     public boolean isBlocked(Block block, BlockPos blockPos) {
-        return !(blocks.get().contains(block) && (!exposedOnly.get() || BlockUtils.isExposed(blockPos)));
+        return !(blocks.get().contains(block) && (!exposedOnly.get() || (blockPos == null || BlockUtils.isExposed(blockPos))));
+    }
+
+    public static int getAlpha(BlockState state, BlockPos pos) {
+        WallHack wallHack = Modules.get().get(WallHack.class);
+        Xray xray = Modules.get().get(Xray.class);
+
+        if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
+            int alpha;
+
+            if (xray.isActive()) alpha = xray.opacity.get();
+            else alpha = wallHack.opacity.get();
+
+            return alpha;
+        }
+        else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
+            return xray.opacity.get();
+        }
+
+        return -1;
     }
 }
