@@ -47,30 +47,36 @@ public class FontUtils {
     public static Set<String> getSearchPaths() {
         Set<String> paths = new HashSet<>();
         paths.add(System.getProperty("java.home") + "/lib/fonts");
-        paths.add(getUFontDir().getAbsolutePath());
-        paths.add(getSFontDir().getAbsolutePath());
+
+        for (File dir : getUFontDirs()) paths.add(dir.getAbsolutePath());
+        for (File dir : getSFontDirs()) paths.add(dir.getAbsolutePath());
 
         return paths;
     }
 
-    public static File getUFontDir() {
-        String path = switch (Util.getOperatingSystem()) {
-            case WINDOWS -> System.getProperty("user.home") + "\\AppData\\Local\\Microsoft\\Windows\\Fonts";
-            case OSX -> System.getProperty("user.home") + "/Library/Fonts/";
-            default -> System.getProperty("user.home") + "/.local/share/fonts";
+    public static List<File> getUFontDirs() {
+        return switch (Util.getOperatingSystem()) {
+            case WINDOWS -> List.of(new File(System.getProperty("user.home") + "\\AppData\\Local\\Microsoft\\Windows\\Fonts"));
+            case OSX -> List.of(new File(System.getProperty("user.home") + "/Library/Fonts/"));
+            default -> List.of(new File(System.getProperty("user.home") + "/.local/share/fonts"), new File(System.getProperty("user.home") + "/.fonts"));
         };
-
-        return new File(path);
     }
 
-    public static File getSFontDir() {
-        String path = switch (Util.getOperatingSystem()) {
-            case WINDOWS -> System.getenv("SystemRoot") + "\\Fonts";
-            case OSX -> "/System/Library/Fonts/";
-            default -> "/usr/share/fonts/";
+    public static List<File> getSFontDirs() {
+        return switch (Util.getOperatingSystem()) {
+            case WINDOWS -> List.of(new File(System.getenv("SystemRoot") + "\\Fonts"));
+            case OSX -> List.of(new File("/System/Library/Fonts/"));
+            default -> List.of(new File("/usr/share/fonts/"));
         };
+    }
 
-        return new File(path);
+    public static File getDir(List<File> dirs) {
+        for (File dir : dirs) {
+            if (dir.exists()) return dir;
+        }
+
+        dirs.get(0).mkdirs();
+        return dirs.get(0);
     }
 
     public static void collectFonts(List<FontFamily> fontList, File dir) {
