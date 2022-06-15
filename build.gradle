@@ -52,7 +52,7 @@ dependencies {
     library "meteordevelopment:discord-ipc:${project.discordipc_version}"
     library "org.reflections:reflections:${project.reflections_version}"
 
-    implementation("io.netty:netty-handler-proxy:4.1.77.Final") { transitive = false }
+    implementation("io.netty:netty-handler-proxy:4.1.78.Final") { transitive = false }
     shadow("io.netty:netty-handler-proxy:4.1.77.Final") { transitive = false }
 
     // Launch sub project
