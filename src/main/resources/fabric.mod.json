@@ -49,6 +49,7 @@
   "breaks": {
     "optifabric": "*",
     "feather": "*",
-    "origins": "*"
+    "origins": "*",
+    "wurst": "*"
   }
 }
