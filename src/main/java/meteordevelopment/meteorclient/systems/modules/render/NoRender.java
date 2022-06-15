@@ -155,13 +155,6 @@ public class NoRender extends Module {
         .build()
     );
 
-    public final Setting<Boolean> noMountHiding = sgHUD.add(new BoolSetting.Builder()
-        .name("no-mount-hiding")
-        .description("Display xp bar and hunger when riding.")
-        .defaultValue(false)
-        .build()
-    );
-
     // World
 
     private final Setting<Boolean> noWeather = sgWorld.add(new BoolSetting.Builder()
@@ -382,10 +375,6 @@ public class NoRender extends Module {
 
     public boolean noPotionIcons() {
         return isActive() && noPotionIcons.get();
-    }
-
-    public boolean noMountHiding() {
-        return isActive() && noMountHiding.get();
     }
 
     // World
