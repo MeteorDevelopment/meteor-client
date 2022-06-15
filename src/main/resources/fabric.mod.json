@@ -34,7 +34,7 @@
   "custom": {
     "meteor-client:devbuild": "${devbuild}",
     "meteor-client:color": "145,61,226",
-    "meteor-client:commit":  "${commit}",
+    "meteor-client:commit": "${commit}",
     "modmenu": {
       "links": {
         "modmenu.discord": "https://meteorclient.com/discord"
@@ -47,6 +47,8 @@
     "fabricloader": ">=0.13.2"
   },
   "breaks": {
-    "optifabric": "*"
+    "optifabric": "*",
+    "feather": "*",
+    "origins": "*"
   }
 }
