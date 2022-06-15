@@ -79,6 +79,13 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    public final Setting<Boolean> alwaysShow = sgGeneral.add(new BoolSetting.Builder()
+        .name("always-show")
+        .description("Disables the HideFlags nbt tag.")
+        .defaultValue(true)
+        .build()
+    );
+
     // Previews
 
     private final Setting<Boolean> shulkers = sgPreviews.add(new BoolSetting.Builder()
@@ -399,6 +406,10 @@ public class BetterTooltips extends Module {
 
     public boolean middleClickOpen() {
         return isActive() && middleClickOpen.get();
+    }
+
+    public boolean alwaysShow() {
+        return isActive() && alwaysShow.get();
     }
 
     public boolean previewShulkers() {
