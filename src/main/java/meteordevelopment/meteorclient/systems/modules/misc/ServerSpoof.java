@@ -54,37 +54,61 @@ public class ServerSpoof extends Module {
 
     private class Listener {
         @EventHandler
-        private void onPacketSend(PacketEvent.Send event) {
-            if (!isActive()) return;
-            if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
-            Identifier id = packet.getChannel();
+		private void onPacketSend(PacketEvent.Send event) {
+			if (isActive()) {
+				if (event.packet instanceof CustomPayloadC2SPacket) {
+					CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
+					Identifier id = packet.getChannel();
 
-            if (id.equals(CustomPayloadC2SPacket.BRAND)) {
-                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
-            }
-            else if (StringUtils.containsIgnoreCase(packet.getData().toString(StandardCharsets.UTF_8), "fabric") && brand.get().equalsIgnoreCase("fabric")) {
-                event.cancel();
-            }
-        }
+					if (id.equals(CustomPayloadC2SPacket.BRAND)) {
+						packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+					} else if (StringUtils.containsIgnoreCase(packet.getData().toString(StandardCharsets.UTF_8), "fabric") && brand.get().equalsIgnoreCase("fabric")) {
+						event.cancel();
+					} else if (id.toString().equals("fabric:registry/sync")) {
+						event.cancel();
+					} else if (id.toString().equals("minecraft:register")) {
+						event.cancel();
+					}
+				}
+			}
+		}
+		@EventHandler
+		private void onPacketSent(PacketEvent.Sent event) {
+			if (event.packet instanceof CustomPayloadS2CPacket payload) {
+				if (payload.getChannel().toString().equals("fabric:registry/sync")) {
+					event.setCancelled(true);
+				}
+				else if (payload.getChannel().toString().equals("minecraft:register")) {
+					event.cancel();
+				}
+			}
+		}
 
-        @EventHandler
-        private void onPacketRecieve(PacketEvent.Receive event) {
-            if (!isActive() || !resourcePack.get()) return;
-            if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
-            event.cancel();
-            MutableText msg = Text.literal("This server has ");
-            msg.append(packet.isRequired() ? "a required " : "an optional ");
-            MutableText link = Text.literal("resource pack");
-            link.setStyle(link.getStyle()
-                .withColor(Formatting.BLUE)
-                .withUnderline(true)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
-            );
-            msg.append(link);
-            msg.append(".");
-            info(msg);
-        }
+		@EventHandler
+		private void onPacketRecieve(PacketEvent.Receive event) {
+			if (isActive() && resourcePack.get()) {
+				if (event.packet instanceof ResourcePackSendS2CPacket packet) {
+					event.cancel();
+					MutableText msg = Text.literal("This server has ");
+					msg.append(packet.isRequired() ? "a required " : "an optional ");
+					MutableText link = Text.literal("resource pack");
+					link.setStyle(link.getStyle()
+						.withColor(Formatting.BLUE)
+						.withUnderline(true)
+						.withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
+						.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
+					);
+					msg.append(link);
+					msg.append(".");
+					info(msg);
+				}
+			}
+			if (event.packet instanceof CustomPayloadS2CPacket payload) {
+				if (payload.getChannel().toString().equals("fabric:registry/sync")) {
+					event.cancel();
+				}
+
+			}
+		}
     }
 }
