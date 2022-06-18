@@ -17,12 +17,15 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
+import net.minecraft.block.BambooBlock;
+import net.minecraft.block.BambooSaplingBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShearsItem;
+import net.minecraft.item.SwordItem;
 import net.minecraft.item.ToolItem;
 
 import java.util.function.Predicate;
@@ -122,6 +125,8 @@ public class AutoTool extends Module {
             double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
             if (score < 0) continue;
 
+            info(i + " " + score);
+
             if (score > bestScore) {
                 bestScore = score;
                 bestSlot = i;
@@ -166,6 +171,10 @@ public class AutoTool extends Module {
 
         if (enchantPreference == EnchantPreference.Fortune) score += EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack);
         if (enchantPreference == EnchantPreference.SilkTouch) score += EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack);
+
+        if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooSaplingBlock))
+            score += 9000 + (item.getMaterial().getMiningLevel() * 1000);
+
 
         return score;
     }
