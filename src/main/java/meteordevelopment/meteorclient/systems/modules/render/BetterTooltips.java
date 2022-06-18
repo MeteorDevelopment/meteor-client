@@ -80,7 +80,7 @@ public class BetterTooltips extends Module {
     );
 
     public final Setting<Boolean> alwaysShow = sgGeneral.add(new BoolSetting.Builder()
-        .name("bypass-'hideflag'-nbt")
+        .name("always-show")
         .description("Disables the HideFlags nbt tag.")
         .defaultValue(true)
         .build()
