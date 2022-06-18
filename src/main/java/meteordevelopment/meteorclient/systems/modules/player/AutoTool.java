@@ -125,8 +125,6 @@ public class AutoTool extends Module {
             double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
             if (score < 0) continue;
 
-            info(i + " " + score);
-
             if (score > bestScore) {
                 bestScore = score;
                 bestSlot = i;
