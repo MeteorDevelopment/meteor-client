@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
@@ -101,6 +102,7 @@ public class BetterChat extends Module {
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
         .visible(filterRegex::get)
+        .onChanged(this::recompileFilterRegexList)
         .build()
     );
 
@@ -206,6 +208,7 @@ public class BetterChat extends Module {
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
     }
 
+    private static final Pattern timestampRegex = Pattern.compile("^(<\\d{2}:\\d{2}>\\s)");
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
         ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
@@ -214,19 +217,8 @@ public class BetterChat extends Module {
         Text message = event.getMessage();
 
         if (filterRegex.get()) {
-            for (int i = 0; i < regexFilters.get().size(); i++) {
-                Pattern p;
-
-                try {
-                    p = Pattern.compile(regexFilters.get().get(i));
-                }
-                catch (PatternSyntaxException e) {
-                    String removed = regexFilters.get().remove(i);
-                    error("Removing Invalid regex: %s", removed);
-                    continue;
-                }
-
-                if (p.matcher(message.getString()).find()) {
+            for (Pattern pattern : filterRegexList) {
+                if (pattern.matcher(message.getString()).find()) {
                     event.cancel();
                     return;
                 }
@@ -234,7 +226,7 @@ public class BetterChat extends Module {
         }
 
         if (timestamps.get()) {
-            Matcher matcher = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)").matcher(message.getString());
+            Matcher matcher = timestampRegex.matcher(message.getString());
             if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
 
             Text timestamp = Text.literal("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
@@ -261,6 +253,7 @@ public class BetterChat extends Module {
         event.setMessage(message);
     }
 
+    private static final Pattern antiSpamRegex = Pattern.compile(".*(\\(\\d+\\)$)");
     private Text appendAntiSpam(Text text, int index) {
         List<ChatHudLine<OrderedText>> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
         if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return null;
@@ -281,7 +274,7 @@ public class BetterChat extends Module {
             return parsed.append(Text.literal(" (2)").formatted(Formatting.GRAY));
         }
         else {
-            Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(oldMessage);
+            Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
             if (!matcher.matches()) return null;
 
@@ -351,6 +344,38 @@ public class BetterChat extends Module {
         return sb.toString();
     }
 
+    // Filter Regex
+
+    private final List<Pattern> filterRegexList = compileFilterRegexList();
+
+    private void recompileFilterRegexList(List<String> regexStringList) {
+        filterRegexList.clear();
+
+        for (int i = 0; i < regexFilters.get().size(); i++) {
+            try {
+                filterRegexList.add(Pattern.compile(regexFilters.get().get(i)));
+            } catch (PatternSyntaxException e) {
+                String removed = regexFilters.get().remove(i);
+                error("Removing Invalid regex: %s", removed);
+            }
+        }
+    }
+
+    private List<Pattern> compileFilterRegexList() {
+        List<Pattern> patternList = Lists.newArrayList();
+
+        for (int i = 0; i < regexFilters.get().size(); i++) {
+            try {
+                patternList.add(Pattern.compile(regexFilters.get().get(i)));
+            } catch (PatternSyntaxException e) {
+                String removed = regexFilters.get().remove(i);
+                error("Removing Invalid regex: %s", removed);
+            }
+        }
+
+        return patternList;
+    }
+
     // Prefix and Suffix
 
     private String getPrefix() {
@@ -369,8 +394,9 @@ public class BetterChat extends Module {
 
     // Coords Protection
 
+    private static final Pattern coordRegex = Pattern.compile("(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>-?\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?)");
     private boolean containsCoordinates(String message) {
-        return message.matches(".*(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?).*");
+        return coordRegex.matcher(message).find();
     }
 
     private MutableText getSendButton(String message) {
