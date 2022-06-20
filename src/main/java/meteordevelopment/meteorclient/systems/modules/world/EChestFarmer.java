@@ -65,7 +65,7 @@ public class EChestFarmer extends Module {
 
     private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
         .name("swing-hand")
-        .description("Swing hand client side.")
+        .description("Swing hand client-side.")
         .defaultValue(true)
         .build()
     );
