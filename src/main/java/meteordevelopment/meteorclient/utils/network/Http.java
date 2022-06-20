@@ -11,8 +11,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -32,12 +34,8 @@ public class Http {
         private Method method;
 
         public Request(Method method, String url) {
-            try {
-                this.builder = HttpRequest.newBuilder().uri(new URI(url)).header("User-Agent", "Meteor Client");
-                this.method = method;
-            } catch (URISyntaxException e) {
-                e.printStackTrace();
-            }
+            this.builder = HttpRequest.newBuilder().uri(validateURL(url)).header("User-Agent", "Meteor Client");
+            this.method = method;
         }
 
         public Request bearer(String token) {
@@ -110,6 +108,19 @@ public class Http {
         public <T> T sendJson(Type type) {
             InputStream in = _send("application/json", HttpResponse.BodyHandlers.ofInputStream());
             return in == null ? null : GSON.fromJson(new InputStreamReader(in), type);
+        }
+
+        /**
+         * Encodes invalid URL characters
+         * @author Crosby
+         */
+        private URI validateURL(String urlString) {
+            try {
+                URL url = new URL(urlString);
+                return new URI(url.getProtocol(), url.getUserInfo(), url.getHost(), url.getPort(), url.getPath(), url.getQuery(), url.getRef());
+            } catch (MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
