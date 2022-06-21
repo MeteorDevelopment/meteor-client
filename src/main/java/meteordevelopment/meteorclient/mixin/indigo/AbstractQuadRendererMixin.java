@@ -34,7 +34,7 @@ public abstract class AbstractQuadRendererMixin {
     @Shadow protected abstract Matrix4f matrix();
     @Shadow protected abstract int overlay();
 
-    @Inject(method = "bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lnet/minecraft/client/render/RenderLayer;)V", at = @At("HEAD"), cancellable = true, remap = false)
+    @Inject(method = "bufferQuad(Lnet/fabricmc/fabric/impl/client/indigo/renderer/mesh/MutableQuadViewImpl;Lnet/minecraft/client/render/RenderLayer;)V", at = @At("HEAD"), cancellable = true, remap = true)
     private void onBufferQuad(MutableQuadViewImpl quad, RenderLayer renderLayer, CallbackInfo info) {
         int alpha = Xray.getAlpha(blockInfo.blockState, blockInfo.blockPos);
 
