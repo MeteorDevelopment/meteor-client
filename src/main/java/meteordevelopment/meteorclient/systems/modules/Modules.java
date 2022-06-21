@@ -412,6 +412,7 @@ public class Modules extends System<Modules> {
         add(new FastUse());
         add(new GhostHand());
         add(new InstaMine());
+        add(new IgnoreBorder());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new NoBreakDelay());

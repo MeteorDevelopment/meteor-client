@@ -153,7 +153,8 @@
     "WorldAccessor",
     "WorldChunkMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "WorldBorderMixin"
   ],
   "injectors": {
     "defaultRequire": 1
