@@ -3,13 +3,13 @@
  * Copyright (c) 2022 Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.player;
+package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 
 public class IgnoreBorder extends Module {
     public IgnoreBorder() {
-        super(Categories.Player, "Ignore Border", "Disables worldborder restrictions");
+        super(Categories.World, "Ignore Border", "Disables worldborder restrictions");
     }
 }

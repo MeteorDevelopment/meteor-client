@@ -412,7 +412,6 @@ public class Modules extends System<Modules> {
         add(new FastUse());
         add(new GhostHand());
         add(new InstaMine());
-        add(new IgnoreBorder());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new NoBreakDelay());
@@ -521,6 +520,7 @@ public class Modules extends System<Modules> {
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
+        add(new IgnoreBorder());
         add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
