@@ -152,7 +152,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     // EntityControl improvement
     @Inject(method = "getMountJumpStrength", at = @At("HEAD"), cancellable = true)
     private void getMountJumpStrength(CallbackInfoReturnable<Float> infoR) {
-        if (Modules.get().get(EntityControl.class).maxJump.get()) {
+        if (Modules.get().get(EntityControl.class).isActive() && Modules.get().get(EntityControl.class).maxJump.get()) {
             infoR.setReturnValue(1f);
         }
     }
