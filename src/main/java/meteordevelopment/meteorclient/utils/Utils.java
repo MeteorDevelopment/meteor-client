@@ -51,7 +51,6 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Range;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -67,7 +66,6 @@ public class Utils {
     public static final Color WHITE = new Color(255, 255, 255);
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
-    public static int minimumLightLevel;
     public static double frameTime;
     public static Screen screenToOpen;
 
@@ -144,7 +142,7 @@ public class Utils {
     }
 
     public static int getRenderDistance() {
-        return Math.max(mc.options.viewDistance, ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
+        return Math.max(mc.options.getViewDistance().getValue(), ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
     }
 
     public static int getWindowWidth() {
@@ -368,9 +366,8 @@ public class Utils {
         };
     }
 
-    public static byte[] readBytes(File file) {
+    public static byte[] readBytes(InputStream in) {
         try {
-            InputStream in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             byte[] buffer = new byte[256];

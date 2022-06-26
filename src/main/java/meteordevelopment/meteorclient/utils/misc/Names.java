@@ -19,7 +19,6 @@ import net.minecraft.item.Item;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.StringHelper;
 import org.apache.commons.lang3.text.WordUtils;
@@ -67,7 +66,7 @@ public class Names {
     }
 
     public static String get(Enchantment enchantment) {
-        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(new TranslatableText(enchantment1.getTranslationKey()).getString()));
+        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(Text.translatable(enchantment1.getTranslationKey()).getString()));
     }
 
     public static String get(EntityType<?> entityType) {

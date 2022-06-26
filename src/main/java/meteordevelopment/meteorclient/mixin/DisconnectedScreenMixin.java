@@ -14,7 +14,6 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.network.ServerAddress;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,7 +39,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-            reconnectBtn = addDrawableChild(new ButtonWidget(x, y, 200, 20, new LiteralText(getText()), button -> ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address), Modules.get().get(AutoReconnect.class).lastServerInfo)));
+            reconnectBtn = addDrawableChild(new ButtonWidget(x, y, 200, 20, Text.literal(getText()), button -> ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address), Modules.get().get(AutoReconnect.class).lastServerInfo)));
         }
     }
 
@@ -53,7 +52,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
             ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(autoReconnect.lastServerInfo.address), autoReconnect.lastServerInfo);
         } else {
             time--;
-            if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(new LiteralText(getText()));
+            if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(Text.literal(getText()));
         }
     }
 

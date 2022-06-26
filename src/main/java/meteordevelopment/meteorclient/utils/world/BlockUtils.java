@@ -116,7 +116,7 @@ public class BlockUtils {
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
 
-        ActionResult result = mc.interactionManager.interactBlock(mc.player, mc.world, hand, blockHitResult);
+        ActionResult result = mc.interactionManager.interactBlock(mc.player, hand, blockHitResult);
 
         if (result.shouldSwingHand()) {
             if (swing) mc.player.swingHand(hand);

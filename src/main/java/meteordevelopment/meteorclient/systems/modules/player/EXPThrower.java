@@ -26,11 +26,11 @@ public class EXPThrower extends Module {
 
         Rotations.rotate(mc.player.getYaw(), 90, () -> {
             if (exp.getHand() != null) {
-                mc.interactionManager.interactItem(mc.player, mc.world, exp.getHand());
+                mc.interactionManager.interactItem(mc.player, exp.getHand());
             }
             else {
                 InvUtils.swap(exp.slot(), true);
-                mc.interactionManager.interactItem(mc.player, mc.world, exp.getHand());
+                mc.interactionManager.interactItem(mc.player, exp.getHand());
                 InvUtils.swapBack();
             }
         });
