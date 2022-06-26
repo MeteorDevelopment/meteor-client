@@ -51,7 +51,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         }
     }
 
-    @Inject(method = "attackBlock", at = @At("HEAD"))
+    @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
         if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
     }

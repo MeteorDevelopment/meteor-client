@@ -79,6 +79,13 @@ public class BetterTooltips extends Module {
         .build()
     );
 
+    public final Setting<Boolean> alwaysShow = sgGeneral.add(new BoolSetting.Builder()
+        .name("always-show")
+        .description("Disables the HideFlags nbt tag.")
+        .defaultValue(true)
+        .build()
+    );
+
     // Previews
 
     private final Setting<Boolean> shulkers = sgPreviews.add(new BoolSetting.Builder()
@@ -292,7 +299,8 @@ public class BetterTooltips extends Module {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
         }
         else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
-            event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(Registry.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0)));
+            RegistryEntry<BannerPattern> bannerPattern = (Registry.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() ? Registry.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
+            if (bannerPattern != null) event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(bannerPattern));
         }
         else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
             ItemStack banner = createBannerFromShield(event.itemStack);
@@ -399,6 +407,10 @@ public class BetterTooltips extends Module {
 
     public boolean middleClickOpen() {
         return isActive() && middleClickOpen.get();
+    }
+
+    public boolean alwaysShow() {
+        return isActive() && alwaysShow.get();
     }
 
     public boolean previewShulkers() {

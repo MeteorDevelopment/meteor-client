@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface Init {
-    InitStage stage() default InitStage.Pre;
+    InitStage stage();
     Class<?>[] dependencies() default { };
 }
