@@ -29,15 +29,18 @@ import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 public class FontUtils {
     public static FontInfo getFontInfo(File file) {
         InputStream stream = stream(file);
+        if (stream == null) return null;
+
         byte[] bytes = Utils.readBytes(stream);
+        if (bytes.length < 2) return null;
+
         ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes).flip();
         STBTTFontinfo fontInfo = STBTTFontinfo.create();
-        STBTruetype.stbtt_InitFont(fontInfo, buffer);
+        if (!STBTruetype.stbtt_InitFont(fontInfo, buffer)) return null;
+
         ByteBuffer nameBuffer = STBTruetype.stbtt_GetFontNameString(fontInfo, STBTruetype.STBTT_PLATFORM_ID_MICROSOFT, STBTruetype.STBTT_MS_EID_UNICODE_BMP, STBTruetype.STBTT_MS_LANG_ENGLISH, 1);
         ByteBuffer typeBuffer = STBTruetype.stbtt_GetFontNameString(fontInfo, STBTruetype.STBTT_PLATFORM_ID_MICROSOFT, STBTruetype.STBTT_MS_EID_UNICODE_BMP, STBTruetype.STBTT_MS_LANG_ENGLISH, 2);
-        if (typeBuffer == null || nameBuffer == null) {
-            return null;
-        }
+        if (typeBuffer == null || nameBuffer == null) return null;
 
         return new FontInfo(
             StandardCharsets.UTF_16.decode(nameBuffer).toString(),
