@@ -115,6 +115,7 @@
     "MultiplayerScreenMixin",
     "NamespaceResourceManagerMixin",
     "ParticleManagerMixin",
+    "PlayerArmorSlotMixin",
     "PlayerEntityMixin",
     "PlayerEntityRendererMixin",
     "PlayerInteractEntityC2SPacketMixin",

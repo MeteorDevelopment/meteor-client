@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.*;
 import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.player.NoBreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
 import meteordevelopment.meteorclient.systems.modules.world.Nuker;
@@ -19,6 +20,8 @@ import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.PlayerScreenHandler;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -40,6 +43,9 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Shadow protected abstract void syncSelectedSlot();
 
+    @Shadow
+    public abstract void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player);
+
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void onClickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {
         if (actionType == SlotActionType.THROW && slotId >= 0 && slotId < player.currentScreenHandler.slots.size()) {
@@ -48,6 +54,28 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         else if (slotId == -999) {
             // Clicking outside of inventory
             if (MeteorClient.EVENT_BUS.post(DropItemsEvent.get(player.currentScreenHandler.getCursorStack())).isCancelled()) info.cancel();
+        }
+    }
+
+    @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
+    public void onClickArmorSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
+        if (!Modules.get().get(InventoryTweaks.class).armorStorage()) return;
+
+        ScreenHandler screenHandler = player.currentScreenHandler;
+
+        if (screenHandler instanceof PlayerScreenHandler) {
+            if (slotId >= 5 && slotId <= 8) {
+                int armorSlot = (8 - slotId) + 36;
+                if (actionType == SlotActionType.PICKUP && !screenHandler.getCursorStack().isEmpty()) {
+                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
+                    clickSlot(syncId, 17, button, SlotActionType.PICKUP, player); //inv slot <-> cursor slot
+                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
+                    ci.cancel();
+                } else if (actionType == SlotActionType.SWAP) {
+                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
+                    ci.cancel();
+                }
+            }
         }
     }
 
