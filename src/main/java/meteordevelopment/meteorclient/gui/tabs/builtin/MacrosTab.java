@@ -49,6 +49,16 @@ public class MacrosTab extends Tab {
         }
 
         @Override
+        protected void init() {
+            super.init();
+
+            if (!firstInit) {
+                clear();
+                initWidgets();
+            }
+        }
+
+        @Override
         public void initWidgets() {
             // Macros
             if (Macros.get().getAll().size() > 0) {
