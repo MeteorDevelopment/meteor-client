@@ -57,32 +57,24 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         }
     }
 
-    private int armorStorageAction = 0;
-
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     public void onClickArmorSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
+        if (!Modules.get().get(InventoryTweaks.class).armorStorage()) return;
+
         ScreenHandler screenHandler = player.currentScreenHandler;
 
-        if (!(screenHandler instanceof PlayerScreenHandler)) return;
-
-        if (armorStorageAction > 0) {
-            armorStorageAction--;
-            return;
-        }
-
-        if (slotId >= 5 && slotId <= 8 && Modules.get().get(InventoryTweaks.class).armorStorage()) {
-            int armorSlot = (8 - slotId) + 36;
-
-            if (actionType == SlotActionType.PICKUP && !screenHandler.getCursorStack().isEmpty()) {
-                armorStorageAction = 3;
-                clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
-                clickSlot(syncId, 17, button, SlotActionType.PICKUP, player); //inv slot <-> cursor slot
-                clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
-                ci.cancel();
-            } else if (actionType == SlotActionType.SWAP) {
-                armorStorageAction = 1;
-                clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                ci.cancel();
+        if (screenHandler instanceof PlayerScreenHandler) {
+            if (slotId >= 5 && slotId <= 8) {
+                int armorSlot = (8 - slotId) + 36;
+                if (actionType == SlotActionType.PICKUP && !screenHandler.getCursorStack().isEmpty()) {
+                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
+                    clickSlot(syncId, 17, button, SlotActionType.PICKUP, player); //inv slot <-> cursor slot
+                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
+                    ci.cancel();
+                } else if (actionType == SlotActionType.SWAP) {
+                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
+                    ci.cancel();
+                }
             }
         }
     }

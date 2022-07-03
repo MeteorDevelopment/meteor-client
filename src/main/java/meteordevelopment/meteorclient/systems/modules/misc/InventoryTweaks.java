@@ -77,7 +77,7 @@ public class InventoryTweaks extends Module {
     );
 
     private final Setting<Boolean> armorStorage = sgGeneral.add(new BoolSetting.Builder()
-        .name("Armor Storage")
+        .name("armor-storage")
         .description("Allows you to put normal items in your armor slots.")
         .defaultValue(true)
         .build()
