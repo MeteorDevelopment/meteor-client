@@ -538,6 +538,7 @@ public class Modules extends System<Modules> {
         add(new AutoLog());
         add(new AutoReconnect());
         add(new AutoRespawn());
+        add(new BetterBeacons());
         add(new BetterChat());
         add(new BetterTab());
         add(new BookBot());
