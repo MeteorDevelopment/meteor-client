@@ -16,13 +16,13 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 public class SettingArgumentType implements ArgumentType<String> {
-    private static final DynamicCommandExceptionType NO_SUCH_SETTING = new DynamicCommandExceptionType(o -> new LiteralText("No such setting '" + o + "'."));
+    private static final DynamicCommandExceptionType NO_SUCH_SETTING = new DynamicCommandExceptionType(o -> Text.literal("No such setting '" + o + "'."));
 
     public static SettingArgumentType setting() {
         return new SettingArgumentType();

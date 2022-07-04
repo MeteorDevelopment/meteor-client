@@ -75,13 +75,11 @@ public class MeteorClient implements ClientModInitializer {
         EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
         // Pre-load
-        Systems.addPreLoadTask(() -> {
-            if (!FOLDER.exists()) {
-                FOLDER.getParentFile().mkdirs();
-                FOLDER.mkdir();
-                Modules.get().get(DiscordPresence.class).toggle();
-            }
-        });
+        if (!FOLDER.exists()) {
+            FOLDER.getParentFile().mkdirs();
+            FOLDER.mkdir();
+            Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).toggle());
+        }
 
         // Pre init
         init(InitStage.Pre);

@@ -64,6 +64,10 @@ public class WTable extends WContainer {
         rowI--;
     }
 
+    public List<Cell<?>> getRow(int i) {
+        return rows.get(i);
+    }
+
     @Override
     public void clear() {
         super.clear();

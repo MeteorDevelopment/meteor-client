@@ -20,7 +20,7 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,10 +56,10 @@ public abstract class WidgetScreen extends Screen {
 
     private List<Runnable> onClosed;
 
-    private boolean firstInit = true;
+    protected boolean firstInit = true;
 
     public WidgetScreen(GuiTheme theme, String title) {
-        super(new LiteralText(title));
+        super(Text.literal(title));
 
         this.parent = mc.currentScreen;
         this.root = new WFullScreenRoot();

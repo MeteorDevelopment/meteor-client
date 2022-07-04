@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
 
 import java.util.Arrays;
@@ -34,7 +35,6 @@ public class FriendsCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-
         builder.then(literal("add").then(argument("friend", FriendArgumentType.friend())
                         .executes(context -> {
                             Friend friend = FriendArgumentType.getFriend(context, "friend");
@@ -75,7 +75,15 @@ public class FriendsCommand extends Command {
 
         @Override
         public Friend parse(StringReader reader) throws CommandSyntaxException {
-            return new Friend(reader.readString());
+            String name = reader.readString();
+
+            for (PlayerListEntry playerListEntry : mc.getNetworkHandler().getPlayerList()) {
+                if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
+                    return new Friend(playerListEntry);
+                }
+            }
+
+            return Friends.get().getFromName(name);
         }
 
         public static Friend getFriend(CommandContext<?> context, String name) {
@@ -93,5 +101,4 @@ public class FriendsCommand extends Command {
             return Arrays.asList("seasnail8169", "MineGame159");
         }
     }
-
 }

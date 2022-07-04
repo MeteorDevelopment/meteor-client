@@ -5,19 +5,22 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
+import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
     private List<Friend> friends = new ArrayList<>();
@@ -70,8 +73,18 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return null;
     }
 
+    public Friend get(UUID uuid) {
+        for (Friend friend : friends) {
+            if (friend.id.equals(uuid)) {
+                return friend;
+            }
+        }
+
+        return null;
+    }
+
     public Friend get(PlayerEntity player) {
-        return get(player.getEntityName());
+        return get(player.getUuid());
     }
 
     public boolean isFriend(PlayerEntity player) {
@@ -106,9 +119,36 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     @Override
     public Friends fromTag(NbtCompound tag) {
-        friends = NbtUtils.listFromTag(tag.getList("friends", 10), tag1 -> new Friend((NbtCompound) tag1));
+        NbtList friendList = tag.getList("friends", 10);
+
+        friends = new ArrayList<>();
+        for (NbtElement friendTag : friendList) {
+            NbtCompound compound = (NbtCompound) friendTag;
+
+            Friend friend;
+            if (compound.contains("name")) {
+                friend = getFromName(compound.getString("name"));
+            } else {
+                friend = new Friend(compound);
+            }
+
+            if (friend != null) friends.add(friend);
+        }
+
         if (tag.contains("color")) color.fromTag(tag.getCompound("color"));
         attack = tag.contains("attack") && tag.getBoolean("attack");
         return this;
+    }
+
+    public Friend getFromName(String username) {
+        Response resp = Http.get("https://api.mojang.com/users/profiles/minecraft/" + username).sendJson(Response.class);
+        if (resp != null) {
+            return new Friend(username, UUIDTypeAdapter.fromString(resp.id));
+        }
+        return null;
+    }
+
+    private static class Response {
+        String id;
     }
 }

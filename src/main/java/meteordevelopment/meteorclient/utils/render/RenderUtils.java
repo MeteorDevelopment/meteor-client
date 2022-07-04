@@ -46,7 +46,7 @@ public class RenderUtils {
 
         Vec3d pos = new Vec3d(0, 0, 1);
 
-        if (mc.options.bobView) {
+        if (mc.options.getBobView().getValue()) {
             MatrixStack bobViewMatrices = new MatrixStack();
 
             bobView(bobViewMatrices);

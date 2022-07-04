@@ -7,9 +7,9 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Nametags;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
@@ -32,6 +32,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
+        if (Modules.get().get(NoRender.class).noNametags()) info.cancel();
         if (!(entity instanceof PlayerEntity)) return;
         if (Modules.get().isActive(Nametags.class)) info.cancel();
     }
@@ -44,7 +45,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
 
     @Inject(method = "getSkyLight", at = @At("RETURN"), cancellable = true)
     private void onGetSkyLight(CallbackInfoReturnable<Integer> info) {
-        info.setReturnValue(Math.max(Utils.minimumLightLevel, info.getReturnValueI()));
+        info.setReturnValue(Math.max(Modules.get().get(Fullbright.class).getLuminance(), info.getReturnValueI()));
     }
 
     @Override

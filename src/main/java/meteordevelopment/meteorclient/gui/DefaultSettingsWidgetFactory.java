@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.*;
 import meteordevelopment.meteorclient.gui.widgets.input.*;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
+import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import org.apache.commons.lang3.StringUtils;
 
@@ -62,6 +63,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
+        factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
     }
 
     @Override
@@ -331,6 +333,21 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(list, setting, () -> item.set(setting.get().potion));
+    }
+
+    private void fontW(WTable table, FontFaceSetting setting) {
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+        WLabel label = list.add(theme.label(setting.get().info().family())).widget();
+
+        WButton button = list.add(theme.button("Select")).expandCellX().widget();
+        button.action = () -> {
+            WidgetScreen screen = new FontFaceSettingScreen(theme, setting);
+            screen.onClosed(() -> label.set(setting.get().info().family()));
+
+            mc.setScreen(screen);
+        };
+
+        reset(list, setting, () -> label.set(Fonts.DEFAULT_FONT.info().family()));
     }
 
     // Other

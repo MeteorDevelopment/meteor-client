@@ -55,8 +55,6 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "render", at = @At("HEAD"))
     private void onRenderHead(MatrixStack matrices, float tickDelta, long limitTime, boolean renderBlockOutline, Camera camera, GameRenderer gameRenderer, LightmapTextureManager lightmapTextureManager, Matrix4f matrix4f, CallbackInfo info) {
-        Utils.minimumLightLevel = Modules.get().get(Fullbright.class).getMinimumLightLevel();
-
         EntityShaders.beginRender();
     }
 
@@ -132,6 +130,6 @@ public abstract class WorldRendererMixin {
 
     @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 0)
     private static int getLightmapCoordinatesModifySkyLight(int sky) {
-        return Math.max(Utils.minimumLightLevel, sky);
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), sky);
     }
 }

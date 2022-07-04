@@ -389,7 +389,7 @@ public class CrystalAura extends Module {
 
     private final Setting<Boolean> renderSwing = sgRender.add(new BoolSetting.Builder()
         .name("swing")
-        .description("Renders hand swinging client side.")
+        .description("Renders hand swinging client-side.")
         .defaultValue(true)
         .build()
     );
@@ -930,7 +930,7 @@ public class CrystalAura extends Module {
         // Place
         if (supportBlock == null) {
             // Place crystal
-            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result));
+            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
 
             if (renderSwing.get()) mc.player.swingHand(hand);
             else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));

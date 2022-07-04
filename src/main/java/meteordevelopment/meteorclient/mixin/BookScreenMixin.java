@@ -17,7 +17,6 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 import org.lwjgl.glfw.GLFW;
@@ -47,7 +46,7 @@ public class BookScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(4, 4, 120, 20, new LiteralText("Copy"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4, 120, 20, Text.literal("Copy"), button -> {
             NbtList listTag = new NbtList();
             for (int i = 0; i < contents.getPageCount(); i++) listTag.add(NbtString.of(contents.getPage(i).getString()));
 
@@ -79,7 +78,7 @@ public class BookScreenMixin extends Screen {
         ItemStack book = itemStack; // Fuck you Java
         Hand hand2 = hand; // Honestly
 
-        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, new LiteralText("Edit title & author"), button -> {
+        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, Text.literal("Edit title & author"), button -> {
             mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
         }));
     }
