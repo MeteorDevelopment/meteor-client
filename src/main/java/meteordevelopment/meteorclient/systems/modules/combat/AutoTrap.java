@@ -165,10 +165,10 @@ public class AutoTrap extends Module {
             return;
         }
 
-        for (Block CB : blocks.get()) {
-            FindItemResult RB = InvUtils.findInHotbar(CB.asItem());
+        for (Block currentBlock : blocks.get()) {
+            FindItemResult itemResult = InvUtils.findInHotbar(currentBlock.asItem());
 
-            if (!RB.isHotbar() && !RB.isOffhand()) {
+            if (!itemResult.isHotbar() && !itemResult.isOffhand()) {
                 placePositions.clear();
                 placed = false;
                 continue;
@@ -182,7 +182,7 @@ public class AutoTrap extends Module {
             if (timer >= delay.get() && placePositions.size() > 0) {
                 BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-                if (BlockUtils.place(blockPos, RB, rotate.get(), 50, true)) {
+                if (BlockUtils.place(blockPos, itemResult, rotate.get(), 50, true)) {
                     placePositions.remove(blockPos);
                     placed = true;
                 }
