@@ -142,25 +142,25 @@ public class SelfTrap extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Block CB : blocks.get()) {
-            FindItemResult RB = InvUtils.findInHotbar(CB.asItem());
+        for (Block currentBlock : blocks.get()) {
+            FindItemResult itemResult = InvUtils.findInHotbar(currentBlock.asItem());
 
-            if (turnOff.get() && ((placed && placePositions.isEmpty()) || !RB.found())) {
+            if (turnOff.get() && ((placed && placePositions.isEmpty()) || !itemResult.found())) {
                 toggle();
                 continue;
             }
 
-            if (!RB.found()) {
+            if (!itemResult.found()) {
                 placePositions.clear();
                 continue;
             }
 
-            findPlacePos(CB);
+            findPlacePos(currentBlock);
 
             if (delay >= delaySetting.get() && placePositions.size() > 0) {
                 BlockPos blockPos = placePositions.get(placePositions.size() - 1);
 
-                if (BlockUtils.place(blockPos, RB, rotate.get(), 50)) {
+                if (BlockUtils.place(blockPos, itemResult, rotate.get(), 50)) {
                     placePositions.remove(blockPos);
                     placed = true;
                 }
