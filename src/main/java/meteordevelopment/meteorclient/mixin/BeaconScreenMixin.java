@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.systems.modules.misc.BetterBeacons;
 import net.minecraft.block.entity.BeaconBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawableHelper;
-import net.minecraft.client.gui.screen.ingame.BeaconScreen.BeaconButtonWidget;
 import net.minecraft.client.gui.screen.ingame.BeaconScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
@@ -30,9 +29,8 @@ import java.util.List;
 
 @Mixin(BeaconScreen.class)
 public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandler> {
-
     @Shadow
-    protected abstract <T extends ClickableWidget & BeaconButtonWidget> void addButton(T button);
+    protected abstract <T extends ClickableWidget> void addButton(T button);
 
     public BeaconScreenMixin(BeaconScreenHandler handler, PlayerInventory inventory, Text title) {
         super(handler, inventory, title);
