@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.client.util.Session;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -33,6 +34,9 @@ public interface MinecraftClientAccessor {
 
     @Accessor("itemUseCooldown")
     int getItemUseCooldown();
+
+    @Accessor("resourceReloadLogger")
+    ResourceReloadLogger getResourceReloadLogger();
 
     @Invoker("doAttack")
     boolean leftClick();

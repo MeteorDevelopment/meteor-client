@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.renderer;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
@@ -64,6 +65,7 @@ public class Fonts {
 
         try {
             RENDERER = new CustomTextRenderer(fontFace);
+            MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
         }
         catch (Exception e) {
             if (fontFace.equals(DEFAULT_FONT)) {

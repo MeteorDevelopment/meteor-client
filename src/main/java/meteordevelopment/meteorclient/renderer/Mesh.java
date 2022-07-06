@@ -96,6 +96,12 @@ public class Mesh {
         GL.bindIndexBuffer(0);
     }
 
+    public void destroy() {
+        GL.deleteBuffer(ibo);
+        GL.deleteBuffer(vbo);
+        GL.deleteVertexArray(vao);
+    }
+
     public void begin() {
         if (building) throw new IllegalStateException("Mesh.end() called while already building.");
 
@@ -276,6 +282,10 @@ public class Mesh {
         GL.restoreState();
 
         beganRendering = false;
+    }
+
+    public boolean isBuilding() {
+        return building;
     }
 
     protected void beforeRender() {}

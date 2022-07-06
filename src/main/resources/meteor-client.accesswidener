@@ -66,3 +66,5 @@ accessible   class   net/minecraft/client/option/SimpleOption$Callbacks
 
 accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$BeaconButtonWidget
 accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$EffectButtonWidget
+
+accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadState

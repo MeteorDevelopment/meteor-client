@@ -26,6 +26,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RainbowColors {
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
+    private static final List<Setting<List<SettingColor>>> colorListSettings = new UnorderedArrayList<>();
+
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
     private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
@@ -40,8 +42,16 @@ public class RainbowColors {
         colorSettings.add(setting);
     }
 
+    public static void addSettingList(Setting<List<SettingColor>> setting) {
+        colorListSettings.add(setting);
+    }
+
     public static void removeSetting(Setting<SettingColor> setting) {
         colorSettings.remove(setting);
+    }
+
+    public static void removeSettingList(Setting<List<SettingColor>> setting) {
+        colorListSettings.remove(setting);
     }
 
     public static void add(SettingColor color) {
@@ -59,6 +69,12 @@ public class RainbowColors {
 
         for (Setting<SettingColor> setting : colorSettings) {
             if (setting.module == null || setting.module.isActive()) setting.get().update();
+        }
+
+        for (Setting<List<SettingColor>> setting : colorListSettings) {
+            if (setting.module == null || setting.module.isActive()) {
+                for (SettingColor color : setting.get()) color.update();
+            }
         }
 
         for (SettingColor color : colors) {

@@ -9,14 +9,19 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
+import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.widgets.*;
 import meteordevelopment.meteorclient.gui.widgets.containers.*;
 import meteordevelopment.meteorclient.gui.widgets.input.*;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -30,6 +35,8 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     protected interface Factory {
         void create(WTable table, Setting<?> setting);
     }
+
+    private static final SettingColor WHITE = new SettingColor();
 
     private final GuiTheme theme;
     private final Map<Class<?>, Factory> factories = new HashMap<>();
@@ -63,6 +70,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
+        factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
     }
 
@@ -156,7 +164,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     private void intW(WTable table, IntSetting setting) {
         WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
 
-        edit.actionOnRelease = () -> {
+        edit.action = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
         };
 
@@ -178,7 +186,10 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void stringW(WTable table, StringSetting setting) {
-        WTextBox textBox = table.add(theme.textBox(setting.get())).expandX().widget();
+        Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), (text, c) -> true, setting.renderer));
+        if (setting.wide) cell.minWidth(Utils.getWindowWidth() - Utils.getWindowWidth() / 4.0);
+
+        WTextBox textBox = cell.expandX().widget();
         textBox.action = () -> setting.set(textBox.get());
 
         reset(table, setting, () -> textBox.set(setting.get()));
@@ -348,6 +359,64 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(list, setting, () -> label.set(Fonts.DEFAULT_FONT.info().family()));
+    }
+
+    private void colorListW(WTable table, ColorListSetting setting) {
+        WTable tab = table.add(theme.table()).expandX().widget();
+        WTable t = tab.add(theme.table()).expandX().widget();
+        tab.row();
+
+        colorListWFill(t, setting);
+
+        WPlus add = tab.add(theme.plus()).expandCellX().widget();
+        add.action = () -> {
+            setting.get().add(new SettingColor());
+            setting.onChanged();
+
+            t.clear();
+            colorListWFill(t, setting);
+        };
+
+        reset(tab, setting, () -> {
+            t.clear();
+            colorListWFill(t, setting);
+        });
+    }
+
+    private void colorListWFill(WTable t, ColorListSetting setting) {
+        int i = 0;
+        for (SettingColor color : setting.get()) {
+            int _i = i;
+
+            t.add(theme.label(i + ":"));
+
+            t.add(theme.quad(color)).widget();
+
+            WButton edit = t.add(theme.button(GuiRenderer.EDIT)).widget();
+            edit.action = () -> {
+                SettingColor defaultValue = WHITE;
+                if (_i < setting.getDefaultValue().size()) defaultValue = setting.getDefaultValue().get(_i);
+
+                ColorSetting set = new ColorSetting(setting.name, setting.description, defaultValue, settingColor -> {
+                    setting.get().get(_i).set(settingColor);
+                    setting.onChanged();
+                }, null, null);
+                set.set(setting.get().get(_i));
+                mc.setScreen(new ColorSettingScreen(theme, set));
+            };
+
+            WMinus remove = t.add(theme.minus()).expandCellX().right().widget();
+            remove.action = () -> {
+                setting.get().remove(_i);
+                setting.onChanged();
+
+                t.clear();
+                colorListWFill(t, setting);
+            };
+
+            t.row();
+            i++;
+        }
     }
 
     // Other

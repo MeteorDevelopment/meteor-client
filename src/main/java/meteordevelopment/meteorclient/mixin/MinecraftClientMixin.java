@@ -138,7 +138,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
             Script script = Compiler.compile(result);
 
             try {
-                customTitle = MeteorStarscript.ss.run(script);
+                customTitle = MeteorStarscript.ss.run(script).toString();
             } catch (StarscriptError e) {
                 MeteorStarscript.printChatError(e);
             }
