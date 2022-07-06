@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
@@ -57,6 +58,7 @@ public class DiscordPresence extends Module {
         .description("Messages used for the first line.")
         .defaultValue("{player}", "{server}")
         .onChanged(strings -> recompileLine1())
+        .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
 
@@ -83,6 +85,7 @@ public class DiscordPresence extends Module {
         .description("Messages used for the second line.")
         .defaultValue("Meteor on Crack!", "{round({server.tps}, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count} Players online")
         .onChanged(strings -> recompileLine2())
+        .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
 
@@ -201,7 +204,7 @@ public class DiscordPresence extends Module {
                     }
 
                     try {
-                        rpc.setDetails(MeteorStarscript.ss.run(line1Scripts.get(i)));
+                        rpc.setDetails(MeteorStarscript.ss.run(line1Scripts.get(i)).toString());
                     } catch (StarscriptError e) {
                         ChatUtils.error("Starscript", e.getMessage());
                     }
@@ -221,7 +224,7 @@ public class DiscordPresence extends Module {
                     }
 
                     try {
-                        rpc.setState(MeteorStarscript.ss.run(line2Scripts.get(i)));
+                        rpc.setState(MeteorStarscript.ss.run(line2Scripts.get(i)).toString());
                     } catch (StarscriptError e) {
                         ChatUtils.error("Starscript", e.getMessage());
                     }

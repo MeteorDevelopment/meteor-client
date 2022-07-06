@@ -11,9 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
-import meteordevelopment.meteorclient.mixin.MinecraftServerAccessor;
+import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
@@ -32,6 +30,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
@@ -263,8 +262,10 @@ public class Utils {
     }
 
     public static String getWorldName() {
+        // Singleplayer
         if (mc.isInSingleplayer()) {
-            // Singleplayer
+            if (mc.world == null) return "";
+
             File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
@@ -272,8 +273,8 @@ public class Utils {
             return folder.getName();
         }
 
+        // Multiplayer
         if (mc.getCurrentServerEntry() != null) {
-            // Multiplayer
             String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
             if (SystemUtils.IS_OS_WINDOWS) {
                 name = name.replace(":", "_");
@@ -504,5 +505,10 @@ public class Utils {
             (int) (first.g * (1 - v) + second.g * v),
             (int) (first.b * (1 - v) + second.b * v)
         );
+    }
+
+    public static boolean isLoading() {
+        ResourceReloadLogger.ReloadState state = ((ResourceReloadLoggerAccessor) ((MinecraftClientAccessor) mc).getResourceReloadLogger()).getReloadState();
+        return state == null || !((ReloadStateAccessor) state).isFinished();
     }
 }

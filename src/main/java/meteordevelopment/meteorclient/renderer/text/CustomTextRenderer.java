@@ -15,7 +15,7 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class CustomTextRenderer implements TextRenderer {
-    private static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
+    public static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
 
     private final Mesh mesh = new ShaderMesh(Shaders.TEXT, DrawMode.Triangles, Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
 
@@ -71,20 +71,22 @@ public class CustomTextRenderer implements TextRenderer {
         this.building = true;
         this.scaleOnly = scaleOnly;
 
-        double fontScale = font.getHeight() / 18;
+        double fontScale = font.getHeight() / 18.0;
         this.scale = 1 + (scale - fontScale) / fontScale;
     }
 
     @Override
     public double getWidth(String text, int length, boolean shadow) {
+        if (text.isEmpty()) return 0;
+
         Font font = building ? this.font : fonts[0];
-        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale;
+        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale + (shadow ? 1 : 0);
     }
 
     @Override
     public double getHeight(boolean shadow) {
         Font font = building ? this.font : fonts[0];
-        return (font.getHeight() + (shadow ? 1 : 0)) * scale;
+        return (font.getHeight() + 1 + (shadow ? 1 : 0)) * scale;
     }
 
     @Override

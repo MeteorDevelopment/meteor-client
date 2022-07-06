@@ -95,9 +95,12 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
 
     public abstract WSlider slider(double value, double min, double max);
 
-    public abstract WTextBox textBox(String text, CharFilter filter);
+    public abstract WTextBox textBox(String text, CharFilter filter, Class<? extends WTextBox.Renderer> renderer);
+    public WTextBox textBox(String text, CharFilter filter) {
+        return textBox(text, filter, null);
+    }
     public WTextBox textBox(String text) {
-        return textBox(text, (text1, c) -> true);
+        return textBox(text, (text1, c) -> true, null);
     }
 
     public abstract <T> WDropdown<T> dropdown(T[] values, T value);
@@ -226,6 +229,28 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract Color textColor();
 
     public abstract Color textSecondaryColor();
+
+    //     Starscript
+
+    public abstract Color starscriptTextColor();
+
+    public abstract Color starscriptBraceColor();
+
+    public abstract Color starscriptParenthesisColor();
+
+    public abstract Color starscriptDotColor();
+
+    public abstract Color starscriptCommaColor();
+
+    public abstract Color starscriptOperatorColor();
+
+    public abstract Color starscriptStringColor();
+
+    public abstract Color starscriptNumberColor();
+
+    public abstract Color starscriptKeywordColor();
+
+    public abstract Color starscriptAccessedObjectColor();
 
     // Other
 
