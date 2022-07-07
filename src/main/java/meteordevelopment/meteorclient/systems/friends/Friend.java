@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.friends;
 
 import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import meteordevelopment.meteorclient.utils.network.Http;
+import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -25,7 +25,7 @@ public class Friend implements ISerializable<Friend> {
     }
 
     public Friend(PlayerEntity player) {
-        this(player.getGameProfile().getName(), player.getUuid());
+        this(player.getEntityName(), player.getUuid());
     }
 
     public Friend(PlayerListEntry entry) {
@@ -34,10 +34,6 @@ public class Friend implements ISerializable<Friend> {
 
     public Friend(NbtCompound tag) {
         fromTag(tag);
-    }
-
-    public void refresh() {
-        name = getName(id);
     }
 
     @Override
@@ -50,12 +46,10 @@ public class Friend implements ISerializable<Friend> {
 
     @Override
     public Friend fromTag(NbtCompound tag) {
-        if (tag.contains("id") && isUUIDValid(tag.getString("id"))) {
-            id = UUIDTypeAdapter.fromString(tag.getString("id"));
-            name = getName(id);
-        } else if (tag.contains("name")) {
-            return Friends.get().getFromName(tag.getString("name"));
-        }
+        if (!tag.contains("id") || !tag.contains("name")) throw new NbtException();
+
+        id = UUIDTypeAdapter.fromString(tag.getString("id"));
+        name = tag.getString("name");
 
         return this;
     }
@@ -71,22 +65,5 @@ public class Friend implements ISerializable<Friend> {
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
-    }
-
-    private boolean isUUIDValid(String id) {
-        try {
-            UUIDTypeAdapter.fromString(id);
-            return true;
-        } catch (IllegalArgumentException e) {
-            return false;
-        }
-    }
-
-    private String getName(UUID uuid) {
-        return ((NameResponse) Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UUIDTypeAdapter.fromUUID(uuid)).sendJson(NameResponse.class)).name;
-    }
-
-    private static class NameResponse {
-        String name;
     }
 }
