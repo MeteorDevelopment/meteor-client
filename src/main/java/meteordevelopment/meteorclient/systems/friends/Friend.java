@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.friends;
 import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
+import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
@@ -36,20 +37,28 @@ public class Friend implements ISerializable<Friend> {
         fromTag(tag);
     }
 
+    public boolean updateName() {
+        NameResponse fetch = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UUIDTypeAdapter.fromUUID(id)).sendJson(NameResponse.class);
+        if (fetch == null || fetch.name == null || fetch.name.isBlank()) return false;
+        name = fetch.name;
+        return true;
+    }
+
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-        tag.putString("name", name);
+
         tag.putString("id", UUIDTypeAdapter.fromUUID(id));
+
         return tag;
     }
 
     @Override
     public Friend fromTag(NbtCompound tag) {
-        if (!tag.contains("id") || !tag.contains("name")) throw new NbtException();
+        if (!tag.contains("id")) throw new NbtException();
 
         id = UUIDTypeAdapter.fromString(tag.getString("id"));
-        name = tag.getString("name");
+        if (!updateName()) return null;
 
         return this;
     }
@@ -65,5 +74,9 @@ public class Friend implements ISerializable<Friend> {
     @Override
     public int hashCode() {
         return Objects.hash(id, name);
+    }
+
+    private static class NameResponse {
+        String name;
     }
 }
