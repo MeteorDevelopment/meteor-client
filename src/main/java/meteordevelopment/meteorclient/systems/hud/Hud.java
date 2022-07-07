@@ -97,7 +97,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     public void init() {
         settings.registerColorSettings(null);
 
-        register(TextHud.INFO);
+        register(MeteorTextHud.INFO);
         register(ItemHud.INFO);
         register(InventoryHud.INFO);
         register(CompassHud.INFO);
@@ -170,19 +170,19 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         int h = (int) Math.ceil(HudRenderer.INSTANCE.textHeight(true));
 
         // Top Left
-        add(TextHud.WATERMARK, 4, 4, XAnchor.Left, YAnchor.Top);
-        add(TextHud.FPS, 4, 4 + h, XAnchor.Left, YAnchor.Top);
-        add(TextHud.TPS, 4, 4 + h * 2, XAnchor.Left, YAnchor.Top);
-        add(TextHud.PING, 4, 4 + h * 3, XAnchor.Left, YAnchor.Top);
-        add(TextHud.SPEED, 4, 4 + h * 4, XAnchor.Left, YAnchor.Top);
+        add(MeteorTextHud.WATERMARK, 4, 4, XAnchor.Left, YAnchor.Top);
+        add(MeteorTextHud.FPS, 4, 4 + h, XAnchor.Left, YAnchor.Top);
+        add(MeteorTextHud.TPS, 4, 4 + h * 2, XAnchor.Left, YAnchor.Top);
+        add(MeteorTextHud.PING, 4, 4 + h * 3, XAnchor.Left, YAnchor.Top);
+        add(MeteorTextHud.SPEED, 4, 4 + h * 4, XAnchor.Left, YAnchor.Top);
 
         // Top Right
         add(ActiveModulesHud.INFO, -4, 4, XAnchor.Right, YAnchor.Top);
 
         // Bottom Right
-        add(TextHud.POSITION, -4, -4, XAnchor.Right, YAnchor.Bottom);
-        add(TextHud.OPPOSITE_POSITION, -4, -4 - h, XAnchor.Right, YAnchor.Bottom);
-        add(TextHud.ROTATION, -4, -4 - h * 2, XAnchor.Right, YAnchor.Bottom);
+        add(MeteorTextHud.POSITION, -4, -4, XAnchor.Right, YAnchor.Bottom);
+        add(MeteorTextHud.OPPOSITE_POSITION, -4, -4 - h, XAnchor.Right, YAnchor.Bottom);
+        add(MeteorTextHud.ROTATION, -4, -4 - h * 2, XAnchor.Right, YAnchor.Bottom);
     }
 
     @EventHandler
