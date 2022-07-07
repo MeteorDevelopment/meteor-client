@@ -63,6 +63,14 @@ public class GL {
 
     // Deletion
 
+    public static void deleteBuffer(int buffer) {
+        GlStateManager._glDeleteBuffers(buffer);
+    }
+
+    public static void deleteVertexArray(int vao) {
+        GlStateManager._glDeleteVertexArrays(vao);
+    }
+
     public static void deleteShader(int shader) {
         GlStateManager.glDeleteShader(shader);
     }

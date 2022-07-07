@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.systems.hud.HUD;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.macros.Macros;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
@@ -46,7 +46,7 @@ public class Profile implements ISerializable<Profile> {
         if (macros) Macros.get().load(folder);
         if (modules) Modules.get().load(folder);
         if (waypoints) Waypoints.get().load(folder);
-        if (hud) HUD.get().load(folder);
+        if (hud) Hud.get().load(folder);
     }
 
     public void save(System<?> system) {
@@ -63,7 +63,7 @@ public class Profile implements ISerializable<Profile> {
         if (macros) Macros.get().save(folder);
         if (modules) Modules.get().save(folder);
         if (waypoints) Waypoints.get().save(folder);
-        if (hud) HUD.get().save(folder);
+        if (hud) Hud.get().save(folder);
     }
 
     public void delete(System<?> system) {

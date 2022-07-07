@@ -89,7 +89,7 @@ public class FreeLook extends Module {
     }
 
     public boolean cameraMode() {
-        return isActive() && mc.options.getPerspective() == Perspective.THIRD_PERSON_BACK && mode.get() == Mode.Camera;
+        return isActive() && mode.get() == Mode.Camera;
     }
 
     @EventHandler

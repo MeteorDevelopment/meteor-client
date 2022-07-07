@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.ModuleArgumentType;
-import meteordevelopment.meteorclient.systems.hud.HUD;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -58,7 +58,7 @@ public class ResetCommand extends Command {
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("hud").executes(context -> {
-            Systems.get(HUD.class).reset.run();
+            Systems.get(Hud.class).resetToDefaultElements();
             ChatUtils.info("HUD", "Reset all elements.");
             return SINGLE_SUCCESS;
         }));

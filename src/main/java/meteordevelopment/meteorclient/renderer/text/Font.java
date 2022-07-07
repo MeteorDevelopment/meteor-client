@@ -92,7 +92,7 @@ public class Font {
         return width;
     }
 
-    public double getHeight() {
+    public int getHeight() {
         return height;
     }
 

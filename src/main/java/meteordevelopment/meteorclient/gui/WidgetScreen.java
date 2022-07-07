@@ -56,7 +56,7 @@ public abstract class WidgetScreen extends Screen {
 
     private List<Runnable> onClosed;
 
-    private boolean firstInit = true;
+    protected boolean firstInit = true;
 
     public WidgetScreen(GuiTheme theme, String title) {
         super(Text.literal(title));

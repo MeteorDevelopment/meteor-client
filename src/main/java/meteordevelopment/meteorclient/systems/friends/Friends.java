@@ -5,10 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
-import com.mojang.util.UUIDTypeAdapter;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,10 +22,25 @@ import java.util.List;
 import java.util.UUID;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
-    private List<Friend> friends = new ArrayList<>();
+    public final Settings settings = new Settings();
 
-    public final SettingColor color = new SettingColor(0, 255, 180);
-    public boolean attack = false;
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    public final Setting<SettingColor> color = sgGeneral.add(new ColorSetting.Builder()
+        .name("color")
+        .description("The color used to show friends.")
+        .defaultValue(new SettingColor(0, 255, 180))
+        .build()
+    );
+
+    public final Setting<Boolean> attack = sgGeneral.add(new BoolSetting.Builder()
+        .name("attack")
+        .description("Whether to attack friends.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final List<Friend> friends = new ArrayList<>();
 
     public Friends() {
         super("friends");
@@ -38,7 +52,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     @Override
     public void init() {
-        RainbowColors.add(color);
+        RainbowColors.add(color.get());
     }
 
     public boolean add(Friend friend) {
@@ -92,7 +106,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public boolean shouldAttack(PlayerEntity player) {
-        return !isFriend(player) || attack;
+        return !isFriend(player) || attack.get();
     }
 
     public int count() {
@@ -111,8 +125,8 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
         for (Friend friend : friends) friendsTag.add(friend.toTag());
         tag.put("friends", friendsTag);
-        tag.put("color", color.toTag());
-        tag.putBoolean("attack", attack);
+
+        tag.put("settings", settings.toTag());
 
         return tag;
     }
@@ -120,35 +134,17 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     @Override
     public Friends fromTag(NbtCompound tag) {
         NbtList friendList = tag.getList("friends", 10);
+        friends.clear();
 
-        friends = new ArrayList<>();
         for (NbtElement friendTag : friendList) {
             NbtCompound compound = (NbtCompound) friendTag;
+            if (!compound.contains("id") || !compound.contains("name")) continue;
 
-            Friend friend;
-            if (compound.contains("name")) {
-                friend = getFromName(compound.getString("name"));
-            } else {
-                friend = new Friend(compound);
-            }
-
-            if (friend != null) friends.add(friend);
+            friends.add(new Friend(compound));
         }
 
-        if (tag.contains("color")) color.fromTag(tag.getCompound("color"));
-        attack = tag.contains("attack") && tag.getBoolean("attack");
+        settings.fromTag(tag.getCompound("settings"));
+
         return this;
-    }
-
-    public Friend getFromName(String username) {
-        Response resp = Http.get("https://api.mojang.com/users/profiles/minecraft/" + username).sendJson(Response.class);
-        if (resp != null) {
-            return new Friend(username, UUIDTypeAdapter.fromString(resp.id));
-        }
-        return null;
-    }
-
-    private static class Response {
-        String id;
     }
 }

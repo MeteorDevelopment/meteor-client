@@ -18,11 +18,14 @@ public abstract class System<T> implements ISerializable<T> {
     private final String name;
     private File file;
 
+    protected boolean isFirstInit;
+
     public System(String name) {
         this.name = name;
 
         if (name != null) {
             this.file = new File(MeteorClient.FOLDER, name + ".nbt");
+            this.isFirstInit = !file.exists();
         }
     }
 
