@@ -34,8 +34,9 @@ public class Macro implements ISerializable<Macro> {
 
     public boolean onAction(boolean isKey, int value) {
         if (keybind.matches(isKey, value) && mc.currentScreen == null) {
-            for (String command : messages) {
-                mc.player.sendChatMessage(command);
+            for (String message : messages) {
+                if (message.startsWith("/")) mc.player.sendCommand(message.substring(1));
+                else mc.player.sendChatMessage(message);
             }
 
             return true;

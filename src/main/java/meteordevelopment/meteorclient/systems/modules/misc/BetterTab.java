@@ -85,7 +85,7 @@ public class BetterTab extends Module {
         }
         else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getId()) != null) {
             Friend friend = Friends.get().get(playerListEntry.getProfile().getId());
-            if (friend != null) color = Friends.get().color;
+            if (friend != null) color = Friends.get().color.get();
         }
 
         if (color != null) {

@@ -83,7 +83,7 @@ public class FriendsCommand extends Command {
                 }
             }
 
-            return Friends.get().getFromName(name);
+            return null;
         }
 
         public static Friend getFriend(CommandContext<?> context, String name) {

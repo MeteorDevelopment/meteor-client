@@ -95,12 +95,12 @@ public class GuiRenderer {
         GL.disableScissorTest();
     }
 
-    private void beginRender() {
+    public void beginRender() {
         r.begin();
         rTex.begin();
     }
 
-    private void endRender() {
+    public void endRender() {
         r.end();
         rTex.end();
 

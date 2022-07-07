@@ -23,9 +23,12 @@ import java.util.function.Consumer;
 
 public class StringListSetting extends Setting<List<String>>{
     public String newText = "";
+    public final Class<? extends WTextBox.Renderer> renderer;
 
-    public StringListSetting(String name, String description, List<String> defaultValue, Consumer<List<String>> onChanged, Consumer<Setting<List<String>>> onModuleActivated, IVisible visible) {
+    public StringListSetting(String name, String description, List<String> defaultValue, Consumer<List<String>> onChanged, Consumer<Setting<List<String>>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+
+        this.renderer = renderer;
     }
 
     @Override
@@ -74,7 +77,7 @@ public class StringListSetting extends Setting<List<String>>{
             int msgI = i;
             String message = setting.get().get(i);
 
-            WTextBox textBox = table.add(theme.textBox(message)).expandX().widget();
+            WTextBox textBox = table.add(theme.textBox(message, (text, c) -> true, setting.renderer)).expandX().widget();
             textBox.action = () -> strings.set(msgI, textBox.get());
             textBox.actionOnUnfocused = () -> setting.set(strings);
 
@@ -114,6 +117,8 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     public static class Builder extends SettingBuilder<Builder, List<String>, StringListSetting> {
+        private Class<? extends WTextBox.Renderer> renderer;
+
         public Builder() {
             super(new ArrayList<>(0));
         }
@@ -122,9 +127,14 @@ public class StringListSetting extends Setting<List<String>>{
             return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
+        public Builder renderer(Class<? extends WTextBox.Renderer> renderer) {
+            this.renderer = renderer;
+            return this;
+        }
+
         @Override
         public StringListSetting build() {
-            return new StringListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+            return new StringListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, renderer);
         }
     }
 }

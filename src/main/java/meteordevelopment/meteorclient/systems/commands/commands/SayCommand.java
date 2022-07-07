@@ -41,7 +41,7 @@ public class SayCommand extends Command {
                 Script script = Compiler.compile(result);
 
                 try {
-                    String message = MeteorStarscript.ss.run(script);
+                    String message = MeteorStarscript.ss.run(script).toString();
                     MessageSignature messageSignature = ((ClientPlayerEntityAccessor) mc.player)._signChatMessage(ChatMessageSigner.create(mc.player.getUuid()), Text.literal(message));
                     mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(message, messageSignature, false));
                 } catch (StarscriptError e) {
