@@ -66,7 +66,10 @@ public class TextHud extends HudElement {
         .name("text")
         .description("Text to display with Starscript.")
         .defaultValue("Meteor Client")
-        .onChanged(s -> needsCompile = true)
+        .onChanged(s -> {
+            firstTick = true; 
+            needsCompile = true;
+        })
         .wide()
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
