@@ -23,32 +23,6 @@ import meteordevelopment.starscript.utils.StarscriptError;
 import java.util.List;
 
 public class TextHud extends HudElement {
-    public static final HudElementInfo<TextHud> INFO = new HudElementInfo<>(Hud.GROUP, "text", "Displays arbitrary text with Starscript.", TextHud::new);
-
-    // Presets
-
-    public static final HudElementInfo<TextHud>.Preset FPS;
-    public static final HudElementInfo<TextHud>.Preset TPS;
-    public static final HudElementInfo<TextHud>.Preset PING;
-    public static final HudElementInfo<TextHud>.Preset SPEED;
-    public static final HudElementInfo<TextHud>.Preset DURABILITY;
-    public static final HudElementInfo<TextHud>.Preset POSITION;
-    public static final HudElementInfo<TextHud>.Preset OPPOSITE_POSITION;
-    public static final HudElementInfo<TextHud>.Preset LOOKING_AT;
-    public static final HudElementInfo<TextHud>.Preset LOOKING_AT_WITH_POSITION;
-    public static final HudElementInfo<TextHud>.Preset BREAKING_PROGRESS;
-    public static final HudElementInfo<TextHud>.Preset SERVER;
-    public static final HudElementInfo<TextHud>.Preset BIOME;
-    public static final HudElementInfo<TextHud>.Preset WORLD_TIME;
-    public static final HudElementInfo<TextHud>.Preset REAL_TIME;
-    public static final HudElementInfo<TextHud>.Preset ROTATION;
-    public static final HudElementInfo<TextHud>.Preset MODULE_ENABLED;
-    public static final HudElementInfo<TextHud>.Preset MODULE_ENABLED_WITH_INFO;
-    public static final HudElementInfo<TextHud>.Preset WATERMARK;
-    public static final HudElementInfo<TextHud>.Preset BARITONE;
-
-    // Other
-
     private static final Color WHITE = new Color();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -62,12 +36,12 @@ public class TextHud extends HudElement {
 
     // General
 
-    private final Setting<String> text = sgGeneral.add(new StringSetting.Builder()
+    public final Setting<String> text = sgGeneral.add(new StringSetting.Builder()
         .name("text")
         .description("Text to display with Starscript.")
         .defaultValue("Meteor Client")
         .onChanged(s -> {
-            firstTick = true; 
+            firstTick = true;
             needsCompile = true;
         })
         .wide()
@@ -75,7 +49,7 @@ public class TextHud extends HudElement {
         .build()
     );
 
-    private final Setting<Integer> updateDelay = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Integer> updateDelay = sgGeneral.add(new IntSetting.Builder()
         .name("update-delay")
         .description("Update delay in ticks")
         .defaultValue(4)
@@ -86,7 +60,7 @@ public class TextHud extends HudElement {
         .build()
     );
 
-    private final Setting<Boolean> shadow = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> shadow = sgGeneral.add(new BoolSetting.Builder()
         .name("shadow")
         .description("Renders shadow behind text.")
         .defaultValue(true)
@@ -94,7 +68,7 @@ public class TextHud extends HudElement {
         .build()
     );
 
-    private final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Integer> border = sgGeneral.add(new IntSetting.Builder()
         .name("border")
         .description("How much space to add around the text.")
         .defaultValue(0)
@@ -104,7 +78,7 @@ public class TextHud extends HudElement {
 
     // Scale
 
-    private final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
+    public final Setting<Boolean> customScale = sgScale.add(new BoolSetting.Builder()
         .name("custom-scale")
         .description("Applies custom text scale rather than the global one.")
         .defaultValue(false)
@@ -112,7 +86,7 @@ public class TextHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
+    public final Setting<Double> scale = sgScale.add(new DoubleSetting.Builder()
         .name("scale")
         .description("Custom scale.")
         .visible(customScale::get)
@@ -125,14 +99,14 @@ public class TextHud extends HudElement {
 
     // Background
 
-    private final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
+    public final Setting<Boolean> background = sgBackground.add(new BoolSetting.Builder()
         .name("background")
         .description("Displays background.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
+    public final Setting<SettingColor> backgroundColor = sgBackground.add(new ColorSetting.Builder()
         .name("background-color")
         .description("Color used for the background.")
         .visible(background::get)
@@ -146,8 +120,8 @@ public class TextHud extends HudElement {
     private boolean firstTick = true;
     private boolean empty = false;
 
-    private TextHud() {
-        super(INFO);
+    public TextHud(HudElementInfo<TextHud> info) {
+        super(info);
 
         needsCompile = true;
     }
@@ -255,41 +229,5 @@ public class TextHud extends HudElement {
     public static Color getSectionColor(int i) {
         List<SettingColor> colors = Hud.get().textColors.get();
         return (i >= 0 && i < colors.size()) ? colors.get(i) : WHITE;
-    }
-
-    // Presets
-
-    static {
-        addPreset("Empty", null);
-        FPS = addPreset("FPS", "FPS: #1{fps}", 0);
-        TPS = addPreset("TPS", "TPS: #1{round(server.tps, 1)}");
-        PING = addPreset("Ping", "Ping: #1{ping}");
-        SPEED = addPreset("Speed", "Speed: #1{round(player.speed, 1)}", 0);
-        DURABILITY = addPreset("Durability", "Durability: #1{player.hand_or_offhand.durability}");
-        POSITION = addPreset("Position", "Pos: #1{floor(camera.pos.x)}, {floor(camera.pos.y)}, {floor(camera.pos.z)}", 0);
-        OPPOSITE_POSITION = addPreset("Opposite Position", "{player.opposite_dimension != \"End\" ? player.opposite_dimension + \":\" : \"\"} #1{player.opposite_dimension != \"End\" ? \"\" + floor(camera.opposite_dim_pos.x) + \", \" + floor(camera.opposite_dim_pos.y) + \", \" + floor(camera.opposite_dim_pos.z) : \"\"}", 0);
-        LOOKING_AT = addPreset("Looking at", "Looking at: #1{crosshair_target.value}", 0);
-        LOOKING_AT_WITH_POSITION = addPreset("Looking at  with position", "Looking at: #1{crosshair_target.value} {crosshair_target.type != \"miss\" ? \"(\" + \"\" + floor(crosshair_target.value.pos.x) + \", \" + floor(crosshair_target.value.pos.y) + \", \" + floor(crosshair_target.value.pos.z) + \")\" : \"\"}", 0);
-        BREAKING_PROGRESS = addPreset("Breaking progress", "Breaking progress: #1{round(player.breaking_progress * 100)}%", 0);
-        SERVER = addPreset("Server", "Server: #1{server}");
-        BIOME = addPreset("Biome", "Biome: #1{player.biome}", 0);
-        WORLD_TIME = addPreset("World time", "Time: #1{server.time}");
-        REAL_TIME = addPreset("Real time", "Time: #1{time}");
-        ROTATION = addPreset("Rotation", "{camera.direction} #1({round(camera.yaw, 1)}, {round(camera.pitch, 1)})", 0);
-        MODULE_ENABLED = addPreset("Module enabled", "Kill Aura: {meteor.is_module_active(\"kill-aura\") ? #2 \"ON\" : #3 \"OFF\"}", 0);
-        MODULE_ENABLED_WITH_INFO = addPreset("Module enabled with info", "Kill Aura: {meteor.is_module_active(\"kill-aura\") ? #2 \"ON\" : #3 \"OFF\"} #1{meteor.get_module_info(\"kill-aura\")}", 0);
-        WATERMARK = addPreset("Watermark", "Meteor Client #1{version}", Integer.MAX_VALUE);
-        BARITONE = addPreset("Baritone", "Baritone: #1{baritone.process_name}");
-    }
-
-    private static HudElementInfo<TextHud>.Preset addPreset(String title, String text, int updateDelay) {
-        return INFO.addPreset(title, textHud -> {
-            if (text != null) textHud.text.set(text);
-            if (updateDelay != -1) textHud.updateDelay.set(updateDelay);
-        });
-    }
-
-    private static HudElementInfo<TextHud>.Preset addPreset(String title, String text) {
-        return addPreset(title, text, -1);
     }
 }
