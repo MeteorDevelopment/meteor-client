@@ -48,7 +48,7 @@ public class Notifier extends Module {
 
     private final Setting<Boolean> totemsIgnoreOwn = sgTotemPops.add(new BoolSetting.Builder()
         .name("ignore-own")
-        .description("Notifies you of your own totem pops.")
+        .description("Ignores your own totem pops.")
         .defaultValue(false)
         .build()
     );
