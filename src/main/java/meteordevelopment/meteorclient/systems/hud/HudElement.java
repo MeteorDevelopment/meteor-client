@@ -124,12 +124,12 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
     public HudElement fromTag(NbtCompound tag) {
         settings.reset();
 
-        active = tag.contains("active") && tag.getBoolean("active");
+        active = tag.getBoolean("active");
 
-        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
-        if (tag.contains("box")) box.fromTag(tag.getCompound("box"));
+        settings.fromTag(tag.getCompound("settings"));
+        box.fromTag(tag.getCompound("box"));
 
-        autoAnchors = !tag.contains("autoAnchors") || tag.getBoolean("autoAnchors");
+        autoAnchors = tag.getBoolean("autoAnchors");
 
         x = box.getRenderX();
         y = box.getRenderY();
