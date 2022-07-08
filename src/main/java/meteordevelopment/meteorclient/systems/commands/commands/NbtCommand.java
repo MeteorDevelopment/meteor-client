@@ -15,6 +15,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -78,7 +79,6 @@ public class NbtCommand extends Command {
                 error("You must hold an item in your main hand.");
             } else {
                 NbtCompound tag = stack.getNbt();
-                String nbt = tag == null ? "{}" : tag.asString();
 
                 MutableText copyButton = Text.literal("NBT");
                 copyButton.setStyle(copyButton.getStyle()
@@ -94,7 +94,9 @@ public class NbtCommand extends Command {
 
                 MutableText text = Text.literal("");
                 text.append(copyButton);
-                text.append(Text.literal(": " + nbt));
+
+                if (tag == null) text.append("{}");
+                else text.append(" ").append(NbtHelper.toPrettyPrintedText(tag));
 
                 info(text);
             }
@@ -115,7 +117,7 @@ public class NbtCommand extends Command {
                         .withFormatting(Formatting.UNDERLINE)
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
-                                Text.literal(tag.toString())
+                                NbtHelper.toPrettyPrintedText(tag)
                         )));
 
                 MutableText text = Text.literal("");
