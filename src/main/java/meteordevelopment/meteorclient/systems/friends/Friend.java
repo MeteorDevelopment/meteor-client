@@ -40,6 +40,7 @@ public class Friend implements ISerializable<Friend> {
     public boolean updateName() {
         NameResponse fetch = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UUIDTypeAdapter.fromUUID(id)).sendJson(NameResponse.class);
         if (fetch == null || fetch.name == null || fetch.name.isBlank()) return false;
+
         name = fetch.name;
         return true;
     }
@@ -58,7 +59,6 @@ public class Friend implements ISerializable<Friend> {
         if (!tag.contains("id")) throw new NbtException();
 
         id = UUIDTypeAdapter.fromString(tag.getString("id"));
-        if (!updateName()) return null;
 
         return this;
     }
