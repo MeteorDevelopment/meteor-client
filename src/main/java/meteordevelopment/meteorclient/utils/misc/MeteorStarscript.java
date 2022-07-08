@@ -380,7 +380,7 @@ public class MeteorStarscript {
 
     // Wrapping
 
-    private static Value wrap(ItemStack itemStack) {
+    public static Value wrap(ItemStack itemStack) {
         String name = itemStack.isEmpty() ? "" : Names.get(itemStack.getItem());
 
         int durability = 0;
@@ -395,7 +395,7 @@ public class MeteorStarscript {
         );
     }
 
-    private static Value wrap(BlockPos blockPos, BlockState blockState) {
+    public static Value wrap(BlockPos blockPos, BlockState blockState) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(Names.get(blockState.getBlock())))
             .set("pos", Value.map(new ValueMap()
@@ -407,7 +407,7 @@ public class MeteorStarscript {
         );
     }
 
-    private static Value wrap(Entity entity) {
+    public static Value wrap(Entity entity) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(entity.getName().getString()))
             .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth() : 0))
@@ -420,7 +420,7 @@ public class MeteorStarscript {
         );
     }
 
-    private static Value wrap(HorizontalDirection dir) {
+    public static Value wrap(HorizontalDirection dir) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(dir.name + " " + dir.axis))
             .set("name", Value.string(dir.name))
