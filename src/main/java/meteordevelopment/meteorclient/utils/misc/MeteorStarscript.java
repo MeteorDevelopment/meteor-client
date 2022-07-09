@@ -69,6 +69,8 @@ public class MeteorStarscript {
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
 
+        ss.set("string", MeteorStarscript::string); // TODO: Move to StandardLib
+
         // Meteor
         ss.set("meteor", new ValueMap()
             .set("modules", () -> Value.number(Modules.get().getAll().size()))
@@ -172,6 +174,12 @@ public class MeteorStarscript {
     }
 
     // Functions
+
+    private static Value string(Starscript ss, int argCount) {
+        if (argCount != 1) ss.error("string() requires 1 argument, got %d.", argCount);
+
+        return Value.string(ss.pop().toString());
+    }
 
     private static Value getModuleInfo(Starscript ss, int argCount) {
         if (argCount != 1) ss.error("meteor.get_module_info() requires 1 argument, got %d.", argCount);
