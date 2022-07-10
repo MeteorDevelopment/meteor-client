@@ -100,7 +100,7 @@ public class PotionTimersHud extends HudElement {
 
     @Override
     public void tick(HudRenderer renderer) {
-        if (mc.player == null) {
+        if (mc.player == null || isInEditor()) {
             setSize(renderer.textWidth("Potion Timers 0:00", shadow.get(), getScale()), renderer.textHeight(shadow.get(), getScale()));
             return;
         }
