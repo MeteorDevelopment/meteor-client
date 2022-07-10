@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -21,12 +23,9 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.compiler.Compiler;
-import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.Error;
-import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
+import net.minecraft.client.RunArgs;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.client.util.Window;
@@ -63,6 +62,12 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow
     @Nullable
     public ClientPlayerInteractionManager interactionManager;
+
+    @Shadow
+    protected abstract UserApiService createUserApiService(YggdrasilAuthenticationService authService, RunArgs runArgs);
+
+    @Shadow
+    public abstract void scheduleStop();
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
@@ -129,19 +134,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (Config.get() == null || !Config.get().customWindowTitle.get()) return original;
 
         String customTitle = Config.get().customWindowTitleText.get();
-        Parser.Result result = Parser.parse(customTitle);
+        Script script = MeteorStarscript.compile(customTitle);
 
-        if (result.hasErrors()) {
-            for (Error error : result.errors) MeteorStarscript.printChatError(error);
-        }
-        else {
-            Script script = Compiler.compile(result);
-
-            try {
-                customTitle = MeteorStarscript.ss.run(script).toString();
-            } catch (StarscriptError e) {
-                MeteorStarscript.printChatError(e);
-            }
+        if (script != null) {
+            String title = MeteorStarscript.run(script);
+            if (title != null) customTitle = title;
         }
 
         return customTitle;

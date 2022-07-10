@@ -20,8 +20,12 @@ import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.meteorclient.utils.world.TickRate;
+import meteordevelopment.starscript.Script;
+import meteordevelopment.starscript.Section;
 import meteordevelopment.starscript.StandardLib;
 import meteordevelopment.starscript.Starscript;
+import meteordevelopment.starscript.compiler.Compiler;
+import meteordevelopment.starscript.compiler.Parser;
 import meteordevelopment.starscript.utils.Error;
 import meteordevelopment.starscript.utils.StarscriptError;
 import meteordevelopment.starscript.value.Value;
@@ -158,6 +162,40 @@ public class MeteorStarscript {
             .set("player_count", () -> Value.number(mc.getNetworkHandler() != null ? mc.getNetworkHandler().getPlayerList().size() : 0))
             .set("difficulty", () -> Value.string(mc.world != null ? mc.world.getDifficulty().getName() : ""))
         );
+    }
+
+    // Helpers
+
+    public static Script compile(String source) {
+        Parser.Result result = Parser.parse(source);
+
+        if (result.hasErrors()) {
+            for (Error error : result.errors) printChatError(error);
+            return null;
+        }
+
+        return Compiler.compile(result);
+    }
+
+    public static Section runSection(Script script, StringBuilder sb) {
+        try {
+            return ss.run(script, sb);
+        }
+        catch (StarscriptError error) {
+            printChatError(error);
+            return null;
+        }
+    }
+    public static String run(Script script, StringBuilder sb) {
+        Section section = runSection(script, sb);
+        return section != null ? section.toString() : null;
+    }
+
+    public static Section runSection(Script script) {
+        return runSection(script, new StringBuilder());
+    }
+    public static String run(Script script) {
+        return run(script, new StringBuilder());
     }
 
     // Errors

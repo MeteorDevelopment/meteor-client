@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WKeybind;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
@@ -160,8 +161,8 @@ public class MacrosTab extends Tab {
             for (int i = 0; i < macro.messages.size(); i++) {
                 int ii = i;
 
-                WTextBox line = lines.add(theme.textBox(macro.messages.get(i))).minWidth(400).expandX().widget();
-                line.action = () -> macro.messages.set(ii, line.get().trim());
+                WTextBox line = lines.add(theme.textBox(macro.messages.get(i), (text, c) -> true, StarscriptTextBoxRenderer.class)).minWidth(400).expandX().widget();
+                line.action = () -> macro.setMessage(ii, line.get().trim());
 
                 if (i != macro.messages.size() - 1) {
                     WMinus remove = lines.add(theme.minus()).widget();

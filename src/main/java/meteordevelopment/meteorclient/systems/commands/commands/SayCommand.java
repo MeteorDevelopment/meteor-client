@@ -11,10 +11,6 @@ import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.compiler.Compiler;
-import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.Error;
-import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.message.ChatMessageSigner;
 import net.minecraft.network.message.MessageSignature;
@@ -32,20 +28,14 @@ public class SayCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
             String msg = context.getArgument("message", String.class);
-            Parser.Result result = Parser.parse(msg);
+            Script script = MeteorStarscript.compile(msg);
 
-            if (result.hasErrors()) {
-                for (Error error : result.errors) MeteorStarscript.printChatError(error);
-            }
-            else {
-                Script script = Compiler.compile(result);
+            if (script != null) {
+                String message = MeteorStarscript.run(script);
 
-                try {
-                    String message = MeteorStarscript.ss.run(script).toString();
+                if (message != null) {
                     MessageSignature messageSignature = ((ClientPlayerEntityAccessor) mc.player)._signChatMessage(ChatMessageSigner.create(mc.player.getUuid()), Text.literal(message));
                     mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(message, messageSignature, false));
-                } catch (StarscriptError e) {
-                    MeteorStarscript.printChatError(e);
                 }
             }
 
