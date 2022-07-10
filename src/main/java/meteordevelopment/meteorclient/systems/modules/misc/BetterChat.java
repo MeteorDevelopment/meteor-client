@@ -23,6 +23,7 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -101,6 +102,7 @@ public class BetterChat extends Module {
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
         .visible(filterRegex::get)
+        .onChanged(strings -> compileFilterRegexList())
         .build()
     );
 
@@ -204,6 +206,7 @@ public class BetterChat extends Module {
         String[] a = "abcdefghijklmnopqrstuvwxyz".split("");
         String[] b = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴩqʀꜱᴛᴜᴠᴡxyᴢ".split("");
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
+        compileFilterRegexList();
     }
 
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
@@ -215,19 +218,8 @@ public class BetterChat extends Module {
         Text message = event.getMessage();
 
         if (filterRegex.get()) {
-            for (int i = 0; i < regexFilters.get().size(); i++) {
-                Pattern p;
-
-                try {
-                    p = Pattern.compile(regexFilters.get().get(i));
-                }
-                catch (PatternSyntaxException e) {
-                    String removed = regexFilters.get().remove(i);
-                    error("Removing Invalid regex: %s", removed);
-                    continue;
-                }
-
-                if (p.matcher(message.getString()).find()) {
+            for (Pattern pattern : filterRegexList) {
+                if (pattern.matcher(message.getString()).find()) {
                     event.cancel();
                     return;
                 }
@@ -351,6 +343,23 @@ public class BetterChat extends Module {
         }
 
         return sb.toString();
+    }
+
+    // Filter Regex
+
+    private final List<Pattern> filterRegexList = new ArrayList<>();
+
+    private void compileFilterRegexList() {
+        filterRegexList.clear();
+
+        for (int i = 0; i < regexFilters.get().size(); i++) {
+            try {
+                filterRegexList.add(Pattern.compile(regexFilters.get().get(i)));
+            } catch (PatternSyntaxException e) {
+                String removed = regexFilters.get().remove(i);
+                error("Removing Invalid regex: %s", removed);
+            }
+        }
     }
 
     // Prefix and Suffix
