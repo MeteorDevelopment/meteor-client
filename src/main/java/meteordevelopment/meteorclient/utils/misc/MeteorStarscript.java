@@ -160,9 +160,19 @@ public class MeteorStarscript {
         );
     }
 
+    // Errors
+
     public static void printChatError(int i, Error error) {
-        if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
-        else ChatUtils.error("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
+        String caller = getCallerName();
+
+        if (caller != null) {
+            if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
+            else ChatUtils.error("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
+        }
+        else {
+            if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
+            else ChatUtils.error("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
+        }
     }
 
     public static void printChatError(Error error) {
@@ -170,7 +180,26 @@ public class MeteorStarscript {
     }
 
     public static void printChatError(StarscriptError e) {
-        ChatUtils.error("Starscript", e.getMessage());
+        String caller = getCallerName();
+
+        if (caller != null) ChatUtils.error("Starscript", "%s (from %s)", e.getMessage(), caller);
+        else ChatUtils.error("Starscript", "%s", e.getMessage());
+    }
+
+    private static String getCallerName() {
+        StackTraceElement[] elements = Thread.currentThread().getStackTrace();
+        if (elements.length == 0) return null;
+
+        for (int i = 1; i < elements.length; i++) {
+            String name = elements[i].getClassName();
+
+            if (name.startsWith(Starscript.class.getPackageName())) continue;
+            if (name.equals(MeteorStarscript.class.getName())) continue;
+
+            return name.substring(name.lastIndexOf('.') + 1);
+        }
+
+        return null;
     }
 
     // Functions
