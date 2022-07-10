@@ -7,7 +7,9 @@ package meteordevelopment.meteorclient.systems.macros;
 
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.starscript.Script;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -24,25 +26,53 @@ public class Macro implements ISerializable<Macro> {
     public List<String> messages = new ArrayList<>(1);
     public Keybind keybind = Keybind.none();
 
-    public void addMessage(String command) {
-        messages.add(command);
+    private final List<Script> scripts = new ArrayList<>(1);
+    private boolean dirty;
+
+    public void addMessage(String message) {
+        messages.add(message);
+        dirty = true;
     }
 
     public void removeMessage(int i) {
         messages.remove(i);
+        dirty = true;
+    }
+
+    public void setMessage(int i, String message) {
+        messages.set(i, message);
+        dirty = true;
     }
 
     public boolean onAction(boolean isKey, int value) {
         if (keybind.matches(isKey, value) && mc.currentScreen == null) {
-            for (String message : messages) {
-                if (message.startsWith("/")) mc.player.sendCommand(message.substring(1));
-                else mc.player.sendChatMessage(message);
+            if (dirty) {
+                compile();
+                dirty = false;
+            }
+
+            for (Script script : scripts) {
+                String message = MeteorStarscript.run(script);
+
+                if (message != null) {
+                    if (message.startsWith("/")) mc.player.sendCommand(message.substring(1));
+                    else mc.player.sendChatMessage(message);
+                }
             }
 
             return true;
         }
 
         return false;
+    }
+
+    private void compile() {
+        scripts.clear();
+
+        for (String message : messages) {
+            Script script = MeteorStarscript.compile(message);
+            if (script != null) scripts.add(script);
+        }
     }
 
     @Override
@@ -69,6 +99,8 @@ public class Macro implements ISerializable<Macro> {
         else keybind.fromTag(tag.getCompound("keybind"));
 
         messages = NbtUtils.listFromTag(tag.getList("messages", 8), NbtElement::asString);
+
+        dirty = true;
 
         return this;
     }

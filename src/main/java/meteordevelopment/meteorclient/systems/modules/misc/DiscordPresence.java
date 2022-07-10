@@ -22,12 +22,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.compiler.Compiler;
-import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.client.gui.screen.*;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.option.*;
@@ -154,18 +150,9 @@ public class DiscordPresence extends Module {
     private void recompile(List<String> messages, List<Script> scripts) {
         scripts.clear();
 
-        for (int i = 0; i < messages.size(); i++) {
-            Parser.Result result = Parser.parse(messages.get(i));
-
-            if (result.hasErrors()) {
-                if (Utils.canUpdate()) {
-                    MeteorStarscript.printChatError(i, result.errors.get(0));
-                }
-
-                continue;
-            }
-
-            scripts.add(Compiler.compile(result));
+        for (String message : messages) {
+            Script script = MeteorStarscript.compile(message);
+            if (script != null) scripts.add(script);
         }
 
         forceUpdate = true;
@@ -203,11 +190,8 @@ public class DiscordPresence extends Module {
                         i = line1I++;
                     }
 
-                    try {
-                        rpc.setDetails(MeteorStarscript.ss.run(line1Scripts.get(i)).toString());
-                    } catch (StarscriptError e) {
-                        ChatUtils.error("Starscript", e.getMessage());
-                    }
+                    String message = MeteorStarscript.run(line1Scripts.get(i));
+                    if (message != null) rpc.setDetails(message);
                 }
                 update = true;
 
@@ -223,11 +207,8 @@ public class DiscordPresence extends Module {
                         i = line2I++;
                     }
 
-                    try {
-                        rpc.setState(MeteorStarscript.ss.run(line2Scripts.get(i)).toString());
-                    } catch (StarscriptError e) {
-                        ChatUtils.error("Starscript", e.getMessage());
-                    }
+                    String message = MeteorStarscript.run(line2Scripts.get(i));
+                    if (message != null) rpc.setState(message);
                 }
                 update = true;
 
