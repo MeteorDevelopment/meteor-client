@@ -196,7 +196,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void stringListW(WTable table, StringListSetting setting) {
-        WTable wtable = table.add(theme.table()).widget();
+        WTable wtable = table.add(theme.table()).expandX().widget();
         StringListSetting.fillTable(theme, wtable, setting);
     }
 
