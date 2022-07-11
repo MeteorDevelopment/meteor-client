@@ -118,6 +118,22 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
+    private final Setting<Double> rainbowSaturation = sgGeneral.add(new DoubleSetting.Builder()
+        .name("rainbow-saturation")
+        .defaultValue(1.0d)
+        .sliderRange(0.0d, 1.0d)
+        .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .build()
+    );
+
+    private final Setting<Double> rainbowBrightness = sgGeneral.add(new DoubleSetting.Builder()
+        .name("rainbow-brightness")
+        .defaultValue(1.0d)
+        .sliderRange(0.0d, 1.0d)
+        .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .build()
+    );
+
     private final List<Module> modules = new ArrayList<>();
 
     private final Color rainbow = new Color(255, 255, 255);
@@ -208,7 +224,7 @@ public class ActiveModulesHud extends HudElement {
         if (colorMode == ColorMode.Random) color = module.color;
         else if (colorMode == ColorMode.Rainbow) {
             rainbowHue2 += rainbowSpread.get();
-            int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, 1, 1);
+            int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
 
             rainbow.r = Color.toRGBAR(c);
             rainbow.g = Color.toRGBAG(c);
