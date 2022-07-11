@@ -35,7 +35,7 @@ public class NametagUtils {
         cameraNegated.set(camera);
         cameraNegated.negate();
 
-        windowScale = mc.getWindow().calculateScaleFactor(1, mc.forcesUnicodeFont());
+        windowScale = mc.getWindow().calculateScaleFactor(1, false);
     }
 
     public static boolean to2D(Vec3 pos, double scale) {
