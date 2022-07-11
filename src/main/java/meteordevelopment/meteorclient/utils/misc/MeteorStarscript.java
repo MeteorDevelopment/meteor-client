@@ -35,6 +35,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -154,6 +156,9 @@ public class MeteorStarscript {
                 .set("total", () -> Value.number(mc.player != null ? mc.player.totalExperience : 0))
             )
 
+            .set("has_potion_effect", MeteorStarscript::hasPotionEffect)
+            .set("get_potion_effect", MeteorStarscript::getPotionEffect)
+
             .set("get_stat", MeteorStarscript::getStat)
         );
 
@@ -252,6 +257,34 @@ public class MeteorStarscript {
     // Functions
 
     private static long lastRequestedStatsTime = 0;
+
+    private static Value hasPotionEffect(Starscript ss, int argCount) {
+        if (argCount < 1) ss.error("player.has_potion_effect() requires 1 argument, got %d.", argCount);
+        if (mc.player == null) return Value.bool(false);
+
+        Identifier name = new Identifier(ss.popString("First argument to player.has_potion_effect() needs to a string."));
+
+        StatusEffect effect = Registry.STATUS_EFFECT.get(name);
+        if (effect == null) return Value.bool(false);
+
+        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect);
+        return Value.bool(effectInstance != null);
+    }
+
+    private static Value getPotionEffect(Starscript ss, int argCount) {
+        if (argCount < 1) ss.error("player.get_potion_effect() requires 1 argument, got %d.", argCount);
+        if (mc.player == null) return Value.null_();
+
+        Identifier name = new Identifier(ss.popString("First argument to player.get_potion_effect() needs to a string."));
+
+        StatusEffect effect = Registry.STATUS_EFFECT.get(name);
+        if (effect == null) return Value.null_();
+
+        StatusEffectInstance effectInstance = mc.player.getStatusEffect(effect);
+        if (effectInstance == null) return Value.null_();
+
+        return wrap(effectInstance);
+    }
 
     private static Value getStat(Starscript ss, int argCount) {
         if (argCount < 1) ss.error("player.get_stat() requires 1 argument, got %d.", argCount);
@@ -536,6 +569,13 @@ public class MeteorStarscript {
             .set("_toString", Value.string(dir.name + " " + dir.axis))
             .set("name", Value.string(dir.name))
             .set("axis", Value.string(dir.axis))
+        );
+    }
+
+    public static Value wrap(StatusEffectInstance effectInstance) {
+        return Value.map(new ValueMap()
+            .set("duration", effectInstance.getDuration())
+            .set("level", effectInstance.getAmplifier() + 1)
         );
     }
 }
