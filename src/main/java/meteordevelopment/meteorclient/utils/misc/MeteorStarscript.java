@@ -73,8 +73,6 @@ public class MeteorStarscript {
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
 
-        ss.set("string", MeteorStarscript::string); // TODO: Move to StandardLib
-
         // Meteor
         ss.set("meteor", new ValueMap()
             .set("modules", () -> Value.number(Modules.get().getAll().size()))
@@ -241,12 +239,6 @@ public class MeteorStarscript {
     }
 
     // Functions
-
-    private static Value string(Starscript ss, int argCount) {
-        if (argCount != 1) ss.error("string() requires 1 argument, got %d.", argCount);
-
-        return Value.string(ss.pop().toString());
-    }
 
     private static Value getModuleInfo(Starscript ss, int argCount) {
         if (argCount != 1) ss.error("meteor.get_module_info() requires 1 argument, got %d.", argCount);
@@ -445,11 +437,10 @@ public class MeteorStarscript {
     }
 
     private static Value crosshairValue() {
-        if (mc.crosshairTarget == null) return Value.null_();
+        if (mc.world == null || mc.crosshairTarget == null) return Value.null_();
 
         if (mc.crosshairTarget.getType() == HitResult.Type.MISS) return Value.string("");
-        if (mc.crosshairTarget instanceof BlockHitResult hit)
-            return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
+        if (mc.crosshairTarget instanceof BlockHitResult hit) return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
         return wrap(((EntityHitResult) mc.crosshairTarget).getEntity());
     }
 
