@@ -454,7 +454,7 @@ public abstract class WTextBox extends WWidget {
         else if (key == GLFW_KEY_DOWN && completionsW != null) {
             int currentI = getSelectedCompletion();
 
-            if (currentI == 5) {
+            if (currentI == Math.min(5, completions.size() - 1)) {
                 if (completionsStart + 6 < completions.size()) {
                     completionsStart++;
                     createCompletions(completionsStart + currentI);
