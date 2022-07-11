@@ -212,15 +212,15 @@ public class TextHud extends HudElement {
                 section = MeteorStarscript.ss.run(script);
                 calculateSize(renderer);
             }
-
-            if (shown.get() != Shown.Always && conditionScript != null) {
-                String text = MeteorStarscript.run(conditionScript);
-                visible = shown.get() == Shown.WhenTrue ? text.equalsIgnoreCase("true") : text.equalsIgnoreCase("false");
-            }
         }
         catch (StarscriptError error) {
             section = new Section(0, error.getMessage());
             calculateSize(renderer);
+        }
+
+        if (shown.get() != Shown.Always && conditionScript != null) {
+            String text = MeteorStarscript.run(conditionScript);
+            visible = shown.get() == Shown.WhenTrue ? text.equalsIgnoreCase("true") : text.equalsIgnoreCase("false");
         }
 
         firstTick = false;
