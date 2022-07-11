@@ -209,7 +209,7 @@ public class TextHud extends HudElement {
 
         try {
             if (script != null) {
-                section = MeteorStarscript.runSection(script);
+                section = MeteorStarscript.ss.run(script);
                 calculateSize(renderer);
             }
 

@@ -148,6 +148,12 @@ public class MeteorStarscript {
             .set("get_item", MeteorStarscript::getItem)
             .set("count_items", MeteorStarscript::countItems)
 
+            .set("xp", new ValueMap()
+                .set("level", () -> Value.number(mc.player != null ? mc.player.experienceLevel : 0))
+                .set("progress", () -> Value.number(mc.player != null ? mc.player.experienceProgress : 0))
+                .set("total", () -> Value.number(mc.player != null ? mc.player.totalExperience : 0))
+            )
+
             .set("get_stat", MeteorStarscript::getStat)
         );
 
