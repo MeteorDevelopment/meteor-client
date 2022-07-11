@@ -68,12 +68,12 @@ public class Friend implements ISerializable<Friend> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Friend friend = (Friend) o;
-        return Objects.equals(id, friend.id) && Objects.equals(name, friend.name);
+        return Objects.equals(id, friend.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(id);
     }
 
     private static class NameResponse {
