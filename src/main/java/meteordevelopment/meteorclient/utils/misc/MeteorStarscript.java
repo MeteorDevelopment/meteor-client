@@ -38,6 +38,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
+import net.minecraft.stat.Stat;
+import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
@@ -144,6 +147,8 @@ public class MeteorStarscript {
             .set("hand_or_offhand", MeteorStarscript::handOrOffhand)
             .set("get_item", MeteorStarscript::getItem)
             .set("count_items", MeteorStarscript::countItems)
+
+            .set("get_stat", MeteorStarscript::getStat)
         );
 
         // Crosshair target
@@ -239,6 +244,40 @@ public class MeteorStarscript {
     }
 
     // Functions
+
+    private static long lastRequestedStatsTime = 0;
+
+    private static Value getStat(Starscript ss, int argCount) {
+        if (argCount < 1) ss.error("player.get_stat() requires 1 argument, got %d.", argCount);
+        if (mc.player == null) return Value.number(0);
+
+        long time = System.currentTimeMillis();
+        if ((time - lastRequestedStatsTime) / 1000.0 >= 1 && mc.getNetworkHandler() != null) {
+            mc.getNetworkHandler().sendPacket(new ClientStatusC2SPacket(ClientStatusC2SPacket.Mode.REQUEST_STATS));
+            lastRequestedStatsTime = time;
+        }
+
+        String type = argCount > 1 ? ss.popString("First argument to player.get_stat() needs to be a string.") : "custom";
+        Identifier name = new Identifier(ss.popString((argCount > 1 ? "Second" : "First") + " argument to player.get_stat() needs to be a string."));
+
+        Stat<?> stat = switch (type) {
+            case "mined" -> Stats.MINED.getOrCreateStat(Registry.BLOCK.get(name));
+            case "crafted" -> Stats.CRAFTED.getOrCreateStat(Registry.ITEM.get(name));
+            case "used" -> Stats.USED.getOrCreateStat(Registry.ITEM.get(name));
+            case "broken" -> Stats.BROKEN.getOrCreateStat(Registry.ITEM.get(name));
+            case "picked_up" -> Stats.PICKED_UP.getOrCreateStat(Registry.ITEM.get(name));
+            case "dropped" -> Stats.DROPPED.getOrCreateStat(Registry.ITEM.get(name));
+            case "killed" -> Stats.KILLED.getOrCreateStat(Registry.ENTITY_TYPE.get(name));
+            case "killed_by" -> Stats.KILLED_BY.getOrCreateStat(Registry.ENTITY_TYPE.get(name));
+            case "custom" -> {
+                name = Registry.CUSTOM_STAT.get(name);
+                yield name != null ? Stats.CUSTOM.getOrCreateStat(name) : null;
+            }
+            default -> null;
+        };
+
+        return Value.number(stat != null ? mc.player.getStatHandler().getStat(stat) : 0);
+    }
 
     private static Value getModuleInfo(Starscript ss, int argCount) {
         if (argCount != 1) ss.error("meteor.get_module_info() requires 1 argument, got %d.", argCount);
