@@ -26,6 +26,7 @@ public class TextHud extends HudElement {
     private static final Color WHITE = new Color();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgShown = settings.createGroup("Shown");
     private final SettingGroup sgScale = settings.createGroup("Scale");
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
@@ -40,10 +41,7 @@ public class TextHud extends HudElement {
         .name("text")
         .description("Text to display with Starscript.")
         .defaultValue("Meteor Client")
-        .onChanged(s -> {
-            firstTick = true;
-            needsCompile = true;
-        })
+        .onChanged(s -> recompile())
         .wide()
         .renderer(StarscriptTextBoxRenderer.class)
         .build()
@@ -73,6 +71,26 @@ public class TextHud extends HudElement {
         .description("How much space to add around the text.")
         .defaultValue(0)
         .onChanged(integer -> super.setSize(originalWidth + integer * 2, originalHeight + integer * 2))
+        .build()
+    );
+
+    // Shown
+
+    public final Setting<Shown> shown = sgShown.add(new EnumSetting.Builder<Shown>()
+        .name("shown")
+        .description("When this text element is shown.")
+        .defaultValue(Shown.Always)
+        .onChanged(s -> recompile())
+        .build()
+    );
+
+    public final Setting<String> condition = sgShown.add(new StringSetting.Builder()
+        .name("condition")
+        .description("Condition to check when shown is not Always.")
+        .visible(() -> shown.get() != Shown.Always)
+        .defaultValue("")
+        .onChanged(s -> recompile())
+        .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
 
@@ -114,15 +132,21 @@ public class TextHud extends HudElement {
         .build()
     );
 
-    private Script script;
+    private Script script, conditionScript;
     private Section section;
 
     private boolean firstTick = true;
     private boolean empty = false;
+    private boolean visible;
 
     public TextHud(HudElementInfo<TextHud> info) {
         super(info);
 
+        needsCompile = true;
+    }
+
+    private void recompile() {
+        firstTick = true;
         needsCompile = true;
     }
 
@@ -176,13 +200,22 @@ public class TextHud extends HudElement {
             }
             else script = Compiler.compile(result);
 
+            if (shown.get() != Shown.Always) {
+                conditionScript = Compiler.compile(Parser.parse(condition.get()));
+            }
+
             needsCompile = false;
         }
 
         try {
             if (script != null) {
-                section = MeteorStarscript.ss.run(script);
+                section = MeteorStarscript.runSection(script);
                 calculateSize(renderer);
+            }
+
+            if (shown.get() != Shown.Always && conditionScript != null) {
+                String text = MeteorStarscript.run(conditionScript);
+                visible = shown.get() == Shown.WhenTrue ? text.equalsIgnoreCase("true") : text.equalsIgnoreCase("false");
             }
         }
         catch (StarscriptError error) {
@@ -197,12 +230,14 @@ public class TextHud extends HudElement {
     public void render(HudRenderer renderer) {
         if (firstTick) runTick(renderer);
 
-        if (empty && isInEditor()) {
+        boolean visible = shown.get() == Shown.Always || this.visible;
+
+        if ((empty || !visible) && isInEditor()) {
             renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
             renderer.line(x, y + getHeight(), x + getWidth(), y, Color.GRAY);
         }
 
-        if (section == null) return;
+        if (section == null || !visible) return;
 
         double x = this.x + border.get();
         Section s = section;
@@ -229,5 +264,20 @@ public class TextHud extends HudElement {
     public static Color getSectionColor(int i) {
         List<SettingColor> colors = Hud.get().textColors.get();
         return (i >= 0 && i < colors.size()) ? colors.get(i) : WHITE;
+    }
+
+    public enum Shown {
+        Always,
+        WhenTrue,
+        WhenFalse;
+
+        @Override
+        public String toString() {
+            return switch (this) {
+                case Always -> "Always";
+                case WhenTrue -> "When True";
+                case WhenFalse -> "When False";
+            };
+        }
     }
 }
