@@ -122,7 +122,6 @@ public class ActiveModulesHud extends HudElement {
         .name("rainbow-saturation")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
-        .decimalPlaces(2)
         .visible(() -> colorMode.get() == ColorMode.Rainbow)
         .build()
     );
@@ -131,7 +130,6 @@ public class ActiveModulesHud extends HudElement {
         .name("rainbow-brightness")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
-        .decimalPlaces(2)
         .visible(() -> colorMode.get() == ColorMode.Rainbow)
         .build()
     );
