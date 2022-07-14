@@ -54,10 +54,19 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
-        .name("durability-threshold")
-        .description("The durability percentage at which to start repairing the tool.")
-        .defaultValue(10)
+    public final Setting<Double> startRepairing = sgGeneral.add(new DoubleSetting.Builder()
+        .name("repair-threshold")
+        .description("The durability percentage at which to start repairing.")
+        .defaultValue(20)
+        .range(1, 99)
+        .sliderRange(1, 99)
+        .build()
+    );
+
+    public final Setting<Double> startMining = sgGeneral.add(new DoubleSetting.Builder()
+        .name("mine-threshold")
+        .description("The durability percentage at which to start mining.")
+        .defaultValue(70)
         .range(1, 99)
         .sliderRange(1, 99)
         .build()
@@ -95,7 +104,6 @@ public class InfinityMiner extends Module {
     public void onActivate() {
         prevMineScanDroppedItems = baritoneSettings.mineScanDroppedItems.value;
         baritoneSettings.mineScanDroppedItems.value = true;
-
         homePos.set(mc.player.getBlockPos());
         repairing = false;
     }
@@ -128,6 +136,12 @@ public class InfinityMiner extends Module {
             return;
         }
 
+        if (!checkThresholds()) {
+            error("Start mining value can't be lower than start repairing value.");
+            toggle();
+            return;
+        }
+
         if (repairing) {
             if (!needsRepair()) {
                 warning("Finished repairing, going back to mining.");
@@ -152,7 +166,8 @@ public class InfinityMiner extends Module {
 
     private boolean needsRepair() {
         ItemStack itemStack = mc.player.getMainHandStack();
-        return ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage() <= durabilityThreshold.get();
+        double toolPercentage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
+        return !(toolPercentage > startMining.get() || (toolPercentage > startRepairing.get() && !repairing));
     }
 
     private boolean findPickaxe() {
@@ -165,6 +180,10 @@ public class InfinityMiner extends Module {
         else if (bestPick.isHotbar()) InvUtils.swap(bestPick.slot(), false);
 
         return InvUtils.findInHotbar(pickaxePredicate).isMainHand();
+    }
+
+    private boolean checkThresholds() {
+        return startRepairing.get() < startMining.get();
     }
 
     private void mineTargetBlocks() {
