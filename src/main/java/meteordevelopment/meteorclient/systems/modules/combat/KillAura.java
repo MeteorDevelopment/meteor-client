@@ -88,6 +88,7 @@ public class KillAura extends Module {
         .defaultValue(true)
         .build()
     );
+
     private final Setting<Boolean> noRightClick = sgGeneral.add(new BoolSetting.Builder()
         .name("no-right-click")
         .description("Does not attack if the right mouse button is pressed (Using a shield, you eat food or drink a potion).")
