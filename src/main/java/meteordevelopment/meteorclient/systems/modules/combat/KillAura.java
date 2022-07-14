@@ -26,6 +26,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -78,7 +79,7 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> randomTeleport = sgGeneral.add(new BoolSetting.Builder()
         .name("random-teleport")
-        .description("Randomly teleport around the target")
+        .description("Randomly teleport around the target.")
         .defaultValue(false)
         .visible(() -> !onlyWhenLook.get())
         .build()
@@ -107,7 +108,15 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noRightClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-on-use")
+        .description("Does not attack if using an item.")
+        .defaultValue(true)
+        .build()
+    );
+
     // Targeting
+
     private final Setting<Boolean> ignorePassive = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-passive")
         .description("Will only attack sometimes passive mobs if they are targeting you.")
@@ -175,6 +184,13 @@ public class KillAura extends Module {
         .name("nametagged")
         .description("Whether or not to attack mobs with a name tag.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreShield = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-shield")
+        .description("Attacks only if the blow is not blocked by a shield.")
+        .defaultValue(true)
         .build()
     );
 
@@ -250,7 +266,7 @@ public class KillAura extends Module {
             }
             return;
         }
-		
+
         if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
             wasPathing = true;
@@ -310,6 +326,7 @@ public class KillAura extends Module {
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+        if (noRightClick.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return false;
         if (PlayerUtils.distanceTo(entity) > range.get()) return false;
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
@@ -325,11 +342,12 @@ public class KillAura extends Module {
             if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAngryAt(mc.player)) return false;
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
         }
-        if (entity instanceof PlayerEntity) {
-            if (((PlayerEntity) entity).isCreative()) return false;
-            if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
+        if (entity instanceof PlayerEntity player) {
+            if (player.isCreative()) return false;
+            if (!Friends.get().shouldAttack(player)) return false;
+            if (ignoreShield.get() && player.blockedByShield(DamageSource.player(mc.player))) return false;
         }
-        return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
+        return !(entity instanceof AnimalEntity animal) || babies.get() || !animal.isBaby();
     }
 
     private boolean delayCheck() {
@@ -358,7 +376,6 @@ public class KillAura extends Module {
     }
 
     private void hitEntity(Entity target) {
-
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
     }
