@@ -56,7 +56,7 @@ axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
             avatar_url: "https://meteorclient.com/icon.png",
             embeds: [
                 {
-                    title: "meteor client v" + version + " build #" + build,
+                    title: "meteor client v" + version + " build #" + number,
                     description: description,
                     url: "https://meteorclient.com",
                     color: success ? 3066993 : 15158332
