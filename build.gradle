@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version
+version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
 group = project.maven_group
 
 repositories {
@@ -74,7 +74,7 @@ shadowJar {
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-               "devbuild": System.getenv("CIRCLE_BUILD_NUM") ?: "",
+               "devbuild": project.findProperty("devbuild") ?: "",
                "commit": project.findProperty("commit") ?: ""
     }
 }
