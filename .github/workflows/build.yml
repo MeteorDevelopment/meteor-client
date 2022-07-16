@@ -31,6 +31,6 @@ jobs:
           node-version: latest
       - name: Upload file & Discord webhook
         run: |
-          cd .github/discordwebhook
+          cd .github/devbuilds
           npm install
           npm start ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }}
