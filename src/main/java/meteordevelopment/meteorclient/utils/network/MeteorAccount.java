@@ -24,12 +24,22 @@ public class MeteorAccount {
     public String discord_avatar;
     public Cape[] capes;
 
+    private String error;
+
     public static void login() {
         String token = Config.get().token;
         if (token == null || token.isBlank()) return;
 
-        ACCOUNT = Http.get("https://meteorclient.com/api/account/info").bearer(token).sendJson(MeteorAccount.class);
-        MeteorClient.LOG.info(ACCOUNT.toString());
+        MeteorAccount res = Http.get("https://meteorclient.com/api/account/info")
+                                .bearer(token)
+                                .sendJson(MeteorAccount.class, false);
+
+        if (res.error != null && res.error.isBlank()) {
+            MeteorClient.LOG.error("Error logging into account: " + res.error);
+            return;
+        }
+
+        ACCOUNT = res;
     }
 
     private static class Cape {

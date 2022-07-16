@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -16,6 +15,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorAccount;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.screen.Screen;
 
 public class AccountTab extends Tab {
@@ -30,7 +30,7 @@ public class AccountTab extends Tab {
 
     @Override
     public boolean isScreen(Screen screen) {
-        return screen instanceof AccountScreen;
+        return screen instanceof AccountScreen || screen instanceof LoginScreen;
     }
 
     private static class AccountScreen extends WindowTabScreen {
@@ -50,6 +50,8 @@ public class AccountTab extends Tab {
 
     private static class LoginScreen extends WindowTabScreen {
         private static final String URL = "https://meteorclient.com/api/account/login?name=%s&password=%s";
+        private static final Color RED = new Color(255, 0, 0);
+        private static String error;
 
         public LoginScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
@@ -61,7 +63,9 @@ public class AccountTab extends Tab {
             WTextBox username = add(theme.textBox("")).minWidth(400).expandX().widget();
 
             add(theme.label("Password")).expandX();
-            WTextBox password = add(theme.textBox("")).minWidth(400).expandX().widget();
+            WTextBox password = add(theme.textBox("")).minWidth(400).padBottom(10).expandX().widget();
+
+            if (error != null) add(theme.label(error).color(RED)).expandX();
 
             WButton login = add(theme.button("Log In")).expandX().widget();
             login.action = () -> {
@@ -70,12 +74,14 @@ public class AccountTab extends Tab {
 
                 String url = String.format(URL, usrText, pswText);
 
-                LoginResponse res = Http.get(url).sendJson(LoginResponse.class);
+                LoginResponse res = Http.get(url).sendJson(LoginResponse.class, false);
                 if (res == null) return;
                 if (res.error != null) {
-                    MeteorClient.LOG.error(res.error);
+                    error = res.error;
+                    reload();
                     return;
                 }
+                else error = null;
 
                 Config.get().token = res.token;
                 MeteorAccount.login();

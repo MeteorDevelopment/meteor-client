@@ -78,38 +78,58 @@ public class Http {
             return this;
         }
 
-        private <T> T _send(String accept, HttpResponse.BodyHandler<T> responseBodyHandler) {
+        private <T> T _send(String accept, HttpResponse.BodyHandler<T> responseBodyHandler, boolean checkStatus) {
             builder.header("Accept", accept);
             if (method != null) builder.method(method.name(), HttpRequest.BodyPublishers.noBody());
 
             try {
                 var res = CLIENT.send(builder.build(), responseBodyHandler);
-                return res.statusCode() == 200 ? res.body() : null;
+                return (res.statusCode() == 200 || !checkStatus) ? res.body() : null;
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 return null;
             }
         }
 
+        public void send(boolean checkStatus) {
+            _send("*/*", HttpResponse.BodyHandlers.discarding(), checkStatus);
+        }
+
         public void send() {
-            _send("*/*", HttpResponse.BodyHandlers.discarding());
+            send(true);
+        }
+
+        public InputStream sendInputStream(boolean checkStatus) {
+            return _send("*/*", HttpResponse.BodyHandlers.ofInputStream(), checkStatus);
         }
 
         public InputStream sendInputStream() {
-            return _send("*/*", HttpResponse.BodyHandlers.ofInputStream());
+            return sendInputStream(true);
+        }
+
+        public String sendString(boolean checkStatus) {
+            return _send("*/*", HttpResponse.BodyHandlers.ofString(), checkStatus);
         }
 
         public String sendString() {
-            return _send("*/*", HttpResponse.BodyHandlers.ofString());
+            return sendString(true);
+        }
+
+        public Stream<String> sendLines(boolean checkStatus) {
+            return _send("*/*", HttpResponse.BodyHandlers.ofLines(), checkStatus);
         }
 
         public Stream<String> sendLines() {
-            return _send("*/*", HttpResponse.BodyHandlers.ofLines());
+            return sendLines(true);
+        }
+
+        public <T> T sendJson(Type type, boolean checkStatus) {
+            InputStream in = _send("application/json", HttpResponse.BodyHandlers.ofInputStream(), checkStatus);
+            return in == null ? null : GSON.fromJson(new InputStreamReader(in), type);
         }
 
         public <T> T sendJson(Type type) {
-            InputStream in = _send("application/json", HttpResponse.BodyHandlers.ofInputStream());
-            return in == null ? null : GSON.fromJson(new InputStreamReader(in), type);
+            return sendJson(type, true);
         }
     }
 
