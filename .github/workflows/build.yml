@@ -25,6 +25,9 @@ jobs:
       - name: Build
         run: ./gradlew build -Pcommit=${{ github.sha }}
 
+      - name: Publish
+        run: ./gradlew publish
+
       - name: Set up Node JS
         uses: actions/setup-node@v3
         with:
