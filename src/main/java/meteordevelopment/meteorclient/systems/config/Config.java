@@ -127,6 +127,7 @@ public class Config extends System<Config> {
     );
 
     public List<String> dontShowAgainPrompts = new ArrayList<>();
+    public String token = "";
 
     public Config() {
         super("config");
@@ -143,6 +144,7 @@ public class Config extends System<Config> {
         tag.putString("version", MeteorClient.VERSION.toString());
         tag.put("settings", settings.toTag());
         tag.put("dontShowAgainPrompts", listToTag(dontShowAgainPrompts));
+        tag.putString("token", token);
 
         return tag;
     }
@@ -151,6 +153,7 @@ public class Config extends System<Config> {
     public Config fromTag(NbtCompound tag) {
         if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
         if (tag.contains("dontShowAgainPrompts")) dontShowAgainPrompts = listFromTag(tag, "dontShowAgainPrompts");
+        if (tag.contains("token")) token = tag.getString("token");
 
         return this;
     }

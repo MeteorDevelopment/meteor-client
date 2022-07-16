@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
+import meteordevelopment.meteorclient.gui.tabs.builtin.ModulesTab;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -25,6 +26,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
+import meteordevelopment.meteorclient.utils.network.MeteorAccount;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
@@ -58,6 +60,14 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), MOD_ID);
     public static final Logger LOG = LoggerFactory.getLogger("Meteor Client");
+
+    static {
+        String versionString = MOD_META.getVersion().getFriendlyString();
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
+
+        VERSION = new Version(versionString);
+        DEV_BUILD = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
+    }
 
     @Override
     public void onInitializeClient() {
@@ -101,6 +111,9 @@ public class MeteorClient implements ClientModInitializer {
         // Post init
         init(InitStage.Post);
 
+        // Meteor login
+        MeteorAccount.login();
+
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             OnlinePlayers.leave();
@@ -131,7 +144,7 @@ public class MeteorClient implements ClientModInitializer {
     }
 
     private void openGui() {
-        if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
+        if (Utils.canOpenGui()) Tabs.get(ModulesTab.class).openScreen(GuiThemes.get());
     }
 
     // Hide HUD
@@ -183,13 +196,5 @@ public class MeteorClient implements ClientModInitializer {
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         }
-    }
-
-    static {
-        String versionString = MOD_META.getVersion().getFriendlyString();
-        if (versionString.contains("-")) versionString = versionString.split("-")[0];
-
-        VERSION = new Version(versionString);
-        DEV_BUILD = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
     }
 }
