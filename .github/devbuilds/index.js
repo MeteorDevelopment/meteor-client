@@ -8,7 +8,7 @@ const FormData = require("form-data");
 const fs = require("fs");
 
 const branch = process.argv[2];
-const compareUrl = process[3];
+const compareUrl = process.argv[3];
 
 // Upload
 let jar = "";
