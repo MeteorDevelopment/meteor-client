@@ -7,7 +7,7 @@ plugins {
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
+version = project.mod_version
 group = project.maven_group
 
 repositories {
