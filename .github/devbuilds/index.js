@@ -26,8 +26,8 @@ axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
         "Authorization": process.env.SERVER_TOKEN
     }
 }).then(res => {
-    let version = res.version;
-    let number = res.number;
+    let version = res.data.version;
+    let number = res.data.number;
 
     // Discord webhook
     axios.get(compareUrl).then(res => {
