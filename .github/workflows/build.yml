@@ -24,12 +24,12 @@ jobs:
 
       - name: Build
         run: ./gradlew build -Pcommit=${{ github.sha }}
-        env:
-          MAVEN_METEOR_ALIAS: ${{ secrets.MAVEN_METEOR_ALIAS }}
-          MAVEN_METEOR_TOKEN: ${{ secrets.MAVEN_METEOR_TOKEN }}
 
       - name: Publish
         run: ./gradlew publish
+        env:
+          MAVEN_METEOR_ALIAS: ${{ secrets.MAVEN_METEOR_ALIAS }}
+          MAVEN_METEOR_TOKEN: ${{ secrets.MAVEN_METEOR_TOKEN }}
 
       - name: Set up Node JS
         uses: actions/setup-node@v3
