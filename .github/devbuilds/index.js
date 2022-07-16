@@ -14,7 +14,7 @@ const compareUrl = process[3];
 let jar = "";
 
 fs.readdirSync("../../build/libs").forEach(file => {
-    if (!file.endsWith("-all.jar") && !file.endsWith("-sources.jar")) jar = file;
+    if (!file.endsWith("-all.jar") && !file.endsWith("-sources.jar")) jar = "../../build/libs/" + file;
 });
 
 let form = new FormData();
