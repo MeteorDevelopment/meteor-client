@@ -263,6 +263,7 @@ public class DiscordPresence extends Module {
                         if (className.startsWith(pair.getLeft())) {
                             rpc.setState(pair.getRight());
                             setState = true;
+                            break;
                         }
                     }
                     if (!setState) rpc.setState("In main menu");
