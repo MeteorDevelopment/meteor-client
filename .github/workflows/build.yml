@@ -38,7 +38,7 @@ jobs:
         run: ./gradlew build -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
 
       - name: Publish
-        run: ./gradlew publish
+        run: ./gradlew publish -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
         env:
           MAVEN_METEOR_ALIAS: ${{ secrets.MAVEN_METEOR_ALIAS }}
           MAVEN_METEOR_TOKEN: ${{ secrets.MAVEN_METEOR_TOKEN }}
