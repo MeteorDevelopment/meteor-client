@@ -115,7 +115,7 @@ publishing {
     publications {
         java(MavenPublication) {
             artifactId = "meteor-client"
-            version = System.getenv("CIRCLE_BUILD_NUM") == null ? project.mod_version : "SNAPSHOT"
+            version = project.hasProperty("devbuild") ? "SNAPSHOT" : project.mod_version
 
             artifact(remapJar) {
                 builtBy remapJar
@@ -134,7 +134,7 @@ publishing {
     repositories {
         maven {
             name = "meteor-maven"
-            url = System.getenv("CIRCLE_BUILD_NUM") == null ? "https://maven.meteordev.org" : "https://maven.meteordev.org/snapshots"
+            url = project.hasProperty("devbuild") ? "https://maven.meteordev.org/snapshots" : "https://maven.meteordev.org/releases"
 
             credentials {
                 username = System.getenv("MAVEN_METEOR_ALIAS")
