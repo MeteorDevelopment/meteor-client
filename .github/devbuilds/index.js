@@ -9,29 +9,10 @@ const fs = require("fs");
 
 const branch = process.argv[2];
 const compareUrl = process.argv[3];
+const success = process.argv[4] === "true";
 
-// Upload
-let jar = "";
-
-fs.readdirSync("../../build/libs").forEach(file => {
-    if (!file.endsWith("-all.jar") && !file.endsWith("-sources.jar")) jar = "../../build/libs/" + file;
-});
-
-let form = new FormData();
-form.append("file", fs.createReadStream(jar));
-
-axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
-    headers: {
-        ...form.getHeaders(),
-        "Authorization": process.env.SERVER_TOKEN
-    }
-}).then(res => {
-    let version = res.data.version;
-    let number = res.data.number;
-
-    // Discord webhook
+function send(version, number) {
     axios.get(compareUrl).then(res => {
-        let success = true;
         let description = "";
 
         description += "**Branch:** " + branch;
@@ -59,11 +40,35 @@ axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
                     title: "meteor client v" + version + " build #" + number,
                     description: description,
                     url: "https://meteorclient.com",
-                    color: success ? 3066993 : 15158332
+                        color: success ? 2672680 : 13117480
                 }
             ]
         };
 
         axios.post(process.env.DISCORD_WEBHOOK, webhook);
     });
-});
+}
+
+if (success) {
+    let jar = "";
+    fs.readdirSync("../../build/libs").forEach(file => {
+        if (!file.endsWith("-all.jar") && !file.endsWith("-sources.jar")) jar = "../../build/libs/" + file;
+    });
+
+    let form = new FormData();
+    form.append("file", fs.createReadStream(jar));
+
+    axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
+        headers: {
+            ...form.getHeaders(),
+            "Authorization": process.env.SERVER_TOKEN
+        }
+    }).then(res => {
+        send(res.data.version, res.data.number)
+    });
+}
+else {
+    axios.get("https://meteorclient.com/api/stats").then(res => {
+        send(res.data.dev_build_version, parseInt(res.data.devBuild) + 1)
+    });
+}
