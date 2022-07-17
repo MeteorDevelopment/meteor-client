@@ -115,6 +115,11 @@ public class DiscordPresence extends Module {
 
     public static final List<Pair<String, String>> customStates = new ArrayList<>();
 
+    static {
+        registerCustomState("com.terraformersmc.modmenu.gui", "Browsing mods");
+        registerCustomState("me.jellysquid.mods.sodium.client", "Changing options");
+    }
+
     public DiscordPresence() {
         super(Categories.Misc, "discord-presence", "Displays Meteor as your presence on Discord.");
 
@@ -136,11 +141,6 @@ public class DiscordPresence extends Module {
     /** The package name must match exactly to the one provided through {@link #registerCustomState(String, String)}. */
     public static void unregisterCustomState(String packageName) {
         customStates.removeIf(pair -> pair.getLeft().equals(packageName));
-    }
-
-    static {
-        registerCustomState("com.terraformersmc.modmenu.gui", "Browsing mods");
-        registerCustomState("me.jellysquid.mods.sodium.client", "Changing options");
     }
 
     @Override
