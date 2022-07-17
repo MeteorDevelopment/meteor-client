@@ -32,6 +32,7 @@ public class ArmorHud extends HudElement {
         .name("orientation")
         .description("How to display armor.")
         .defaultValue(Orientation.Horizontal)
+        .onChanged(val -> calculateSize())
         .build()
     );
 
