@@ -39,9 +39,12 @@ jobs:
 
       - name: Webhook Failure
         if: ${{ failure() }}
-        run:
+        run: |
           cd .github/devbuilds
           npm start ${{ github.ref_name }} https://api.github.com/repos/MeteorDevelopment/meteor-client/compare/${{ github.event.before }}...${{ github.event.after }} false
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+
 
       - name: Publish
         run: ./gradlew publish -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
