@@ -33,6 +33,7 @@ import net.minecraft.client.gui.screen.world.EditGameRulesScreen;
 import net.minecraft.client.gui.screen.world.EditWorldScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.realms.gui.screen.RealmsScreen;
+import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
 
 import java.util.ArrayList;
@@ -112,10 +113,34 @@ public class DiscordPresence extends Module {
     private final List<Script> line2Scripts = new ArrayList<>();
     private int line2Ticks, line2I;
 
+    public static final List<Pair<String, String>> customStates = new ArrayList<>();
+
+    static {
+        registerCustomState("com.terraformersmc.modmenu.gui", "Browsing mods");
+        registerCustomState("me.jellysquid.mods.sodium.client", "Changing options");
+    }
+
     public DiscordPresence() {
         super(Categories.Misc, "discord-presence", "Displays Meteor as your presence on Discord.");
 
         runInMainMenu = true;
+    }
+
+    /** Registers a custom state to be used when the current screen is a class in the specified package. */
+    public static void registerCustomState(String packageName, String state) {
+        for (var pair : customStates) {
+            if (pair.getLeft().equals(packageName)) {
+                pair.setRight(state);
+                return;
+            }
+        }
+
+        customStates.add(new Pair<>(packageName, state));
+    }
+
+    /** The package name must match exactly to the one provided through {@link #registerCustomState(String, String)}. */
+    public static void unregisterCustomState(String packageName) {
+        customStates.removeIf(pair -> pair.getLeft().equals(packageName));
     }
 
     @Override
@@ -233,10 +258,15 @@ public class DiscordPresence extends Module {
                 else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
                 else {
                     String className = mc.currentScreen.getClass().getName();
-
-                    if (className.startsWith("com.terraformersmc.modmenu.gui")) rpc.setState("Browsing mods");
-                    else if (className.startsWith("me.jellysquid.mods.sodium.client")) rpc.setState("Changing options");
-                    else rpc.setState("In main menu");
+                    boolean setState = false;
+                    for (var pair : customStates) {
+                        if (className.startsWith(pair.getLeft())) {
+                            rpc.setState(pair.getRight());
+                            setState = true;
+                            break;
+                        }
+                    }
+                    if (!setState) rpc.setState("In main menu");
                 }
 
                 update = true;
