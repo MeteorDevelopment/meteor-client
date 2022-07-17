@@ -18,7 +18,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
@@ -185,5 +187,10 @@ public class EntityUtils {
         });
 
         return found.get();
+    }
+
+    public static EntityGroup getGroup(Entity entity) {
+        if (entity instanceof LivingEntity livingEntity) return livingEntity.getGroup();
+        else return EntityGroup.DEFAULT;
     }
 }
