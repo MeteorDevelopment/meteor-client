@@ -27,8 +27,17 @@ public class GuiThemes {
     private static GuiTheme theme;
 
     @Init(stage = InitStage.Pre)
-    public static void init() {
-        add(new MeteorGuiTheme());
+    public static void init() throws IOException {
+        if (THEMES_FOLDER.exists()) {
+            File[] files = THEMES_FOLDER.listFiles();
+            if (files != null && files.length != 0) {
+                for (var entry : files) {
+                    if (!entry.isFile()) continue;
+                    NbtCompound tag = NbtIo.read(entry);
+                    if (tag != null) add(new MeteorGuiTheme().fromTag(tag)); //replace MeteorGuiTheme with non-abstract version of GuiTheme
+                }
+            }
+        } else add(new MeteorGuiTheme()); //hardcoded default theme for if folder/file is deleted
     }
 
     @Init(stage = InitStage.Post)
