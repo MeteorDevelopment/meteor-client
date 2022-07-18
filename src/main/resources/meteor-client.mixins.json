@@ -37,6 +37,7 @@
     "ChatHudAccessor",
     "ChatHudMixin",
     "ChatScreenMixin",
+    "ChatPreviewerMixin",
     "ChunkAccessor",
     "ChunkOcclusionDataBuilderMixin",
     "ChunkSkyLightProviderMixin",

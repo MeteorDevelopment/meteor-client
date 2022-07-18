@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import net.minecraft.client.MinecraftClient;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import net.minecraft.client.gui.screen.ChatScreen;
@@ -22,5 +24,17 @@ public class ChatScreenMixin {
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;setMaxLength(I)V", shift = At.Shift.AFTER))
     private void onInit(CallbackInfo info) {
         if (Modules.get().get(BetterChat.class).isInfiniteChatBox()) chatField.setMaxLength(Integer.MAX_VALUE);
+    }
+
+    @Inject(at=@At("HEAD"),method = "shouldPreviewChat",cancellable = true)
+    public void noChatPreviewChecks(CallbackInfoReturnable<Boolean> cir) {
+        if (MinecraftClient.getInstance().player == null) {
+            cir.setReturnValue(false);
+
+        }
+        if (MinecraftClient.getInstance().isInSingleplayer()) {
+            cir.setReturnValue(true);
+        }
+
     }
 }
