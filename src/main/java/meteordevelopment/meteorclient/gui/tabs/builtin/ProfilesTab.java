@@ -125,7 +125,7 @@ public class ProfilesTab extends Tab {
 
             // Name
             table.add(theme.label("Name:"));
-            WTextBox nameInput = table.add(theme.textBox(ogProfile.name, this::nameFilter)).minWidth(400).expandX().widget();
+            WTextBox nameInput = table.add(theme.textBox(ogProfile.name, "Meteor PvP", this::nameFilter)).minWidth(400).expandX().widget();
             nameInput.action = () -> newProfile.name = nameInput.get();
             table.row();
 
@@ -221,7 +221,7 @@ public class ProfilesTab extends Tab {
             for (int i = 0; i < ipList.size(); i++) {
                 int ii = i;
 
-                WTextBox line = table.add(theme.textBox(ipList.get(ii), this::ipFilter)).minWidth(400).expandX().widget();
+                WTextBox line = table.add(theme.textBox(ipList.get(ii), "pvp.meteorclient.com", this::ipFilter)).minWidth(400).expandX().widget();
                 line.action = () -> {
                     String ip = line.get().trim();
 
