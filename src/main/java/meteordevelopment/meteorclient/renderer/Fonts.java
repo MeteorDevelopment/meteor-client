@@ -44,7 +44,7 @@ public class Fonts {
 
         for (String fontPath : FontUtils.getSearchPaths()) {
             FontUtils.collectFonts(FONT_FAMILIES, new File(fontPath), file -> {
-                if (file.getAbsolutePath().endsWith(BUILTIN_FONTS[0] + ".ttf")) {
+                if (file.getAbsolutePath().endsWith(BUILTIN_FONTS[1] + ".ttf")) {
                     DEFAULT_FONT_FAMILY = FontUtils.getFontInfo(file).family();
                 }
             });
