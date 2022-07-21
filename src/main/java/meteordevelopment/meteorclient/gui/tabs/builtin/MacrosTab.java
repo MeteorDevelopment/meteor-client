@@ -61,10 +61,10 @@ public class MacrosTab extends Tab {
 
         @Override
         public void initWidgets() {
+            WTable table = add(theme.table()).expandX().minWidth(300).widget();
+
             // Macros
             if (Macros.get().getAll().size() > 0) {
-                WTable table = add(theme.table()).expandX().widget();
-
                 for (Macro macro : Macros.get()) {
                     table.add(theme.label(macro.name + " (" + macro.keybind + ")"));
 
@@ -83,8 +83,11 @@ public class MacrosTab extends Tab {
                 }
             }
 
-            // New
-            WButton create = add(theme.button("Create")).expandX().widget();
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
+
+            // Create
+            WButton create = table.add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new MacroEditorScreen(theme, null));
         }
 
@@ -161,7 +164,7 @@ public class MacrosTab extends Tab {
             for (int i = 0; i < macro.messages.size(); i++) {
                 int ii = i;
 
-                WTextBox line = lines.add(theme.textBox(macro.messages.get(i), (text, c) -> true, StarscriptTextBoxRenderer.class)).minWidth(400).expandX().widget();
+                WTextBox line = lines.add(theme.textBox(macro.messages.get(i), ".say Hello, World!", (text, c) -> true, StarscriptTextBoxRenderer.class)).minWidth(400).expandX().widget();
                 line.action = () -> macro.setMessage(ii, line.get().trim());
 
                 if (i != macro.messages.size() - 1) {
@@ -172,7 +175,8 @@ public class MacrosTab extends Tab {
                         clear();
                         initWidgets(macro);
                     };
-                } else {
+                }
+                else {
                     WPlus add = lines.add(theme.plus()).widget();
                     add.action = () -> {
                         macro.addMessage("");
