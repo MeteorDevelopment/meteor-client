@@ -11,6 +11,7 @@ import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Init;
@@ -85,6 +86,7 @@ public class MeteorStarscript {
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
             .set("get_module_info", MeteorStarscript::getModuleInfo)
+            .set("prefix", MeteorStarscript::getMeteorPrefix)
         );
 
         // Baritone
@@ -362,6 +364,11 @@ public class MeteorStarscript {
         }
 
         return Value.number(count);
+    }
+
+    private static Value getMeteorPrefix() {
+        if (Config.get() == null) return Value.null_();
+        return Value.string(Config.get().prefix.get());
     }
 
     // Other
