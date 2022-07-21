@@ -98,6 +98,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public final Setting<SettingColor> textHighlightColor = color(sgTextColors, "text-highlight", "Color of text highlighting.", new SettingColor(45, 125, 245, 100));
     public final Setting<SettingColor> titleTextColor = color(sgTextColors, "title-text", "Color of title text.", new SettingColor(255, 255, 255));
     public final Setting<SettingColor> loggedInColor = color(sgTextColors, "logged-in-text", "Color of logged in account name.", new SettingColor(45, 225, 45));
+    public final Setting<SettingColor> placeholderColor = color(sgTextColors, "placeholder", "Color of placeholder text.", new SettingColor(255, 255, 255, 20));
 
     // Background
 
@@ -229,8 +230,8 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public WTextBox textBox(String text, CharFilter filter, Class<? extends WTextBox.Renderer> renderer) {
-        return w(new WMeteorTextBox(text, filter, renderer));
+    public WTextBox textBox(String text, String placeholder, CharFilter filter, Class<? extends WTextBox.Renderer> renderer) {
+        return w(new WMeteorTextBox(text, placeholder, filter, renderer));
     }
 
     @Override
