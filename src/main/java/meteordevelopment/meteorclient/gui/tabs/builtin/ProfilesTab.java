@@ -50,7 +50,7 @@ public class ProfilesTab extends Tab {
 
         @Override
         public void initWidgets() {
-            WTable table = add(theme.table()).expandX().minWidth(300).widget();
+            WTable table = add(theme.table()).expandX().minWidth(400).widget();
 
             // Waypoints
             for (Profile profile : Profiles.get()) {
