@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.utils.network;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
@@ -106,7 +107,7 @@ public class Capes {
         return null;
     }
 
-    private static class Cape extends Identifier {
+    private static class Cape extends MeteorIdentifier {
         private static int COUNT = 0;
 
         private final String name;
@@ -119,7 +120,7 @@ public class Capes {
         private int retryTimer;
 
         public Cape(String name) {
-            super("meteor-client", "capes/" + COUNT++);
+            super("capes/" + COUNT++);
 
             this.name = name;
         }

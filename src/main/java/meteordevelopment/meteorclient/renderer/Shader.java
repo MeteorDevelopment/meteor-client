@@ -9,7 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
-import net.minecraft.util.Identifier;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.io.IOUtils;
 
@@ -58,7 +58,7 @@ public class Shader {
 
     private String read(String path) {
         try {
-            return IOUtils.toString(mc.getResourceManager().getResource(new Identifier(MeteorClient.MOD_ID, "shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
+            return IOUtils.toString(mc.getResourceManager().getResource(new MeteorIdentifier("shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return "";

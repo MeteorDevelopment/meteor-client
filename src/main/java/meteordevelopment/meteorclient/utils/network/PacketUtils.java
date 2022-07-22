@@ -9,6 +9,7 @@ import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import net.minecraft.network.Packet;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
@@ -387,7 +388,7 @@ public class PacketUtils {
 
     private static class PacketRegistry extends Registry<Class<? extends Packet<?>>> {
         public PacketRegistry() {
-            super(RegistryKey.ofRegistry(new Identifier("meteor-client", "packets")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(new MeteorIdentifier("packets")), Lifecycle.stable());
         }
 
         @Override

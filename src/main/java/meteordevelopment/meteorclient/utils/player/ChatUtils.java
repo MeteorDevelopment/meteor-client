@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
-import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PostInit;
@@ -33,7 +33,7 @@ public class ChatUtils {
         PREFIX = Text.literal("")
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
-            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(AddonManager.METEOR.color.getPacked()))))
+            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(MeteorClient.ADDON.color.getPacked()))))
             .append("] ");
     }
 

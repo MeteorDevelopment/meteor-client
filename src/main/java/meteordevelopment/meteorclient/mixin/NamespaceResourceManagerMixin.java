@@ -21,8 +21,8 @@ import java.util.Optional;
 public class NamespaceResourceManagerMixin {
     @Inject(method = "getResource", at = @At("HEAD"), cancellable = true)
     private void onGetResource(Identifier id, CallbackInfoReturnable<Optional<Resource>> info) {
-        if (id.getNamespace().equals("meteor-client")) {
-            info.setReturnValue(Optional.of(new Resource("meteor-client", () -> MeteorClient.class.getResourceAsStream("/assets/meteor-client/" + id.getPath()))));
+        if (id.getNamespace().equals(MeteorClient.MOD_ID)) {
+            info.setReturnValue(Optional.of(new Resource(MeteorClient.MOD_ID, () -> MeteorClient.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/" + id.getPath()))));
         }
     }
 }

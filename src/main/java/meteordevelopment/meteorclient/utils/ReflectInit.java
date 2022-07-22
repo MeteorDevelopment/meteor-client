@@ -21,9 +21,9 @@ public class ReflectInit {
     private static final List<String> packages = new ArrayList<>();
 
     public static void registerPackages() {
-        packages.add(MeteorClient.PACKAGE);
+        packages.add(MeteorClient.ADDON.getPackage());
         for (MeteorAddon addon : AddonManager.ADDONS) {
-            String pkg = addon.getInitPkg();
+            String pkg = addon.getPackage();
             if (pkg != null && !pkg.isBlank()) {
                 packages.add(pkg);
             }

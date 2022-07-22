@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.render.EntityShaders;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.Entity;
@@ -207,7 +208,7 @@ public class Chams extends Module {
         .build()
     );
 
-    public static final Identifier BLANK = new Identifier("meteor-client", "textures/blank.png");
+    public static final Identifier BLANK = new MeteorIdentifier("textures/blank.png");
 
     public Chams() {
         super(Categories.Render, "chams", "Tweaks rendering of entities.");
