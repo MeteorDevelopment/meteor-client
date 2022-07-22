@@ -42,10 +42,10 @@ import java.lang.invoke.MethodHandles;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
-    public static final String PACKAGE = "meteordevelopment.meteorclient";
     public static final ModMetadata MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata();
     public final static Version VERSION;
     public final static String DEV_BUILD;
+    public static MeteorAddon ADDON;
 
     public static MinecraftClient mc;
     public static MeteorClient INSTANCE;
@@ -58,7 +58,7 @@ public class MeteorClient implements ClientModInitializer {
         if (versionString.contains("-")) versionString = versionString.split("-")[0];
 
         VERSION = new Version(versionString);
-        DEV_BUILD = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
+        DEV_BUILD = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":devbuild").getAsString();
     }
 
     @Override
@@ -73,9 +73,6 @@ public class MeteorClient implements ClientModInitializer {
         // Global minecraft client accessor
         mc = MinecraftClient.getInstance();
 
-        // Register event handlers
-        EVENT_BUS.registerLambdaFactory(PACKAGE, (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
-
         // Pre-load
         if (!FOLDER.exists()) {
             FOLDER.getParentFile().mkdirs();
@@ -83,6 +80,14 @@ public class MeteorClient implements ClientModInitializer {
             Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).toggle());
         }
 
+        // Register addons
+        AddonManager.init();
+
+        // Register event handlers
+        EVENT_BUS.registerLambdaFactory(ADDON.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+        AddonManager.ADDONS.forEach(addon -> EVENT_BUS.registerLambdaFactory(addon.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup())));
+
+        // Register init classes
         ReflectInit.registerPackages();
 
         // Pre init
@@ -94,18 +99,22 @@ public class MeteorClient implements ClientModInitializer {
         // Load systems
         Systems.init();
 
+        // Subscribe after systems are loaded
         EVENT_BUS.subscribe(this);
 
+        // Initialise addons
         AddonManager.ADDONS.forEach(MeteorAddon::onInitialize);
+
+        // Sort modules after addons have added their own
         Modules.get().sortModules();
 
-        // Load saves
+        // Load configs
         Systems.load();
 
         // Post init
         ReflectInit.postInit();
 
-        // Shutdown hook
+        // Save on shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             OnlinePlayers.leave();
             Systems.save();
