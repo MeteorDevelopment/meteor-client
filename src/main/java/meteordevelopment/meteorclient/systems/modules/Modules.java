@@ -34,6 +34,7 @@ import meteordevelopment.meteorclient.systems.modules.render.search.Search;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -214,6 +215,10 @@ public class Modules extends System<Modules> {
         this.moduleToBind = moduleToBind;
     }
 
+    public boolean isBinding() {
+        return moduleToBind != null;
+    }
+
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onKeyBinding(KeyEvent event) {
         if (event.action == KeyAction.Press && onBinding(true, event.key)) event.cancel();
@@ -225,16 +230,22 @@ public class Modules extends System<Modules> {
     }
 
     private boolean onBinding(boolean isKey, int value) {
-        if (moduleToBind != null && moduleToBind.keybind.canBindTo(isKey, value)) {
+        if (!isBinding()) return false;
+
+        if (moduleToBind.keybind.canBindTo(isKey, value)) {
             moduleToBind.keybind.set(isKey, value);
             moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
-
-            MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
-            moduleToBind = null;
-            return true;
         }
+        else if (value == GLFW.GLFW_KEY_ESCAPE) {
+            moduleToBind.keybind.set(Keybind.none());
+            moduleToBind.info("Removed bind.");
+        }
+        else return false;
 
-        return false;
+        MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
+        moduleToBind = null;
+
+        return true;
     }
 
     @EventHandler(priority = EventPriority.HIGH)
