@@ -19,8 +19,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.ReflectInit;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
@@ -35,20 +34,15 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
-import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.stream.Collectors;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
+    public static final String PACKAGE = "meteordevelopment.meteorclient";
     public static final ModMetadata MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).get().getMetadata();
     public final static Version VERSION;
     public final static String DEV_BUILD;
@@ -58,6 +52,14 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = new File(FabricLoader.getInstance().getGameDir().toString(), MOD_ID);
     public static final Logger LOG = LoggerFactory.getLogger("Meteor Client");
+
+    static {
+        String versionString = MOD_META.getVersion().getFriendlyString();
+        if (versionString.contains("-")) versionString = versionString.split("-")[0];
+
+        VERSION = new Version(versionString);
+        DEV_BUILD = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
+    }
 
     @Override
     public void onInitializeClient() {
@@ -72,7 +74,7 @@ public class MeteorClient implements ClientModInitializer {
         mc = MinecraftClient.getInstance();
 
         // Register event handlers
-        EVENT_BUS.registerLambdaFactory("meteordevelopment.meteorclient", (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+        EVENT_BUS.registerLambdaFactory(PACKAGE, (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
 
         // Pre-load
         if (!FOLDER.exists()) {
@@ -81,8 +83,11 @@ public class MeteorClient implements ClientModInitializer {
             Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).toggle());
         }
 
+        ReflectInit.registerPackage(PACKAGE);
+        AddonManager.ADDONS.forEach(a -> ReflectInit.registerPackage(a.getInitPkg()));
+
         // Pre init
-        init(InitStage.Pre);
+        ReflectInit.preInit();
 
         // Register module categories
         Categories.init();
@@ -99,7 +104,7 @@ public class MeteorClient implements ClientModInitializer {
         Systems.load();
 
         // Post init
-        init(InitStage.Post);
+        ReflectInit.postInit();
 
         // Shutdown hook
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -150,46 +155,5 @@ public class MeteorClient implements ClientModInitializer {
         }
 
         wasWidgetScreen = event.screen instanceof WidgetScreen;
-    }
-
-    // Reflection initialisation
-
-    private static void init(InitStage initStage) {
-        Reflections reflections = new Reflections("meteordevelopment.meteorclient", Scanners.MethodsAnnotated);
-        Set<Method> initTasks = reflections.getMethodsAnnotatedWith(Init.class);
-        if (initTasks == null) return;
-        Map<Class<?>, List<Method>> byClass = initTasks.stream()
-            .collect(Collectors.groupingBy(Method::getDeclaringClass));
-        Set<Method> left = new HashSet<>(initTasks);
-
-        for (Method m; (m = left.stream().findAny().orElse(null)) != null;) {
-            reflectInit(m, initStage, left, byClass);
-        }
-    }
-
-    private static void reflectInit(Method task, InitStage initStage, Set<Method> left, Map<Class<?>, List<Method>> byClass) {
-        left.remove(task);
-        Init init = task.getAnnotation(Init.class);
-        if (!init.stage().equals(initStage)) return;
-        for (Class<?> clazz : init.dependencies()) {
-            for (Method m : byClass.getOrDefault(clazz, Collections.emptyList())) {
-                if (left.contains(m)) {
-                    reflectInit(m, initStage, left, byClass);
-                }
-            }
-        }
-        try {
-            task.invoke(null);
-        } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
-        }
-    }
-
-    static {
-        String versionString = MOD_META.getVersion().getFriendlyString();
-        if (versionString.contains("-")) versionString = versionString.split("-")[0];
-
-        VERSION = new Version(versionString);
-        DEV_BUILD = MOD_META.getCustomValue("meteor-client:devbuild").getAsString();
     }
 }

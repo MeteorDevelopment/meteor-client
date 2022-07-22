@@ -9,8 +9,7 @@ import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PostInit;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
@@ -29,7 +28,7 @@ public class ChatUtils {
 
     private static Text PREFIX;
 
-    @Init(stage = InitStage.Post)
+    @PostInit
     public static void init() {
         PREFIX = Text.literal("")
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))

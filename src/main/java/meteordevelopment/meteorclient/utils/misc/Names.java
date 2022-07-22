@@ -7,8 +7,7 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.client.sound.WeightedSoundSet;
@@ -37,7 +36,7 @@ public class Names {
     private static final Map<ParticleType<?>, String> particleTypesNames = new HashMap<>(64);
     private static final Map<Identifier, String> soundNames = new HashMap<>(64);
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Names.class);
     }
