@@ -83,8 +83,7 @@ public class MeteorClient implements ClientModInitializer {
             Systems.addPreLoadTask(() -> Modules.get().get(DiscordPresence.class).toggle());
         }
 
-        ReflectInit.registerPackage(PACKAGE);
-        AddonManager.ADDONS.forEach(a -> ReflectInit.registerPackage(a.getInitPkg()));
+        ReflectInit.registerPackages();
 
         // Pre init
         ReflectInit.preInit();

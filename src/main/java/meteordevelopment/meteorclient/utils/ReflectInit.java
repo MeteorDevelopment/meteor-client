@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.utils;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
+import meteordevelopment.meteorclient.addons.MeteorAddon;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -17,9 +20,14 @@ import java.util.stream.Collectors;
 public class ReflectInit {
     private static final List<String> packages = new ArrayList<>();
 
-    public static void registerPackage(String pkg) {
-        if (pkg == null || pkg.isBlank()) return;
-        packages.add(pkg);
+    public static void registerPackages() {
+        packages.add(MeteorClient.PACKAGE);
+        for (MeteorAddon addon : AddonManager.ADDONS) {
+            String pkg = addon.getInitPkg();
+            if (pkg != null && !pkg.isBlank()) {
+                packages.add(pkg);
+            }
+        }
     }
 
     public static void preInit() {
