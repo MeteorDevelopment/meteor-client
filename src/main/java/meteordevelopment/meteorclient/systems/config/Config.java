@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -83,6 +84,13 @@ public class Config extends System<Config> {
         .visible(customWindowTitle::get)
         .defaultValue("Minecraft {mc_version} - Meteor Client {version}")
         .onChanged(value -> mc.updateWindowTitle())
+        .build()
+    );
+
+    public final Setting<SettingColor> friendColor = sgVisual.add(new ColorSetting.Builder()
+        .name("friend-color")
+        .description("The color used to show friends.")
+        .defaultValue(new SettingColor(0, 255, 180))
         .build()
     );
 
