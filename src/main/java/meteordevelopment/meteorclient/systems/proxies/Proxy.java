@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.systems.proxies;
 
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 
 import java.net.InetSocketAddress;
 
 public class Proxy implements ISerializable<Proxy> {
-
     public ProxyType type = ProxyType.Socks5;
     public String address = "";
     public int port = 0;
@@ -21,6 +21,11 @@ public class Proxy implements ISerializable<Proxy> {
     public String password = "";
 
     public boolean enabled = false;
+
+    public Proxy() {}
+    public Proxy(NbtElement tag) {
+        fromTag((NbtCompound) tag);
+    }
 
     public boolean resolveAddress() {
         if (port <= 0 || port > 65535 || address == null || address.isEmpty()) return false;

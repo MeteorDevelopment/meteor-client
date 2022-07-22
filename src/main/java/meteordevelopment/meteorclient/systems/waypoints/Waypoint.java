@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 
 import java.util.Map;
 
@@ -31,6 +32,11 @@ public class Waypoint implements ISerializable<Waypoint> {
     public boolean overworld, nether, end;
 
     public Dimension actualDimension;
+
+    public Waypoint() {}
+    public Waypoint(NbtElement tag) {
+        fromTag((NbtCompound) tag);
+    }
 
     public void validateIcon() {
         Map<String, AbstractTexture> icons = Waypoints.get().icons;

@@ -61,27 +61,9 @@ public class MacrosTab extends Tab {
 
         @Override
         public void initWidgets() {
-            WTable table = add(theme.table()).expandX().minWidth(300).widget();
+            WTable table = add(theme.table()).expandX().minWidth(400).widget();
 
-            // Macros
-            if (Macros.get().getAll().size() > 0) {
-                for (Macro macro : Macros.get()) {
-                    table.add(theme.label(macro.name + " (" + macro.keybind + ")"));
-
-                    WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                    edit.action = () -> mc.setScreen(new MacroEditorScreen(theme, macro));
-
-                    WMinus remove = table.add(theme.minus()).widget();
-                    remove.action = () -> {
-                        Macros.get().remove(macro);
-
-                        clear();
-                        initWidgets();
-                    };
-
-                    table.row();
-                }
-            }
+            initTable(table);
 
             table.add(theme.horizontalSeparator()).expandX();
             table.row();
@@ -89,6 +71,27 @@ public class MacrosTab extends Tab {
             // Create
             WButton create = table.add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new MacroEditorScreen(theme, null));
+        }
+
+        private void initTable(WTable table) {
+            if (Macros.get().getAll().size() == 0) return;
+
+            for (Macro macro : Macros.get()) {
+                table.add(theme.label(macro.name + " (" + macro.keybind + ")"));
+
+                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
+                edit.action = () -> mc.setScreen(new MacroEditorScreen(theme, macro));
+
+                WMinus remove = table.add(theme.minus()).widget();
+                remove.action = () -> {
+                    Macros.get().remove(macro);
+
+                    clear();
+                    initWidgets();
+                };
+
+                table.row();
+            }
         }
 
         @Override

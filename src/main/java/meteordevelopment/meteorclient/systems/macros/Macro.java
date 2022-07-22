@@ -29,6 +29,11 @@ public class Macro implements ISerializable<Macro> {
     private final List<Script> scripts = new ArrayList<>(1);
     private boolean dirty;
 
+    public Macro() {}
+    public Macro(NbtElement tag) {
+        fromTag((NbtCompound) tag);
+    }
+
     public void addMessage(String message) {
         messages.add(message);
         dirty = true;

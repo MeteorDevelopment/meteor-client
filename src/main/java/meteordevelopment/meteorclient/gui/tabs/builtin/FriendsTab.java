@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
-import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
@@ -46,19 +45,17 @@ public class FriendsTab extends Tab {
 
         @Override
         public void initWidgets() {
-            // Settings
-            add(theme.settings(Friends.get().settings)).expandX();
-
-            // Friends
-            WSection friends = add(theme.section("Friends")).expandX().widget();
-            WTable table = friends.add(theme.table()).expandX().widget();
+            WTable table = add(theme.table()).expandX().minWidth(400).widget();
 
             initTable(table);
 
-            // New
-            WHorizontalList list = friends.add(theme.horizontalList()).expandX().widget();
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
 
-            WTextBox nameW = list.add(theme.textBox("")).minWidth(400).expandX().widget();
+            // New
+            WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+
+            WTextBox nameW = list.add(theme.textBox("")).expandX().widget();
             nameW.setFocused(true);
 
             WPlus add = list.add(theme.plus()).widget();
