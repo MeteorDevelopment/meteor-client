@@ -71,7 +71,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
 
     @Override
     public Profiles fromTag(NbtCompound tag) {
-        profiles = NbtUtils.listFromTag(tag.getList("profiles", 10), tag1 -> new Profile().fromTag((NbtCompound) tag1));
+        profiles = NbtUtils.listFromTag(tag.getList("profiles", 10), Profile::new);
         return this;
     }
 

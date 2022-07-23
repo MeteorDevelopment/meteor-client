@@ -191,7 +191,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     @Override
     public Waypoints fromTag(NbtCompound tag) {
-        Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), tag1 -> new Waypoint().fromTag((NbtCompound) tag1)).stream().collect(Collectors.toMap(o -> o.name.toLowerCase(Locale.ROOT), o -> o));
+        Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.name.toLowerCase(Locale.ROOT), o -> o));
         this.waypoints = new ConcurrentHashMap<>(fromNbt);
 
         return this;

@@ -5,8 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -14,7 +13,7 @@ import java.util.concurrent.Executors;
 public class MeteorExecutor {
     public static ExecutorService executor;
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         executor = Executors.newSingleThreadExecutor();
     }

@@ -9,10 +9,10 @@ import com.mojang.blaze3d.platform.TextureUtil;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.Identifier;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
@@ -103,7 +103,7 @@ public class AccountCache implements ISerializable<AccountCache> {
 
     public static void loadSteveHead() {
         try {
-            ByteBuffer data = TextureUtil.readResource(mc.getResourceManager().getResource(new Identifier(MeteorClient.MOD_ID, "textures/steve.png")).get().getInputStream());
+            ByteBuffer data = TextureUtil.readResource(mc.getResourceManager().getResource(new MeteorIdentifier("textures/steve.png")).get().getInputStream());
             data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {

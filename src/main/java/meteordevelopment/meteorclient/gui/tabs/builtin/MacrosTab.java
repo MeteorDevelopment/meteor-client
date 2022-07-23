@@ -61,31 +61,37 @@ public class MacrosTab extends Tab {
 
         @Override
         public void initWidgets() {
-            // Macros
-            if (Macros.get().getAll().size() > 0) {
-                WTable table = add(theme.table()).expandX().widget();
+            WTable table = add(theme.table()).expandX().minWidth(400).widget();
 
-                for (Macro macro : Macros.get()) {
-                    table.add(theme.label(macro.name + " (" + macro.keybind + ")"));
+            initTable(table);
 
-                    WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
-                    edit.action = () -> mc.setScreen(new MacroEditorScreen(theme, macro));
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
 
-                    WMinus remove = table.add(theme.minus()).widget();
-                    remove.action = () -> {
-                        Macros.get().remove(macro);
-
-                        clear();
-                        initWidgets();
-                    };
-
-                    table.row();
-                }
-            }
-
-            // New
-            WButton create = add(theme.button("Create")).expandX().widget();
+            // Create
+            WButton create = table.add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new MacroEditorScreen(theme, null));
+        }
+
+        private void initTable(WTable table) {
+            if (Macros.get().getAll().size() == 0) return;
+
+            for (Macro macro : Macros.get()) {
+                table.add(theme.label(macro.name + " (" + macro.keybind + ")"));
+
+                WButton edit = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().right().widget();
+                edit.action = () -> mc.setScreen(new MacroEditorScreen(theme, macro));
+
+                WMinus remove = table.add(theme.minus()).widget();
+                remove.action = () -> {
+                    Macros.get().remove(macro);
+
+                    clear();
+                    initWidgets();
+                };
+
+                table.row();
+            }
         }
 
         @Override
@@ -161,7 +167,7 @@ public class MacrosTab extends Tab {
             for (int i = 0; i < macro.messages.size(); i++) {
                 int ii = i;
 
-                WTextBox line = lines.add(theme.textBox(macro.messages.get(i), (text, c) -> true, StarscriptTextBoxRenderer.class)).minWidth(400).expandX().widget();
+                WTextBox line = lines.add(theme.textBox(macro.messages.get(i), ".say Hello, World!", (text, c) -> true, StarscriptTextBoxRenderer.class)).minWidth(400).expandX().widget();
                 line.action = () -> macro.setMessage(ii, line.get().trim());
 
                 if (i != macro.messages.size() - 1) {
@@ -172,7 +178,8 @@ public class MacrosTab extends Tab {
                         clear();
                         initWidgets(macro);
                     };
-                } else {
+                }
+                else {
                     WPlus add = lines.add(theme.plus()).widget();
                     add.action = () -> {
                         macro.addMessage("");

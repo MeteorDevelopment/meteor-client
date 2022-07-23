@@ -26,11 +26,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Profile implements ISerializable<Profile> {
-
     public String name = "";
     public boolean onLaunch = false;
     public List<String> loadOnJoinIps = new ArrayList<>();
     public boolean accounts = false, config = true, friends = false, macros = true, modules = true, waypoints = false, hud = false;
+
+    public Profile() {}
+    public Profile(NbtElement tag) {
+        fromTag((NbtCompound) tag);
+    }
 
     public void load(System<?> system) {
         File folder = new File(Profiles.FOLDER, name);

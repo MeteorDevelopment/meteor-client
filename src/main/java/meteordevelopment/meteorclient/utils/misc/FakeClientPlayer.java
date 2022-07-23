@@ -7,8 +7,7 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.OtherClientPlayerEntity;
@@ -34,7 +33,7 @@ public class FakeClientPlayer {
     private static String lastId;
     private static boolean needsNewEntry;
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(FakeClientPlayer.class);
     }

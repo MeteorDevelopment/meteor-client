@@ -90,6 +90,11 @@ public class ModuleScreen extends WindowScreen {
     }
 
     @Override
+    public boolean shouldCloseOnEsc() {
+        return !Modules.get().isBinding();
+    }
+
+    @Override
     public void tick() {
         super.tick();
 

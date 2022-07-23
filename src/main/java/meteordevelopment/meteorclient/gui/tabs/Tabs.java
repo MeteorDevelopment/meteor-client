@@ -6,8 +6,7 @@
 package meteordevelopment.meteorclient.gui.tabs;
 
 import meteordevelopment.meteorclient.gui.tabs.builtin.*;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.List;
 public class Tabs {
     private static final List<Tab> tabs = new ArrayList<>();
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         add(new ModulesTab());
         add(new ConfigTab());

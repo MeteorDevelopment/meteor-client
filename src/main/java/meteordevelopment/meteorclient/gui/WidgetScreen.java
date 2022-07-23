@@ -221,6 +221,9 @@ public abstract class WidgetScreen extends Screen {
         }
         else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
             reload();
+            if (parent instanceof WidgetScreen wScreen) {
+                wScreen.reload();
+            }
             return true;
         }
 

@@ -31,6 +31,7 @@ public abstract class WTextBox extends WWidget {
     public Runnable actionOnUnfocused;
 
     protected String text;
+    protected String placeholder;
     protected CharFilter filter;
 
     protected final Renderer renderer;
@@ -50,7 +51,12 @@ public abstract class WTextBox extends WWidget {
     private WContainer completionsW;
 
     public WTextBox(String text, CharFilter filter, Class<? extends Renderer> renderer) {
+        this(text, null, filter, renderer);
+    }
+
+    public WTextBox(String text, String placeholder, CharFilter filter, Class<? extends Renderer> renderer) {
         this.text = text;
+        this.placeholder = placeholder;
         this.filter = filter;
 
         try {

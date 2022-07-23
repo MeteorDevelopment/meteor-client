@@ -11,10 +11,10 @@ import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -44,6 +44,7 @@ import net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket;
 import net.minecraft.stat.Stat;
 import net.minecraft.stat.Stats;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.InvalidIdentifierException;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -67,7 +68,7 @@ public class MeteorStarscript {
     private static final BlockPos.Mutable BP = new BlockPos.Mutable();
     private static final StringBuilder SB = new StringBuilder();
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         StandardLib.init(ss);
 
@@ -84,6 +85,7 @@ public class MeteorStarscript {
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
             .set("get_module_info", MeteorStarscript::getModuleInfo)
+            .set("prefix", MeteorStarscript::getMeteorPrefix)
         );
 
         // Baritone
@@ -262,7 +264,7 @@ public class MeteorStarscript {
         if (argCount < 1) ss.error("player.has_potion_effect() requires 1 argument, got %d.", argCount);
         if (mc.player == null) return Value.bool(false);
 
-        Identifier name = new Identifier(ss.popString("First argument to player.has_potion_effect() needs to a string."));
+        Identifier name = popIdentifier(ss, "First argument to player.has_potion_effect() needs to a string.");
 
         StatusEffect effect = Registry.STATUS_EFFECT.get(name);
         if (effect == null) return Value.bool(false);
@@ -275,7 +277,7 @@ public class MeteorStarscript {
         if (argCount < 1) ss.error("player.get_potion_effect() requires 1 argument, got %d.", argCount);
         if (mc.player == null) return Value.null_();
 
-        Identifier name = new Identifier(ss.popString("First argument to player.get_potion_effect() needs to a string."));
+        Identifier name = popIdentifier(ss, "First argument to player.get_potion_effect() needs to a string.");
 
         StatusEffect effect = Registry.STATUS_EFFECT.get(name);
         if (effect == null) return Value.null_();
@@ -297,7 +299,7 @@ public class MeteorStarscript {
         }
 
         String type = argCount > 1 ? ss.popString("First argument to player.get_stat() needs to be a string.") : "custom";
-        Identifier name = new Identifier(ss.popString((argCount > 1 ? "Second" : "First") + " argument to player.get_stat() needs to be a string."));
+        Identifier name = popIdentifier(ss, (argCount > 1 ? "Second" : "First") + " argument to player.get_stat() needs to be a string.");
 
         Stat<?> stat = switch (type) {
             case "mined" -> Stats.MINED.getOrCreateStat(Registry.BLOCK.get(name));
@@ -361,6 +363,11 @@ public class MeteorStarscript {
         }
 
         return Value.number(count);
+    }
+
+    private static Value getMeteorPrefix() {
+        if (Config.get() == null) return Value.null_();
+        return Value.string(Config.get().prefix.get());
     }
 
     // Other
@@ -520,6 +527,18 @@ public class MeteorStarscript {
         if (mc.crosshairTarget.getType() == HitResult.Type.MISS) return Value.string("");
         if (mc.crosshairTarget instanceof BlockHitResult hit) return wrap(hit.getBlockPos(), mc.world.getBlockState(hit.getBlockPos()));
         return wrap(((EntityHitResult) mc.crosshairTarget).getEntity());
+    }
+
+    // Utility
+
+    public static Identifier popIdentifier(Starscript ss, String errorMessage) {
+        try {
+            return new Identifier(ss.popString(errorMessage));
+        }
+        catch (InvalidIdentifierException e) {
+            ss.error(e.getMessage());
+            return null;
+        }
     }
 
     // Wrapping

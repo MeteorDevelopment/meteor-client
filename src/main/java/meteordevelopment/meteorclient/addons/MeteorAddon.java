@@ -21,6 +21,8 @@ public abstract class MeteorAddon {
 
     public void onRegisterCategories() {}
 
+    public abstract String getPackage();
+
     public String getWebsite() {
         return null;
     }
