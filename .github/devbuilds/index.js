@@ -1,8 +1,3 @@
-/*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2022 Meteor Development.
- */
-
 const axios = require("axios").default;
 const FormData = require("form-data");
 const fs = require("fs");
