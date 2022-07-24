@@ -147,5 +147,3 @@ publishing {
         }
     }
 }
-
-apply from: "scripts/packetutils.gradle"
