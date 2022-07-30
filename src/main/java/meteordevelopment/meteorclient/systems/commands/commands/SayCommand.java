@@ -12,10 +12,11 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.starscript.Script;
 import net.minecraft.command.CommandSource;
-import net.minecraft.network.message.ChatMessageSigner;
-import net.minecraft.network.message.MessageSignature;
+import net.minecraft.network.message.DecoratedContents;
+import net.minecraft.network.message.LastSeenMessageList;
+import net.minecraft.network.message.MessageMetadata;
+import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
-import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -34,8 +35,13 @@ public class SayCommand extends Command {
                 String message = MeteorStarscript.run(script);
 
                 if (message != null) {
-                    MessageSignature messageSignature = ((ClientPlayerEntityAccessor) mc.player)._signChatMessage(ChatMessageSigner.create(mc.player.getUuid()), Text.literal(message));
-                    mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(message, messageSignature, false));
+                    MessageMetadata metadata = MessageMetadata.of(mc.player.getUuid());
+                    DecoratedContents contents = new DecoratedContents(message);
+
+                    LastSeenMessageList.Acknowledgment acknowledgment = mc.getNetworkHandler().consumeAcknowledgment();
+                    MessageSignatureData messageSignatureData = ((ClientPlayerEntityAccessor) mc.player)._signChatMessage(metadata, contents, acknowledgment.lastSeen());
+                    mc.getNetworkHandler().sendPacket(new ChatMessageC2SPacket(contents.plain(), metadata.timestamp(), metadata.salt(), messageSignatureData, contents.isDecorated(), acknowledgment));
+
                 }
             }
 

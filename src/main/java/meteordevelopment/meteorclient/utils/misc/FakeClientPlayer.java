@@ -61,7 +61,7 @@ public class FakeClientPlayer {
 
     public static PlayerListEntry getPlayerListEntry() {
         if (playerListEntry == null || needsNewEntry) {
-            playerListEntry = new PlayerListEntry(PlayerListEntryFactory.create(mc.getSession().getProfile(), 0, GameMode.SURVIVAL, Text.of(mc.getSession().getProfile().getName()), null), null);
+            playerListEntry = new PlayerListEntry(PlayerListEntryFactory.create(mc.getSession().getProfile(), 0, GameMode.SURVIVAL, Text.of(mc.getSession().getProfile().getName()), null), null, false);
             needsNewEntry = false;
         }
 

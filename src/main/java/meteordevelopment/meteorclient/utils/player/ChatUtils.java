@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
+import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PostInit;
 import net.minecraft.text.*;
@@ -58,7 +58,15 @@ public class ChatUtils {
         forcedPrefixClassName = klass.getName();
     }
 
+    // Player
+
+    /** Sends the message as if the user typed it into chat. */
+    public static void sendPlayerMsg(String message) {
+        mc.inGameHud.getChatHud().getChatScreen().sendMessage(message, false);
+    }
+
     // Default
+
     public static void info(String message, Object... args) {
         sendMsg(Formatting.GRAY, message, args);
     }
@@ -68,6 +76,7 @@ public class ChatUtils {
     }
 
     // Warning
+
     public static void warning(String message, Object... args) {
         sendMsg(Formatting.YELLOW, message, args);
     }
@@ -77,6 +86,7 @@ public class ChatUtils {
     }
 
     // Error
+
     public static void error(String message, Object... args) {
         sendMsg(Formatting.RED, message, args);
     }
@@ -86,6 +96,7 @@ public class ChatUtils {
     }
 
     // Misc
+
     public static void sendMsg(Text message) {
         sendMsg(null, message);
     }
@@ -122,7 +133,7 @@ public class ChatUtils {
 
         if (!Config.get().deleteChatFeedback.get()) id = 0;
 
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
+        ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
     }
 
     private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {

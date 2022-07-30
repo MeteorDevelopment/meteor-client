@@ -19,7 +19,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.text.*;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
@@ -210,11 +213,9 @@ public class BetterChat extends Module {
     }
 
     private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
+
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
-
         Text message = event.getMessage();
 
         if (filterRegex.get()) {
@@ -256,14 +257,14 @@ public class BetterChat extends Module {
 
     private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
     private Text appendAntiSpam(Text text, int index) {
-        List<ChatHudLine<OrderedText>> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
+        List<ChatHudLine.Visible> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
         if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return null;
 
-        ChatHudLine<OrderedText> visibleMessage = visibleMessages.get(index);
+        ChatHudLine.Visible visibleMessage = visibleMessages.get(index);
 
         MutableText parsed = Text.literal("");
 
-        visibleMessage.getText().accept((i, style, codePoint) -> {
+        visibleMessage.content().accept((i, style, codePoint) -> {
             parsed.append(Text.literal(new String(Character.toChars(codePoint))).setStyle(style));
             return true;
         });
@@ -381,6 +382,7 @@ public class BetterChat extends Module {
     // Coords Protection
 
     private static final Pattern coordRegex = Pattern.compile("(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>-?\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?)");
+
     private boolean containsCoordinates(String message) {
         return coordRegex.matcher(message).find();
     }
