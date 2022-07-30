@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
@@ -199,7 +200,7 @@ public class AntiAFK extends Module {
                         i = messageI++;
                     }
 
-                    mc.player.sendChatMessage(messages.get(i));
+                    ChatUtils.sendPlayerMsg(messages.get(i));
 
                     timer = delay.get() * 20;
                 } else {
