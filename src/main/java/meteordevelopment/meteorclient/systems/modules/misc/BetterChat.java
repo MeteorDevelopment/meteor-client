@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
+import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
@@ -200,7 +200,7 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
+    private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
     public BetterChat() {
@@ -339,8 +339,7 @@ public class BetterChat extends Module {
         StringBuilder sb = new StringBuilder();
 
         for (char ch : message.toCharArray()) {
-            if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
-            else sb.append(ch);
+            sb.append(SMALL_CAPS.getOrDefault(ch, ch));
         }
 
         return sb.toString();
