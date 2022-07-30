@@ -217,7 +217,6 @@ public class Nametags extends Module {
     private final Vec3 pos = new Vec3();
     private final double[] itemWidths = new double[6];
 
-    private final Map<Enchantment, Integer> enchantmentsToShowScale = new HashMap<>();
     private final List<Entity> entityList = new ArrayList<>();
 
     public Nametags() {
@@ -400,20 +399,16 @@ public class Nametags extends Module {
 
                 if (displayItemEnchants.get()) {
                     Map<Enchantment, Integer> enchantments = EnchantmentHelper.get(itemStack);
-                    enchantmentsToShowScale.clear();
 
-                    for (Enchantment enchantment : enchantments.keySet()) {
-                        if (!ignoredEnchantments.get().contains(enchantment)) {
-                            enchantmentsToShowScale.put(enchantment, enchantments.get(enchantment));
-                        }
-                    }
-
-                    for (Enchantment enchantment : enchantmentsToShowScale.keySet()) {
-                        String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShowScale.get(enchantment);
+                    int size = 0;
+                    for (var enchantment : enchantments.keySet()) {
+                        if (ignoredEnchantments.get().contains(enchantment)) continue;
+                        String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantments.get(enchantment);
                         itemWidths[i] = Math.max(itemWidths[i], (text.getWidth(enchantName, shadow) / 2));
+                        size++;
                     }
 
-                    maxEnchantCount = Math.max(maxEnchantCount, enchantmentsToShowScale.size());
+                    maxEnchantCount = Math.max(maxEnchantCount, size);
                 }
             }
 
