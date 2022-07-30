@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.player.PlayerEntity;
 
@@ -39,7 +40,7 @@ public class MiddleClickFriend extends Module {
         if (event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_MIDDLE && mc.currentScreen == null && mc.targetedEntity != null && mc.targetedEntity instanceof PlayerEntity player) {
             if (!Friends.get().isFriend(player)) {
                 Friends.get().add(new Friend(player));
-                if (message.get()) mc.player.sendChatMessage("/msg " + player.getEntityName() + " I just friended you on Meteor.");
+                if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getEntityName() + " I just friended you on Meteor.");
             } else {
                 Friends.get().remove(Friends.get().get(player));
             }

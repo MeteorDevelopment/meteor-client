@@ -12,7 +12,7 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.CommandSuggestor;
+import net.minecraft.client.gui.screen.ChatInputSuggestor;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.command.CommandSource;
 import org.spongepowered.asm.mixin.Final;
@@ -25,16 +25,17 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.concurrent.CompletableFuture;
 
-@Mixin(CommandSuggestor.class)
-public abstract class CommandSuggestorMixin {
+@Mixin(ChatInputSuggestor.class)
+public abstract class ChatInputSuggestorMixin {
     @Shadow private ParseResults<CommandSource> parse;
     @Shadow @Final TextFieldWidget textField;
     @Shadow @Final MinecraftClient client;
     @Shadow boolean completingSuggestions;
     @Shadow private CompletableFuture<Suggestions> pendingSuggestions;
-    @Shadow CommandSuggestor.SuggestionWindow window;
+    @Shadow private ChatInputSuggestor.SuggestionWindow window;
 
-    @Shadow protected abstract void show();
+    @Shadow
+    protected abstract void showCommandSuggestions();
 
     @Inject(method = "refresh",
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/StringReader;canRead()Z", remap = false),
@@ -57,12 +58,11 @@ public abstract class CommandSuggestorMixin {
                 this.pendingSuggestions = commandDispatcher.getCompletionSuggestions(this.parse, cursor);
                 this.pendingSuggestions.thenRun(() -> {
                     if (this.pendingSuggestions.isDone()) {
-                        this.show();
+                        this.showCommandSuggestions();
                     }
                 });
             }
             ci.cancel();
         }
     }
-
 }
