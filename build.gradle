@@ -38,13 +38,13 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Compat fixes
-    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.api_version)
+    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
     modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") { transitive = false }
     modCompileOnly("io.vram:canvas-fabric-mc118:1.0.+") { transitive = false }
 
-	// Baritone integration
-    modImplementation "baritone:fabric:${project.baritone_version}"
-    include "baritone:fabric:${project.baritone_version}"
+	// Baritone (https://github.com/MeteorDevelopment/baritone)
+    modImplementation "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+    include "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"

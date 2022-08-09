@@ -11,6 +11,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.SimpleOption;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -39,7 +40,7 @@ public class SimpleOptionMixin<T> {
     }
 
     @Inject(method = "setValue", at = @At("RETURN"))
-    private void onSetValueReturn(T value, CallbackInfo info) {
+    public void onSetValueReturn(T value, CallbackInfo info) {
         if (aCallbacks != null) {
             this.callbacks = aCallbacks;
             aCallbacks = null;
@@ -58,46 +59,36 @@ public class SimpleOptionMixin<T> {
     }
 
     @Unique
-    private SimpleOption.Callbacks<T> getCallbacks() {
+    public SimpleOption.Callbacks<T> getCallbacks() {
         GameOptions options = MinecraftClient.getInstance().options;
 
         if ((Object) this == options.getGamma()) {
-            return new SimpleOption.Callbacks<>() {
-                @Override
-                public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width) {
-                    return null;
-                }
-
-                @Override
-                public Optional<T> validate(T value) {
-                    return Optional.of(value);
-                }
-
-                @Override
-                public Codec<T> codec() {
-                    return null;
-                }
-            };
+            return createCallback();
         }
         else if ((Object) this == options.getFov()) {
-            return new SimpleOption.Callbacks<>() {
-                @Override
-                public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width) {
-                    return null;
-                }
-
-                @Override
-                public Optional<T> validate(T value) {
-                    return Optional.of(value);
-                }
-
-                @Override
-                public Codec<T> codec() {
-                    return null;
-                }
-            };
+            return createCallback();
         }
 
         return null;
+    }
+
+    @NotNull
+    private SimpleOption.Callbacks<T> createCallback() {
+        return new SimpleOption.Callbacks<>() {
+            @Override
+            public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width) {
+                return null;
+            }
+
+            @Override
+            public Optional<T> validate(T value) {
+                return Optional.of(value);
+            }
+
+            @Override
+            public Codec<T> codec() {
+                return null;
+            }
+        };
     }
 }
