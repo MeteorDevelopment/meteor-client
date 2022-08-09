@@ -23,7 +23,9 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.PickaxeItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
 import net.minecraft.text.Text;
@@ -43,6 +45,13 @@ public class InfinityMiner extends Module {
         .description("The target blocks to mine.")
         .defaultValue(Blocks.DIAMOND_ORE, Blocks.DEEPSLATE_DIAMOND_ORE)
         .filter(this::filterBlocks)
+        .build()
+    );
+
+    public final Setting<List<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("target-items")
+        .description("The target items to collect.")
+        .defaultValue(Items.DIAMOND)
         .build()
     );
 
@@ -116,7 +125,7 @@ public class InfinityMiner extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.getInventory().getEmptySlot() == -1) {
+        if (isFull()) {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
                     info("Walking home.");
@@ -125,7 +134,10 @@ public class InfinityMiner extends Module {
                 else if (mc.player.getBlockPos().equals(homePos) && logOut.get()) logOut();
             }
             else if (logOut.get()) logOut();
-            else toggle();
+            else {
+                info("Inventory full, stopping process.");
+                toggle();
+            }
 
             return;
         }
@@ -215,5 +227,20 @@ public class InfinityMiner extends Module {
 
     private boolean filterBlocks(Block block) {
         return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
+    }
+
+    private boolean isFull() {
+        for (int i = 0; i <= 35; i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
+
+            for (Item item : targetItems.get()) {
+                if ((itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxCount())
+                    || itemStack.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }
