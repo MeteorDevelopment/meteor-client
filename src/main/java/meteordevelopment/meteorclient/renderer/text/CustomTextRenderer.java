@@ -31,7 +31,7 @@ public class CustomTextRenderer implements TextRenderer {
     public CustomTextRenderer(FontFace fontFace) {
         this.fontFace = fontFace;
 
-        byte[] bytes = Utils.readBytes(fontFace.asStream());
+        byte[] bytes = Utils.readBytes(fontFace.toStream());
         ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
 
         fonts = new Font[5];

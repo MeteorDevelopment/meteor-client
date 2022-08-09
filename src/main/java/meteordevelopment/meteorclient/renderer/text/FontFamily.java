@@ -5,9 +5,6 @@
 
 package meteordevelopment.meteorclient.renderer.text;
 
-import meteordevelopment.meteorclient.utils.render.FontUtils;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,40 +16,24 @@ public class FontFamily {
         this.name = name;
     }
 
-    public FontFace add(File fontFile) {
-        FontInfo info = FontUtils.getFontInfo(fontFile);
-        if (info == null) return null;
-
-        for (FontFace font : fonts) {
-            if (font.info().equals(info)) {
-                return null;
-            }
-        }
-
-        FontFace font = new FontFace(info, fontFile.toPath());
-        fonts.add(font);
-        return font;
+    public boolean addFont(FontFace font) {
+        return fonts.add(font);
     }
 
-    public FontFace get(FontFace.Type type) {
+    public boolean hasType(FontInfo.Type type) {
+        return get(type) != null;
+    }
+
+    public FontFace get(FontInfo.Type type) {
         if (type == null) return null;
 
         for (FontFace font : fonts) {
-            if (font.info().type().equals(type)) {
+            if (font.info.type().equals(type)) {
                 return font;
             }
         }
 
         return null;
-    }
-
-    public boolean has(FontFace.Type type) {
-        return get(type) != null;
-    }
-
-    public boolean contains(FontFace fontFace) {
-        if (fontFace == null) return false;
-        return fonts.contains(fontFace);
     }
 
     public String getName() {

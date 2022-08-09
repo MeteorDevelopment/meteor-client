@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.settings;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
+import meteordevelopment.meteorclient.renderer.text.FontInfo;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
@@ -26,7 +27,7 @@ public class FontFaceSetting extends Setting<FontFace> {
         for (FontFamily family : Fonts.FONT_FAMILIES) {
             if (family.getName().replace(" ", "").equals(split[0])) {
                 try {
-                    return family.get(FontFace.Type.valueOf(split[1]));
+                    return family.get(FontInfo.Type.valueOf(split[1]));
                 }
                 catch (IllegalArgumentException ignored) {
                     return null;
@@ -47,7 +48,7 @@ public class FontFaceSetting extends Setting<FontFace> {
         if (value == null) return false;
 
         for (FontFamily fontFamily : Fonts.FONT_FAMILIES) {
-            if (fontFamily.has(value.info().type())) {
+            if (fontFamily.hasType(value.info.type())) {
                 return true;
             }
         }
@@ -56,18 +57,18 @@ public class FontFaceSetting extends Setting<FontFace> {
 
     @Override
     protected NbtCompound save(NbtCompound tag) {
-        tag.putString("family", get().info().family());
-        tag.putString("type", get().info().type().name());
+        tag.putString("family", get().info.family());
+        tag.putString("type", get().info.type().toString());
         return tag;
     }
 
     @Override
     protected FontFace load(NbtCompound tag) {
         String family = tag.getString("family");
-        FontFace.Type type;
+        FontInfo.Type type;
 
         try {
-            type = FontFace.Type.valueOf(tag.getString("type"));
+            type = FontInfo.Type.valueOf(tag.getString("type"));
         }
         catch (IllegalArgumentException ignored) {
             set(Fonts.DEFAULT_FONT);

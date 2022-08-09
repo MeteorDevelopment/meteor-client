@@ -16,8 +16,8 @@ import meteordevelopment.meteorclient.gui.widgets.input.WDropdown;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.renderer.Fonts;
-import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
+import meteordevelopment.meteorclient.renderer.text.FontInfo;
 import meteordevelopment.meteorclient.settings.FontFaceSetting;
 import org.apache.commons.lang3.StringUtils;
 
@@ -75,7 +75,7 @@ public class FontFaceSettingScreen extends WindowScreen {
             if (!filterText.isEmpty() && !StringUtils.containsIgnoreCase(name, filterText)) continue;
             table.add(item);
 
-            WDropdown<FontFace.Type> dropdown = table.add(theme.dropdown(FontFace.Type.Regular)).right().widget();
+            WDropdown<FontInfo.Type> dropdown = table.add(theme.dropdown(FontInfo.Type.Regular)).right().widget();
 
             WButton select = table.add(theme.button("Select")).expandCellX().right().widget();
             select.action = () -> {
