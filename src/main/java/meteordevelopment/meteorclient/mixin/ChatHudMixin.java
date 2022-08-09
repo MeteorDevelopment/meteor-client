@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
@@ -92,10 +93,11 @@ public abstract class ChatHudMixin implements IChatHud {
         }
     }
 
-    @Redirect(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    @Redirect(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;visibleMessages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
     private int addMessageListSizeProxy(List<ChatHudLine> list) {
         BetterChat betterChat = Modules.get().get(BetterChat.class);
-        return betterChat.isLongerChat() && betterChat.getChatLength() > 100 ? 1 : list.size();
+        if (betterChat.isLongerChat() && betterChat.getChatLength() > 100) return list.size() - betterChat.getChatLength();
+        return list.size();
     }
 
     @Inject(method = "render", at = @At("TAIL"))
