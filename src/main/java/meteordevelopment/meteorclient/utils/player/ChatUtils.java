@@ -62,7 +62,10 @@ public class ChatUtils {
 
     /** Sends the message as if the user typed it into chat. */
     public static void sendPlayerMsg(String message) {
-        mc.inGameHud.getChatHud().getChatScreen().sendMessage(message, false);
+        mc.inGameHud.getChatHud().addToMessageHistory(message);
+
+        if (message.startsWith("/")) mc.player.sendCommand(message.substring(1), null);
+        else mc.player.sendChatMessage(message, null);
     }
 
     // Default
