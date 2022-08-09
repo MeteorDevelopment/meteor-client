@@ -175,13 +175,13 @@ public abstract class GameRendererMixin {
             info.cancel();
     }
 
-    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3))
+    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3), require = 0)
     private double updateTargetedEntityModifySurvivalReach(double d) {
         Reach reach = Modules.get().get(Reach.class);
         return reach.isActive() ? reach.getReach() : d;
     }
 
-    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
+    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9), require = 0)
     private double updateTargetedEntityModifySquaredMaxReach(double d) {
         Reach reach = Modules.get().get(Reach.class);
         return reach.isActive() ? reach.getReach() * reach.getReach() : d;

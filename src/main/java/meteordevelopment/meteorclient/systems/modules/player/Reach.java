@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import net.fabricmc.loader.api.FabricLoader;
 
 public class Reach extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -25,6 +26,11 @@ public class Reach extends Module {
 
     public Reach() {
         super(Categories.Player, "reach", "Gives you super long arms.");
+    }
+
+    @Override
+    public void onActivate() {
+        if (FabricLoader.getInstance().isModLoaded("reach-entity-attributes")) warning("Origins is known to cause issues with reach.");
     }
 
     public float getReach() {
