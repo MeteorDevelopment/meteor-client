@@ -42,10 +42,15 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
         List<StatusEffect> effects = Arrays.stream(BeaconBlockEntity.EFFECTS_BY_LEVEL).flatMap(Arrays::stream).toList();
 
         if (MinecraftClient.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
-            for (int x = 0; x<3;x++) {
-                for (int y = 0; y<2; y++) {
-                    addButton(beaconScreen.new EffectButtonWidget(this.x+x*25+27,this.y+y*25+32,effects.get(x*2+y),true,-1));
-                    addButton(beaconScreen.new EffectButtonWidget(this.x+x*25+133,this.y+y*25+32,effects.get(x*2+y),false,-1));
+            for (int x = 0; x < 3; x++) {
+                for (int y = 0; y < 2; y++) {
+                    StatusEffect effect = effects.get(x * 2 + y);
+                    int xMin = this.x + x * 25;
+                    int yMin = this.y + y * 25;
+                    addButton(beaconScreen.new EffectButtonWidget(xMin + 27, yMin + 32, effect, true, -1));
+                    BeaconScreen.EffectButtonWidget secondaryWidget = beaconScreen.new EffectButtonWidget(xMin + 133, yMin + 32, effect, false, 3);
+                    if (getScreenHandler().getProperties() != 4) secondaryWidget.active = false;
+                    addButton(secondaryWidget);
                 }
             }
         }
@@ -57,14 +62,5 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         //this will clear the background from useless pyramid graphics
         DrawableHelper.fill(matrices,this.x+10,this.y+7,this.x+220,this.y+98, 0xFF212121);
-    }
-
-    @Inject(method = "drawForeground", at = @At("HEAD"))
-    private void onDrawForeground(MatrixStack matrices, int mouseX, int mouseY, CallbackInfo ci) {
-        if (!Modules.get().get(BetterBeacons.class).isActive()) return;
-        int beaconLvl = getScreenHandler().getProperties();
-        if (beaconLvl < 4) {
-            drawCenteredText(matrices, this.textRenderer, "Secondary power inactive at beacon lvl " + beaconLvl, backgroundWidth/2, 86, 14737632);
-        }
     }
 }
