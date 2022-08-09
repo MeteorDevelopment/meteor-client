@@ -28,7 +28,7 @@ public abstract class ScreenMixin {
             info.cancel();
     }
 
-    @Inject(method = "method_32635", at = @At("HEAD"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "method_32635", at = @At("HEAD"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
     private static void onComponentConstruct(List<TooltipComponent> list, TooltipData data, CallbackInfo info) {
         if (data instanceof MeteorTooltipData) {
             list.add(((MeteorTooltipData) data).getComponent());

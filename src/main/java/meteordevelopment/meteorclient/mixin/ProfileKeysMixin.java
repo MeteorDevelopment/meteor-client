@@ -29,7 +29,7 @@ public class ProfileKeysMixin {
         if (Modules.get().get(ServerSpoof.class).noSignatures()) info.setReturnValue(Optional.empty());
     }
 
-    @Inject(method = "getPublicKeyData", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getPublicKey", at = @At("HEAD"), cancellable = true)
     private void onGetPublicKeyData(CallbackInfoReturnable<Optional<PlayerPublicKey.PublicKeyData>> info) {
         if (Modules.get().get(ServerSpoof.class).noSignatures()) info.setReturnValue(Optional.empty());
     }
