@@ -348,17 +348,17 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
     private void fontW(WTable table, FontFaceSetting setting) {
         WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
-        WLabel label = list.add(theme.label(setting.get().info().family())).widget();
+        WLabel label = list.add(theme.label(setting.get().info.family())).widget();
 
         WButton button = list.add(theme.button("Select")).expandCellX().widget();
         button.action = () -> {
             WidgetScreen screen = new FontFaceSettingScreen(theme, setting);
-            screen.onClosed(() -> label.set(setting.get().info().family()));
+            screen.onClosed(() -> label.set(setting.get().info.family()));
 
             mc.setScreen(screen);
         };
 
-        reset(list, setting, () -> label.set(Fonts.DEFAULT_FONT.info().family()));
+        reset(list, setting, () -> label.set(Fonts.DEFAULT_FONT.info.family()));
     }
 
     private void colorListW(WTable table, ColorListSetting setting) {

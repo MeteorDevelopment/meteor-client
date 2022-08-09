@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.renderer.text.FontFamily;
+import meteordevelopment.meteorclient.renderer.text.FontInfo;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.render.FontUtils;
@@ -21,10 +22,9 @@ import java.util.Comparator;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
-import static meteordevelopment.meteorclient.utils.render.FontUtils.copyBuiltin;
 
 public class Fonts {
-    private static final String[] BUILTIN_FONTS = { "JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation" };
+    public static final String[] BUILTIN_FONTS = { "JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation" };
 
     public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
@@ -34,26 +34,22 @@ public class Fonts {
 
     @PreInit(dependencies = Shaders.class)
     public static void refresh() {
-        File target = FontUtils.getDir(FontUtils.getUFontDirs());
-        for (String builtinFont : BUILTIN_FONTS) {
-            copyBuiltin(builtinFont, target);
-        }
-
         FONT_FAMILIES.clear();
 
+        for (String builtinFont : BUILTIN_FONTS) {
+            FontUtils.loadBuiltin(FONT_FAMILIES, builtinFont);
+        }
+
         for (String fontPath : FontUtils.getSearchPaths()) {
-            FontUtils.collectFonts(FONT_FAMILIES, new File(fontPath), file -> {
-                if (file.getAbsolutePath().endsWith(BUILTIN_FONTS[1] + ".ttf")) {
-                    DEFAULT_FONT_FAMILY = FontUtils.getFontInfo(file).family();
-                }
-            });
+            FontUtils.loadSystem(FONT_FAMILIES, new File(fontPath));
         }
 
         FONT_FAMILIES.sort(Comparator.comparing(FontFamily::getName));
 
         MeteorClient.LOG.info("Found {} font families.", FONT_FAMILIES.size());
 
-        DEFAULT_FONT = getFamily(DEFAULT_FONT_FAMILY).get(FontFace.Type.Regular);
+        DEFAULT_FONT_FAMILY = FontUtils.getBuiltinFontInfo(BUILTIN_FONTS[1]).family();
+        DEFAULT_FONT = getFamily(DEFAULT_FONT_FAMILY).get(FontInfo.Type.Regular);
 
         Config config = Config.get();
         load(config != null ? config.font.get() : DEFAULT_FONT);

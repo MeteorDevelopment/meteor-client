@@ -7,11 +7,8 @@ package meteordevelopment.meteorclient.utils.render;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.Fonts;
-import meteordevelopment.meteorclient.renderer.text.FontFace;
-import meteordevelopment.meteorclient.renderer.text.FontFamily;
-import meteordevelopment.meteorclient.renderer.text.FontInfo;
+import meteordevelopment.meteorclient.renderer.text.*;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import net.minecraft.util.Util;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTFontinfo;
@@ -23,17 +20,21 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
-
-import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class FontUtils {
-    public static FontInfo getFontInfo(File file) {
-        InputStream stream = stream(file);
+
+    public static FontInfo getSysFontInfo(File file) {
+        return getFontInfo(stream(file));
+    }
+
+    public static FontInfo getBuiltinFontInfo(String builtin) {
+        return getFontInfo(stream(builtin));
+    }
+
+    public static FontInfo getFontInfo(InputStream stream) {
         if (stream == null) return null;
 
         byte[] bytes = Utils.readBytes(stream);
@@ -57,7 +58,7 @@ public class FontUtils {
 
         return new FontInfo(
             StandardCharsets.UTF_16.decode(nameBuffer).toString(),
-            FontFace.Type.fromString(StandardCharsets.UTF_16.decode(typeBuffer).toString())
+            FontInfo.Type.fromString(StandardCharsets.UTF_16.decode(typeBuffer).toString())
         );
     }
 
@@ -92,16 +93,17 @@ public class FontUtils {
         };
     }
 
-    public static File getDir(List<File> dirs) {
-        for (File dir : dirs) {
-            if (dir.exists()) return dir;
-        }
+    public static void loadBuiltin(List<FontFamily> fontList, String builtin) {
+        FontInfo fontInfo = FontUtils.getBuiltinFontInfo(builtin);
+        if (fontInfo == null) return;
 
-        dirs.get(0).mkdirs();
-        return dirs.get(0);
+        FontFace fontFace = new BuiltinFontFace(fontInfo, builtin);
+        if (!addFont(fontList, fontFace)) {
+            MeteorClient.LOG.warn("Failed to load builtin font {}", fontFace);
+        }
     }
 
-    public static void collectFonts(List<FontFamily> fontList, File dir, Consumer<File> consumer) {
+    public static void loadSystem(List<FontFamily> fontList, File dir) {
         if (!dir.exists() || !dir.isDirectory()) return;
 
         File[] files = dir.listFiles((file) -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
@@ -109,43 +111,47 @@ public class FontUtils {
 
         for (File file : files) {
             if (file.isDirectory()) {
-                collectFonts(fontList, file, consumer);
+                loadSystem(fontList, file);
                 continue;
             }
 
-            FontInfo fontInfo = FontUtils.getFontInfo(file);
-            if (fontInfo != null) {
-                consumer.accept(file);
+            FontInfo fontInfo = FontUtils.getSysFontInfo(file);
+            if (fontInfo == null) continue;
 
-                FontFamily family = Fonts.getFamily(fontInfo.family());
-                if (family == null) {
-                    family = new FontFamily(fontInfo.family());
-                    fontList.add(family);
+            boolean isBuiltin = false;
+            for (String builtinFont : Fonts.BUILTIN_FONTS) {
+                if (builtinFont.equals(fontInfo.family())) {
+                    isBuiltin = true;
+                    break;
                 }
+            }
+            if (isBuiltin) continue;
 
-                if (family.add(file) == null) {
-                    MeteorClient.LOG.warn("Failed to load font: {}", fontInfo);
-                }
+            FontFace fontFace = new SystemFontFace(fontInfo, file.toPath());
+            if (!addFont(fontList, fontFace)) {
+                MeteorClient.LOG.warn("Failed to load system font {}", fontFace);
             }
         }
     }
 
-    public static void copyBuiltin(String name, File target) {
-        try {
-            File fontFile = new File(MeteorClient.FOLDER, name + ".ttf");
-            fontFile.createNewFile();
-            InputStream stream = FontUtils.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/fonts/" + name + ".ttf");
-            StreamUtils.copy(stream, fontFile);
-            Files.copy(fontFile.toPath(), new File(target, fontFile.getName()).toPath(), REPLACE_EXISTING);
-            fontFile.delete();
+    public static boolean addFont(List<FontFamily> fontList, FontFace font) {
+        if (font == null) return false;
+
+        FontInfo info = font.info;
+
+        FontFamily family = Fonts.getFamily(info.family());
+        if (family == null) {
+            family = new FontFamily(info.family());
+            fontList.add(family);
         }
-        catch (Exception e) {
-            MeteorClient.LOG.error("Failed to copy builtin font " + name + " to " + target.getAbsolutePath());
-            e.printStackTrace();
-            if (name.equals(Fonts.DEFAULT_FONT_FAMILY)) {
-                throw new RuntimeException("Failed to load default font.");
-            }
-        }
+
+        if (family.hasType(info.type())) return false;
+
+        return family.addFont(font);
+    }
+
+    public static InputStream stream(String builtin) {
+        return FontUtils.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/fonts/" + builtin + ".ttf");
     }
 
     public static InputStream stream(File file) {
