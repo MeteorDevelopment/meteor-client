@@ -20,6 +20,16 @@ public class InvUtils {
     private static final Action ACTION = new Action();
     public static int previousSlot = -1;
 
+    // Predicates
+
+    public static boolean testInMainHand(Predicate<ItemStack> predicate) {
+        return predicate.test(mc.player.getMainHandStack());
+    }
+
+    public static boolean testInOffHand(Predicate<ItemStack> predicate) {
+        return predicate.test(mc.player.getOffHandStack());
+    }
+
     // Finding items
 
     public static FindItemResult findEmpty() {
