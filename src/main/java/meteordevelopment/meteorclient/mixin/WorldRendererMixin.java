@@ -54,7 +54,7 @@ public abstract class WorldRendererMixin {
 
 	@Inject(method = {"method_43788(Lnet/minecraft/client/render/Camera;)Z"}, at = @At("HEAD"), cancellable = true)
 	private void method_43788(Camera camera, CallbackInfoReturnable<Boolean> info) {
-		if (Modules.get().get(NoRender.class).noBlind() || Modules.get().get(NoRender.class).noDarkness()) info.setReturnValue(null);
+		if (Modules.get().get(NoRender.class).noBlindness() || Modules.get().get(NoRender.class).noDarkness()) info.setReturnValue(null);
 	}
 
     // EntityShaders
