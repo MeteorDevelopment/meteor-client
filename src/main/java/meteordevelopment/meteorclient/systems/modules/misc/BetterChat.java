@@ -19,8 +19,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.client.util.ChatMessages;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -249,6 +251,11 @@ public class BetterChat extends Module {
     }
 
     private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
+
+    /**
+     * @author Crosby
+     * Adding author tag because this is spaghetti code
+     */
     private Text appendAntiSpam(Text text) {
         Text returnText = null;
         int messageIndex = -1;
@@ -262,20 +269,15 @@ public class BetterChat extends Module {
             String oldMessage = message.getString();
             String newMessage = text.getString();
 
-            messageIndex = i;
-
-
-
             if (oldMessage.equals(newMessage)) {
                 originalMessage = message.copy();
+                messageIndex = i;
                 returnText = message.append(Text.literal(" (2)").formatted(Formatting.GRAY));
                 break;
             } else {
                 Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
                 if (!matcher.matches()) continue;
-
-                originalMessage = message.copy();
 
                 String group = matcher.group(matcher.groupCount());
                 int number = Integer.parseInt(group.substring(1, group.length() - 1));
@@ -284,6 +286,8 @@ public class BetterChat extends Module {
 
                 if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
                     message.getSiblings().remove(message.getSiblings().size() - 1);
+                    originalMessage = message.copy();
+                    messageIndex = i;
                     returnText = message.append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
                     break;
                 }
@@ -293,7 +297,12 @@ public class BetterChat extends Module {
         if (returnText != null) {
             ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(messageIndex);
 
-            //todo remove spam message from visibleMessages
+            List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(originalMessage, MathHelper.floor((double)mc.inGameHud.getChatHud().getWidth() / mc.inGameHud.getChatHud().getChatScale()), mc.textRenderer);
+            int lines = list.size();
+
+            for (int i = 0; i < lines; i++) {
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(messageIndex);
+            }
         }
 
         return returnText;

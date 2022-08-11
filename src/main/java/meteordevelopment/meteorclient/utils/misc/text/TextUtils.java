@@ -31,7 +31,6 @@ public class TextUtils {
      * @param orderedText the {@link OrderedText} to parse.
      * @return The {@link Text} equivalent of the {@link OrderedText} parameter.
      */
-
     public static MutableText parseOrderedText(OrderedText orderedText) {
         MutableText parsedText = Text.empty();
         orderedText.accept((i, style, codePoint) -> {
