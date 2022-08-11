@@ -164,6 +164,20 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noBlind = sgWorld.add(new BoolSetting.Builder()
+    .name("blindness")
+    .description("Disables rendering of blindness.")
+    .defaultValue(false)
+    .build()
+    );
+
+    private final Setting<Boolean> noDarkness = sgWorld.add(new BoolSetting.Builder()
+        .name("darkness")
+        .description("Disables rendering of darkness.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> noFog = sgWorld.add(new BoolSetting.Builder()
         .name("fog")
         .description("Disables rendering of fog.")
@@ -381,6 +395,14 @@ public class NoRender extends Module {
 
     public boolean noWeather() {
         return isActive() && noWeather.get();
+    }
+
+    public boolean noBlind() {
+        return isActive() && noBlind.get();
+    }
+
+    public boolean noDarkness() {
+        return isActive() && noDarkness.get();
     }
 
     public boolean noFog() {

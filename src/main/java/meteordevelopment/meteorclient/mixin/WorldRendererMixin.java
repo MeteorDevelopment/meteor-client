@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(WorldRenderer.class)
 public abstract class WorldRendererMixin {
@@ -50,6 +51,11 @@ public abstract class WorldRendererMixin {
     private boolean renderSetupTerrainModifyArg(boolean spectator) {
         return Modules.get().isActive(Freecam.class) || spectator;
     }
+
+	@Inject(method = {"method_43788(Lnet/minecraft/client/render/Camera;)Z"}, at = @At("HEAD"), cancellable = true)
+	private void method_43788(Camera camera, CallbackInfoReturnable<Boolean> info) {
+		if (Modules.get().get(NoRender.class).noBlind() || Modules.get().get(NoRender.class).noDarkness()) info.setReturnValue(null);
+	}
 
     // EntityShaders
 
