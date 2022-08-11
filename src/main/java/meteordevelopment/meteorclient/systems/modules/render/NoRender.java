@@ -164,7 +164,7 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noBlind = sgWorld.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noBlindness = sgWorld.add(new BoolSetting.Builder()
     .name("blindness")
     .description("Disables rendering of blindness.")
     .defaultValue(false)
@@ -397,8 +397,8 @@ public class NoRender extends Module {
         return isActive() && noWeather.get();
     }
 
-    public boolean noBlind() {
-        return isActive() && noBlind.get();
+    public boolean noBlindness() {
+        return isActive() && noBlindness.get();
     }
 
     public boolean noDarkness() {
