@@ -19,10 +19,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
 import java.text.SimpleDateFormat;
@@ -240,15 +237,11 @@ public class BetterChat extends Module {
             message = Text.literal("  ").append(message);
         }
 
-        for (int i = 0; i < antiSpamDepth.get(); i++) {
-            if (antiSpam.get()) {
-                Text antiSpammed = appendAntiSpam(message, i);
+        if (antiSpam.get()) {
+            Text antiSpammed = appendAntiSpam(message);
 
-                if (antiSpammed != null) {
-                    message = antiSpammed;
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
-                }
+            if (antiSpammed != null) {
+                message = antiSpammed;
             }
         }
 
@@ -256,42 +249,54 @@ public class BetterChat extends Module {
     }
 
     private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
-    private Text appendAntiSpam(Text text, int index) {
-        List<ChatHudLine.Visible> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
-        if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return null;
+    private Text appendAntiSpam(Text text) {
+        Text returnText = null;
+        int messageIndex = -1;
+        MutableText originalMessage = null;
 
-        ChatHudLine.Visible visibleMessage = visibleMessages.get(index);
+        for (int i = 0; i < antiSpamDepth.get(); i++) {
+            List<ChatHudLine> messages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages();
+            if (messages.isEmpty() || i > messages.size() - 1) return null;
 
-        MutableText parsed = Text.literal("");
+            MutableText message = messages.get(i).content().copy();
+            String oldMessage = message.getString();
+            String newMessage = text.getString();
 
-        visibleMessage.content().accept((i, style, codePoint) -> {
-            parsed.append(Text.literal(new String(Character.toChars(codePoint))).setStyle(style));
-            return true;
-        });
+            messageIndex = i;
 
-        String oldMessage = parsed.getString();
-        String newMessage = text.getString();
 
-        if (oldMessage.equals(newMessage)) {
-            return parsed.append(Text.literal(" (2)").formatted(Formatting.GRAY));
-        }
-        else {
-            Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
-            if (!matcher.matches()) return null;
+            if (oldMessage.equals(newMessage)) {
+                originalMessage = message.copy();
+                returnText = message.append(Text.literal(" (2)").formatted(Formatting.GRAY));
+                break;
+            } else {
+                Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
-            String group = matcher.group(matcher.groupCount());
-            int number = Integer.parseInt(group.substring(1, group.length() - 1));
+                if (!matcher.matches()) continue;
 
-            String counter = " (" + number + ")";
+                originalMessage = message.copy();
 
-            if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
-                for (int i = 0; i < counter.length(); i++) parsed.getSiblings().remove(parsed.getSiblings().size() - 1);
-                return parsed.append(Text.literal( " (" + (number + 1) + ")").formatted(Formatting.GRAY));
+                String group = matcher.group(matcher.groupCount());
+                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+
+                String counter = " (" + number + ")";
+
+                if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
+                    message.getSiblings().remove(message.getSiblings().size() - 1);
+                    returnText = message.append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
+                    break;
+                }
             }
         }
 
-        return null;
+        if (returnText != null) {
+            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(messageIndex);
+
+            //todo remove spam message from visibleMessages
+        }
+
+        return returnText;
     }
 
     @EventHandler
