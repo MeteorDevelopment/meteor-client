@@ -96,7 +96,7 @@ public abstract class ChatHudMixin implements IChatHud {
     @Redirect(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;visibleMessages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
     private int addMessageListSizeProxy(List<ChatHudLine> list) {
         BetterChat betterChat = Modules.get().get(BetterChat.class);
-        if (betterChat.isLongerChat() && betterChat.getChatLength() > 100) return list.size() - betterChat.getChatLength();
+        if (betterChat.isLongerChat() && betterChat.getChatLength() >= 100) return list.size() - betterChat.getChatLength();
         return list.size();
     }
 
