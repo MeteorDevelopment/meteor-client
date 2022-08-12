@@ -30,7 +30,7 @@ public class BackgroundRendererMixin {
         }
     }
 
-    @Inject(method = {"getFogModifier(Lnet/minecraft/entity/Entity;F)Lnet/minecraft/client/render/BackgroundRenderer$StatusEffectFogModifier;"}, at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getFogModifier(Lnet/minecraft/entity/Entity;F)Lnet/minecraft/client/render/BackgroundRenderer$StatusEffectFogModifier;", at = @At("HEAD"), cancellable = true)
     private static void onGetFogModifier(Entity entity, float tickDelta, CallbackInfoReturnable<Object> info) {
         if (Modules.get().get(NoRender.class).noBlindness()) info.setReturnValue(null);
     }
