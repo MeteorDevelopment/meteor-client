@@ -16,9 +16,7 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -28,6 +26,7 @@ public class TitleScreenCredits {
     private static final int RED = Color.fromRGBA(225, 25, 25, 255);
 
     private static final List<Credit> credits = new ArrayList<>();
+    public static final Map<MeteorAddon, Credit> customCredits = new HashMap<>();
 
     private static void init() {
         // Add addons
@@ -56,6 +55,13 @@ public class TitleScreenCredits {
     }
 
     private static void add(MeteorAddon addon) {
+        if (customCredits.containsKey(addon)) {
+            Credit credit = customCredits.get(addon);
+            credit.calculateWidth();
+            credits.add(credit);
+            return;
+        }
+
         Credit credit = new Credit(addon);
 
         credit.sections.add(new Section(addon.name, addon.color.getPacked()));
@@ -109,7 +115,7 @@ public class TitleScreenCredits {
         return false;
     }
 
-    private static class Credit {
+    public static class Credit {
         public final MeteorAddon addon;
         public final List<Section> sections = new ArrayList<>();
         public int width;
@@ -124,7 +130,7 @@ public class TitleScreenCredits {
         }
     }
 
-    private static class Section {
+    public static class Section {
         public final String text;
         public final int color, width;
 
