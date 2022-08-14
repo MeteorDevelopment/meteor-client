@@ -93,6 +93,11 @@ public class StringListSetting extends Setting<List<String>>{
             table.row();
         }
 
+        if (!setting.get().isEmpty()) {
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
+        }
+
         WTextBox textBox = table.add(theme.textBox(setting.newText)).minWidth(300).expandX().widget();
         textBox.action = () -> setting.newText = textBox.get();
 
