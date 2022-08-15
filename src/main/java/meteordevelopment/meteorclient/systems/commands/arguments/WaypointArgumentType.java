@@ -48,7 +48,7 @@ public class WaypointArgumentType implements ArgumentType<String> {
     @Override
     public Collection<String> getExamples() {
         List<String> names = new ArrayList<>();
-        for (Waypoint waypoint : Waypoints.get()) names.add(waypoint.name);
+        for (Waypoint waypoint : Waypoints.get()) names.add(waypoint.nameSetting.get());
         return names;
     }
 }

@@ -232,6 +232,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return new Color(r, g, b, a);
     }
 
+    public SettingColor toSetting() {
+        return new SettingColor(r, g, b, a);
+    }
+
     public void validate() {
         if (r < 0) r = 0;
         else if (r > 255) r = 255;

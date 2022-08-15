@@ -12,19 +12,16 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.screens.settings.ColorSettingScreen;
 import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
-import meteordevelopment.meteorclient.gui.widgets.input.WDoubleEdit;
-import meteordevelopment.meteorclient.gui.widgets.input.WDropdown;
-import meteordevelopment.meteorclient.gui.widgets.input.WIntEdit;
-import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
@@ -32,11 +29,11 @@ import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
 import java.text.SimpleDateFormat;
@@ -101,27 +98,12 @@ public class WaypointsModule extends Module {
 
         // Create waypoint
         if (maxDeathPositions.get() > 0) {
-            Waypoint waypoint = new Waypoint();
-            waypoint.name = "Death " + time;
-            waypoint.icon = "skull";
-            waypoint.scale = 2;
-            waypoint.x = (int) deathPos.x;
-            waypoint.y = (int) deathPos.y + 2;
-            waypoint.z = (int) deathPos.z;
-            waypoint.maxVisibleDistance = Integer.MAX_VALUE;
-            waypoint.actualDimension = PlayerUtils.getDimension();
-
-            switch (waypoint.actualDimension) {
-                case Overworld:
-                    waypoint.overworld = true;
-                    break;
-                case Nether:
-                    waypoint.nether = true;
-                    break;
-                case End:
-                    waypoint.end = true;
-                    break;
-            }
+            Waypoint waypoint = new Waypoint.Builder()
+                .name("Death " + time)
+                .icon("skull")
+                .pos(new BlockPos(deathPos).up(2))
+                .dimension(PlayerUtils.getDimension())
+                .build();
 
             Waypoints.get().add(waypoint);
         }
@@ -135,7 +117,7 @@ public class WaypointsModule extends Module {
         ListIterator<Waypoint> wps = Waypoints.get().iteratorReverse();
         while (wps.hasPrevious()) {
             Waypoint wp = wps.previous();
-            if (wp.name.startsWith("Death ") && "skull".equals(wp.icon)) {
+            if (wp.nameSetting.get().startsWith("Death ") && "skull".equals(wp.iconSetting.get())) {
                 oldWpC++;
                 if (oldWpC > max)
                     Waypoints.get().remove(wp);
@@ -167,18 +149,13 @@ public class WaypointsModule extends Module {
             table.add(new WIcon(waypoint));
 
             // Name
-            WLabel name = table.add(theme.label(waypoint.name)).expandCellX().widget();
-            boolean goodDimension = false;
-            Dimension dimension = PlayerUtils.getDimension();
-            if (waypoint.overworld && dimension == Dimension.Overworld) goodDimension = true;
-            else if (waypoint.nether && dimension == Dimension.Nether) goodDimension = true;
-            else if (waypoint.end && dimension == Dimension.End) goodDimension = true;
-            if (!goodDimension) name.color = GRAY;
+            WLabel name = table.add(theme.label(waypoint.nameSetting.get())).expandCellX().widget();
+            if (!Waypoints.checkDimension(waypoint)) name.color = GRAY;
 
             // Visible
-            WCheckbox visible = table.add(theme.checkbox(waypoint.visible)).widget();
+            WCheckbox visible = table.add(theme.checkbox(waypoint.visibleSetting.get())).widget();
             visible.action = () -> {
-                waypoint.visible = visible.checked;
+                waypoint.visibleSetting.set(visible.checked);
                 Waypoints.get().save();
             };
 
@@ -196,13 +173,13 @@ public class WaypointsModule extends Module {
             };
 
             // Goto
-            if (waypoint.actualDimension == dimension) {
+            if (waypoint.dimensionSetting.get().equals(PlayerUtils.getDimension())) {
                 WButton gotoB = table.add(theme.button("Goto")).widget();
                 gotoB.action = () -> {
                     if (mc.player == null || mc.world == null) return;
                     IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                     if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
-                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(waypoint.getCoords().toBlockPos()));
+                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(waypoint.getPos()));
                 };
             }
 
@@ -219,132 +196,25 @@ public class WaypointsModule extends Module {
             super(theme, waypoint == null ? "New Waypoint" : "Edit Waypoint");
 
             this.newWaypoint = waypoint == null;
-            this.waypoint = newWaypoint ? new Waypoint() : waypoint;
             this.action = action;
 
-            this.waypoint.validateIcon();
-
             if (newWaypoint) {
-                this.waypoint.x = (int) mc.player.getX();
-                this.waypoint.y = (int) mc.player.getY() + 2;
-                this.waypoint.z = (int) mc.player.getZ();
-
-                this.waypoint.actualDimension = PlayerUtils.getDimension();
-
-                switch (PlayerUtils.getDimension()) {
-                    case Overworld -> this.waypoint.overworld = true;
-                    case Nether -> this.waypoint.nether = true;
-                    case End -> this.waypoint.end = true;
-                }
+                this.waypoint = new Waypoint.Builder()
+                    .pos(mc.player.getBlockPos().up(2))
+                    .dimension(PlayerUtils.getDimension())
+                    .build();
+            }
+            else {
+                this.waypoint = waypoint;
             }
         }
 
         @Override
         public void initWidgets() {
-            WTable table = add(theme.table()).expandX().widget();
-
-            // Name
-            table.add(theme.label("Name:"));
-            WTextBox name = table.add(theme.textBox(waypoint.name)).minWidth(400).expandX().widget();
-            name.action = () -> waypoint.name = name.get().trim();
-            table.row();
-
-            // Icon
-            table.add(theme.label("Icon:"));
-            WHorizontalList list = table.add(theme.horizontalList()).widget();
-            list.add(theme.button("<")).widget().action = waypoint::prevIcon;
-            list.add(new WIcon(waypoint));
-            list.add(theme.button(">")).widget().action = waypoint::nextIcon;
-            table.row();
-
-            // Color:
-            table.add(theme.label("Color:"));
-            list = table.add(theme.horizontalList()).widget();
-            list.add(theme.quad(waypoint.color));
-            list.add(theme.button(GuiRenderer.EDIT)).widget().action = () -> mc.setScreen(new ColorSettingScreen(theme, new ColorSetting("", "", waypoint.color, color -> waypoint.color.set(color), null, null)));
-            table.row();
-
-            table.add(theme.horizontalSeparator()).expandX();
-            table.row();
-
-            // X
-            table.add(theme.label("X:"));
-            WIntEdit x = theme.intEdit(waypoint.x, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
-            x.noSlider = true;
-            x.action = () -> waypoint.x = x.get();
-            table.add(x).expandX();
-            table.row();
-
-            // Y
-            table.add(theme.label("Y:"));
-            WIntEdit y = theme.intEdit(waypoint.y, getMinHeight(), getMaxHeight(), true);
-            y.noSlider = true;
-            y.actionOnRelease = () -> {
-                if (y.get() < getMinHeight()) y.set(getMinHeight());
-                else if (y.get() > getMaxHeight()) y.set(getMaxHeight());
-
-                waypoint.y = y.get();
-            };
-            table.add(y).expandX();
-            table.row();
-
-            // Z
-            table.add(theme.label("Z:"));
-            WIntEdit z = theme.intEdit(waypoint.z, Integer.MIN_VALUE, Integer.MAX_VALUE, true);
-            z.action = () -> waypoint.z = z.get();
-            table.add(z).expandX();
-            table.row();
-
-            table.add(theme.horizontalSeparator()).expandX();
-            table.row();
-
-            // Visible
-            table.add(theme.label("Visible:"));
-            WCheckbox visible = table.add(theme.checkbox(waypoint.visible)).widget();
-            visible.action = () -> waypoint.visible = visible.checked;
-            table.row();
-
-            // Max visible distance
-            table.add(theme.label("Max Visible Distance"));
-            WIntEdit maxVisibleDist = table.add(theme.intEdit(waypoint.maxVisibleDistance, 0, Integer.MAX_VALUE, 0, 10000)).expandX().widget();
-            maxVisibleDist.action = () -> waypoint.maxVisibleDistance = maxVisibleDist.get();
-            table.row();
-
-            // Scale
-            table.add(theme.label("Scale:"));
-            WDoubleEdit scale = table.add(theme.doubleEdit(waypoint.scale, 0, 4, 0, 4)).expandX().widget();
-            scale.action = () -> waypoint.scale = scale.get();
-            table.row();
-
-            table.add(theme.horizontalSeparator()).expandX();
-            table.row();
-
-            // Dimension
-            table.add(theme.label("Actual Dimension:"));
-            WDropdown<Dimension> dimensionDropdown = table.add(theme.dropdown(waypoint.actualDimension)).widget();
-            dimensionDropdown.action = () -> waypoint.actualDimension = dimensionDropdown.get();
-            table.row();
-
-            // Overworld
-            table.add(theme.label("Visible in Overworld:"));
-            WCheckbox overworld = table.add(theme.checkbox(waypoint.overworld)).widget();
-            overworld.action = () -> waypoint.overworld = overworld.checked;
-            table.row();
-
-            // Nether
-            table.add(theme.label("Visible in Nether:"));
-            WCheckbox nether = table.add(theme.checkbox(waypoint.nether)).widget();
-            nether.action = () -> waypoint.nether = nether.checked;
-            table.row();
-
-            // End
-            table.add(theme.label("Visible in End:"));
-            WCheckbox end = table.add(theme.checkbox(waypoint.end)).widget();
-            end.action = () -> waypoint.end = end.checked;
-            table.row();
+            add(theme.settings(waypoint.settings)).expandX();
 
             // Save
-            WButton save = table.add(theme.button("Save")).expandX().widget();
+            WButton save = add(theme.button("Save")).expandX().widget();
             save.action = () -> {
                 if (newWaypoint) Waypoints.get().add(waypoint);
                 else Waypoints.get().save();
