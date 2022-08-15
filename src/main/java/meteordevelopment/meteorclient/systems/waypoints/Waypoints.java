@@ -82,16 +82,22 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         }
     }
 
-    public void add(Waypoint waypoint) {
-        waypoints.put(waypoint.name.get().toLowerCase(Locale.ROOT), waypoint);
-        save();
+    public boolean add(Waypoint waypoint) {
+        Waypoint added = waypoints.put(waypoint.name.get().toLowerCase(Locale.ROOT), waypoint);
+        if (added != null) {
+            save();
+        }
+
+        return added != null;
     }
 
-    public void remove(Waypoint waypoint) {
+    public boolean remove(Waypoint waypoint) {
         Waypoint removed = waypoints.remove(waypoint.name.get().toLowerCase(Locale.ROOT));
         if (removed != null) {
             save();
         }
+
+        return removed != null;
     }
 
     public Waypoint get(String name) {
@@ -188,19 +194,8 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         return new File(new File(MeteorClient.FOLDER, "waypoints"), Utils.getWorldName() + ".nbt");
     }
 
-    @Override
-    public NbtCompound toTag() {
-        NbtCompound tag = new NbtCompound();
-        tag.put("waypoints", NbtUtils.listToTag(waypoints.values()));
-        return tag;
-    }
-
-    @Override
-    public Waypoints fromTag(NbtCompound tag) {
-        Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.name.get().toLowerCase(Locale.ROOT), o -> o));
-        this.waypoints = new ConcurrentHashMap<>(fromNbt);
-
-        return this;
+    public boolean isEmpty() {
+        return waypoints.isEmpty();
     }
 
     @Override
@@ -214,5 +209,20 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     private void copyIcon(File file) {
         StreamUtils.copy(Waypoints.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/textures/icons/waypoints/" + file.getName()), file);
+    }
+
+    @Override
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
+        tag.put("waypoints", NbtUtils.listToTag(waypoints.values()));
+        return tag;
+    }
+
+    @Override
+    public Waypoints fromTag(NbtCompound tag) {
+        Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.name.get().toLowerCase(Locale.ROOT), o -> o));
+        this.waypoints = new ConcurrentHashMap<>(fromNbt);
+
+        return this;
     }
 }

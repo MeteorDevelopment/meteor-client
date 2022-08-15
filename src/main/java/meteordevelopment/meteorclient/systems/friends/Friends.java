@@ -77,6 +77,10 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return friends.size();
     }
 
+    public boolean isEmpty() {
+        return friends.isEmpty();
+    }
+
     @Override
     public @NotNull Iterator<Friend> iterator() {
         return friends.iterator();

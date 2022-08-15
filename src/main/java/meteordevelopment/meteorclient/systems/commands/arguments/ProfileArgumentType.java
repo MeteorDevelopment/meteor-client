@@ -50,7 +50,7 @@ public class ProfileArgumentType implements ArgumentType<String> {
     @Override
     public Collection<String> getExamples() {
         List<String> names = new ArrayList<>();
-        for (Profile profile : Profiles.get()) names.add(profile.name);
+        for (Profile profile : Profiles.get()) names.add(profile.name.get());
         return names;
     }
 }

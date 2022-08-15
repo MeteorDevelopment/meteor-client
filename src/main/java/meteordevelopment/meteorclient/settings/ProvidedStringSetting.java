@@ -13,24 +13,19 @@ import java.util.function.Supplier;
 public class ProvidedStringSetting extends StringSetting {
     public final Supplier<String[]> supplier;
 
-    public ProvidedStringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, boolean wide, Class<? extends WTextBox.Renderer> renderer, Supplier<String[]> supplier) {
-        super(name, description, defaultValue, onChanged, onModuleActivated, visible, wide, renderer);
+    public ProvidedStringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer, boolean wide, Supplier<String[]> supplier) {
+        super(name, description, defaultValue, onChanged, onModuleActivated, visible, renderer, null, wide);
 
         this.supplier = supplier;
     }
 
     public static class Builder extends SettingBuilder<Builder, String, ProvidedStringSetting> {
-        private boolean wide;
         private Class<? extends WTextBox.Renderer> renderer;
         private Supplier<String[]> supplier;
+        private boolean wide;
 
         public Builder() {
             super(null);
-        }
-
-        public Builder wide() {
-            wide = true;
-            return this;
         }
 
         public Builder renderer(Class<? extends WTextBox.Renderer> renderer) {
@@ -43,9 +38,14 @@ public class ProvidedStringSetting extends StringSetting {
             return this;
         }
 
+        public Builder wide() {
+            wide = true;
+            return this;
+        }
+
         @Override
         public ProvidedStringSetting build() {
-            return new ProvidedStringSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, wide, renderer, supplier);
+            return new ProvidedStringSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, renderer, wide, supplier);
         }
     }
 }

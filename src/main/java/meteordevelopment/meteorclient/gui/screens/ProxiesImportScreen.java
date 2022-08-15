@@ -28,7 +28,7 @@ public class ProxiesImportScreen extends WindowScreen {
         this.file = file;
         this.onClosed(() -> {
             if (parent instanceof ProxiesScreen screen) {
-                screen.dirty = true;
+                screen.reload();
             }
         });
     }
@@ -56,11 +56,11 @@ public class ProxiesImportScreen extends WindowScreen {
                             .build();
 
                         if (proxies.add(proxy)) {
-                            list.add(theme.label("Imported proxy: " + proxy.nameSetting.get()).color(Color.GREEN));
+                            list.add(theme.label("Imported proxy: " + proxy.name.get()).color(Color.GREEN));
                             pog++;
                         }
                         else {
-                            list.add(theme.label("Proxy already exists: " + proxy.nameSetting.get()).color(Color.ORANGE));
+                            list.add(theme.label("Proxy already exists: " + proxy.name.get()).color(Color.ORANGE));
                             bruh++;
                         }
                     }
