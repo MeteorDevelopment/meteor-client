@@ -81,7 +81,7 @@ public class RainbowColors {
         }
 
         for (Waypoint waypoint : Waypoints.get()) {
-            waypoint.color.update();
+            waypoint.colorSetting.get().update();
         }
 
         if (mc.currentScreen instanceof WidgetScreen) {
