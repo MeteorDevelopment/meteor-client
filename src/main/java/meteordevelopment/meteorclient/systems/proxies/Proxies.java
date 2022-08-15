@@ -32,10 +32,10 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public boolean add(Proxy proxy) {
         for (Proxy p : proxies) {
-            if (p.typeSetting.get().equals(proxy.typeSetting.get()) && p.addressSetting.get().equals(proxy.addressSetting.get()) && p.portSetting.get() == proxy.portSetting.get()) return false;
+            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && p.port.get() == proxy.port.get()) return false;
         }
 
-        if (proxies.isEmpty()) proxy.enabledSetting.set(true);
+        if (proxies.isEmpty()) proxy.enabled.set(true);
 
         proxies.add(proxy);
         save();
@@ -51,7 +51,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public Proxy getEnabled() {
         for (Proxy proxy : proxies) {
-            if (proxy.enabledSetting.get()) return proxy;
+            if (proxy.enabled.get()) return proxy;
         }
 
         return null;
@@ -59,11 +59,15 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public void setEnabled(Proxy proxy, boolean enabled) {
         for (Proxy p : proxies) {
-            p.enabledSetting.set(false);
+            p.enabled.set(false);
         }
 
-        proxy.enabledSetting.set(enabled);
+        proxy.enabled.set(enabled);
         save();
+    }
+
+    public boolean isEmpty() {
+        return proxies.isEmpty();
     }
 
     @NotNull

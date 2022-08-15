@@ -19,6 +19,7 @@ import net.minecraft.nbt.NbtElement;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Waypoint implements ISerializable<Waypoint> {
     public final Settings settings = new Settings();
@@ -136,37 +137,37 @@ public class Waypoint implements ISerializable<Waypoint> {
     }
 
     public static class Builder {
-        private String nameB = "", iconB = "";
-        private BlockPos posB = BlockPos.ORIGIN;
-        private Dimension dimB = Dimension.Overworld;
+        private String name = "", icon = "";
+        private BlockPos pos = BlockPos.ORIGIN;
+        private Dimension dimension = Dimension.Overworld;
 
         public Builder name(String name) {
-            this.nameB = name;
+            this.name = name;
             return this;
         }
 
         public Builder icon(String icon) {
-            this.iconB = icon;
+            this.icon = icon;
             return this;
         }
 
         public Builder pos(BlockPos pos) {
-            this.posB = pos;
+            this.pos = pos;
             return this;
         }
 
         public Builder dimension(Dimension dimension) {
-            this.dimB = dimension;
+            this.dimension = dimension;
             return this;
         }
 
         public Waypoint build() {
             Waypoint waypoint = new Waypoint();
 
-            if (!nameB.equals(waypoint.name.getDefaultValue())) waypoint.name.set(nameB);
-            if (!iconB.equals(waypoint.icon.getDefaultValue())) waypoint.icon.set(iconB);
-            if (!posB.equals(waypoint.pos.getDefaultValue())) waypoint.pos.set(posB);
-            if (!dimB.equals(waypoint.dimension.getDefaultValue())) waypoint.dimension.set(dimB);
+            if (!name.equals(waypoint.name.getDefaultValue())) waypoint.name.set(name);
+            if (!icon.equals(waypoint.icon.getDefaultValue())) waypoint.icon.set(icon);
+            if (!pos.equals(waypoint.pos.getDefaultValue())) waypoint.pos.set(pos);
+            if (!dimension.equals(waypoint.dimension.getDefaultValue())) waypoint.dimension.set(dimension);
 
             return waypoint;
         }
@@ -188,5 +189,13 @@ public class Waypoint implements ISerializable<Waypoint> {
         }
 
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Waypoint waypoint = (Waypoint) o;
+        return Objects.equals(waypoint.name.get(), this.name.get());
     }
 }

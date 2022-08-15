@@ -9,12 +9,12 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WLabel;
-import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -32,78 +32,25 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ProxiesScreen extends WindowScreen {
     private final List<WCheckbox> checkboxes = new ArrayList<>();
-    boolean dirty;
 
     public ProxiesScreen(GuiTheme theme) {
         super(theme, "Proxies");
     }
 
-    protected void openEditProxyScreen(Proxy proxy) {
-        mc.setScreen(new EditProxyScreen(theme, proxy));
-    }
-
-    @Override
-    protected void init() {
-        super.init();
-
-        if (dirty) {
-            reload();
-            dirty = false;
-        }
-    }
-
     @Override
     public void initWidgets() {
-        // Proxies
-        WTable table = add(theme.table()).expandX().widget();
+        WTable table = add(theme.table()).expandX().minWidth(400).widget();
 
-        for (Proxy proxy : Proxies.get()) {
-            // Enabled
-            WCheckbox enabled = table.add(theme.checkbox(proxy.enabledSetting.get())).widget();
-            checkboxes.add(enabled);
-            enabled.action = () -> {
-                boolean checked = enabled.checked;
-                Proxies.get().setEnabled(proxy, checked);
+        initTable(table);
 
-                for (WCheckbox checkbox : checkboxes) checkbox.checked = false;
-                enabled.checked = checked;
-            };
+        table.add(theme.horizontalSeparator()).expandX();
+        table.row();
 
-            // Name
-            WLabel name = table.add(theme.label(proxy.nameSetting.get())).widget();
-            name.color = theme.textColor();
-
-            // Type
-            WLabel type = table.add(theme.label("(" + proxy.typeSetting.get() + ")")).widget();
-            type.color = theme.textSecondaryColor();
-
-            // IP + Port
-            WHorizontalList ipList = table.add(theme.horizontalList()).expandCellX().widget();
-            ipList.spacing = 0;
-
-            ipList.add(theme.label(proxy.addressSetting.get()));
-            ipList.add(theme.label(":")).widget().color = theme.textSecondaryColor();
-            ipList.add(theme.label(Integer.toString(proxy.portSetting.get())));
-
-            // Edit
-            WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
-            edit.action = () -> openEditProxyScreen(proxy);
-
-            // Remove
-            WMinus remove = table.add(theme.minus()).widget();
-            remove.action = () -> {
-                Proxies.get().remove(proxy);
-                reload();
-            };
-
-            table.row();
-        }
-
-        WHorizontalList l = add(theme.horizontalList()).expandX().widget();
+        WHorizontalList l = table.add(theme.horizontalList()).expandX().widget();
 
         // New
         WButton newBtn = l.add(theme.button("New")).expandX().widget();
-        newBtn.action = () -> openEditProxyScreen(null);
+        newBtn.action = () -> mc.setScreen(new EditProxyScreen(theme, null, this::reload));
 
         // Import
         PointerBuffer filters = BufferUtils.createPointerBuffer(1);
@@ -123,6 +70,48 @@ public class ProxiesScreen extends WindowScreen {
         };
     }
 
+    private void initTable(WTable table) {
+        table.clear();
+
+        if (Proxies.get().isEmpty()) return;
+
+        for (Proxy proxy : Proxies.get()) {
+            WCheckbox enabled = table.add(theme.checkbox(proxy.enabled.get())).widget();
+            checkboxes.add(enabled);
+            enabled.action = () -> {
+                boolean checked = enabled.checked;
+                Proxies.get().setEnabled(proxy, checked);
+
+                for (WCheckbox checkbox : checkboxes) checkbox.checked = false;
+                enabled.checked = checked;
+            };
+
+            WLabel name = table.add(theme.label(proxy.name.get())).widget();
+            name.color = theme.textColor();
+
+            WLabel type = table.add(theme.label("(" + proxy.type.get() + ")")).widget();
+            type.color = theme.textSecondaryColor();
+
+            WHorizontalList ipList = table.add(theme.horizontalList()).expandCellX().widget();
+            ipList.spacing = 0;
+
+            ipList.add(theme.label(proxy.address.get()));
+            ipList.add(theme.label(":")).widget().color = theme.textSecondaryColor();
+            ipList.add(theme.label(Integer.toString(proxy.port.get())));
+
+            WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
+            edit.action = () -> mc.setScreen(new EditProxyScreen(theme, proxy, this::reload));
+
+            WMinus remove = table.add(theme.minus()).widget();
+            remove.action = () -> {
+                Proxies.get().remove(proxy);
+                reload();
+            };
+
+            table.row();
+        }
+    }
+
     @Override
     public boolean toClipboard() {
         return NbtUtils.toClipboard(Proxies.get());
@@ -133,39 +122,24 @@ public class ProxiesScreen extends WindowScreen {
         return NbtUtils.fromClipboard(Proxies.get());
     }
 
-    protected class EditProxyScreen extends WindowScreen {
-        private WContainer settingsContainer;
-        private final boolean isNew;
-        private final Proxy proxy;
-
-        public EditProxyScreen(GuiTheme theme, Proxy p) {
-            super(theme, p == null ? "New Proxy" : "Edit Proxy");
-
-            isNew = p == null;
-            proxy = isNew ? new Proxy.Builder().build() : p;
+    protected static class EditProxyScreen extends EditSystemScreen<Proxy> {
+        public EditProxyScreen(GuiTheme theme, Proxy value, Runnable reload) {
+            super(theme, value, reload);
         }
 
         @Override
-        public void initWidgets() {
-            settingsContainer = add(theme.verticalList()).expandX().widget();
-            settingsContainer.add(theme.settings(proxy.settings)).expandX();
-
-            add(theme.horizontalSeparator()).expandX();
-
-            WButton addSave = add(theme.button(isNew ? "Add" : "Save")).expandX().widget();
-            addSave.action = () -> {
-                if (proxy.resolveAddress() && (!isNew || Proxies.get().add(proxy))) {
-                    dirty = true;
-                    close();
-                }
-            };
-
-            enterAction = addSave.action;
+        public Proxy create() {
+            return new Proxy.Builder().build();
         }
 
         @Override
-        public void tick() {
-            proxy.settings.tick(settingsContainer, theme);
+        public boolean save() {
+            return value.resolveAddress() && (!isNew || Proxies.get().add(value));
+        }
+
+        @Override
+        public Settings getSettings() {
+            return value.settings;
         }
     }
 }

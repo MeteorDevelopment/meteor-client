@@ -66,6 +66,10 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         }
     }
 
+    public boolean isEmpty() {
+        return macros.isEmpty();
+    }
+
     @Override
     public Iterator<Macro> iterator() {
         return macros.iterator();

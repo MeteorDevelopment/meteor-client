@@ -10,19 +10,15 @@ import baritone.api.IBaritone;
 import baritone.api.pathing.goals.GoalGetToBlock;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.screens.EditSystemScreen;
 import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
@@ -131,113 +127,77 @@ public class WaypointsModule extends Module {
         if (!Utils.canUpdate()) return theme.label("You need to be in a world.");
 
         WTable table = theme.table();
-        fillTable(theme, table);
+        initTable(theme, table);
         return table;
     }
 
-    private void fillTable(GuiTheme theme, WTable table) {
-        // Create
-        WButton create = table.add(theme.button("Create")).expandX().widget();
-        create.action = () -> mc.setScreen(new EditWaypointScreen(theme, null, () -> {
-            table.clear();
-            fillTable(theme, table);
-        }));
-        table.row();
+    private void initTable(GuiTheme theme, WTable table) {
+        table.clear();
 
-        // Waypoints
         for (Waypoint waypoint : Waypoints.get()) {
-            // Icon
+            boolean validDim = Waypoints.checkDimension(waypoint);
+
             table.add(new WIcon(waypoint));
 
-            // Name
             WLabel name = table.add(theme.label(waypoint.name.get())).expandCellX().widget();
-            if (!Waypoints.checkDimension(waypoint)) name.color = GRAY;
+            if (!validDim) name.color = GRAY;
 
-            // Visible
             WCheckbox visible = table.add(theme.checkbox(waypoint.visible.get())).widget();
             visible.action = () -> {
                 waypoint.visible.set(visible.checked);
                 Waypoints.get().save();
             };
 
-            // Edit
             WButton edit = table.add(theme.button(GuiRenderer.EDIT)).widget();
             edit.action = () -> mc.setScreen(new EditWaypointScreen(theme, waypoint, null));
 
-            // Remove
-            WMinus remove = table.add(theme.minus()).widget();
-            remove.action = () -> {
-                Waypoints.get().remove(waypoint);
-
-                table.clear();
-                fillTable(theme, table);
-            };
-
             // Goto
-            if (waypoint.dimension.get().equals(PlayerUtils.getDimension())) {
+            if (validDim) {
                 WButton gotoB = table.add(theme.button("Goto")).widget();
                 gotoB.action = () -> {
-                    if (mc.player == null || mc.world == null) return;
                     IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
                     if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
                     baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(waypoint.getPos()));
                 };
             }
 
-            table.row();
-        }
-    }
-
-    private class EditWaypointScreen extends WindowScreen {
-        private WContainer settingsContainer;
-        private final Waypoint waypoint;
-        private final boolean newWaypoint;
-        private final Runnable action;
-
-        public EditWaypointScreen(GuiTheme theme, Waypoint waypoint, Runnable action) {
-            super(theme, waypoint == null ? "New Waypoint" : "Edit Waypoint");
-
-            this.newWaypoint = waypoint == null;
-            this.action = action;
-
-            if (newWaypoint) {
-                this.waypoint = new Waypoint.Builder()
-                    .pos(mc.player.getBlockPos().up(2))
-                    .dimension(PlayerUtils.getDimension())
-                    .build();
-            }
-            else {
-                this.waypoint = waypoint;
-            }
-        }
-
-        @Override
-        public void initWidgets() {
-            settingsContainer = add(theme.verticalList()).expandX().widget();
-            settingsContainer.add(theme.settings(waypoint.settings)).expandX();
-
-            add(theme.horizontalSeparator()).expandX();
-
-            // Save
-            WButton save = add(theme.button("Save")).expandX().widget();
-            save.action = () -> {
-                if (newWaypoint) Waypoints.get().add(waypoint);
-                else Waypoints.get().save();
-
-                close();
+            WMinus remove = table.add(theme.minus()).widget();
+            remove.action = () -> {
+                Waypoints.get().remove(waypoint);
+                initTable(theme, table);
             };
 
-            enterAction = save.action;
+            table.row();
+        }
+
+        table.add(theme.horizontalSeparator()).expandX();
+        table.row();
+
+        WButton create = table.add(theme.button("Create")).expandX().widget();
+        create.action = () -> mc.setScreen(new EditWaypointScreen(theme, null, () -> initTable(theme, table)));
+    }
+
+    private class EditWaypointScreen extends EditSystemScreen<Waypoint> {
+        public EditWaypointScreen(GuiTheme theme, Waypoint value, Runnable reload) {
+            super(theme, value, reload);
         }
 
         @Override
-        public void tick() {
-            waypoint.settings.tick(settingsContainer, theme);
+        public Waypoint create() {
+            return new Waypoint.Builder()
+                .pos(mc.player.getBlockPos().up(2))
+                .dimension(PlayerUtils.getDimension())
+                .build();
         }
 
         @Override
-        protected void onClosed() {
-            if (action != null) action.run();
+        public boolean save() {
+            return !isNew || Waypoints.get().add(value);
+        }
+
+        @Override
+        public Settings getSettings() {
+            return value.settings;
         }
     }
 
