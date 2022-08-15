@@ -62,6 +62,19 @@ public class ToggleCommand extends Command {
                         return SINGLE_SUCCESS;
                     })
                 )
+            )
+            .then(literal("hud")
+                .then(literal("on")
+                    .executes(context -> {
+                        Hud.get().active = true;
+                        return SINGLE_SUCCESS;
+                    })
+                ).then(literal("off")
+                    .executes(context -> {
+                        Hud.get().active = false;
+                        return SINGLE_SUCCESS;
+                    })
+                )
             );
     }
 }
