@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WLabel;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
@@ -117,7 +118,7 @@ public class WaypointsModule extends Module {
         ListIterator<Waypoint> wps = Waypoints.get().iteratorReverse();
         while (wps.hasPrevious()) {
             Waypoint wp = wps.previous();
-            if (wp.nameSetting.get().startsWith("Death ") && "skull".equals(wp.iconSetting.get())) {
+            if (wp.name.get().startsWith("Death ") && "skull".equals(wp.icon.get())) {
                 oldWpC++;
                 if (oldWpC > max)
                     Waypoints.get().remove(wp);
@@ -149,13 +150,13 @@ public class WaypointsModule extends Module {
             table.add(new WIcon(waypoint));
 
             // Name
-            WLabel name = table.add(theme.label(waypoint.nameSetting.get())).expandCellX().widget();
+            WLabel name = table.add(theme.label(waypoint.name.get())).expandCellX().widget();
             if (!Waypoints.checkDimension(waypoint)) name.color = GRAY;
 
             // Visible
-            WCheckbox visible = table.add(theme.checkbox(waypoint.visibleSetting.get())).widget();
+            WCheckbox visible = table.add(theme.checkbox(waypoint.visible.get())).widget();
             visible.action = () -> {
-                waypoint.visibleSetting.set(visible.checked);
+                waypoint.visible.set(visible.checked);
                 Waypoints.get().save();
             };
 
@@ -173,7 +174,7 @@ public class WaypointsModule extends Module {
             };
 
             // Goto
-            if (waypoint.dimensionSetting.get().equals(PlayerUtils.getDimension())) {
+            if (waypoint.dimension.get().equals(PlayerUtils.getDimension())) {
                 WButton gotoB = table.add(theme.button("Goto")).widget();
                 gotoB.action = () -> {
                     if (mc.player == null || mc.world == null) return;
@@ -188,6 +189,7 @@ public class WaypointsModule extends Module {
     }
 
     private class EditWaypointScreen extends WindowScreen {
+        private WContainer settingsContainer;
         private final Waypoint waypoint;
         private final boolean newWaypoint;
         private final Runnable action;
@@ -211,7 +213,10 @@ public class WaypointsModule extends Module {
 
         @Override
         public void initWidgets() {
-            add(theme.settings(waypoint.settings)).expandX();
+            settingsContainer = add(theme.verticalList()).expandX().widget();
+            settingsContainer.add(theme.settings(waypoint.settings)).expandX();
+
+            add(theme.horizontalSeparator()).expandX();
 
             // Save
             WButton save = add(theme.button("Save")).expandX().widget();
@@ -226,17 +231,14 @@ public class WaypointsModule extends Module {
         }
 
         @Override
+        public void tick() {
+            waypoint.settings.tick(settingsContainer, theme);
+        }
+
+        @Override
         protected void onClosed() {
             if (action != null) action.run();
         }
-    }
-
-    private Integer getMaxHeight() {
-        return mc.world.getDimension().height() - Math.abs(getMinHeight()) - 1;
-    }
-
-    private Integer getMinHeight() {
-        return mc.world.getDimension().minY();
     }
 
     private static class WIcon extends WWidget {

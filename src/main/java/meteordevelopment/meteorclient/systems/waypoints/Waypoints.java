@@ -83,12 +83,12 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     }
 
     public void add(Waypoint waypoint) {
-        waypoints.put(waypoint.nameSetting.get().toLowerCase(Locale.ROOT), waypoint);
+        waypoints.put(waypoint.name.get().toLowerCase(Locale.ROOT), waypoint);
         save();
     }
 
     public void remove(Waypoint waypoint) {
-        Waypoint removed = waypoints.remove(waypoint.nameSetting.get().toLowerCase(Locale.ROOT));
+        Waypoint removed = waypoints.remove(waypoint.name.get().toLowerCase(Locale.ROOT));
         if (removed != null) {
             save();
         }
@@ -110,10 +110,10 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     public static boolean checkDimension(Waypoint waypoint) {
         Dimension playerDim = PlayerUtils.getDimension();
-        Dimension waypointDim = waypoint.dimensionSetting.get();
+        Dimension waypointDim = waypoint.dimension.get();
 
         if (playerDim == waypointDim) return true;
-        if (!waypoint.oppositeSetting.get()) return false;
+        if (!waypoint.opposite.get()) return false;
 
         boolean playerOpp = playerDim == Dimension.Overworld || playerDim == Dimension.Nether;
         boolean waypointOpp = waypointDim == Dimension.Overworld || waypointDim == Dimension.Nether;
@@ -132,7 +132,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
         for (Waypoint waypoint : this) {
             // Continue if this waypoint should not be rendered
-            if (!waypoint.visibleSetting.get() || !checkDimension(waypoint)) continue;
+            if (!waypoint.visible.get() || !checkDimension(waypoint)) continue;
 
             // Calculate distance
             BlockPos blockPos = waypoint.getPos();
@@ -140,7 +140,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
 
             // Continue if this waypoint should not be rendered
-            if (dist > waypoint.maxVisibleSetting.get()) continue;
+            if (dist > waypoint.maxVisible.get()) continue;
             if (!NametagUtils.to2D(pos, 1)) continue;
 
             // Calculate alpha and distance to center of the screen
@@ -153,7 +153,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
             }
 
             // Render
-            NametagUtils.scale = waypoint.scaleSetting.get() - 0.2;
+            NametagUtils.scale = waypoint.scale.get() - 0.2;
             NametagUtils.begin(pos);
 
             // Render icon
@@ -167,7 +167,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
                 text.begin();
 
                 // Render name
-                text.render(waypoint.nameSetting.get(), -text.getWidth(waypoint.nameSetting.get()) / 2, -16 - text.getHeight(), TEXT, true);
+                text.render(waypoint.name.get(), -text.getWidth(waypoint.name.get()) / 2, -16 - text.getHeight(), TEXT, true);
 
                 // Render distance
                 String distText = String.format("%d blocks", (int) Math.round(dist));
@@ -197,7 +197,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     @Override
     public Waypoints fromTag(NbtCompound tag) {
-        Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.nameSetting.get().toLowerCase(Locale.ROOT), o -> o));
+        Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.name.get().toLowerCase(Locale.ROOT), o -> o));
         this.waypoints = new ConcurrentHashMap<>(fromNbt);
 
         return this;

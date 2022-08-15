@@ -29,7 +29,7 @@ public class WaypointCommand extends Command {
             else {
                 info(Formatting.WHITE + "Created Waypoints:");
                 for (Waypoint waypoint : Waypoints.get()) {
-                    info("Name: (highlight)'%s'(default), Dimension: (highlight)%s(default), Pos: (highlight)%s(default)", waypoint.nameSetting.get(), waypoint.dimensionSetting.get(), waypointPos(waypoint));
+                    info("Name: (highlight)'%s'(default), Dimension: (highlight)%s(default), Pos: (highlight)%s(default)", waypoint.name.get(), waypoint.dimension.get(), waypointPos(waypoint));
                 }
             }
             return SINGLE_SUCCESS;
@@ -37,10 +37,10 @@ public class WaypointCommand extends Command {
 
         builder.then(literal("get").then(argument("waypoint", WaypointArgumentType.waypoint()).executes(context -> {
             Waypoint waypoint = WaypointArgumentType.getWaypoint(context, "waypoint");
-            info("Name: " + Formatting.WHITE + waypoint.nameSetting.get());
-            info("Actual Dimension: " + Formatting.WHITE + waypoint.dimensionSetting.get());
+            info("Name: " + Formatting.WHITE + waypoint.name.get());
+            info("Actual Dimension: " + Formatting.WHITE + waypoint.dimension.get());
             info("Position: " + Formatting.WHITE + waypointFullPos(waypoint));
-            info("Visible: " + (waypoint.visibleSetting.get() ? Formatting.GREEN + "True" : Formatting.RED + "False"));
+            info("Visible: " + (waypoint.visible.get() ? Formatting.GREEN + "True" : Formatting.RED + "False"));
             return SINGLE_SUCCESS;
         })));
 
@@ -55,14 +55,14 @@ public class WaypointCommand extends Command {
 
             Waypoints.get().add(waypoint);
 
-            info("Created waypoint with name: (highlight)%s(default)", waypoint.nameSetting.get());
+            info("Created waypoint with name: (highlight)%s(default)", waypoint.name.get());
             return SINGLE_SUCCESS;
         })));
 
         builder.then(literal("delete").then(argument("waypoint", WaypointArgumentType.waypoint()).executes(context -> {
             Waypoint waypoint = WaypointArgumentType.getWaypoint(context, "waypoint");
 
-            info("The waypoint (highlight)'%s'(default) has been deleted.", waypoint.nameSetting.get());
+            info("The waypoint (highlight)'%s'(default) has been deleted.", waypoint.name.get());
 
             Waypoints.get().remove(waypoint);
 
@@ -71,7 +71,7 @@ public class WaypointCommand extends Command {
 
         builder.then(literal("toggle").then(argument("waypoint", WaypointArgumentType.waypoint()).executes(context -> {
             Waypoint waypoint = WaypointArgumentType.getWaypoint(context, "waypoint");
-            waypoint.visibleSetting.set(!waypoint.visibleSetting.get());
+            waypoint.visible.set(!waypoint.visible.get());
 
             Waypoints.get().save();
             return SINGLE_SUCCESS;
@@ -79,10 +79,10 @@ public class WaypointCommand extends Command {
     }
 
     private String waypointPos(Waypoint waypoint) {
-        return "X: " + waypoint.posSetting.get().getX() + " Z: " + waypoint.posSetting.get().getZ();
+        return "X: " + waypoint.pos.get().getX() + " Z: " + waypoint.pos.get().getZ();
     }
 
     private String waypointFullPos(Waypoint waypoint) {
-        return "X: " + waypoint.posSetting.get().getX() +  ", Y: " + waypoint.posSetting.get().getY() + ", Z: " + waypoint.posSetting.get().getZ();
+        return "X: " + waypoint.pos.get().getX() +  ", Y: " + waypoint.pos.get().getY() + ", Z: " + waypoint.pos.get().getZ();
     }
 }
