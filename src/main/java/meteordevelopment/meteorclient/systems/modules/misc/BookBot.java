@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
@@ -25,9 +25,9 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
@@ -206,9 +206,9 @@ public class BookBot extends Module {
 
             // Handle the file being empty
             if (file.length() == 0) {
-                MutableText message = new LiteralText("");
-                message.append(new LiteralText("The bookbot file is empty! ").formatted(Formatting.RED));
-                message.append(new LiteralText("Click here to edit it.")
+                MutableText message = Text.literal("");
+                message.append(Text.literal("The bookbot file is empty! ").formatted(Formatting.RED));
+                message.append(Text.literal("Click here to edit it.")
                     .setStyle(Style.EMPTY
                             .withFormatting(Formatting.UNDERLINE, Formatting.RED)
                             .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()))

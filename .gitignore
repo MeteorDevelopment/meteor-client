@@ -8,9 +8,10 @@ out
 run
 bin
 logs
-.circleci/discordwebhook/node_modules
+.github/devbuilds/node_modules
 *.iws
 *.ipr
 *.iml
 .idea/*
 !.idea/copyright/*
+!.idea/scopes/*

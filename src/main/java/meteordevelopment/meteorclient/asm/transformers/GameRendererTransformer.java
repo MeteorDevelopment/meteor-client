@@ -1,26 +1,23 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.asm.transformers;
 
 import meteordevelopment.meteorclient.asm.AsmTransformer;
 import meteordevelopment.meteorclient.asm.Descriptor;
-import meteordevelopment.meteorclient.asm.FieldInfo;
 import meteordevelopment.meteorclient.asm.MethodInfo;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.tree.*;
 
 public class GameRendererTransformer extends AsmTransformer {
     private final MethodInfo getFovMethod;
-    private final FieldInfo fovField;
 
     public GameRendererTransformer() {
         super(mapClassName("net/minecraft/class_757"));
 
         getFovMethod = new MethodInfo("net/minecraft/class_4184", null, new Descriptor("Lnet/minecraft/class_4184;", "F", "Z", "D"), true);
-        fovField = new FieldInfo("net/minecraft/class_315", "field_1826", new Descriptor("D"), true);
     }
 
     @Override
@@ -41,7 +38,7 @@ public class GameRendererTransformer extends AsmTransformer {
                 injectionCount++;
             }
             else if (
-                (insn instanceof FieldInsnNode in1 && fovField.equals(in1))
+                (insn instanceof MethodInsnNode in1 && in1.name.equals("intValue") && insn.getNext() instanceof InsnNode _in && _in.getOpcode() == Opcodes.I2D)
                 ||
                 (insn instanceof MethodInsnNode in2 && in2.owner.equals(klass.name) && in2.name.startsWith("redirect") && in2.name.endsWith("getFov")) // Wi Zoom compatibility
             ) {
@@ -50,7 +47,7 @@ public class GameRendererTransformer extends AsmTransformer {
                 insns.add(new VarInsnNode(Opcodes.DSTORE, method.maxLocals));
                 generateEventCall(insns, new VarInsnNode(Opcodes.DLOAD, method.maxLocals));
 
-                method.instructions.insert(insn, insns);
+                method.instructions.insert(insn.getNext(), insns);
                 injectionCount++;
             }
         }

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils;
@@ -11,9 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
-import meteordevelopment.meteorclient.mixin.MinecraftServerAccessor;
+import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
@@ -32,6 +30,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
+import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
@@ -51,9 +50,9 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Range;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetSocketAddress;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -67,11 +66,10 @@ public class Utils {
     public static final Color WHITE = new Color(255, 255, 255);
     public static boolean rendering3D = true;
     public static boolean renderingEntityOutline = false;
-    public static int minimumLightLevel;
     public static double frameTime;
     public static Screen screenToOpen;
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(Utils.class);
     }
@@ -144,7 +142,7 @@ public class Utils {
     }
 
     public static int getRenderDistance() {
-        return Math.max(mc.options.viewDistance, ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
+        return Math.max(mc.options.getViewDistance().getValue(), ((ClientPlayNetworkHandlerAccessor) mc.getNetworkHandler()).getChunkLoadDistance());
     }
 
     public static int getWindowWidth() {
@@ -265,8 +263,10 @@ public class Utils {
     }
 
     public static String getWorldName() {
+        // Singleplayer
         if (mc.isInSingleplayer()) {
-            // Singleplayer
+            if (mc.world == null) return "";
+
             File folder = ((MinecraftServerAccessor) mc.getServer()).getSession().getWorldDirectory(mc.world.getRegistryKey()).toFile();
             if (folder.toPath().relativize(mc.runDirectory.toPath()).getNameCount() != 2) {
                 folder = folder.getParentFile();
@@ -274,8 +274,8 @@ public class Utils {
             return folder.getName();
         }
 
+        // Multiplayer
         if (mc.getCurrentServerEntry() != null) {
-            // Multiplayer
             String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
             if (SystemUtils.IS_OS_WINDOWS) {
                 name = name.replace(":", "_");
@@ -368,9 +368,8 @@ public class Utils {
         };
     }
 
-    public static byte[] readBytes(File file) {
+    public static byte[] readBytes(InputStream in) {
         try {
-            InputStream in = new FileInputStream(file);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
             byte[] buffer = new byte[256];
@@ -507,5 +506,57 @@ public class Utils {
             (int) (first.g * (1 - v) + second.g * v),
             (int) (first.b * (1 - v) + second.b * v)
         );
+    }
+
+    public static boolean isLoading() {
+        ResourceReloadLogger.ReloadState state = ((ResourceReloadLoggerAccessor) ((MinecraftClientAccessor) mc).getResourceReloadLogger()).getReloadState();
+        return state == null || !((ReloadStateAccessor) state).isFinished();
+    }
+
+    public static int parsePort(String full) {
+        if (full == null || full.isBlank() || !full.contains(":")) return -1;
+
+        int port;
+
+        try {
+            port = Integer.parseInt(full.substring(full.lastIndexOf(':') + 1, full.length() - 1));
+        }
+        catch (NumberFormatException ignored) {
+            port = -1;
+        }
+
+        return port;
+    }
+
+    public static String parseAddress(String full) {
+        if (full == null || full.isBlank() || !full.contains(":")) return full;
+        return full.substring(0, full.lastIndexOf(':'));
+    }
+
+    public static boolean resolveAddress(String address) {
+        if (address == null || address.isBlank()) return false;
+
+        int port = parsePort(address);
+        if (port == -1) port = 25565;
+        else address = parseAddress(address);
+
+        return resolveAddress(address, port);
+    }
+
+    public static boolean resolveAddress(String address, int port) {
+        if (port <= 0 || port > 65535 || address == null || address.isBlank()) return false;
+        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+        return !socketAddress.isUnresolved();
+    }
+
+    // Filters
+
+    public static boolean nameFilter(String text, char character) {
+        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '_' || character == '-' || character == '.' || character == ' ';
+    }
+
+    public static boolean ipFilter(String text, char character) {
+        if (text.contains(":") && character == ':') return false;
+        return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
     }
 }

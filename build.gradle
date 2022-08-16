@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.10-SNAPSHOT'
+    id 'fabric-loom' version '0.12-SNAPSHOT'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
@@ -7,13 +7,13 @@ plugins {
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
 
 archivesBaseName = project.archives_base_name
-version = project.mod_version + (System.getenv("CIRCLE_BUILD_NUM") != null ? ("-" + System.getenv("CIRCLE_BUILD_NUM")) : "")
+version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
 group = project.maven_group
 
 repositories {
     maven {
 		name = "meteor-maven"
-		url = "https://maven.meteordev.org"
+		url = "https://maven.meteordev.org/releases"
 	}
     maven {
         name = "meteor-maven-snapshots"
@@ -23,6 +23,7 @@ repositories {
         name = "vram"
         url = "https://maven.vram.io//"
     }
+    mavenCentral()
 }
 
 dependencies {
@@ -37,19 +38,26 @@ dependencies {
 	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Compat fixes
-    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.api_version)
+    modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
     modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") { transitive = false }
     modCompileOnly("io.vram:canvas-fabric-mc118:1.0.+") { transitive = false }
 
-	// Baritone integration
-    modImplementation "baritone:baritone:${project.baritone_version}"
-    include "baritone:baritone:${project.baritone_version}"
+	// Baritone (https://github.com/MeteorDevelopment/baritone)
+    modImplementation "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+    include "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "meteordevelopment:discord-ipc:${project.discordipc_version}"
     library "org.reflections:reflections:${project.reflections_version}"
+
+    // Proxies
+    implementation("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
+    shadow("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
+
+    implementation("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
+    shadow("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
 
     // Launch sub project
     shadow project(":launch")
@@ -66,7 +74,7 @@ shadowJar {
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-               "devbuild": System.getenv("CIRCLE_BUILD_NUM") ?: "",
+               "devbuild": project.findProperty("devbuild") ?: "",
                "commit": project.findProperty("commit") ?: ""
     }
 }
@@ -107,7 +115,7 @@ publishing {
     publications {
         java(MavenPublication) {
             artifactId = "meteor-client"
-            version = System.getenv("CIRCLE_BUILD_NUM") == null ? project.mod_version : "SNAPSHOT"
+            version = project.hasProperty("devbuild") ? (project.mod_version + "-SNAPSHOT") : project.mod_version
 
             artifact(remapJar) {
                 builtBy remapJar
@@ -126,7 +134,7 @@ publishing {
     repositories {
         maven {
             name = "meteor-maven"
-            url = System.getenv("CIRCLE_BUILD_NUM") == null ? "https://maven.meteordev.org" : "https://maven.meteordev.org/snapshots"
+            url = project.hasProperty("devbuild") ? "https://maven.meteordev.org/snapshots" : "https://maven.meteordev.org/releases"
 
             credentials {
                 username = System.getenv("MAVEN_METEOR_ALIAS")
@@ -139,5 +147,3 @@ publishing {
         }
     }
 }
-
-apply from: "scripts/packetutils.gradle"

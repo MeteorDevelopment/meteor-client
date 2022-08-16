@@ -1,16 +1,15 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
-import meteordevelopment.meteorclient.addons.AddonManager;
-import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PostInit;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
@@ -29,12 +28,12 @@ public class ChatUtils {
 
     private static Text PREFIX;
 
-    @Init(stage = InitStage.Post)
+    @PostInit
     public static void init() {
-        PREFIX = new LiteralText("")
+        PREFIX = Text.literal("")
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
-            .append(new LiteralText("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(AddonManager.METEOR.color.getPacked()))))
+            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(new TextColor(MeteorClient.ADDON.color.getPacked()))))
             .append("] ");
     }
 
@@ -59,7 +58,18 @@ public class ChatUtils {
         forcedPrefixClassName = klass.getName();
     }
 
+    // Player
+
+    /** Sends the message as if the user typed it into chat. */
+    public static void sendPlayerMsg(String message) {
+        mc.inGameHud.getChatHud().addToMessageHistory(message);
+
+        if (message.startsWith("/")) mc.player.sendCommand(message.substring(1), null);
+        else mc.player.sendChatMessage(message, null);
+    }
+
     // Default
+
     public static void info(String message, Object... args) {
         sendMsg(Formatting.GRAY, message, args);
     }
@@ -69,6 +79,7 @@ public class ChatUtils {
     }
 
     // Warning
+
     public static void warning(String message, Object... args) {
         sendMsg(Formatting.YELLOW, message, args);
     }
@@ -78,6 +89,7 @@ public class ChatUtils {
     }
 
     // Error
+
     public static void error(String message, Object... args) {
         sendMsg(Formatting.RED, message, args);
     }
@@ -87,6 +99,7 @@ public class ChatUtils {
     }
 
     // Misc
+
     public static void sendMsg(Text message) {
         sendMsg(null, message);
     }
@@ -108,7 +121,7 @@ public class ChatUtils {
     }
 
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
-        BaseText message = new LiteralText(messageContent);
+        MutableText message = Text.literal(messageContent);
         message.setStyle(message.getStyle().withFormatting(messageColor));
         sendMsg(id, prefixTitle, prefixColor, message);
     }
@@ -116,23 +129,23 @@ public class ChatUtils {
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Text msg) {
         if (mc.world == null) return;
 
-        BaseText message = new LiteralText("");
+        MutableText message = Text.literal("");
         message.append(getPrefix());
         if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
 
         if (!Config.get().deleteChatFeedback.get()) id = 0;
 
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).add(message, id);
+        ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
     }
 
-    private static BaseText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
-        BaseText prefix = new LiteralText("");
+    private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
+        MutableText prefix = Text.literal("");
         prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
 
         prefix.append("[");
 
-        BaseText moduleTitle = new LiteralText(prefixTitle);
+        MutableText moduleTitle = Text.literal(prefixTitle);
         moduleTitle.setStyle(moduleTitle.getStyle().withFormatting(prefixColor));
         prefix.append(moduleTitle);
 
@@ -181,17 +194,17 @@ public class ChatUtils {
 
     private static String formatMsg(String format, Formatting defaultColor, Object... args) {
         String msg = String.format(format, args);
-        msg = msg.replaceAll("\\(default\\)", defaultColor.toString());
-        msg = msg.replaceAll("\\(highlight\\)", Formatting.WHITE.toString());
-        msg = msg.replaceAll("\\(underline\\)", Formatting.UNDERLINE.toString());
+        msg = msg.replace("(default)", defaultColor.toString());
+        msg = msg.replace("(highlight)", Formatting.WHITE.toString());
+        msg = msg.replace("(underline)", Formatting.UNDERLINE.toString());
 
         return msg;
     }
 
-    public static BaseText formatCoords(Vec3d pos) {
+    public static MutableText formatCoords(Vec3d pos) {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
         coordsString = formatMsg(coordsString, Formatting.GRAY);
-        BaseText coordsText = new LiteralText(coordsString);
+        MutableText coordsText = Text.literal(coordsString);
         coordsText.setStyle(coordsText.getStyle()
                 .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
@@ -200,7 +213,7 @@ public class ChatUtils {
                 ))
                 .withHoverEvent(new HoverEvent(
                         HoverEvent.Action.SHOW_TEXT,
-                        new LiteralText("Set as Baritone goal")
+                        Text.literal("Set as Baritone goal")
                 ))
         );
         return coordsText;

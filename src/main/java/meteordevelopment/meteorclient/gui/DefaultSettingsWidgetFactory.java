@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui;
@@ -9,13 +9,20 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
+import meteordevelopment.meteorclient.gui.utils.Cell;
+import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.widgets.*;
 import meteordevelopment.meteorclient.gui.widgets.containers.*;
 import meteordevelopment.meteorclient.gui.widgets.input.*;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
+import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -29,6 +36,8 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     protected interface Factory {
         void create(WTable table, Setting<?> setting);
     }
+
+    private static final SettingColor WHITE = new SettingColor();
 
     private final GuiTheme theme;
     private final Map<Class<?>, Factory> factories = new HashMap<>();
@@ -62,6 +71,8 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
+        factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
+        factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
     }
 
     @Override
@@ -154,7 +165,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     private void intW(WTable table, IntSetting setting) {
         WIntEdit edit = table.add(theme.intEdit(setting.get(), setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.noSlider)).expandX().widget();
 
-        edit.actionOnRelease = () -> {
+        edit.action = () -> {
             if (!setting.set(edit.get())) edit.set(setting.get());
         };
 
@@ -176,14 +187,18 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
     }
 
     private void stringW(WTable table, StringSetting setting) {
-        WTextBox textBox = table.add(theme.textBox(setting.get())).expandX().widget();
+        CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
+        Cell<WTextBox> cell = table.add(theme.textBox(setting.get(), filter, setting.renderer));
+        if (setting.wide) cell.minWidth(Utils.getWindowWidth() - Utils.getWindowWidth() / 4.0);
+
+        WTextBox textBox = cell.expandX().widget();
         textBox.action = () -> setting.set(textBox.get());
 
         reset(table, setting, () -> textBox.set(setting.get()));
     }
 
     private void stringListW(WTable table, StringListSetting setting) {
-        WTable wtable = table.add(theme.table()).widget();
+        WTable wtable = table.add(theme.table()).expandX().widget();
         StringListSetting.fillTable(theme, wtable, setting);
     }
 
@@ -331,6 +346,79 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         };
 
         reset(list, setting, () -> item.set(setting.get().potion));
+    }
+
+    private void fontW(WTable table, FontFaceSetting setting) {
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+        WLabel label = list.add(theme.label(setting.get().info.family())).widget();
+
+        WButton button = list.add(theme.button("Select")).expandCellX().widget();
+        button.action = () -> {
+            WidgetScreen screen = new FontFaceSettingScreen(theme, setting);
+            screen.onClosed(() -> label.set(setting.get().info.family()));
+
+            mc.setScreen(screen);
+        };
+
+        reset(list, setting, () -> label.set(Fonts.DEFAULT_FONT.info.family()));
+    }
+
+    private void colorListW(WTable table, ColorListSetting setting) {
+        WTable tab = table.add(theme.table()).expandX().widget();
+        WTable t = tab.add(theme.table()).expandX().widget();
+        tab.row();
+
+        colorListWFill(t, setting);
+
+        WPlus add = tab.add(theme.plus()).expandCellX().widget();
+        add.action = () -> {
+            setting.get().add(new SettingColor());
+            setting.onChanged();
+
+            t.clear();
+            colorListWFill(t, setting);
+        };
+
+        reset(tab, setting, () -> {
+            t.clear();
+            colorListWFill(t, setting);
+        });
+    }
+
+    private void colorListWFill(WTable t, ColorListSetting setting) {
+        int i = 0;
+        for (SettingColor color : setting.get()) {
+            int _i = i;
+
+            t.add(theme.label(i + ":"));
+
+            t.add(theme.quad(color)).widget();
+
+            WButton edit = t.add(theme.button(GuiRenderer.EDIT)).widget();
+            edit.action = () -> {
+                SettingColor defaultValue = WHITE;
+                if (_i < setting.getDefaultValue().size()) defaultValue = setting.getDefaultValue().get(_i);
+
+                ColorSetting set = new ColorSetting(setting.name, setting.description, defaultValue, settingColor -> {
+                    setting.get().get(_i).set(settingColor);
+                    setting.onChanged();
+                }, null, null);
+                set.set(setting.get().get(_i));
+                mc.setScreen(new ColorSettingScreen(theme, set));
+            };
+
+            WMinus remove = t.add(theme.minus()).expandCellX().right().widget();
+            remove.action = () -> {
+                setting.get().remove(_i);
+                setting.onChanged();
+
+                t.clear();
+                colorListWFill(t, setting);
+            };
+
+            t.row();
+            i++;
+        }
     }
 
     // Other

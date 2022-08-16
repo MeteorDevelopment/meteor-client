@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -12,10 +12,10 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -30,7 +30,7 @@ public class CommandsCommand extends Command {
         builder.executes(context -> {
             ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.get().getCount());
 
-            BaseText commands = new LiteralText("");
+            MutableText commands = Text.literal("");
             Commands.get().getAll().forEach(command -> commands.append(getCommandText(command)));
             ChatUtils.sendMsg(commands);
 
@@ -38,13 +38,13 @@ public class CommandsCommand extends Command {
         });
     }
 
-    private BaseText getCommandText(Command command) {
+    private MutableText getCommandText(Command command) {
         // Hover tooltip
-        BaseText tooltip = new LiteralText("");
+        MutableText tooltip = Text.literal("");
 
-        tooltip.append(new LiteralText(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
+        tooltip.append(Text.literal(Utils.nameToTitle(command.getName())).formatted(Formatting.BLUE, Formatting.BOLD)).append("\n");
 
-        BaseText aliases = new LiteralText(Config.get().prefix.get() + command.getName());
+        MutableText aliases = Text.literal(Config.get().prefix.get() + command.getName());
         if (command.getAliases().size() > 0) {
             aliases.append(", ");
             for (String alias : command.getAliases()) {
@@ -55,11 +55,11 @@ public class CommandsCommand extends Command {
         }
         tooltip.append(aliases.formatted(Formatting.GRAY)).append("\n\n");
 
-        tooltip.append(new LiteralText(command.getDescription()).formatted(Formatting.WHITE));
+        tooltip.append(Text.literal(command.getDescription()).formatted(Formatting.WHITE));
 
         // Text
-        BaseText text = new LiteralText(Utils.nameToTitle(command.getName()));
-        if (command != Commands.get().getAll().get(Commands.get().getAll().size() - 1)) text.append(new LiteralText(", ").formatted(Formatting.GRAY));
+        MutableText text = Text.literal(Utils.nameToTitle(command.getName()));
+        if (command != Commands.get().getAll().get(Commands.get().getAll().size() - 1)) text.append(Text.literal(", ").formatted(Formatting.GRAY));
         text.setStyle(text
                 .getStyle()
                 .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip))

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.widgets.containers;
@@ -62,6 +62,10 @@ public class WTable extends WContainer {
         }
 
         rowI--;
+    }
+
+    public List<Cell<?>> getRow(int i) {
+        return rows.get(i);
     }
 
     @Override

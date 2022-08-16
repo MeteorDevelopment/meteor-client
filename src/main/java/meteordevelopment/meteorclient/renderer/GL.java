@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer;
@@ -9,8 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
@@ -35,7 +34,10 @@ public class GL {
 
     private static boolean changeBufferRenderer = true;
 
-    @Init(stage = InitStage.Pre)
+    public static int CURRENT_IBO;
+    private static int prevIbo;
+
+    @PreInit
     public static void init() {
         if (FabricLoader.getInstance().isModLoaded("canvas")) changeBufferRenderer = false;
     }
@@ -60,6 +62,14 @@ public class GL {
 
     // Deletion
 
+    public static void deleteBuffer(int buffer) {
+        GlStateManager._glDeleteBuffers(buffer);
+    }
+
+    public static void deleteVertexArray(int vao) {
+        GlStateManager._glDeleteVertexArrays(vao);
+    }
+
     public static void deleteShader(int shader) {
         GlStateManager.glDeleteShader(shader);
     }
@@ -80,17 +90,16 @@ public class GL {
 
     public static void bindVertexArray(int vao) {
         GlStateManager._glBindVertexArray(vao);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexArray(vao);
+        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexBuffer(null);
     }
 
     public static void bindVertexBuffer(int vbo) {
         GlStateManager._glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentVertexBuffer(vbo);
     }
 
     public static void bindIndexBuffer(int ibo) {
-        GlStateManager._glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        if (changeBufferRenderer) BufferRendererAccessor.setCurrentElementBuffer(ibo);
+        if (ibo != 0) prevIbo = CURRENT_IBO;
+        GlStateManager._glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo != 0 ? ibo : prevIbo);
     }
 
     public static void bindFramebuffer(int fbo) {

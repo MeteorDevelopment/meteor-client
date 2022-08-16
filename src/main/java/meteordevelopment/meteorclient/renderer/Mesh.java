@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer;
@@ -94,6 +94,12 @@ public class Mesh {
         GL.bindVertexArray(0);
         GL.bindVertexBuffer(0);
         GL.bindIndexBuffer(0);
+    }
+
+    public void destroy() {
+        GL.deleteBuffer(ibo);
+        GL.deleteBuffer(vbo);
+        GL.deleteVertexArray(vao);
     }
 
     public void begin() {
@@ -276,6 +282,10 @@ public class Mesh {
         GL.restoreState();
 
         beganRendering = false;
+    }
+
+    public boolean isBuilding() {
+        return building;
     }
 
     protected void beforeRender() {}

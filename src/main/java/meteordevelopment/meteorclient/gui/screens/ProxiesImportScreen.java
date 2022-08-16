@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2022 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.screens;
@@ -28,7 +28,7 @@ public class ProxiesImportScreen extends WindowScreen {
         this.file = file;
         this.onClosed(() -> {
             if (parent instanceof ProxiesScreen screen) {
-                screen.dirty = true;
+                screen.reload();
             }
         });
     }
@@ -43,21 +43,28 @@ public class ProxiesImportScreen extends WindowScreen {
                 int pog = 0, bruh = 0;
                 for (String line : Files.readAllLines(file.toPath())) {
                     Matcher matcher = Proxies.PROXY_PATTERN.matcher(line);
+
                     if (matcher.matches()) {
-                        Proxy proxy = new Proxy();
-                        proxy.address = matcher.group(2).replaceAll("\\b0+\\B", "");
-                        // should be safe to parse because of regex matching
-                        proxy.port = Integer.parseInt(matcher.group(3));
-                        proxy.name = matcher.group(1) != null ? matcher.group(1) : proxy.address + ":" + proxy.port;
-                        proxy.type = matcher.group(4) != null ? ProxyType.parse(matcher.group(4)) : ProxyType.Socks4;
+                        String address = matcher.group(2).replaceAll("\\b0+\\B", "");
+                        int port = Integer.parseInt(matcher.group(3));
+
+                        Proxy proxy = new Proxy.Builder()
+                            .address(address)
+                            .port(port)
+                            .name(matcher.group(1) != null ? matcher.group(1) : address + ":" + port)
+                            .type(matcher.group(4) != null ? ProxyType.parse(matcher.group(4)) : ProxyType.Socks4)
+                            .build();
+
                         if (proxies.add(proxy)) {
-                            list.add(theme.label("Imported proxy: " + proxy.name).color(Color.GREEN));
+                            list.add(theme.label("Imported proxy: " + proxy.name.get()).color(Color.GREEN));
                             pog++;
-                        } else {
-                            list.add(theme.label("Proxy already exists: " + proxy.name).color(Color.ORANGE));
+                        }
+                        else {
+                            list.add(theme.label("Proxy already exists: " + proxy.name.get()).color(Color.ORANGE));
                             bruh++;
                         }
-                    } else {
+                    }
+                    else {
                         list.add(theme.label("Invalid proxy: " + line).color(Color.RED));
                         bruh++;
                     }

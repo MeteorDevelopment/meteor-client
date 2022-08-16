@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
@@ -73,6 +73,13 @@ public class InventoryTweaks extends Module {
             mc.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(mc.player.playerScreenHandler.syncId));
             invOpened = false;
         })
+        .build()
+    );
+
+    private final Setting<Boolean> armorStorage = sgGeneral.add(new BoolSetting.Builder()
+        .name("armor-storage")
+        .description("Allows you to put normal items in your armor slots.")
+        .defaultValue(true)
         .build()
     );
 
@@ -305,5 +312,9 @@ public class InventoryTweaks extends Module {
 
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
+    }
+
+    public boolean armorStorage() {
+        return isActive() && armorStorage.get();
     }
 }

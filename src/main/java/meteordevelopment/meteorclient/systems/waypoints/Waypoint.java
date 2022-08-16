@@ -1,163 +1,201 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.waypoints;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.Map;
+import java.util.Objects;
 
 public class Waypoint implements ISerializable<Waypoint> {
-    public String name = "Meteor on Crack!";
-    public String icon = "Square";
-    public SettingColor color = new SettingColor(225, 25, 25);
+    public final Settings settings = new Settings();
 
-    public int x, y, z;
+    private final SettingGroup sgVisual = settings.createGroup("Visual");
+    private final SettingGroup sgPosition = settings.createGroup("Position");
 
-    public boolean visible = true;
-    public int maxVisibleDistance = 1000;
-    public double scale = 1;
+    public Setting<String> name = sgVisual.add(new StringSetting.Builder()
+        .name("name")
+        .description("The name of the waypoint.")
+        .defaultValue("Home")
+        .build()
+    );
 
-    public boolean overworld, nether, end;
+    public Setting<String> icon = sgVisual.add(new ProvidedStringSetting.Builder()
+        .name("icon")
+        .description("The icon of the waypoint.")
+        .defaultValue("Square")
+        .supplier(() -> Waypoints.BUILTIN_ICONS)
+        .onChanged(v -> validateIcon())
+        .build()
+    );
 
-    public Dimension actualDimension;
+    public Setting<SettingColor> color = sgVisual.add(new ColorSetting.Builder()
+        .name("color")
+        .description("The color of the waypoint.")
+        .defaultValue(MeteorClient.ADDON.color.toSetting())
+        .build()
+    );
 
-    public void validateIcon() {
-        Map<String, AbstractTexture> icons = Waypoints.get().icons;
+    public Setting<Boolean> visible = sgVisual.add(new BoolSetting.Builder()
+        .name("visible")
+        .description("Whether to show the waypoint.")
+        .defaultValue(true)
+        .build()
+    );
 
-        AbstractTexture texture = icons.get(icon);
-        if (texture == null && !icons.isEmpty()) {
-            icon = icons.keySet().iterator().next();
-        }
+    public Setting<Integer> maxVisible = sgVisual.add(new IntSetting.Builder()
+        .name("max-visible-distance")
+        .description("How far away to render the waypoint.")
+        .defaultValue(5000)
+        .build()
+    );
+
+    public Setting<Double> scale = sgVisual.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("The scale of the waypoint.")
+        .defaultValue(1)
+        .build()
+    );
+
+    public Setting<BlockPos> pos = sgPosition.add(new BlockPosSetting.Builder()
+        .name("location")
+        .description("The location of the waypoint.")
+        .defaultValue(BlockPos.ORIGIN)
+        .build()
+    );
+
+    public Setting<Dimension> dimension = sgPosition.add(new EnumSetting.Builder<Dimension>()
+        .name("dimension")
+        .description("Which dimension the waypoint is in.")
+        .defaultValue(Dimension.Overworld)
+        .build()
+    );
+
+    public Setting<Boolean> opposite = sgPosition.add(new BoolSetting.Builder()
+        .name("opposite-dimension")
+        .description("Whether to show the waypoint in the opposite dimension.")
+        .defaultValue(true)
+        .visible(() -> dimension.get() != Dimension.End)
+        .build()
+    );
+
+    private Waypoint() {}
+    public Waypoint(NbtElement tag) {
+        fromTag((NbtCompound) tag);
     }
 
     public void renderIcon(double x, double y, double a, double size) {
-        validateIcon();
-
-        AbstractTexture texture = Waypoints.get().icons.get(icon);
+        AbstractTexture texture = Waypoints.get().icons.get(icon.get());
         if (texture == null) return;
 
-        int preA = color.a;
-        color.a *= a;
+        int preA = color.get().a;
+        color.get().a *= a;
 
         GL.bindTexture(texture.getGlId());
         Renderer2D.TEXTURE.begin();
-        Renderer2D.TEXTURE.texQuad(x, y, size, size, color);
+        Renderer2D.TEXTURE.texQuad(x, y, size, size, color.get());
         Renderer2D.TEXTURE.render(null);
 
-        color.a = preA;
+        color.get().a = preA;
     }
 
-    private int findIconIndex() {
-        int i = 0;
-        for (String icon : Waypoints.get().icons.keySet()) {
-            if (this.icon.equals(icon)) return i;
-            i++;
+    public BlockPos getPos() {
+        Dimension dim = dimension.get();
+        BlockPos pos = this.pos.get();
+
+        Dimension currentDim = PlayerUtils.getDimension();
+        if (dim == currentDim || dim.equals(Dimension.End)) return this.pos.get();
+
+        return switch (dim) {
+            case Overworld -> new BlockPos(pos.getX() / 8, pos.getY(), pos.getZ() / 8);
+            case Nether -> new BlockPos(pos.getX() * 8, pos.getY(), pos.getZ() * 8);
+            default -> null;
+        };
+    }
+
+    private void validateIcon() {
+        Map<String, AbstractTexture> icons = Waypoints.get().icons;
+
+        AbstractTexture texture = icons.get(icon.get());
+        if (texture == null && !icons.isEmpty()) {
+            icon.set(icons.keySet().iterator().next());
+        }
+    }
+
+    public static class Builder {
+        private String name = "", icon = "";
+        private BlockPos pos = BlockPos.ORIGIN;
+        private Dimension dimension = Dimension.Overworld;
+
+        public Builder name(String name) {
+            this.name = name;
+            return this;
         }
 
-        return -1;
-    }
-
-    private int correctIconIndex(int i) {
-        if (i < 0) return Waypoints.get().icons.size() + i;
-        else if (i >= Waypoints.get().icons.size()) return i - Waypoints.get().icons.size();
-        return i;
-    }
-
-    private String getIcon(int i) {
-        i = correctIconIndex(i);
-
-        int _i = 0;
-        for (String icon : Waypoints.get().icons.keySet()) {
-            if (_i == i) return icon;
-            _i++;
+        public Builder icon(String icon) {
+            this.icon = icon;
+            return this;
         }
 
-        return "Square";
-    }
-
-    public void prevIcon() {
-        icon = getIcon(findIconIndex() - 1);
-    }
-
-    public void nextIcon() {
-        icon = getIcon(findIconIndex() + 1);
-    }
-
-    public Vec3 getCoords() {
-        double x = this.x;
-        double y = this.y;
-        double z = this.z;
-
-        if (actualDimension == Dimension.Overworld && PlayerUtils.getDimension() == Dimension.Nether) {
-            x = x / 8f;
-            z = z / 8f;
-        }
-        else if (actualDimension == Dimension.Nether && PlayerUtils.getDimension() == Dimension.Overworld) {
-            x = x * 8;
-            z = z * 8;
+        public Builder pos(BlockPos pos) {
+            this.pos = pos;
+            return this;
         }
 
-        return new Vec3(x, y, z);
+        public Builder dimension(Dimension dimension) {
+            this.dimension = dimension;
+            return this;
+        }
+
+        public Waypoint build() {
+            Waypoint waypoint = new Waypoint();
+
+            if (!name.equals(waypoint.name.getDefaultValue())) waypoint.name.set(name);
+            if (!icon.equals(waypoint.icon.getDefaultValue())) waypoint.icon.set(icon);
+            if (!pos.equals(waypoint.pos.getDefaultValue())) waypoint.pos.set(pos);
+            if (!dimension.equals(waypoint.dimension.getDefaultValue())) waypoint.dimension.set(dimension);
+
+            return waypoint;
+        }
     }
 
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
 
-        tag.putString("name", name);
-        tag.putString("icon", icon);
-        tag.put("color", color.toTag());
-
-        tag.putInt("x", x);
-        tag.putInt("y", y);
-        tag.putInt("z", z);
-
-        tag.putBoolean("visible", visible);
-        tag.putInt("maxVisibleDistance", maxVisibleDistance);
-        tag.putDouble("scale", scale);
-
-        tag.putString("dimension", actualDimension.name());
-
-        tag.putBoolean("overworld", overworld);
-        tag.putBoolean("nether", nether);
-        tag.putBoolean("end", end);
+        tag.put("settings", settings.toTag());
 
         return tag;
     }
 
     @Override
     public Waypoint fromTag(NbtCompound tag) {
-        name = tag.getString("name");
-        icon = tag.getString("icon");
-        color.fromTag(tag.getCompound("color"));
-
-        x = tag.getInt("x");
-        y = tag.getInt("y");
-        z = tag.getInt("z");
-
-        visible = tag.getBoolean("visible");
-        maxVisibleDistance = tag.getInt("maxVisibleDistance");
-        scale = tag.getDouble("scale");
-
-        actualDimension = Dimension.valueOf(tag.getString("dimension"));
-
-        overworld = tag.getBoolean("overworld");
-        nether = tag.getBoolean("nether");
-        end = tag.getBoolean("end");
-
-        if (!Waypoints.get().icons.containsKey(icon)) icon = "Square";
+        if (tag.contains("settings")) {
+            settings.fromTag(tag.getCompound("settings"));
+        }
 
         return this;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Waypoint waypoint = (Waypoint) o;
+        return Objects.equals(waypoint.name.get(), this.name.get());
     }
 }

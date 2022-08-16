@@ -1,11 +1,12 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.client.util.Session;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -33,6 +34,9 @@ public interface MinecraftClientAccessor {
 
     @Accessor("itemUseCooldown")
     int getItemUseCooldown();
+
+    @Accessor("resourceReloadLogger")
+    ResourceReloadLogger getResourceReloadLogger();
 
     @Invoker("doAttack")
     boolean leftClick();

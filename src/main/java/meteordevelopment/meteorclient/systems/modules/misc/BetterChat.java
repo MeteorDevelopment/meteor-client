@@ -1,12 +1,12 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import it.unimi.dsi.fastutil.chars.Char2CharArrayMap;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
+import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
@@ -19,10 +19,13 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.client.util.ChatMessages;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.MathHelper;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -101,6 +104,7 @@ public class BetterChat extends Module {
         .name("regex-filter")
         .description("Regex filter used for filtering chat messages.")
         .visible(filterRegex::get)
+        .onChanged(strings -> compileFilterRegexList())
         .build()
     );
 
@@ -195,7 +199,7 @@ public class BetterChat extends Module {
         .build()
     );
 
-    private final Char2CharMap SMALL_CAPS = new Char2CharArrayMap();
+    private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
     public BetterChat() {
@@ -204,29 +208,18 @@ public class BetterChat extends Module {
         String[] a = "abcdefghijklmnopqrstuvwxyz".split("");
         String[] b = "ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴩqʀꜱᴛᴜᴠᴡxyᴢ".split("");
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
+        compileFilterRegexList();
     }
+
+    private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
-        ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().removeIf((message) -> message.getId() == event.id && event.id != 0);
-
         Text message = event.getMessage();
 
         if (filterRegex.get()) {
-            for (int i = 0; i < regexFilters.get().size(); i++) {
-                Pattern p;
-
-                try {
-                    p = Pattern.compile(regexFilters.get().get(i));
-                }
-                catch (PatternSyntaxException e) {
-                    String removed = regexFilters.get().remove(i);
-                    error("Removing Invalid regex: %s", removed);
-                    continue;
-                }
-
-                if (p.matcher(message.getString()).find()) {
+            for (Pattern pattern : filterRegexList) {
+                if (pattern.matcher(message.getString()).find()) {
                     event.cancel();
                     return;
                 }
@@ -234,69 +227,85 @@ public class BetterChat extends Module {
         }
 
         if (timestamps.get()) {
-            Matcher matcher = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)").matcher(message.getString());
+            Matcher matcher = timestampRegex.matcher(message.getString());
             if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
 
-            Text timestamp = new LiteralText("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
+            Text timestamp = Text.literal("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
 
-            message = new LiteralText("").append(timestamp).append(message);
+            message = Text.literal("").append(timestamp).append(message);
         }
 
         if (playerHeads.get()) {
-            message = new LiteralText("  ").append(message);
+            message = Text.literal("  ").append(message);
         }
 
-        for (int i = 0; i < antiSpamDepth.get(); i++) {
-            if (antiSpam.get()) {
-                Text antiSpammed = appendAntiSpam(message, i);
+        if (antiSpam.get()) {
+            Text antiSpammed = appendAntiSpam(message);
 
-                if (antiSpammed != null) {
-                    message = antiSpammed;
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(i);
-                    ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(i);
-                }
+            if (antiSpammed != null) {
+                message = antiSpammed;
             }
         }
 
         event.setMessage(message);
     }
 
-    private Text appendAntiSpam(Text text, int index) {
-        List<ChatHudLine<OrderedText>> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
-        if (visibleMessages.isEmpty() || index < 0 || index > visibleMessages.size() - 1) return null;
+    private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
 
-        ChatHudLine<OrderedText> visibleMessage = visibleMessages.get(index);
+    /**
+     * @author Crosby
+     * Adding author tag because this is spaghetti code
+     */
+    private Text appendAntiSpam(Text text) {
+        Text returnText = null;
+        int messageIndex = -1;
+        MutableText originalMessage = null;
 
-        LiteralText parsed = new LiteralText("");
+        for (int i = 0; i < antiSpamDepth.get(); i++) {
+            List<ChatHudLine> messages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages();
+            if (messages.isEmpty() || i > messages.size() - 1) return null;
 
-        visibleMessage.getText().accept((i, style, codePoint) -> {
-            parsed.append(new LiteralText(new String(Character.toChars(codePoint))).setStyle(style));
-            return true;
-        });
+            MutableText message = messages.get(i).content().copy();
+            String oldMessage = message.getString();
+            String newMessage = text.getString();
 
-        String oldMessage = parsed.getString();
-        String newMessage = text.getString();
+            if (oldMessage.equals(newMessage)) {
+                originalMessage = message.copy();
+                messageIndex = i;
+                returnText = message.append(Text.literal(" (2)").formatted(Formatting.GRAY));
+                break;
+            } else {
+                Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
-        if (oldMessage.equals(newMessage)) {
-            return parsed.append(new LiteralText(" (2)").formatted(Formatting.GRAY));
-        }
-        else {
-            Matcher matcher = Pattern.compile(".*(\\([0-9]+\\)$)").matcher(oldMessage);
+                if (!matcher.matches()) continue;
 
-            if (!matcher.matches()) return null;
+                String group = matcher.group(matcher.groupCount());
+                int number = Integer.parseInt(group.substring(1, group.length() - 1));
 
-            String group = matcher.group(matcher.groupCount());
-            int number = Integer.parseInt(group.substring(1, group.length() - 1));
+                String counter = " (" + number + ")";
 
-            String counter = " (" + number + ")";
-
-            if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
-                for (int i = 0; i < counter.length(); i++) parsed.getSiblings().remove(parsed.getSiblings().size() - 1);
-                return parsed.append(new LiteralText( " (" + (number + 1) + ")").formatted(Formatting.GRAY));
+                if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
+                    message.getSiblings().remove(message.getSiblings().size() - 1);
+                    originalMessage = message.copy();
+                    messageIndex = i;
+                    returnText = message.append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
+                    break;
+                }
             }
         }
 
-        return null;
+        if (returnText != null) {
+            ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(messageIndex);
+
+            List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(originalMessage, MathHelper.floor((double)mc.inGameHud.getChatHud().getWidth() / mc.inGameHud.getChatHud().getChatScale()), mc.textRenderer);
+            int lines = list.size();
+
+            for (int i = 0; i < lines; i++) {
+                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(messageIndex);
+            }
+        }
+
+        return returnText;
     }
 
     @EventHandler
@@ -310,9 +319,9 @@ public class BetterChat extends Module {
         message = getPrefix() + message + getSuffix();
 
         if (coordsProtection.get() && containsCoordinates(message)) {
-            BaseText warningMessage = new LiteralText("It looks like there are coordinates in your message! ");
+            MutableText warningMessage = Text.literal("It looks like there are coordinates in your message! ");
 
-            BaseText sendButton = getSendButton(message);
+            MutableText sendButton = getSendButton(message);
             warningMessage.append(sendButton);
 
             ChatUtils.sendMsg(warningMessage);
@@ -344,11 +353,27 @@ public class BetterChat extends Module {
         StringBuilder sb = new StringBuilder();
 
         for (char ch : message.toCharArray()) {
-            if (SMALL_CAPS.containsKey(ch)) sb.append(SMALL_CAPS.get(ch));
-            else sb.append(ch);
+            sb.append(SMALL_CAPS.getOrDefault(ch, ch));
         }
 
         return sb.toString();
+    }
+
+    // Filter Regex
+
+    private final List<Pattern> filterRegexList = new ArrayList<>();
+
+    private void compileFilterRegexList() {
+        filterRegexList.clear();
+
+        for (int i = 0; i < regexFilters.get().size(); i++) {
+            try {
+                filterRegexList.add(Pattern.compile(regexFilters.get().get(i)));
+            } catch (PatternSyntaxException e) {
+                String removed = regexFilters.get().remove(i);
+                error("Removing Invalid regex: %s", removed);
+            }
+        }
     }
 
     // Prefix and Suffix
@@ -369,19 +394,21 @@ public class BetterChat extends Module {
 
     // Coords Protection
 
+    private static final Pattern coordRegex = Pattern.compile("(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>-?\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?)");
+
     private boolean containsCoordinates(String message) {
-        return message.matches(".*(?<x>-?\\d{3,}(?:\\.\\d*)?)(?:\\s+(?<y>\\d{1,3}(?:\\.\\d*)?))?\\s+(?<z>-?\\d{3,}(?:\\.\\d*)?).*");
+        return coordRegex.matcher(message).find();
     }
 
-    private BaseText getSendButton(String message) {
-        BaseText sendButton = new LiteralText("[SEND ANYWAY]");
-        BaseText hintBaseText = new LiteralText("");
+    private MutableText getSendButton(String message) {
+        MutableText sendButton = Text.literal("[SEND ANYWAY]");
+        MutableText hintBaseText = Text.literal("");
 
-        BaseText hintMsg = new LiteralText("Send your message to the global chat even if there are coordinates:");
+        MutableText hintMsg = Text.literal("Send your message to the global chat even if there are coordinates:");
         hintMsg.setStyle(hintBaseText.getStyle().withFormatting(Formatting.GRAY));
         hintBaseText.append(hintMsg);
 
-        hintBaseText.append(new LiteralText('\n' + message));
+        hintBaseText.append(Text.literal('\n' + message));
 
         sendButton.setStyle(sendButton.getStyle()
             .withFormatting(Formatting.DARK_RED)

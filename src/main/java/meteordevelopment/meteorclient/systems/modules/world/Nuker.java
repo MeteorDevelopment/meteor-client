@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.world;
@@ -59,7 +59,7 @@ public class Nuker extends Module {
 
 
     private final Setting<Integer> range_up = sgGeneral.add(new IntSetting.Builder()
-        .name("Up")
+        .name("up")
         .description("The break range.")
         .defaultValue(1)
         .min(0)
@@ -162,14 +162,14 @@ public class Nuker extends Module {
 
     // Bounding box
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
-        .name("Bounding box")
+        .name("bounding-box")
         .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<ShapeMode> shapeModeBox = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-        .name("nuke-block-mode")
+        .name("nuke-box-mode")
         .description("How the shape for the bounding box is rendered.")
         .defaultValue(ShapeMode.Both)
         .build()
@@ -192,7 +192,7 @@ public class Nuker extends Module {
     // Broken blocks
 
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
-        .name("Broken blocks")
+        .name("broken-blocks")
         .description("Enable rendering bounding box for Cube and Uniform Cube.")
         .defaultValue(true)
         .build()
@@ -280,6 +280,7 @@ public class Nuker extends Module {
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
         renderBlocks.forEach(RenderBlock::tick);
+        renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
 
         // Update timer
         if (timer > 0) {
@@ -308,8 +309,7 @@ public class Nuker extends Module {
             pos2.set(pX_ + r-1, pY + r, pZ + r); // up
         } else {
             int direction = Math.round((mc.player.getRotationClient().y % 360) / 90);
-            direction = (direction == 4 || direction == -4)? 0: direction;
-            direction = direction == -2? 2: direction == -1? 3: direction == -3? 1: direction; // stupid java not doing modulo shit
+            direction = Math.floorMod(direction, 4);
 
             // direction == 1
             pos1.set(pX_ - (range_forward.get()), Math.ceil(pY) - range_down.get(), pZ_ - range_right.get()); // down
@@ -350,8 +350,6 @@ public class Nuker extends Module {
             boolean toofarUniformCube = maxDist(Math.floor(pX), Math.floor(pY), Math.floor(pZ), blockPos.getX(), blockPos.getY(), blockPos.getZ()) >= range.get();
             boolean toofarCube = !box.contains(Vec3d.ofCenter(blockPos));
 
-//            MeteorClient.LOG.info(box + " " + blockPos + " " + box.contains(Vec3d.ofCenter(blockPos)));
-
             if (!BlockUtils.canBreak(blockPos, blockState)
                 || (toofarSphere && shape.get() == Shape.Sphere)
                 || (toofarUniformCube && shape.get() == Shape.UniformCube)
@@ -375,13 +373,10 @@ public class Nuker extends Module {
         BlockIterator.after(() -> {
             // Sort blocks
 
-            // TODO Fix logic flow
-            if (sortMode.get() != SortMode.None) {
-                if (sortMode.get() == SortMode.Closest || sortMode.get() == SortMode.Furthest)
-                    blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
-                else if (sortMode.get() == SortMode.TopDown)
-                    blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
-            }
+			if (sortMode.get() == SortMode.TopDown)
+                blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
+            else if (sortMode.get() != SortMode.None)
+                blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
             // Check if some block was found
             if (blocks.isEmpty()) {

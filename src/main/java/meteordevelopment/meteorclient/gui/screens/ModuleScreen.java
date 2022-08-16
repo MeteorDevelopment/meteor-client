@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.screens;
@@ -87,6 +87,11 @@ public class ModuleScreen extends WindowScreen {
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle();
         };
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return !Modules.get().isBinding();
     }
 
     @Override

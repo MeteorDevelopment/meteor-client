@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -25,8 +25,8 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.BaseText;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 
@@ -84,7 +84,7 @@ public class LocateCommand extends Command {
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            BaseText text = new LiteralText("Buried Treasure located at ");
+            MutableText text = Text.literal("Buried Treasure located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -109,7 +109,7 @@ public class LocateCommand extends Command {
             }
 
             Vec3d coords = new Vec3d(nbt1.getDouble("X"),nbt1.getDouble("Y"),nbt1.getDouble("Z"));
-            BaseText text = new LiteralText("Lodestone located at ");
+            MutableText text = Text.literal("Lodestone located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -136,7 +136,7 @@ public class LocateCommand extends Command {
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            BaseText text = new LiteralText("Mansion located at ");
+            MutableText text = Text.literal("Mansion located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -160,7 +160,7 @@ public class LocateCommand extends Command {
                     error("No stronghold found nearby. You can use (highlight)Ender Eyes(default) for more success.");
                     return SINGLE_SUCCESS;
                 }
-                BaseText text = new LiteralText("Stronghold located at ");
+                MutableText text = Text.literal("Stronghold located at ");
                 text.append(ChatUtils.formatCoords(coords));
                 text.append(".");
                 info(text);
@@ -174,7 +174,7 @@ public class LocateCommand extends Command {
                 error("No nether fortress found.");
                 return SINGLE_SUCCESS;
             }
-            BaseText text = new LiteralText("Fortress located at ");
+            MutableText text = Text.literal("Fortress located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -191,7 +191,7 @@ public class LocateCommand extends Command {
                         NbtCompound iconNBT = nbt1.getCompound(0);
                         if (iconNBT != null) {
                             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-                            BaseText text = new LiteralText("Monument located at ");
+                            MutableText text = Text.literal("Monument located at ");
                             text.append(ChatUtils.formatCoords(coords));
                             text.append(".");
                             info(text);
@@ -205,7 +205,7 @@ public class LocateCommand extends Command {
                 error("No monument found. You can try using a (highlight)Ocean explorer map(default) for more success.");
                 return SINGLE_SUCCESS;
             }
-            BaseText text = new LiteralText("Monument located at ");
+            MutableText text = Text.literal("Monument located at ");
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -291,7 +291,7 @@ public class LocateCommand extends Command {
         BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
         MeteorClient.EVENT_BUS.unsubscribe(this);
         Vec3d coords = new Vec3d(intersection[0],0,intersection[1]);
-        BaseText text = new LiteralText("Stronghold roughly located at ");
+        MutableText text = Text.literal("Stronghold roughly located at ");
         text.append(ChatUtils.formatCoords(coords));
         text.append(".");
         info(text);

@@ -1,21 +1,20 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import meteordevelopment.meteorclient.gui.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.systems.hud.HUD;
+import meteordevelopment.meteorclient.systems.hud.Hud;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.NbtCompound;
@@ -38,12 +37,12 @@ public class HudTab extends Tab {
     }
 
     public static class HudScreen extends WindowTabScreen {
-        private final HUD hud;
+        private final Hud hud;
 
         public HudScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
 
-            hud = Systems.get(HUD.class);
+            hud = Hud.get();
             hud.settings.onActivated();
         }
 
@@ -54,10 +53,11 @@ public class HudTab extends Tab {
             add(theme.horizontalSeparator()).expandX();
 
             WButton openEditor = add(theme.button("Edit")).expandX().widget();
-            openEditor.action = () -> mc.setScreen(new HudEditorScreen(theme, this));
+            openEditor.action = () -> mc.setScreen(new HudEditorScreen(theme));
 
-            WButton resetHud = add(theme.button("Reset")).expandX().widget();
-            resetHud.action = hud.reset;
+            WHorizontalList buttons = add(theme.horizontalList()).expandX().widget();
+            buttons.add(theme.button("Clear")).expandX().widget().action = hud::clear;
+            buttons.add(theme.button("Reset to default elements")).expandX().widget().action = hud::resetToDefaultElements;
 
             add(theme.horizontalSeparator()).expandX();
 
@@ -69,6 +69,11 @@ public class HudTab extends Tab {
 
             WButton resetSettings = bottom.add(theme.button(GuiRenderer.RESET)).widget();
             resetSettings.action = hud.settings::reset;
+        }
+
+        @Override
+        protected void onRenderBefore(float delta) {
+            HudEditorScreen.renderElements();
         }
 
         @Override

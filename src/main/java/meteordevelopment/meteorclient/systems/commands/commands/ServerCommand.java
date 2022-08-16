@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -21,19 +21,15 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.text.BaseText;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -112,10 +108,10 @@ public class ServerCommand extends Command {
             ipv4 = InetAddress.getByName(server.address).getHostAddress();
         } catch (UnknownHostException ignored) {}
 
-        BaseText ipText;
+        MutableText ipText;
 
         if (ipv4.isEmpty()) {
-            ipText = new LiteralText(Formatting.GRAY + server.address);
+            ipText = Text.literal(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
                     ClickEvent.Action.COPY_TO_CLIPBOARD,
@@ -123,12 +119,12 @@ public class ServerCommand extends Command {
                 ))
                 .withHoverEvent(new HoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
-                    new LiteralText("Copy to clipboard")
+                    Text.literal("Copy to clipboard")
                 ))
             );
         }
         else {
-            ipText = new LiteralText(Formatting.GRAY + server.address);
+            ipText = Text.literal(Formatting.GRAY + server.address);
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
                     ClickEvent.Action.COPY_TO_CLIPBOARD,
@@ -136,10 +132,10 @@ public class ServerCommand extends Command {
                 ))
                 .withHoverEvent(new HoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
-                    new LiteralText("Copy to clipboard")
+                    Text.literal("Copy to clipboard")
                 ))
             );
-            BaseText ipv4Text = new LiteralText(String.format("%s (%s)", Formatting.GRAY, ipv4));
+            MutableText ipv4Text = Text.literal(String.format("%s (%s)", Formatting.GRAY, ipv4));
             ipv4Text.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
                     ClickEvent.Action.COPY_TO_CLIPBOARD,
@@ -147,13 +143,13 @@ public class ServerCommand extends Command {
                 ))
                 .withHoverEvent(new HoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
-                    new LiteralText("Copy to clipboard")
+                    Text.literal("Copy to clipboard")
                 ))
             );
             ipText.append(ipv4Text);
         }
         info(
-            new LiteralText(String.format("%sIP: ", Formatting.GRAY))
+            Text.literal(String.format("%sIP: ", Formatting.GRAY))
             .append(ipText)
         );
 
@@ -170,7 +166,7 @@ public class ServerCommand extends Command {
         info("Difficulty: %s (Local: %.2f)", mc.world.getDifficulty().getTranslatableName().getString(), mc.world.getLocalDifficulty(mc.player.getBlockPos()).getLocalDifficulty());
 
         info("Day: %d", mc.world.getTimeOfDay() / 24000L);
-        
+
         info("Permission level: %s", formatPerms());
     }
 
@@ -201,19 +197,19 @@ public class ServerCommand extends Command {
     private void onReadPacket(PacketEvent.Receive event) {
         try {
             if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
-                
+
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches == null) {
                     error("Invalid Packet.");
                     return;
                 }
-                
+
                 for (Suggestion suggestion : matches.getList()) {
                     String[] command = suggestion.getText().split(":");
                     if (command.length > 1) {
                         String pluginName = command[0].replace("/", "");
-        
+
                         if (!plugins.contains(pluginName)) {
                             plugins.add(pluginName);
                         }

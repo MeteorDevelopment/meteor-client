@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.player;
@@ -44,7 +44,8 @@ public class MiddleClickExtra extends Module {
         Bow(Items.BOW, Type.Longer),
         Gap(Items.GOLDEN_APPLE, Type.Longer),
         EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
-        Chorus(Items.CHORUS_FRUIT, Type.Longer);
+        Chorus(Items.CHORUS_FRUIT, Type.Longer),
+        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate);
 
         private final Item item;
         private final Type type;
@@ -97,10 +98,10 @@ public class MiddleClickExtra extends Module {
 
         switch (mode.get().type) {
             case Immediate -> {
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
                 InvUtils.swapBack();
             }
-            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
             case Longer -> {
                 mc.options.useKey.setPressed(true);
                 isUsing = true;

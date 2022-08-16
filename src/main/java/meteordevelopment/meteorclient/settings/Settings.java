@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.settings;
@@ -84,6 +84,9 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
                 if (setting instanceof ColorSetting) {
                     RainbowColors.addSetting((Setting<SettingColor>) setting);
                 }
+                else if (setting instanceof ColorListSetting) {
+                    RainbowColors.addSettingList((Setting<List<SettingColor>>) setting);
+                }
             }
         }
     }
@@ -93,6 +96,9 @@ public class Settings implements ISerializable<Settings>, Iterable<SettingGroup>
             for (Setting<?> setting : group) {
                 if (setting instanceof ColorSetting) {
                     RainbowColors.removeSetting((Setting<SettingColor>) setting);
+                }
+                else if (setting instanceof ColorListSetting) {
+                    RainbowColors.removeSettingList((Setting<List<SettingColor>>) setting);
                 }
             }
         }

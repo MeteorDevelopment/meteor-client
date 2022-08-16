@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2022 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient;
@@ -28,7 +28,7 @@ public class Main {
         );
 
         switch (option) {
-            case 0: getOS().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Installation"); break;
+            case 0: getOS().open("https://meteorclient.com/installation"); break;
             case 1: {
                 String path;
 

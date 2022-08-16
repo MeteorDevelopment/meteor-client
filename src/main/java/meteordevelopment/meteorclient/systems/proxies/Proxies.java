@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.proxies;
@@ -32,10 +32,10 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public boolean add(Proxy proxy) {
         for (Proxy p : proxies) {
-            if (p.type == proxy.type && p.address.equals(proxy.address) && p.port == proxy.port) return false;
+            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && p.port.get() == proxy.port.get()) return false;
         }
 
-        if (proxies.isEmpty()) proxy.enabled = true;
+        if (proxies.isEmpty()) proxy.enabled.set(true);
 
         proxies.add(proxy);
         save();
@@ -51,7 +51,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public Proxy getEnabled() {
         for (Proxy proxy : proxies) {
-            if (proxy.enabled) return proxy;
+            if (proxy.enabled.get()) return proxy;
         }
 
         return null;
@@ -59,11 +59,15 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     public void setEnabled(Proxy proxy, boolean enabled) {
         for (Proxy p : proxies) {
-            p.enabled = false;
+            p.enabled.set(false);
         }
 
-        proxy.enabled = enabled;
+        proxy.enabled.set(enabled);
         save();
+    }
+
+    public boolean isEmpty() {
+        return proxies.isEmpty();
     }
 
     @NotNull
@@ -83,7 +87,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
 
     @Override
     public Proxies fromTag(NbtCompound tag) {
-        proxies = NbtUtils.listFromTag(tag.getList("proxies", 10), tag1 -> new Proxy().fromTag((NbtCompound) tag1));
+        proxies = NbtUtils.listFromTag(tag.getList("proxies", 10), Proxy::new);
 
         return this;
     }

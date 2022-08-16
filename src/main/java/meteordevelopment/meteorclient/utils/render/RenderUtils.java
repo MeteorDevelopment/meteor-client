@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.render;
@@ -46,7 +46,7 @@ public class RenderUtils {
 
         Vec3d pos = new Vec3d(0, 0, 1);
 
-        if (mc.options.bobView) {
+        if (mc.options.getBobView().getValue()) {
             MatrixStack bobViewMatrices = new MatrixStack();
 
             bobView(bobViewMatrices);

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.render;
@@ -16,7 +16,6 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
@@ -36,15 +35,15 @@ public class MeteorToast implements Toast {
 
     public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text, long duration) {
         this.icon = item != null ? item.getDefaultStack() : null;
-        this.title = new LiteralText(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
-        this.text = text != null ? new LiteralText(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
+        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
+        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
         this.duration = duration;
     }
 
     public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text) {
         this.icon = item != null ? item.getDefaultStack() : null;
-        this.title = new LiteralText(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
-        this.text = text != null ? new LiteralText(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
+        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
+        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
         this.duration = 6000;
     }
 
@@ -86,12 +85,12 @@ public class MeteorToast implements Toast {
     }
 
     public void setTitle(@NotNull String title) {
-        this.title = new LiteralText(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
+        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
         justUpdated = true;
     }
 
     public void setText(@Nullable String text) {
-        this.text = text != null ? new LiteralText(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
+        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
         justUpdated = true;
     }
 

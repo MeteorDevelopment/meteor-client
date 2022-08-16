@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.friends;
@@ -8,22 +8,18 @@ package meteordevelopment.meteorclient.systems.friends;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtList;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
-    private List<Friend> friends = new ArrayList<>();
-
-    public final SettingColor color = new SettingColor(0, 255, 180);
-    public boolean attack = false;
+    private final List<Friend> friends = new ArrayList<>();
 
     public Friends() {
         super("friends");
@@ -31,11 +27,6 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     public static Friends get() {
         return Systems.get(Friends.class);
-    }
-
-    @Override
-    public void init() {
-        RainbowColors.add(color);
     }
 
     public boolean add(Friend friend) {
@@ -60,9 +51,9 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return false;
     }
 
-    public Friend get(String name) {
+    public Friend get(UUID uuid) {
         for (Friend friend : friends) {
-            if (friend.name.equals(name)) {
+            if (friend.id.equals(uuid)) {
                 return friend;
             }
         }
@@ -71,7 +62,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public Friend get(PlayerEntity player) {
-        return get(player.getEntityName());
+        return get(player.getUuid());
     }
 
     public boolean isFriend(PlayerEntity player) {
@@ -79,11 +70,15 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public boolean shouldAttack(PlayerEntity player) {
-        return !isFriend(player) || attack;
+        return !isFriend(player);
     }
 
     public int count() {
         return friends.size();
+    }
+
+    public boolean isEmpty() {
+        return friends.isEmpty();
     }
 
     @Override
@@ -94,21 +89,30 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-        NbtList friendsTag = new NbtList();
 
-        for (Friend friend : friends) friendsTag.add(friend.toTag());
-        tag.put("friends", friendsTag);
-        tag.put("color", color.toTag());
-        tag.putBoolean("attack", attack);
+        tag.put("friends", NbtUtils.listToTag(friends));
 
         return tag;
     }
 
     @Override
     public Friends fromTag(NbtCompound tag) {
-        friends = NbtUtils.listFromTag(tag.getList("friends", 10), tag1 -> new Friend((NbtCompound) tag1));
-        if (tag.contains("color")) color.fromTag(tag.getCompound("color"));
-        attack = tag.contains("attack") && tag.getBoolean("attack");
+        List<Friend> saved = NbtUtils.listFromTag(tag.getList("friends", 10), nbt -> {
+            NbtCompound friendTag = (NbtCompound) nbt;
+            if (!friendTag.contains("id")) return null;
+            return new Friend(friendTag);
+        });
+
+        friends.clear();
+
+        for (Friend friend : saved) {
+            MeteorExecutor.execute(() -> {
+                if (friend.updateName()) {
+                    friends.add(friend);
+                }
+            });
+        }
+
         return this;
     }
 }

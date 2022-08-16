@@ -1,11 +1,13 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.misc.text;
 
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.OrderedText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 
@@ -21,6 +23,21 @@ public class TextUtils {
         preOrderTraverse(text, stack, coloredTexts);
         coloredTexts.removeIf(e -> e.getText().equals(""));
         return coloredTexts;
+    }
+
+    /**
+     * Parses a given {@link OrderedText} into its {@link Text} equivalent.
+     *
+     * @param orderedText the {@link OrderedText} to parse.
+     * @return The {@link Text} equivalent of the {@link OrderedText} parameter.
+     */
+    public static MutableText parseOrderedText(OrderedText orderedText) {
+        MutableText parsedText = Text.empty();
+        orderedText.accept((i, style, codePoint) -> {
+            parsedText.append(Text.literal(new String(Character.toChars(codePoint))).setStyle(style));
+            return true;
+        });
+        return parsedText;
     }
 
     /**
@@ -76,7 +93,7 @@ public class TextUtils {
             return;
 
         // Do actions here
-        String textString = text.asString();
+        String textString = text.getString();
 
         TextColor mcTextColor = text.getStyle().getColor();
 

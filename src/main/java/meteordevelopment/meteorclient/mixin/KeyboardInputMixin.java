@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(KeyboardInput.class)
 public class KeyboardInputMixin extends Input {
     @Inject(method = "tick", at = @At("TAIL"))
-    private void isPressed(boolean slowDown, CallbackInfo ci) {
+    private void isPressed(boolean slowDown, float f, CallbackInfo ci) {
         if (Modules.get().get(Sneak.class).doVanilla()) sneaking = true;
     }
 }

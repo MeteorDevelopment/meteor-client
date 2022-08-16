@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin.sodium;
@@ -16,10 +16,9 @@ import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelB
 import me.jellysquid.mods.sodium.client.render.chunk.format.ModelVertexSink;
 import me.jellysquid.mods.sodium.client.render.pipeline.BlockRenderer;
 import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.WallHack;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
+import net.minecraft.client.render.model.BakedModel;
 import net.minecraft.client.render.model.BakedQuad;
 import net.minecraft.client.texture.Sprite;
 import net.minecraft.util.math.BlockPos;
@@ -28,42 +27,41 @@ import net.minecraft.world.BlockRenderView;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
     @Shadow @Final private ColorBlender colorBlender;
 
+    @Unique private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
+
+    @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
+    private void onRenderModel(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, BakedModel model, ChunkModelBuilder buffers, boolean cull, long seed, CallbackInfoReturnable<Boolean> info) {
+        int alpha = Xray.getAlpha(state, pos);
+
+        if (alpha == 0) info.cancel();
+        else alphas.set(alpha);
+    }
+
     @Inject(method = "renderQuad", at = @At(value = "HEAD"), cancellable = true)
-    private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo ci) {
-        WallHack wallHack = Modules.get().get(WallHack.class);
-        Xray xray = Modules.get().get(Xray.class);
+    private void onRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, CallbackInfo info) {
+        int alpha = alphas.get();
 
-        if (wallHack.isActive()) {
-            if (wallHack.blocks.get().contains(state.getBlock())) {
-                int alpha;
-
-                if (xray.isActive()) {
-                    alpha = xray.opacity.get();
-                } else {
-                    alpha = wallHack.opacity.get();
-                }
-
-                whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorSampler, bakedQuad, light, model, alpha);
-                ci.cancel();
-            }
-        }
-        else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorSampler, bakedQuad, light, model, xray.opacity.get());
-            ci.cancel();
+        if (alpha == 0) info.cancel();
+        else if (alpha != -1) {
+            whRenderQuad(world, state, pos, origin, vertices, indices, blockOffset, colorSampler, bakedQuad, light, model, alpha);
+            info.cancel();
         }
     }
 
     // https://github.com/CaffeineMC/sodium-fabric/blob/8b3015efe85be9336a150ff7c26085ea3d2d43d0/src/main/java/me/jellysquid/mods/sodium/client/render/pipeline/BlockRenderer.java#L119
     // Copied from Sodium, for now, can't think of a better way, because of the nature of the locals, and for loop.
     // Mixin seems to freak out when I try to do this the "right" way - Wala (sobbing)
+    @Unique
     private void whRenderQuad(BlockRenderView world, BlockState state, BlockPos pos, BlockPos origin, ModelVertexSink vertices, IndexBufferBuilder indices, Vec3d blockOffset, ColorSampler<BlockState> colorSampler, BakedQuad bakedQuad, QuadLightData light, ChunkModelBuilder model, int alpha) {
         ModelQuadView src = (ModelQuadView) bakedQuad;
         ModelQuadOrientation orientation = ModelQuadOrientation.orientByBrightness(light.br);

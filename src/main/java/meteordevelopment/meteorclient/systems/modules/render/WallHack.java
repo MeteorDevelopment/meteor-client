@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
@@ -20,8 +20,8 @@ public class WallHack extends Module {
     public final Setting<Integer> opacity = sgGeneral.add(new IntSetting.Builder()
         .name("opacity")
         .description("The opacity for rendered blocks.")
-        .defaultValue(1)
-        .range(1, 255)
+        .defaultValue(0)
+        .range(0, 255)
         .sliderMax(255)
         .onChanged(onChanged -> {
             if (this.isActive()) {
@@ -64,8 +64,6 @@ public class WallHack extends Module {
 
     @EventHandler
     private void onChunkOcclusion(ChunkOcclusionEvent event) {
-        if(!occludeChunks.get()) {
-            event.cancel();
-        }
+        if (!occludeChunks.get()) event.cancel();
     }
 }

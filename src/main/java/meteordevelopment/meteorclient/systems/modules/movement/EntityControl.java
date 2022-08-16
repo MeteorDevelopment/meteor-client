@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.movement;
@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.HorseBaseEntity;
+import net.minecraft.entity.passive.AbstractHorseEntity;
 
 public class EntityControl extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -39,14 +39,14 @@ public class EntityControl extends Module {
         if (!Utils.canUpdate() || mc.world.getEntities() == null) return;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof HorseBaseEntity) ((IHorseBaseEntity) entity).setSaddled(false);
+            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).setSaddled(false);
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof HorseBaseEntity) ((IHorseBaseEntity) entity).setSaddled(true);
+            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).setSaddled(true);
         }
 
         if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).setMountJumpStrength(1);

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.gui.utils.StarscriptTextBoxRenderer;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.settings.*;
@@ -21,12 +22,8 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.compiler.Compiler;
-import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.client.gui.screen.*;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.option.*;
@@ -36,6 +33,7 @@ import net.minecraft.client.gui.screen.world.EditGameRulesScreen;
 import net.minecraft.client.gui.screen.world.EditWorldScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.realms.gui.screen.RealmsScreen;
+import net.minecraft.util.Pair;
 import net.minecraft.util.Util;
 
 import java.util.ArrayList;
@@ -57,6 +55,7 @@ public class DiscordPresence extends Module {
         .description("Messages used for the first line.")
         .defaultValue("{player}", "{server}")
         .onChanged(strings -> recompileLine1())
+        .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
 
@@ -81,8 +80,9 @@ public class DiscordPresence extends Module {
     private final Setting<List<String>> line2Strings = sgLine2.add(new StringListSetting.Builder()
         .name("line-2-messages")
         .description("Messages used for the second line.")
-        .defaultValue("Meteor on Crack!", "{round({server.tps}, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count} Players online")
+        .defaultValue("Meteor on Crack!", "{round(server.tps, 1)} TPS", "Playing on {server.difficulty} difficulty.", "{server.player_count} Players online")
         .onChanged(strings -> recompileLine2())
+        .renderer(StarscriptTextBoxRenderer.class)
         .build()
     );
 
@@ -113,10 +113,34 @@ public class DiscordPresence extends Module {
     private final List<Script> line2Scripts = new ArrayList<>();
     private int line2Ticks, line2I;
 
+    public static final List<Pair<String, String>> customStates = new ArrayList<>();
+
+    static {
+        registerCustomState("com.terraformersmc.modmenu.gui", "Browsing mods");
+        registerCustomState("me.jellysquid.mods.sodium.client", "Changing options");
+    }
+
     public DiscordPresence() {
         super(Categories.Misc, "discord-presence", "Displays Meteor as your presence on Discord.");
 
         runInMainMenu = true;
+    }
+
+    /** Registers a custom state to be used when the current screen is a class in the specified package. */
+    public static void registerCustomState(String packageName, String state) {
+        for (var pair : customStates) {
+            if (pair.getLeft().equals(packageName)) {
+                pair.setRight(state);
+                return;
+            }
+        }
+
+        customStates.add(new Pair<>(packageName, state));
+    }
+
+    /** The package name must match exactly to the one provided through {@link #registerCustomState(String, String)}. */
+    public static void unregisterCustomState(String packageName) {
+        customStates.removeIf(pair -> pair.getLeft().equals(packageName));
     }
 
     @Override
@@ -151,18 +175,9 @@ public class DiscordPresence extends Module {
     private void recompile(List<String> messages, List<Script> scripts) {
         scripts.clear();
 
-        for (int i = 0; i < messages.size(); i++) {
-            Parser.Result result = Parser.parse(messages.get(i));
-
-            if (result.hasErrors()) {
-                if (Utils.canUpdate()) {
-                    MeteorStarscript.printChatError(i, result.errors.get(0));
-                }
-
-                continue;
-            }
-
-            scripts.add(Compiler.compile(result));
+        for (String message : messages) {
+            Script script = MeteorStarscript.compile(message);
+            if (script != null) scripts.add(script);
         }
 
         forceUpdate = true;
@@ -200,11 +215,8 @@ public class DiscordPresence extends Module {
                         i = line1I++;
                     }
 
-                    try {
-                        rpc.setDetails(MeteorStarscript.ss.run(line1Scripts.get(i)));
-                    } catch (StarscriptError e) {
-                        ChatUtils.error("Starscript", e.getMessage());
-                    }
+                    String message = MeteorStarscript.run(line1Scripts.get(i));
+                    if (message != null) rpc.setDetails(message);
                 }
                 update = true;
 
@@ -220,11 +232,8 @@ public class DiscordPresence extends Module {
                         i = line2I++;
                     }
 
-                    try {
-                        rpc.setState(MeteorStarscript.ss.run(line2Scripts.get(i)));
-                    } catch (StarscriptError e) {
-                        ChatUtils.error("Starscript", e.getMessage());
-                    }
+                    String message = MeteorStarscript.run(line2Scripts.get(i));
+                    if (message != null) rpc.setState(message);
                 }
                 update = true;
 
@@ -240,7 +249,6 @@ public class DiscordPresence extends Module {
                 else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Creating world");
                 else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
                 else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
-                else if (mc.currentScreen instanceof SaveLevelScreen) rpc.setState("Saving world");
                 else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
                 else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
                 else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Connecting to server");
@@ -250,10 +258,15 @@ public class DiscordPresence extends Module {
                 else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
                 else {
                     String className = mc.currentScreen.getClass().getName();
-
-                    if (className.startsWith("com.terraformersmc.modmenu.gui")) rpc.setState("Browsing mods");
-                    else if (className.startsWith("me.jellysquid.mods.sodium.client")) rpc.setState("Changing options");
-                    else rpc.setState("In main menu");
+                    boolean setState = false;
+                    for (var pair : customStates) {
+                        if (className.startsWith(pair.getLeft())) {
+                            rpc.setState(pair.getRight());
+                            setState = true;
+                            break;
+                        }
+                    }
+                    if (!setState) rpc.setState("In main menu");
                 }
 
                 update = true;

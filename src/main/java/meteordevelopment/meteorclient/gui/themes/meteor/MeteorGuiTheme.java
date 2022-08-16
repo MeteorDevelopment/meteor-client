@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.themes.meteor;
@@ -42,6 +42,7 @@ public class MeteorGuiTheme extends GuiTheme {
     private final SettingGroup sgSeparator = settings.createGroup("Separator");
     private final SettingGroup sgScrollbar = settings.createGroup("Scrollbar");
     private final SettingGroup sgSlider = settings.createGroup("Slider");
+    private final SettingGroup sgStarscript = settings.createGroup("Starscript");
 
     // General
 
@@ -84,11 +85,11 @@ public class MeteorGuiTheme extends GuiTheme {
 
     // Colors
 
-    public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(135, 0, 255));
-    public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(135, 0, 255));
-    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 255, 255));
-    public final Setting<SettingColor> favoriteColor = color("favorite", "Color of checked favorite button.", new SettingColor(255, 255, 0));
+    public final Setting<SettingColor> accentColor = color("accent", "Main color of the GUI.", new SettingColor(145, 61, 226));
+    public final Setting<SettingColor> checkboxColor = color("checkbox", "Color of checkbox.", new SettingColor(145, 61, 226));
+    public final Setting<SettingColor> plusColor = color("plus", "Color of plus button.", new SettingColor(50, 255, 50));
+    public final Setting<SettingColor> minusColor = color("minus", "Color of minus button.", new SettingColor(255, 50, 50));
+    public final Setting<SettingColor> favoriteColor = color("favorite", "Color of checked favorite button.", new SettingColor(250, 215, 0));
 
     // Text
 
@@ -97,6 +98,7 @@ public class MeteorGuiTheme extends GuiTheme {
     public final Setting<SettingColor> textHighlightColor = color(sgTextColors, "text-highlight", "Color of text highlighting.", new SettingColor(45, 125, 245, 100));
     public final Setting<SettingColor> titleTextColor = color(sgTextColors, "title-text", "Color of title text.", new SettingColor(255, 255, 255));
     public final Setting<SettingColor> loggedInColor = color(sgTextColors, "logged-in-text", "Color of logged in account name.", new SettingColor(45, 225, 45));
+    public final Setting<SettingColor> placeholderColor = color(sgTextColors, "placeholder", "Color of placeholder text.", new SettingColor(255, 255, 255, 20));
 
     // Background
 
@@ -141,13 +143,26 @@ public class MeteorGuiTheme extends GuiTheme {
     public final ThreeStateColorSetting sliderHandle = new ThreeStateColorSetting(
             sgSlider,
             "slider-handle",
-            new SettingColor(0, 255, 180),
-            new SettingColor(0, 240, 165),
-            new SettingColor(0, 225, 150)
+            new SettingColor(130, 0, 255),
+            new SettingColor(140, 30, 255),
+            new SettingColor(150, 60, 255)
     );
 
-    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(0, 150, 80));
+    public final Setting<SettingColor> sliderLeft = color(sgSlider, "slider-left", "Color of slider left part.", new SettingColor(100,35,170));
     public final Setting<SettingColor> sliderRight = color(sgSlider, "slider-right", "Color of slider right part.", new SettingColor(50, 50, 50));
+
+    // Starscript
+
+    private final Setting<SettingColor> starscriptText = color(sgStarscript, "starscript-text", "Color of text in Starscript code.", new SettingColor(169, 183, 198));
+    private final Setting<SettingColor> starscriptBraces = color(sgStarscript, "starscript-braces", "Color of braces in Starscript code.", new SettingColor(150, 150, 150));
+    private final Setting<SettingColor> starscriptParenthesis = color(sgStarscript, "starscript-parenthesis", "Color of parenthesis in Starscript code.", new SettingColor(169, 183, 198));
+    private final Setting<SettingColor> starscriptDots = color(sgStarscript, "starscript-dots", "Color of dots in starscript code.", new SettingColor(169, 183, 198));
+    private final Setting<SettingColor> starscriptCommas = color(sgStarscript, "starscript-commas", "Color of commas in starscript code.", new SettingColor(169, 183, 198));
+    private final Setting<SettingColor> starscriptOperators = color(sgStarscript, "starscript-operators", "Color of operators in Starscript code.", new SettingColor(169, 183, 198));
+    private final Setting<SettingColor> starscriptStrings = color(sgStarscript, "starscript-strings", "Color of strings in Starscript code.", new SettingColor(106, 135, 89));
+    private final Setting<SettingColor> starscriptNumbers = color(sgStarscript, "starscript-numbers", "Color of numbers in Starscript code.", new SettingColor(104, 141, 187));
+    private final Setting<SettingColor> starscriptKeywords = color(sgStarscript, "starscript-keywords", "Color of keywords in Starscript code.", new SettingColor(204, 120, 50));
+    private final Setting<SettingColor> starscriptAccessedObjects = color(sgStarscript, "starscript-accessed-objects", "Color of accessed objects (before a dot) in Starscript code.", new SettingColor(152, 118, 170));
 
     public MeteorGuiTheme() {
         super("Meteor");
@@ -215,8 +230,8 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     @Override
-    public WTextBox textBox(String text, CharFilter filter) {
-        return w(new WMeteorTextBox(text, filter));
+    public WTextBox textBox(String text, String placeholder, CharFilter filter, Class<? extends WTextBox.Renderer> renderer) {
+        return w(new WMeteorTextBox(text, placeholder, filter, renderer));
     }
 
     @Override
@@ -279,6 +294,58 @@ public class MeteorGuiTheme extends GuiTheme {
     @Override
     public Color textSecondaryColor() {
         return textSecondaryColor.get();
+    }
+
+    //     Starscript
+
+    @Override
+    public Color starscriptTextColor() {
+        return starscriptText.get();
+    }
+
+    @Override
+    public Color starscriptBraceColor() {
+        return starscriptBraces.get();
+    }
+
+    @Override
+    public Color starscriptParenthesisColor() {
+        return starscriptParenthesis.get();
+    }
+
+    @Override
+    public Color starscriptDotColor() {
+        return starscriptDots.get();
+    }
+
+    @Override
+    public Color starscriptCommaColor() {
+        return starscriptCommas.get();
+    }
+
+    @Override
+    public Color starscriptOperatorColor() {
+        return starscriptOperators.get();
+    }
+
+    @Override
+    public Color starscriptStringColor() {
+        return starscriptStrings.get();
+    }
+
+    @Override
+    public Color starscriptNumberColor() {
+        return starscriptNumbers.get();
+    }
+
+    @Override
+    public Color starscriptKeywordColor() {
+        return starscriptKeywords.get();
+    }
+
+    @Override
+    public Color starscriptAccessedObjectColor() {
+        return starscriptAccessedObjects.get();
     }
 
     // Other

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.world;
@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.PacketMine;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -102,7 +101,7 @@ public class EChestFarmer extends Module {
     private final VoxelShape SHAPE = Block.createCuboidShape(1.0D, 0.0D, 1.0D, 15.0D, 14.0D, 15.0D);
 
     private BlockPos target;
-    private int startCount, prevSlot;
+    private int startCount;
 
     public EChestFarmer() {
         super(Categories.World, "echest-farmer", "Places and breaks EChests to farm obsidian.");
@@ -112,7 +111,6 @@ public class EChestFarmer extends Module {
     public void onActivate() {
         target = null;
         startCount = InvUtils.find(Items.OBSIDIAN).count();
-        prevSlot = mc.player.getInventory().selectedSlot;
     }
 
     @Override

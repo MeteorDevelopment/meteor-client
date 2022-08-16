@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.player;
@@ -11,7 +11,7 @@ import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
 import net.minecraft.entity.mob.ZombieHorseEntity;
 import net.minecraft.entity.passive.AbstractDonkeyEntity;
-import net.minecraft.entity.passive.HorseBaseEntity;
+import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.ItemGroup;
@@ -132,7 +132,7 @@ public class SlotUtils {
     }
 
     private static int horse(ScreenHandler handler, int i) {
-        HorseBaseEntity entity = ((HorseScreenHandlerAccessor) handler).getEntity();
+        AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).getEntity();
 
         if (entity instanceof LlamaEntity) {
             int strength = ((LlamaEntity) entity).getStrength();

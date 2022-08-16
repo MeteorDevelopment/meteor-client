@@ -1,89 +1,88 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.text.CustomTextRenderer;
+import meteordevelopment.meteorclient.renderer.text.FontFace;
+import meteordevelopment.meteorclient.renderer.text.FontFamily;
+import meteordevelopment.meteorclient.renderer.text.FontInfo;
 import meteordevelopment.meteorclient.systems.config.Config;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
-import meteordevelopment.meteorclient.utils.files.StreamUtils;
+import meteordevelopment.meteorclient.utils.PreInit;
+import meteordevelopment.meteorclient.utils.render.FontUtils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
-    private static final String[] BUILTIN_FONTS = { "JetBrains Mono.ttf", "Comfortaa.ttf", "Tw Cen MT.ttf", "Pixelation.ttf" };
-    public static final String DEFAULT_FONT = "JetBrains Mono";
-    private static final File FOLDER = new File(MeteorClient.FOLDER, "fonts");
+    public static final String[] BUILTIN_FONTS = { "JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation" };
 
-    public static CustomTextRenderer CUSTOM_FONT;
+    public static String DEFAULT_FONT_FAMILY;
+    public static FontFace DEFAULT_FONT;
 
-    private static String lastFont = "";
+    public static final List<FontFamily> FONT_FAMILIES = new ArrayList<>();
+    public static CustomTextRenderer RENDERER;
 
-    @Init(stage = InitStage.Pre)
-    public static void init() {
-        FOLDER.mkdirs();
+    @PreInit(dependencies = Shaders.class)
+    public static void refresh() {
+        FONT_FAMILIES.clear();
 
-        // Copy built in fonts if they not exist
-        for (String font : BUILTIN_FONTS) {
-            File file = new File(FOLDER, font);
-            if (!file.exists()) {
-                StreamUtils.copy(Fonts.class.getResourceAsStream("/assets/" + MeteorClient.MOD_ID + "/fonts/" + font), file);
-            }
+        for (String builtinFont : BUILTIN_FONTS) {
+            FontUtils.loadBuiltin(FONT_FAMILIES, builtinFont);
         }
 
-        // Load default font
-        CUSTOM_FONT = new CustomTextRenderer(new File(FOLDER, DEFAULT_FONT + ".ttf"));
-        lastFont = DEFAULT_FONT;
+        for (String fontPath : FontUtils.getSearchPaths()) {
+            FontUtils.loadSystem(FONT_FAMILIES, new File(fontPath));
+        }
+
+        FONT_FAMILIES.sort(Comparator.comparing(FontFamily::getName));
+
+        MeteorClient.LOG.info("Found {} font families.", FONT_FAMILIES.size());
+
+        DEFAULT_FONT_FAMILY = FontUtils.getBuiltinFontInfo(BUILTIN_FONTS[1]).family();
+        DEFAULT_FONT = getFamily(DEFAULT_FONT_FAMILY).get(FontInfo.Type.Regular);
+
+        Config config = Config.get();
+        load(config != null ? config.font.get() : DEFAULT_FONT);
     }
 
-    @Init(stage = InitStage.Post)
-    public static void load() {
-        if (lastFont.equals(Config.get().font.get())) return;
-
-        File file = new File(FOLDER, Config.get().font + ".ttf");
-        if (!file.exists()) {
-            Config.get().font.set(DEFAULT_FONT);
-            file = new File(FOLDER, Config.get().font + ".ttf");
-        }
+    public static void load(FontFace fontFace) {
+        if (RENDERER != null && RENDERER.fontFace.equals(fontFace)) return;
 
         try {
-            CUSTOM_FONT = new CustomTextRenderer(file);
-        } catch (Exception ignored) {
-            Config.get().font.set(DEFAULT_FONT);
-            file = new File(FOLDER, Config.get().font + ".ttf");
+            RENDERER = new CustomTextRenderer(fontFace);
+            MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
+        }
+        catch (Exception e) {
+            if (fontFace.equals(DEFAULT_FONT)) {
+                throw new RuntimeException("Failed to load default font: " + fontFace, e);
+            }
 
-            CUSTOM_FONT = new CustomTextRenderer(file);
+            MeteorClient.LOG.error("Failed to load font: " + fontFace, e);
+            load(Fonts.DEFAULT_FONT);
         }
 
         if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont.get()) {
             ((WidgetScreen) mc.currentScreen).invalidate();
         }
-
-        lastFont = Config.get().font.get();
     }
 
-    public static String[] getAvailableFonts() {
-        List<String> fonts = new ArrayList<>(4);
-
-        File[] files = FOLDER.listFiles(File::isFile);
-        if (files != null) {
-            for (File file : files) {
-                int i = file.getName().lastIndexOf('.');
-                if (file.getName().substring(i).equals(".ttf")) {
-                    fonts.add(file.getName().substring(0, i));
-                }
+    public static FontFamily getFamily(String name) {
+        for (FontFamily fontFamily : Fonts.FONT_FAMILIES) {
+            if (fontFamily.getName().equalsIgnoreCase(name)) {
+                return fontFamily;
             }
         }
 
-        return fonts.toArray(new String[0]);
+        return null;
     }
 }

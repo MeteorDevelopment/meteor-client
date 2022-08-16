@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
@@ -24,8 +24,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Random;
@@ -48,7 +48,7 @@ public class Notifier extends Module {
 
     private final Setting<Boolean> totemsIgnoreOwn = sgTotemPops.add(new BoolSetting.Builder()
         .name("ignore-own")
-        .description("Notifies you of your own totem pops.")
+        .description("Ignores your own totem pops.")
         .defaultValue(false)
         .build()
     );
@@ -125,10 +125,10 @@ public class Notifier extends Module {
             }
         }
         else {
-            MutableText text = new LiteralText(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-            text.append(new LiteralText(" has spawned at ").formatted(Formatting.GRAY));
+            MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
+            text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
             text.append(formatCoords(event.entity.getPos()));
-            text.append(new LiteralText(".").formatted(Formatting.GRAY));
+            text.append(Text.literal(".").formatted(Formatting.GRAY));
             info(text);
         }
     }
@@ -142,10 +142,10 @@ public class Notifier extends Module {
                 ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
             }
         } else {
-            MutableText text = new LiteralText(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-            text.append(new LiteralText(" has despawned at ").formatted(Formatting.GRAY));
+            MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
+            text.append(Text.literal(" has despawned at ").formatted(Formatting.GRAY));
             text.append(formatCoords(event.entity.getPos()));
-            text.append(new LiteralText(".").formatted(Formatting.GRAY));
+            text.append(Text.literal(".").formatted(Formatting.GRAY));
             info(text);
         }
     }

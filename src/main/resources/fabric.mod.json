@@ -34,7 +34,7 @@
   "custom": {
     "meteor-client:devbuild": "${devbuild}",
     "meteor-client:color": "145,61,226",
-    "meteor-client:commit":  "${commit}",
+    "meteor-client:commit": "${commit}",
     "modmenu": {
       "links": {
         "modmenu.discord": "https://meteorclient.com/discord"
@@ -43,10 +43,13 @@
   },
   "depends": {
     "java": ">=17",
-    "minecraft": ">=1.18.2",
-    "fabricloader": ">=0.13.2"
+    "minecraft": ">=1.19.1",
+    "fabricloader": ">=0.14.8"
   },
   "breaks": {
-    "optifabric": "*"
+    "optifabric": "*",
+    "feather": "*",
+    "origins": "*",
+    "wurst": "*"
   }
 }

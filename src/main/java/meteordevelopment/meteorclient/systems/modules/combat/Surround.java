@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -79,7 +79,7 @@ public class Surround extends Module {
 
     private final Setting<Boolean> toggleOnYChange = sgGeneral.add(new BoolSetting.Builder()
         .name("toggle-on-y-change")
-        .description("Automatically disables when your y level (step, jumping, atc).")
+        .description("Automatically disables when your y level changes (step, jumping, etc).")
         .defaultValue(true)
         .build()
     );

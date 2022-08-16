@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2022 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.world;
@@ -23,10 +23,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FluidBlock;
 import net.minecraft.enchantment.Enchantments;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.PickaxeItem;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
@@ -46,6 +48,13 @@ public class InfinityMiner extends Module {
         .build()
     );
 
+    public final Setting<List<Item>> targetItems = sgGeneral.add(new ItemListSetting.Builder()
+        .name("target-items")
+        .description("The target items to collect.")
+        .defaultValue(Items.DIAMOND)
+        .build()
+    );
+
     public final Setting<List<Block>> repairBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("repair-blocks")
         .description("The repair blocks to mine.")
@@ -54,10 +63,19 @@ public class InfinityMiner extends Module {
         .build()
     );
 
-    public final Setting<Double> durabilityThreshold = sgGeneral.add(new DoubleSetting.Builder()
-        .name("durability-threshold")
-        .description("The durability percentage at which to start repairing the tool.")
-        .defaultValue(10)
+    public final Setting<Double> startRepairing = sgGeneral.add(new DoubleSetting.Builder()
+        .name("repair-threshold")
+        .description("The durability percentage at which to start repairing.")
+        .defaultValue(20)
+        .range(1, 99)
+        .sliderRange(1, 99)
+        .build()
+    );
+
+    public final Setting<Double> startMining = sgGeneral.add(new DoubleSetting.Builder()
+        .name("mine-threshold")
+        .description("The durability percentage at which to start mining.")
+        .defaultValue(70)
         .range(1, 99)
         .sliderRange(1, 99)
         .build()
@@ -95,7 +113,6 @@ public class InfinityMiner extends Module {
     public void onActivate() {
         prevMineScanDroppedItems = baritoneSettings.mineScanDroppedItems.value;
         baritoneSettings.mineScanDroppedItems.value = true;
-
         homePos.set(mc.player.getBlockPos());
         repairing = false;
     }
@@ -108,22 +125,31 @@ public class InfinityMiner extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.getInventory().getEmptySlot() == -1) {
+        if (isFull()) {
             if (walkHome.get()) {
                 if (isBaritoneNotWalking()) {
                     info("Walking home.");
                     baritone.getCustomGoalProcess().setGoalAndPath(new GoalBlock(homePos));
                 }
-                else if (mc.player.getBlockPos().equals(homePos)) logOut();
+                else if (mc.player.getBlockPos().equals(homePos) && logOut.get()) logOut();
             }
             else if (logOut.get()) logOut();
-            else toggle();
+            else {
+                info("Inventory full, stopping process.");
+                toggle();
+            }
 
             return;
         }
 
         if (!findPickaxe()) {
             error("Could not find a usable mending pickaxe.");
+            toggle();
+            return;
+        }
+
+        if (!checkThresholds()) {
+            error("Start mining value can't be lower than start repairing value.");
             toggle();
             return;
         }
@@ -152,7 +178,8 @@ public class InfinityMiner extends Module {
 
     private boolean needsRepair() {
         ItemStack itemStack = mc.player.getMainHandStack();
-        return ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage() <= durabilityThreshold.get();
+        double toolPercentage = ((itemStack.getMaxDamage() - itemStack.getDamage()) * 100f) / (float) itemStack.getMaxDamage();
+        return !(toolPercentage > startMining.get() || (toolPercentage > startRepairing.get() && !repairing));
     }
 
     private boolean findPickaxe() {
@@ -164,7 +191,11 @@ public class InfinityMiner extends Module {
         if (bestPick.isOffhand()) InvUtils.quickMove().fromOffhand().toHotbar(mc.player.getInventory().selectedSlot);
         else if (bestPick.isHotbar()) InvUtils.swap(bestPick.slot(), false);
 
-        return InvUtils.findInHotbar(pickaxePredicate).isMainHand();
+        return InvUtils.testInMainHand(pickaxePredicate);
+    }
+
+    private boolean checkThresholds() {
+        return startRepairing.get() < startMining.get();
     }
 
     private void mineTargetBlocks() {
@@ -183,7 +214,7 @@ public class InfinityMiner extends Module {
 
     private void logOut() {
         toggle();
-        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(new LiteralText("[Infinity Miner] Inventory is full.")));
+        mc.player.networkHandler.sendPacket(new DisconnectS2CPacket(Text.literal("[Infinity Miner] Inventory is full.")));
     }
 
     private boolean isBaritoneNotMining() {
@@ -196,5 +227,20 @@ public class InfinityMiner extends Module {
 
     private boolean filterBlocks(Block block) {
         return block != Blocks.AIR && block.getDefaultState().getHardness(mc.world, null) != -1 && !(block instanceof FluidBlock);
+    }
+
+    private boolean isFull() {
+        for (int i = 0; i <= 35; i++) {
+            ItemStack itemStack = mc.player.getInventory().getStack(i);
+
+            for (Item item : targetItems.get()) {
+                if ((itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxCount())
+                    || itemStack.isEmpty()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

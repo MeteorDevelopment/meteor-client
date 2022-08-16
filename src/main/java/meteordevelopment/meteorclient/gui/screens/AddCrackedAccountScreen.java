@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.screens;
@@ -22,7 +22,7 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
 
         // Name
         t.add(theme.label("Name: "));
-        WTextBox name = t.add(theme.textBox("", (text, c) ->
+        WTextBox name = t.add(theme.textBox("", "seasnail8169", (text, c) ->
             // Username can't contain spaces
             c != ' '
         )).minWidth(400).expandX().widget();

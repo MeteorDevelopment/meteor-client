@@ -1,12 +1,11 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.WallHack;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.render.RenderLayer;
@@ -18,21 +17,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(RenderLayers.class)
 public class RenderLayersMixin {
-
     @Inject(method = "getBlockLayer", at = @At("HEAD"), cancellable = true)
-    private static void onGetBlockLayer(BlockState state, CallbackInfoReturnable<RenderLayer> cir) {
-        if(Modules.get() != null) {
-            WallHack wallHack = Modules.get().get(WallHack.class);
-            Xray xray = Modules.get().get(Xray.class);
+    private static void onGetBlockLayer(BlockState state, CallbackInfoReturnable<RenderLayer> info) {
+        if (Modules.get() == null) return;
 
-            if(wallHack.isActive()) {
-                if(wallHack.blocks.get().contains(state.getBlock())) {
-                    cir.setReturnValue(RenderLayer.getTranslucent());
-                }
-            } else if(xray.isActive()) {
-                cir.setReturnValue(RenderLayer.getTranslucent());
-            }
-        }
+        int alpha = Xray.getAlpha(state, null);
+        if (alpha > 0 && alpha < 255) info.setReturnValue(RenderLayer.getTranslucent());
     }
-
 }

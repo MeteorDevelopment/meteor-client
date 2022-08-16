@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.player.PacketMine;
+import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -83,15 +83,14 @@ public class BreakIndicators extends Module {
         if (ownBreakingPos != null && mc.interactionManager.isBreakingBlock()) {
             BlockState state = mc.world.getBlockState(ownBreakingPos);
             VoxelShape shape = state.getOutlineShape(mc.world, ownBreakingPos);
-            if (shape.isEmpty() || shape == null) return;
+            if (shape == null || shape.isEmpty()) return;
 
             Box orig = shape.getBoundingBox();
-            Box box = orig;
 
             double shrinkFactor = 1d - ownBreakingStage;
             double progress = 1d - shrinkFactor;
 
-            renderBlock(event, box, orig, ownBreakingPos, shrinkFactor, progress);
+            renderBlock(event, orig, ownBreakingPos, shrinkFactor, progress);
         }
 
         blocks.values().forEach(info -> {
@@ -101,15 +100,14 @@ public class BreakIndicators extends Module {
 
             BlockState state = mc.world.getBlockState(pos);
             VoxelShape shape = state.getOutlineShape(mc.world, pos);
-            if (shape.isEmpty()) return;
+            if (shape == null || shape.isEmpty()) return;
 
             Box orig = shape.getBoundingBox();
-            Box box = orig;
 
             double shrinkFactor = (9 - (stage + 1)) / 9d;
             double progress = 1d - shrinkFactor;
 
-            renderBlock(event, box, orig, pos, shrinkFactor, progress);
+            renderBlock(event, orig, pos, shrinkFactor, progress);
         });
     }
 
@@ -117,25 +115,24 @@ public class BreakIndicators extends Module {
         for (PacketMine.MyBlock block : blocks) {
             if (block.mining && block.progress != Double.POSITIVE_INFINITY) {
                 VoxelShape shape = block.blockState.getOutlineShape(mc.world, block.blockPos);
-                if (shape.isEmpty()) return;
+                if (shape == null || shape.isEmpty()) return;
 
                 Box orig = shape.getBoundingBox();
-                Box box = orig;
 
                 double progressNormalised = block.progress > 1 ? 1 : block.progress;
                 double shrinkFactor = 1d - progressNormalised;
                 BlockPos pos = block.blockPos;
 
-                renderBlock(event, box, orig, pos, shrinkFactor, progressNormalised);
+                renderBlock(event, orig, pos, shrinkFactor, progressNormalised);
             }
         }
     }
 
-    private void renderBlock(Render3DEvent event, Box box, Box orig, BlockPos pos, double shrinkFactor, double progress) {
-        box = box.shrink(
-            box.getXLength() * shrinkFactor,
-            box.getYLength() * shrinkFactor,
-            box.getZLength() * shrinkFactor
+    private void renderBlock(Render3DEvent event, Box orig, BlockPos pos, double shrinkFactor, double progress) {
+        Box box = orig.shrink(
+            orig.getXLength() * shrinkFactor,
+            orig.getYLength() * shrinkFactor,
+            orig.getZLength() * shrinkFactor
         );
 
         double xShrink = (orig.getXLength() * shrinkFactor) / 2;

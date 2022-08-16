@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.movement;
@@ -152,11 +152,11 @@ public class NoFall extends Module {
 
         Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
             if (bucket.isOffhand()) {
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.OFF_HAND);
+                mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
             } else {
                 int preSlot = mc.player.getInventory().selectedSlot;
                 InvUtils.swap(bucket.slot(), true);
-                mc.interactionManager.interactItem(mc.player, mc.world, Hand.MAIN_HAND);
+                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
                 InvUtils.swapBack();
             }
 

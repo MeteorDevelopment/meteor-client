@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -37,12 +37,12 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     private boolean worldNotNull;
 
-    @Inject(at = @At("HEAD"), method = "onGameJoin")
+    @Inject(method = "onGameJoin", at = @At("HEAD"))
     private void onGameJoinHead(GameJoinS2CPacket packet, CallbackInfo info) {
         worldNotNull = world != null;
     }
 
-    @Inject(at = @At("TAIL"), method = "onGameJoin")
+    @Inject(method = "onGameJoin", at = @At("TAIL"))
     private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info) {
         if (worldNotNull) {
             MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
@@ -51,7 +51,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
     }
 
-    @Inject(at = @At("HEAD"), method = "onPlaySound")
+    @Inject(method = "onPlaySound", at = @At("HEAD"))
     private void onPlaySound(PlaySoundS2CPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(PlaySoundPacketEvent.get(packet));
     }
@@ -74,9 +74,16 @@ public abstract class ClientPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER))
+    @Inject(
+        method = "onExplosion",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
+            shift = At.Shift.AFTER
+        )
+    )
     private void onExplosionVelocity(ExplosionS2CPacket packet, CallbackInfo ci) {
-        Velocity velocity = Modules.get().get(Velocity.class); //Velocity for explosions
+        Velocity velocity = Modules.get().get(Velocity.class);
         if (!velocity.explosions.get()) return;
 
         ((IExplosionS2CPacket) packet).setVelocityX((float) (packet.getPlayerVelocityX() * velocity.getHorizontal(velocity.explosionsHorizontal)));

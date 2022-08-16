@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
@@ -19,7 +19,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     public boolean doNotPush, hideWhenInsideCamera;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
-        super(mc.world, new GameProfile(UUID.randomUUID(), name));
+        super(mc.world, new GameProfile(UUID.randomUUID(), name), player.getPublicKey());
 
         copyPositionAndRotation(player);
 

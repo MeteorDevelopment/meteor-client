@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
@@ -230,7 +230,7 @@ public class LogoutSpots extends Module {
         }
 
         public void render2D() {
-            if (PlayerUtils.distanceToCamera(x, y, z) > mc.options.viewDistance * 16) return;
+            if (PlayerUtils.distanceToCamera(x, y, z) > mc.options.getViewDistance().getValue() * 16) return;
 
             TextRenderer text = TextRenderer.get();
             double scale = LogoutSpots.this.scale.get();

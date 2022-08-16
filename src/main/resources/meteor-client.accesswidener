@@ -1,63 +1,70 @@
 accessWidener	v1	named
 
-Accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
-Accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
-Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
-Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
-Accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
-Accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMap
+accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
+accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
+accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
+accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractAtHandler
+accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
+accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMap
 
-Accessible   method  net/minecraft/text/TextColor <init> (I)V
+accessible   method  net/minecraft/text/TextColor <init> (I)V
 
-Accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity cachedScoreboardEntry Lnet/minecraft/client/network/PlayerListEntry;
+accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity cachedScoreboardEntry Lnet/minecraft/client/network/PlayerListEntry;
 
-Accessible   field   net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
-Accessible   field   net/minecraft/client/model/ModelPart children Ljava/util/Map;
-Accessible   class   net/minecraft/client/model/ModelPart$Quad
-Accessible   class   net/minecraft/client/model/ModelPart$Vertex
-Accessible   field   net/minecraft/client/model/ModelPart$Cuboid sides [Lnet/minecraft/client/model/ModelPart$Quad;
-Accessible   method  net/minecraft/client/render/entity/PlayerEntityRenderer getArmPose (Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/client/render/entity/model/BipedEntityModel$ArmPose;
-Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer setupTransforms (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;FFF)V
-Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer scale (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V
-Accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer getAnimationProgress (Lnet/minecraft/entity/LivingEntity;F)F
+accessible   field   net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
+accessible   field   net/minecraft/client/model/ModelPart children Ljava/util/Map;
+accessible   class   net/minecraft/client/model/ModelPart$Quad
+accessible   class   net/minecraft/client/model/ModelPart$Vertex
+accessible   field   net/minecraft/client/model/ModelPart$Cuboid sides [Lnet/minecraft/client/model/ModelPart$Quad;
+accessible   method  net/minecraft/client/render/entity/PlayerEntityRenderer getArmPose (Lnet/minecraft/client/network/AbstractClientPlayerEntity;Lnet/minecraft/util/Hand;)Lnet/minecraft/client/render/entity/model/BipedEntityModel$ArmPose;
+accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer setupTransforms (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;FFF)V
+accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer scale (Lnet/minecraft/entity/LivingEntity;Lnet/minecraft/client/util/math/MatrixStack;F)V
+accessible   method  net/minecraft/client/render/entity/LivingEntityRenderer getAnimationProgress (Lnet/minecraft/entity/LivingEntity;F)F
 
-Accessible   field   net/minecraft/client/render/entity/model/AnimalModel headScaled Z
-Accessible   field   net/minecraft/client/render/entity/model/AnimalModel childHeadYOffset F
-Accessible   field   net/minecraft/client/render/entity/model/AnimalModel childHeadZOffset F
-Accessible   field   net/minecraft/client/render/entity/model/AnimalModel invertedChildHeadScale F
-Accessible   field   net/minecraft/client/render/entity/model/AnimalModel invertedChildBodyScale F
-Accessible   field   net/minecraft/client/render/entity/model/AnimalModel childBodyYOffset F
-Accessible   method  net/minecraft/client/render/entity/model/AnimalModel getHeadParts ()Ljava/lang/Iterable;
-Accessible   method  net/minecraft/client/render/entity/model/AnimalModel getBodyParts ()Ljava/lang/Iterable;
+accessible   field   net/minecraft/client/render/entity/model/AnimalModel headScaled Z
+accessible   field   net/minecraft/client/render/entity/model/AnimalModel childHeadYOffset F
+accessible   field   net/minecraft/client/render/entity/model/AnimalModel childHeadZOffset F
+accessible   field   net/minecraft/client/render/entity/model/AnimalModel invertedChildHeadScale F
+accessible   field   net/minecraft/client/render/entity/model/AnimalModel invertedChildBodyScale F
+accessible   field   net/minecraft/client/render/entity/model/AnimalModel childBodyYOffset F
+accessible   method  net/minecraft/client/render/entity/model/AnimalModel getHeadParts ()Ljava/lang/Iterable;
+accessible   method  net/minecraft/client/render/entity/model/AnimalModel getBodyParts ()Ljava/lang/Iterable;
 
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel head Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel body Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel rightHindLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel leftHindLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel rightFrontLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel leftFrontLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel rightChest Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel leftChest Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel head Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel body Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel rightHindLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel leftHindLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel rightFrontLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel leftFrontLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel rightChest Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/LlamaEntityModel leftChest Lnet/minecraft/client/model/ModelPart;
 
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftHindLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightHindLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftHaunch Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightHaunch Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel body Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftFrontLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightFrontLeg Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel head Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightEar Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftEar Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel tail Lnet/minecraft/client/model/ModelPart;
-Accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel nose Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftHindLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightHindLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftHaunch Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightHaunch Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel body Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftFrontLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightFrontLeg Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel head Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel rightEar Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel leftEar Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel tail Lnet/minecraft/client/model/ModelPart;
+accessible   field   net/minecraft/client/render/entity/model/RabbitEntityModel nose Lnet/minecraft/client/model/ModelPart;
 
-Accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer SINE_45_DEGREES F
+accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer SINE_45_DEGREES F
 accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer core Lnet/minecraft/client/model/ModelPart;
 accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer frame Lnet/minecraft/client/model/ModelPart;
 accessible   field   net/minecraft/client/render/entity/EndCrystalEntityRenderer bottom Lnet/minecraft/client/model/ModelPart;
 
-Accessible   field   net/minecraft/client/render/entity/BoatEntityRenderer texturesAndModels Ljava/util/Map;
+accessible   field   net/minecraft/client/render/entity/BoatEntityRenderer texturesAndModels Ljava/util/Map;
 
-Accessible   class   net/minecraft/client/render/MapRenderer$MapTexture
-Accessible   field   net/minecraft/client/render/MapRenderer$MapTexture texture Lnet/minecraft/client/texture/NativeImageBackedTexture;
+accessible   class   net/minecraft/client/render/MapRenderer$MapTexture
+accessible   field   net/minecraft/client/render/MapRenderer$MapTexture texture Lnet/minecraft/client/texture/NativeImageBackedTexture;
+
+accessible   class   net/minecraft/client/option/SimpleOption$Callbacks
+
+accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$BeaconButtonWidget
+accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$EffectButtonWidget
+
+accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadState

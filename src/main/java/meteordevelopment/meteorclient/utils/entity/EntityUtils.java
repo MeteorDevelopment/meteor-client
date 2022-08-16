@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.entity;
@@ -18,7 +18,9 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
@@ -101,7 +103,7 @@ public class EntityUtils {
     public static boolean isInRenderDistance(double posX, double posZ) {
         double x = Math.abs(mc.gameRenderer.getCamera().getPos().x - posX);
         double z = Math.abs(mc.gameRenderer.getCamera().getPos().z - posZ);
-        double d = (mc.options.viewDistance + 1) * 16;
+        double d = (mc.options.getViewDistance().getValue() + 1) * 16;
 
         return x < d && z < d;
     }
@@ -185,5 +187,10 @@ public class EntityUtils {
         });
 
         return found.get();
+    }
+
+    public static EntityGroup getGroup(Entity entity) {
+        if (entity instanceof LivingEntity livingEntity) return livingEntity.getGroup();
+        else return EntityGroup.DEFAULT;
     }
 }

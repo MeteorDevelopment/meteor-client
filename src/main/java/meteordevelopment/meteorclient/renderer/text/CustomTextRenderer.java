@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer.text;
@@ -11,14 +11,15 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.BufferUtils;
 
-import java.io.File;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class CustomTextRenderer implements TextRenderer {
-    private static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
+    public static final Color SHADOW_COLOR = new Color(60, 60, 60, 180);
 
     private final Mesh mesh = new ShaderMesh(Shaders.TEXT, DrawMode.Triangles, Mesh.Attrib.Vec2, Mesh.Attrib.Vec2, Mesh.Attrib.Color);
+
+    public final FontFace fontFace;
 
     private final Font[] fonts;
     private Font font;
@@ -27,8 +28,10 @@ public class CustomTextRenderer implements TextRenderer {
     private boolean scaleOnly;
     private double scale = 1;
 
-    public CustomTextRenderer(File file) {
-        byte[] bytes = Utils.readBytes(file);
+    public CustomTextRenderer(FontFace fontFace) {
+        this.fontFace = fontFace;
+
+        byte[] bytes = Utils.readBytes(fontFace.toStream());
         ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
 
         fonts = new Font[5];
@@ -68,20 +71,22 @@ public class CustomTextRenderer implements TextRenderer {
         this.building = true;
         this.scaleOnly = scaleOnly;
 
-        double fontScale = font.getHeight() / 18;
+        double fontScale = font.getHeight() / 18.0;
         this.scale = 1 + (scale - fontScale) / fontScale;
     }
 
     @Override
     public double getWidth(String text, int length, boolean shadow) {
+        if (text.isEmpty()) return 0;
+
         Font font = building ? this.font : fonts[0];
-        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale;
+        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale + (shadow ? 1 : 0);
     }
 
     @Override
     public double getHeight(boolean shadow) {
         Font font = building ? this.font : fonts[0];
-        return (font.getHeight() + (shadow ? 1 : 0)) * scale;
+        return (font.getHeight() + 1 + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
