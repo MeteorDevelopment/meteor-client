@@ -547,6 +547,7 @@ public class Modules extends System<Modules> {
         add(new Swarm());
         add(new AntiPacketKick());
         add(new AutoClicker());
+        add(new AutoEz());
         add(new AutoLog());
         add(new AutoReconnect());
         add(new AutoRespawn());
