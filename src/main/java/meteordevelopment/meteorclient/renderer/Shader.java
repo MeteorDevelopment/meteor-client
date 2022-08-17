@@ -10,6 +10,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.io.IOUtils;
 
@@ -92,6 +93,10 @@ public class Shader {
 
     public void set(String name, double v1, double v2) {
         GL.uniformFloat2(getLocation(name), (float) v1, (float) v2);
+    }
+
+    public void set(String name, Color color) {
+        GL.uniformFloat4(getLocation(name), (float) color.r / 255, (float) color.g / 255, (float) color.b / 255, (float) color.a / 255);
     }
 
     public void set(String name, Matrix4f mat) {
