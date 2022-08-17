@@ -1,14 +1,14 @@
 #version 330 core
 
-out vec4 color;
+in vec2 v_TexCoord;
+in vec2 v_OneTexel;
 
 uniform sampler2D u_Texture;
 uniform int u_Width;
 uniform float u_FillOpacity;
 uniform int u_ShapeMode;
 
-in vec2 v_TexCoord;
-in vec2 v_OneTexel;
+out vec4 color;
 
 void main() {
     vec4 center = texture(u_Texture, v_TexCoord);
