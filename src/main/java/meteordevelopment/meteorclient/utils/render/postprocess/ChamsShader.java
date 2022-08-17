@@ -30,7 +30,7 @@ public class ChamsShader extends EntityShader {
     @PostInit
     public static void init() {
         try {
-            ByteBuffer data = TextureUtil.readResource(mc.getResourceManager().getResource(new MeteorIdentifier("textures/chams.jpg")).get().getInputStream());
+            ByteBuffer data = TextureUtil.readResource(mc.getResourceManager().getResource(new MeteorIdentifier("textures/chams.png")).get().getInputStream());
             data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
