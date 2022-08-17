@@ -14,23 +14,38 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.resource.Resource;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ChamsShader extends EntityShader {
+    private static final String[] FILE_FORMATS = { "png", "jpg" };
+
     private static Texture IMAGE_TEX;
     private static Chams chams;
 
     @PostInit
     public static void init() {
         try {
-            ByteBuffer data = TextureUtil.readResource(mc.getResourceManager().getResource(new MeteorIdentifier("textures/chams.png")).get().getInputStream());
+            ByteBuffer data = null;
+            for (String fileFormat : FILE_FORMATS) {
+                Optional<Resource> optional = mc.getResourceManager().getResource(new MeteorIdentifier("textures/chams." + fileFormat));
+                if (optional.isEmpty() || optional.get().getInputStream() == null) {
+                    continue;
+                }
+
+                data = TextureUtil.readResource(optional.get().getInputStream());
+                break;
+            }
+            if (data == null) return;
+
             data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
