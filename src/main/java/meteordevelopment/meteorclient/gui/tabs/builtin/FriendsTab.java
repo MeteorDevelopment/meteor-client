@@ -16,12 +16,8 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.PlayerListEntry;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FriendsTab extends Tab {
     public FriendsTab() {
@@ -46,33 +42,24 @@ public class FriendsTab extends Tab {
         @Override
         public void initWidgets() {
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
-
             initTable(table);
 
-            table.add(theme.horizontalSeparator()).expandX();
-            table.row();
+            add(theme.horizontalSeparator()).expandX();
 
             // New
-            WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+            WHorizontalList list = add(theme.horizontalList()).expandX().widget();
 
-            WTextBox nameW = list.add(theme.textBox("")).expandX().widget();
+            WTextBox nameW = list.add(theme.textBox("", (text, c) -> c != ' ')).expandX().widget();
             nameW.setFocused(true);
 
             WPlus add = list.add(theme.plus()).widget();
             add.action = () -> {
                 String name = nameW.get().trim();
 
-                Friend friend = null;
-                if (Utils.canUpdate() && mc.getNetworkHandler() != null) {
-                    for (PlayerListEntry playerListEntry : mc.getNetworkHandler().getPlayerList()) {
-                        if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
-                            friend = new Friend(playerListEntry);
-                            break;
-                        }
-                    }
-                }
+                Friend friend = new Friend(name);
 
-                if (friend != null && Friends.get().add(friend)) {
+                if (Friends.get().add(friend)) {
+                    friend.updateID();
                     nameW.set("");
                     reload();
                 }
@@ -87,6 +74,7 @@ public class FriendsTab extends Tab {
             if (Friends.get().isEmpty()) return;
 
             for (Friend friend : Friends.get()) {
+                table.add(theme.texture(32, 32, friend.headTexture.needsRotate() ? 90 : 0, friend.headTexture));
                 table.add(theme.label(friend.name));
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
