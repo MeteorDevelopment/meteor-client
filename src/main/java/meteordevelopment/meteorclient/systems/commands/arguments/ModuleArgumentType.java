@@ -22,28 +22,26 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class ModuleArgumentType implements ArgumentType<Module> {
+    private static final DynamicCommandExceptionType NO_SUCH_MODULE = new DynamicCommandExceptionType(name -> Text.literal("Module with name " + name + " doesn't exist."));
+
     private static final Collection<String> EXAMPLES = Modules.get().getAll()
             .stream()
             .limit(3)
             .map(module -> module.name)
             .collect(Collectors.toList());
 
-    private static final DynamicCommandExceptionType NO_SUCH_MODULE = new DynamicCommandExceptionType(o ->
-            Text.literal("Module with name " + o + " doesn't exist."));
-
-    public static ModuleArgumentType module() {
+    public static ModuleArgumentType create() {
         return new ModuleArgumentType();
     }
 
-    public static Module getModule(final CommandContext<?> context, final String name) {
-        return context.getArgument(name, Module.class);
+    public static Module get(CommandContext<?> context) {
+        return context.getArgument("module", Module.class);
     }
 
     @Override
     public Module parse(StringReader reader) throws CommandSyntaxException {
         String argument = reader.readString();
         Module module = Modules.get().get(argument);
-
         if (module == null) throw NO_SUCH_MODULE.create(argument);
 
         return module;

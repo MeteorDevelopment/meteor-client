@@ -20,8 +20,12 @@ import static net.minecraft.nbt.StringNbtReader.EXPECTED_VALUE;
 public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
     private static final Collection<String> EXAMPLES = Arrays.asList("{foo:bar}", "{foo:[aa, bb],bar:15}");
 
-    public static CompoundNbtTagArgumentType nbtTag() {
+    public static CompoundNbtTagArgumentType create() {
         return new CompoundNbtTagArgumentType();
+    }
+
+    public static NbtCompound get(CommandContext<?> context) {
+        return context.getArgument("nbt", NbtCompound.class);
     }
 
     @Override
@@ -49,10 +53,6 @@ public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
                 .replace("$", "\u00a7")
                 .replace("\u00a7\u00a7", "$")
         );
-    }
-
-    public static NbtCompound getTag(final CommandContext<?> context, String name) {
-        return context.getArgument(name, NbtCompound.class);
     }
 
     @Override

@@ -20,7 +20,7 @@ public class BindCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("module", ModuleArgumentType.module()).executes(context -> {
+        builder.then(argument("module", ModuleArgumentType.create()).executes(context -> {
             Module module = context.getArgument("module", Module.class);
             Modules.get().setModuleToBind(module);
 

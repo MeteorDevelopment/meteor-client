@@ -17,33 +17,21 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.text.Text;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry> {
+    private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(name -> Text.literal("Player list entry with name " + name + " doesn't exist."));
 
-    private static Collection<String> EXAMPLES;
+    private static final Collection<String> EXAMPLES = List.of("seasnail8169", "MineGame159");
 
-    static {
-        if (mc.getNetworkHandler() != null) {
-            EXAMPLES = mc.getNetworkHandler().getPlayerList()
-                .stream()
-                .limit(3)
-                .map(playerListEntry -> playerListEntry.getProfile().getName())
-                .collect(Collectors.toList());
-        }
-    }
-
-    private static final DynamicCommandExceptionType NO_SUCH_PLAYER = new DynamicCommandExceptionType(o ->
-            Text.literal("Player list entry with name " + o + " doesn't exist."));
-
-    public static PlayerListEntryArgumentType playerListEntry() {
+    public static PlayerListEntryArgumentType create() {
         return new PlayerListEntryArgumentType();
     }
 
-    public static PlayerListEntry getPlayerListEntry(CommandContext<?> context) {
+    public static PlayerListEntry get(CommandContext<?> context) {
         return context.getArgument("player", PlayerListEntry.class);
     }
 
@@ -58,8 +46,8 @@ public class PlayerListEntryArgumentType implements ArgumentType<PlayerListEntry
                 break;
             }
         }
-
         if (playerListEntry == null) throw NO_SUCH_PLAYER.create(argument);
+
         return playerListEntry;
     }
 

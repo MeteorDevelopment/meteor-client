@@ -35,8 +35,8 @@ public class WaypointCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("get").then(argument("waypoint", WaypointArgumentType.waypoint()).executes(context -> {
-            Waypoint waypoint = WaypointArgumentType.getWaypoint(context, "waypoint");
+        builder.then(literal("get").then(argument("waypoint", WaypointArgumentType.create()).executes(context -> {
+            Waypoint waypoint = WaypointArgumentType.get(context);
             info("Name: " + Formatting.WHITE + waypoint.name.get());
             info("Actual Dimension: " + Formatting.WHITE + waypoint.dimension.get());
             info("Position: " + Formatting.WHITE + waypointFullPos(waypoint));
@@ -59,8 +59,8 @@ public class WaypointCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("delete").then(argument("waypoint", WaypointArgumentType.waypoint()).executes(context -> {
-            Waypoint waypoint = WaypointArgumentType.getWaypoint(context, "waypoint");
+        builder.then(literal("delete").then(argument("waypoint", WaypointArgumentType.create()).executes(context -> {
+            Waypoint waypoint = WaypointArgumentType.get(context);
 
             info("The waypoint (highlight)'%s'(default) has been deleted.", waypoint.name.get());
 
@@ -69,8 +69,8 @@ public class WaypointCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("toggle").then(argument("waypoint", WaypointArgumentType.waypoint()).executes(context -> {
-            Waypoint waypoint = WaypointArgumentType.getWaypoint(context, "waypoint");
+        builder.then(literal("toggle").then(argument("waypoint", WaypointArgumentType.create()).executes(context -> {
+            Waypoint waypoint = WaypointArgumentType.get(context);
             waypoint.visible.set(!waypoint.visible.get());
 
             Waypoints.get().save();
