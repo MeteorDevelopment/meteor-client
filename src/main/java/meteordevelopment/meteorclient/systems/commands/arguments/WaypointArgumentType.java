@@ -25,10 +25,12 @@ import java.util.concurrent.CompletableFuture;
 public class WaypointArgumentType implements ArgumentType<String> {
     private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Text.literal("Waypoint with name '" + name + "' doesn't exist."));
 
-    public static WaypointArgumentType waypoint() {return new WaypointArgumentType();}
+    public static WaypointArgumentType create() {
+        return new WaypointArgumentType();
+    }
 
-    public static Waypoint getWaypoint(final CommandContext<?> context, final String name) {
-        return Waypoints.get().get(context.getArgument(name, String.class));
+    public static Waypoint get(CommandContext<?> context) {
+        return Waypoints.get().get(context.getArgument("waypoint", String.class));
     }
 
     @Override

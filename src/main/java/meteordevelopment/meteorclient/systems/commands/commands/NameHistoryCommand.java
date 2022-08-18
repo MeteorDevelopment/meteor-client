@@ -38,9 +38,9 @@ public class NameHistoryCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("player", PlayerListEntryArgumentType.playerListEntry()).executes(context -> {
+        builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             MeteorExecutor.execute(() -> {
-                PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.getPlayerListEntry(context);
+                PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);
                 UUID uuid = lookUpTarget.getProfile().getId();
 
                 List<NameHistoryObject> nameHistoryObjects = Http.get("https://api.mojang.com/user/profiles/" + formatUUID(uuid) + "/names").sendJson(RESPONSE_TYPE);
