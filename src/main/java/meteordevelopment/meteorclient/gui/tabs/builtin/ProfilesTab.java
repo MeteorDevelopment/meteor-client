@@ -49,20 +49,17 @@ public class ProfilesTab extends Tab {
         @Override
         public void initWidgets() {
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
-
             initTable(table);
 
-            table.add(theme.horizontalSeparator()).expandX();
-            table.row();
+            add(theme.horizontalSeparator()).expandX();
 
             // Create
-            WButton create = table.add(theme.button("Create")).expandX().widget();
+            WButton create = add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new EditProfileScreen(theme, null, this::reload));
         }
 
         private void initTable(WTable table) {
             table.clear();
-
             if (Profiles.get().isEmpty()) return;
 
             for (Profile profile : Profiles.get()) {

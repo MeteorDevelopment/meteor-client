@@ -40,13 +40,11 @@ public class ProxiesScreen extends WindowScreen {
     @Override
     public void initWidgets() {
         WTable table = add(theme.table()).expandX().minWidth(400).widget();
-
         initTable(table);
 
-        table.add(theme.horizontalSeparator()).expandX();
-        table.row();
+        add(theme.horizontalSeparator()).expandX();
 
-        WHorizontalList l = table.add(theme.horizontalList()).expandX().widget();
+        WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 
         // New
         WButton newBtn = l.add(theme.button("New")).expandX().widget();
@@ -72,7 +70,6 @@ public class ProxiesScreen extends WindowScreen {
 
     private void initTable(WTable table) {
         table.clear();
-
         if (Proxies.get().isEmpty()) return;
 
         for (Proxy proxy : Proxies.get()) {

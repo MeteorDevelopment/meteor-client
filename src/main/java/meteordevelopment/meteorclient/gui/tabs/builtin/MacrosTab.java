@@ -45,19 +45,16 @@ public class MacrosTab extends Tab {
         @Override
         public void initWidgets() {
             WTable table = add(theme.table()).expandX().minWidth(400).widget();
-
             initTable(table);
 
-            table.add(theme.horizontalSeparator()).expandX();
-            table.row();
+            add(theme.horizontalSeparator()).expandX();
 
-            WButton create = table.add(theme.button("Create")).expandX().widget();
+            WButton create = add(theme.button("Create")).expandX().widget();
             create.action = () -> mc.setScreen(new EditMacroScreen(theme, null, this::reload));
         }
 
         private void initTable(WTable table) {
             table.clear();
-
             if (Macros.get().isEmpty()) return;
 
             for (Macro macro : Macros.get()) {
