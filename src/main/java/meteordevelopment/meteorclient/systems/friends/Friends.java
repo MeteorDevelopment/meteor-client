@@ -63,7 +63,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     public Friend get(UUID uuid) {
         for (Friend friend : friends) {
-            if (friend.id.equals(uuid)) {
+            if (friend.id != null && friend.id.equals(uuid)) {
                 return friend;
             }
         }
@@ -107,19 +107,16 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     @Override
     public Friends fromTag(NbtCompound tag) {
-        List<Friend> saved = NbtUtils.listFromTag(tag.getList("friends", 10), nbt -> {
-            NbtCompound friendTag = (NbtCompound) nbt;
-            if (!friendTag.contains("id")) return null;
-            return new Friend(friendTag);
-        });
-
+        List<Friend> saved = NbtUtils.listFromTag(tag.getList("friends", 10), Friend::new);
         friends.clear();
 
         for (Friend friend : saved) {
             MeteorExecutor.execute(() -> {
-                if (friend.updateName()) {
-                    friends.add(friend);
-                }
+                if (friend.name == null && !friend.updateName()) return;
+                if (friend.id == null) friend.updateID();
+
+                friends.add(friend);
+                friend.updateHead();
             });
         }
 
