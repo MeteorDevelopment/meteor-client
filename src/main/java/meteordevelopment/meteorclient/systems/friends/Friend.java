@@ -44,18 +44,17 @@ public class Friend implements ISerializable<Friend> {
         if (id == null) return false;
 
         APIResponse res = Http.get("https://api.mojang.com/user/profile/" + UUIDTypeAdapter.fromUUID(id)).sendJson(APIResponse.class);
-        if (res == null || res.name == null || res.name.isBlank()) return false;
+        if (res == null || res.name == null) return false;
         name = res.name;
 
         return true;
     }
 
-    public void updateID() {
-        if (name == null) return;
-
+    public void updateInfo() {
         MeteorExecutor.execute(() -> {
             APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
-            if (res == null || res.id == null || res.id.isBlank()) return;
+            if (res == null || res.name == null || res.id == null) return;
+            name = res.name;
             id = UUIDTypeAdapter.fromString(res.id);
         });
     }
@@ -92,12 +91,12 @@ public class Friend implements ISerializable<Friend> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Friend friend = (Friend) o;
-        return Objects.equals(id, friend.id);
+        return Objects.equals(name, friend.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(name);
     }
 
     private static class APIResponse {

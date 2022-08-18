@@ -113,7 +113,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         for (Friend friend : saved) {
             MeteorExecutor.execute(() -> {
                 if (friend.name == null && !friend.updateName()) return;
-                if (friend.id == null) friend.updateID();
+                if (friend.id == null) friend.updateInfo();
 
                 friends.add(friend);
                 friend.updateHead();
