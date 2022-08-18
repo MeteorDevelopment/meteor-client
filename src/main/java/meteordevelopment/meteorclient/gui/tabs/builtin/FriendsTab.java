@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.gui.screen.Screen;
 
 public class FriendsTab extends Tab {
@@ -55,13 +56,14 @@ public class FriendsTab extends Tab {
             WPlus add = list.add(theme.plus()).widget();
             add.action = () -> {
                 String name = nameW.get().trim();
-
                 Friend friend = new Friend(name);
 
                 if (Friends.get().add(friend)) {
-                    friend.updateID();
-                    nameW.set("");
-                    reload();
+                    MeteorExecutor.execute(() -> {
+                        friend.updateInfo();
+                        nameW.set("");
+                        reload();
+                    });
                 }
             };
 
@@ -70,7 +72,6 @@ public class FriendsTab extends Tab {
 
         private void initTable(WTable table) {
             table.clear();
-
             if (Friends.get().isEmpty()) return;
 
             for (Friend friend : Friends.get()) {
