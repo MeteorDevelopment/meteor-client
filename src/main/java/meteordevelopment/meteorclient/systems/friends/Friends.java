@@ -30,7 +30,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public boolean add(Friend friend) {
-        if (friend.name.isEmpty()) return false;
+        if (friend.name.isEmpty() || friend.name.contains(" ")) return false;
 
         if (!friends.contains(friend)) {
             friends.add(friend);
@@ -49,6 +49,16 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         }
 
         return false;
+    }
+
+    public Friend get(String name) {
+        for (Friend friend : friends) {
+            if (friend.name.equals(name)) {
+                return friend;
+            }
+        }
+
+        return null;
     }
 
     public Friend get(UUID uuid) {
