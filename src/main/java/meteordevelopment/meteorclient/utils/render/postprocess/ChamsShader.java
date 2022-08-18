@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.render.postprocess;
 
 import com.mojang.blaze3d.platform.TextureUtil;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -31,8 +32,12 @@ public class ChamsShader extends EntityShader {
     private static Texture IMAGE_TEX;
     private static Chams chams;
 
+    public ChamsShader() {
+        MeteorClient.EVENT_BUS.subscribe(ChamsShader.class);
+    }
+
     @PostInit
-    public static void init() {
+    public static void load() {
         try {
             ByteBuffer data = null;
             for (String fileFormat : FILE_FORMATS) {
@@ -69,8 +74,8 @@ public class ChamsShader extends EntityShader {
     }
 
     @EventHandler
-    private void onReload(ResourcePacksReloadedEvent event) {
-        init();
+    private static void onResourcePacksReloaded(ResourcePacksReloadedEvent event) {
+        load();
     }
 
     @Override

@@ -30,15 +30,7 @@ public class ReflectInit {
         }
     }
 
-    public static void preInit() {
-        init(PreInit.class);
-    }
-
-    public static void postInit() {
-        init(PostInit.class);
-    }
-
-    private static void init(Class<? extends Annotation> annotation) {
+    public static void init(Class<? extends Annotation> annotation) {
         for (String pkg : packages) {
             Reflections reflections = new Reflections(pkg, Scanners.MethodsAnnotated);
             Set<Method> initTasks = reflections.getMethodsAnnotatedWith(annotation);

@@ -7,6 +7,10 @@ import net.minecraft.entity.Entity;
 public class StorageOutlineShader extends PostProcessShader {
     private static StorageESP storageESP;
 
+    public StorageOutlineShader() {
+        init("outline");
+    }
+
     @Override
     protected void preDraw() {
         framebuffer.clear(false);
