@@ -30,7 +30,7 @@ public class Texture {
 
     public Texture() {}
 
-    private void upload(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
+    protected void upload(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
         ByteBuffer buffer = BufferUtils.createByteBuffer(data.length).put(data);
 
         upload(width, height, buffer, format, filterMin, filterMag, false);

@@ -29,6 +29,8 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
         String token = auth();
         if (token == null) return false;
 
+        cache.loadHead();
+
         setSession(new Session(cache.username, cache.uuid, token, Optional.empty(), Optional.empty(), Session.AccountType.MSA));
         return true;
     }

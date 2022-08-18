@@ -62,6 +62,8 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
             setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
             cache.username = auth.getSelectedProfile().getName();
+            cache.loadHead();
+
             return true;
         } catch (AuthenticationException e) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");
