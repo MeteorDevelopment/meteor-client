@@ -30,11 +30,6 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
         return Systems.get(Accounts.class);
     }
 
-    @Override
-    public void init() {
-        AccountCache.loadSteveHead();
-    }
-
     public void add(Account<?> account) {
         accounts.add(account);
         save();
@@ -83,7 +78,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
                 };
 
-                if (account.fetchHead()) return account;
+                if (account.fetchInfo()) return account;
             } catch (NbtException e) {
                 return null;
             }
