@@ -9,6 +9,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class EntityOutlineShader extends EntityShader {
     private static ESP esp;
 
+    public EntityOutlineShader() {
+        init("outline");
+    }
+
     @Override
     protected boolean shouldDraw() {
         if (esp == null) esp = Modules.get().get(ESP.class);
