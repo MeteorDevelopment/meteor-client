@@ -166,6 +166,20 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
+    private final Setting<Boolean> autoStealWhitelist = sgAutoSteal.add(new BoolSetting.Builder()
+        .name("whitelist")
+        .description("enable whitelisting")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<List<Item>> autoStealWhitelistedItems = sgAutoSteal.add(new ItemListSetting.Builder()
+        .name("items")
+        .description("Whitelist items to steal")
+        .visible(autoStealWhitelist::get)
+        .build()
+    );
+
 
     private InventorySorter sorter;
     private boolean invOpened;
@@ -272,7 +286,7 @@ public class InventoryTweaks extends Module {
     private void moveSlots(ScreenHandler handler, int start, int end) {
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack()) continue;
-
+            if(autoStealWhitelist.get() && !autoStealWhitelistedItems.get().contains(handler.getSlot(i).getStack().getItem())) continue;
             int sleep = getSleepTime();
             if (sleep > 0) {
                 try {
