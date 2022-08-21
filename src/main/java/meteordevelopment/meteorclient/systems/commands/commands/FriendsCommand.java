@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.FriendArgumentType;
-import meteordevelopment.meteorclient.systems.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.systems.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -27,7 +27,8 @@ public class FriendsCommand extends Command {
         builder.then(literal("add")
             .then(argument("player", PlayerListEntryArgumentType.create())
                 .executes(context -> {
-                    Friend friend = new Friend(PlayerArgumentType.get(context));
+                    GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
+                    Friend friend = new Friend(profile.getName(), profile.getId());
 
                     if (Friends.get().add(friend)) info("Added (highlight)%s (default)to friends.", friend.name);
                     else error("Already friends with that player.");
