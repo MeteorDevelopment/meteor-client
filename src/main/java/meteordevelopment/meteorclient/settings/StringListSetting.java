@@ -1,16 +1,17 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.settings;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
-import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -22,10 +23,14 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class StringListSetting extends Setting<List<String>>{
-    public String newText = "";
+    public final Class<? extends WTextBox.Renderer> renderer;
+    public final CharFilter filter;
 
-    public StringListSetting(String name, String description, List<String> defaultValue, Consumer<List<String>> onChanged, Consumer<Setting<List<String>>> onModuleActivated, IVisible visible) {
+    public StringListSetting(String name, String description, List<String> defaultValue, Consumer<List<String>> onChanged, Consumer<Setting<List<String>>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer, CharFilter filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
+
+        this.renderer = renderer;
+        this.filter = filter;
     }
 
     @Override
@@ -67,14 +72,16 @@ public class StringListSetting extends Setting<List<String>>{
     }
 
     public static void fillTable(GuiTheme theme, WTable table, StringListSetting setting) {
-        setting.get().removeIf(String::isEmpty);
+        table.clear();
+
         ArrayList<String> strings = new ArrayList<>(setting.get());
+        CharFilter filter = setting.filter == null ? (text, c) -> true : setting.filter;
 
         for (int i = 0; i < setting.get().size(); i++) {
             int msgI = i;
             String message = setting.get().get(i);
 
-            WTextBox textBox = table.add(theme.textBox(message)).expandX().widget();
+            WTextBox textBox = table.add(theme.textBox(message, filter, setting.renderer)).expandX().widget();
             textBox.action = () -> strings.set(msgI, textBox.get());
             textBox.actionOnUnfocused = () -> setting.set(strings);
 
@@ -83,37 +90,37 @@ public class StringListSetting extends Setting<List<String>>{
                 strings.remove(msgI);
                 setting.set(strings);
 
-                table.clear();
                 fillTable(theme, table, setting);
             };
 
             table.row();
         }
 
-        WTextBox textBox = table.add(theme.textBox(setting.newText)).minWidth(300).expandX().widget();
-        textBox.action = () -> setting.newText = textBox.get();
+        if (!setting.get().isEmpty()) {
+            table.add(theme.horizontalSeparator()).expandX();
+            table.row();
+        }
 
-        WPlus add = table.add(theme.plus()).widget();
+        WButton add = table.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            strings.add(setting.newText);
+            strings.add("");
             setting.set(strings);
-            setting.newText = "";
 
-            table.clear();
             fillTable(theme, table, setting);
         };
 
-        // Reset
-        table.row();
-        WButton reset = table.add(theme.button("Reset")).widget();
+        WButton reset = table.add(theme.button(GuiRenderer.RESET)).widget();
         reset.action = () -> {
             setting.reset();
-            table.clear();
+
             fillTable(theme, table, setting);
         };
     }
 
     public static class Builder extends SettingBuilder<Builder, List<String>, StringListSetting> {
+        private Class<? extends WTextBox.Renderer> renderer;
+        private CharFilter filter;
+
         public Builder() {
             super(new ArrayList<>(0));
         }
@@ -122,9 +129,19 @@ public class StringListSetting extends Setting<List<String>>{
             return defaultValue(defaults != null ? Arrays.asList(defaults) : new ArrayList<>());
         }
 
+        public Builder renderer(Class<? extends WTextBox.Renderer> renderer) {
+            this.renderer = renderer;
+            return this;
+        }
+
+        public Builder filter(CharFilter filter) {
+            this.filter = filter;
+            return this;
+        }
+
         @Override
         public StringListSetting build() {
-            return new StringListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible);
+            return new StringListSetting(name, description, defaultValue, onChanged, onModuleActivated, visible, renderer, filter);
         }
     }
 }

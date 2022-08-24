@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.player;
@@ -19,6 +19,16 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class InvUtils {
     private static final Action ACTION = new Action();
     public static int previousSlot = -1;
+
+    // Predicates
+
+    public static boolean testInMainHand(Predicate<ItemStack> predicate) {
+        return predicate.test(mc.player.getMainHandStack());
+    }
+
+    public static boolean testInOffHand(Predicate<ItemStack> predicate) {
+        return predicate.test(mc.player.getOffHandStack());
+    }
 
     // Finding items
 
@@ -57,10 +67,13 @@ public class InvUtils {
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood) {
+        if (mc.player == null) return new FindItemResult(0, 0);
         return find(isGood, 0, mc.player.getInventory().size());
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood, int start, int end) {
+        if (mc.player == null) return new FindItemResult(0, 0);
+
         int slot = -1, count = 0;
 
         for (int i = start; i <= end; i++) {

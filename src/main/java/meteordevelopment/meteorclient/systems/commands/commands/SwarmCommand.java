@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -115,8 +115,8 @@ public class SwarmCommand extends Command {
             }
 
             return SINGLE_SUCCESS;
-        }).then(argument("player", PlayerArgumentType.player()).executes(context -> {
-            PlayerEntity playerEntity = PlayerArgumentType.getPlayer(context);
+        }).then(argument("player", PlayerArgumentType.create()).executes(context -> {
+            PlayerEntity playerEntity = PlayerArgumentType.get(context);
 
             Swarm swarm = Modules.get().get(Swarm.class);
             if (swarm.isActive()) {
@@ -251,14 +251,14 @@ public class SwarmCommand extends Command {
         );
 
         builder.then(literal("toggle")
-                .then(argument("module", ModuleArgumentType.module())
+                .then(argument("module", ModuleArgumentType.create())
                         .executes(context -> {
                             Swarm swarm = Modules.get().get(Swarm.class);
                             if (swarm.isActive()) {
                                 if (swarm.isHost()) {
                                     swarm.host.sendMessage(context.getInput());
                                 } else if (swarm.isWorker()) {
-                                    Module module = ModuleArgumentType.getModule(context, "module");
+                                    Module module = ModuleArgumentType.get(context);
                                     module.toggle();
                                 }
                             } else {
@@ -272,7 +272,7 @@ public class SwarmCommand extends Command {
                                         if (swarm.isHost()) {
                                             swarm.host.sendMessage(context.getInput());
                                         } else if (swarm.isWorker()) {
-                                            Module m = ModuleArgumentType.getModule(context, "module");
+                                            Module m = ModuleArgumentType.get(context);
                                             if (!m.isActive()) m.toggle();
                                         }
                                     } else {
@@ -286,7 +286,7 @@ public class SwarmCommand extends Command {
                                         if (swarm.isHost()) {
                                             swarm.host.sendMessage(context.getInput());
                                         } else if (swarm.isWorker()) {
-                                            Module m = ModuleArgumentType.getModule(context, "module");
+                                            Module m = ModuleArgumentType.get(context);
                                             if (m.isActive()) m.toggle();
                                         }
                                     } else {
@@ -344,7 +344,7 @@ public class SwarmCommand extends Command {
                 if (swarm.isHost()) {
                     swarm.host.sendMessage(context.getInput());
                 } else if (swarm.isWorker()) {
-                    mc.player.sendChatMessage(StringArgumentType.getString(context, "command"));
+                    ChatUtils.sendPlayerMsg(StringArgumentType.getString(context, "command"));
                 }
             } else {
                 throw SWARM_NOT_ACTIVE.create();

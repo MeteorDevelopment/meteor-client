@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.asm.transformers;
@@ -28,7 +28,7 @@ public class CanvasWorldRendererTransformer extends AsmTransformer {
 
     @Override
     public void transform(ClassNode klass) {
-        // Inject EntityShaders.endRender() after OutlineVertexConsumerProvider.draw() in CanvasWorldRenderer
+        // Inject PostProcessShaders.endRender() after OutlineVertexConsumerProvider.draw() in CanvasWorldRenderer
         MethodNode method = getMethod(klass, renderWorldMethod);
         if (method == null) return;
 
@@ -36,7 +36,7 @@ public class CanvasWorldRendererTransformer extends AsmTransformer {
             if (!(insn instanceof MethodInsnNode in)) continue;
 
             if (drawMethod.equals(in)) {
-                method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "meteordevelopment/meteorclient/utils/render/EntityShaders", "endRender", "()V"));
+                method.instructions.insert(insn, new MethodInsnNode(Opcodes.INVOKESTATIC, "meteordevelopment/meteorclient/utils/render/postprocess/PostProcessShaders", "endRender", "()V"));
                 break;
             }
         }

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer;
@@ -9,7 +9,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
-import net.minecraft.util.Identifier;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.util.math.Matrix4f;
 import org.apache.commons.io.IOUtils;
 
@@ -58,7 +59,7 @@ public class Shader {
 
     private String read(String path) {
         try {
-            return IOUtils.toString(mc.getResourceManager().getResource(new Identifier(MeteorClient.MOD_ID, "shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
+            return IOUtils.toString(mc.getResourceManager().getResource(new MeteorIdentifier("shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
             e.printStackTrace();
             return "";
@@ -92,6 +93,10 @@ public class Shader {
 
     public void set(String name, double v1, double v2) {
         GL.uniformFloat2(getLocation(name), (float) v1, (float) v2);
+    }
+
+    public void set(String name, Color color) {
+        GL.uniformFloat4(getLocation(name), (float) color.r / 255, (float) color.g / 255, (float) color.b / 255, (float) color.a / 255);
     }
 
     public void set(String name, Matrix4f mat) {

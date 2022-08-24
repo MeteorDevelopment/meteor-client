@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2022 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -29,7 +29,7 @@ public class ProfileKeysMixin {
         if (Modules.get().get(ServerSpoof.class).noSignatures()) info.setReturnValue(Optional.empty());
     }
 
-    @Inject(method = "getPublicKeyData", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getPublicKey", at = @At("HEAD"), cancellable = true)
     private void onGetPublicKeyData(CallbackInfoReturnable<Optional<PlayerPublicKey.PublicKeyData>> info) {
         if (Modules.get().get(ServerSpoof.class).noSignatures()) info.setReturnValue(Optional.empty());
     }

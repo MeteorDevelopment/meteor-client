@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -31,8 +31,8 @@ public class SpectateCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
-            mc.setCameraEntity(PlayerArgumentType.getPlayer(context));
+        builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
+            mc.setCameraEntity(PlayerArgumentType.get(context));
             mc.player.sendMessage(Text.literal("Sneak to un-spectate."), true);
             MeteorClient.EVENT_BUS.subscribe(shiftListener);
             return SINGLE_SUCCESS;

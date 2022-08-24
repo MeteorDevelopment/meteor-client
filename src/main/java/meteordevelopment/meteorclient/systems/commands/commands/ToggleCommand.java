@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.ModuleArgumentType;
-import meteordevelopment.meteorclient.systems.hud.HUD;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import net.minecraft.command.CommandSource;
@@ -31,34 +31,51 @@ public class ToggleCommand extends Command {
                         new ArrayList<>(Modules.get().getAll()).forEach(module -> {
                             if (!module.isActive()) module.toggle();
                         });
-                        HUD.get().active = true;
+                        Hud.get().active = true;
                         return SINGLE_SUCCESS;
                     })
                 )
                 .then(literal("off")
                     .executes(context -> {
                         new ArrayList<>(Modules.get().getActive()).forEach(Module::toggle);
-                        HUD.get().active = false;
+                        Hud.get().active = false;
                         return SINGLE_SUCCESS;
                     })
                 )
             )
-            .then(argument("module", ModuleArgumentType.module())
+            .then(argument("module", ModuleArgumentType.create())
                 .executes(context -> {
-                    Module m = ModuleArgumentType.getModule(context, "module");
+                    Module m = ModuleArgumentType.get(context);
                     m.toggle();
                     return SINGLE_SUCCESS;
                 })
                 .then(literal("on")
                     .executes(context -> {
-                        Module m = ModuleArgumentType.getModule(context, "module");
+                        Module m = ModuleArgumentType.get(context);
                         if (!m.isActive()) m.toggle();
                         return SINGLE_SUCCESS;
                     }))
                 .then(literal("off")
                     .executes(context -> {
-                        Module m = ModuleArgumentType.getModule(context, "module");
+                        Module m = ModuleArgumentType.get(context);
                         if (m.isActive()) m.toggle();
+                        return SINGLE_SUCCESS;
+                    })
+                )
+            )
+            .then(literal("hud")
+                .executes(context -> {
+                    Hud.get().active = !(Hud.get().active);
+                    return SINGLE_SUCCESS;
+                })
+                .then(literal("on")
+                    .executes(context -> {
+                        Hud.get().active = true;
+                        return SINGLE_SUCCESS;
+                    })
+                ).then(literal("off")
+                    .executes(context -> {
+                        Hud.get().active = false;
                         return SINGLE_SUCCESS;
                     })
                 )

@@ -1,7 +1,7 @@
 <component name="CopyrightManager">
   <copyright>
-      <option name="keyword" value="This file is part of the Meteor Client distribution" />
-      <option name="notice" value="This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).&#10;Copyright (c) &amp;#36;today.year Meteor Development." />
-      <option name="myName" value="Meteor" />
+    <option name="keyword" value="This file is part of the Meteor Client distribution" />
+    <option name="notice" value="This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).&#10;Copyright (c) Meteor Development." />
+    <option name="myName" value="Meteor" />
   </copyright>
 </component>

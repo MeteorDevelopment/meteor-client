@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.widgets.input;
@@ -9,21 +9,32 @@ import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import meteordevelopment.meteorclient.gui.GuiKeyEvents;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.MinecraftClient;
 import org.apache.commons.lang3.SystemUtils;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.*;
 
 public abstract class WTextBox extends WWidget {
+    private static final Renderer DEFAULT_RENDERER = (renderer, x, y, text, color) -> renderer.text(text, x, y, color, false);
+
     public Runnable action;
     public Runnable actionOnUnfocused;
 
     protected String text;
+    protected String placeholder;
     protected CharFilter filter;
+
+    protected final Renderer renderer;
 
     protected boolean focused;
     protected DoubleList textWidths = new DoubleArrayList();
@@ -35,10 +46,29 @@ public abstract class WTextBox extends WWidget {
     protected int selectionStart, selectionEnd;
     private int preSelectionCursor;
 
-    public WTextBox(String text, CharFilter filter) {
-        this.text = text;
-        this.filter = filter;
+    private List<String> completions;
+    private int completionsStart;
+    private WContainer completionsW;
+
+    public WTextBox(String text, CharFilter filter, Class<? extends Renderer> renderer) {
+        this(text, null, filter, renderer);
     }
+
+    public WTextBox(String text, String placeholder, CharFilter filter, Class<? extends Renderer> renderer) {
+        this.text = text;
+        this.placeholder = placeholder;
+        this.filter = filter;
+
+        try {
+            this.renderer = renderer != null ? renderer.getDeclaredConstructor().newInstance() : DEFAULT_RENDERER;
+        } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    protected abstract WContainer createCompletionsRootWidget();
+
+    protected abstract <T extends WWidget & ICompletionItem> T createCompletionsValueWidth(String completion, boolean selected);
 
     @Override
     protected void onCalculateSize() {
@@ -49,6 +79,25 @@ public abstract class WTextBox extends WWidget {
         height = pad + s + pad;
 
         calculateTextWidths();
+
+        if (completionsW != null) completionsW.calculateSize();
+    }
+
+    @Override
+    public void calculateWidgetPositions() {
+        super.calculateWidgetPositions();
+
+        if (completionsW != null) {
+            completionsW.x = x;
+            completionsW.y = y + height;
+            completionsW.calculateWidgetPositions();
+        }
+    }
+
+    @Override
+    public void move(double deltaX, double deltaY) {
+        super.move(deltaX, deltaY);
+        if (completionsW != null) completionsW.move(deltaX, deltaY);
     }
 
     protected double maxTextWidth() {
@@ -179,6 +228,32 @@ public abstract class WTextBox extends WWidget {
             setFocused(false);
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
+            return true;
+        }
+        else if (key == GLFW_KEY_TAB && completionsW != null) {
+            String completion = ((ICompletionItem) completionsW.cells.get(getSelectedCompletion()).widget()).getCompletion();
+
+            StringBuilder sb = new StringBuilder(text.length() + completion.length() + 1);
+            String a = text.substring(0, cursor);
+            sb.append(a);
+
+            for (int i = 0; i < completion.length() - 1; i++) {
+                if (a.endsWith(completion.substring(0, completion.length() - i - 1))) {
+                    completion = completion.substring(completion.length() - i - 1);
+                    break;
+                }
+            }
+
+            sb.append(completion);
+            if (completion.endsWith("(")) sb.append(')');
+
+            sb.append(text, cursor, text.length());
+
+            text = sb.toString();
+            cursor += completion.length();
+            resetSelection();
+            runAction();
+
             return true;
         }
 
@@ -382,8 +457,51 @@ public abstract class WTextBox extends WWidget {
 
             return true;
         }
+        else if (key == GLFW_KEY_DOWN && completionsW != null) {
+            int currentI = getSelectedCompletion();
+
+            if (currentI == Math.min(5, completions.size() - 1)) {
+                if (completionsStart + 6 < completions.size()) {
+                    completionsStart++;
+                    createCompletions(completionsStart + currentI);
+                }
+            }
+            else {
+                ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
+                ((ICompletionItem) completionsW.cells.get(currentI + 1).widget()).setSelected(true);
+            }
+
+            return true;
+        }
+        else if (key == GLFW_KEY_UP && completionsW != null) {
+            int currentI = getSelectedCompletion();
+
+            if (currentI == 0) {
+                if (completionsStart > 0) {
+                    completionsStart--;
+                    createCompletions(completionsStart + currentI);
+                }
+            }
+            else {
+                ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
+                ((ICompletionItem) completionsW.cells.get(currentI - 1).widget()).setSelected(true);
+            }
+
+            return true;
+        }
 
         return false;
+    }
+
+    private int getSelectedCompletion() {
+        for (int i = 0; i < completionsW.cells.size(); i++) {
+            ICompletionItem item = (ICompletionItem) completionsW.cells.get(i).widget();
+            if (!item.isSelected()) continue;
+
+            return i;
+        }
+
+        return -1;
     }
 
     @Override
@@ -408,6 +526,14 @@ public abstract class WTextBox extends WWidget {
     @Override
     public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (isFocused()) GuiKeyEvents.canUseKeys = false;
+
+        if (completionsW != null && focused) {
+            renderer.absolutePost(() -> {
+                renderer.beginRender();
+                completionsW.render(renderer, mouseX, mouseY, delta);
+                renderer.endRender();
+            });
+        }
 
         return super.render(renderer, mouseX, mouseY, delta);
     }
@@ -483,8 +609,33 @@ public abstract class WTextBox extends WWidget {
         textStart = Utils.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
 
         onCursorChanged();
+
+        // Completions
+        completions = renderer.getCompletions(text, this.cursor);
+        completionsStart = 0;
+        completionsW = null;
+        if (completions != null && completions.size() > 0) createCompletions(0);
     }
     protected void onCursorChanged() {}
+
+    private void createCompletions(int selected) {
+        completionsW = createCompletionsRootWidget();
+        completionsW.theme = theme;
+
+        int max = Math.min(completions.size(), completionsStart + 6);
+        for (int i = completionsStart; i < max; i++) {
+            WWidget widget = createCompletionsValueWidth(completions.get(i), i == selected);
+            widget.theme = theme;
+
+            Cell<?> cell = completionsW.add(widget).expandX().padHorizontal(4);
+            if (i == max - 1) cell.padBottom(4);
+        }
+
+        completionsW.calculateSize();
+        completionsW.x = Math.min(Math.max(x - pad() * 2 + getTextWidth(cursor) - getOverflowWidthForRender(), x), x + width - completionsW.width);
+        completionsW.y = y + height;
+        completionsW.calculateWidgetPositions();
+    }
 
     protected double getTextWidth(int pos) {
         if (textWidths.isEmpty()) return 0;
@@ -536,5 +687,21 @@ public abstract class WTextBox extends WWidget {
 
     public void setCursorMax() {
         cursor = text.length();
+    }
+
+    public interface Renderer {
+        void render(GuiRenderer renderer, double x, double y, String text, Color color);
+
+        default List<String> getCompletions(String text, int position) {
+            return null;
+        }
+    }
+
+    public interface ICompletionItem {
+        boolean isSelected();
+
+        void setSelected(boolean selected);
+
+        String getCompletion();
     }
 }

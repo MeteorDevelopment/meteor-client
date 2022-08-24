@@ -1,104 +1,65 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.authlib.GameProfile;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
+import meteordevelopment.meteorclient.systems.commands.arguments.FriendArgumentType;
+import meteordevelopment.meteorclient.systems.commands.arguments.PlayerListEntryArgumentType;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.command.CommandSource;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
-
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class FriendsCommand extends Command {
-
     public FriendsCommand() {
         super("friends", "Manages friends.");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("add").then(argument("friend", FriendArgumentType.friend())
-                        .executes(context -> {
-                            Friend friend = FriendArgumentType.getFriend(context, "friend");
+        builder.then(literal("add")
+            .then(argument("player", PlayerListEntryArgumentType.create())
+                .executes(context -> {
+                    GameProfile profile = PlayerListEntryArgumentType.get(context).getProfile();
+                    Friend friend = new Friend(profile.getName(), profile.getId());
 
-                            if (Friends.get().add(friend)) info("Added (highlight)%s (default)to friends.", friend.name);
-                            else error("That person is already your friend.");
+                    if (Friends.get().add(friend)) info("Added (highlight)%s (default)to friends.", friend.name);
+                    else error("Already friends with that player.");
 
-                            return SINGLE_SUCCESS;
-                        })
-                )
+                    return SINGLE_SUCCESS;
+                })
+            )
         );
 
-        builder.then(literal("remove").then(argument("friend", FriendArgumentType.friend())
-                        .executes(context -> {
-                            Friend friend = FriendArgumentType.getFriend(context, "friend");
+        builder.then(literal("remove")
+            .then(argument("friend", FriendArgumentType.create())
+                .executes(context -> {
+                    Friend friend = FriendArgumentType.get(context);
+                    if (friend == null) {
+                        error("Not friends with that player.");
+                        return SINGLE_SUCCESS;
+                    }
 
-                            if (Friends.get().remove(friend)) info("Removed (highlight)%s (default)from friends.", friend.name);
-                            else error("That person is not your friend.");
+                    if (Friends.get().remove(friend)) info("Removed (highlight)%s (default)from friends.", friend.name);
+                    else error("Failed to remove that friend.");
 
-                            return SINGLE_SUCCESS;
-                        })
-                )
+                    return SINGLE_SUCCESS;
+                })
+            )
         );
 
         builder.then(literal("list").executes(context -> {
-                    info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
-                    Friends.get().forEach(friend-> ChatUtils.info("(highlight)" + friend.name));
-                    return SINGLE_SUCCESS;
-                })
+                info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
+                Friends.get().forEach(friend -> ChatUtils.info("(highlight)" + friend.name));
+                return SINGLE_SUCCESS;
+            })
         );
-    }
-
-    private static class FriendArgumentType implements ArgumentType<Friend> {
-
-        public static FriendArgumentType friend() {
-            return new FriendArgumentType();
-        }
-
-        @Override
-        public Friend parse(StringReader reader) throws CommandSyntaxException {
-            String name = reader.readString();
-
-            for (PlayerListEntry playerListEntry : mc.getNetworkHandler().getPlayerList()) {
-                if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
-                    return new Friend(playerListEntry);
-                }
-            }
-
-            return Friends.get().getFromName(name);
-        }
-
-        public static Friend getFriend(CommandContext<?> context, String name) {
-            return context.getArgument(name, Friend.class);
-        }
-
-        @Override
-        public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-            return suggestMatching(mc.getNetworkHandler().getPlayerList().stream()
-                    .map(entry -> entry.getProfile().getName()).collect(Collectors.toList()), builder);
-        }
-
-        @Override
-        public Collection<String> getExamples() {
-            return Arrays.asList("seasnail8169", "MineGame159");
-        }
     }
 }

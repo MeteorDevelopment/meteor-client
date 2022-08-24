@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.profiles;
@@ -20,8 +20,8 @@ import java.util.Iterator;
 import java.util.List;
 
 public class Profiles extends System<Profiles> implements Iterable<Profile> {
-
     public static final File FOLDER = new File(MeteorClient.FOLDER, "profiles");
+
     private List<Profile> profiles = new ArrayList<>();
 
     public Profiles() {
@@ -45,7 +45,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
 
     public Profile get(String name) {
         for (Profile profile : this) {
-            if (profile.name.equalsIgnoreCase(name)) {
+            if (profile.name.get().equalsIgnoreCase(name)) {
                 return profile;
             }
         }
@@ -62,6 +62,24 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
         return new File(FOLDER, "profiles.nbt");
     }
 
+    @EventHandler
+    private void onGameJoined(GameJoinedEvent event) {
+        for (Profile profile : this) {
+            if (profile.loadOnJoin.get().contains(Utils.getWorldName())) {
+                profile.load();
+            }
+        }
+    }
+
+    public boolean isEmpty() {
+        return profiles.isEmpty();
+    }
+
+    @Override
+    public Iterator<Profile> iterator() {
+        return profiles.iterator();
+    }
+
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
@@ -71,21 +89,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
 
     @Override
     public Profiles fromTag(NbtCompound tag) {
-        profiles = NbtUtils.listFromTag(tag.getList("profiles", 10), tag1 -> new Profile().fromTag((NbtCompound) tag1));
+        profiles = NbtUtils.listFromTag(tag.getList("profiles", 10), Profile::new);
         return this;
-    }
-
-    @EventHandler
-    private void onGameJoined(GameJoinedEvent event) {
-        for (Profile profile : this) {
-            if (profile.loadOnJoinIps.contains(Utils.getWorldName())) {
-                profile.load();
-            }
-        }
-    }
-
-    @Override
-    public Iterator<Profile> iterator() {
-        return profiles.iterator();
     }
 }

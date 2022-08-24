@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer;
@@ -9,8 +9,7 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.Matrix4f;
@@ -38,7 +37,7 @@ public class GL {
     public static int CURRENT_IBO;
     private static int prevIbo;
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         if (FabricLoader.getInstance().isModLoaded("canvas")) changeBufferRenderer = false;
     }
@@ -62,6 +61,14 @@ public class GL {
     }
 
     // Deletion
+
+    public static void deleteBuffer(int buffer) {
+        GlStateManager._glDeleteBuffers(buffer);
+    }
+
+    public static void deleteVertexArray(int vao) {
+        GlStateManager._glDeleteVertexArrays(vao);
+    }
 
     public static void deleteShader(int shader) {
         GlStateManager.glDeleteShader(shader);

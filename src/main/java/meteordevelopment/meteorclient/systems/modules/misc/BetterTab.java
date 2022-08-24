@@ -1,11 +1,12 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -85,7 +86,7 @@ public class BetterTab extends Module {
         }
         else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getId()) != null) {
             Friend friend = Friends.get().get(playerListEntry.getProfile().getId());
-            if (friend != null) color = Friends.get().color;
+            if (friend != null) color = Config.get().friendColor.get();
         }
 
         if (color != null) {

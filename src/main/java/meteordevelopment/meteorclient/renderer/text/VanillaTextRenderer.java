@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.renderer.text;
@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.renderer.text;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.math.Matrix4f;
@@ -15,13 +16,17 @@ import net.minecraft.util.math.Matrix4f;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class VanillaTextRenderer implements TextRenderer {
-    public static final TextRenderer INSTANCE = new VanillaTextRenderer();
+    public static final VanillaTextRenderer INSTANCE = new VanillaTextRenderer();
 
     private final BufferBuilder buffer = new BufferBuilder(2048);
     private final VertexConsumerProvider.Immediate immediate = VertexConsumerProvider.immediate(buffer);
+
+    private final MatrixStack matrices = new MatrixStack();
     private final Matrix4f emptyMatrix = new Matrix4f();
 
-    private double scale = 2;
+    public double scale = 2;
+    public boolean scaleIndividually;
+
     private boolean building;
     private double alpha = 1;
 
@@ -38,9 +43,10 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public double getWidth(String text, int length, boolean shadow) {
-        String string = text;
-        if (length != string.length()) string = string.substring(0, length);
-        return (mc.textRenderer.getWidth(string) + (shadow ? 1 : 0)) * scale;
+        if (text.isEmpty()) return 0;
+
+        if (length != text.length()) text = text.substring(0, length);
+        return (mc.textRenderer.getWidth(text) + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
@@ -67,12 +73,21 @@ public class VanillaTextRenderer implements TextRenderer {
         int preA = color.a;
         color.a = (int) ((color.a / 255 * alpha) * 255);
 
-        double width = mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, emptyMatrix, immediate, true, 0, 15728880);
+        Matrix4f matrix = emptyMatrix;
+        if (scaleIndividually) {
+            matrices.push();
+            matrices.scale((float) scale, (float) scale, 1);
+            matrix = matrices.peek().getPositionMatrix();
+        }
+
+        double x2 = mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, false, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+
+        if (scaleIndividually) matrices.pop();
 
         color.a = preA;
 
         if (!wasBuilding) end();
-        return width * scale;
+        return (x2 - 1) * scale;
     }
 
     @Override
@@ -89,7 +104,7 @@ public class VanillaTextRenderer implements TextRenderer {
         RenderSystem.disableDepthTest();
         matrixStack.push();
         if (matrices != null) matrixStack.multiplyPositionMatrix(matrices.peek().getPositionMatrix());
-        matrixStack.scale((float) scale, (float) scale, 1);
+        if (!scaleIndividually) matrixStack.scale((float) scale, (float) scale, 1);
         RenderSystem.applyModelViewMatrix();
 
         immediate.draw();

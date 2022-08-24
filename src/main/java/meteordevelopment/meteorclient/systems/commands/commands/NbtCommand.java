@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -15,6 +15,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtHelper;
 import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -31,11 +32,11 @@ public class NbtCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("add").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
+        builder.then(literal("add").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                NbtCompound tag = CompoundNbtTagArgumentType.getTag(s, "nbt_data");
+                NbtCompound tag = CompoundNbtTagArgumentType.get(s);
                 NbtCompound source = stack.getOrCreateNbt();
 
                 if (tag != null) {
@@ -49,36 +50,35 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("set").then(argument("nbt_data", CompoundNbtTagArgumentType.nbtTag()).executes(s -> {
+        builder.then(literal("set").then(argument("nbt", CompoundNbtTagArgumentType.create()).executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                stack.setNbt(s.getArgument("nbt_data", NbtCompound.class));
+                stack.setNbt(CompoundNbtTagArgumentType.get(context));
                 setStack(stack);
             }
 
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("remove").then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(s -> {
+        builder.then(literal("remove").then(argument("nbt_path", NbtPathArgumentType.nbtPath()).executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                NbtPathArgumentType.NbtPath path = s.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
+                NbtPathArgumentType.NbtPath path = context.getArgument("nbt_path", NbtPathArgumentType.NbtPath.class);
                 path.remove(stack.getNbt());
             }
 
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("get").executes(s -> {
+        builder.then(literal("get").executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (stack == null) {
                 error("You must hold an item in your main hand.");
             } else {
                 NbtCompound tag = stack.getNbt();
-                String nbt = tag == null ? "{}" : tag.asString();
 
                 MutableText copyButton = Text.literal("NBT");
                 copyButton.setStyle(copyButton.getStyle()
@@ -94,7 +94,9 @@ public class NbtCommand extends Command {
 
                 MutableText text = Text.literal("");
                 text.append(copyButton);
-                text.append(Text.literal(": " + nbt));
+
+                if (tag == null) text.append("{}");
+                else text.append(" ").append(NbtHelper.toPrettyPrintedText(tag));
 
                 info(text);
             }
@@ -102,7 +104,7 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("copy").executes(s -> {
+        builder.then(literal("copy").executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (stack == null) {
@@ -115,7 +117,7 @@ public class NbtCommand extends Command {
                         .withFormatting(Formatting.UNDERLINE)
                         .withHoverEvent(new HoverEvent(
                                 HoverEvent.Action.SHOW_TEXT,
-                                Text.literal(tag.toString())
+                                NbtHelper.toPrettyPrintedText(tag)
                         )));
 
                 MutableText text = Text.literal("");
@@ -128,7 +130,7 @@ public class NbtCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("paste").executes(s -> {
+        builder.then(literal("paste").executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.arguments;
@@ -25,10 +25,12 @@ import java.util.concurrent.CompletableFuture;
 public class WaypointArgumentType implements ArgumentType<String> {
     private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Text.literal("Waypoint with name '" + name + "' doesn't exist."));
 
-    public static WaypointArgumentType waypoint() {return new WaypointArgumentType();}
+    public static WaypointArgumentType create() {
+        return new WaypointArgumentType();
+    }
 
-    public static Waypoint getWaypoint(final CommandContext<?> context, final String name) {
-        return Waypoints.get().get(context.getArgument(name, String.class));
+    public static Waypoint get(CommandContext<?> context) {
+        return Waypoints.get().get(context.getArgument("waypoint", String.class));
     }
 
     @Override
@@ -48,7 +50,7 @@ public class WaypointArgumentType implements ArgumentType<String> {
     @Override
     public Collection<String> getExamples() {
         List<String> names = new ArrayList<>();
-        for (Waypoint waypoint : Waypoints.get()) names.add(waypoint.name);
+        for (Waypoint waypoint : Waypoints.get()) names.add(waypoint.name.get());
         return names;
     }
 }

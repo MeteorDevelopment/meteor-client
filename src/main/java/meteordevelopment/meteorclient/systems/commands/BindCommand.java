@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands;
@@ -20,7 +20,7 @@ public class BindCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("module", ModuleArgumentType.module()).executes(context -> {
+        builder.then(argument("module", ModuleArgumentType.create()).executes(context -> {
             Module module = context.getArgument("module", Module.class);
             Modules.get().setModuleToBind(module);
 

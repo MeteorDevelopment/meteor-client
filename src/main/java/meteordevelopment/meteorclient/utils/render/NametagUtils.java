@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.render;
@@ -35,7 +35,7 @@ public class NametagUtils {
         cameraNegated.set(camera);
         cameraNegated.negate();
 
-        windowScale = mc.getWindow().calculateScaleFactor(1, mc.forcesUnicodeFont());
+        windowScale = mc.getWindow().calculateScaleFactor(1, false);
     }
 
     public static boolean to2D(Vec3 pos, double scale) {

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -28,7 +28,7 @@ public class SettingCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         // Open module screen
         builder.then(
-            argument("module", ModuleArgumentType.module())
+            argument("module", ModuleArgumentType.create())
                 .executes(context -> {
                     Module module = context.getArgument("module", Module.class);
 
@@ -42,26 +42,26 @@ public class SettingCommand extends Command {
 
         // View or change settings
         builder.then(
-                argument("module", ModuleArgumentType.module())
+                argument("module", ModuleArgumentType.create())
                 .then(
-                        argument("setting", SettingArgumentType.setting())
+                        argument("setting", SettingArgumentType.create())
                         .executes(context -> {
                             // Get setting value
-                            Setting<?> setting = SettingArgumentType.getSetting(context);
+                            Setting<?> setting = SettingArgumentType.get(context);
 
-                            ModuleArgumentType.getModule(context, "module").info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
 
                             return SINGLE_SUCCESS;
                         })
                         .then(
-                                argument("value", SettingValueArgumentType.value())
+                                argument("value", SettingValueArgumentType.create())
                                 .executes(context -> {
                                     // Set setting value
-                                    Setting<?> setting = SettingArgumentType.getSetting(context);
-                                    String value = context.getArgument("value", String.class);
+                                    Setting<?> setting = SettingArgumentType.get(context);
+                                    String value = SettingValueArgumentType.get(context);
 
                                     if (setting.parse(value)) {
-                                        ModuleArgumentType.getModule(context, "module").info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
                                     }
 
                                     return SINGLE_SUCCESS;

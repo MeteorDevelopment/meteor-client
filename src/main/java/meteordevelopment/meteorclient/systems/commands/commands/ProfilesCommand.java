@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -22,34 +22,34 @@ public class ProfilesCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("load").then(argument("profile", ProfileArgumentType.profile()).executes(context -> {
-            Profile profile = ProfileArgumentType.getProfile(context, "profile");
+        builder.then(literal("load").then(argument("profile", ProfileArgumentType.create()).executes(context -> {
+            Profile profile = ProfileArgumentType.get(context);
 
             if (profile != null) {
                 profile.load();
-                info("Loaded profile (highlight)%s(default).", profile.name);
+                info("Loaded profile (highlight)%s(default).", profile.name.get());
             }
 
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("save").then(argument("profile", ProfileArgumentType.profile()).executes(context -> {
-            Profile profile = ProfileArgumentType.getProfile(context, "profile");
+        builder.then(literal("save").then(argument("profile", ProfileArgumentType.create()).executes(context -> {
+            Profile profile = ProfileArgumentType.get(context);
 
             if (profile != null) {
                 profile.save();
-                info("Saved profile (highlight)%s(default).", profile.name);
+                info("Saved profile (highlight)%s(default).", profile.name.get());
             }
 
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("delete").then(argument("profile", ProfileArgumentType.profile()).executes(context -> {
-            Profile profile = ProfileArgumentType.getProfile(context, "profile");
+        builder.then(literal("delete").then(argument("profile", ProfileArgumentType.create()).executes(context -> {
+            Profile profile = ProfileArgumentType.get(context);
 
             if (profile != null) {
                 Profiles.get().remove(profile);
-                info("Deleted profile (highlight)%s(default).", profile.name);
+                info("Deleted profile (highlight)%s(default).", profile.name.get());
             }
 
             return SINGLE_SUCCESS;

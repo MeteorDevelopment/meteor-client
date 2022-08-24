@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.accounts;
@@ -28,11 +28,6 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
     public static Accounts get() {
         return Systems.get(Accounts.class);
-    }
-
-    @Override
-    public void init() {
-        AccountCache.loadSteveHead();
     }
 
     public void add(Account<?> account) {
@@ -78,12 +73,12 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
 
             try {
                 Account<?> account = switch (type) {
-                    case Cracked ->    new CrackedAccount(null).fromTag(t);
-                    case Microsoft ->  new MicrosoftAccount(null).fromTag(t);
+                    case Cracked ->     new CrackedAccount(null).fromTag(t);
+                    case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
                 };
 
-                if (account.fetchHead()) return account;
+                if (account.fetchInfo()) return account;
             } catch (NbtException e) {
                 return null;
             }
