@@ -110,6 +110,7 @@ public abstract class EntityMixin {
     private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
         if ((Object) this != mc.player) return blockState.getBlock();
         if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
+        if (blockState.getBlock() == Blocks.HONEY_BLOCK && Modules.get().get(NoSlow.class).honeyBlock()) return Blocks.STONE;
         return blockState.getBlock();
     }
 
