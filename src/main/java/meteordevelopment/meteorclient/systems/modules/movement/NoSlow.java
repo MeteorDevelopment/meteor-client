@@ -42,6 +42,13 @@ public class NoSlow extends Module {
         .build()
     );
 
+    private final Setting<Boolean> honeyBlock = sgGeneral.add(new BoolSetting.Builder()
+        .name("honey-block")
+        .description("Whether or not Honey Block will not slow you down.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
         .name("soul-sand")
         .description("Whether or not Soul Sand will not slow you down.")
@@ -87,6 +94,10 @@ public class NoSlow extends Module {
 
     public boolean items() {
         return isActive() && items.get();
+    }
+
+    public boolean honeyBlock() {
+        return isActive() && honeyBlock.get();
     }
 
     public boolean soulSand() {
