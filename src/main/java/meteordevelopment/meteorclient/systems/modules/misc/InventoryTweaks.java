@@ -23,6 +23,7 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.InventorySorter;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.item.Item;
@@ -31,6 +32,7 @@ import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.world.GameMode;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -201,7 +203,8 @@ public class InventoryTweaks extends Module {
     }
 
     private void sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return;
+        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null 
+           || PlayerUtils.getGameMode() == GameMode.CREATIVE) return;
 
         Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
         if (focusedSlot == null) return;
