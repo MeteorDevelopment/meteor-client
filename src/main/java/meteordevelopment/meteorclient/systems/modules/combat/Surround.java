@@ -135,7 +135,7 @@ public class Surround extends Module {
 
     private final Setting<Boolean> toggleOnDeath = sgToggles.add(new BoolSetting.Builder()
         .name("toggle-on-death")
-        .description("Toggles off when all blocks are placed.")
+        .description("Toggles off when you die.")
         .defaultValue(true)
         .build()
     );
