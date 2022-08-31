@@ -221,7 +221,7 @@ public class Surround extends Module {
     private final BlockPos.Mutable placePos = new BlockPos.Mutable();
     private final BlockPos.Mutable renderPos = new BlockPos.Mutable();
     private final BlockPos.Mutable testPos = new BlockPos.Mutable();
-    public ArrayList<Module> toActivate;
+    public ArrayList<Module> toActivate = new ArrayList<>();
     private int ticks;
 
     public Surround() {
@@ -266,8 +266,6 @@ public class Surround extends Module {
 
         // Reset delay
         ticks = 0;
-
-        toActivate = new ArrayList<>();
 
         if (toggleModules.get() && !modules.get().isEmpty() && mc.world != null && mc.player != null) {
             for (Module module : modules.get()) {
