@@ -150,7 +150,7 @@ public class ServerCommand extends Command {
     }
     
     private void printPlugins() {
-        List<String> plugins = mc
+        Set<String> plugins = mc
                 .getNetworkHandler()
                 .getCommandDispatcher()
                 .getRoot()
