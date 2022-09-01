@@ -18,8 +18,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
-import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
-import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -30,16 +28,13 @@ import net.minecraft.util.Formatting;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ServerCommand extends Command {
     private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith");
-    private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
-    private int ticks = 0;
-    private List<String> plugins = new ArrayList<>();
-
-
+    
     public ServerCommand() {
         super("server", "Prints server information");
     }
@@ -57,21 +52,7 @@ public class ServerCommand extends Command {
         }));
 
         builder.then(literal("plugins").executes(ctx -> {
-            ticks = 0;
-            plugins.clear();
-            MeteorClient.EVENT_BUS.subscribe(this);
-            info("Please wait around 5 seconds...");
-            (new Thread(() -> {
-                Random random = new Random();
-                completionStarts.chars().forEach(i -> {
-                    mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), Character.toString(i)));
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-            })).start();
+            printPlugins();
             return SINGLE_SUCCESS;
         }));
 
@@ -89,10 +70,8 @@ public class ServerCommand extends Command {
     private void basicInfo() {
         if (mc.isIntegratedServerRunning()) {
             IntegratedServer server = mc.getServer();
-
             info("Singleplayer");
             if (server != null) info("Version: %s", server.getVersion());
-
             return;
         }
 
@@ -169,57 +148,27 @@ public class ServerCommand extends Command {
 
         info("Permission level: %s", formatPerms());
     }
-
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        ticks++;
-
-        if (ticks >= 100) {
-            Collections.sort(plugins);
-
-            for (int i = 0; i < plugins.size(); i++) {
-                plugins.set(i, formatName(plugins.get(i)));
-            }
-
-            if (!plugins.isEmpty()) {
-                info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
-            } else {
-                error("No plugins found.");
-            }
-
-            ticks = 0;
-            plugins.clear();
-            MeteorClient.EVENT_BUS.unsubscribe(this);
+    
+    private void printPlugins() {
+        List<String> plugins = mc
+                .getNetworkHandler()
+                .getCommandDispatcher()
+                .getRoot()
+                .getChildren()
+                .stream()
+                .filter(cmd -> !(cmd.getRequirement().getClass().getName().startsWith("net.fabricmc.fabric.impl.command.client.ClientCommandInternals"))) // ugly way to skip fabric client commands
+                .map(cmd -> cmd.getName())
+                .filter(cmd -> cmd.contains(":"))
+                .map(cmd -> cmd.split(":")[0])
+                .map(this::formatName)
+                .collect(Collectors.toUnmodifiableSet());
+        if (!plugins.isEmpty()) {
+            info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+        } else {
+            error("No plugins found.");
         }
     }
 
-    @EventHandler
-    private void onReadPacket(PacketEvent.Receive event) {
-        try {
-            if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
-
-                Suggestions matches = packet.getSuggestions();
-
-                if (matches == null) {
-                    error("Invalid Packet.");
-                    return;
-                }
-
-                for (Suggestion suggestion : matches.getList()) {
-                    String[] command = suggestion.getText().split(":");
-                    if (command.length > 1) {
-                        String pluginName = command[0].replace("/", "");
-
-                        if (!plugins.contains(pluginName)) {
-                            plugins.add(pluginName);
-                        }
-                    }
-                }
-            }
-        } catch (Exception e) {
-            error("An error occurred while trying to find plugins");
-        }
-    }
 
     private String formatName(String name) {
         if (ANTICHEAT_LIST.contains(name)) {
