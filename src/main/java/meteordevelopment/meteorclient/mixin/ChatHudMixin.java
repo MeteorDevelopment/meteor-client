@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
+import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.text.StringCharacterVisitor;
 import net.minecraft.client.MinecraftClient;
@@ -195,5 +196,12 @@ public abstract class ChatHudMixin implements IChatHud {
             }
         }
         return null;
+    }
+
+    // No Message Signature Indicator
+
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
+    private MessageIndicator onMessageIndicator(ChatHudLine.Visible message) {
+        return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : message.indicator();
     }
 }
