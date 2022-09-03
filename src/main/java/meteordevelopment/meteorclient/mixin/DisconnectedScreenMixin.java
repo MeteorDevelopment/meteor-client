@@ -49,11 +49,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
                 button -> {
                     Modules.get().get(AutoReconnect.class).toggle();
                     time = Modules.get().get(AutoReconnect.class).time.get() * 20;
-                    }));
-            if (Modules.get().get(ServerSpoof.class).noSignatures()) addDrawableChild(new ButtonWidget(x, y + 44, 200, 20, Text.literal("Deactivate ServerSpoof & Reconnect"), button -> {
-                Modules.get().get(ServerSpoof.class).toggle();
-                reconnectBtn.onPress();
-            }));
+                }));
         }
     }
 
