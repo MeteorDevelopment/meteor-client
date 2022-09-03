@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
+import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
@@ -12,16 +13,17 @@ import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
 import net.minecraft.nbt.NbtCompound;
 
 public class AccountCache implements ISerializable<AccountCache> {
-    private PlayerHeadTexture headTexture;
     public String username = "";
     public String uuid = "";
+    private PlayerHeadTexture headTexture;
 
     public PlayerHeadTexture getHeadTexture() {
-        return headTexture;
+        return headTexture != null ? headTexture : PlayerHeadUtils.STEVE_HEAD;
     }
 
     public void loadHead() {
-        headTexture = PlayerHeadUtils.fetchHead(username);
+        if (uuid == null || uuid.isBlank()) return;
+        headTexture = PlayerHeadUtils.fetchHead(UUIDTypeAdapter.fromString(uuid));
     }
 
     @Override
