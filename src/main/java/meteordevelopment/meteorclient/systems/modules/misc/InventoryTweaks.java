@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.InventorySorter;
 import meteordevelopment.orbit.EventHandler;
@@ -202,6 +203,12 @@ public class InventoryTweaks extends Module {
 
     private void sort() {
         if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return;
+
+        if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+            FindItemResult empty = InvUtils.findEmpty();
+            if (!empty.found()) InvUtils.click().slot(-999);
+            else InvUtils.click().slot(empty.slot());
+        }
 
         Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
         if (focusedSlot == null) return;
