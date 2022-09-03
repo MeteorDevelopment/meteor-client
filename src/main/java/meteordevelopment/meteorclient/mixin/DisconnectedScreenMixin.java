@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.AutoReconnect;
+import meteordevelopment.meteorclient.systems.modules.misc.ServerSpoof;
 import net.minecraft.client.gui.screen.ConnectScreen;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -27,7 +29,6 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Shadow private int reasonHeight;
 
     @Unique private ButtonWidget reconnectBtn;
-    @Unique private ButtonWidget toggleAutoReconnectBtn;
     @Unique private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
     protected DisconnectedScreenMixin(Text title) {
@@ -44,11 +45,11 @@ public abstract class DisconnectedScreenMixin extends Screen {
                 button -> ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client,
                 ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address),
                 Modules.get().get(AutoReconnect.class).lastServerInfo)));
-            toggleAutoReconnectBtn = addDrawableChild(new ButtonWidget(x, y + 22, 200, 20, Text.literal("Toggle AutoReconnect"),
+            addDrawableChild(new ButtonWidget(x, y + 22, 200, 20, Text.literal("Toggle AutoReconnect"),
                 button -> {
                     Modules.get().get(AutoReconnect.class).toggle();
                     time = Modules.get().get(AutoReconnect.class).time.get() * 20;
-                    }));
+                }));
         }
     }
 
