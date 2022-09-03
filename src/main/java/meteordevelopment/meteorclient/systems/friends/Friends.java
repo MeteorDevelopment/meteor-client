@@ -5,18 +5,16 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
+import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
     private final List<Friend> friends = new ArrayList<>();
@@ -107,18 +105,24 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     @Override
     public Friends fromTag(NbtCompound tag) {
-        List<Friend> saved = NbtUtils.listFromTag(tag.getList("friends", 10), Friend::new);
         friends.clear();
 
-        for (Friend friend : saved) {
-            MeteorExecutor.execute(() -> {
-                if (friend.name == null && !friend.updateName()) return;
-                if (friend.id == null) friend.updateInfo();
+        for (NbtElement itemTag : tag.getList("friends", 10)) {
+            NbtCompound friendTag = (NbtCompound) itemTag;
+            if (!friendTag.contains("name")) continue;
 
-                friends.add(friend);
-                friend.updateHead();
-            });
+            String name = friendTag.getString("name");
+            if (get(name) != null) continue;
+
+            String uuid = friendTag.getString("id");
+            Friend friend = !uuid.isBlank()
+                ? new Friend(name, UUIDTypeAdapter.fromString(uuid))
+                : new Friend(name);
+
+            friends.add(friend);
         }
+
+        Collections.sort(friends);
 
         return this;
     }

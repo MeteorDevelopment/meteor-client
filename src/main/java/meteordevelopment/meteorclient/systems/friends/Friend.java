@@ -8,26 +8,25 @@ package meteordevelopment.meteorclient.systems.friends;
 import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.network.Http;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.nbt.NbtElement;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.UUID;
 
-public class Friend implements ISerializable<Friend> {
+public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     public String name;
     public @Nullable UUID id;
-    public PlayerHeadTexture headTexture;
+    public @Nullable PlayerHeadTexture headTexture;
 
     public Friend(String name, @Nullable UUID id) {
         this.name = name;
         this.id = id;
-        updateHead();
+        this.headTexture = PlayerHeadUtils.fetchHead(id);
     }
 
     public Friend(PlayerEntity player) {
@@ -36,31 +35,17 @@ public class Friend implements ISerializable<Friend> {
     public Friend(String name) {
         this(name, null);
     }
-    public Friend(NbtElement tag) {
-        fromTag((NbtCompound) tag);
-    }
 
-    public boolean updateName() {
-        if (id == null) return false;
-
-        APIResponse res = Http.get("https://api.mojang.com/user/profile/" + UUIDTypeAdapter.fromUUID(id)).sendJson(APIResponse.class);
-        if (res == null || res.name == null) return false;
-        name = res.name;
-
-        return true;
+    public PlayerHeadTexture getHead() {
+        return headTexture != null ? headTexture : PlayerHeadUtils.STEVE_HEAD;
     }
 
     public void updateInfo() {
-        MeteorExecutor.execute(() -> {
-            APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
-            if (res == null || res.name == null || res.id == null) return;
-            name = res.name;
-            id = UUIDTypeAdapter.fromString(res.id);
-        });
-    }
-
-    public void updateHead() {
-        headTexture = PlayerHeadUtils.fetchHead(name);
+        APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
+        if (res == null || res.name == null || res.id == null) return;
+        name = res.name;
+        id = UUIDTypeAdapter.fromString(res.id);
+        headTexture = PlayerHeadUtils.fetchHead(id);
     }
 
     @Override
@@ -75,14 +60,6 @@ public class Friend implements ISerializable<Friend> {
 
     @Override
     public Friend fromTag(NbtCompound tag) {
-        if (tag.contains("name")) {
-            name = tag.getString("name");
-        }
-
-        if (tag.contains("id")) {
-            id = UUIDTypeAdapter.fromString(tag.getString("id"));
-        }
-
         return this;
     }
 
@@ -97,6 +74,11 @@ public class Friend implements ISerializable<Friend> {
     @Override
     public int hashCode() {
         return Objects.hash(name);
+    }
+
+    @Override
+    public int compareTo(@NotNull Friend friend) {
+        return name.compareTo(friend.name);
     }
 
     private static class APIResponse {
