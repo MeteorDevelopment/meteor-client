@@ -9,12 +9,16 @@ import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
     private final List<Friend> friends = new ArrayList<>();
@@ -59,21 +63,19 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return null;
     }
 
-    public Friend get(UUID uuid) {
-        for (Friend friend : friends) {
-            if (friend.id != null && friend.id.equals(uuid)) {
-                return friend;
-            }
-        }
-
-        return null;
+    public Friend get(PlayerEntity player) {
+        return get(player.getEntityName());
     }
 
-    public Friend get(PlayerEntity player) {
-        return get(player.getUuid());
+    public Friend get(PlayerListEntry player) {
+        return get(player.getProfile().getName());
     }
 
     public boolean isFriend(PlayerEntity player) {
+        return get(player) != null;
+    }
+
+    public boolean isFriend(PlayerListEntry player) {
         return get(player) != null;
     }
 
