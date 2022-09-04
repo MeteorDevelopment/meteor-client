@@ -32,24 +32,28 @@ public class Flight extends Module {
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The mode for Flight.")
-            .defaultValue(Mode.Abilities)
-            .build()
+        .name("mode")
+        .description("The mode for Flight.")
+        .defaultValue(Mode.Abilities)
+        .onChanged(mode -> {
+            if (!isActive()) return;
+            abilitiesOff();
+        })
+        .build()
     );
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Your speed when flying.")
-            .defaultValue(0.1)
-            .min(0.0)
-            .build()
+        .name("speed")
+        .description("Your speed when flying.")
+        .defaultValue(0.1)
+        .min(0.0)
+        .build()
     );
     private final Setting<Boolean> verticalSpeedMatch = sgGeneral.add(new BoolSetting.Builder()
-            .name("vertical-speed-match")
-            .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
-            .defaultValue(false)
-            .build()
+        .name("vertical-speed-match")
+        .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
+        .defaultValue(false)
+        .build()
     );
 
     // Anti Kick
@@ -99,10 +103,7 @@ public class Flight extends Module {
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            mc.player.getAbilities().flying = false;
-            mc.player.getAbilities().setFlySpeed(0.05f);
-            if (mc.player.getAbilities().creativeMode) return;
-            mc.player.getAbilities().allowFlying = false;
+            abilitiesOff();
         }
     }
 
@@ -127,10 +128,7 @@ public class Flight extends Module {
             offLeft --;
 
             if (mode.get() == Mode.Abilities) {
-                mc.player.getAbilities().flying = false;
-                mc.player.getAbilities().setFlySpeed(0.05f);
-                if (mc.player.getAbilities().creativeMode) return;
-                mc.player.getAbilities().allowFlying = false;
+                abilitiesOff();
             }
 
             return;
@@ -144,7 +142,7 @@ public class Flight extends Module {
         if (mc.player.getYaw() != lastYaw) mc.player.setYaw(lastYaw);
 
         switch (mode.get()) {
-            case Velocity:
+            case Velocity -> {
 
                  /*TODO: deal with underwater movement, find a way to "spoof" not being in water
                 also, all of the multiplication below is to get the speed to roughly match the speed
@@ -152,20 +150,20 @@ public class Flight extends Module {
 
                 mc.player.getAbilities().flying = false;
                 mc.player.airStrafingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
-
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();
-
-                if (mc.options.jumpKey.isPressed()) mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
-                if (mc.options.sneakKey.isPressed()) mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
-                break;
-            case Abilities:
+                if (mc.options.jumpKey.isPressed())
+                    mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+                if (mc.options.sneakKey.isPressed())
+                    mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+            }
+            case Abilities -> {
                 if (mc.player.isSpectator()) return;
                 mc.player.getAbilities().setFlySpeed(speed.get().floatValue());
                 mc.player.getAbilities().flying = true;
                 if (mc.player.getAbilities().creativeMode) return;
                 mc.player.getAbilities().allowFlying = true;
-                break;
+            }
         }
     }
 
@@ -177,16 +175,15 @@ public class Flight extends Module {
      */
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket) || antiKickMode.get() != AntiKickMode.Packet) return;
+        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || antiKickMode.get() != AntiKickMode.Packet) return;
 
-        PlayerMoveC2SPacket packet = (PlayerMoveC2SPacket) event.packet;
         long currentTime = System.currentTimeMillis();
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {
             // maximum time we can be "floating" is 80 ticks, so 4 seconds max
             if (currentTime - lastModifiedTime > 1000
-                    && lastY != Double.MAX_VALUE
-                    && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
+                && lastY != Double.MAX_VALUE
+                && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
                 // actual check is for >= -0.03125D but we have to do a bit more than that
                 // probably due to compression or some shit idk
                 ((PlayerMoveC2SPacketAccessor) packet).setY(lastY - 0.03130D);
@@ -195,5 +192,12 @@ public class Flight extends Module {
                 lastY = currentY;
             }
         }
+    }
+
+    private void abilitiesOff() {
+        mc.player.getAbilities().flying = false;
+        mc.player.getAbilities().setFlySpeed(0.05f);
+        if (mc.player.getAbilities().creativeMode) return;
+        mc.player.getAbilities().allowFlying = false;
     }
 }
