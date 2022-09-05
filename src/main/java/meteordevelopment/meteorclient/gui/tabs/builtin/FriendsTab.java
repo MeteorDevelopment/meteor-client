@@ -78,7 +78,7 @@ public class FriendsTab extends Tab {
 
             for (Friend friend : Friends.get()) {
                 table.add(theme.texture(32, 32, friend.getHead().needsRotate() ? 90 : 0, friend.getHead()));
-                table.add(theme.label(friend.name));
+                table.add(theme.label(friend.getName()));
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
                 remove.action = () -> {

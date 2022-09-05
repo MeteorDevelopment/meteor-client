@@ -34,7 +34,7 @@ public class FriendArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return suggestMatching(Streams.stream(Friends.get()).map(friend -> friend.name), builder);
+        return suggestMatching(Streams.stream(Friends.get()).map(Friend::getName), builder);
     }
 
     @Override
