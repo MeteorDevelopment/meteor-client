@@ -20,8 +20,8 @@ import java.util.UUID;
 
 public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     public String name;
-    public @Nullable UUID id;
-    public @Nullable PlayerHeadTexture headTexture;
+    private @Nullable UUID id;
+    private @Nullable PlayerHeadTexture headTexture;
 
     public Friend(String name, @Nullable UUID id) {
         this.name = name;
@@ -34,6 +34,10 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     }
     public Friend(String name) {
         this(name, null);
+    }
+
+    public String getName() {
+        return name;
     }
 
     public PlayerHeadTexture getHead() {
