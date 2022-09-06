@@ -66,7 +66,7 @@ public class NotebotUtils {
     }
 
     public enum NotebotMode {
-        Any, OneToOne
+        AnyInstrument, ExactInstrument
     }
 
     public enum NullableInstrument {
