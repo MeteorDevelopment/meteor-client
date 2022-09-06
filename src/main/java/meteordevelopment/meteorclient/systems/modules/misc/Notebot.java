@@ -96,6 +96,14 @@ public class Notebot extends Module {
     private final Setting<Boolean> autoPlay = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-play")
         .description("Auto plays random songs")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> roundOutOfRange = sgGeneral.add(new BoolSetting.Builder()
+        .name("round-out-of-range")
+        .description("Rounds out of range notes")
+        .defaultValue(false)
         .build()
     );
 
@@ -433,6 +441,15 @@ public class Notebot extends Module {
                 continue;
             }
 
+            if (val < 0 || val > 24) {
+                if (roundOutOfRange.get()) {
+                    val = val < 0 ? 0 : 24;
+                } else {
+                    warning("Note at tick %d out of range.", key);
+                    continue;
+                }
+            }
+
             if (mode.get() == NotebotUtils.NotebotMode.OneToOne) {
                 Instrument newInstrument;
                 try {
@@ -469,8 +486,12 @@ public class Notebot extends Module {
                 if (NotebotUtils.fromNBSInstrument(instr) == null) continue;
                 int n = note.getNoteLevel();
                 if (n < 0 || n > 24) {
-                    warning("Note at tick %d out of range.", tick);
-                    continue;
+                    if (roundOutOfRange.get()) {
+                        note.setNoteLevel(n < 0 ? 0 : 24);
+                    } else {
+                        warning("Note at tick %d out of range.", tick);
+                        continue;
+                    }
                 }
                 if (mode.get() == NotebotUtils.NotebotMode.OneToOne) {
                     Instrument newInstrument = getMappedInstrument(note.getInstrument());

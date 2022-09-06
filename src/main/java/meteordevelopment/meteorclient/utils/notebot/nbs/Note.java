@@ -48,6 +48,10 @@ public class Note {
         return this.key - NotebotUtils.NOTE_OFFSET;
     }
 
+    public void setNoteLevel(int level) {
+        this.key = level + NotebotUtils.NOTE_OFFSET;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
