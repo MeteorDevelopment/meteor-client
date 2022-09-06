@@ -39,7 +39,6 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.RaycastContext;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.Nullable;
@@ -87,9 +86,9 @@ public class Notebot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> lookAtNoteBlock = sgGeneral.add(new BoolSetting.Builder()
-        .name("look-at-note-block")
-        .description("Should client look at note block when hit it")
+    private final Setting<Boolean> autoRotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-rotate")
+        .description("Should client look at note block when he wants to hit it")
         .defaultValue(true)
         .build()
     );
@@ -615,7 +614,7 @@ public class Notebot extends Module {
             stage = Stage.SetUp;
             return;
         }
-        if (lookAtNoteBlock.get()) {
+        if (autoRotate.get()) {
             Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 100, this::tuneRotate);
         } else {
             this.tuneRotate();
@@ -671,12 +670,12 @@ public class Notebot extends Module {
             }
 
             if (polyphonic.get()) {
-                if (lookAtNoteBlock.get()) {
+                if (autoRotate.get()) {
                     Rotations.setCamRotation(Rotations.getYaw(pos), Rotations.getPitch(pos));
                 }
                 playRotate(pos);
             } else {
-                if (lookAtNoteBlock.get()) {
+                if (autoRotate.get()) {
                     Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 100, () -> this.playRotate(pos));
                 } else {
                     this.playRotate(pos);
