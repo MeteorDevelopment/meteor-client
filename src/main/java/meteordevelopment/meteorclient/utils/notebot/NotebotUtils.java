@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class NotebotUtils {
     public static final int NOTE_OFFSET = 33; // Magic value (https://opennbs.org/nbs)
 
+    // Magic Values (https://opennbs.org/nbs)
     public static Instrument fromNBSInstrument(int instrument) {
         return switch (instrument) {
             case 0 -> Instrument.HARP;
