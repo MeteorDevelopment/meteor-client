@@ -95,6 +95,7 @@ public class Notebot extends Module {
 
     private final Setting<Boolean> autoPlay = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-play")
+        .description("Auto plays random songs")
         .build()
     );
 
