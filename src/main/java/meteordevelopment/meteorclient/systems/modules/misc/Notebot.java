@@ -129,7 +129,6 @@ public class Notebot extends Module {
 
 
 
-    private final List<BlockPos> possibleBlockPos = new ArrayList<>();
     private final TreeMap<Integer, List<Note>> song = new TreeMap<>(Comparator.naturalOrder()); // tick -> notes
     private final List<Note> uniqueNotes = new ArrayList<>();
     private final Map<Note, BlockPos> noteBlockPositions = new HashMap<>();
@@ -154,19 +153,6 @@ public class Notebot extends Module {
                 .build()
             );
         }
-
-        for (int y = -5; y < 5; y++) {
-            for (int x = -5; x < 5; x++) {
-                if (y != 0 || x != 0) {
-                    BlockPos pos = new BlockPos(x, 0, y);
-                    if (pos.getSquaredDistance(0, 0, 0) < (4.3 * 4.3) - 0.5) {
-                        possibleBlockPos.add(pos);
-                    }
-                }
-            }
-        }
-
-        possibleBlockPos.sort(Comparator.comparingDouble(vec -> vec.getSquaredDistance(new Vec3i(0, 0, 0))));
     }
 
     @Override
@@ -536,8 +522,8 @@ public class Notebot extends Module {
             });
         });
         scanForNoteblocks();
-        if (uniqueNotes.size() > possibleBlockPos.size() + scannedNoteblocks.size()) {
-            error("Too many notes. %d is the maximum.", possibleBlockPos.size());
+        if (uniqueNotes.size() > scannedNoteblocks.size()) {
+            error("Too many notes. %d is the maximum.", scannedNoteblocks.size());
             return false;
         }
         currentNote = 0;
