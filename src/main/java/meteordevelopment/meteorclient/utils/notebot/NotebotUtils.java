@@ -7,16 +7,9 @@ package meteordevelopment.meteorclient.utils.notebot;
 
 import meteordevelopment.meteorclient.utils.notebot.nbs.Note;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.Material;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
-import net.minecraft.sound.SoundEvent;
-import net.minecraft.sound.SoundEvents;
-import net.minecraft.util.math.BlockPos;
 import org.jetbrains.annotations.Nullable;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class NotebotUtils {
     public static final int NOTE_OFFSET = 33; // Magic value (https://opennbs.org/nbs)
