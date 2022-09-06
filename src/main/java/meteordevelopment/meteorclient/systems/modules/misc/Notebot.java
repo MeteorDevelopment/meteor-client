@@ -240,7 +240,7 @@ public class Notebot extends Module {
 
         // Stop
         WButton stop = table.add(theme.button("Stop")).right().widget();
-        stop.action = this::stop;
+        stop.action = this::forceStop;
 
         table.row();
 
@@ -327,19 +327,23 @@ public class Notebot extends Module {
         }
     }
 
+    public void forceStop() {
+        info("Stopping.");
+        if (stage == Stage.SetUp || stage == Stage.Tune) {
+            resetVariables();
+        } else {
+            isPlaying = false;
+            currentNote = 0;
+            currentTick = 0;
+        }
+        if (status != null) status.set(getStatus());
+    }
+
     public void stop() {
         if (autoPlay.get()) {
             playRandomSong();
         } else {
-            info("Stopping.");
-            if (stage == Stage.SetUp || stage == Stage.Tune) {
-                resetVariables();
-            } else {
-                isPlaying = false;
-                currentNote = 0;
-                currentTick = 0;
-            }
-            if (status != null) status.set(getStatus());
+            forceStop();
         }
     }
 
@@ -475,7 +479,8 @@ public class Notebot extends Module {
                         addNote(tick, note);
                     }
                 } else {
-                    addNote(tick, new Note(-1, n));
+                    note.setRawInstrument(-1);
+                    addNote(tick, note);
                 }
             }
         }
@@ -522,8 +527,10 @@ public class Notebot extends Module {
             });
         });
         scanForNoteblocks();
-        if (uniqueNotes.size() > scannedNoteblocks.size()) {
-            error("Too many notes. %d is the maximum.", scannedNoteblocks.size());
+
+        int scannedNoteBlocksSize = countScannedNoteBlocks();
+        if (uniqueNotes.size() > scannedNoteBlocksSize) {
+            error("Too many notes. %d is the maximum.", scannedNoteBlocksSize);
             return false;
         }
         currentNote = 0;
@@ -625,7 +632,7 @@ public class Notebot extends Module {
         }
     }
 
-    private boolean tuneBlock(BlockPos pos, Note note) {
+    private boolean tuneBlock(BlockPos pos, Note targetNote) {
         if (mc.world == null || mc.player == null) {
             return false;
         }
@@ -636,10 +643,19 @@ public class Notebot extends Module {
             return true;
         }
 
-        if (NotebotUtils.getNoteFromNoteBlock(block, mode.get()).equals(note)) {
-            currentNote++;
-            stage = Stage.SetUp;
-            return true;
+        Note note = NotebotUtils.getNoteFromNoteBlock(block);
+        if (mode.get() == NotebotUtils.NotebotMode.OneToOne) {
+            if (note.equals(targetNote)) {
+                currentNote++;
+                stage = Stage.SetUp;
+                return true;
+            }
+        } else {
+            if (note.getNoteLevel() == targetNote.getNoteLevel()) {
+                currentNote++;
+                stage = Stage.SetUp;
+                return true;
+            }
         }
 
         mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(pos), rayTraceCheck(pos), pos, true), 0));
@@ -712,6 +728,15 @@ public class Notebot extends Module {
         } else {
             return inst;
         }
+    }
+
+    private int countScannedNoteBlocks() {
+        int i = 0;
+        for (List<BlockPos> blockPosList : scannedNoteblocks.values()) {
+            i+=blockPosList.size();
+        }
+
+        return i;
     }
 
     private enum Stage {
