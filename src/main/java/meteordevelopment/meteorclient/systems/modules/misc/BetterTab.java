@@ -75,10 +75,9 @@ public class BetterTab extends Module {
     }
 
     public Text getPlayerName(PlayerListEntry playerListEntry) {
-        Text name;
         Color color = null;
 
-        name = playerListEntry.getDisplayName();
+        Text name = playerListEntry.getDisplayName();
         if (name == null) name = Text.literal(playerListEntry.getProfile().getName());
 
         if (playerListEntry.getProfile().getId().toString().equals(mc.player.getGameProfile().getId().toString()) && self.get()) {

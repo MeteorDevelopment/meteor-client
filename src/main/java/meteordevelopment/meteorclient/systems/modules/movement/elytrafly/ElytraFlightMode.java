@@ -39,9 +39,9 @@ public class ElytraFlightMode {
     public void onTick() {
         if (elytraFly.autoReplenish.get()) {
             FindItemResult fireworks = InvUtils.find(Items.FIREWORK_ROCKET);
-            FindItemResult hotbarFireworks = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
+            boolean hotbarFireworks = InvUtils.testInHotbar(Items.FIREWORK_ROCKET);
 
-            if (!hotbarFireworks.found() && fireworks.found()) {
+            if (!hotbarFireworks && fireworks.found()) {
                 InvUtils.move().from(fireworks.slot()).toHotbar(elytraFly.replenishSlot.get() - 1);
             }
         }

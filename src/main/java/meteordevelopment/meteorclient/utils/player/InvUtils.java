@@ -23,11 +23,48 @@ public class InvUtils {
     // Predicates
 
     public static boolean testInMainHand(Predicate<ItemStack> predicate) {
-        return predicate.test(mc.player.getMainHandStack());
+        return mc.player != null && predicate.test(mc.player.getMainHandStack());
+    }
+
+    public static boolean testInMainHand(Item... items) {
+        return testInMainHand(itemStack -> {
+            for (Item item : items) {
+                if (itemStack.getItem() == item) return true;
+            }
+            return false;
+        });
     }
 
     public static boolean testInOffHand(Predicate<ItemStack> predicate) {
-        return predicate.test(mc.player.getOffHandStack());
+        return mc.player != null && predicate.test(mc.player.getOffHandStack());
+    }
+
+    public static boolean testInHotbar(Predicate<ItemStack> predicate) {
+        if (mc.player == null) return false;
+
+        if (predicate.test(mc.player.getOffHandStack())) {
+            return true;
+        }
+
+        if (predicate.test(mc.player.getMainHandStack())) {
+            return true;
+        }
+
+        for (int i = SlotUtils.HOTBAR_START; i < SlotUtils.HOTBAR_END; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (predicate.test(stack)) return true;
+        }
+
+        return false;
+    }
+
+    public static boolean testInHotbar(Item... items) {
+        return testInHotbar(itemStack -> {
+            for (Item item : items) {
+                if (itemStack.getItem() == item) return true;
+            }
+            return false;
+        });
     }
 
     // Finding items
@@ -46,6 +83,8 @@ public class InvUtils {
     }
 
     public static FindItemResult findInHotbar(Predicate<ItemStack> isGood) {
+        if (mc.player == null) return new FindItemResult(0, 0);
+
         if (isGood.test(mc.player.getOffHandStack())) {
             return new FindItemResult(SlotUtils.OFFHAND, mc.player.getOffHandStack().getCount());
         }
@@ -54,7 +93,7 @@ public class InvUtils {
             return new FindItemResult(mc.player.getInventory().selectedSlot, mc.player.getMainHandStack().getCount());
         }
 
-        return find(isGood, 0, 8);
+        return find(isGood, SlotUtils.HOTBAR_START, SlotUtils.HOTBAR_END);
     }
 
     public static FindItemResult find(Item... items) {
@@ -106,7 +145,7 @@ public class InvUtils {
     // Interactions
 
     public static boolean swap(int slot, boolean swapBack) {
-        if (slot < 0 || slot > 8) return false;
+        if (slot < SlotUtils.HOTBAR_START || slot > SlotUtils.HOTBAR_END) return false;
         if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
 
         mc.player.getInventory().selectedSlot = slot;

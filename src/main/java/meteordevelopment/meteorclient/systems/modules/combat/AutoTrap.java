@@ -164,8 +164,10 @@ public class AutoTrap extends Module {
             return;
         }
 
-        if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
-        if (TargetUtils.isBadTarget(target, range.get())) return;
+        if (TargetUtils.isBadTarget(target, range.get())) {
+            target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+            if (TargetUtils.isBadTarget(target, range.get())) return;
+        }
 
         fillPlaceArray(target);
 

@@ -144,9 +144,9 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("stronghold").executes(s -> {
-            FindItemResult eye = InvUtils.findInHotbar(Items.ENDER_EYE);
+            boolean eye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
-            if (eye.found()) {
+            if (eye) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
                 firstStart = null;
                 firstEnd = null;

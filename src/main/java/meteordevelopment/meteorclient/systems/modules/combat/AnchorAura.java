@@ -249,9 +249,10 @@ public class AnchorAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (TargetUtils.isBadTarget(target, targetRange.get()))
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
             target = TargetUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
-        if (TargetUtils.isBadTarget(target, targetRange.get())) return;
+            if (TargetUtils.isBadTarget(target, targetRange.get())) return;
+        }
 
         FindItemResult anchor = InvUtils.findInHotbar(Items.RESPAWN_ANCHOR);
         FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);
@@ -313,7 +314,7 @@ public class AnchorAura extends Module {
                 else if (isValidPlace(targetPlacePos.add(1, 1, 0))) return targetPlacePos.add(1, 1, 0);
                 else if (isValidPlace(targetPlacePos.add(-1, -1, 0))) return targetPlacePos.add(-1, -1, 0);
                 else if (isValidPlace(targetPlacePos.add(0, 1, 1))) return targetPlacePos.add(0, 1, 1);
-                else if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
+                else if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1); //Duplicate of line 313
                 break;
             case Above:
                 if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
@@ -336,7 +337,7 @@ public class AnchorAura extends Module {
         else if (isValidBreak(targetPos.add(1, 1, 0))) return targetPos.add(1, 1, 0);
         else if (isValidBreak(targetPos.add(-1, -1, 0))) return targetPos.add(-1, -1, 0);
         else if (isValidBreak(targetPos.add(0, 1, 1))) return targetPos.add(0, 1, 1);
-        else if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
+        else if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1); //Duplicate of line 336
         return null;
     }
 

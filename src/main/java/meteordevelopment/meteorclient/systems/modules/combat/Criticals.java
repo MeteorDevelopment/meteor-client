@@ -90,8 +90,7 @@ public class Criticals extends Module {
                     }
                 }
             }
-        }
-        else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
+        } else if (event.packet instanceof HandSwingC2SPacket && mode.get() != Mode.Packet) {
             if (skipCrit()) return;
 
             if (sendPackets && swingPacket == null) {

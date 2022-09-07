@@ -105,24 +105,22 @@ public class AutoEXP extends Module {
             }
 
             FindItemResult exp = InvUtils.find(Items.EXPERIENCE_BOTTLE);
+            if (!exp.found()) return;
 
-            if (exp.found()) {
-                if (!exp.isHotbar() && !exp.isOffhand()) {
-                    if (!replenish.get()) return;
-                    InvUtils.move().from(exp.slot()).toHotbar(slot.get() - 1);
-                }
-
-                Rotations.rotate(mc.player.getYaw(), 90, () -> {
-                    if (exp.getHand() != null) {
-                        mc.interactionManager.interactItem(mc.player, exp.getHand());
-                    }
-                    else {
-                        InvUtils.swap(exp.slot(), true);
-                        mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                        InvUtils.swapBack();
-                    }
-                });
+            if (!exp.isHotbar() && !exp.isOffhand()) {
+                if (!replenish.get()) return;
+                InvUtils.move().from(exp.slot()).toHotbar(slot.get() - 1);
             }
+
+            Rotations.rotate(mc.player.getYaw(), 90, () -> {
+                if (exp.getHand() != null) {
+                    mc.interactionManager.interactItem(mc.player, exp.getHand());
+                } else {
+                    InvUtils.swap(exp.slot(), true);
+                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                    InvUtils.swapBack();
+                }
+            });
         }
     }
 
