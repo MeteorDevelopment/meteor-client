@@ -157,7 +157,7 @@ public class Notebot extends Module {
             sgNoteMap.add(new EnumSetting.Builder<NotebotUtils.NullableInstrument>()
                 .name(inst.name())
                 .defaultValue(NotebotUtils.NullableInstrument.fromMinecraftInstrument(inst))
-                .visible(() -> mode.get() == NotebotUtils.NotebotMode.ExactInstrument)
+                .visible(() -> mode.get() == NotebotUtils.NotebotMode.ExactInstruments)
                 .build()
             );
         }
@@ -450,7 +450,7 @@ public class Notebot extends Module {
                 }
             }
 
-            if (mode.get() == NotebotUtils.NotebotMode.ExactInstrument) {
+            if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
                 Instrument newInstrument;
                 try {
                     newInstrument = getMappedInstrument(Instrument.values()[type]);
@@ -493,7 +493,7 @@ public class Notebot extends Module {
                         continue;
                     }
                 }
-                if (mode.get() == NotebotUtils.NotebotMode.ExactInstrument) {
+                if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
                     Instrument newInstrument = getMappedInstrument(note.getInstrument());
                     if (newInstrument != null) {
                         note.setInstrument(newInstrument);
@@ -561,7 +561,7 @@ public class Notebot extends Module {
 
     private void onTickPreview() {
         for (Note note : song.get(currentTick)) {
-            if (mode.get() == NotebotUtils.NotebotMode.ExactInstrument) {
+            if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
                 mc.player.playSound(note.getInstrument().getSound(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             } else {
                 mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP, 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
@@ -587,7 +587,7 @@ public class Notebot extends Module {
             for (var entry : scannedNoteblocks.entrySet()) {
                 List<BlockPos> positions = entry.getValue();
 
-                if (mode.get() == NotebotUtils.NotebotMode.ExactInstrument) {
+                if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
                     Instrument inst = entry.getKey();
 
                     List<Note> notes = uniqueNotesToUse.stream()
@@ -736,7 +736,7 @@ public class Notebot extends Module {
     }
 
     private @Nullable Instrument getMappedInstrument(Instrument inst) {
-        if (mode.get() == NotebotUtils.NotebotMode.ExactInstrument) {
+        if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
             return ((NotebotUtils.NullableInstrument) sgNoteMap.get(inst.name()).get()).toMinecraftInstrument();
         } else {
             return inst;

@@ -61,7 +61,7 @@ public class NotebotUtils {
     public static Note getNoteFromNoteBlock(BlockState noteBlock, NotebotMode mode) {
         int instrument = -1;
         int level = noteBlock.get(NoteBlock.NOTE) + NOTE_OFFSET;
-        if (mode == NotebotMode.ExactInstrument) {
+        if (mode == NotebotMode.ExactInstruments) {
             Instrument blockInstrument = noteBlock.get(NoteBlock.INSTRUMENT);
             instrument = NotebotUtils.toNBSInstrument(blockInstrument);
         }
@@ -70,7 +70,7 @@ public class NotebotUtils {
     }
 
     public enum NotebotMode {
-        AnyInstrument, ExactInstrument
+        AnyInstrument, ExactInstruments
     }
 
     public enum NullableInstrument {
