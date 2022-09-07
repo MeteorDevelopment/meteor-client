@@ -58,11 +58,15 @@ public class NotebotUtils {
         };
     }
 
-    public static Note getNoteFromNoteBlock(BlockState noteBlock) {
-        Instrument instrument = noteBlock.get(NoteBlock.INSTRUMENT);
+    public static Note getNoteFromNoteBlock(BlockState noteBlock, NotebotMode mode) {
+        int instrument = -1;
         int level = noteBlock.get(NoteBlock.NOTE) + NOTE_OFFSET;
+        if (mode == NotebotMode.ExactInstrument) {
+            Instrument blockInstrument = noteBlock.get(NoteBlock.INSTRUMENT);
+            instrument = NotebotUtils.toNBSInstrument(blockInstrument);
+        }
 
-        return new Note(NotebotUtils.toNBSInstrument(instrument), level);
+        return new Note(instrument, level);
     }
 
     public enum NotebotMode {

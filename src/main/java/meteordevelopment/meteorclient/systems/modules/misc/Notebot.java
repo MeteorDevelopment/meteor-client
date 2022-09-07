@@ -664,19 +664,11 @@ public class Notebot extends Module {
             return true;
         }
 
-        Note note = NotebotUtils.getNoteFromNoteBlock(block);
-        if (mode.get() == NotebotUtils.NotebotMode.ExactInstrument) {
-            if (note.equals(targetNote)) {
-                currentNote++;
-                stage = Stage.SetUp;
-                return true;
-            }
-        } else {
-            if (note.getNoteLevel() == targetNote.getNoteLevel()) {
-                currentNote++;
-                stage = Stage.SetUp;
-                return true;
-            }
+        Note note = NotebotUtils.getNoteFromNoteBlock(block, mode.get());
+        if (note.equals(targetNote)) {
+            currentNote++;
+            stage = Stage.SetUp;
+            return true;
         }
 
         mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(Hand.MAIN_HAND, new BlockHitResult(Utils.vec3d(pos), rayTraceCheck(pos), pos, true), 0));
