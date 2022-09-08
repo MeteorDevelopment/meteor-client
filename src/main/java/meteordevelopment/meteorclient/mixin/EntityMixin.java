@@ -94,7 +94,8 @@ public abstract class EntityMixin {
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
         if ((Object) this == mc.player) {
             MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
-        } else if ((Object) this instanceof LivingEntity) {
+        }
+        else if ((Object) this instanceof LivingEntity) {
             MeteorClient.EVENT_BUS.post(LivingEntityMoveEvent.get((LivingEntity) (Object) this, movement));
         }
     }
@@ -117,7 +118,7 @@ public abstract class EntityMixin {
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (!Utils.canUpdate()) return;
-        if (Modules.get().get(NoRender.class).noInvisibility() || Modules.get().get(ESP.class).shouldDrawOutline((Entity) (Object) this)) info.setReturnValue(false);
+        if (Modules.get().get(NoRender.class).noInvisibility() || !Modules.get().get(ESP.class).shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)

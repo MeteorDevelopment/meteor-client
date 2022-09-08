@@ -257,7 +257,7 @@ public class PlayerUtils {
     }
 
     public static double distanceToCamera(Entity entity) {
-        return distanceToCamera(entity.getX(), entity.getY(), entity.getZ());
+        return distanceToCamera(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ());
     }
 
     public static Dimension getDimension() {
