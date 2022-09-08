@@ -41,9 +41,9 @@ public class TargetUtils {
             if (entity != null && isGood.test(entity)) targetList.add(entity);
         }
 
-        for (Entity entity : FakePlayerManager.getPlayers()) {
-            if (entity != null && isGood.test(entity)) targetList.add(entity);
-        }
+        FakePlayerManager.forEach(fp -> {
+            if (fp != null && isGood.test(fp)) targetList.add(fp);
+        });
 
         targetList.sort((e1, e2) -> sort(e1, e2, sortPriority));
         targetList.removeIf(entity -> targetList.indexOf(entity) > maxCount -1);
