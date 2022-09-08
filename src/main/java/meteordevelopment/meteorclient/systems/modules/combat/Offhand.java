@@ -155,7 +155,8 @@ public class Offhand extends Module {
         Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
         Totem(Items.TOTEM_OF_UNDYING),
-        Shield(Items.SHIELD);
+        Shield(Items.SHIELD),
+        LavaBucket(Items.LAVA_BUCKET);
 
         net.minecraft.item.Item item;
 
