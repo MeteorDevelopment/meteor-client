@@ -54,23 +54,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CrystalAura extends Module {
-    public enum YawStepMode {
-        Break,
-        All,
-    }
-
-    public enum AutoSwitchMode {
-        Normal,
-        Silent,
-        None
-    }
-
-    public enum SupportMode {
-        Disabled,
-        Accurate,
-        Fast
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgFacePlace = settings.createGroup("Face Place");
@@ -1089,11 +1072,11 @@ public class CrystalAura extends Module {
         }
 
         // Fake players
-        for (PlayerEntity player : FakePlayerManager.getPlayers()) {
-            if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && player.distanceTo(mc.player) <= targetRange.get()) {
-                targets.add(player);
+        FakePlayerManager.forEach(fp -> {
+            if (!fp.isDead() && fp.isAlive() && Friends.get().shouldAttack(fp) && fp.distanceTo(mc.player) <= targetRange.get()) {
+                targets.add(fp);
             }
-        }
+        });
     }
 
     private boolean intersectsWithEntities(Box box) {
@@ -1141,5 +1124,22 @@ public class CrystalAura extends Module {
             TextRenderer.get().end();
             NametagUtils.end();
         }
+    }
+
+    public enum YawStepMode {
+        Break,
+        All,
+    }
+
+    public enum AutoSwitchMode {
+        Normal,
+        Silent,
+        None
+    }
+
+    public enum SupportMode {
+        Disabled,
+        Accurate,
+        Fast
     }
 }
