@@ -199,6 +199,9 @@ public class BetterChat extends Module {
         .build()
     );
 
+    private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
+    private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
+
     private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
@@ -210,8 +213,6 @@ public class BetterChat extends Module {
         for (int i = 0; i < a.length; i++) SMALL_CAPS.put(a[i].charAt(0), b[i].charAt(0));
         compileFilterRegexList();
     }
-
-    private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
 
     @EventHandler
     private void onMessageReceive(ReceiveMessageEvent event) {
@@ -250,8 +251,6 @@ public class BetterChat extends Module {
         event.setMessage(message);
     }
 
-    private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
-
     /**
      * @author Crosby
      * Adding author tag because this is spaghetti code
@@ -274,7 +273,8 @@ public class BetterChat extends Module {
                 messageIndex = i;
                 returnText = message.append(Text.literal(" (2)").formatted(Formatting.GRAY));
                 break;
-            } else {
+            }
+            else {
                 Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
                 if (!matcher.matches()) continue;
