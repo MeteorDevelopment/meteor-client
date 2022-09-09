@@ -39,6 +39,10 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
         return setting;
     }
 
+    public Setting<?> getByIndex(int index) {
+        return settings.get(index);
+    }
+
     @Override
     public Iterator<Setting<?>> iterator() {
         return settings.iterator();
