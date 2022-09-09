@@ -88,7 +88,7 @@ public class Notebot extends Module {
 
     private final Setting<Boolean> autoRotate = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-rotate")
-        .description("Should client look at note block when he wants to hit it")
+        .description("Should client look at note block when it wants to hit it")
         .defaultValue(true)
         .build()
     );
