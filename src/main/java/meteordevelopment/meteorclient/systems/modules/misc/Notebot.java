@@ -616,9 +616,9 @@ public class Notebot extends Module {
 
             if (!uniqueNotesToUse.isEmpty()) {
                 for (Note note : uniqueNotesToUse) {
-                    warning("Unused note: "+note);
+                    warning("Missing note: "+note);
                 }
-                warning(uniqueNotesToUse.size()+" unsued notes!");
+                warning(uniqueNotesToUse.size()+" missing notes!");
             }
         }
 
