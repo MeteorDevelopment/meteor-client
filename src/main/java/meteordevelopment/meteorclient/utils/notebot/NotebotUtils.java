@@ -77,7 +77,7 @@ public class NotebotUtils {
     public enum NullableInstrument {
         None(null),
         Harp(Instrument.HARP),
-        BaseDrum(Instrument.BASEDRUM),
+        Basedrum(Instrument.BASEDRUM),
         Snare(Instrument.SNARE),
         Hat(Instrument.HAT),
         Bass(Instrument.BASS),
