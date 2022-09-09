@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.notebot;
 
+import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.nbs.Note;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NoteBlock;
@@ -104,7 +105,7 @@ public class NotebotUtils {
         }
 
         public static NullableInstrument fromMinecraftInstrument(Instrument instrument) {
-            return instrument == null ? null : NullableInstrument.valueOf(instrument.name());
+            return instrument == null ? null : NullableInstrument.values()[instrument.ordinal()+1]; // Offset by 1 to exclude 'None'
         }
     }
 }

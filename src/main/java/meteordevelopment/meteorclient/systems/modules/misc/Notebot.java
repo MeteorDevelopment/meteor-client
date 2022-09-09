@@ -150,7 +150,7 @@ public class Notebot extends Module {
 
         for (Instrument inst : Instrument.values()) {
             sgNoteMap.add(new EnumSetting.Builder<NotebotUtils.NullableInstrument>()
-                .name(inst.name())
+                .name(beautifyText(inst.name()))
                 .defaultValue(NotebotUtils.NullableInstrument.fromMinecraftInstrument(inst))
                 .visible(() -> mode.get() == NotebotUtils.NotebotMode.ExactInstruments)
                 .build()
@@ -735,7 +735,7 @@ public class Notebot extends Module {
 
     private @Nullable Instrument getMappedInstrument(Instrument inst) {
         if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-            return ((NotebotUtils.NullableInstrument) sgNoteMap.get(inst.name()).get()).toMinecraftInstrument();
+            return ((NotebotUtils.NullableInstrument) sgNoteMap.getByIndex(inst.ordinal()).get()).toMinecraftInstrument();
         } else {
             return inst;
         }
@@ -748,6 +748,19 @@ public class Notebot extends Module {
         }
 
         return i;
+    }
+
+    private String beautifyText(String text) {
+        text = text.toLowerCase(Locale.ROOT);
+
+        String[] arr = text.split("_");
+        StringBuilder sb = new StringBuilder();
+
+        for (String s : arr) {
+            sb.append(Character.toUpperCase(s.charAt(0)))
+                .append(s.substring(1));
+        }
+        return sb.toString().trim();
     }
 
     private enum Stage {
