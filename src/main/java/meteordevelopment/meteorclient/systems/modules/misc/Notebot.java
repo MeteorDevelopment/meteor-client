@@ -677,20 +677,21 @@ public class Notebot extends Module {
     }
 
     private void onTickPlay() {
-        for (Note note : song.get(currentTick)) {
-            BlockPos pos = noteBlockPositions.get(note);
-            if (pos == null) {
-                return;
+        List<Note> notes = song.get(currentTick);
+        if (!notes.isEmpty()) {
+            BlockPos firstPos = noteBlockPositions.get(notes.get(0));
+            if (autoRotate.get()) {
+                Rotations.rotate(Rotations.getYaw(firstPos), Rotations.getPitch(firstPos));
             }
 
-            if (polyphonic.get()) {
-                if (autoRotate.get()) {
-                    Rotations.setCamRotation(Rotations.getYaw(pos), Rotations.getPitch(pos));
+            for (Note note : notes) {
+                BlockPos pos = noteBlockPositions.get(note);
+                if (pos == null) {
+                    return;
                 }
-                playRotate(pos);
-            } else {
-                if (autoRotate.get()) {
-                    Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 100, () -> this.playRotate(pos));
+
+                if (polyphonic.get()) {
+                    playRotate(pos);
                 } else {
                     this.playRotate(pos);
                 }
