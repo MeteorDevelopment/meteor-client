@@ -74,23 +74,23 @@ public class NotebotUtils {
     }
 
     public enum NullableInstrument {
-        NONE(null),
-        HARP(Instrument.HARP),
-        BASEDRUM(Instrument.BASEDRUM),
-        SNARE(Instrument.SNARE),
-        HAT(Instrument.HAT),
-        BASS(Instrument.BASS),
-        FLUTE(Instrument.FLUTE),
-        BELL(Instrument.BELL),
-        GUITAR(Instrument.GUITAR),
-        CHIME(Instrument.CHIME),
-        XYLOPHONE(Instrument.XYLOPHONE),
-        IRON_XYLOPHONE(Instrument.IRON_XYLOPHONE),
-        COW_BELL(Instrument.COW_BELL),
-        DIDGERIDOO(Instrument.DIDGERIDOO),
-        BIT(Instrument.BIT),
-        BANJO(Instrument.BANJO),
-        PLING(Instrument.PLING)
+        None(null),
+        Harp(Instrument.HARP),
+        BaseDrum(Instrument.BASEDRUM),
+        Snare(Instrument.SNARE),
+        Hat(Instrument.HAT),
+        Bass(Instrument.BASS),
+        Flute(Instrument.FLUTE),
+        Bell(Instrument.BELL),
+        Guitar(Instrument.GUITAR),
+        Chime(Instrument.CHIME),
+        Xylophone(Instrument.XYLOPHONE),
+        IronXylophone(Instrument.IRON_XYLOPHONE),
+        CowBell(Instrument.COW_BELL),
+        Didgeridoo(Instrument.DIDGERIDOO),
+        Bit(Instrument.BIT),
+        Banjo(Instrument.BANJO),
+        Pling(Instrument.PLING)
         ;
 
         private final Instrument minecraftInstrument;

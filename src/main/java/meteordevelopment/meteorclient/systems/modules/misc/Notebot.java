@@ -47,12 +47,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
@@ -616,7 +611,7 @@ public class Notebot extends Module {
 
             if (!uniqueNotesToUse.isEmpty()) {
                 for (Note note : uniqueNotesToUse) {
-                    warning("Missing note: "+note);
+                    warning("Missing note: "+note.getInstrument()+", "+note.getNoteLevel());
                 }
                 warning(uniqueNotesToUse.size()+" missing notes!");
             }
@@ -680,8 +675,10 @@ public class Notebot extends Module {
         List<Note> notes = song.get(currentTick);
         if (!notes.isEmpty()) {
             BlockPos firstPos = noteBlockPositions.get(notes.get(0));
-            if (autoRotate.get()) {
-                Rotations.rotate(Rotations.getYaw(firstPos), Rotations.getPitch(firstPos));
+            if (firstPos != null) {
+                if (autoRotate.get()) {
+                    Rotations.rotate(Rotations.getYaw(firstPos), Rotations.getPitch(firstPos));
+                }
             }
 
             for (Note note : notes) {
