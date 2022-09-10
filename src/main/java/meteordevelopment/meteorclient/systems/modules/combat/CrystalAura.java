@@ -591,7 +591,8 @@ public class CrystalAura extends Module {
             if (ticks > 3) {
                 it.remove();
                 removed.remove(id);
-            } else {
+            }
+            else {
                 waitingToExplode.put(id, ticks + 1);
             }
         }
