@@ -26,6 +26,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
     private static boolean isIndigoPresent;
     private static boolean isSodiumPresent;
     private static boolean isCanvasPresent;
+    private static boolean isModmenuPresent;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -68,6 +69,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         isOriginsPresent = FabricLoader.getInstance().isModLoaded("origins");
         isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
         isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");
+        isModmenuPresent = FabricLoader.getInstance().isModLoaded("modmenu");
 
         loaded = true;
     }
@@ -94,7 +96,9 @@ public class MixinPlugin implements IMixinConfigPlugin {
         else if (mixinClassName.startsWith(mixinPackage + ".canvas")) {
             return isCanvasPresent;
         }
-
+        else if (mixinClassName.startsWith(mixinPackage + ".modmenu")) {
+            return isModmenuPresent;
+        }
 
         return true;
     }

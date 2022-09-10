@@ -23,6 +23,10 @@ repositories {
         name = "vram"
         url = "https://maven.vram.io//"
     }
+    maven {
+        name = "terraformersmc"
+        url = "https://maven.terraformersmc.com/releases"
+    }
     mavenCentral()
 }
 
@@ -47,6 +51,7 @@ dependencies {
     modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
     modCompileOnly("me.jellysquid.mods:sodium-fabric:${project.sodium_version}") { transitive = false }
     modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false }
+    modCompileOnly("com.terraformersmc:modmenu:4.0.+") { transitive = false }
 
 	// Baritone (https://github.com/MeteorDevelopment/baritone)
     modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
