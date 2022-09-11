@@ -261,6 +261,7 @@ public class ESP extends Module {
     public boolean shouldSkip(Entity entity) {
         if (!entities.get().getBoolean(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
+        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity) || getFadeAlpha(entity) == 0;
     }
 
