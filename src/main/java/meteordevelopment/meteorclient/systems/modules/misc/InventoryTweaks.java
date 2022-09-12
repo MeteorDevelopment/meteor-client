@@ -67,7 +67,7 @@ public class InventoryTweaks extends Module {
 
     private final Setting<Boolean> xCarry = sgGeneral.add(new BoolSetting.Builder()
         .name("xcarry")
-        .description("Allows you to store four extra items in your crafting grid.")
+        .description("Allows you to store four extra item stacks in your crafting grid.")
         .defaultValue(true)
         .onChanged(v -> {
             if (v || !Utils.canUpdate()) return;
