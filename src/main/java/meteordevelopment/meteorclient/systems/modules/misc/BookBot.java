@@ -65,8 +65,8 @@ public class BookBot extends Module {
         .name("pages")
         .description("The number of pages to write per book.")
         .defaultValue(50)
-        .range(1, 100)
-        .sliderRange(1, 100)
+        .range(1, 50)
+        .sliderRange(1, 50)
         .visible(() -> mode.get() != Mode.File)
         .build()
     );
