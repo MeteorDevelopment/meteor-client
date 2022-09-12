@@ -26,7 +26,7 @@ public class BetterTab extends Module {
 
     public final Setting<Integer> tabSize = sgGeneral.add(new IntSetting.Builder()
             .name("tablist-size")
-            .description("Bypasses the 80 player limit on the tablist.")
+            .description("How many players to display in the tablist.")
             .defaultValue(100)
             .min(1)
             .sliderRange(1, 1000)
