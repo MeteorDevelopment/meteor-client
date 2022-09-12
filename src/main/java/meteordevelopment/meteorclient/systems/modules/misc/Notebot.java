@@ -373,7 +373,12 @@ public class Notebot extends Module {
 
     public void loadSong(File file) {
         if (!isActive()) toggle();
-        if (!loadFileToMap(file)) return;
+        if (!loadFileToMap(file)) {
+            if (autoPlay.get()) {
+                playRandomSong();
+            }
+            return;
+        }
         if (!setupBlocks()) return;
         info("Loading song \"%s\".", getFileLabel(file.toPath()));
     }
