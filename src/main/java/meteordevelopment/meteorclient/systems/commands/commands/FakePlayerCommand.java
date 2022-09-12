@@ -67,7 +67,7 @@ public class FakePlayerCommand extends Command {
 
         builder.then(literal("list")
             .executes(context -> {
-                info("--- Fake Players ((highlight)%s(default)) ---", Friends.get().count());
+                info("--- Fake Players ((highlight)%s(default)) ---", FakePlayerManager.count());
                 FakePlayerManager.forEach(fp -> ChatUtils.info("(highlight)%s".formatted(fp.getEntityName())));
                 return SINGLE_SUCCESS;
             })
