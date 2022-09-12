@@ -54,7 +54,7 @@ public class AimAssist extends Module {
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
         .name("priority")
-        .description("How to select target from entities in range.")
+        .description("How to filter targets within range.")
         .defaultValue(SortPriority.LowestHealth)
         .build()
     );
