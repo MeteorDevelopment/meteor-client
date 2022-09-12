@@ -233,6 +233,10 @@ public class Notebot extends Module {
         // Label
         status = table.add(theme.label(getStatus())).expandCellX().widget();
 
+        // Skip
+        WButton skip = table.add(theme.button("Skip")).right().widget();
+        skip.action = this::playRandomSong;
+
         // Pause
         WButton pause = table.add(theme.button(isPlaying ? "Pause" : "Resume")).right().widget();
         pause.action = () -> {
