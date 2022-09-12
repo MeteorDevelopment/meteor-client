@@ -57,7 +57,7 @@ public class FakePlayer extends Module {
 
         WButton clear = w.add(theme.button("Clear")).widget();
         clear.action = () -> {
-            FakePlayerManager.add(name.get(), health.get(), copyInv.get());
+            FakePlayerManager.clear();
         };
 
         return w;
