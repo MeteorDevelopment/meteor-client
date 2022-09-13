@@ -109,6 +109,8 @@ public class Freecam extends Module {
     public float yaw, pitch;
     public float prevYaw, prevPitch;
 
+    private double fovScale;
+
     private boolean forward, backward, right, left, up, down;
 
     public Freecam() {
@@ -117,6 +119,8 @@ public class Freecam extends Module {
 
     @Override
     public void onActivate() {
+        fovScale = mc.options.getFovEffectScale().getValue();
+        mc.options.getFovEffectScale().setValue((double)0);
         yaw = mc.player.getYaw();
         pitch = mc.player.getPitch();
 
@@ -144,6 +148,7 @@ public class Freecam extends Module {
     public void onDeactivate() {
         if (reloadChunks.get()) mc.worldRenderer.reload();
         mc.options.setPerspective(perspective);
+        mc.options.getFovEffectScale().setValue((double)fovScale);
     }
 
     @EventHandler
