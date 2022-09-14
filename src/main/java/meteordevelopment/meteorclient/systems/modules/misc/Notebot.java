@@ -233,6 +233,10 @@ public class Notebot extends Module {
         // Label
         status = table.add(theme.label(getStatus())).expandCellX().widget();
 
+        // Random Song
+        WButton randomSong = table.add(theme.button("Random Song")).right().widget();
+        randomSong.action = this::playRandomSong;
+
         // Pause
         WButton pause = table.add(theme.button(isPlaying ? "Pause" : "Resume")).right().widget();
         pause.action = () -> {
@@ -369,7 +373,12 @@ public class Notebot extends Module {
 
     public void loadSong(File file) {
         if (!isActive()) toggle();
-        if (!loadFileToMap(file)) return;
+        if (!loadFileToMap(file)) {
+            if (autoPlay.get()) {
+                playRandomSong();
+            }
+            return;
+        }
         if (!setupBlocks()) return;
         info("Loading song \"%s\".", getFileLabel(file.toPath()));
     }
