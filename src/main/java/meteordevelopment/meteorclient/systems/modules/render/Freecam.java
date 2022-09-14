@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseScrollEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
@@ -41,63 +42,63 @@ public class Freecam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Your speed while in freecam.")
-            .onChanged(aDouble -> speedValue = aDouble)
-            .defaultValue(1.0)
-            .min(0.0)
-            .build()
+        .name("speed")
+        .description("Your speed while in freecam.")
+        .onChanged(aDouble -> speedValue = aDouble)
+        .defaultValue(1.0)
+        .min(0.0)
+        .build()
     );
 
     private final Setting<Double> speedScrollSensitivity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed-scroll-sensitivity")
-            .description("Allows you to change speed value using scroll wheel. 0 to disable.")
-            .defaultValue(0)
-            .min(0)
-            .sliderMax(2)
-            .build()
+        .name("speed-scroll-sensitivity")
+        .description("Allows you to change speed value using scroll wheel. 0 to disable.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(2)
+        .build()
     );
 
     private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
-            .name("toggle-on-damage")
-            .description("Disables freecam when you take damage.")
-            .defaultValue(false)
-            .build()
+        .name("toggle-on-damage")
+        .description("Disables freecam when you take damage.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> toggleOnDeath = sgGeneral.add(new BoolSetting.Builder()
-            .name("toggle-on-death")
-            .description("Disables freecam when you die.")
-            .defaultValue(false)
-            .build()
+        .name("toggle-on-death")
+        .description("Disables freecam when you die.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> toggleOnLog = sgGeneral.add(new BoolSetting.Builder()
-            .name("toggle-on-log")
-            .description("Disables freecam when you disconnect from a server.")
-            .defaultValue(true)
-            .build()
+        .name("toggle-on-log")
+        .description("Disables freecam when you disconnect from a server.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> reloadChunks = sgGeneral.add(new BoolSetting.Builder()
-            .name("reload-chunks")
-            .description("Disables cave culling.")
-            .defaultValue(true)
-            .build()
+        .name("reload-chunks")
+        .description("Disables cave culling.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
-            .name("show-hands")
-            .description("Whether or not to render your hands in freecam.")
-            .defaultValue(true)
-            .build()
+        .name("show-hands")
+        .description("Whether or not to render your hands in freecam.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Rotates to the block or entity you are looking at.")
-            .defaultValue(false)
-            .build()
+        .name("rotate")
+        .description("Rotates to the block or entity you are looking at.")
+        .defaultValue(false)
+        .build()
     );
 
     public final Vec3 pos = new Vec3();
@@ -244,35 +245,68 @@ public class Freecam extends Module {
     @EventHandler
     public void onKey(KeyEvent event) {
         if (Input.isKeyPressed(GLFW.GLFW_KEY_F3)) return;
-
-        // TODO: This is very bad but you all can cope :cope:
-        GUIMove guiMove = Modules.get().get(GUIMove.class);
-        if (mc.currentScreen != null && !guiMove.isActive()) return;
-        if (mc.currentScreen != null && guiMove.isActive() && guiMove.skip()) return;
+        if (checkGuiMove()) return;
 
         boolean cancel = true;
 
-        if (mc.options.forwardKey.matchesKey(event.key, 0) || mc.options.forwardKey.matchesMouse(event.key)) {
+        if (mc.options.forwardKey.matchesKey(event.key, 0)) {
             forward = event.action != KeyAction.Release;
             mc.options.forwardKey.setPressed(false);
         }
-        else if (mc.options.backKey.matchesKey(event.key, 0) || mc.options.backKey.matchesMouse(event.key)) {
+        else if (mc.options.backKey.matchesKey(event.key, 0)) {
             backward = event.action != KeyAction.Release;
             mc.options.backKey.setPressed(false);
         }
-        else if (mc.options.rightKey.matchesKey(event.key, 0) || mc.options.rightKey.matchesMouse(event.key)) {
+        else if (mc.options.rightKey.matchesKey(event.key, 0)) {
             right = event.action != KeyAction.Release;
             mc.options.rightKey.setPressed(false);
         }
-        else if (mc.options.leftKey.matchesKey(event.key, 0) || mc.options.leftKey.matchesMouse(event.key)) {
+        else if (mc.options.leftKey.matchesKey(event.key, 0)) {
             left = event.action != KeyAction.Release;
             mc.options.leftKey.setPressed(false);
         }
-        else if (mc.options.jumpKey.matchesKey(event.key, 0) || mc.options.jumpKey.matchesMouse(event.key)) {
+        else if (mc.options.jumpKey.matchesKey(event.key, 0)) {
             up = event.action != KeyAction.Release;
             mc.options.jumpKey.setPressed(false);
         }
-        else if (mc.options.sneakKey.matchesKey(event.key, 0) || mc.options.sneakKey.matchesMouse(event.key)) {
+        else if (mc.options.sneakKey.matchesKey(event.key, 0)) {
+            down = event.action != KeyAction.Release;
+            mc.options.sneakKey.setPressed(false);
+        }
+        else {
+            cancel = false;
+        }
+
+        if (cancel) event.cancel();
+    }
+
+    @EventHandler
+    private void onMouseButton(MouseButtonEvent event) {
+        if (checkGuiMove()) return;
+
+        boolean cancel = true;
+
+        if (mc.options.forwardKey.matchesMouse(event.button)) {
+            forward = event.action != KeyAction.Release;
+            mc.options.forwardKey.setPressed(false);
+        }
+        else if (mc.options.backKey.matchesMouse(event.button)) {
+            backward = event.action != KeyAction.Release;
+            mc.options.backKey.setPressed(false);
+        }
+        else if (mc.options.rightKey.matchesMouse(event.button)) {
+            right = event.action != KeyAction.Release;
+            mc.options.rightKey.setPressed(false);
+        }
+        else if (mc.options.leftKey.matchesMouse(event.button)) {
+            left = event.action != KeyAction.Release;
+            mc.options.leftKey.setPressed(false);
+        }
+        else if (mc.options.jumpKey.matchesMouse(event.button)) {
+            up = event.action != KeyAction.Release;
+            mc.options.jumpKey.setPressed(false);
+        }
+        else if (mc.options.sneakKey.matchesMouse(event.button)) {
             down = event.action != KeyAction.Release;
             mc.options.sneakKey.setPressed(false);
         }
@@ -325,6 +359,13 @@ public class Freecam extends Module {
                 info("Toggled off because you died.");
             }
         }
+    }
+
+    private boolean checkGuiMove() {
+        // TODO: This is very bad but you all can cope :cope:
+        GUIMove guiMove = Modules.get().get(GUIMove.class);
+        if (mc.currentScreen != null && !guiMove.isActive()) return true;
+        return (mc.currentScreen != null && guiMove.isActive() && guiMove.skip());
     }
 
     public void changeLookDirection(double deltaX, double deltaY) {
