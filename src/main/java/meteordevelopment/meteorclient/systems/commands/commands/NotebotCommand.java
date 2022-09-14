@@ -71,7 +71,7 @@ public class NotebotCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("skip").executes(ctx -> {
+        builder.then(literal("randomsong").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
             notebot.playRandomSong();
             return SINGLE_SUCCESS;
