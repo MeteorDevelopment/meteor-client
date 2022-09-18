@@ -61,7 +61,7 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
         .name("self")
-        .description("Displays a nametag on your player if you're in Freecam.")
+        .description("Displays a nametag on your player if you're in Freecam or third person.")
         .defaultValue(true)
         .build()
     );
@@ -104,6 +104,13 @@ public class Nametags extends Module {
         .min(1)
         .sliderRange(1, 100)
         .visible(culling::get)
+        .build()
+    );
+
+    private final Setting<Boolean> excludeBots = sgItems.add(new BoolSetting.Builder()
+        .name("exclude-bots")
+        .description("Only render non-bot nametags.")
+        .defaultValue(true)
         .build()
     );
 
@@ -242,6 +249,7 @@ public class Nametags extends Module {
         entityList.clear();
 
         boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
+        boolean notThirdPerson = mc.options.getPerspective().isFirstPerson();
         Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
         for (Entity entity : mc.world.getEntities()) {
@@ -249,7 +257,8 @@ public class Nametags extends Module {
             if (!entities.get().containsKey(type)) continue;
 
             if (type == EntityType.PLAYER) {
-                if ((!yourself.get() || freecamNotActive) && entity == mc.player) continue;
+                if ((!yourself.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
+                if (EntityUtils.getGameMode((PlayerEntity) entity) == null && excludeBots.get()) continue;
             }
 
             if (!culling.get() || entity.getPos().distanceTo(cameraPos) < maxCullRange.get()) {
@@ -360,9 +369,12 @@ public class Nametags extends Module {
         double distWidth = text.getWidth(distText, shadow);
         double width = nameWidth + healthWidth;
 
+        boolean renderPlayerDistance = player != mc.cameraEntity || Modules.get().isActive(Freecam.class);
+
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
-        if (displayDistance.get()) width += distWidth;
+        if (displayDistance.get() && renderPlayerDistance)
+            width += distWidth;
 
         double widthHalf = width / 2;
         double heightDown = text.getHeight(shadow);
@@ -379,7 +391,8 @@ public class Nametags extends Module {
 
         hX = text.render(healthText, hX, hY, healthColor, shadow);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, BLUE, shadow);
-        if (displayDistance.get()) text.render(distText, hX, hY, GREY, shadow);
+        if (displayDistance.get() && renderPlayerDistance)
+            text.render(distText, hX, hY, GREY, shadow);
         text.end();
 
         if (displayItems.get()) {
@@ -586,5 +599,13 @@ public class Nametags extends Module {
     public enum Position {
         Above,
         OnTop
+    }
+
+    public boolean excludeBots() {
+        return excludeBots.get();
+    }
+
+    public boolean playerNametags() {
+        return isActive() && entities.get().containsKey(EntityType.PLAYER);
     }
 }
