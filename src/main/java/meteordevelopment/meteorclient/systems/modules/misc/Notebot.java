@@ -51,7 +51,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -82,7 +84,7 @@ public class Notebot extends Module {
     private final Setting<NotebotUtils.NotebotMode> mode = sgGeneral.add(new EnumSetting.Builder<NotebotUtils.NotebotMode>()
         .name("mode")
         .description("Select mode of notebot")
-        .defaultValue(NotebotUtils.NotebotMode.AnyInstrument)
+        .defaultValue(NotebotUtils.NotebotMode.ExactInstruments)
         .build()
     );
 
@@ -186,6 +188,20 @@ public class Notebot extends Module {
         .build()
     );
 
+    private final Setting<SettingColor> scannedNoteblockSideColor = sgRender.add(new ColorSetting.Builder()
+        .name("scanned-noteblock-side-color")
+        .description("The color of the sides of the scanned noteblocks being rendered.")
+        .defaultValue(new SettingColor(255, 255, 0, 30))
+        .build()
+    );
+
+    private final Setting<SettingColor> scannedNoteblockLineColor = sgRender.add(new ColorSetting.Builder()
+        .name("scanned-noteblock-line-color")
+        .description("The color of the lines of the scanned noteblocks being rendered.")
+        .defaultValue(new SettingColor(255, 255, 0, 255))
+        .build()
+    );
+
     private final Setting<Double> noteTextScale = sgRender.add(new DoubleSetting.Builder()
         .name("note-text-scale")
         .description("The scale.")
@@ -194,7 +210,16 @@ public class Notebot extends Module {
         .build()
     );
 
-    private final TreeMap<Integer, List<Note>> song = new TreeMap<>(Comparator.naturalOrder()); // tick -> notes
+    private final Setting<Boolean> showScannedNoteblocks = sgRender.add(new BoolSetting.Builder()
+        .name("show-scanned-noteblocks")
+        .description("Show scanned Noteblocks")
+        .defaultValue(false)
+        .build()
+    );
+
+    private CompletableFuture<Boolean> loadingSongFuture = null;
+
+    private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
     private final List<Note> uniqueNotes = new ArrayList<>();
     private final Map<Note, BlockPos> noteBlockPositions = new HashMap<>(); // Currently used noteblocks by the song
     private final Map<Note, List<BlockPos>> scannedNoteblocks = new HashMap<>(); // Found noteblocks
@@ -205,6 +230,7 @@ public class Notebot extends Module {
     private int ticks = 0;
     private boolean noSongsFound = true;
     private WLabel status;
+    private int lastTick = -1;
 
     private boolean anyNoteblockTuned = false;
     private final Map<BlockPos, Integer> tuneHits = new HashMap<>(); // noteblock -> target hits
@@ -237,10 +263,15 @@ public class Notebot extends Module {
     }
 
     private void resetVariables() {
+        if (loadingSongFuture != null) {
+            loadingSongFuture.cancel(true);
+            loadingSongFuture = null;
+        }
         clickedBlocks.clear();
         tuneHits.clear();
         anyNoteblockTuned = false;
         currentTick = 0;
+        lastTick = -1;
         isPlaying = false;
         stage = Stage.None;
         song.clear();
@@ -254,40 +285,55 @@ public class Notebot extends Module {
 
         if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying) return;
 
-        for (var entry : noteBlockPositions.entrySet()) {
-            Note note = entry.getKey();
-            BlockPos blockPos = entry.getValue();
+        if (showScannedNoteblocks.get()) {
+            for (List<BlockPos> blockPosList : scannedNoteblocks.values()) {
+                for (BlockPos blockPos : blockPosList) {
+                    double x1 = blockPos.getX();
+                    double y1 = blockPos.getY();
+                    double z1 = blockPos.getZ();
+                    double x2 = blockPos.getX() + 1;
+                    double y2 = blockPos.getY() + 1;
+                    double z2 = blockPos.getZ() + 1;
 
-            BlockState state = mc.world.getBlockState(blockPos);
-            if (state.getBlock() != Blocks.NOTE_BLOCK) continue;
-
-            int level = state.get(NoteBlock.NOTE);
-
-            double x1 = blockPos.getX();
-            double y1 = blockPos.getY();
-            double z1 = blockPos.getZ();
-            double x2 = blockPos.getX() + 1;
-            double y2 = blockPos.getY() + 1;
-            double z2 = blockPos.getZ() + 1;
-
-            // Render boxes around using noteblocks
-
-            Color sideColor;
-            Color lineColor;
-            if (clickedBlocks.contains(blockPos)) {
-                sideColor = tuneHitSideColor.get();
-                lineColor = tuneHitLineColor.get();
-            } else {
-                if (note.getNoteLevel() == level) {
-                    sideColor = tunedSideColor.get();
-                    lineColor = tunedLineColor.get();
-                } else {
-                    sideColor = untunedSideColor.get();
-                    lineColor = untunedLineColor.get();
+                    event.renderer.box(x1, y1, z1, x2, y2, z2, scannedNoteblockSideColor.get(), scannedNoteblockLineColor.get(), shapeMode.get(), 0);
                 }
             }
+        } else {
+            for (var entry : noteBlockPositions.entrySet()) {
+                Note note = entry.getKey();
+                BlockPos blockPos = entry.getValue();
 
-            event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), 0);
+                BlockState state = mc.world.getBlockState(blockPos);
+                if (state.getBlock() != Blocks.NOTE_BLOCK) continue;
+
+                int level = state.get(NoteBlock.NOTE);
+
+                double x1 = blockPos.getX();
+                double y1 = blockPos.getY();
+                double z1 = blockPos.getZ();
+                double x2 = blockPos.getX() + 1;
+                double y2 = blockPos.getY() + 1;
+                double z2 = blockPos.getZ() + 1;
+
+                // Render boxes around noteblocks in use
+
+                Color sideColor;
+                Color lineColor;
+                if (clickedBlocks.contains(blockPos)) {
+                    sideColor = tuneHitSideColor.get();
+                    lineColor = tuneHitLineColor.get();
+                } else {
+                    if (note.getNoteLevel() == level) {
+                        sideColor = tunedSideColor.get();
+                        lineColor = tunedLineColor.get();
+                    } else {
+                        sideColor = untunedSideColor.get();
+                        lineColor = untunedLineColor.get();
+                    }
+                }
+
+                event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode.get(), 0);
+            }
         }
     }
 
@@ -350,12 +396,14 @@ public class Notebot extends Module {
             waitTicks--;
             if (waitTicks == 0) {
                 waitTicks = -1;
+                info("Checking noteblocks again...");
 
                 setupTuneHitsMap();
                 stage = Stage.Tune;
             }
         }
         else if (stage == Stage.SetUp) {
+            setupBlocks();
             setupNoteblocksMap();
             setupTuneHitsMap();
             stage = Stage.Tune;
@@ -366,7 +414,7 @@ public class Notebot extends Module {
         else if (stage == Stage.Preview || stage == Stage.Playing) {
             if (!isPlaying) return;
 
-            if (mc.player == null || currentTick > song.lastKey()) {
+            if (mc.player == null || currentTick > lastTick) {
                 stop();
                 return;
             }
@@ -529,7 +577,7 @@ public class Notebot extends Module {
     public String getStatus() {
         if (!this.isActive()) return "Module disabled.";
         if (song.isEmpty()) return "No song loaded.";
-        if (isPlaying) return String.format("Playing song. %d/%d", currentTick, song.lastKey());
+        if (isPlaying) return String.format("Playing song. %d/%d", currentTick, lastTick);
         if (stage == Stage.Playing || stage == Stage.Preview) return "Ready to play.";
         if (stage == Stage.SetUp || stage == Stage.Tune) return "Setting up the noteblocks.";
         else return String.format("Stage: %s.", stage.toString());
@@ -574,7 +622,7 @@ public class Notebot extends Module {
 
     public void forceStop() {
         info("Stopping.");
-        if (stage == Stage.SetUp || stage == Stage.Tune) {
+        if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks) {
             resetVariables();
         } else {
             isPlaying = false;
@@ -616,8 +664,6 @@ public class Notebot extends Module {
             }
             return;
         }
-        if (!setupBlocks()) return;
-        info("Loading song \"%s\".", getFileLabel(file.toPath()));
     }
 
     public void previewSong(File file) {
@@ -647,10 +693,32 @@ public class Notebot extends Module {
             return false;
         }
         String extension = FilenameUtils.getExtension(file.getName());
-        boolean success = false;
-        if (extension.equals("txt")) success = loadTextFile(file);
-        else if (extension.equals("nbs")) success = loadNbsFile(file);
-        return success;
+
+        resetVariables();
+        info("Loading song \"%s\".", getFileLabel(file.toPath()));
+
+        if (extension.equals("txt")) loadingSongFuture = CompletableFuture.supplyAsync(() -> loadTextFile(file));
+        else if (extension.equals("nbs")) loadingSongFuture = CompletableFuture.supplyAsync(() -> loadNbsFile(file));
+        loadingSongFuture.completeOnTimeout(false, 10, TimeUnit.SECONDS);
+
+        stage = Stage.LoadingSong;
+        long time1 = System.currentTimeMillis();
+        loadingSongFuture.thenAccept(success -> {
+            if (success) {
+                long time2 = System.currentTimeMillis();
+                long diff = time2 - time1;
+
+                lastTick = Collections.max(song.keySet());
+                stage = Stage.SetUp;
+                info("Song has been loaded to the memory! Took "+diff+"ms");
+            } else {
+                error("Could not load song '"+file.getName()+"'");
+                if (autoPlay.get()) {
+                    playRandomSong();
+                }
+            }
+        });
+        return true;
     }
 
     private boolean loadTextFile(File file) {
@@ -661,7 +729,6 @@ public class Notebot extends Module {
             error("Error while reading \"%s\"", file.getName());
             return false;
         }
-        resetVariables();
         for (int i = 0; i < data.size(); i++) {
             String[] parts = data.get(i).split(":");
             if (parts.length < 2) {
@@ -716,7 +783,6 @@ public class Notebot extends Module {
             return false;
         }
         List<Layer> layers = new ArrayList<>(nbsSong.getLayerHashMap().values());
-        resetVariables();
         for (Layer layer : layers) {
             for (var entry : layer.getHashMap().entrySet()) {
                 int tick = entry.getKey();
@@ -781,7 +847,7 @@ public class Notebot extends Module {
         }
     }
 
-    private boolean setupBlocks() {
+    private void setupBlocks() {
         song.values().forEach(notes -> {
             notes.forEach(note -> {
                 if (!uniqueNotes.contains(note)) {
@@ -790,9 +856,6 @@ public class Notebot extends Module {
             });
         });
         scanForNoteblocks();
-
-        stage = Stage.SetUp;
-        return true;
     }
 
     private void onTickPreview() {
@@ -812,7 +875,7 @@ public class Notebot extends Module {
                 waitTicks = checkNoteblocksAgainDelay.get();
                 stage = Stage.WaitingToCheckNoteblocks;
 
-                info("Checking noteblocks again...");
+                info("Delaying check for noteblocks");
             } else {
                 stage = Stage.Playing;
                 info("Loading done.");
@@ -954,6 +1017,7 @@ public class Notebot extends Module {
 
     private enum Stage {
         None,
+        LoadingSong,
         SetUp,
         Tune,
         WaitingToCheckNoteblocks,
