@@ -233,7 +233,7 @@ public class Notebot extends Module {
     private int lastTick = -1;
 
     private boolean anyNoteblockTuned = false;
-    private final Map<BlockPos, Integer> tuneHits = new HashMap<>(); // noteblock -> target hits
+    private final Map<BlockPos, Integer> tuneHits = new HashMap<>(); // noteblock -> target hits number
 
     private int waitTicks = -1;
 
