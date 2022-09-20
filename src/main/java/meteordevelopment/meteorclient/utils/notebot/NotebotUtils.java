@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.notebot;
 
-import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.nbs.Note;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NoteBlock;
