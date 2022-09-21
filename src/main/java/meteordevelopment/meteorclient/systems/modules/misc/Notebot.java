@@ -126,7 +126,7 @@ public class Notebot extends Module {
     private final Setting<Integer> checkNoteblocksAgainDelay = sgGeneral.add(new IntSetting.Builder()
         .name("check-noteblocks-again-delay")
         .description("How much delay should be between end of tuning and checking again")
-        .defaultValue(20)
+        .defaultValue(10)
         .min(1)
         .sliderRange(1, 20)
         .build()
