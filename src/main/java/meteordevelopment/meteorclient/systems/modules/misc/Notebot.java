@@ -516,6 +516,15 @@ public class Notebot extends Module {
     public WWidget getWidget(GuiTheme theme) {
         WTable table = theme.table();
 
+        // Align Center
+        WButton alignCenter = table.add(theme.button("Align Center")).expandCellX().center().widget();
+        alignCenter.action = () -> {
+            if (mc.player == null) return;
+            mc.player.setPosition(Vec3d.ofBottomCenter(mc.player.getBlockPos()));
+        };
+
+        table.row();
+
         // Label
         status = table.add(theme.label(getStatus())).expandCellX().widget();
 
@@ -829,6 +838,7 @@ public class Notebot extends Module {
                     BlockState blockState = mc.world.getBlockState(pos);
                     if (blockState.getBlock() != Blocks.NOTE_BLOCK) continue;
 
+                    // Copied from ServerPlayNetworkHandler#onPlayerInteractBlock
                     Vec3d vec3d2 = Vec3d.ofCenter(pos);
                     double sqrt = mc.player.getEyePos().squaredDistanceTo(vec3d2);
                     if (sqrt > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) continue;
