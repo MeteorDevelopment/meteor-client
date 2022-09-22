@@ -132,8 +132,15 @@ public class Notebot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-        .name("render")
+    private final Setting<Boolean> renderText = sgRender.add(new BoolSetting.Builder()
+        .name("render-text")
+        .description("Whether or not to render the text above noteblocks.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> renderBoxes = sgRender.add(new BoolSetting.Builder()
+        .name("render-boxes")
         .description("Whether or not to render the outline around the noteblocks.")
         .defaultValue(true)
         .build()
@@ -281,7 +288,7 @@ public class Notebot extends Module {
 
     @EventHandler
     private void onRender3D(Render3DEvent event) {
-        if (!render.get()) return;
+        if (!renderBoxes.get()) return;
 
         if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying) return;
 
@@ -339,7 +346,7 @@ public class Notebot extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        if (!render.get()) return;
+        if (!renderText.get()) return;
 
         if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying) return;
 
