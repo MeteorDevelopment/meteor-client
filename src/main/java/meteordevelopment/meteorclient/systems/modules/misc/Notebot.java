@@ -667,21 +667,19 @@ public class Notebot extends Module {
 
     public void loadSong(File file) {
         if (!isActive()) toggle();
-        if (!loadFileToMap(file)) {
+        if (!loadFileToMap(file, () -> stage = Stage.SetUp)) {
             if (autoPlay.get()) {
                 playRandomSong();
             }
-            return;
         }
     }
 
     public void previewSong(File file) {
         if (!isActive()) toggle();
-        if (loadFileToMap(file)) {
-            info("Song \"%s\" loaded.", getFileLabel(file.toPath()));
+        loadFileToMap(file, () -> {
             stage = Stage.Preview;
             play();
-        }
+        });
     }
 
     private void addNote(int tick, Note value) {
@@ -696,7 +694,7 @@ public class Notebot extends Module {
         }
     }
 
-    private boolean loadFileToMap(File file) {
+    private boolean loadFileToMap(File file, Runnable callback) {
         if (!file.exists() || !file.isFile()) {
             error("File not found");
             return false;
@@ -718,10 +716,10 @@ public class Notebot extends Module {
                 long diff = time2 - time1;
 
                 lastTick = Collections.max(song.keySet());
-                stage = Stage.SetUp;
-                info("Song has been loaded to the memory! Took "+diff+"ms");
+                info("Song '"+getFileLabel(file.toPath())+"' has been loaded to the memory! Took "+diff+"ms");
+                callback.run();
             } else {
-                error("Could not load song '"+file.getName()+"'");
+                error("Could not load song '"+getFileLabel(file.toPath())+"'");
                 if (autoPlay.get()) {
                     playRandomSong();
                 }
