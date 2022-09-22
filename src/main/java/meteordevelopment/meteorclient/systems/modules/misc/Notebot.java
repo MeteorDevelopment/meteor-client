@@ -834,9 +834,11 @@ public class Notebot extends Module {
         scannedNoteblocks.clear();
         int min = (int) (-mc.interactionManager.getReachDistance()) - 2;
         int max = (int) mc.interactionManager.getReachDistance() + 2;
-        // 5^3 kek
-        for (int x = min; x < max; x++) {
-            for (int y = min; y < max; y++) {
+
+        // Scan for noteblocks horizontally
+        // 6^3 kek
+        for (int y = min; y < max; y++) {
+            for (int x = min; x < max; x++) {
                 for (int z = min; z < max; z++) {
                     BlockPos pos = mc.player.getBlockPos().add(x, y + 1, z);
 
