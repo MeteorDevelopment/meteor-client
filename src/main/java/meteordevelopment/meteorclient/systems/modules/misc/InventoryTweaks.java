@@ -22,8 +22,8 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ArmorItem;
@@ -242,7 +242,7 @@ public class InventoryTweaks extends Module {
 
     private boolean swapArmor() {  // would mixin to use method in ArmorItem, but it's buggy and unreliable on servers
         if (mc.currentScreen != null) {
-            if (!(mc.currentScreen instanceof AbstractInventoryScreen<?> screen)) return false;
+            if (!(mc.currentScreen instanceof InventoryScreen screen)) return false;
             Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
             if (focusedSlot == null || !(focusedSlot.getStack().getItem() instanceof ArmorItem)) return false;
 
