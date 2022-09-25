@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -241,14 +242,12 @@ public class InventoryTweaks extends Module {
 
     private boolean swapArmor() {  // would mixin to use method in ArmorItem, but it's buggy and unreliable on servers
         if (mc.currentScreen != null) {
-            if (!(mc.currentScreen instanceof HandledScreen<?> screen)) return false;
-
+            if (!(mc.currentScreen instanceof AbstractInventoryScreen<?> screen)) return false;
             Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
             if (focusedSlot == null || !(focusedSlot.getStack().getItem() instanceof ArmorItem)) return false;
 
             ItemStack itemStack = focusedSlot.getStack();
             EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
-            if (mc.player.getEquippedStack(equipmentSlot).isEmpty()) return false;
 
             mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
                 focusedSlot.getIndex(), SlotActionType.SWAP, mc.player);
@@ -258,7 +257,6 @@ public class InventoryTweaks extends Module {
             if (!(itemStack.getItem() instanceof ArmorItem)) return false;
 
             EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
-            if (mc.player.getEquippedStack(equipmentSlot).isEmpty()) return false;
 
             mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
                 mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
