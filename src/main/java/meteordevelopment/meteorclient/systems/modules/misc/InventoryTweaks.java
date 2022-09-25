@@ -201,22 +201,30 @@ public class InventoryTweaks extends Module {
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Press && sortingKey.get().matches(true, event.key)) sort();
-        if (event.action != KeyAction.Release && mc.options.useKey.matchesKey(event.key, 0) && armorSwap()) {
+        if (event.action != KeyAction.Press) return;
+
+        if (sortingKey.get().matches(true, event.key)) {
+            if (sort()) event.cancel();
+        }
+        if (mc.options.useKey.matchesKey(event.key, 0) && armorSwap()) {
             if (swapArmor()) event.cancel();
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && sortingKey.get().matches(false, event.button)) sort();
-        if (event.action != KeyAction.Release && mc.options.useKey.matchesMouse(event.button) && armorSwap()) {
+        if (event.action != KeyAction.Press) return;
+
+        if (sortingKey.get().matches(false, event.button)) {
+            if (sort()) event.cancel();
+        }
+        if (mc.options.useKey.matchesMouse(event.button) && armorSwap()) {
             if (swapArmor()) event.cancel();
         }
     }
 
-    private void sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return;
+    private boolean sort() {
+        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return false;
 
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             FindItemResult empty = InvUtils.findEmpty();
@@ -225,20 +233,37 @@ public class InventoryTweaks extends Module {
         }
 
         Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
-        if (focusedSlot == null) return;
+        if (focusedSlot == null) return false;
 
         sorter = new InventorySorter(screen, focusedSlot);
+        return true;
     }
 
     private boolean swapArmor() {  // would mixin to use method in ArmorItem, but it's buggy and unreliable on servers
-        ItemStack itemStack = mc.player.getMainHandStack();
-        if (!(itemStack.getItem() instanceof ArmorItem)) return false;
+        if (mc.currentScreen != null) {
+            if (!(mc.currentScreen instanceof HandledScreen<?> screen)) return false;
 
-        EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
-        if (mc.player.getEquippedStack(equipmentSlot).isEmpty()) return false;
+            Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
+            if (focusedSlot == null || !(focusedSlot.getStack().getItem() instanceof ArmorItem)) return false;
 
-        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
-            mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+            ItemStack itemStack = focusedSlot.getStack();
+            EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
+            if (mc.player.getEquippedStack(equipmentSlot).isEmpty()) return false;
+
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
+                focusedSlot.getIndex(), SlotActionType.SWAP, mc.player);
+
+        } else {
+            ItemStack itemStack = mc.player.getMainHandStack();
+            if (!(itemStack.getItem() instanceof ArmorItem)) return false;
+
+            EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
+            if (mc.player.getEquippedStack(equipmentSlot).isEmpty()) return false;
+
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
+                mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+
+        }
         return true;
     }
 
