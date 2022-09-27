@@ -31,16 +31,18 @@ public class ModuleListSetting extends Setting<List<Module>> {
     @Override
     protected List<Module> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Module> modules = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
                 Module module = Modules.get().get(value.trim());
-                if (module != null) modules.add(module);
+                if (module != null) {
+                    if (!this.value.contains(module)) this.value.add(module);
+                    else this.value.remove(module);
+                }
             }
         } catch (Exception ignored) {}
 
-        return modules;
+        return this.value;
     }
 
     @Override

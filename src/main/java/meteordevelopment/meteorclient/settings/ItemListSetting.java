@@ -33,16 +33,18 @@ public class ItemListSetting extends Setting<List<Item>> {
     @Override
     protected List<Item> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Item> items = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
                 Item item = parseId(Registry.ITEM, value);
-                if (item != null && (filter == null || filter.test(item))) items.add(item);
+                if (item != null && (filter == null || filter.test(item))) {
+                    if (!this.value.contains(item)) this.value.add(item);
+                    else this.value.remove(item);
+                }
             }
         } catch (Exception ignored) {}
 
-        return items;
+        return this.value;
     }
 
     @Override

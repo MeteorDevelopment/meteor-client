@@ -31,16 +31,18 @@ public class StatusEffectListSetting extends Setting<List<StatusEffect>> {
     @Override
     protected List<StatusEffect> parseImpl(String str) {
         String[] values = str.split(",");
-        List<StatusEffect> effects = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
                 StatusEffect effect = parseId(Registry.STATUS_EFFECT, value);
-                if (effect != null) effects.add(effect);
+                if (effect != null) {
+                    if (!this.value.contains(effect)) this.value.add(effect);
+                    else this.value.remove(effect);
+                }
             }
         } catch (Exception ignored) {}
 
-        return effects;
+        return this.value;
     }
 
     @Override

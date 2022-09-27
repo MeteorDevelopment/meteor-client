@@ -42,32 +42,32 @@ public class SettingCommand extends Command {
 
         // View or change settings
         builder.then(
-                argument("module", ModuleArgumentType.create())
+            argument("module", ModuleArgumentType.create())
+            .then(
+                argument("setting", SettingArgumentType.create())
+                .executes(context -> {
+                    // Get setting value
+                    Setting<?> setting = SettingArgumentType.get(context);
+
+                    ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+
+                    return SINGLE_SUCCESS;
+                })
                 .then(
-                        argument("setting", SettingArgumentType.create())
-                        .executes(context -> {
-                            // Get setting value
-                            Setting<?> setting = SettingArgumentType.get(context);
+                    argument("value", SettingValueArgumentType.create())
+                    .executes(context -> {
+                        // Set setting value
+                        Setting<?> setting = SettingArgumentType.get(context);
+                        String value = SettingValueArgumentType.get(context);
 
-                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) is (highlight)%s(default).", setting.title, setting.get());
+                        if (setting.parse(value)) {
+                            ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, setting.toString());
+                        }
 
-                            return SINGLE_SUCCESS;
-                        })
-                        .then(
-                                argument("value", SettingValueArgumentType.create())
-                                .executes(context -> {
-                                    // Set setting value
-                                    Setting<?> setting = SettingArgumentType.get(context);
-                                    String value = SettingValueArgumentType.get(context);
-
-                                    if (setting.parse(value)) {
-                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
-                                    }
-
-                                    return SINGLE_SUCCESS;
-                                })
-                        )
+                        return SINGLE_SUCCESS;
+                    })
                 )
+            )
         );
     }
 }

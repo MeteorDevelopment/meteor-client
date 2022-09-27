@@ -36,16 +36,18 @@ public class BlockListSetting extends Setting<List<Block>> {
     @Override
     protected List<Block> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Block> blocks = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
                 Block block = parseId(Registry.BLOCK, value);
-                if (block != null && (filter == null || filter.test(block))) blocks.add(block);
+                if (block != null && (filter == null || filter.test(block))) {
+                    if (!this.value.contains(block)) this.value.add(block);
+                    else this.value.remove(block);
+                }
             }
         } catch (Exception ignored) {}
 
-        return blocks;
+        return this.value;
     }
 
     @Override

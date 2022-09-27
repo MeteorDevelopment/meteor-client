@@ -31,16 +31,18 @@ public class SoundEventListSetting extends Setting<List<SoundEvent>> {
     @Override
     protected List<SoundEvent> parseImpl(String str) {
         String[] values = str.split(",");
-        List<SoundEvent> sounds = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
                 SoundEvent sound = parseId(Registry.SOUND_EVENT, value);
-                if (sound != null) sounds.add(sound);
+                if (sound != null) {
+                    if (!this.value.contains(sound)) this.value.add(sound);
+                    else this.value.remove(sound);
+                }
             }
         } catch (Exception ignored) {}
 
-        return sounds;
+        return this.value;
     }
 
     @Override

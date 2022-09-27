@@ -32,16 +32,18 @@ public class ParticleTypeListSetting extends Setting<List<ParticleType<?>>> {
     @Override
     protected List<ParticleType<?>> parseImpl(String str) {
         String[] values = str.split(",");
-        List<ParticleType<?>> particleTypes = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
                 ParticleType<?> particleType = parseId(Registry.PARTICLE_TYPE, value);
-                if (particleType instanceof ParticleEffect) particleTypes.add(particleType);
+                if (particleType instanceof ParticleEffect) {
+                    if (this.value.contains(particleType)) this.value.add(particleType);
+                    else this.value.remove(particleType);
+                }
             }
         } catch (Exception ignored) {}
 
-        return particleTypes;
+        return this.value;
     }
 
     @Override

@@ -31,16 +31,18 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
     @Override
     protected List<Enchantment> parseImpl(String str) {
         String[] values = str.split(",");
-        List<Enchantment> enchs = new ArrayList<>(values.length);
 
         try {
             for (String value : values) {
-                Enchantment ench = parseId(Registry.ENCHANTMENT, value);
-                if (ench != null) enchs.add(ench);
+                Enchantment enchantment = parseId(Registry.ENCHANTMENT, value);
+                if (enchantment != null) {
+                    if (!this.value.contains(enchantment)) this.value.add(enchantment);
+                    else this.value.remove(enchantment);
+                }
             }
         } catch (Exception ignored) {}
 
-        return enchs;
+        return this.value;
     }
 
     @Override
