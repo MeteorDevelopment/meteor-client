@@ -34,6 +34,7 @@ public class BaritoneTab extends Tab {
         SettingGroup sgBool = settings.createGroup("Checkboxes");
         SettingGroup sgDouble = settings.createGroup("Numbers");
         SettingGroup sgInt = settings.createGroup("Whole Numbers");
+        SettingGroup sgString = settings.createGroup("Strings");
         SettingGroup sgColor = settings.createGroup("Colors");
 
         try {
@@ -87,6 +88,15 @@ public class BaritoneTab extends Tab {
                         .defaultValue(((Long) setting.defaultValue).intValue())
                         .onChanged(integer -> setting.value = integer.longValue())
                         .onModuleActivated(integerSetting -> integerSetting.set(((Long) setting.value).intValue()))
+                        .build()
+                    );
+                } else if (value instanceof String) {
+                    sgString.add(new StringSetting.Builder()
+                        .name(setting.getName())
+                        .description(setting.getName())
+                        .defaultValue((String) setting.defaultValue)
+                        .onChanged(string -> setting.value = string)
+                        .onModuleActivated(stringSetting -> stringSetting.set((String) setting.value))
                         .build()
                     );
                 } else if (value instanceof Color) {
