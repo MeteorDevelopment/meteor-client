@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui.tabs.builtin;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.SettingsUtil;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -14,10 +15,15 @@ import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.block.Block;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.item.Item;
 
 import java.awt.*;
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.List;
 
 public class BaritoneTab extends Tab {
     private static Settings settings;
@@ -26,6 +32,7 @@ public class BaritoneTab extends Tab {
         super("Baritone");
     }
 
+    @SuppressWarnings("unchecked")
     private static Settings getSettings() {
         if (settings != null) return settings;
 
@@ -36,6 +43,9 @@ public class BaritoneTab extends Tab {
         SettingGroup sgInt = settings.createGroup("Whole Numbers");
         SettingGroup sgString = settings.createGroup("Strings");
         SettingGroup sgColor = settings.createGroup("Colors");
+
+        SettingGroup sgBlockLists = settings.createGroup("Block Lists");
+        SettingGroup sgItemLists = settings.createGroup("Item Lists");
 
         try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
@@ -110,6 +120,29 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(colorSetting -> colorSetting.set(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
                         .build()
                     );
+                } else if (value instanceof List) {
+                    Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                    Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
+
+                    if (type == Block.class) {
+                        sgBlockLists.add(new BlockListSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue((List<Block>) setting.defaultValue)
+                            .onChanged(blockList -> setting.value = blockList)
+                            .onModuleActivated(blockListSetting -> blockListSetting.set((List<Block>) setting.value))
+                            .build()
+                        );
+                    } else if (type == Item.class) {
+                        sgItemLists.add(new ItemListSetting.Builder()
+                            .name(setting.getName())
+                            .description(setting.getName())
+                            .defaultValue((List<Item>) setting.defaultValue)
+                            .onChanged(itemList -> setting.value = itemList)
+                            .onModuleActivated(itemListSetting -> itemListSetting.set((List<Item>) setting.value))
+                            .build()
+                        );
+                    }
                 }
             }
         } catch (IllegalAccessException e) {
