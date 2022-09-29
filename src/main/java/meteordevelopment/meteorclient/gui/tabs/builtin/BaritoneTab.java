@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.gui.tabs.builtin;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.utils.SettingsUtil;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
