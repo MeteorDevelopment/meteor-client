@@ -38,7 +38,7 @@ public class ServerCommand extends Command {
     private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith");
     private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
     private static final String completionStartsBukkitHelp = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    private boolean bukkitHelpMode = false;
+    private boolean bukkitCmdMode = false;
     private int ticks = 0;
     private List<String> plugins = new ArrayList<>();
 
@@ -59,9 +59,9 @@ public class ServerCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("plugins").then(argument("bukkit_help_mode", BoolArgumentType.bool())
+        builder.then(literal("plugins").then(argument("bukkit_cmd_mode", BoolArgumentType.bool())
             .executes(ctx -> {
-                getPlugins(BoolArgumentType.getBool(ctx, "bukkit_help_mode"));
+                getPlugins(BoolArgumentType.getBool(ctx, "bukkit_cmd_mode"));
                 return SINGLE_SUCCESS;
             })
         ));
@@ -78,17 +78,17 @@ public class ServerCommand extends Command {
     }
 
     private void getPlugins(boolean mode) {
-        bukkitHelpMode = mode;
+        bukkitCmdMode = mode;
         ticks = 0;
         plugins.clear();
         MeteorClient.EVENT_BUS.subscribe(this);
-        info("Please wait around 5 seconds... Current mode: " + (bukkitHelpMode ? "BukkitHelp" : "Legacy"));
-        String currentStarts = bukkitHelpMode ? completionStartsBukkitHelp : completionStarts;
+        info("Please wait around 5 seconds... Current mode: " + (bukkitCmdMode ? "BukkitHelp" : "Legacy"));
+        String currentStarts = bukkitCmdMode ? completionStartsBukkitHelp : completionStarts;
         (new Thread(() -> {
             Random random = new Random();
             currentStarts.chars().forEach(i -> {
                 mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200),
-                    bukkitHelpMode ? "bukkit:help " : "" + Character.toString(i)));
+                    bukkitCmdMode ? "bukkit:ver " : "" + Character.toString(i)));
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -218,9 +218,9 @@ public class ServerCommand extends Command {
                 }
 
                 for (Suggestion suggestion : matches.getList()) {
-                    if (bukkitHelpMode) {
+                    if (bukkitCmdMode) {
                         String pluginName = suggestion.getText();
-                        if (!plugins.contains(pluginName) && Character.isUpperCase(pluginName.charAt(0))) {
+                        if (!plugins.contains(pluginName)) {
                             plugins.add(pluginName);
                         }
                     } else {
