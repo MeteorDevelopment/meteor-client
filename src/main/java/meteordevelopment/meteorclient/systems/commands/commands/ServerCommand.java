@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.commands.commands;
 
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -36,6 +37,8 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class ServerCommand extends Command {
     private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith");
     private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
+    private static final String completionStartsBukkitHelp = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private boolean bukkitHelpMode = false;
     private int ticks = 0;
     private List<String> plugins = new ArrayList<>();
 
@@ -56,24 +59,12 @@ public class ServerCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("plugins").executes(ctx -> {
-            ticks = 0;
-            plugins.clear();
-            MeteorClient.EVENT_BUS.subscribe(this);
-            info("Please wait around 5 seconds...");
-            (new Thread(() -> {
-                Random random = new Random();
-                completionStarts.chars().forEach(i -> {
-                    mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), Character.toString(i)));
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-            })).start();
-            return SINGLE_SUCCESS;
-        }));
+        builder.then(literal("plugins").then(argument("bukkit_help_mode", BoolArgumentType.bool())
+            .executes(ctx -> {
+                getPlugins(BoolArgumentType.getBool(ctx, "bukkit_help_mode"));
+                return SINGLE_SUCCESS;
+            })
+        ));
 
         builder.then(literal("tps").executes(ctx -> {
             float tps = TickRate.INSTANCE.getTickRate();
@@ -84,6 +75,27 @@ public class ServerCommand extends Command {
             info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
+    }
+
+    private void getPlugins(boolean mode) {
+        bukkitHelpMode = mode;
+        ticks = 0;
+        plugins.clear();
+        MeteorClient.EVENT_BUS.subscribe(this);
+        info("Please wait around 5 seconds... Current mode: " + (bukkitHelpMode ? "BukkitHelp" : "Legacy"));
+        String currentStarts = bukkitHelpMode ? completionStartsBukkitHelp : completionStarts;
+        (new Thread(() -> {
+            Random random = new Random();
+            currentStarts.chars().forEach(i -> {
+                mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200),
+                    bukkitHelpMode ? "bukkit:help " : "" + Character.toString(i)));
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            });
+        })).start();
     }
 
     private void basicInfo() {
@@ -206,12 +218,19 @@ public class ServerCommand extends Command {
                 }
 
                 for (Suggestion suggestion : matches.getList()) {
-                    String[] command = suggestion.getText().split(":");
-                    if (command.length > 1) {
-                        String pluginName = command[0].replace("/", "");
-
-                        if (!plugins.contains(pluginName)) {
+                    if (bukkitHelpMode) {
+                        String pluginName = suggestion.getText();
+                        if (!plugins.contains(pluginName) && Character.isUpperCase(pluginName.charAt(0))) {
                             plugins.add(pluginName);
+                        }
+                    } else {
+                        String[] command = suggestion.getText().split(":");
+                        if (command.length > 1) {
+                            String pluginName = command[0].replace("/", "");
+
+                            if (!plugins.contains(pluginName)) {
+                                plugins.add(pluginName);
+                            }
                         }
                     }
                 }
