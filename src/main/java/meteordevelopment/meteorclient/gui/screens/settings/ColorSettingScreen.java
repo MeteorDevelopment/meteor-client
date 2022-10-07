@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WIntEdit;
+import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -37,6 +38,7 @@ public class ColorSettingScreen extends WindowScreen {
     private WHueQuad hueQuad;
 
     private WIntEdit rItb, gItb, bItb, aItb;
+    private WTextBox hexTextBox;
     private WCheckbox rainbow;
 
     public ColorSettingScreen(GuiTheme theme, Setting<SettingColor> setting) {
@@ -58,13 +60,6 @@ public class ColorSettingScreen extends WindowScreen {
         SettingColor parsed;
 
         if ((parsed = parseRGBA(clipboard)) != null) {
-            setting.get().rainbow(false);
-            setting.set(parsed);
-            setting.get().validate();
-            return true;
-        }
-
-        if ((parsed = parseHex(clipboard)) != null) {
             setting.get().rainbow(false);
             setting.set(parsed);
             setting.get().validate();
@@ -107,6 +102,12 @@ public class ColorSettingScreen extends WindowScreen {
         return color;
     }
 
+    private String toHexString(Color c) {
+        if (c != null) return String.format("#%02x%02x%02x%02x", c.r, c.g, c.b, c.a);
+        return "#00000000";
+
+    }
+
     @Override
     public void initWidgets() {
         // Top
@@ -137,6 +138,12 @@ public class ColorSettingScreen extends WindowScreen {
         rgbaTable.add(theme.label("A:"));
         aItb = rgbaTable.add(theme.intEdit(setting.get().a, 0, 255, 0, 255, false)).expandX().widget();
         aItb.action = this::rgbaChanged;
+        rgbaTable.row();
+
+        rgbaTable.add(theme.label("Hex:"));
+        hexTextBox = rgbaTable.add(theme.textBox(toHexString(setting.get()))).expandX().widget();
+        hexTextBox.action = this::hexChanged;
+
 
         // Rainbow
         WHorizontalList rainbowList = add(theme.horizontalList()).expandX().widget();
@@ -174,6 +181,7 @@ public class ColorSettingScreen extends WindowScreen {
         if (c.a != aItb.get()) aItb.set(c.a);
         rainbow.checked = c.rainbow;
 
+        hexTextBox.set(toHexString(c));
         displayQuad.color.set(setting.get());
         hueQuad.calculateFromSetting(true);
         brightnessQuad.calculateFromColor(setting.get(), true);
@@ -203,6 +211,33 @@ public class ColorSettingScreen extends WindowScreen {
         if (c.g != gItb.get()) gItb.set(c.g);
         if (c.b != bItb.get()) bItb.set(c.b);
         if (c.a != aItb.get()) aItb.set(c.a);
+
+        hexTextBox.set(toHexString(c));
+        displayQuad.color.set(c);
+        hueQuad.calculateFromSetting(true);
+        brightnessQuad.calculateFromColor(setting.get(), true);
+
+        setting.onChanged();
+        callAction();
+    }
+
+    private void hexChanged() {
+        Color c = setting.get();
+        Color c2 = parseHex(hexTextBox.get());
+
+        if (c2 == null) return;
+
+        c.r = c2.r;
+        c.g = c2.g;
+        c.b = c2.b;
+        c.a = c2.a;
+
+        c.validate();
+
+        if (c.r != c2.r) rItb.set(c.r);
+        if (c.g != c2.g) gItb.set(c.g);
+        if (c.b != c2.b) bItb.set(c.b);
+        if (c.a != c2.a) aItb.set(c.a);
 
         displayQuad.color.set(c);
         hueQuad.calculateFromSetting(true);
@@ -283,6 +318,7 @@ public class ColorSettingScreen extends WindowScreen {
         gItb.set(c.g);
         bItb.set(c.b);
 
+        hexTextBox.set(toHexString(c));
         displayQuad.color.set(c);
         setting.onChanged();
         callAction();
