@@ -11,6 +11,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -396,6 +397,10 @@ public class Utils {
         if (canUpdate()) return mc.currentScreen == null;
 
         return mc.currentScreen instanceof TitleScreen || mc.currentScreen instanceof MultiplayerScreen || mc.currentScreen instanceof SelectWorldScreen;
+    }
+
+    public static boolean canCloseGui() {
+        return mc.currentScreen instanceof WidgetScreen;
     }
 
     public static int random(int min, int max) {
