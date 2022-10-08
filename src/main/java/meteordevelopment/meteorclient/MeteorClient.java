@@ -142,19 +142,20 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler
     private void onKey(KeyEvent event) {
         if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) {
-            openGui();
+            toggleGui();
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.button)) {
-            openGui();
+            toggleGui();
         }
     }
 
-    private void openGui() {
-        if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
+    private void toggleGui() {
+        if (Utils.canCloseGui()) mc.currentScreen.close();
+        else if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
     // Hide HUD
