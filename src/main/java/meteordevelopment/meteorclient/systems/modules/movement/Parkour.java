@@ -7,6 +7,9 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.settings.DoubleSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -16,6 +19,17 @@ import net.minecraft.util.shape.VoxelShape;
 import java.util.stream.Stream;
 
 public class Parkour extends Module {
+
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Double> edgeDistance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("edge-distance")
+        .description("How far from the edge should you jump.")
+        .range(0.001, 0.1)
+        .defaultValue(0.001)
+        .build()
+    );
+
     public Parkour() {
         super(Categories.Movement, "parkour", "Automatically jumps at the edges of blocks.");
     }
@@ -27,7 +41,7 @@ public class Parkour extends Module {
         if(mc.player.isSneaking() || mc.options.sneakKey.isPressed()) return;
 
         Box box = mc.player.getBoundingBox();
-        Box adjustedBox = box.offset(0, -0.5, 0).expand(-0.001, 0, -0.001);
+        Box adjustedBox = box.offset(0, -0.5, 0).expand(-edgeDistance.get(), 0, -edgeDistance.get());
 
         Stream<VoxelShape> blockCollisions = Streams.stream(mc.world.getBlockCollisions(mc.player, adjustedBox));
 
