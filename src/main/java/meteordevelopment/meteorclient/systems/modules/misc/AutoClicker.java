@@ -31,6 +31,7 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
+        .visible(() -> leftClickMode.get() != Mode.Disabled)
         .build()
     );
 
@@ -47,6 +48,7 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
+        .visible(() -> leftClickMode.get() != Mode.Disabled)
         .build()
     );
 
@@ -73,6 +75,7 @@ public class AutoClicker extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         switch (leftClickMode.get()) {
+            case Disabled -> {}
             case Hold -> mc.options.attackKey.setPressed(true);
             case Press -> {
                 leftClickTimer++;
@@ -83,6 +86,7 @@ public class AutoClicker extends Module {
             }
         }
         switch (rightClickMode.get()) {
+            case Disabled -> {}
             case Hold -> mc.options.useKey.setPressed(true);
             case Press -> {
                 rightClickTimer++;
@@ -95,6 +99,7 @@ public class AutoClicker extends Module {
     }
 
     public enum Mode {
+        Disabled,
         Hold,
         Press
     }
