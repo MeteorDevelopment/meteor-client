@@ -210,7 +210,7 @@ public class DamageUtils {
         Box box = entity.getBoundingBox();
         if (predictMovement) {
             Vec3d v = entity.getVelocity();
-            box.offset(v.x, v.y, v.z);
+            box = box.offset(v.x, v.y, v.z);
         }
 
         double d = 1 / ((box.maxX - box.minX) * 2 + 1);
