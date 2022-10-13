@@ -36,7 +36,7 @@ public class CrashReportMixin {
                 boolean categoryActive = false;
 
                 for (Module module : modules) {
-                    if (module == null || module.isActive()) continue;
+                    if (module == null || !module.isActive()) continue;
 
                     if (!modulesActive) {
                         modulesActive = true;
