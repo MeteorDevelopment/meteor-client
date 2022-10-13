@@ -5,10 +5,10 @@ import meteordevelopment.meteorclient.utils.render.FontUtils;
 import java.io.InputStream;
 import java.nio.file.Path;
 
-public class SystemFontFace extends FontFace {
+public class ExternalFontFace extends FontFace {
     private final Path path;
 
-    public SystemFontFace(FontInfo info, Path path) {
+    public ExternalFontFace(FontInfo info, Path path) {
         super(info);
 
         this.path = path;

@@ -24,7 +24,7 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Fonts {
-    public static final String[] BUILTIN_FONTS = { "JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation" };
+    public static final String[] BUILTIN_FONTS = {"JetBrains Mono", "Comfortaa", "Tw Cen MT", "Pixelation"};
 
     public static String DEFAULT_FONT_FAMILY;
     public static FontFace DEFAULT_FONT;
@@ -40,9 +40,7 @@ public class Fonts {
             FontUtils.loadBuiltin(FONT_FAMILIES, builtinFont);
         }
 
-        for (String fontPath : FontUtils.getSearchPaths()) {
-            FontUtils.loadSystem(FONT_FAMILIES, new File(fontPath));
-        }
+        FontUtils.loadExternal(FONT_FAMILIES, new File(MeteorClient.FOLDER, "fonts"));
 
         FONT_FAMILIES.sort(Comparator.comparing(FontFamily::getName));
 
@@ -61,8 +59,7 @@ public class Fonts {
         try {
             RENDERER = new CustomTextRenderer(fontFace);
             MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (fontFace.equals(DEFAULT_FONT)) {
                 throw new RuntimeException("Failed to load default font: " + fontFace, e);
             }

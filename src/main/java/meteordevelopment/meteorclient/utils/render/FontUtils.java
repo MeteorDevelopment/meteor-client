@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.*;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.util.Util;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBTTFontinfo;
 import org.lwjgl.stb.STBTruetype;
@@ -20,9 +19,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class FontUtils {
 
@@ -62,37 +59,6 @@ public class FontUtils {
         );
     }
 
-    public static Set<String> getSearchPaths() {
-        Set<String> paths = new HashSet<>();
-        paths.add(System.getProperty("java.home") + "/lib/fonts");
-
-        for (File dir : getUFontDirs()) {
-            if (dir.exists()) paths.add(dir.getAbsolutePath());
-        }
-
-        for (File dir : getSFontDirs()) {
-            if (dir.exists()) paths.add(dir.getAbsolutePath());
-        }
-
-        return paths;
-    }
-
-    public static List<File> getUFontDirs() {
-        return switch (Util.getOperatingSystem()) {
-            case WINDOWS -> List.of(new File(System.getProperty("user.home") + "\\AppData\\Local\\Microsoft\\Windows\\Fonts"));
-            case OSX -> List.of(new File(System.getProperty("user.home") + "/Library/Fonts/"));
-            default -> List.of(new File(System.getProperty("user.home") + "/.local/share/fonts"), new File(System.getProperty("user.home") + "/.fonts"));
-        };
-    }
-
-    public static List<File> getSFontDirs() {
-        return switch (Util.getOperatingSystem()) {
-            case WINDOWS -> List.of(new File(System.getenv("SystemRoot") + "\\Fonts"));
-            case OSX -> List.of(new File("/System/Library/Fonts/"));
-            default -> List.of(new File("/usr/share/fonts/"));
-        };
-    }
-
     public static void loadBuiltin(List<FontFamily> fontList, String builtin) {
         FontInfo fontInfo = FontUtils.getBuiltinFontInfo(builtin);
         if (fontInfo == null) return;
@@ -103,15 +69,15 @@ public class FontUtils {
         }
     }
 
-    public static void loadSystem(List<FontFamily> fontList, File dir) {
-        if (!dir.exists() || !dir.isDirectory()) return;
+    public static void loadExternal(List<FontFamily> fontList, File dir) {
+        if (dir.mkdir() || !dir.isDirectory()) return;
 
         File[] files = dir.listFiles((file) -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
         if (files == null) return;
 
         for (File file : files) {
             if (file.isDirectory()) {
-                loadSystem(fontList, file);
+                loadExternal(fontList, file);
                 continue;
             }
 
@@ -127,9 +93,9 @@ public class FontUtils {
             }
             if (isBuiltin) continue;
 
-            FontFace fontFace = new SystemFontFace(fontInfo, file.toPath());
+            FontFace fontFace = new ExternalFontFace(fontInfo, file.toPath());
             if (!addFont(fontList, fontFace)) {
-                MeteorClient.LOG.warn("Failed to load system font {}", fontFace);
+                MeteorClient.LOG.warn("Failed to load external font {}", fontFace);
             }
         }
     }
