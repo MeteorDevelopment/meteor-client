@@ -7,8 +7,13 @@ package meteordevelopment.meteorclient.mixin;
 
 import com.google.gson.JsonParser;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.GuiThemes;
+import meteordevelopment.meteorclient.gui.tabs.TabScreen;
+import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
@@ -17,8 +22,10 @@ import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
+import net.minecraft.client.gui.widget.TexturedButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
 import org.spongepowered.asm.mixin.Mixin;
@@ -31,6 +38,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class TitleScreenMixin extends Screen {
     public TitleScreenMixin(Text title) {
         super(title);
+    }
+
+    private static final Identifier METEOR_BTN = new MeteorIdentifier("textures/gui/meteor_btn.png");
+
+    @Inject(method = "init()V", at = @At("HEAD"))
+    private void init(CallbackInfo info) {
+        addDrawableChild(new TexturedButtonWidget( width / 2 - 124, height/4 + 72,
+            20, 20, 0, 0, 20, METEOR_BTN, 20, 40, b -> {
+            GuiTheme theme = GuiThemes.get();
+            TabScreen screen = Tabs.get().get(0).createScreen(theme);
+            screen.addDirect(theme.topBar()).top().centerX();
+            client.setScreen(screen);
+        }));
     }
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawStringWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V", ordinal = 0))
