@@ -44,7 +44,7 @@ public class TitleScreenMixin extends Screen {
 
     @Inject(method = "init()V", at = @At("HEAD"))
     private void init(CallbackInfo info) {
-        addDrawableChild(new TexturedButtonWidget( width / 2 - 124, height/4 + 72,
+        addDrawableChild(new TexturedButtonWidget( width / 2 - 148, height/4 + 132,
             20, 20, 0, 0, 20, METEOR_BTN, 20, 40, b -> {
             GuiTheme theme = GuiThemes.get();
             TabScreen screen = Tabs.get().get(0).createScreen(theme);
