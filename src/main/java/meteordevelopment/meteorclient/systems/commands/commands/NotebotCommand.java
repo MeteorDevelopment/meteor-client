@@ -11,30 +11,32 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.systems.commands.Command;
+import meteordevelopment.meteorclient.systems.commands.arguments.NotebotSongArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
+import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.enums.Instrument;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
-import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class NotebotCommand extends Command {
-    private final static SimpleCommandExceptionType INVALID_NAME = new SimpleCommandExceptionType(Text.literal("Invalid name."));
+    private final static SimpleCommandExceptionType INVALID_SONG = new SimpleCommandExceptionType(Text.literal("Invalid song."));
 
     int ticks = -1;
-    List<List<Integer>> song = new ArrayList<>();
+    private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
 
     public NotebotCommand() {
         super("notebot", "Allows you load notebot files");
@@ -77,32 +79,30 @@ public class NotebotCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("play").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
-            Notebot notebot = Modules.get().get(Notebot.class);
-            String name = ctx.getArgument("name", String.class);
-            if (name == null || name.equals("")) {
-                throw INVALID_NAME.create();
-            }
-            Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt", name));
-            if (!path.toFile().exists()) {
-                path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.nbs", name));
-            }
-            notebot.loadSong(path.toFile());
-            return SINGLE_SUCCESS;
-        })));
+        builder.then(
+            literal("play").then(
+                argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
+                    Notebot notebot = Modules.get().get(Notebot.class);
+                    Path songPath = ctx.getArgument("song", Path.class);
+                    if (songPath == null || !songPath.toFile().exists()) {
+                        throw INVALID_SONG.create();
+                    }
+                    notebot.loadSong(songPath.toFile());
+                    return SINGLE_SUCCESS;
+                })
+            )
+        );
 
-        builder.then(literal("preview").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
-            Notebot notebot = Modules.get().get(Notebot.class);
-            String name = ctx.getArgument("name", String.class);
-            if (name == null || name.equals("")) {
-                throw INVALID_NAME.create();
-            }
-            Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt", name));
-            if (!path.toFile().exists()) {
-                path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.nbs", name));
-            }
-            notebot.previewSong(path.toFile());
-            return SINGLE_SUCCESS;
+        builder.then(
+            literal("preview").then(
+                argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
+                    Notebot notebot = Modules.get().get(Notebot.class);
+                    Path songPath = ctx.getArgument("song", Path.class);
+                    if (songPath == null || !songPath.toFile().exists()) {
+                        throw INVALID_SONG.create();
+                    }
+                    notebot.previewSong(songPath.toFile());
+                    return SINGLE_SUCCESS;
         })));
 
         builder.then(literal("record").then(literal("start").executes(ctx -> {
@@ -122,7 +122,7 @@ public class NotebotCommand extends Command {
         builder.then(literal("record").then(literal("save").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
             String name = ctx.getArgument("name", String.class);
             if (name == null || name.equals("")) {
-                throw INVALID_NAME.create();
+                throw INVALID_SONG.create();
             }
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt", name));
             saveRecording(path);
@@ -138,9 +138,13 @@ public class NotebotCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound() == SoundEvents.BLOCK_NOTE_BLOCK_HARP) {
+        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound().getId().getPath().contains("note_block")) {
             if (ticks == -1) ticks = 0;
-            song.add(Arrays.asList(ticks, getNote(sound.getPitch())));
+            List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
+            var note = getNote(sound);
+            if (note != null) {
+                notes.add(note);
+            }
         }
     }
 
@@ -151,16 +155,20 @@ public class NotebotCommand extends Command {
         }
         try {
             FileWriter file = new FileWriter(path.toFile());
-            for (int i = 0; i < song.size() - 1; i++) {
-                List<Integer> note = song.get(i);
-                file.write(String.format("%d:%d\n",
-                    note.get(0), note.get(1)
-                ));
+            for (var entry : song.entrySet()) {
+                int tick = entry.getKey();
+                List<Note> notes = entry.getValue();
+
+                for (var note : notes) {
+                    Instrument instrument = note.getInstrument();
+                    int noteLevel = note.getNoteLevel();
+
+                    file.write(String.format("%d:%d:%d\n", tick, noteLevel, instrument.ordinal()));
+                }
             }
-            List<Integer> note = song.get(song.size() - 1);
-            file.write(String.format("%d:%d", note.get(0), note.get(1)));
+
             file.close();
-            info(String.format("Song saved. Length: (highlight)%d(default).", note.get(0)));
+            info("Song saved.");
             MeteorClient.EVENT_BUS.unsubscribe(this);
         } catch (IOException e) {
             info("Couldn't create the file.");
@@ -169,13 +177,67 @@ public class NotebotCommand extends Command {
 
     }
 
-    private int getNote(float pitch) {
+    private Note getNote(PlaySoundS2CPacket soundPacket) {
+        float pitch = soundPacket.getPitch();
+
+        // Bruteforce note level
+        int noteLevel = -1;
         for (int n = 0; n < 25; n++) {
             if ((float) Math.pow(2.0D, (n - 12) / 12.0D) - 0.01 < pitch &&
                 (float) Math.pow(2.0D, (n - 12) / 12.0D) + 0.01 > pitch) {
-                return n;
+                noteLevel = n;
+                break;
             }
         }
-        return 0;
+
+        if (noteLevel == -1) {
+            error("Error while bruteforcing a note level! Sound: "+soundPacket.getSound()+" Pitch: "+pitch);
+            return null;
+        }
+
+        Instrument instrument = getInstrumentFromSound(soundPacket.getSound());
+        if (instrument == null) {
+            error("Can't find the instrument from sound! Sound: "+soundPacket.getSound());
+            return null;
+        }
+
+        return new Note(instrument, noteLevel);
+    }
+
+    private Instrument getInstrumentFromSound(SoundEvent sound) {
+        String path = sound.getId().getPath();
+        if (path.contains("harp"))
+            return Instrument.HARP;
+        else if (path.contains("basedrum"))
+            return Instrument.BASEDRUM;
+        else if (path.contains("snare"))
+            return Instrument.SNARE;
+        else if (path.contains("hat"))
+            return Instrument.HAT;
+        else if (path.contains("bass"))
+            return Instrument.BASS;
+        else if (path.contains("flute"))
+            return Instrument.FLUTE;
+        else if (path.contains("bell"))
+            return Instrument.BELL;
+        else if (path.contains("guitar"))
+            return Instrument.GUITAR;
+        else if (path.contains("chime"))
+            return Instrument.CHIME;
+        else if (path.contains("xylophone"))
+            return Instrument.XYLOPHONE;
+        else if (path.contains("iron_xylophone"))
+            return Instrument.IRON_XYLOPHONE;
+        else if (path.contains("cow_bell"))
+            return Instrument.COW_BELL;
+        else if (path.contains("didgeridoo"))
+            return Instrument.DIDGERIDOO;
+        else if (path.contains("bit"))
+            return Instrument.BIT;
+        else if (path.contains("banjo"))
+            return Instrument.BANJO;
+        else if (path.contains("pling"))
+            return Instrument.PLING;
+        return null;
     }
 }

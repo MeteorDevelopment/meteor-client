@@ -3,15 +3,17 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.notebot;
+package meteordevelopment.meteorclient.utils.notebot.decoder;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.utils.notebot.nbs.Layer;
-import meteordevelopment.meteorclient.utils.notebot.nbs.Note;
-import meteordevelopment.meteorclient.utils.notebot.nbs.Song;
+import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
+import meteordevelopment.meteorclient.utils.notebot.song.Note;
+import meteordevelopment.meteorclient.utils.notebot.song.Song;
+import net.minecraft.block.enums.Instrument;
 
 import java.io.*;
-import java.util.HashMap;
 
 // https://github.com/koca2000/NoteBlockAPI/blob/master/src/main/java/com/xxmicloxx/NoteBlockAPI/utils/NBSDecoder.java
 
@@ -19,7 +21,9 @@ import java.util.HashMap;
  * Utils for reading Note Block Studio data
  *
  */
-public class NBSDecoder {
+public class NBSSongDecoder extends SongDecoder {
+
+    public static final int NOTE_OFFSET = 33; // Magic value (https://opennbs.org/nbs)
 
     /**
      * Parses a Song from a Note Block Studio project file (.nbs)
@@ -27,7 +31,8 @@ public class NBSDecoder {
      * @param songFile .nbs file
      * @return Song object representing a Note Block Studio project
      */
-    public static Song parse(File songFile) {
+    @Override
+    public Song parse(File songFile) {
         try {
             return parse(new FileInputStream(songFile), songFile);
         } catch (FileNotFoundException e) {
@@ -42,7 +47,7 @@ public class NBSDecoder {
      * @param inputStream of a Note Block Studio project file (.nbs)
      * @return Song object from the InputStream
      */
-    public static Song parse(InputStream inputStream) {
+    public Song parse(InputStream inputStream) {
         return parse(inputStream, null); // Source is unknown -> no file
     }
 
@@ -53,8 +58,9 @@ public class NBSDecoder {
      * @param songFile representing a .nbs file
      * @return Song object representing the given .nbs file
      */
-    private static Song parse(InputStream inputStream, File songFile) {
-        HashMap<Integer, Layer> layerHashMap = new HashMap<Integer, Layer>();
+    private Song parse(InputStream inputStream, File songFile) {
+        Multimap<Integer, Note> notesMap = MultimapBuilder.linkedHashKeys().arrayListValues().build();
+
         try {
             DataInputStream dataInputStream = new DataInputStream(inputStream);
             short length = readShort(dataInputStream);
@@ -66,11 +72,11 @@ public class NBSDecoder {
                     length = readShort(dataInputStream);
                 }
             }
-            short songHeight = readShort(dataInputStream);
+            readShort(dataInputStream); // Song Height
             String title = readString(dataInputStream);
             String author = readString(dataInputStream);
             readString(dataInputStream); // original author
-            String description = readString(dataInputStream);
+            readString(dataInputStream); // description
             float speed = readShort(dataInputStream) / 100f;
             dataInputStream.readBoolean(); // auto-save
             dataInputStream.readByte(); // auto-save duration
@@ -86,14 +92,15 @@ public class NBSDecoder {
                 dataInputStream.readByte(); // max loop count
                 readShort(dataInputStream); // loop start tick
             }
-            short tick = -1;
+
+            double tick = -1;
             while (true) {
                 short jumpTicks = readShort(dataInputStream); // jumps till next tick
                 //System.out.println("Jumps to next tick: " + jumpTicks);
                 if (jumpTicks == 0) {
                     break;
                 }
-                tick += jumpTicks;
+                tick += jumpTicks * (20f / speed);
                 //System.out.println("Tick: " + tick);
                 short layer = -1;
                 while (true) {
@@ -112,46 +119,12 @@ public class NBSDecoder {
                         readShort(dataInputStream); // note block pitch
                     }
 
-                    setNote(layer, tick,
-                        new Note(instrument /* instrument */, key/* note */),
-                        layerHashMap);
+                    Note note = new Note(fromNBSInstrument(instrument) /* instrument */, key - NOTE_OFFSET /* note */);
+                    setNote((int) Math.round(tick), note, notesMap);
                 }
             }
 
-            if (nbsversion > 0 && nbsversion < 3) {
-                length = tick;
-            }
-
-            for (int i = 0; i < songHeight; i++) {
-                Layer layer = layerHashMap.get(i);
-
-                String name = readString(dataInputStream);
-                if (nbsversion >= 4){
-                    dataInputStream.readByte(); // layer lock
-                }
-
-                byte volume = dataInputStream.readByte();
-                if (nbsversion >= 2){
-                    dataInputStream.readUnsignedByte(); // layer stereo, 0 is right in nbs format
-                }
-
-                if (layer != null) {
-                    layer.setName(name);
-                    layer.setVolume(volume);
-                }
-            }
-            //count of custom instruments
-            byte customAmnt = dataInputStream.readByte();
-
-            for (int index = 0; index < customAmnt; index++) {
-                readString(dataInputStream); // name
-                readString(dataInputStream); // sound file name
-                dataInputStream.readByte();//pitch
-                dataInputStream.readByte();//key
-            }
-
-            return new Song(speed, layerHashMap, songHeight, length, title,
-                author, description, songFile);
+            return new Song(notesMap, title, author);
         } catch (EOFException e) {
             String file = "";
             if (songFile != null) {
@@ -166,18 +139,12 @@ public class NBSDecoder {
 
     /**
      * Sets a note at a tick in a song
-     * @param layerIndex
      * @param ticks
      * @param note
-     * @param layerHashMap
+     * @param notesMap
      */
-    private static void setNote(int layerIndex, int ticks, Note note, HashMap<Integer, Layer> layerHashMap) {
-        Layer layer = layerHashMap.get(layerIndex);
-        if (layer == null) {
-            layer = new Layer();
-            layerHashMap.put(layerIndex, layer);
-        }
-        layer.setNote(ticks, note);
+    private static void setNote(int ticks, Note note, Multimap<Integer, Note> notesMap) {
+        notesMap.put(ticks, note);
     }
 
     private static short readShort(DataInputStream dataInputStream) throws IOException {
@@ -205,6 +172,29 @@ public class NBSDecoder {
             builder.append(c);
         }
         return builder.toString();
+    }
+
+    // Magic Values (https://opennbs.org/nbs)
+    private static Instrument fromNBSInstrument(int instrument) {
+        return switch (instrument) {
+            case 0 -> Instrument.HARP;
+            case 1 -> Instrument.BASS;
+            case 2 -> Instrument.BASEDRUM;
+            case 3 -> Instrument.SNARE;
+            case 4 -> Instrument.HAT;
+            case 5 -> Instrument.GUITAR;
+            case 6 -> Instrument.FLUTE;
+            case 7 -> Instrument.BELL;
+            case 8 -> Instrument.CHIME;
+            case 9 -> Instrument.XYLOPHONE;
+            case 10 -> Instrument.IRON_XYLOPHONE;
+            case 11 -> Instrument.COW_BELL;
+            case 12 -> Instrument.DIDGERIDOO;
+            case 13 -> Instrument.BIT;
+            case 14 -> Instrument.BANJO;
+            case 15 -> Instrument.PLING;
+            default -> null;
+        };
     }
 
 }
