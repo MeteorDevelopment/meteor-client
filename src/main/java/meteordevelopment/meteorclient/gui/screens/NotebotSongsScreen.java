@@ -40,8 +40,6 @@ public class NotebotSongsScreen extends WindowScreen {
         WButton randomSong = add(theme.button("Random Song")).minWidth(400).expandX().widget();
         randomSong.action = notebot::playRandomSong;
 
-        add(theme.horizontalSeparator()).minWidth(400).expandX();
-
         // Filter
         filter = add(theme.textBox("", "Search for the songs...")).minWidth(400).expandX().widget();
         filter.setFocused(true);
@@ -82,6 +80,9 @@ public class NotebotSongsScreen extends WindowScreen {
     }
 
     private void addPath(Path path) {
+        table.add(theme.horizontalSeparator()).expandX().minWidth(400);
+        table.row();
+
         table.add(theme.label(FilenameUtils.getBaseName(path.getFileName().toString()))).expandCellX();
         WButton load = table.add(theme.button("Load")).right().widget();
         load.action = () -> {
@@ -91,8 +92,7 @@ public class NotebotSongsScreen extends WindowScreen {
         preview.action = () -> {
             notebot.previewSong(path.toFile());
         };
-        table.row();
-        table.add(theme.horizontalSeparator()).expandX().minWidth(400);
+
         table.row();
     }
 }
