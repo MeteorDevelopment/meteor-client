@@ -5,11 +5,14 @@
 
 package meteordevelopment.meteorclient.utils.notebot;
 
-import meteordevelopment.meteorclient.utils.notebot.nbs.Note;
+import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class NotebotUtils {
     public static final int NOTE_OFFSET = 33; // Magic value (https://opennbs.org/nbs)
@@ -59,11 +62,10 @@ public class NotebotUtils {
     }
 
     public static Note getNoteFromNoteBlock(BlockState noteBlock, NotebotMode mode) {
-        int instrument = -1;
-        int level = noteBlock.get(NoteBlock.NOTE) + NOTE_OFFSET;
+        Instrument instrument = null;
+        int level = noteBlock.get(NoteBlock.NOTE);
         if (mode == NotebotMode.ExactInstruments) {
-            Instrument blockInstrument = noteBlock.get(NoteBlock.INSTRUMENT);
-            instrument = NotebotUtils.toNBSInstrument(blockInstrument);
+            instrument = noteBlock.get(NoteBlock.INSTRUMENT);
         }
 
         return new Note(instrument, level);
@@ -73,7 +75,7 @@ public class NotebotUtils {
         AnyInstrument, ExactInstruments
     }
 
-    public enum NullableInstrument {
+    public enum OptionalInstrument {
         None(null),
         Harp(Instrument.HARP),
         Basedrum(Instrument.BASEDRUM),
@@ -92,10 +94,17 @@ public class NotebotUtils {
         Banjo(Instrument.BANJO),
         Pling(Instrument.PLING)
         ;
+        public static final Map<Instrument, OptionalInstrument> BY_MINECRAFT_INSTRUMENT = new HashMap<>();
+
+        static {
+            for (OptionalInstrument optionalInstrument : values()) {
+                BY_MINECRAFT_INSTRUMENT.put(optionalInstrument.minecraftInstrument, optionalInstrument);
+            }
+        }
 
         private final Instrument minecraftInstrument;
 
-        NullableInstrument(@Nullable Instrument minecraftInstrument) {
+        OptionalInstrument(@Nullable Instrument minecraftInstrument) {
             this.minecraftInstrument = minecraftInstrument;
         }
 
@@ -103,8 +112,12 @@ public class NotebotUtils {
             return minecraftInstrument;
         }
 
-        public static NullableInstrument fromMinecraftInstrument(Instrument instrument) {
-            return instrument == null ? null : NullableInstrument.values()[instrument.ordinal()+1]; // Offset by 1 to exclude 'None'
+        public static OptionalInstrument fromMinecraftInstrument(Instrument instrument) {
+            if (instrument != null) {
+                return BY_MINECRAFT_INSTRUMENT.get(instrument);
+            } else {
+                return null;
+            }
         }
     }
 }
