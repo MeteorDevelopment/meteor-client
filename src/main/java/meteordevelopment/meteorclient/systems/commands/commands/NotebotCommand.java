@@ -44,11 +44,6 @@ public class NotebotCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.executes(ctx -> {
-            mc.setScreen(GuiThemes.get().notebotSongs());
-            MeteorClient.LOG.info("Opening GUI");
-            return SINGLE_SUCCESS;
-        });
         builder.then(literal("help").executes(ctx -> {
             Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
             return SINGLE_SUCCESS;
