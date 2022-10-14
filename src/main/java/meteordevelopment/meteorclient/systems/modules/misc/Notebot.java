@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import com.google.common.collect.Multimap;
+import com.google.common.collect.MultimapBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -224,7 +226,7 @@ public class Notebot extends Module {
 
     private Song song; // Loaded song
     private final Map<Note, BlockPos> noteBlockPositions = new HashMap<>(); // Currently used noteblocks by the song
-    private final Map<Note, List<BlockPos>> scannedNoteblocks = new HashMap<>(); // Found noteblocks
+    private final Multimap<Note, BlockPos> scannedNoteblocks = MultimapBuilder.linkedHashKeys().arrayListValues().build(); // Found noteblocks
     private final List<BlockPos> clickedBlocks = new ArrayList<>();
     private Stage stage = Stage.None;
     private boolean isPlaying = false;
@@ -287,17 +289,15 @@ public class Notebot extends Module {
         if (stage != Stage.SetUp && stage != Stage.Tune && stage != Stage.WaitingToCheckNoteblocks && !isPlaying) return;
 
         if (showScannedNoteblocks.get()) {
-            for (List<BlockPos> blockPosList : scannedNoteblocks.values()) {
-                for (BlockPos blockPos : blockPosList) {
-                    double x1 = blockPos.getX();
-                    double y1 = blockPos.getY();
-                    double z1 = blockPos.getZ();
-                    double x2 = blockPos.getX() + 1;
-                    double y2 = blockPos.getY() + 1;
-                    double z2 = blockPos.getZ() + 1;
+            for (BlockPos blockPos : scannedNoteblocks.values()) {
+                double x1 = blockPos.getX();
+                double y1 = blockPos.getY();
+                double z1 = blockPos.getZ();
+                double x2 = blockPos.getX() + 1;
+                double y2 = blockPos.getY() + 1;
+                double z2 = blockPos.getZ() + 1;
 
-                    event.renderer.box(x1, y1, z1, x2, y2, z2, scannedNoteblockSideColor.get(), scannedNoteblockLineColor.get(), shapeMode.get(), 0);
-                }
+                event.renderer.box(x1, y1, z1, x2, y2, z2, scannedNoteblockSideColor.get(), scannedNoteblockLineColor.get(), shapeMode.get(), 0);
             }
         } else {
             for (var entry : noteBlockPositions.entrySet()) {
@@ -438,7 +438,7 @@ public class Notebot extends Module {
         Map<Instrument, List<BlockPos>> incorrectNoteBlocks = new HashMap<>();
 
         // Check if there are already tuned noteblocks
-        for (var entry : scannedNoteblocks.entrySet()) {
+        for (var entry : scannedNoteblocks.asMap().entrySet()) {
             Note note = entry.getKey();
             List<BlockPos> noteblocks = new ArrayList<>(entry.getValue());
 
@@ -699,11 +699,7 @@ public class Notebot extends Module {
                     if (!isValidScanSpot(pos)) continue;
 
                     Note note = NotebotUtils.getNoteFromNoteBlock(blockState, mode.get());
-                    if (!scannedNoteblocks.containsKey(note)) {
-                        scannedNoteblocks.put(note, new ArrayList<>());
-                    }
-
-                    scannedNoteblocks.get(note).add(pos);
+                    scannedNoteblocks.put(note, pos);
                 }
             }
 
