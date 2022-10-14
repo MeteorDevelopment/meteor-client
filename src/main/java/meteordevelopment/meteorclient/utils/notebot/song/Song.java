@@ -42,10 +42,12 @@ public class Song {
     }
 
     public Set<Note> getRequirements() {
+        if (!finishedLoading) throw new IllegalStateException("Song is still loading!");
         return requirements;
     }
 
     public int getLastTick() {
+        if (!finishedLoading) throw new IllegalStateException("Song is still loading!");
         return lastTick;
     }
 
