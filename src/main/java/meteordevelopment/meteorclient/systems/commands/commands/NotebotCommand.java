@@ -93,18 +93,16 @@ public class NotebotCommand extends Command {
             )
         );
 
-        builder.then(literal("preview").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
-            Notebot notebot = Modules.get().get(Notebot.class);
-            String name = ctx.getArgument("name", String.class);
-            if (name == null || name.equals("")) {
-                throw INVALID_SONG.create();
-            }
-            Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt", name));
-            if (!path.toFile().exists()) {
-                path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.nbs", name));
-            }
-            notebot.previewSong(path.toFile());
-            return SINGLE_SUCCESS;
+        builder.then(
+            literal("preview").then(
+                argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
+                    Notebot notebot = Modules.get().get(Notebot.class);
+                    Path songPath = ctx.getArgument("song", Path.class);
+                    if (songPath == null || !songPath.toFile().exists()) {
+                        throw INVALID_SONG.create();
+                    }
+                    notebot.previewSong(songPath.toFile());
+                    return SINGLE_SUCCESS;
         })));
 
         builder.then(literal("record").then(literal("start").executes(ctx -> {
