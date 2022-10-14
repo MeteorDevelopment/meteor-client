@@ -40,27 +40,6 @@ public class NotebotUtils {
         };
     }
 
-    public static int toNBSInstrument(Instrument instrument) {
-        return switch (instrument) {
-            case HARP -> 0;
-            case BASS -> 1;
-            case BASEDRUM -> 2;
-            case SNARE -> 3;
-            case HAT -> 4;
-            case GUITAR -> 5;
-            case FLUTE -> 6;
-            case BELL -> 7;
-            case CHIME -> 8;
-            case XYLOPHONE -> 9;
-            case IRON_XYLOPHONE -> 10;
-            case COW_BELL -> 11;
-            case DIDGERIDOO -> 12;
-            case BIT -> 13;
-            case BANJO -> 14;
-            case PLING -> 15;
-        };
-    }
-
     public static Note getNoteFromNoteBlock(BlockState noteBlock, NotebotMode mode) {
         Instrument instrument = null;
         int level = noteBlock.get(NoteBlock.NOTE);
