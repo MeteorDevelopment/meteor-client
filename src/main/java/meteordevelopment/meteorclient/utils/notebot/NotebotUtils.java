@@ -15,30 +15,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class NotebotUtils {
-    public static final int NOTE_OFFSET = 33; // Magic value (https://opennbs.org/nbs)
-
-    // Magic Values (https://opennbs.org/nbs)
-    public static Instrument fromNBSInstrument(int instrument) {
-        return switch (instrument) {
-            case 0 -> Instrument.HARP;
-            case 1 -> Instrument.BASS;
-            case 2 -> Instrument.BASEDRUM;
-            case 3 -> Instrument.SNARE;
-            case 4 -> Instrument.HAT;
-            case 5 -> Instrument.GUITAR;
-            case 6 -> Instrument.FLUTE;
-            case 7 -> Instrument.BELL;
-            case 8 -> Instrument.CHIME;
-            case 9 -> Instrument.XYLOPHONE;
-            case 10 -> Instrument.IRON_XYLOPHONE;
-            case 11 -> Instrument.COW_BELL;
-            case 12 -> Instrument.DIDGERIDOO;
-            case 13 -> Instrument.BIT;
-            case 14 -> Instrument.BANJO;
-            case 15 -> Instrument.PLING;
-            default -> null;
-        };
-    }
 
     public static Note getNoteFromNoteBlock(BlockState noteBlock, NotebotMode mode) {
         Instrument instrument = null;
