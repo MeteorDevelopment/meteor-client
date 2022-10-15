@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
+import meteordevelopment.meteorclient.systems.hud.elements.TextHud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -23,7 +24,7 @@ import java.util.List;
 public class CrashReportMixin {
     @Inject(method = "addStackTrace", at = @At("TAIL"))
     private void onAddStackTrace(StringBuilder sb, CallbackInfo info) {
-        sb.append("<--- Meteor Client --->\n\n");
+        sb.append("\n\n-- Meteor Client --\n\n");
         sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
         if (!MeteorClient.DEV_BUILD.isEmpty()) {
             sb.append("Dev Build: ").append(MeteorClient.DEV_BUILD).append("\n");
@@ -40,12 +41,14 @@ public class CrashReportMixin {
 
                     if (!modulesActive) {
                         modulesActive = true;
-                        sb.append("\n-- Active Modules --\n");
+                        sb.append("\n[[ Active Modules ]]\n");
                     }
 
                     if (!categoryActive) {
                         categoryActive = true;
-                        sb.append("\n[").append(category).append("]:\n");
+                        sb.append("\n[")
+                          .append(category)
+                          .append("]:\n");
                     }
 
                     sb.append(module.name).append("\n");
@@ -62,10 +65,21 @@ public class CrashReportMixin {
 
                 if (!hudActive) {
                     hudActive = true;
-                    sb.append("\n-- Active Hud Elements --\n");
+                    sb.append("\n[[ Active Hud Elements ]]\n");
                 }
 
-                sb.append(element.info.name).append("\n");
+                if (!(element instanceof TextHud textHud)) sb.append(element.info.name).append("\n");
+                else {
+                    sb.append("Text\n{")
+                      .append(textHud.text.get())
+                      .append("}\n");
+                    if (textHud.shown.get() != TextHud.Shown.Always) {
+                        sb.append("(")
+                          .append(textHud.shown.get())
+                          .append(textHud.condition.get())
+                          .append(")\n");
+                    }
+                }
             }
         }
     }
