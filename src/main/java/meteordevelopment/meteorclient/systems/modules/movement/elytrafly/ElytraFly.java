@@ -18,7 +18,11 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.P
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Pitch40;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
@@ -26,6 +30,7 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
@@ -91,6 +96,13 @@ public class ElytraFly extends Module {
         .name("no-unloaded-chunks")
         .description("Stops you from going into unloaded chunks.")
         .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> autoDock = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-hover")
+        .description("Automatically hover .3 blocks off ground when holding shift.")
+        .defaultValue(false)
         .build()
     );
 
@@ -310,6 +322,26 @@ public class ElytraFly extends Module {
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
             if (hitResult != null && hitResult.getType() == HitResult.Type.BLOCK) {
                 ((IVec3d) event.movement).set(0, currentMode.velY, 0);
+            }
+        }
+
+        if (autoDock.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying()) {
+            Block under = mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock();
+            Block under2 = mc.world.getBlockState(mc.player.getBlockPos().down().down()).getBlock();
+
+            if(!under.collidable && under2.collidable) {
+                ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
+            }
+
+            if (under.collidable) {
+                ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
+                mc.player.setPitch(Math.max(-90.f, Math.min(20.f, mc.player.getPitch(0)))); // clamp between -90 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
+
+                if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
+                    ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
+                    mc.player.setSneaking(false);
+                    mc.player.input.sneaking = false;
+                }
             }
         }
     }
