@@ -58,6 +58,6 @@ public class PacketCanceller extends Module {
     }
 
     public boolean silentDisconnect() {
-        return silentDisconnect.get();
+        return isActive() && silentDisconnect.get();
     }
 }
