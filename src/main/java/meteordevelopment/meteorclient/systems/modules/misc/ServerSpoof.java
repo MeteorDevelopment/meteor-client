@@ -32,10 +32,17 @@ import java.nio.charset.StandardCharsets;
 public class ServerSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Boolean> spoofBrand = sgGeneral.add(new BoolSetting.Builder()
+        .name("spoof-brand")
+        .description("Whether or not to spoof the brand.")
+        .defaultValue(true)
+        .build()
+    );
     private final Setting<String> brand = sgGeneral.add(new StringSetting.Builder()
         .name("brand")
         .description("Specify the brand that will be send to the server.")
         .defaultValue("vanilla")
+        .visible(spoofBrand::get)
         .build()
     );
 
@@ -60,11 +67,13 @@ public class ServerSpoof extends Module {
             CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
             Identifier id = packet.getChannel();
 
-            if (id.equals(CustomPayloadC2SPacket.BRAND)) {
-                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
-            }
-            else if (StringUtils.containsIgnoreCase(packet.getData().toString(StandardCharsets.UTF_8), "fabric") && brand.get().equalsIgnoreCase("fabric")) {
-                event.cancel();
+            if (spoofBrand.get()) {
+                if (id.equals(CustomPayloadC2SPacket.BRAND)) {
+                    packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+                }
+                else if (StringUtils.containsIgnoreCase(packet.getData().toString(StandardCharsets.UTF_8), "fabric") && brand.get().equalsIgnoreCase("fabric")) {
+                    event.cancel();
+                }
             }
         }
 
