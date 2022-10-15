@@ -48,7 +48,7 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
-        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .visible(() -> rightClickMode.get() != Mode.Disabled)
         .build()
     );
 
