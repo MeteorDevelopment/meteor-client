@@ -21,19 +21,38 @@ public class Strafe extends SpeedMode {
     }
 
     private long timer = 0L;
+    private boolean didManualJump = false;
 
     @Override
     public void onMove(PlayerMoveEvent event) {
         switch (stage) {
             case 0: //Reset
-                if (PlayerUtils.isMoving()) {
+                if (PlayerUtils.isMoving() && !settings.noAutoJump.get()) {
                     stage++;
                     speed = 1.18f * getDefaultSpeed() - 0.01;
                 }
-            case 1: //Jump
-                if (!PlayerUtils.isMoving() || !mc.player.isOnGround()) break;
 
-                ((IVec3d) event.movement).setY(getHop(0.40123128));
+                if (settings.noAutoJump.get()) {
+                    if (!mc.player.isOnGround()) {
+                        stage++;
+                        speed = 1.18f * getDefaultSpeed() - 0.01;
+                    } else {
+                        speed = getDefaultSpeed();
+                    }
+                }
+            case 1: //Jump
+                if (settings.noAutoJump.get()) {
+                    if (!didManualJump && !mc.player.isOnGround()) {
+                        didManualJump = true;
+                    } else {
+                        break; // we only wait for a manual jump here
+                    }
+                } else {
+                    if (!PlayerUtils.isMoving() || !mc.player.isOnGround()) break;
+
+                    ((IVec3d) event.movement).setY(getHop(0.40123128)); // Jump only if noAutoJump false
+                }
+
                 speed *= settings.ncpSpeed.get();
                 stage++;
                 break;
@@ -43,6 +62,7 @@ public class Strafe extends SpeedMode {
                     stage = 0;
                 }
                 speed = distance - (distance / 159.0);
+                didManualJump = false;
                 break;
         }
 

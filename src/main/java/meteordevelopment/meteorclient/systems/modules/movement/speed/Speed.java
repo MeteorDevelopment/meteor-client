@@ -92,6 +92,14 @@ public class Speed extends Module {
             .build()
     );
 
+    public final Setting<Boolean> noAutoJump = sgGeneral.add(new BoolSetting.Builder()
+            .name("no-auto-jump")
+            .description("Disables automatic jumping.")
+            .visible(() -> speedMode.get() == SpeedModes.Strafe)
+            .defaultValue(false)
+            .build()
+    );
+
     private SpeedMode currentMode;
 
     public Speed() {
