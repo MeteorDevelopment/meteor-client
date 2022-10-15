@@ -68,9 +68,8 @@ public class CrashReportMixin {
                     sb.append("\n[[ Active Hud Elements ]]\n");
                 }
 
-                if (element.getClass() != TextHud.class) sb.append(element.info.name).append("\n");
+                if (!(element instanceof TextHud textHud)) sb.append(element.info.name).append("\n");
                 else {
-                    TextHud textHud = (TextHud) element;
                     sb.append("Text\n{")
                       .append(textHud.text.get())
                       .append("}\n");
