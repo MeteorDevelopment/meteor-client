@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket;
 import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -52,26 +51,10 @@ public class ServerSpoof extends Module {
         .build()
     );
 
-    private final Setting<Boolean> channels = sgChannel.add(new BoolSetting.Builder()
+    private final Setting<List<String>> channels = sgChannel.add(new StringListSetting.Builder()
         .name("channels")
-        .description("Block specific channels.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<List<String>> channelsIn = sgChannel.add(new StringListSetting.Builder()
-        .name("incoming")
-        .description("Incoming channels.")
-        .defaultValue("fabric:registry/sync")
-        .visible(channels::get)
-        .build()
-    );
-
-    private final Setting<List<String>> channelsOut = sgChannel.add(new StringListSetting.Builder()
-        .name("outgoing")
-        .description("Outgoing channels.")
-        .defaultValue("fabric:registry/sync")
-        .visible(channels::get)
+        .description("The outgoing channels that will be blocked.")
+        .defaultValue("fabric:registry/sync", "fabric:container/open", "fabric-screen-handler-api-v1:open_screen")
         .build()
     );
 
@@ -92,7 +75,7 @@ public class ServerSpoof extends Module {
             if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
                 packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
-            if (channels.get()) for (String channel : channelsOut.get()) {
+            for (String channel : channels.get()) {
                 if (id.toString().equals(channel)) {
                     event.cancel();
                     return;
@@ -119,15 +102,6 @@ public class ServerSpoof extends Module {
                 msg.append(link);
                 msg.append(".");
                 info(msg);
-            }
-
-            if (channels.get() && event.packet instanceof CustomPayloadS2CPacket payload) {
-                for (String channel : channelsIn.get()) {
-                    if (payload.getChannel().toString().equals(channel)) {
-                        event.cancel();
-                        return;
-                    }
-                }
             }
         }
     }
