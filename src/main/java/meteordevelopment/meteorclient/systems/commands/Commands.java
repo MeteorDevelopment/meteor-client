@@ -55,6 +55,7 @@ public class Commands extends System<Commands> {
         add(new NotebotCommand());
         add(new PeekCommand());
         add(new ProfilesCommand());
+        add(new ReconnectCommand());
         add(new ReloadCommand());
         add(new ResetCommand());
         add(new SayCommand());

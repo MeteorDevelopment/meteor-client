@@ -15,13 +15,16 @@ import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosionS2CPacket;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.PacketCanceller;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.network.packet.s2c.play.*;
+import net.minecraft.text.Text;
 import net.minecraft.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -98,6 +101,16 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
         if (itemEntity instanceof ItemEntity && entity == client.player) {
             MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getStack(), packet.getStackAmount()));
+        }
+    }
+
+    @Inject(method = "onDisconnected", at = @At("HEAD"), cancellable = true)
+    private void onDisconnected(Text reason, CallbackInfo info) {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (Modules.get().get(PacketCanceller.class).silentDisconnect() && mc.world != null && mc.player != null) {
+            ChatUtils.warning(Text.translatable("disconnect.lost").getString() + ":");
+            ChatUtils.sendMsg(reason);
+            info.cancel();
         }
     }
 }

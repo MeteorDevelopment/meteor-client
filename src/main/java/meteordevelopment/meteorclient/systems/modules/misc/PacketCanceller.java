@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.PacketListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -35,6 +36,13 @@ public class PacketCanceller extends Module {
         .build()
     );
 
+    private final Setting<Boolean> silentDisconnect = sgGeneral.add(new BoolSetting.Builder()
+        .name("silent-disconnect")
+        .description("Won't show a disconnect screen when you disconnects.")
+        .defaultValue(false)
+        .build()
+    );
+
     public PacketCanceller() {
         super(Categories.Misc, "packet-canceller", "Allows you to cancel certain packets.");
     }
@@ -47,5 +55,9 @@ public class PacketCanceller extends Module {
     @EventHandler(priority = EventPriority.HIGHEST + 1)
     private void onSendPacket(PacketEvent.Send event) {
         if (c2sPackets.get().contains(event.packet.getClass())) event.cancel();
+    }
+
+    public boolean silentDisconnect() {
+        return silentDisconnect.get();
     }
 }
