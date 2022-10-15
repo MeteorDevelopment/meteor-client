@@ -91,9 +91,7 @@ public class MeteorClient implements ClientModInitializer {
             try {
                 EVENT_BUS.registerLambdaFactory(addon.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
             } catch (AbstractMethodError e) {
-                AbstractMethodError exception = new AbstractMethodError("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name));
-                exception.addSuppressed(e);
-                throw exception;
+                throw new RuntimeException("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name), e);
             }
         });
 

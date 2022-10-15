@@ -29,9 +29,7 @@ public class ReflectInit {
                     packages.add(pkg);
                 }
             } catch (AbstractMethodError e) {
-                AbstractMethodError exception = new AbstractMethodError("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name));
-                exception.addSuppressed(e);
-                throw exception;
+                throw new RuntimeException("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name), e);
             }
         }
     }
@@ -66,9 +64,7 @@ public class ReflectInit {
         } catch (IllegalAccessException | InvocationTargetException e) {
             e.printStackTrace();
         } catch (NullPointerException e) {
-            RuntimeException exception = new IllegalStateException("Method \"%s\" using Init annotations from non-static context".formatted(task.getName()));
-            exception.addSuppressed(e);
-            throw exception;
+            throw new RuntimeException("Method \"%s\" using Init annotations from non-static context".formatted(task.getName()), e);
         }
     }
 
