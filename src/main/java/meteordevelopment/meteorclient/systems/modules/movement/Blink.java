@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
@@ -37,13 +38,14 @@ public class Blink extends Module {
         .defaultValue(Keybind.none())
         .action(() -> {
             cancelled = true;
-            dumpPackets(false);
+            if (isActive()) toggle();
         })
         .build()
     );
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
     private FakePlayerEntity model;
+    private final Vec3 start = new Vec3();
 
     private boolean cancelled = false;
     private int timer = 0;
@@ -60,16 +62,14 @@ public class Blink extends Module {
             model.hideWhenInsideCamera = true;
             model.spawn();
         }
+        start.set(mc.player.getPos());
     }
 
     @Override
     public void onDeactivate() {
-        if (cancelled) {
-            cancelled = false;
-            return;
-        }
-
-        dumpPackets(true);
+        dumpPackets(!cancelled);
+        if (cancelled) mc.player.setPos(start.x, start.y, start.z);
+        cancelled = false;
     }
 
     @EventHandler
@@ -105,10 +105,7 @@ public class Blink extends Module {
 
     private void dumpPackets(boolean send) {
         synchronized (packets) {
-            if (send) {
-                packets.forEach(mc.player.networkHandler::sendPacket);
-                toggle();
-            }
+            if (send) packets.forEach(mc.player.networkHandler::sendPacket);
             packets.clear();
         }
 
