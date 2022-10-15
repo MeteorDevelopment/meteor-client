@@ -605,6 +605,7 @@ public class Notebot extends Module {
 
     public void playRandomSong() {
         File[] files = MeteorClient.FOLDER.toPath().resolve("notebot").toFile().listFiles();
+        if (files == null) return;
 
         File randomSong = files[ThreadLocalRandom.current().nextInt(files.length)];
         if (SongDecoders.hasDecoder(randomSong)) {
