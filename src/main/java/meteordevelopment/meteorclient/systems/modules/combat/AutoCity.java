@@ -82,13 +82,13 @@ public class AutoCity extends Module {
             PlayerEntity search = TargetUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance);
             if (search != target) sentMessage = false;
             target = search;
-        }
 
-        if (TargetUtils.isBadTarget(target, targetRange.get())) {
-            target = null;
-            blockPosTarget = null;
-            if (selfToggle.get()) toggle();
-            return;
+            if (TargetUtils.isBadTarget(target, targetRange.get())) {
+                target = null;
+                blockPosTarget = null;
+                if (selfToggle.get()) toggle();
+                return;
+            }
         }
 
         blockPosTarget = EntityUtils.getCityBlock(target);
