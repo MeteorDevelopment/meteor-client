@@ -29,6 +29,7 @@ import java.util.List;
 
 @Mixin(BeaconScreen.class)
 public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandler> {
+    @Shadow
     protected abstract <T extends ClickableWidget> void addButton(T button);
 
     public BeaconScreenMixin(BeaconScreenHandler handler, PlayerInventory inventory, Text title) {
