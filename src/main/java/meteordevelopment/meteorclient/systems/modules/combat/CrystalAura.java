@@ -781,7 +781,7 @@ public class CrystalAura extends Module {
         if (!doPlace.get() || placeTimer > 0) return;
 
         // Return if there are no crystals in hotbar or offhand
-        if (!InvUtils.findInHotbar(Items.END_CRYSTAL).found()) return;
+        if (!InvUtils.testInHotbar(Items.END_CRYSTAL)) return;
 
         // Return if there are no crystals in either hand and auto switch mode is none
         if (autoSwitch.get() == AutoSwitchMode.None && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) return;

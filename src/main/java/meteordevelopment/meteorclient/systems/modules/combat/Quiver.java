@@ -106,7 +106,7 @@ public class Quiver extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (arrowSlots.isEmpty() || !InvUtils.findInHotbar(Items.BOW).isMainHand()) {
+        if (arrowSlots.isEmpty() || !InvUtils.testInMainHand(Items.BOW)) {
             toggle();
             return;
         }
