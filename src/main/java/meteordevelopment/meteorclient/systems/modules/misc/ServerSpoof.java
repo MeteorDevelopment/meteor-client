@@ -51,10 +51,26 @@ public class ServerSpoof extends Module {
         .build()
     );
 
+    private final Setting<Boolean> blockChannels = sgGeneral.add(new BoolSetting.Builder()
+        .name("block-channels")
+        .description("Whether or not to block some channels.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<List<String>> channels = sgChannel.add(new StringListSetting.Builder()
         .name("channels")
         .description("The outgoing channels that will be blocked.")
-        .defaultValue("fabric:registry/sync", "fabric:container/open", "fabric-screen-handler-api-v1:open_screen")
+        .defaultValue("minecraft:register")
+        .visible(blockChannels::get)
+        .build()
+    );
+
+    private final Setting<List<String>> namespaces = sgChannel.add(new StringListSetting.Builder()
+        .name("namespaces")
+        .description("The outgoing channels with a specific namespace that will be blocked.")
+        .defaultValue("fabric")
+        .visible(blockChannels::get)
         .build()
     );
 
@@ -75,12 +91,8 @@ public class ServerSpoof extends Module {
             if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
                 packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
-            for (String channel : channels.get()) {
-                if (id.toString().equals(channel)) {
-                    event.cancel();
-                    return;
-                }
-            }
+            if (blockChannels.get() && (channels.get().contains(id.toString()) || namespaces.get().contains(id.getNamespace())))
+                event.cancel();
         }
 
         @EventHandler
