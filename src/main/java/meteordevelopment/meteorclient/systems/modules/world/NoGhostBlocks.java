@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 
-public class NoGlitchBlocks extends Module {
+public class NoGhostBlocks extends Module {
 
-    public NoGlitchBlocks() {
-        super(Categories.World, "no-glitch-blocks", "Attempts to prevent ghost blocks arising from breaking blocks quickly. Especially useful with multiconnect.");
+    public NoGhostBlocks() {
+        super(Categories.World, "no-ghost-blocks", "Attempts to prevent ghost blocks arising from breaking blocks quickly. Especially useful with multiconnect.");
     }
 
     private BlockState lastState;

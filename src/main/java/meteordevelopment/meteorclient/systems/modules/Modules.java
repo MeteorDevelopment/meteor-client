@@ -534,7 +534,7 @@ public class Modules extends System<Modules> {
         add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
-        add(new NoGlitchBlocks());
+        add(new NoGhostBlocks());
         add(new Nuker());
         add(new StashFinder());
         add(new SpawnProofer());
