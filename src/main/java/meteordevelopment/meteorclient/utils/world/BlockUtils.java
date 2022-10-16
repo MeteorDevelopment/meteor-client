@@ -203,11 +203,24 @@ public class BlockUtils {
         return canBreak(blockPos, mc.world.getBlockState(blockPos));
     }
 
-    public static boolean canInstaBreak(BlockPos blockPos, BlockState state) {
-        return mc.player.isCreative() || state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) >= 1;
+    public static boolean canInstaBreak(BlockPos blockPos, float breakSpeed) {
+        return mc.player.isCreative() || calcBlockBreakingDelta2(blockPos, breakSpeed) >= 1;
     }
+
     public static boolean canInstaBreak(BlockPos blockPos) {
-        return canInstaBreak(blockPos, mc.world.getBlockState(blockPos));
+        BlockState state = mc.world.getBlockState(blockPos);
+        return canInstaBreak(blockPos, mc.player.getBlockBreakingSpeed(state));
+    }
+
+    public static float calcBlockBreakingDelta2(BlockPos blockPos, float breakSpeed) {
+        BlockState state = mc.world.getBlockState(blockPos);
+        float f = state.getHardness(mc.world, blockPos);
+        if (f == -1.0F) {
+            return 0.0F;
+        } else {
+            int i = mc.player.canHarvest(state) ? 30 : 100;
+            return breakSpeed / f / (float)i;
+        }
     }
 
     // Other
