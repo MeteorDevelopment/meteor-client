@@ -19,10 +19,11 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.P
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Material;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
@@ -30,7 +31,6 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
@@ -99,7 +99,7 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    public final Setting<Boolean> autoDock = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> autoHover = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-hover")
         .description("Automatically hover .3 blocks off ground when holding shift.")
         .defaultValue(false)
@@ -325,17 +325,22 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (autoDock.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying()) {
-            Block under = mc.world.getBlockState(mc.player.getBlockPos().down()).getBlock();
-            Block under2 = mc.world.getBlockState(mc.player.getBlockPos().down().down()).getBlock();
+        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying()) {
+            BlockState underState = mc.world.getBlockState(mc.player.getBlockPos().down());
+            Block under = underState.getBlock();
+            BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
+            Block under2 = under2State.getBlock();
 
-            if(!under.collidable && under2.collidable) {
+            final boolean underCollidable = under.collidable || !underState.getFluidState().isEmpty();
+            final boolean under2Collidable = under2.collidable || !under2State.getFluidState().isEmpty();
+
+            if(!underCollidable && under2Collidable) {
                 ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
             }
 
-            if (under.collidable) {
+            if (underCollidable) {
                 ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
-                mc.player.setPitch(Math.max(-90.f, Math.min(20.f, mc.player.getPitch(0)))); // clamp between -90 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
+                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -90.f, 20.f)); // clamp between -90 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
 
                 if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
                     ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
