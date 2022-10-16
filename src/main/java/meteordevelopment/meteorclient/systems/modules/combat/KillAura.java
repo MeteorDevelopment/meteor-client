@@ -327,10 +327,10 @@ public class KillAura extends Module {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (noRightClick.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return false;
-        if (PlayerUtils.distanceTo(entity) > range.get()) return false;
+        if (!PlayerUtils.isWithin(entity, range.get())) return false;
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
-        if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
+        if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
                 && tameable.getOwnerUuid() != null

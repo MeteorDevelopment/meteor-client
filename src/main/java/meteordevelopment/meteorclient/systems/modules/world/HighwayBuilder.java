@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.misc.HorizontalDirection;
 import meteordevelopment.meteorclient.utils.misc.MBlockPos;
 import meteordevelopment.meteorclient.utils.player.CustomPlayerInput;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -268,7 +269,7 @@ public class HighwayBuilder extends Module {
         mc.player.setYaw(dir.yaw);
 
         if (displayInfo) {
-            info("Distance: (highlight)%.0f", mc.player.getPos().distanceTo(start));
+            info("Distance: (highlight)%.0f", PlayerUtils.distanceTo(start));
             info("Blocks broken: (highlight)%d", blocksBroken);
             info("Blocks placed: (highlight)%d", blocksPlaced);
         }
@@ -388,7 +389,7 @@ public class HighwayBuilder extends Module {
     }
 
     public MutableText getStatsText() {
-        MutableText text = Text.literal(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player == null ? 0.0f : mc.player.getPos().distanceTo(start)));
+        MutableText text = Text.literal(String.format("%sDistance: %s%.0f\n", Formatting.GRAY, Formatting.WHITE, mc.player == null ? 0.0f : PlayerUtils.distanceTo(start)));
         text.append(String.format("%sBlocks broken: %s%d\n", Formatting.GRAY, Formatting.WHITE, blocksBroken));
         text.append(String.format("%sBlocks placed: %s%d", Formatting.GRAY, Formatting.WHITE, blocksPlaced));
 

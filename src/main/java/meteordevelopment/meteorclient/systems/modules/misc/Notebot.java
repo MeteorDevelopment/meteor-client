@@ -694,8 +694,8 @@ public class Notebot extends Module {
 
                     // Copied from ServerPlayNetworkHandler#onPlayerInteractBlock
                     Vec3d vec3d2 = Vec3d.ofCenter(pos);
-                    double sqrt = mc.player.getEyePos().squaredDistanceTo(vec3d2);
-                    if (sqrt > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) continue;
+                    double sqDist = mc.player.getEyePos().squaredDistanceTo(vec3d2);
+                    if (sqDist > ServerPlayNetworkHandler.MAX_BREAK_SQUARED_DISTANCE) continue;
 
                     if (!isValidScanSpot(pos)) continue;
 

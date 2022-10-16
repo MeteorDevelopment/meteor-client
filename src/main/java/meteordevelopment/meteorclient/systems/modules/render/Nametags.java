@@ -261,7 +261,7 @@ public class Nametags extends Module {
                 if (EntityUtils.getGameMode((PlayerEntity) entity) == null && excludeBots.get()) continue;
             }
 
-            if (!culling.get() || entity.getPos().distanceTo(cameraPos) < maxCullRange.get()) {
+            if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {
                 entityList.add(entity);
             }
         }
