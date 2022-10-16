@@ -1,6 +1,6 @@
 name: Dev Build
 
-concurrency: 
+concurrency:
   group: "build"
   cancel-in-progress: false
 
