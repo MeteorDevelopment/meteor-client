@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -64,7 +65,7 @@ public class AutoShearer extends Module {
         entity = null;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || mc.player.distanceTo(entity) > distance.get()) continue;
+            if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || !PlayerUtils.isWithin(entity, distance.get())) continue;
 
             boolean findNewShears = false;
             if (mc.player.getInventory().getMainHandStack().getItem() instanceof ShearsItem) {

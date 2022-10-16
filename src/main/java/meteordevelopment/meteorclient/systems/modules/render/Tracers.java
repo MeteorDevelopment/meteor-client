@@ -136,7 +136,7 @@ public class Tracers extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (mc.player.distanceTo(entity) > maxDist.get() || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
+            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
 
             Color color;
 
@@ -173,7 +173,7 @@ public class Tracers extends Module {
 
     private Color getColorFromDistance(Entity entity) {
         // Credit to Icy from Stackoverflow
-        double distance = mc.gameRenderer.getCamera().getPos().distanceTo(entity.getPos());
+        double distance = PlayerUtils.distanceToCamera(entity);
         double percent = distance / 60;
 
         if (percent < 0 || percent > 1) {

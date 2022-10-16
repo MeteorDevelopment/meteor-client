@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -54,7 +55,7 @@ public class TargetUtils {
         return (PlayerEntity) get(entity -> {
             if (!(entity instanceof PlayerEntity) || entity == mc.player) return false;
             if (((PlayerEntity) entity).isDead() || ((PlayerEntity) entity).getHealth() <= 0) return false;
-            if (mc.player.distanceTo(entity) > range) return false;
+            if (!PlayerUtils.isWithin(entity, range)) return false;
             if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
             return EntityUtils.getGameMode((PlayerEntity) entity) == GameMode.SURVIVAL || entity instanceof FakePlayerEntity;
         }, priority);
@@ -62,15 +63,15 @@ public class TargetUtils {
 
     public static boolean isBadTarget(PlayerEntity target, double range) {
         if (target == null) return true;
-        return mc.player.distanceTo(target) > range || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
+        return PlayerUtils.isWithin(target, range) || !target.isAlive() || target.isDead() || target.getHealth() <= 0;
     }
 
     private static int sort(Entity e1, Entity e2, SortPriority priority) {
         return switch (priority) {
-            case LowestDistance -> Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player));
-            case HighestDistance -> invertSort(Double.compare(e1.distanceTo(mc.player), e2.distanceTo(mc.player)));
+            case LowestDistance -> Double.compare(PlayerUtils.squaredDistanceTo(e1), PlayerUtils.squaredDistanceTo(e2));
+            case HighestDistance -> Double.compare(PlayerUtils.squaredDistanceTo(e2), PlayerUtils.squaredDistanceTo(e1));
             case LowestHealth -> sortHealth(e1, e2);
-            case HighestHealth -> invertSort(sortHealth(e1, e2));
+            case HighestHealth -> sortHealth(e2, e1);
             case ClosestAngle -> sortAngle(e1, e2);
         };
     }
@@ -102,10 +103,4 @@ public class TargetUtils {
 
         return Double.compare(Math.sqrt(e1yaw * e1yaw + e1pitch * e1pitch), Math.sqrt(e2yaw * e2yaw + e2pitch * e2pitch));
     }
-
-    private static int invertSort(int sort) {
-        if (sort == 0) return 0;
-        return sort > 0 ? -1 : 1;
-    }
-
 }
