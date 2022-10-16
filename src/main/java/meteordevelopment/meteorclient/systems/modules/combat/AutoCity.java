@@ -102,7 +102,7 @@ public class AutoCity extends Module {
             return;
         }
 
-        if (PlayerUtils.distanceTo(blockPosTarget) > mc.interactionManager.getReachDistance() && selfToggle.get()) {
+        if (!PlayerUtils.isWithinReach(blockPosTarget) && selfToggle.get()) {
             error("Target block out of reach... disabling.");
             toggle();
             return;

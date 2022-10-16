@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -78,7 +79,7 @@ public class AutoBreed extends Module {
             if (!entities.get().getBoolean(animal.getType())
                     || (animal.isBaby() && !ignoreBabies.get())
                     || animalsFed.contains(animal)
-                    || mc.player.distanceTo(animal) > range.get()
+                    || !PlayerUtils.isWithin(animal, range.get())
                     || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
 
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {

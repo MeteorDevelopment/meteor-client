@@ -135,7 +135,7 @@ public class PathFinder {
     @EventHandler
     private void moveEventListener(PlayerMoveEvent event) {
         if (target != null && mc.player != null) {
-            if (mc.player.distanceTo(target) > 3) {
+            if (!PlayerUtils.isWithin(target, 3)) {
                 if (currentPathBlock == null) currentPathBlock = getNextPathBlock();
                 if (mc.player.getPos().distanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .1)
                     currentPathBlock = getNextPathBlock();
