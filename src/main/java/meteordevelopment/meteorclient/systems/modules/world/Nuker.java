@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
+import meteordevelopment.meteorclient.events.entity.player.BlockBreakingCooldownEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -421,6 +422,11 @@ public class Nuker extends Module {
             for (BlockPos.Mutable blockPos : blocks) blockPosPool.free(blockPos);
             blocks.clear();
         });
+    }
+
+    @EventHandler
+    private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
+        event.cooldown = 0;
     }
 
     public enum Mode {
