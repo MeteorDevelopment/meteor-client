@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
@@ -144,9 +143,9 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("stronghold").executes(s -> {
-            FindItemResult eye = InvUtils.findInHotbar(Items.ENDER_EYE);
+            boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
-            if (eye.found()) {
+            if (foundEye) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
                 firstStart = null;
                 firstEnd = null;
