@@ -147,7 +147,7 @@ public class HoleFiller extends Module {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
-        boolean foundBlock = InvUtils.testInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        boolean foundBlock = InvUtils.testInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem blockItem && blocks.get().contains(blockItem.getBlock()));
         if (!foundBlock) return;
 
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
