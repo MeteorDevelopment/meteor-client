@@ -54,13 +54,21 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
         SpeedMine module = Modules.get().get(SpeedMine.class);
         if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal) return;
+        float breakSpeed = cir.getReturnValue();
+        float breakSpeedMod = (float) (breakSpeed * module.modifier.get());
+
+        if (module.modifier.get() < 1) {
+            cir.setReturnValue(breakSpeedMod);
+            return;
+        }
 
         HitResult result = mc.player.raycast(mc.interactionManager.getReachDistance(), 1f / 20f, false);
         if (result.getType() == HitResult.Type.BLOCK) {
-            float breakSpeed = cir.getReturnValue();
             BlockPos pos = ((BlockHitResult) result).getBlockPos();
-            if (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, (float) (breakSpeed * module.modifier.get())))
-                cir.setReturnValue((float) (breakSpeed * module.modifier.get()));
+            if (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod))
+                cir.setReturnValue(breakSpeedMod);
+            else
+                cir.setReturnValue(BlockUtils.getMaxNonInstantBreakSpeed(pos));
         }
 
     }

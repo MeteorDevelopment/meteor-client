@@ -176,14 +176,17 @@ public class BlockUtils {
         }
     }
 
-    /** Needs to be used in {@link TickEvent.Pre} */
+    /**
+     * Needs to be used in {@link TickEvent.Pre}
+     */
     public static boolean breakBlock(BlockPos blockPos, boolean swing) {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
-        if (mc.interactionManager.isBreakingBlock()) mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+        if (mc.interactionManager.isBreakingBlock())
+            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
         else mc.interactionManager.attackBlock(pos, Direction.UP);
 
         if (swing) mc.player.swingHand(Hand.MAIN_HAND);
@@ -199,6 +202,7 @@ public class BlockUtils {
         if (!mc.player.isCreative() && state.getHardness(mc.world, blockPos) < 0) return false;
         return state.getOutlineShape(mc.world, blockPos) != VoxelShapes.empty();
     }
+
     public static boolean canBreak(BlockPos blockPos) {
         return canBreak(blockPos, mc.world.getBlockState(blockPos));
     }
@@ -219,7 +223,18 @@ public class BlockUtils {
             return 0.0F;
         } else {
             int i = mc.player.canHarvest(state) ? 30 : 100;
-            return breakSpeed / f / (float)i;
+            return breakSpeed / f / (float) i;
+        }
+    }
+
+    public static float getMaxNonInstantBreakSpeed(BlockPos blockPos) {
+        BlockState state = mc.world.getBlockState(blockPos);
+        float f = state.getHardness(mc.world, blockPos);
+        if (f == -1.0F) {
+            return 0.0F;
+        } else {
+            int i = mc.player.canHarvest(state) ? 30 : 100;
+            return 0.9F * (float) i * f;
         }
     }
 
@@ -244,7 +259,8 @@ public class BlockUtils {
             mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
 
         if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
-            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube())
+                return MobSpawn.Never;
             if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
