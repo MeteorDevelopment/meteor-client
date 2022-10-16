@@ -189,7 +189,7 @@ public class HoleFiller extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         if (timer <= 0 && !holes.isEmpty()) {
-            FindItemResult block = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+            FindItemResult block = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem blockItem && blocks.get().contains(blockItem.getBlock()));
 
             BlockUtils.place(holes.get(0).blockPos, block, rotate.get(), 10, true);
 
