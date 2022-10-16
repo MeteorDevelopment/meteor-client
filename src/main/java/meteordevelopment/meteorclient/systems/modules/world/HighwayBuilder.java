@@ -130,7 +130,13 @@ public class HighwayBuilder extends Module {
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
         .defaultValue(Blocks.OBSIDIAN)
-        .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, ZERO)))
+        .filter(block -> {
+            try {
+                return Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, ZERO));
+            } catch (NullPointerException ignored) {
+                return false;
+            }
+        })
         .build()
     );
 
