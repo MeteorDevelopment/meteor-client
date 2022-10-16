@@ -334,13 +334,16 @@ public class ElytraFly extends Module {
             final boolean underCollidable = under.collidable || !underState.getFluidState().isEmpty();
             final boolean under2Collidable = under2.collidable || !under2State.getFluidState().isEmpty();
 
-            if(!underCollidable && under2Collidable) {
+            if (!underCollidable && under2Collidable) {
                 ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
+
+                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
             }
 
             if (underCollidable) {
                 ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
-                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -90.f, 20.f)); // clamp between -90 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
+
+                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -50.f, 20.f));
 
                 if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
                     ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
