@@ -84,8 +84,8 @@ public class Flight extends Module {
         .build()
     );
 
-    private final Setting<Integer> goingDownDelay = sgAntiKick.add(new IntSetting.Builder()
-        .name("going-down-delay")
+    private final Setting<Integer> flyDownDelay = sgAntiKick.add(new IntSetting.Builder()
+        .name("fly-down-delay")
         .description("The amount of delay, in milliseconds, to fly down a bit to reset falling ticks.")
         .defaultValue(1500)
         .sliderRange(1, 4000)
@@ -191,7 +191,7 @@ public class Flight extends Module {
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {
             // maximum time we can be "floating" is 80 ticks, so 4 seconds max
-            if (currentTime - lastModifiedTime > goingDownDelay.get()
+            if (currentTime - lastModifiedTime > flyDownDelay.get()
                 && lastY != Double.MAX_VALUE
                 && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
                 // actual check is for >= -0.03125D but we have to do a bit more than that
