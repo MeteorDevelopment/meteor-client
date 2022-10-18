@@ -12,6 +12,8 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Vec3d;
@@ -193,7 +195,7 @@ public class Flight extends Module {
             // maximum time we can be "floating" is 80 ticks, so 4 seconds max
             if (currentTime - lastModifiedTime > flyDownDelay.get()
                 && lastY != Double.MAX_VALUE
-                && mc.world.getBlockState(mc.player.getBlockPos().down()).isAir()) {
+                && isEntityOnAir(mc.player)) {
                 // actual check is for >= -0.03125D but we have to do a bit more than that
                 // probably due to compression or some shit idk
                 ((PlayerMoveC2SPacketAccessor) packet).setY(lastY - 0.03130D);
@@ -209,5 +211,10 @@ public class Flight extends Module {
         mc.player.getAbilities().setFlySpeed(0.05f);
         if (mc.player.getAbilities().creativeMode) return;
         mc.player.getAbilities().allowFlying = false;
+    }
+
+    // Copied from ServerPlayNetworkHandler#isEntityOnAir
+    private boolean isEntityOnAir(Entity entity) {
+        return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
 }
