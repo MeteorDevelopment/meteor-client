@@ -596,7 +596,7 @@ public class Notebot extends Module {
     }
 
     public void stop() {
-        if (autoPlay.get()) {
+        if (autoPlay.get() && stage != Stage.Preview) {
             playRandomSong();
         } else {
             forceStop();
@@ -617,7 +617,6 @@ public class Notebot extends Module {
 
     public void disable() {
         resetVariables();
-        info("Stopping.");
         if (!isActive()) toggle();
     }
 
