@@ -89,18 +89,18 @@ public class DoubleSetting extends Setting<Double> {
         }
 
         public Builder sliderMin(double min) {
-            sliderMin = Math.max(min, this.min);
+            sliderMin = min;
             return this;
         }
 
         public Builder sliderMax(double max) {
-            sliderMax = Math.min(max, this.max);
+            sliderMax = max;
             return this;
         }
 
         public Builder sliderRange(double min, double max) {
-            sliderMin = Math.max(min, this.min);
-            sliderMax = Math.min(max, this.max);
+            sliderMin = min;
+            sliderMax = max;
             return this;
         }
 
