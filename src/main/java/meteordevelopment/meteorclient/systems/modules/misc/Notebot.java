@@ -404,8 +404,20 @@ public class Notebot extends Module {
             }
         }
         else if (stage == Stage.SetUp) {
-            setupBlocks();
+            scanForNoteblocks();
+            if (scannedNoteblocks.isEmpty()) {
+                error("Can't find any nearby noteblock!");
+                forceStop();
+                return;
+            }
+
             setupNoteblocksMap();
+            if (noteBlockPositions.isEmpty()) {
+                error("Can't find any valid noteblock to play song.");
+                forceStop();
+                return;
+            }
+
             setupTuneHitsMap();
             stage = Stage.Tune;
         }
@@ -704,10 +716,6 @@ public class Notebot extends Module {
             }
 
         }
-    }
-
-    private void setupBlocks() {
-        scanForNoteblocks();
     }
 
     private void onTickPreview() {
