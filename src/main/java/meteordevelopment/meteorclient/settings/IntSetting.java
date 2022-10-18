@@ -78,18 +78,18 @@ public class IntSetting extends Setting<Integer> {
         }
 
         public Builder sliderMin(int min) {
-            this.sliderMin = Math.max(min, this.min);
+            this.sliderMin = min;
             return this;
         }
 
         public Builder sliderMax(int max) {
-            this.sliderMax = Math.min(max, this.max);
+            this.sliderMax = max;
             return this;
         }
 
         public Builder sliderRange(int min, int max) {
-            this.sliderMin = Math.max(min, this.min);
-            this.sliderMax = Math.min(max, this.max);
+            this.sliderMin = min;
+            this.sliderMax = max;
             return this;
         }
 
