@@ -58,12 +58,12 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         float breakSpeedMod = (float) (breakSpeed * module.modifier.get());
 
         HitResult result = mc.crosshairTarget;
-        if (result.getType() == HitResult.Type.BLOCK) {
+        if (result != null && result.getType() == HitResult.Type.BLOCK) {
             BlockPos pos = ((BlockHitResult) result).getBlockPos();
             if (module.modifier.get() < 1 || (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod)))
                 cir.setReturnValue(breakSpeedMod);
             else
-                cir.setReturnValue(BlockUtils.getMaxNonInstantBreakSpeed(pos));
+                cir.setReturnValue(0.9f / BlockUtils.calcBlockBreakingDelta2(pos, 1));
         }
 
     }

@@ -227,17 +227,6 @@ public class BlockUtils {
         }
     }
 
-    public static float getMaxNonInstantBreakSpeed(BlockPos blockPos) {
-        BlockState state = mc.world.getBlockState(blockPos);
-        float f = state.getHardness(mc.world, blockPos);
-        if (f == -1.0F) {
-            return 0.0F;
-        } else {
-            int i = mc.player.canHarvest(state) ? 30 : 100;
-            return 0.9F * (float) i * f;
-        }
-    }
-
     // Other
 
     public static boolean isClickable(Block block) {
