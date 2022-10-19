@@ -557,6 +557,34 @@ public class Utils {
         return !socketAddress.isUnresolved();
     }
 
+    public static int levenshtein(String s1, String s2, int insCost, int subCost, int delCost) {
+        int[] d0 = new int[s2.length() + 1];
+        int[] d1 = new int[s2.length() + 1];
+
+        for (int i = 0; i <= s2.length(); i++) {
+            d0[i] = i;
+        }
+
+        int dCost, iCost, sCost;
+        for (int i = 0; i < s1.length(); i++) {
+            d1[0] = i + 1;
+
+            for (int j = 0; j < s2.length(); j++) {
+                dCost = d0[j + 1] + delCost;
+                iCost = d1[j] + insCost;
+                if (s1.charAt(i) == s2.charAt(j)) sCost = d0[j];
+                else sCost = d0[j] + subCost;
+                d1[j + 1] = Math.min(Math.min(dCost, iCost), sCost);
+            }
+
+            int[] swap = d0.clone();
+            d0 = d1.clone();
+            d1 = swap;
+        }
+
+        return d0[s2.length()];
+    }
+
     // Filters
 
     public static boolean nameFilter(String text, char character) {
