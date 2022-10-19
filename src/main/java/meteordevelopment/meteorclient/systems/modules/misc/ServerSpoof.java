@@ -22,12 +22,12 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
 
 public class ServerSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgChannel = settings.createGroup("Channel");
 
     private final Setting<Boolean> spoofBrand = sgGeneral.add(new BoolSetting.Builder()
         .name("spoof-brand")
@@ -58,18 +58,10 @@ public class ServerSpoof extends Module {
         .build()
     );
 
-    private final Setting<List<String>> channels = sgChannel.add(new StringListSetting.Builder()
+    private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
         .name("channels")
-        .description("The outgoing channels that will be blocked.")
+        .description("If the channel contains the keyword, this outgoing channel will be blocked.")
         .defaultValue("minecraft:register")
-        .visible(blockChannels::get)
-        .build()
-    );
-
-    private final Setting<List<String>> namespaces = sgChannel.add(new StringListSetting.Builder()
-        .name("namespaces")
-        .description("The outgoing channels with a specific namespace that will be blocked.")
-        .defaultValue("fabric")
         .visible(blockChannels::get)
         .build()
     );
@@ -91,8 +83,14 @@ public class ServerSpoof extends Module {
             if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
                 packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
-            if (blockChannels.get() && (channels.get().contains(id.toString()) || namespaces.get().contains(id.getNamespace())))
-                event.cancel();
+            if (blockChannels.get()) {
+                for (String channel : channels.get()) {
+                    if (StringUtils.containsIgnoreCase(channel, id.toString())) {
+                        event.cancel();
+                        return;
+                    }
+                }
+            }
         }
 
         @EventHandler
