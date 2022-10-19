@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WWindow;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -22,7 +23,6 @@ import net.minecraft.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
@@ -79,14 +79,14 @@ public class ModulesScreen extends TabScreen {
     protected void createSearchW(WContainer w, String text) {
         if (!text.isEmpty()) {
             // Titles
-            Set<Module> modules = Modules.get().searchTitles(text);
+            List<Module> modules = Modules.get().searchTitles(text);
 
             if (modules.size() > 0) {
                 WSection section = w.add(theme.section("Modules")).expandX().widget();
                 section.spacing = 0;
 
-                for (Module module : modules) {
-                    section.add(theme.module(module)).expandX();
+                for (int i = 0; i < Config.get().moduleSearchCount.get() && i < modules.size(); i++) {
+                    section.add(theme.module(modules.get(i))).expandX();
                 }
             }
 
@@ -97,8 +97,8 @@ public class ModulesScreen extends TabScreen {
                 WSection section = w.add(theme.section("Settings")).expandX().widget();
                 section.spacing = 0;
 
-                for (Module module : modules) {
-                    section.add(theme.module(module)).expandX();
+                for (int i = 0; i < Config.get().moduleSearchCount.get() && i < modules.size(); i++) {
+                    section.add(theme.module(modules.get(i))).expandX();
                 }
             }
         }

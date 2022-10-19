@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
-import com.google.common.collect.Ordering;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
@@ -36,7 +35,6 @@ import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
-import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
@@ -167,30 +165,34 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
-
-        for (Module module : this.moduleInstances.values()) {
-            int words = Utils.search(module.title, text);
-            if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
-        }
-
-        return modules.keySet();
+    public List<Module> searchTitles(String text) {
+        List<Module> modules = new ArrayList<>(this.moduleInstances.values().stream().toList());
+        modules.sort(Comparator.comparingInt(module -> {
+            int lowest = Integer.MAX_VALUE;
+            for (String word : module.name.split("-")) {
+                int d = Utils.levenshtein(text, word, 1, 3, 5);
+                if (d < lowest) lowest = d;
+            }
+            return lowest;
+        }));
+        return modules;
     }
 
-    public Set<Module> searchSettingTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
-
-        for (Module module : this.moduleInstances.values()) {
+    public List<Module> searchSettingTitles(String text) {
+        List<Module> modules = new ArrayList<>(this.moduleInstances.values().stream().toList());
+        modules.sort(Comparator.comparingInt(module -> {
+            int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
-                    int words = Utils.search(setting.title, text);
-                    if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
+                    for (String word : setting.name.split("-")) {
+                        int dist = Utils.levenshtein(text, word, 1, 3, 5);
+                        if (dist < lowest) lowest = dist;
+                    }
                 }
             }
-        }
-
-        return modules.keySet();
+            return lowest;
+        }));
+        return modules;
     }
 
     void addActive(Module module) {
