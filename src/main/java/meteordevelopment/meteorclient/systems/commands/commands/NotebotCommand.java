@@ -154,6 +154,8 @@ public class NotebotCommand extends Command {
             return;
         }
         try {
+            MeteorClient.EVENT_BUS.unsubscribe(this);
+
             FileWriter file = new FileWriter(path.toFile());
             for (var entry : song.entrySet()) {
                 int tick = entry.getKey();
@@ -169,7 +171,6 @@ public class NotebotCommand extends Command {
 
             file.close();
             info("Song saved.");
-            MeteorClient.EVENT_BUS.unsubscribe(this);
         } catch (IOException e) {
             info("Couldn't create the file.");
             MeteorClient.EVENT_BUS.unsubscribe(this);
