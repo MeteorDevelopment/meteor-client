@@ -19,6 +19,9 @@ public interface ClientPlayerEntityAccessor {
     @Accessor("mountJumpStrength")
     void setMountJumpStrength(float strength);
 
+    @Accessor("ticksSinceLastPositionPacketSent")
+    void setTicksSinceLastPositionPacketSent(int ticks);
+
     @Invoker("signChatMessage")
     MessageSignatureData _signChatMessage(MessageMetadata metadata, DecoratedContents content, LastSeenMessageList lastSeenMessages);
 }
