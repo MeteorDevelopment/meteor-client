@@ -59,9 +59,11 @@ public class FriendsTab extends Tab {
                 Friend friend = new Friend(name);
 
                 if (Friends.get().add(friend)) {
+                    nameW.set("");
+                    reload();
+
                     MeteorExecutor.execute(() -> {
                         friend.updateInfo();
-                        nameW.set("");
                         reload();
                     });
                 }
@@ -75,8 +77,8 @@ public class FriendsTab extends Tab {
             if (Friends.get().isEmpty()) return;
 
             for (Friend friend : Friends.get()) {
-                table.add(theme.texture(32, 32, friend.headTexture.needsRotate() ? 90 : 0, friend.headTexture));
-                table.add(theme.label(friend.name));
+                table.add(theme.texture(32, 32, friend.getHead().needsRotate() ? 90 : 0, friend.getHead()));
+                table.add(theme.label(friend.getName()));
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
                 remove.action = () -> {

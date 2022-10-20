@@ -86,8 +86,14 @@ public class MeteorClient implements ClientModInitializer {
         AddonManager.init();
 
         // Register event handlers
-        EVENT_BUS.registerLambdaFactory(ADDON.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
-        AddonManager.ADDONS.forEach(addon -> EVENT_BUS.registerLambdaFactory(addon.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup())));
+        EVENT_BUS.registerLambdaFactory(ADDON.getPackage() , (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+        AddonManager.ADDONS.forEach(addon -> {
+            try {
+                EVENT_BUS.registerLambdaFactory(addon.getPackage(), (lookupInMethod, klass) -> (MethodHandles.Lookup) lookupInMethod.invoke(null, klass, MethodHandles.lookup()));
+            } catch (AbstractMethodError e) {
+                throw new RuntimeException("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name), e);
+            }
+        });
 
         // Register init classes
         ReflectInit.registerPackages();
@@ -134,19 +140,20 @@ public class MeteorClient implements ClientModInitializer {
     @EventHandler
     private void onKey(KeyEvent event) {
         if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesKey(event.key, 0)) {
-            openGui();
+            toggleGui();
         }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action == KeyAction.Press && KeyBinds.OPEN_GUI.matchesMouse(event.button)) {
-            openGui();
+            toggleGui();
         }
     }
 
-    private void openGui() {
-        if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
+    private void toggleGui() {
+        if (Utils.canCloseGui()) mc.currentScreen.close();
+        else if (Utils.canOpenGui()) Tabs.get().get(0).openScreen(GuiThemes.get());
     }
 
     // Hide HUD

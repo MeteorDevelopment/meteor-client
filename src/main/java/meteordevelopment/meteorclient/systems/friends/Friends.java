@@ -5,18 +5,20 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
+import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
     private final List<Friend> friends = new ArrayList<>();
@@ -61,21 +63,19 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return null;
     }
 
-    public Friend get(UUID uuid) {
-        for (Friend friend : friends) {
-            if (friend.id != null && friend.id.equals(uuid)) {
-                return friend;
-            }
-        }
-
-        return null;
+    public Friend get(PlayerEntity player) {
+        return get(player.getEntityName());
     }
 
-    public Friend get(PlayerEntity player) {
-        return get(player.getUuid());
+    public Friend get(PlayerListEntry player) {
+        return get(player.getProfile().getName());
     }
 
     public boolean isFriend(PlayerEntity player) {
+        return get(player) != null;
+    }
+
+    public boolean isFriend(PlayerListEntry player) {
         return get(player) != null;
     }
 
@@ -107,18 +107,24 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
     @Override
     public Friends fromTag(NbtCompound tag) {
-        List<Friend> saved = NbtUtils.listFromTag(tag.getList("friends", 10), Friend::new);
         friends.clear();
 
-        for (Friend friend : saved) {
-            MeteorExecutor.execute(() -> {
-                if (friend.name == null && !friend.updateName()) return;
-                if (friend.id == null) friend.updateInfo();
+        for (NbtElement itemTag : tag.getList("friends", 10)) {
+            NbtCompound friendTag = (NbtCompound) itemTag;
+            if (!friendTag.contains("name")) continue;
 
-                friends.add(friend);
-                friend.updateHead();
-            });
+            String name = friendTag.getString("name");
+            if (get(name) != null) continue;
+
+            String uuid = friendTag.getString("id");
+            Friend friend = !uuid.isBlank()
+                ? new Friend(name, UUIDTypeAdapter.fromString(uuid))
+                : new Friend(name);
+
+            friends.add(friend);
         }
+
+        Collections.sort(friends);
 
         return this;
     }

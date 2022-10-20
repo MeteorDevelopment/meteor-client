@@ -15,7 +15,6 @@ void main() {
 
     if (center.a != 0.0) {
         if (u_ShapeMode == 0) discard;
-
         center = vec4(center.rgb, center.a * u_FillOpacity);
     }
     else {

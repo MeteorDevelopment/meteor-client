@@ -26,8 +26,41 @@ public class InvUtils {
         return predicate.test(mc.player.getMainHandStack());
     }
 
+    public static boolean testInMainHand(Item... items) {
+        return testInMainHand(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
+    }
+
     public static boolean testInOffHand(Predicate<ItemStack> predicate) {
         return predicate.test(mc.player.getOffHandStack());
+    }
+
+    public static boolean testInOffHand(Item... items) {
+        return testInOffHand(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
+    }
+
+    public static boolean testInHotbar(Predicate<ItemStack> predicate) {
+        if (testInMainHand(predicate)) return true;
+        if (testInOffHand(predicate)) return true;
+
+        for (int i = SlotUtils.HOTBAR_START; i < SlotUtils.HOTBAR_END; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (predicate.test(stack)) return true;
+        }
+
+        return false;
+    }
+
+    public static boolean testInHotbar(Item... items) {
+        return testInHotbar(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
     }
 
     // Finding items

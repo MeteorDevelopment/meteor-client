@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -41,11 +40,20 @@ public class ESP extends Module {
         .build()
     );
 
+    public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
+        .name("outline-width")
+        .description("The width of the shader outline.")
+        .visible(() -> mode.get() == Mode.Shader)
+        .defaultValue(2)
+        .range(1, 10)
+        .sliderRange(1, 5)
+        .build()
+    );
+
     public final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-self")
         .description("Ignores yourself drawing the shader.")
         .defaultValue(true)
-        .visible(() -> mode.get() == Mode.Shader)
         .build()
     );
 
@@ -56,30 +64,20 @@ public class ESP extends Module {
         .build()
     );
 
-    public final Setting<Integer> fillOpacity = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Double> fillOpacity = sgGeneral.add(new DoubleSetting.Builder()
         .name("fill-opacity")
         .description("The opacity of the shape fill.")
         .visible(() -> shapeMode.get() != ShapeMode.Lines)
-        .defaultValue(80)
-        .range(0, 255)
-        .sliderMax(255)
-        .build()
-    );
-
-    public final Setting<Integer> outlineWidth = sgGeneral.add(new IntSetting.Builder()
-        .name("width")
-        .description("The width of the shader outline.")
-        .visible(() -> mode.get() == Mode.Shader)
-        .defaultValue(2)
-        .range(1, 10)
-        .sliderRange(1, 5)
+        .defaultValue(0.8)
+        .range(0, 1)
+        .sliderMax(1)
         .build()
     );
 
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
         .name("fade-distance")
         .description("The distance from an entity where the color begins to fade.")
-        .defaultValue(2)
+        .defaultValue(3)
         .min(0)
         .sliderMax(12)
         .build()
@@ -138,6 +136,7 @@ public class ESP extends Module {
 
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
+    private final Color baseColor = new Color();
 
     private final Vec3 pos1 = new Vec3();
     private final Vec3 pos2 = new Vec3();
@@ -166,16 +165,9 @@ public class ESP extends Module {
     }
 
     private void drawBoundingBox(Render3DEvent event, Entity entity) {
-        lineColor.set(getColor(entity));
-        sideColor.set(lineColor).a(fillOpacity.get());
-
-        double a = getFadeAlpha(entity);
-
-        int prevLineA = lineColor.a;
-        int prevSideA = sideColor.a;
-
-        lineColor.a *= a;
-        sideColor.a *= a;
+        Color color = getColor(entity);
+        lineColor.set(color);
+        sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
 
         if (mode.get() == Mode.Box) {
             double x = MathHelper.lerp(event.tickDelta, entity.lastRenderX, entity.getX()) - entity.getX();
@@ -188,9 +180,6 @@ public class ESP extends Module {
         else {
             WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
         }
-
-        lineColor.a = prevLineA;
-        sideColor.a = prevSideA;
     }
 
     // 2D
@@ -228,16 +217,9 @@ public class ESP extends Module {
             if (checkCorner(box.maxX + x, box.maxY + y, box.maxZ + z, pos1, pos2)) continue;
 
             // Setup color
-            lineColor.set(getColor(entity));
-            sideColor.set(lineColor).a(fillOpacity.get());
-
-            double a = getFadeAlpha(entity);
-
-            int prevLineA = lineColor.a;
-            int prevSideA = sideColor.a;
-
-            lineColor.a *= a;
-            sideColor.a *= a;
+            Color color = getColor(entity);
+            lineColor.set(color);
+            sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
 
             // Render
             if (shapeMode.get() != ShapeMode.Lines && sideColor.a > 0) {
@@ -250,10 +232,6 @@ public class ESP extends Module {
                 Renderer2D.COLOR.line(pos1.x, pos1.y, pos2.x, pos1.y, lineColor);
                 Renderer2D.COLOR.line(pos1.x, pos2.y, pos2.x, pos2.y, lineColor);
             }
-
-            // End
-            lineColor.a = prevLineA;
-            sideColor.a = prevSideA;
 
             count++;
         }
@@ -278,45 +256,44 @@ public class ESP extends Module {
         return false;
     }
 
-    // EntityShaders
+    // Utils
 
-    public boolean shouldDrawOutline(Entity entity) {
-        return mode.get() == Mode.Shader && isActive() && getOutlineColor(entity) != null;
+    public boolean shouldSkip(Entity entity) {
+        if (!entities.get().getBoolean(entity.getType())) return true;
+        if (entity == mc.player && ignoreSelf.get()) return true;
+        if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
+        return !EntityUtils.isInRenderDistance(entity) || getFadeAlpha(entity) == 0;
     }
 
-    public Color getOutlineColor(Entity entity) {
+    public Color getColor(Entity entity) {
         if (!entities.get().getBoolean(entity.getType())) return null;
-        Color color = getColor(entity);
-        double alpha = getFadeAlpha(entity);
-        return lineColor.set(color).a((int) (alpha * 255));
-    }
 
-    // Stuff
+        double alpha = getFadeAlpha(entity);
+        if (alpha == 0) return null;
+
+        Color color = getEntityTypeColor(entity);
+        return baseColor.set(color.r, color.g, color.b, (int) (color.a * alpha));
+    }
 
     private double getFadeAlpha(Entity entity) {
-        double dist = PlayerUtils.distanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getHeight() / 2, entity.getZ() + entity.getWidth() / 2);
-        double fadeDist = fadeDistance.get().floatValue() * fadeDistance.get().floatValue();
+        double dist = PlayerUtils.distanceToCamera(entity.getX() + entity.getWidth() / 2, entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ() + entity.getWidth() / 2);
+        double fadeDist = Math.pow(fadeDistance.get(), 2);
         double alpha = 1;
         if (dist <= fadeDist) alpha = (float) (dist / fadeDist);
         if (alpha <= 0.075) alpha = 0;
         return alpha;
     }
 
-    public Color getColor(Entity entity) {
+    public Color getEntityTypeColor(Entity entity) {
         if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
 
         return switch (entity.getType().getSpawnGroup()) {
-            case CREATURE                                                  -> animalsColor.get();
+            case CREATURE -> animalsColor.get();
             case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-            case MONSTER                                                   -> monstersColor.get();
-            case AMBIENT                                                   -> ambientColor.get();
-            default                                                        -> miscColor.get();
+            case MONSTER -> monstersColor.get();
+            case AMBIENT -> ambientColor.get();
+            default -> miscColor.get();
         };
-    }
-
-    private boolean shouldSkip(Entity entity) {
-        if ((!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType())) return true;
-        return !EntityUtils.isInRenderDistance(entity);
     }
 
     @Override

@@ -423,7 +423,6 @@ public class Modules extends System<Modules> {
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
-        add(new InstaMine());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new NoBreakDelay());
@@ -535,6 +534,7 @@ public class Modules extends System<Modules> {
         add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
+        add(new NoGhostBlocks());
         add(new Nuker());
         add(new StashFinder());
         add(new SpawnProofer());

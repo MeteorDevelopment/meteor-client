@@ -141,7 +141,7 @@ public class AutoTrap extends Module {
     private int timer;
 
     public AutoTrap() {
-        super(Categories.Combat, "auto-trap", "Traps people in an box to prevent them from moving.");
+        super(Categories.Combat, "auto-trap", "Traps people in a box to prevent them from moving.");
     }
 
     @Override
@@ -174,8 +174,10 @@ public class AutoTrap extends Module {
                 continue;
             }
 
-            if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
-            if (TargetUtils.isBadTarget(target, range.get())) return;
+            if (TargetUtils.isBadTarget(target, range.get())) {
+                target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+                if (TargetUtils.isBadTarget(target, range.get())) return;
+            }
 
             fillPlaceArray(target);
 

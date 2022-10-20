@@ -1,9 +1,7 @@
 name: Bug
 description: Report a bug to help us improve Meteor.
-title: '[Bug] '
-labels: bug
+labels: [ bug ]
 body:
-
   - type: textarea
     id: description
     attributes:
@@ -11,6 +9,7 @@ body:
       description: |
         A clear and concise description of what the issue is.
         Provide as much information as possible, videos, crash reports, etc.
+        DO NOT PASTE A CRASH REPORT HERE!!!!
     validations:
       required: true
   - type: textarea
@@ -21,6 +20,10 @@ body:
       render: bash
     validations:
       required: true
+  - type: input
+    id: crash-report
+    attributes:
+      label: Link to crash report/log if applicable (https://mclo.gs)
   - type: input
     id: meteor-version
     attributes:
@@ -49,10 +52,8 @@ body:
       label: Before submitting a bug report
       options:
         - label: |
-            This bug wasn't already reported.
-            (I have checked every bug report on github)
+            This bug wasn't already reported (I have searched bug reports on GitHub).
           required: true
         - label: |
-            This is a valid bug.
-            (I am able to reproduce this on the latest dev build)
+            This is a valid bug (I am able to reproduce this on the latest dev build).
           required: true

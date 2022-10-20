@@ -2,24 +2,20 @@ name: Publish
 
 on:
   release:
-    types: [created]
+    types: [ created ]
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Clone repo
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v2
-      with:
-        java-version: '17'
-        distribution: 'adopt'
+      - run: chmod +x gradlew
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-
-    - name: Publish
-      run: ./gradlew publish
+      - name: Publish
+        run: ./gradlew publish
