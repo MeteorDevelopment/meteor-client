@@ -24,14 +24,18 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.fluid.Fluids;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.RaycastContext;
 
 import java.util.function.Predicate;
@@ -46,8 +50,16 @@ public class NoFall extends Module {
         .build()
     );
 
+    private final Setting<PlaceBlocks> placedBlock = sgGeneral.add(new EnumSetting.Builder<PlaceBlocks>()
+        .name("placed-block")
+        .description("Which block to place.")
+        .defaultValue(PlaceBlocks.Bucket)
+        .visible(() -> mode.get() == Mode.Place)
+        .build()
+    );
+
     private final Setting<PlaceMode> airPlaceMode = sgGeneral.add(new EnumSetting.Builder<PlaceMode>()
-        .name("place-mode")
+        .name("air-place-mode")
         .description("Whether place mode places before you die or before you take damage.")
         .defaultValue(PlaceMode.BeforeDeath)
         .visible(() -> mode.get() == Mode.AirPlace)
@@ -57,6 +69,14 @@ public class NoFall extends Module {
     private final Setting<Boolean> anchor = sgGeneral.add(new BoolSetting.Builder()
         .name("anchor")
         .description("Centers the player and reduces movement when using bucket or air place mode.")
+        .defaultValue(true)
+        .visible(() -> mode.get() != Mode.Packet)
+        .build()
+    );
+
+    private final Setting<Boolean> autoDimension = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-dimension")
+        .description("Use powder snow bucket in nether.")
         .defaultValue(true)
         .visible(() -> mode.get() != Mode.Packet)
         .build()
@@ -121,47 +141,55 @@ public class NoFall extends Module {
         }
 
         // Bucket mode
-        else if (mode.get() == Mode.Bucket) {
+        else if (mode.get() == Mode.Place) {
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
-                // Place water
-                FindItemResult waterBucket = InvUtils.findInHotbar(Items.WATER_BUCKET);
+                Item item = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether ? Items.POWDER_SNOW_BUCKET : placedBlock.get().item;
 
-                if (!waterBucket.found()) return;
+                // Place
+                FindItemResult findItemResult = InvUtils.findInHotbar(item);
+
+                if (!findItemResult.found()) return;
 
                 // Center player
                 if (anchor.get()) PlayerUtils.centerPlayer();
 
-                // Check if there is a block within 5 blocks
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+                // Check if there is a block within reach distance
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, mc.interactionManager.getReachDistance(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
-                // Place water
+                // Place
                 if (result != null && result.getType() == HitResult.Type.BLOCK) {
-                    useBucket(waterBucket, true);
+                    if (placedBlock.get() == PlaceBlocks.Bucket)
+                        useItem(findItemResult, true, null);
+                    else {
+                        useItem(findItemResult, placedBlock.get() == PlaceBlocks.PowderSnow, result.getBlockPos().up());
+                    }
                 }
             }
 
-            // Remove water
-            if (placedWater && mc.player.getBlockStateAtPos().getFluidState().getFluid() == Fluids.WATER) {
-                useBucket(InvUtils.findInHotbar(Items.BUCKET), false);
+            // Remove placed
+            if (placedWater && mc.player.getBlockStateAtPos().getBlock() == placedBlock.get().block) {
+                useItem(InvUtils.findInHotbar(Items.BUCKET), false, null);
             }
         }
     }
 
-    private void useBucket(FindItemResult bucket, boolean placedWater) {
-        if (!bucket.found()) return;
+    private void useItem(FindItemResult item, boolean placedWater, BlockPos blockPos) {
+        if (!item.found()) return;
 
-        Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
-            if (bucket.isOffhand()) {
-                mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
-            } else {
-                int preSlot = mc.player.getInventory().selectedSlot;
-                InvUtils.swap(bucket.slot(), true);
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                InvUtils.swapBack();
-            }
+        if (blockPos != null)
+            BlockUtils.place(blockPos, item, true, 10, true);
+        else
+            Rotations.rotate(mc.player.getYaw(), 90, 10, true, () -> {
+                if (item.isOffhand()) {
+                    mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
+                } else {
+                    InvUtils.swap(item.slot(), true);
+                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                    InvUtils.swapBack();
+                }
+            });
 
-            this.placedWater = placedWater;
-        });
+        this.placedWater = placedWater;
     }
 
     @Override
@@ -172,7 +200,21 @@ public class NoFall extends Module {
     public enum Mode {
         Packet,
         AirPlace,
-        Bucket
+        Place
+    }
+
+    public enum PlaceBlocks {
+        Bucket(Items.WATER_BUCKET, Blocks.WATER),
+        PowderSnow(Items.POWDER_SNOW_BUCKET, Blocks.POWDER_SNOW),
+        HayBale(Items.HAY_BLOCK, Blocks.HAY_BLOCK);
+
+        private final Item item;
+        private final Block block;
+
+        PlaceBlocks(Item item, Block block) {
+            this.item = item;
+            this.block = block;
+        }
     }
 
     public enum PlaceMode {
