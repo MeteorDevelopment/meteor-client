@@ -134,6 +134,20 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Boolean> profileEditConfirmation = sgMisc.add(new BoolSetting.Builder()
+        .name("profile-edit-confirmation")
+        .description("Whether to show a confirmation prompt upon editing profiles to prevent accidental edits.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> hudResetConfirmation = sgMisc.add(new BoolSetting.Builder()
+        .name("hud-reset-confirmation")
+        .description("Whether to show a confirmation prompt upon resetting hud to prevent accidental resets.")
+        .defaultValue(true)
+        .build()
+    );
+
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {

@@ -13,9 +13,12 @@ import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
+import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.nbt.NbtCompound;
 
@@ -68,7 +71,15 @@ public class HudTab extends Tab {
             active.action = () -> hud.active = active.checked;
 
             WButton resetSettings = bottom.add(theme.button(GuiRenderer.RESET)).widget();
-            resetSettings.action = hud.settings::reset;
+            resetSettings.action = () -> {
+                if (Config.get().hudResetConfirmation.get()) {
+                    YesNoPrompt.create(theme, this.parent)
+                        .title("Hud Reset")
+                        .message("Are you sure you want to reset the hud?")
+                        .message("This message can be disabled in the config tab.")
+                        .onYes(hud.settings::reset);
+                } else hud.settings.reset();
+            };
         }
 
         @Override

@@ -15,10 +15,12 @@ import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
 import net.minecraft.client.gui.screen.Screen;
 
 import java.util.ArrayList;
@@ -66,7 +68,15 @@ public class ProfilesTab extends Tab {
                 table.add(theme.label(profile.name.get())).expandCellX();
 
                 WButton save = table.add(theme.button("Save")).widget();
-                save.action = profile::save;
+                save.action = () -> {
+                    if (Config.get().profileEditConfirmation.get()) {
+                        YesNoPrompt.create(theme, this.parent)
+                            .title("Profile Save")
+                            .message("Are you sure you want to save to this profile?")
+                            .message("This message can be disabled in the config tab.")
+                            .onYes(profile::save);
+                    } else profile.save();
+                };
 
                 WButton load = table.add(theme.button("Load")).widget();
                 load.action = profile::load;
@@ -76,8 +86,19 @@ public class ProfilesTab extends Tab {
 
                 WMinus remove = table.add(theme.minus()).widget();
                 remove.action = () -> {
-                    Profiles.get().remove(profile);
-                    reload();
+                    if (Config.get().profileEditConfirmation.get()) {
+                        YesNoPrompt.create(theme, this.parent)
+                            .title("Profile Removal")
+                            .message("Are you sure you want to remove this profile?")
+                            .message("This message can be disabled in the config tab.")
+                            .onYes(() -> {
+                                Profiles.get().remove(profile);
+                                reload();
+                            });
+                    } else {
+                        Profiles.get().remove(profile);
+                        reload();
+                    }
                 };
 
                 table.row();
