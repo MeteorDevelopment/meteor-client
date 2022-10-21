@@ -153,8 +153,8 @@ public class NoFall extends Module {
                 // Center player
                 if (anchor.get()) PlayerUtils.centerPlayer();
 
-                // Check if there is a block within reach distance
-                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, mc.interactionManager.getReachDistance(), 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
+                // Check if there is a block within 5 blocks
+                BlockHitResult result = mc.world.raycast(new RaycastContext(mc.player.getPos(), mc.player.getPos().subtract(0, 5, 0), RaycastContext.ShapeType.OUTLINE, RaycastContext.FluidHandling.NONE, mc.player));
 
                 // Place
                 if (result != null && result.getType() == HitResult.Type.BLOCK) {
@@ -206,7 +206,9 @@ public class NoFall extends Module {
     public enum PlaceBlocks {
         Bucket(Items.WATER_BUCKET, Blocks.WATER),
         PowderSnow(Items.POWDER_SNOW_BUCKET, Blocks.POWDER_SNOW),
-        HayBale(Items.HAY_BLOCK, Blocks.HAY_BLOCK);
+        HayBale(Items.HAY_BLOCK, Blocks.HAY_BLOCK),
+        Cobweb(Items.COBWEB, Blocks.COBWEB),
+        SlimeBlock(Items.SLIME_BLOCK, Blocks.SLIME_BLOCK);
 
         private final Item item;
         private final Block block;
