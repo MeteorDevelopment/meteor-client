@@ -171,8 +171,8 @@ public class Modules extends System<Modules> {
         Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
 
         for (Module module : this.moduleInstances.values()) {
-            int score = Utils.searchLevenshteinDefault(module.name, text);
-            modules.put(module, score);
+            int score = Utils.searchLevenshteinDefault(module.title, text);
+            modules.put(module, modules.getOrDefault(module, 0) + score);
         }
 
         return modules.keySet();
@@ -185,11 +185,11 @@ public class Modules extends System<Modules> {
             int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
-                    int score = Utils.searchLevenshteinDefault(module.name, text);
+                    int score = Utils.searchLevenshteinDefault(setting.title, text);
                     if (score < lowest) lowest = score;
                 }
             }
-            modules.put(module, lowest);
+            modules.put(module, modules.getOrDefault(module, 0) + lowest);
         }
 
         return modules.keySet();

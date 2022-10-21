@@ -90,6 +90,7 @@ public class ModulesScreen extends TabScreen {
                 for (Module module : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
                     section.add(theme.module(module)).expandX();
+                    count++;
                 }
             }
 
@@ -104,6 +105,7 @@ public class ModulesScreen extends TabScreen {
                 for (Module module : modules) {
                     if (count >= Config.get().moduleSearchCount.get() || count >= modules.size()) break;
                     section.add(theme.module(module)).expandX();
+                    count++;
                 }
             }
         }

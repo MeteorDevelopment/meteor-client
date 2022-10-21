@@ -238,7 +238,7 @@ public class Utils {
     }
 
     public static int searchLevenshteinDefault(String text, String filter) {
-        return levenshteinDistance(text, filter, 1, 5, 6);
+        return levenshteinDistance(filter, text, 1, 6, 6);
     }
 
     public static int searchInWords(String text, String filter) {
@@ -256,32 +256,41 @@ public class Utils {
         return wordsFound;
     }
 
-    public static int levenshteinDistance(String s1, String s2, int insCost, int subCost, int delCost) {
-        int[] d0 = new int[s2.length() + 1];
-        int[] d1 = new int[s2.length() + 1];
+    public static int levenshteinDistance(String from, String to, int insCost, int subCost, int delCost) {
+        int textLength = from.length();
+        int filterLength = to.length();
 
-        for (int i = 0; i <= s2.length(); i++) {
-            d0[i] = i;
-        }
+        if (textLength == 0) return filterLength * insCost;
+        if (filterLength == 0) return textLength * delCost;
 
-        int dCost, iCost, sCost;
-        for (int i = 0; i < s1.length(); i++) {
-            d1[0] = i + 1;
+        // Populate matrix
+        int[][] d = new int[textLength + 1][filterLength + 1];
 
-            for (int j = 0; j < s2.length(); j++) {
-                dCost = d0[j + 1] + delCost;
-                iCost = d1[j] + insCost;
-                if (s1.charAt(i) == s2.charAt(j)) sCost = d0[j];
-                else sCost = d0[j] + subCost;
-                d1[j + 1] = Math.min(Math.min(dCost, iCost), sCost);
+        for (int i = 0; i < textLength; i++) {
+            for (int j = 0; j < filterLength; j++) {
+                d[i][j] = 0;
             }
-
-            int[] swap = d0.clone();
-            d0 = d1.clone();
-            d1 = swap;
         }
 
-        return d0[s2.length()];
+        for (int i = 0; i <= textLength; i++) {
+            d[i][0] = i * delCost;
+        }
+
+        for (int j = 0; j <= filterLength; j++) {
+            d[0][j] = j * insCost;
+        }
+
+        // Find best route
+        for (int i = 1; i <= textLength; i++) {
+            for (int j = 1; j <= filterLength; j++) {
+                int sCost = d[i-1][j-1] + (from.charAt(i-1) == to.charAt(j-1) ? 0 : subCost);
+                int dCost = d[i-1][j] + delCost;
+                int iCost = d[i][j-1] + insCost;
+                d[i][j] = Math.min(Math.min(dCost, iCost), sCost);
+            }
+        }
+
+        return d[textLength][filterLength];
     }
 
     public static double squaredDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
