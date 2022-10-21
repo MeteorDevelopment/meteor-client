@@ -77,7 +77,7 @@ public abstract class ChatHudMixin implements IChatHud {
     private void onAddMessage(Text message, @Nullable MessageSignatureData signature, int ticks, @Nullable MessageIndicator indicator, boolean refresh, CallbackInfo info) {
         if (skipOnAddMessage) return;
 
-        ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, nextId));
+        ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, indicator, nextId));
 
         if (event.isCancelled()) info.cancel();
         else {
@@ -88,7 +88,7 @@ public abstract class ChatHudMixin implements IChatHud {
                 info.cancel();
 
                 skipOnAddMessage = true;
-                addMessage(event.getMessage(), signature, ticks, indicator, refresh);
+                addMessage(event.getMessage(), signature, ticks, event.getIndicator(), refresh);
                 skipOnAddMessage = false;
             }
         }
