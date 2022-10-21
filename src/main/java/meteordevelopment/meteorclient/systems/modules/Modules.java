@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
+import com.google.common.collect.Ordering;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
@@ -35,6 +36,7 @@ import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
@@ -165,34 +167,32 @@ public class Modules extends System<Modules> {
         }
     }
 
-    public List<Module> searchTitles(String text) {
-        List<Module> modules = new ArrayList<>(this.moduleInstances.values().stream().toList());
-        modules.sort(Comparator.comparingInt(module -> {
-            int lowest = Integer.MAX_VALUE;
-            for (String word : module.name.split("-")) {
-                int d = Utils.levenshtein(text, word, 1, 3, 5);
-                if (d < lowest) lowest = d;
-            }
-            return lowest;
-        }));
-        return modules;
+    public Set<Module> searchTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
+
+        for (Module module : this.moduleInstances.values()) {
+            int score = Utils.searchLevenshteinDefault(module.name, text);
+            modules.put(module, score);
+        }
+
+        return modules.keySet();
     }
 
-    public List<Module> searchSettingTitles(String text) {
-        List<Module> modules = new ArrayList<>(this.moduleInstances.values().stream().toList());
-        modules.sort(Comparator.comparingInt(module -> {
+    public Set<Module> searchSettingTitles(String text) {
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
+
+        for (Module module : this.moduleInstances.values()) {
             int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
-                    for (String word : setting.name.split("-")) {
-                        int dist = Utils.levenshtein(text, word, 1, 3, 5);
-                        if (dist < lowest) lowest = dist;
-                    }
+                    int score = Utils.searchLevenshteinDefault(module.name, text);
+                    if (score < lowest) lowest = score;
                 }
             }
-            return lowest;
-        }));
-        return modules;
+            modules.put(module, lowest);
+        }
+
+        return modules.keySet();
     }
 
     void addActive(Module module) {

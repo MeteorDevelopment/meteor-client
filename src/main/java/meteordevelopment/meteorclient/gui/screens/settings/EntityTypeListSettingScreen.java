@@ -165,8 +165,10 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         } else {
             List<Pair<EntityType<?>, Integer>> entities = new ArrayList<>();
             Registry.ENTITY_TYPE.forEach(entity -> {
-                int words = Utils.search(Names.get(entity), filterText);
-                if (words > 0) entities.add(new Pair<>(entity, words));
+                int words = Utils.searchInWords(Names.get(entity), filterText);
+                int diff = Utils.searchLevenshteinDefault(Names.get(entity), filterText);
+
+                if (words > 0 || diff < Names.get(entity).length() / 2) entities.add(new Pair<>(entity, -diff));
             });
             entities.sort(Comparator.comparingInt(value -> -value.getRight()));
             for (Pair<EntityType<?>, Integer> pair : entities) entityTypeForEach.accept(pair.getLeft());

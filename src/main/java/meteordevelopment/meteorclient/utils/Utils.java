@@ -233,7 +233,15 @@ public class Utils {
         return enchantment.getName(0).getString().substring(0, length);
     }
 
-    public static int search(String text, String filter) {
+    public static boolean searchTextDefault(String text, String filter) {
+        return searchInWords(text, filter) > 0 || searchLevenshteinDefault(text, filter) < text.length() / 2;
+    }
+
+    public static int searchLevenshteinDefault(String text, String filter) {
+        return levenshteinDistance(text, filter, 1, 5, 6);
+    }
+
+    public static int searchInWords(String text, String filter) {
         if (filter.isEmpty()) return 1;
 
         int wordsFound = 0;
@@ -246,6 +254,34 @@ public class Utils {
         }
 
         return wordsFound;
+    }
+
+    public static int levenshteinDistance(String s1, String s2, int insCost, int subCost, int delCost) {
+        int[] d0 = new int[s2.length() + 1];
+        int[] d1 = new int[s2.length() + 1];
+
+        for (int i = 0; i <= s2.length(); i++) {
+            d0[i] = i;
+        }
+
+        int dCost, iCost, sCost;
+        for (int i = 0; i < s1.length(); i++) {
+            d1[0] = i + 1;
+
+            for (int j = 0; j < s2.length(); j++) {
+                dCost = d0[j + 1] + delCost;
+                iCost = d1[j] + insCost;
+                if (s1.charAt(i) == s2.charAt(j)) sCost = d0[j];
+                else sCost = d0[j] + subCost;
+                d1[j + 1] = Math.min(Math.min(dCost, iCost), sCost);
+            }
+
+            int[] swap = d0.clone();
+            d0 = d1.clone();
+            d1 = swap;
+        }
+
+        return d0[s2.length()];
     }
 
     public static double squaredDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
@@ -555,34 +591,6 @@ public class Utils {
         if (port <= 0 || port > 65535 || address == null || address.isBlank()) return false;
         InetSocketAddress socketAddress = new InetSocketAddress(address, port);
         return !socketAddress.isUnresolved();
-    }
-
-    public static int levenshtein(String s1, String s2, int insCost, int subCost, int delCost) {
-        int[] d0 = new int[s2.length() + 1];
-        int[] d1 = new int[s2.length() + 1];
-
-        for (int i = 0; i <= s2.length(); i++) {
-            d0[i] = i;
-        }
-
-        int dCost, iCost, sCost;
-        for (int i = 0; i < s1.length(); i++) {
-            d1[0] = i + 1;
-
-            for (int j = 0; j < s2.length(); j++) {
-                dCost = d0[j + 1] + delCost;
-                iCost = d1[j] + insCost;
-                if (s1.charAt(i) == s2.charAt(j)) sCost = d0[j];
-                else sCost = d0[j] + subCost;
-                d1[j + 1] = Math.min(Math.min(dCost, iCost), sCost);
-            }
-
-            int[] swap = d0.clone();
-            d0 = d1.clone();
-            d1 = swap;
-        }
-
-        return d0[s2.length()];
     }
 
     // Filters
