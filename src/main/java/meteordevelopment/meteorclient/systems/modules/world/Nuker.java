@@ -149,7 +149,7 @@ public class Nuker extends Module {
     private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
         .name("packet-mine")
         .description("Attempt to instamine everything at once.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
