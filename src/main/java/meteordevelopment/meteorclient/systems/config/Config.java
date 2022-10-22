@@ -134,6 +134,14 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<Integer> moduleSearchCount = sgMisc.add(new IntSetting.Builder()
+        .name("module-search-count")
+        .description("Amount of modules and settings to be shown in the module search bar.")
+        .defaultValue(8)
+        .min(1).sliderMax(12)
+        .build()
+    );
+
     public List<String> dontShowAgainPrompts = new ArrayList<>();
 
     public Config() {
