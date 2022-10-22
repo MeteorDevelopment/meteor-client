@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.MinecraftClient;
@@ -111,13 +112,13 @@ public class AutoClicker extends Module {
             case Disabled -> {}
             case Hold -> mc.options.attackKey.setPressed(true);
             case Press -> {
+				if (leftClickTimer <= 500) leftClickTimer++;
+				if (mc.currentScreen instanceof WidgetScreen) break;
 				if (breakBlocks.get() && (client.crosshairTarget.getType() == HitResult.Type.BLOCK) && Input.isPressed2(mc.options.attackKey)) {
 					mc.options.attackKey.setPressed(true);
 					leftClickTimer = 0;
 					break;
 				}
-					
-                if (leftClickTimer <= 60) leftClickTimer++;
                 if ((!onlyWhenHoldingLeftClick.get() || Input.isPressed2(mc.options.attackKey)) && (!breakBlocks.get() || (client.crosshairTarget.getType() != HitResult.Type.BLOCK)) && (smartDelay.get() ? mc.player.getAttackCooldownProgress(0.5f) >= 1 : leftClickTimer > leftClickDelay.get())) {
                     Utils.leftClick();
                     leftClickTimer = 0;
@@ -128,7 +129,7 @@ public class AutoClicker extends Module {
             case Disabled -> {}
             case Hold -> mc.options.useKey.setPressed(true);
             case Press -> {
-                if (rightClickTimer <= 60) rightClickTimer++;
+                if (rightClickTimer <= 500) rightClickTimer++;
                 if ((!onlyWhenHoldingRightClick.get() || Input.isPressed2(mc.options.useKey)) && rightClickTimer > rightClickDelay.get()) {
                     Utils.rightClick();
                     rightClickTimer = 0;
