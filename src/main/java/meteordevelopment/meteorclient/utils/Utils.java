@@ -238,7 +238,7 @@ public class Utils {
     }
 
     public static int searchLevenshteinDefault(String text, String filter, boolean caseSensitive) {
-        return levenshteinDistance(caseSensitive ? filter : filter.toLowerCase(Locale.ROOT), caseSensitive ? text : text.toLowerCase(Locale.ROOT), 1, 6, 6);
+        return levenshteinDistance(caseSensitive ? filter : filter.toLowerCase(Locale.ROOT), caseSensitive ? text : text.toLowerCase(Locale.ROOT), 1, 8, 8);
     }
 
     public static int searchInWords(String text, String filter) {
