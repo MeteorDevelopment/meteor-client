@@ -11,9 +11,12 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.util.hit.HitResult;
 import meteordevelopment.orbit.EventHandler;
 
 public class AutoClicker extends Module {
+	private static MinecraftClient client = MinecraftClient.getInstance();
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> leftClickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
@@ -36,6 +39,14 @@ public class AutoClicker extends Module {
     private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
         .name("smart-delay")
         .description("Uses the vanilla cooldown to attack entities.")
+        .defaultValue(true)
+        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .build()
+    );
+	
+    private final Setting<Boolean> breakBlocks = sgGeneral.add(new BoolSetting.Builder()
+        .name("break-blocks")
+        .description("Allow breaking blocks when autoclicking.")
         .defaultValue(true)
         .visible(() -> leftClickMode.get() != Mode.Disabled)
         .build()
@@ -100,9 +111,14 @@ public class AutoClicker extends Module {
             case Disabled -> {}
             case Hold -> mc.options.attackKey.setPressed(true);
             case Press -> {
+				if (breakBlocks.get() && (client.crosshairTarget.getType() == HitResult.Type.BLOCK) && Input.isPressed2(mc.options.attackKey)) {
+					mc.options.attackKey.setPressed(true);
+					leftClickTimer = 0;
+					break;
+				}
+					
                 if (leftClickTimer <= 60) leftClickTimer++;
-				System.out.println(Input.isPressed2(mc.options.attackKey));
-                if ((!onlyWhenHoldingLeftClick.get() || Input.isPressed2(mc.options.attackKey)) && (smartDelay.get() ? mc.player.getAttackCooldownProgress(0.5f) >= 1 : leftClickTimer > leftClickDelay.get())) {
+                if ((!onlyWhenHoldingLeftClick.get() || Input.isPressed2(mc.options.attackKey)) && (!breakBlocks.get() || (client.crosshairTarget.getType() != HitResult.Type.BLOCK)) && (smartDelay.get() ? mc.player.getAttackCooldownProgress(0.5f) >= 1 : leftClickTimer > leftClickDelay.get())) {
                     Utils.leftClick();
                     leftClickTimer = 0;
                 }
