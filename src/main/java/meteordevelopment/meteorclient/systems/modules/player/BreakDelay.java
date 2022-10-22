@@ -11,6 +11,8 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.world.Nuker;
 import meteordevelopment.orbit.EventHandler;
 
 public class BreakDelay extends Module {
@@ -31,6 +33,7 @@ public class BreakDelay extends Module {
 
     @EventHandler
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
-        event.cooldown = cooldown.get();
+        if (!Modules.get().isActive(Nuker.class))
+            event.cooldown = cooldown.get();
     }
 }
