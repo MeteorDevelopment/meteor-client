@@ -33,6 +33,10 @@ public class Input {
     public static boolean isPressed(KeyBinding bind) {
         return isKeyPressed(KeyBinds.getKey(bind));
     }
+	
+    public static boolean isPressed2(KeyBinding bind) {
+        return isButtonPressed(KeyBinds.getKey(bind));
+    }
 
     public static boolean isKeyPressed(int key) {
         if (!GuiKeyEvents.canUseKeys) return false;

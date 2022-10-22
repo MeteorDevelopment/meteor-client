@@ -6,13 +6,11 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
 
 public class AutoClicker extends Module {
@@ -34,6 +32,22 @@ public class AutoClicker extends Module {
         .visible(() -> leftClickMode.get() != Mode.Disabled)
         .build()
     );
+	
+    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
+        .name("smart-delay")
+        .description("Uses the vanilla cooldown to attack entities.")
+        .defaultValue(true)
+        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .build()
+    );
+	
+    private final Setting<Boolean> onlyWhenHoldingLeftClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("when-holding-left-click")
+        .description("Works only when holding left click.")
+        .defaultValue(true)
+        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .build()
+    );
 
     private final Setting<Mode> rightClickMode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode-right")
@@ -48,6 +62,14 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
+        .visible(() -> rightClickMode.get() != Mode.Disabled)
+        .build()
+    );
+	
+    private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("when-holding-right-click")
+        .description("Works only when holding right click.")
+        .defaultValue(true)
         .visible(() -> rightClickMode.get() != Mode.Disabled)
         .build()
     );
@@ -78,8 +100,9 @@ public class AutoClicker extends Module {
             case Disabled -> {}
             case Hold -> mc.options.attackKey.setPressed(true);
             case Press -> {
-                leftClickTimer++;
-                if (leftClickTimer > leftClickDelay.get()) {
+                if (leftClickTimer <= 60) leftClickTimer++;
+				System.out.println(Input.isPressed2(mc.options.attackKey));
+                if ((!onlyWhenHoldingLeftClick.get() || Input.isPressed2(mc.options.attackKey)) && (smartDelay.get() ? mc.player.getAttackCooldownProgress(0.5f) >= 1 : leftClickTimer > leftClickDelay.get())) {
                     Utils.leftClick();
                     leftClickTimer = 0;
                 }
@@ -89,8 +112,8 @@ public class AutoClicker extends Module {
             case Disabled -> {}
             case Hold -> mc.options.useKey.setPressed(true);
             case Press -> {
-                rightClickTimer++;
-                if (rightClickTimer > rightClickDelay.get()) {
+                if (rightClickTimer <= 60) rightClickTimer++;
+                if ((!onlyWhenHoldingRightClick.get() || Input.isPressed2(mc.options.useKey)) && rightClickTimer > rightClickDelay.get()) {
                     Utils.rightClick();
                     rightClickTimer = 0;
                 }

@@ -398,6 +398,7 @@ public class Modules extends System<Modules> {
         add(new BowSpam());
         add(new Burrow());
         add(new Criticals());
+        add(new KnockbackPlus());
         add(new CrystalAura());
         add(new Hitboxes());
         add(new HoleFiller());
@@ -459,6 +460,7 @@ public class Modules extends System<Modules> {
         add(new GUIMove());
         add(new HighJump());
         add(new Jesus());
+        add(new NoJumpDelay());
         add(new LongJump());
         add(new NoFall());
         add(new NoSlow());
