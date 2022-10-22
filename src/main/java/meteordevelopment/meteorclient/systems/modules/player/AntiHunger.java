@@ -53,6 +53,7 @@ public class AntiHunger extends Module {
         lastOnGround = mc.player.isOnGround();
         sendOnGroundTruePacket = true;
 		ClientCommandC2SPacket packet = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING);
+		mc.player.networkHandler.sendPacket(packet);
     }
 
     @EventHandler
