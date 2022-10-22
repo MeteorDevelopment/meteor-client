@@ -234,11 +234,11 @@ public class Utils {
     }
 
     public static boolean searchTextDefault(String text, String filter) {
-        return searchInWords(text, filter) > 0 || searchLevenshteinDefault(text, filter) < text.length() / 2;
+        return searchInWords(text, filter) > 0 || searchLevenshteinDefault(text, filter, false) < text.length() / 2;
     }
 
-    public static int searchLevenshteinDefault(String text, String filter) {
-        return levenshteinDistance(filter, text, 1, 6, 6);
+    public static int searchLevenshteinDefault(String text, String filter, boolean caseSensitive) {
+        return levenshteinDistance(caseSensitive ? filter : filter.toLowerCase(Locale.ROOT), caseSensitive ? text : text.toLowerCase(Locale.ROOT), 1, 6, 6);
     }
 
     public static int searchInWords(String text, String filter) {

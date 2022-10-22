@@ -64,7 +64,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
             if (skipValue(t) || collection.contains(t)) return;
 
             int words = Utils.searchInWords(getValueName(t), filterText);
-            int diff = Utils.searchLevenshteinDefault(getValueName(t), filterText);
+            int diff = Utils.searchLevenshteinDefault(getValueName(t), filterText, false);
             if (words > 0 || diff <= getValueName(t).length() / 2) pairs.add(new Pair<>(t, -diff));
         }), true, t -> {
             addValue(registry, t);
@@ -81,7 +81,7 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
                 if (skipValue(value)) continue;
 
                 int words = Utils.searchInWords(getValueName(value), filterText);
-                int diff = Utils.searchLevenshteinDefault(getValueName(value), filterText);
+                int diff = Utils.searchLevenshteinDefault(getValueName(value), filterText, false);
                 if (words > 0 || diff <= getValueName(value).length() / 2) pairs.add(new Pair<>(value, -diff));
             }
         }, false, t -> {
