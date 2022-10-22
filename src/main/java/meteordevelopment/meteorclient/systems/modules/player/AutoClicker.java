@@ -113,7 +113,7 @@ public class AutoClicker extends Module {
             case Hold -> mc.options.attackKey.setPressed(true);
             case Press -> {
 				if (leftClickTimer <= 500) leftClickTimer++;
-				if (mc.currentScreen != null) break;
+				if (mc.currentScreen instanceof WidgetScreen) break;
 				if (breakBlocks.get() && (client.crosshairTarget.getType() == HitResult.Type.BLOCK) && Input.isPressed2(mc.options.attackKey)) {
 					mc.options.attackKey.setPressed(true);
 					leftClickTimer = 0;

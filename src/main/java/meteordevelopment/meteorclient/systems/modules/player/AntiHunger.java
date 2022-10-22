@@ -52,6 +52,7 @@ public class AntiHunger extends Module {
     public void onActivate() {
         lastOnGround = mc.player.isOnGround();
         sendOnGroundTruePacket = true;
+		ClientCommandC2SPacket packet = new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.STOP_SPRINTING);
     }
 
     @EventHandler
@@ -61,7 +62,7 @@ public class AntiHunger extends Module {
         if (event.packet instanceof ClientCommandC2SPacket && sprint.get()) {
             ClientCommandC2SPacket.Mode mode = ((ClientCommandC2SPacket) event.packet).getMode();
 
-            if (mode == ClientCommandC2SPacket.Mode.START_SPRINTING || mode == ClientCommandC2SPacket.Mode.STOP_SPRINTING) {
+            if (mode == ClientCommandC2SPacket.Mode.START_SPRINTING) {
                 event.cancel();
             }
         }
