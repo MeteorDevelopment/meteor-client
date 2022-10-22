@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
-import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -239,11 +238,7 @@ public class Utils {
     }
 
     public static int searchLevenshteinDefault(String text, String filter, boolean caseSensitive) {
-        return levenshteinDistance(caseSensitive ? filter : filter.toLowerCase(Locale.ROOT),
-                                   caseSensitive ? text : text.toLowerCase(Locale.ROOT),
-                                   Config.get().levenshteinInsertCost.get(),
-                                   Config.get().levenshteinSubstituteCost.get(),
-                                   Config.get().levenshteinDeleteCost.get());
+        return levenshteinDistance(caseSensitive ? filter : filter.toLowerCase(Locale.ROOT), caseSensitive ? text : text.toLowerCase(Locale.ROOT), 1, 6, 6);
     }
 
     public static int searchInWords(String text, String filter) {

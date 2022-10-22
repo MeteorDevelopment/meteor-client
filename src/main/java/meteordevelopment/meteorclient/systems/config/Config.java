@@ -27,7 +27,6 @@ public class Config extends System<Config> {
 
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgChat = settings.createGroup("Chat");
-    private final SettingGroup sgTextSearch = settings.createGroup("Text Search");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
 
     // Visual
@@ -119,40 +118,6 @@ public class Config extends System<Config> {
         .build()
     );
 
-    // Text search
-
-    public final Setting<Integer> levenshteinInsertCost = sgTextSearch.add(new IntSetting.Builder()
-        .name("levenshtein-insert-cost")
-        .description("Character insertion cost for the default levenshtein.")
-        .defaultValue(1)
-        .sliderRange(0, 10)
-        .build()
-    );
-
-    public final Setting<Integer> levenshteinSubstituteCost = sgTextSearch.add(new IntSetting.Builder()
-        .name("levenshtein-substitute-cost")
-        .description("Character substitution cost for the default levenshtein.")
-        .defaultValue(6)
-        .sliderRange(0, 10)
-        .build()
-    );
-
-    public final Setting<Integer> levenshteinDeleteCost = sgTextSearch.add(new IntSetting.Builder()
-        .name("levenshtein-delete-cost")
-        .description("Character deletion cost for the default levenshtein.")
-        .defaultValue(6)
-        .sliderRange(0, 10)
-        .build()
-    );
-
-    public final Setting<Integer> moduleSearchCount = sgTextSearch.add(new IntSetting.Builder()
-        .name("module-search-count")
-        .description("Amount of modules and settings to be shown in the module search bar.")
-        .defaultValue(8)
-        .min(1).sliderMax(12)
-        .build()
-    );
-
     // Misc
 
     public final Setting<Integer> rotationHoldTicks = sgMisc.add(new IntSetting.Builder()
@@ -166,6 +131,14 @@ public class Config extends System<Config> {
         .name("use-team-color")
         .description("Uses player's team color for rendering things like esp and tracers.")
         .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Integer> moduleSearchCount = sgMisc.add(new IntSetting.Builder()
+        .name("module-search-count")
+        .description("Amount of modules and settings to be shown in the module search bar.")
+        .defaultValue(8)
+        .min(1).sliderMax(12)
         .build()
     );
 
