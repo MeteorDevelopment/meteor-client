@@ -168,26 +168,28 @@ public class Modules extends System<Modules> {
     }
 
     public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
 
         for (Module module : this.moduleInstances.values()) {
-            int words = Utils.search(module.title, text);
-            if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
+            int score = Utils.searchLevenshteinDefault(module.title, text, false);
+            modules.put(module, modules.getOrDefault(module, 0) + score);
         }
 
         return modules.keySet();
     }
 
     public Set<Module> searchSettingTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
 
         for (Module module : this.moduleInstances.values()) {
+            int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
-                    int words = Utils.search(setting.title, text);
-                    if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
+                    int score = Utils.searchLevenshteinDefault(setting.title, text, false);
+                    if (score < lowest) lowest = score;
                 }
             }
+            modules.put(module, modules.getOrDefault(module, 0) + lowest);
         }
 
         return modules.keySet();

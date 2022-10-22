@@ -61,9 +61,8 @@ public class NotebotSongsScreen extends WindowScreen {
             Files.list(MeteorClient.FOLDER.toPath().resolve("notebot")).forEach(path -> {
                 if (SongDecoders.hasDecoder(path)) {
                     String name = path.getFileName().toString();
-                    int words = Utils.search(name, filterText);
 
-                    if (words > 0){
+                    if (Utils.searchTextDefault(name, filterText, false)){
                         addPath(path);
                         noSongsFound.set(false);
                     }
