@@ -233,8 +233,8 @@ public class Utils {
         return enchantment.getName(0).getString().substring(0, length);
     }
 
-    public static boolean searchTextDefault(String text, String filter) {
-        return searchInWords(text, filter) > 0 || searchLevenshteinDefault(text, filter, false) < text.length() / 2;
+    public static boolean searchTextDefault(String text, String filter, boolean caseSensitive) {
+        return searchInWords(text, filter) > 0 || searchLevenshteinDefault(text, filter, caseSensitive) < text.length() / 2;
     }
 
     public static int searchLevenshteinDefault(String text, String filter, boolean caseSensitive) {
