@@ -26,6 +26,7 @@ import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -37,7 +38,8 @@ public class ServerCommand extends Command {
     private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith");
     private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
     private int ticks = 0;
-    private List<String> plugins = new ArrayList<>();
+    private boolean bukkitMode = false;
+    private final List<String> plugins = new ArrayList<>();
 
 
     public ServerCommand() {
@@ -56,24 +58,16 @@ public class ServerCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("plugins").executes(ctx -> {
-            ticks = 0;
-            plugins.clear();
-            MeteorClient.EVENT_BUS.subscribe(this);
-            info("Please wait around 5 seconds...");
-            (new Thread(() -> {
-                Random random = new Random();
-                completionStarts.chars().forEach(i -> {
-                    mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), Character.toString(i)));
-                    try {
-                        Thread.sleep(100);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                });
-            })).start();
-            return SINGLE_SUCCESS;
-        }));
+        builder.then(literal("plugins")
+            .then(literal("BukkitVer").executes(ctx -> {
+                getPlugins(true);
+                return SINGLE_SUCCESS;
+            }))
+            .then(literal("MassScan").executes(ctx -> {
+                getPlugins(false);
+                return SINGLE_SUCCESS;
+            }))
+        );
 
         builder.then(literal("tps").executes(ctx -> {
             float tps = TickRate.INSTANCE.getTickRate();
@@ -84,6 +78,50 @@ public class ServerCommand extends Command {
             info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
+    }
+
+    private void getPlugins(boolean bukkit) {
+        bukkitMode = bukkit;
+        ticks = 0;
+        plugins.clear();
+        Random random = new Random();
+        MeteorClient.EVENT_BUS.subscribe(this);
+
+        if (bukkit) {
+            if (mc.isIntegratedServerRunning()) { // don't bother if we're in singleplayer
+                printPlugins();
+                return;
+            }
+            mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), "bukkit:ver "));
+        } else {
+            info("Please wait around 5 seconds...");
+            (new Thread(() -> completionStarts.chars().forEach(i -> {
+                mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), Character.toString(i)));
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }))).start();
+        }
+    }
+
+    private void printPlugins() {
+        Collections.sort(plugins);
+
+        for (int i = 0; i < plugins.size(); i++) {
+            plugins.set(i, formatName(plugins.get(i)));
+        }
+
+        if (!plugins.isEmpty()) {
+            info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+        } else {
+            error("No plugins found.");
+        }
+
+        ticks = 0;
+        plugins.clear();
+        MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 
     private void basicInfo() {
@@ -174,22 +212,17 @@ public class ServerCommand extends Command {
     private void onTick(TickEvent.Post event) {
         ticks++;
 
-        if (ticks >= 100) {
-            Collections.sort(plugins);
-
-            for (int i = 0; i < plugins.size(); i++) {
-                plugins.set(i, formatName(plugins.get(i)));
+        if (bukkitMode) {
+            if (ticks >= 200) {
+                error("Plugins check timed out. Either the packet has been dropped, or you dont have access to the bukkit:ver command.");
+                MeteorClient.EVENT_BUS.unsubscribe(this);
+                ticks = 0;
             }
-
-            if (!plugins.isEmpty()) {
-                info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
-            } else {
-                error("No plugins found.");
+        }
+        else {
+            if (ticks >= 100) {
+                printPlugins();
             }
-
-            ticks = 0;
-            plugins.clear();
-            MeteorClient.EVENT_BUS.unsubscribe(this);
         }
     }
 
@@ -206,26 +239,36 @@ public class ServerCommand extends Command {
                 }
 
                 for (Suggestion suggestion : matches.getList()) {
-                    String[] command = suggestion.getText().split(":");
-                    if (command.length > 1) {
-                        String pluginName = command[0].replace("/", "");
-
+                    if (bukkitMode) {
+                        String pluginName = suggestion.getText();
                         if (!plugins.contains(pluginName)) {
                             plugins.add(pluginName);
                         }
                     }
+                    else {
+                        String[] command = suggestion.getText().split(":");
+                        if (command.length > 1) {
+                            String pluginName = command[0].replace("/", "");
+
+                            if (!plugins.contains(pluginName)) {
+                                plugins.add(pluginName);
+                            }
+                        }
+                    }
                 }
+
+                if (bukkitMode) printPlugins();
             }
         } catch (Exception e) {
-            error("An error occurred while trying to find plugins");
+            error("An error occurred while trying to find plugins.");
         }
     }
 
     private String formatName(String name) {
-        if (ANTICHEAT_LIST.contains(name)) {
+        if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
-        else if (name.contains("exploit") || name.contains("cheat") || name.contains("illegal")) {
+        else if (StringUtils.containsIgnoreCase(name, "exploit") || StringUtils.containsIgnoreCase(name, "cheat") || StringUtils.containsIgnoreCase(name, "illegal")) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
 
