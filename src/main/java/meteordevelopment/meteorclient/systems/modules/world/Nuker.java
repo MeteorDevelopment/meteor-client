@@ -19,8 +19,12 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
@@ -139,6 +143,13 @@ public class Nuker extends Module {
         .name("swing-hand")
         .description("Swing hand client side.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
+        .name("packet-mine")
+        .description("Attempt to instamine everything at once.")
+        .defaultValue(false)
         .build()
     );
 
@@ -406,13 +417,19 @@ public class Nuker extends Module {
 
                 boolean canInstaMine = BlockUtils.canInstaBreak(block);
 
-                BlockUtils.breakBlock(block, swingHand.get());
-                renderBlocks.add(renderBlockPool.get().set(block));
+                if (packetMine.get()) {
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, block, Direction.UP));
+                    mc.player.swingHand(Hand.MAIN_HAND);
+                    mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, block, Direction.UP));
+                } else {
+                    BlockUtils.breakBlock(block, swingHand.get());
+                }
 
+                renderBlocks.add(renderBlockPool.get().set(block));
                 lastBlockPos.set(block);
 
                 count++;
-                if (!canInstaMine) break;
+                if (!canInstaMine && !packetMine.get() /* With packet mine attempt to break everything possible at once */) break;
             }
 
             firstBlock = false;
