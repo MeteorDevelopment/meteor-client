@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.hud.elements.*;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -36,6 +37,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEditor = settings.createGroup("Editor");
+    private final SettingGroup sgKeybind = settings.createGroup("Keybindings");
 
     // General
 
@@ -80,6 +82,14 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .description("Snapping range in editor.")
         .defaultValue(10)
         .sliderMax(20)
+        .build()
+    );
+
+    // Keybindings
+    private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
+        .name("keybind")
+        .defaultValue(Keybind.none())
+        .action(() -> active = !active)
         .build()
     );
 
