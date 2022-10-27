@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -124,8 +123,6 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
         // Default config
         if (isFirstInit) resetToDefaultElements();
-
-        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     public void register(HudElementInfo<?> info) {
