@@ -7,8 +7,6 @@ package meteordevelopment.meteorclient.systems.hud;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
-import meteordevelopment.meteorclient.events.meteor.KeyEvent;
-import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -19,7 +17,6 @@ import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
@@ -93,6 +90,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
         .name("keybind")
         .defaultValue(Keybind.none())
+        .action(() -> active = !active)
         .build()
     );
 
@@ -128,24 +126,6 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (isFirstInit) resetToDefaultElements();
 
         MeteorClient.EVENT_BUS.subscribe(this);
-    }
-
-    @EventHandler
-    private void onKeyEvent(KeyEvent event) {
-        if (event.action != KeyAction.Press) return;
-
-        if (keybind.get().matches(true, event.key)) {
-            active = !active;
-        }
-    }
-
-    @EventHandler
-    private void onMouseButtonEvent(MouseButtonEvent event) {
-        if (event.action != KeyAction.Press) return;
-
-        if (keybind.get().matches(false, event.button)) {
-            active = !active;
-        }
     }
 
     public void register(HudElementInfo<?> info) {
