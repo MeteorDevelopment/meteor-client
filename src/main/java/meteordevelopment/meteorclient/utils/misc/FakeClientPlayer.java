@@ -1,14 +1,13 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.misc;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.OtherClientPlayerEntity;
@@ -34,7 +33,7 @@ public class FakeClientPlayer {
     private static String lastId;
     private static boolean needsNewEntry;
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(FakeClientPlayer.class);
     }
@@ -62,7 +61,7 @@ public class FakeClientPlayer {
 
     public static PlayerListEntry getPlayerListEntry() {
         if (playerListEntry == null || needsNewEntry) {
-            playerListEntry = new PlayerListEntry(PlayerListEntryFactory.create(mc.getSession().getProfile(), 0, GameMode.SURVIVAL, Text.of(mc.getSession().getProfile().getName()), null), null);
+            playerListEntry = new PlayerListEntry(PlayerListEntryFactory.create(mc.getSession().getProfile(), 0, GameMode.SURVIVAL, Text.of(mc.getSession().getProfile().getName()), null), null, false);
             needsNewEntry = false;
         }
 

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.renderer;
@@ -13,9 +13,9 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -64,14 +64,14 @@ public class GuiRenderer {
         return TEXTURE_PACKER.add(id);
     }
 
-    @Init(stage = InitStage.Post)
+    @PostInit
     public static void init() {
-        CIRCLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/circle.png"));
-        TRIANGLE = addTexture(new Identifier("meteor-client", "textures/icons/gui/triangle.png"));
-        EDIT = addTexture(new Identifier("meteor-client", "textures/icons/gui/edit.png"));
-        RESET = addTexture(new Identifier("meteor-client", "textures/icons/gui/reset.png"));
-        FAVORITE_NO = addTexture(new Identifier("meteor-client", "textures/icons/gui/favorite_no.png"));
-        FAVORITE_YES = addTexture(new Identifier("meteor-client", "textures/icons/gui/favorite_yes.png"));
+        CIRCLE = addTexture(new MeteorIdentifier("textures/icons/gui/circle.png"));
+        TRIANGLE = addTexture(new MeteorIdentifier("textures/icons/gui/triangle.png"));
+        EDIT = addTexture(new MeteorIdentifier("textures/icons/gui/edit.png"));
+        RESET = addTexture(new MeteorIdentifier("textures/icons/gui/reset.png"));
+        FAVORITE_NO = addTexture(new MeteorIdentifier("textures/icons/gui/favorite_no.png"));
+        FAVORITE_YES = addTexture(new MeteorIdentifier("textures/icons/gui/favorite_yes.png"));
 
         TEXTURE = TEXTURE_PACKER.pack();
     }
@@ -95,12 +95,12 @@ public class GuiRenderer {
         GL.disableScissorTest();
     }
 
-    private void beginRender() {
+    public void beginRender() {
         r.begin();
         rTex.begin();
     }
 
-    private void endRender() {
+    public void endRender() {
         r.end();
         rTex.end();
 

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.screens;
@@ -62,7 +62,9 @@ public class AccountsScreen extends WindowScreen {
         if (screen != null) screen.locked = true;
 
         MeteorExecutor.execute(() -> {
-            if (account.fetchInfo() && account.fetchHead()) {
+            if (account.fetchInfo()) {
+                account.getCache().loadHead();
+
                 Accounts.get().add(account);
                 if (account.login()) Accounts.get().save();
 

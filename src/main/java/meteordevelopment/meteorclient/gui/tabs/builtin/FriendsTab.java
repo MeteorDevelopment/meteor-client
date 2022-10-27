@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
@@ -10,24 +10,15 @@ import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
-import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.ColorSetting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.network.PlayerListEntry;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FriendsTab extends Tab {
     public FriendsTab() {
@@ -45,74 +36,36 @@ public class FriendsTab extends Tab {
     }
 
     private static class FriendsScreen extends WindowTabScreen {
-        private final Settings settings = new Settings();
-
         public FriendsScreen(GuiTheme theme, Tab tab) {
             super(theme, tab);
-
-            SettingGroup sgGeneral = settings.getDefaultGroup();
-
-            sgGeneral.add(new ColorSetting.Builder()
-                    .name("color")
-                    .description("The color used to show friends.")
-                    .defaultValue(new SettingColor(0, 255, 180))
-                    .onChanged(Friends.get().color::set)
-                    .onModuleActivated(colorSetting -> colorSetting.set(Friends.get().color))
-                    .build()
-            );
-
-            sgGeneral.add(new BoolSetting.Builder()
-                    .name("attack")
-                    .description("Whether to attack friends.")
-                    .defaultValue(false)
-                    .onChanged(aBoolean -> Friends.get().attack = aBoolean)
-                    .onModuleActivated(booleanSetting -> booleanSetting.set(Friends.get().attack))
-                    .build()
-            );
-
-            settings.onActivated();
         }
 
         @Override
         public void initWidgets() {
-            // Settings
-            add(theme.settings(settings)).expandX();
-
-            // Friends
-            WSection friends = add(theme.section("Friends")).expandX().widget();
-            WTable table = friends.add(theme.table()).expandX().widget();
-
+            WTable table = add(theme.table()).expandX().minWidth(400).widget();
             initTable(table);
 
-            // New
-            WHorizontalList list = friends.add(theme.horizontalList()).expandX().widget();
+            add(theme.horizontalSeparator()).expandX();
 
-            WTextBox nameW = list.add(theme.textBox("")).minWidth(400).expandX().widget();
+            // New
+            WHorizontalList list = add(theme.horizontalList()).expandX().widget();
+
+            WTextBox nameW = list.add(theme.textBox("", (text, c) -> c != ' ')).expandX().widget();
             nameW.setFocused(true);
 
             WPlus add = list.add(theme.plus()).widget();
             add.action = () -> {
                 String name = nameW.get().trim();
+                Friend friend = new Friend(name);
 
-                Friend friend = null;
-                if (Utils.canUpdate() && mc.getNetworkHandler() != null) {
-                    for (PlayerListEntry playerListEntry : mc.getNetworkHandler().getPlayerList()) {
-                        if (playerListEntry.getProfile().getName().equalsIgnoreCase(name)) {
-                            friend = new Friend(playerListEntry);
-                            break;
-                        }
-                    }
-                }
-
-                if (friend == null) {
-                    friend = Friends.get().getFromName(name);
-                }
-
-                if (friend != null && Friends.get().add(friend)) {
+                if (Friends.get().add(friend)) {
                     nameW.set("");
+                    reload();
 
-                    table.clear();
-                    initTable(table);
+                    MeteorExecutor.execute(() -> {
+                        friend.updateInfo();
+                        reload();
+                    });
                 }
             };
 
@@ -120,17 +73,17 @@ public class FriendsTab extends Tab {
         }
 
         private void initTable(WTable table) {
-            for (Friend friend : Friends.get()) {
-                friend.refresh();
+            table.clear();
+            if (Friends.get().isEmpty()) return;
 
-                table.add(theme.label(friend.name));
+            for (Friend friend : Friends.get()) {
+                table.add(theme.texture(32, 32, friend.getHead().needsRotate() ? 90 : 0, friend.getHead()));
+                table.add(theme.label(friend.getName()));
 
                 WMinus remove = table.add(theme.minus()).expandCellX().right().widget();
                 remove.action = () -> {
                     Friends.get().remove(friend);
-
-                    table.clear();
-                    initTable(table);
+                    reload();
                 };
 
                 table.row();

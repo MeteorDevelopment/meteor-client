@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.commands;
@@ -21,8 +21,8 @@ public class InventoryCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(argument("player", PlayerArgumentType.player()).executes(context -> {
-            Utils.screenToOpen = new InventoryScreen(PlayerArgumentType.getPlayer(context));
+        builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
+            Utils.screenToOpen = new InventoryScreen(PlayerArgumentType.get(context));
             return SINGLE_SUCCESS;
         }));
     }

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.accounts.types;
@@ -62,6 +62,8 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
             setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
             cache.username = auth.getSelectedProfile().getName();
+            cache.loadHead();
+
             return true;
         } catch (AuthenticationException e) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");

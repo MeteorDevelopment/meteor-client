@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -43,8 +43,8 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         Slippy slippy = Modules.get().get(Slippy.class);
         Block block = (Block) (Object) this;
 
-        if (slippy.isActive() && !slippy.blocks.get().contains(block)) {
-            info.setReturnValue(slippy.slippness.get().floatValue());
+        if (slippy.isActive() && !slippy.ignoredBlocks.get().contains(block)) {
+            info.setReturnValue(slippy.friction.get().floatValue());
         }
     }
 }

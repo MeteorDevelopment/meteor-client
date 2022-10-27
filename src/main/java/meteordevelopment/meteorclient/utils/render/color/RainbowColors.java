@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.render.color;
@@ -15,8 +15,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
 import meteordevelopment.orbit.EventHandler;
 
@@ -26,12 +25,14 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RainbowColors {
     private static final List<Setting<SettingColor>> colorSettings = new UnorderedArrayList<>();
+    private static final List<Setting<List<SettingColor>>> colorListSettings = new UnorderedArrayList<>();
+
     private static final List<SettingColor> colors = new UnorderedArrayList<>();
     private static final List<Runnable> listeners = new UnorderedArrayList<>();
 
     public static final RainbowColor GLOBAL = new RainbowColor();
 
-    @Init(stage = InitStage.Post)
+    @PostInit
     public static void init() {
         MeteorClient.EVENT_BUS.subscribe(RainbowColors.class);
     }
@@ -40,8 +41,16 @@ public class RainbowColors {
         colorSettings.add(setting);
     }
 
+    public static void addSettingList(Setting<List<SettingColor>> setting) {
+        colorListSettings.add(setting);
+    }
+
     public static void removeSetting(Setting<SettingColor> setting) {
         colorSettings.remove(setting);
+    }
+
+    public static void removeSettingList(Setting<List<SettingColor>> setting) {
+        colorListSettings.remove(setting);
     }
 
     public static void add(SettingColor color) {
@@ -61,12 +70,18 @@ public class RainbowColors {
             if (setting.module == null || setting.module.isActive()) setting.get().update();
         }
 
+        for (Setting<List<SettingColor>> setting : colorListSettings) {
+            if (setting.module == null || setting.module.isActive()) {
+                for (SettingColor color : setting.get()) color.update();
+            }
+        }
+
         for (SettingColor color : colors) {
             color.update();
         }
 
         for (Waypoint waypoint : Waypoints.get()) {
-            waypoint.color.update();
+            waypoint.color.get().update();
         }
 
         if (mc.currentScreen instanceof WidgetScreen) {

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -82,13 +82,13 @@ public class AutoCity extends Module {
             PlayerEntity search = TargetUtils.getPlayerTarget(targetRange.get(), SortPriority.LowestDistance);
             if (search != target) sentMessage = false;
             target = search;
-        }
 
-        if (TargetUtils.isBadTarget(target, targetRange.get())) {
-            target = null;
-            blockPosTarget = null;
-            if (selfToggle.get()) toggle();
-            return;
+            if (TargetUtils.isBadTarget(target, targetRange.get())) {
+                target = null;
+                blockPosTarget = null;
+                if (selfToggle.get()) toggle();
+                return;
+            }
         }
 
         blockPosTarget = EntityUtils.getCityBlock(target);
@@ -102,7 +102,7 @@ public class AutoCity extends Module {
             return;
         }
 
-        if (PlayerUtils.distanceTo(blockPosTarget) > mc.interactionManager.getReachDistance() && selfToggle.get()) {
+        if (!PlayerUtils.isWithinReach(blockPosTarget) && selfToggle.get()) {
             error("Target block out of reach... disabling.");
             toggle();
             return;

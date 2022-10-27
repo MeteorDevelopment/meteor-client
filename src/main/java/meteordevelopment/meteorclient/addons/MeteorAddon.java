@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.addons;
@@ -20,6 +20,8 @@ public abstract class MeteorAddon {
     public abstract void onInitialize();
 
     public void onRegisterCategories() {}
+
+    public abstract String getPackage();
 
     public String getWebsite() {
         return null;

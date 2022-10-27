@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.render;
@@ -35,11 +35,18 @@ public class NametagUtils {
         cameraNegated.set(camera);
         cameraNegated.negate();
 
-        windowScale = mc.getWindow().calculateScaleFactor(1, mc.forcesUnicodeFont());
+        windowScale = mc.getWindow().calculateScaleFactor(1, false);
     }
 
     public static boolean to2D(Vec3 pos, double scale) {
-        NametagUtils.scale = getScale(pos) * scale;
+        return to2D(pos, scale, true);
+    }
+
+    public static boolean to2D(Vec3 pos, double scale, boolean distanceScaling) {
+        NametagUtils.scale = scale;
+        if (distanceScaling) {
+            NametagUtils.scale *= getScale(pos);
+        }
 
         vec4.set(cameraNegated.x + pos.x, cameraNegated.y + pos.y, cameraNegated.z + pos.z, 1);
 

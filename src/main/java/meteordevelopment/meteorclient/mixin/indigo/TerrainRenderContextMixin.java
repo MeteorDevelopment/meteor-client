@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin.indigo;
@@ -19,8 +19,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = TerrainRenderContext.class, remap = false)
 public class TerrainRenderContextMixin {
-    @Inject(method = "tesselateBlock", at = @At("HEAD"), cancellable = true)
-    private void onTesselateBlock(BlockState blockState, BlockPos blockPos, BakedModel model, MatrixStack matrixStack, CallbackInfoReturnable<Boolean> info) {
+    @Inject(method = "tessellateBlock", at = @At("HEAD"), cancellable = true)
+    private void onTessellateBlock(BlockState blockState, BlockPos blockPos, BakedModel model, MatrixStack matrixStack, CallbackInfoReturnable<Boolean> info) {
         Xray xray = Modules.get().get(Xray.class);
 
         if (xray.isActive() && xray.isBlocked(blockState.getBlock(), blockPos)) {

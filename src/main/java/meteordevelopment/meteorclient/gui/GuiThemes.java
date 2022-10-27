@@ -1,14 +1,14 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
-import meteordevelopment.meteorclient.utils.Init;
-import meteordevelopment.meteorclient.utils.InitStage;
+import meteordevelopment.meteorclient.utils.PostInit;
+import meteordevelopment.meteorclient.utils.PreInit;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
 
@@ -26,12 +26,12 @@ public class GuiThemes {
     private static final List<GuiTheme> themes = new ArrayList<>();
     private static GuiTheme theme;
 
-    @Init(stage = InitStage.Pre)
+    @PreInit
     public static void init() {
         add(new MeteorGuiTheme());
     }
 
-    @Init(stage = InitStage.Post)
+    @PostInit
     public static void postInit() {
         if (FILE.exists()) {
             try {

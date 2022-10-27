@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.movement;
@@ -163,7 +163,7 @@ public class Scaffold extends Module {
                 pos = pos.add(0, -0.98f, 0);
                 pos.add(mc.player.getVelocity());
 
-                if (PlayerUtils.distanceTo(prevBp) > placeRange.get()) {
+                if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
                     List<BlockPos> blockPosArray = new ArrayList<>();
 
                     for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
@@ -178,7 +178,7 @@ public class Scaffold extends Module {
                         return;
                     }
 
-                    blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::distanceTo));
+                    blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
 
                     prevBp.set(blockPosArray.get(0));
                 }

@@ -1,11 +1,12 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -25,7 +26,7 @@ public class BetterTab extends Module {
 
     public final Setting<Integer> tabSize = sgGeneral.add(new IntSetting.Builder()
             .name("tablist-size")
-            .description("Bypasses the 80 player limit on the tablist.")
+            .description("How many players to display in the tablist.")
             .defaultValue(100)
             .min(1)
             .sliderRange(1, 1000)
@@ -83,9 +84,9 @@ public class BetterTab extends Module {
         if (playerListEntry.getProfile().getId().toString().equals(mc.player.getGameProfile().getId().toString()) && self.get()) {
             color = selfColor.get();
         }
-        else if (friends.get() && Friends.get().get(playerListEntry.getProfile().getId()) != null) {
-            Friend friend = Friends.get().get(playerListEntry.getProfile().getId());
-            if (friend != null) color = Friends.get().color;
+        else if (friends.get() && Friends.get().isFriend(playerListEntry)) {
+            Friend friend = Friends.get().get(playerListEntry);
+            if (friend != null) color = Config.get().friendColor.get();
         }
 
         if (color != null) {

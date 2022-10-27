@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
@@ -9,8 +9,10 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.render.EntityShaders;
+import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Identifier;
@@ -26,20 +28,23 @@ public class Chams extends Module {
     public final Setting<Object2BooleanMap<EntityType<?>>> entities = sgThroughWalls.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to show through walls.")
-        .defaultValue(EntityType.PLAYER)
         .build()
     );
 
     public final Setting<Shader> shader = sgThroughWalls.add(new EnumSetting.Builder<Shader>()
         .name("shader")
-        .description("Renders a shader instead of the entities.")
-        .defaultValue(Shader.Liquid1)
-        .onModuleActivated(shaderSetting -> {
-            if (shaderSetting.get() != Shader.None) EntityShaders.initOverlay(shaderSetting.get().shaderName);
-        })
-        .onChanged(value -> {
-            if (value != Shader.None) EntityShaders.initOverlay(value.shaderName);
-        })
+        .description("Renders a shader over of the entities.")
+        .defaultValue(Shader.Image)
+        .onModuleActivated(setting -> updateShader(setting.get()))
+        .onChanged(this::updateShader)
+        .build()
+    );
+
+    public final Setting<SettingColor> shaderColor = sgThroughWalls.add(new ColorSetting.Builder()
+        .name("color")
+        .description("The color that the shader is drawn with.")
+        .defaultValue(new SettingColor(255, 255, 255, 150))
+        .visible(() -> shader.get() != Shader.None)
         .build()
     );
 
@@ -50,28 +55,19 @@ public class Chams extends Module {
         .build()
     );
 
-    //Players
+    // Players
 
     public final Setting<Boolean> players = sgPlayers.add(new BoolSetting.Builder()
         .name("players")
         .description("Enables model tweaks for players.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
     public final Setting<Boolean> ignoreSelf = sgPlayers.add(new BoolSetting.Builder()
         .name("ignore-self")
         .description("Ignores yourself when tweaking player models.")
-        .defaultValue(true)
-        .visible(players::get)
-        .build()
-    );
-
-    public final Setting<Double> playersScale = sgPlayers.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("Players scale.")
-        .defaultValue(1.0)
-        .min(0.0)
+        .defaultValue(false)
         .visible(players::get)
         .build()
     );
@@ -87,17 +83,26 @@ public class Chams extends Module {
     public final Setting<SettingColor> playersColor = sgPlayers.add(new ColorSetting.Builder()
         .name("color")
         .description("The color of player models.")
-        .defaultValue(new SettingColor(0, 255, 255, 100))
+        .defaultValue(new SettingColor(198, 135, 254, 150))
         .visible(players::get)
         .build()
     );
 
-    //Crystals
+    public final Setting<Double> playersScale = sgPlayers.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Players scale.")
+        .defaultValue(1.0)
+        .min(0.0)
+        .visible(players::get)
+        .build()
+    );
+
+    // Crystals
 
     public final Setting<Boolean> crystals = sgCrystals.add(new BoolSetting.Builder()
         .name("crystals")
         .description("Enables model tweaks for end crystals.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -113,7 +118,7 @@ public class Chams extends Module {
     public final Setting<Double> crystalsBounce = sgCrystals.add(new DoubleSetting.Builder()
         .name("bounce")
         .description("How high crystals bounce.")
-        .defaultValue(0.3)
+        .defaultValue(0.6)
         .min(0.0)
         .visible(crystals::get)
         .build()
@@ -121,8 +126,8 @@ public class Chams extends Module {
 
     public final Setting<Double> crystalsRotationSpeed = sgCrystals.add(new DoubleSetting.Builder()
         .name("rotation-speed")
-        .description("Multiplies the roation speed of the crystal.")
-        .defaultValue(3)
+        .description("Multiplies the rotation speed of the crystal.")
+        .defaultValue(0.3)
         .min(0)
         .visible(crystals::get)
         .build()
@@ -131,7 +136,7 @@ public class Chams extends Module {
     public final Setting<Boolean> crystalsTexture = sgCrystals.add(new BoolSetting.Builder()
         .name("texture")
         .description("Whether to render crystal model textures.")
-        .defaultValue(false)
+        .defaultValue(true)
         .visible(crystals::get)
         .build()
     );
@@ -146,15 +151,15 @@ public class Chams extends Module {
 
     public final Setting<SettingColor> crystalsCoreColor = sgCrystals.add(new ColorSetting.Builder()
         .name("core-color")
-        .description("The color of end crystal models.")
-        .defaultValue(new SettingColor(0, 255, 255, 100))
-        .visible(renderCore::get)
+        .description("The color of the core of the crystal.")
+        .defaultValue(new SettingColor(198, 135, 254, 255))
+        .visible(() -> crystals.get() && renderCore.get())
         .build()
     );
 
     public final Setting<Boolean> renderFrame1 = sgCrystals.add(new BoolSetting.Builder()
         .name("render-inner-frame")
-        .description("Enables rendering of the frame of the crystal.")
+        .description("Enables rendering of the inner frame of the crystal.")
         .defaultValue(true)
         .visible(crystals::get)
         .build()
@@ -162,15 +167,15 @@ public class Chams extends Module {
 
     public final Setting<SettingColor> crystalsFrame1Color = sgCrystals.add(new ColorSetting.Builder()
         .name("inner-frame-color")
-        .description("The color of end crystal models.")
-        .defaultValue(new SettingColor(0, 255, 255, 100))
-        .visible(renderFrame1::get)
+        .description("The color of the inner frame of the crystal.")
+        .defaultValue(new SettingColor(198, 135, 254, 255))
+        .visible(() -> crystals.get() && renderFrame1.get())
         .build()
     );
 
     public final Setting<Boolean> renderFrame2 = sgCrystals.add(new BoolSetting.Builder()
         .name("render-outer-frame")
-        .description("Enables rendering of the frame of the crystal.")
+        .description("Enables rendering of the outer frame of the crystal.")
         .defaultValue(true)
         .visible(crystals::get)
         .build()
@@ -178,9 +183,9 @@ public class Chams extends Module {
 
     public final Setting<SettingColor> crystalsFrame2Color = sgCrystals.add(new ColorSetting.Builder()
         .name("outer-frame-color")
-        .description("The color of end crystal models.")
-        .defaultValue(new SettingColor(0, 255, 255, 100))
-        .visible(renderFrame2::get)
+        .description("The color of the outer frame of the crystal.")
+        .defaultValue(new SettingColor(198, 135, 254, 255))
+        .visible(() -> crystals.get() && renderFrame2.get())
         .build()
     );
 
@@ -189,7 +194,7 @@ public class Chams extends Module {
     public final Setting<Boolean> hand = sgHand.add(new BoolSetting.Builder()
         .name("enabled")
         .description("Enables tweaks of hand rendering.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -197,17 +202,19 @@ public class Chams extends Module {
         .name("texture")
         .description("Whether to render hand textures.")
         .defaultValue(false)
+        .visible(hand::get)
         .build()
     );
 
     public final Setting<SettingColor> handColor = sgHand.add(new ColorSetting.Builder()
         .name("hand-color")
         .description("The color of your hand.")
-        .defaultValue(new SettingColor(0, 255, 255, 100))
+        .defaultValue(new SettingColor(198, 135, 254, 150))
+        .visible(hand::get)
         .build()
     );
 
-    public static final Identifier BLANK = new Identifier("meteor-client", "textures/blank.png");
+    public static final Identifier BLANK = new MeteorIdentifier("textures/blank.png");
 
     public Chams() {
         super(Categories.Render, "chams", "Tweaks rendering of entities.");
@@ -221,14 +228,13 @@ public class Chams extends Module {
         return isActive() && shader.get() != Shader.None;
     }
 
+    public void updateShader(Shader value) {
+        if (value == Shader.None) return;
+        PostProcessShaders.CHAMS.init(Utils.titleToName(value.name()));
+    }
+
     public enum Shader {
-        Liquid1("liquid"),
-        None(null);
-
-        public final String shaderName;
-
-        Shader(String shaderName) {
-            this.shaderName = shaderName;
-        }
+        Image,
+        None
     }
 }

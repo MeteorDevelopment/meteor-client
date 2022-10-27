@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -24,6 +25,7 @@ public class Spam extends Module {
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to use for spam.")
+        .defaultValue(List.of("Meteor on Crack!"))
         .build()
     );
 
@@ -117,7 +119,7 @@ public class Spam extends Module {
                 text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
 
-            mc.player.sendChatMessage(text);
+            ChatUtils.sendPlayerMsg(text);
             timer = delay.get();
         }
         else {

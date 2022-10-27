@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.widgets;
@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui.widgets;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 
 public class WKeybind extends WHorizontalList {
@@ -62,6 +63,9 @@ public class WKeybind extends WHorizontalList {
     public void reset() {
         listening = false;
         refreshLabel();
+        if (Modules.get().isBinding()) {
+            Modules.get().setModuleToBind(null);
+        }
     }
 
     private void refreshLabel() {

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.config;
@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
@@ -86,6 +87,13 @@ public class Config extends System<Config> {
         .build()
     );
 
+    public final Setting<SettingColor> friendColor = sgVisual.add(new ColorSetting.Builder()
+        .name("friend-color")
+        .description("The color used to show friends.")
+        .defaultValue(new SettingColor(0, 255, 180))
+        .build()
+    );
+
     // Chat
 
     public final Setting<String> prefix = sgChat.add(new StringSetting.Builder()
@@ -123,6 +131,14 @@ public class Config extends System<Config> {
         .name("use-team-color")
         .description("Uses player's team color for rendering things like esp and tracers.")
         .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Integer> moduleSearchCount = sgMisc.add(new IntSetting.Builder()
+        .name("module-search-count")
+        .description("Amount of modules and settings to be shown in the module search bar.")
+        .defaultValue(8)
+        .min(1).sliderMax(12)
         .build()
     );
 

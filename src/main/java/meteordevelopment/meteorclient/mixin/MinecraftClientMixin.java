@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -21,14 +21,11 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.starscript.Script;
-import meteordevelopment.starscript.compiler.Compiler;
-import meteordevelopment.starscript.compiler.Parser;
-import meteordevelopment.starscript.utils.Error;
-import meteordevelopment.starscript.utils.StarscriptError;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.Mouse;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
+import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.util.Window;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.hit.HitResult;
@@ -38,7 +35,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -55,6 +55,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Shadow @Final public Mouse mouse;
     @Shadow @Final private Window window;
     @Shadow public Screen currentScreen;
+    @Shadow @Final public GameOptions options;
 
     @Shadow protected abstract void doItemUse();
     @Shadow public abstract Profiler getProfiler();
@@ -75,7 +76,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         OnlinePlayers.update();
         doItemUseCalled = false;
 
-        getProfiler().push("meteor-client_pre_update");
+        getProfiler().push(MeteorClient.MOD_ID + "_pre_update");
         MeteorClient.EVENT_BUS.post(TickEvent.Pre.get());
         getProfiler().pop();
 
@@ -85,7 +86,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(at = @At("TAIL"), method = "tick")
     private void onTick(CallbackInfo info) {
-        getProfiler().push("meteor-client_post_update");
+        getProfiler().push(MeteorClient.MOD_ID + "_post_update");
         MeteorClient.EVENT_BUS.post(TickEvent.Post.get());
         getProfiler().pop();
     }
@@ -117,11 +118,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         return MeteorClient.EVENT_BUS.post(ItemUseCrosshairTargetEvent.get(client.crosshairTarget)).target;
     }
 
-    @ModifyVariable(method = "reloadResources(Z)Ljava/util/concurrent/CompletableFuture;", at = @At("STORE"), ordinal = 0)
-    private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> completableFuture) {
-        completableFuture.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
-
-        return completableFuture;
+    @Inject(method = "reloadResources(Z)Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"), cancellable = true)
+    private void onReloadResourcesNewCompletableFuture(boolean force, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+        cir.setReturnValue(cir.getReturnValue().thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get())));
     }
 
     @ModifyArg(method = "updateWindowTitle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/Window;setTitle(Ljava/lang/String;)V"))
@@ -129,19 +128,11 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         if (Config.get() == null || !Config.get().customWindowTitle.get()) return original;
 
         String customTitle = Config.get().customWindowTitleText.get();
-        Parser.Result result = Parser.parse(customTitle);
+        Script script = MeteorStarscript.compile(customTitle);
 
-        if (result.hasErrors()) {
-            for (Error error : result.errors) MeteorStarscript.printChatError(error);
-        }
-        else {
-            Script script = Compiler.compile(result);
-
-            try {
-                customTitle = MeteorStarscript.ss.run(script);
-            } catch (StarscriptError e) {
-                MeteorStarscript.printChatError(e);
-            }
+        if (script != null) {
+            String title = MeteorStarscript.run(script);
+            if (title != null) customTitle = title;
         }
 
         return customTitle;
@@ -154,7 +145,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(method = "getFramerateLimit", at = @At("HEAD"), cancellable = true)
     private void onGetFramerateLimit(CallbackInfoReturnable<Integer> info) {
-        if (Modules.get().isActive(UnfocusedCPU.class) && !isWindowFocused()) info.setReturnValue(1);
+        if (Modules.get().isActive(UnfocusedCPU.class) && !isWindowFocused()) info.setReturnValue(Math.min(Modules.get().get(UnfocusedCPU.class).fps.get(), this.options.getMaxFps().getValue()));
     }
 
     // Time delta

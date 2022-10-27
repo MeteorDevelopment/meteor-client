@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.misc;
@@ -172,8 +172,8 @@ public class BookBot extends Module {
         }
 
         // If somehow it failed, just dont do anything until it tries again
-        FindItemResult finalBook = InvUtils.findInHotbar(Items.WRITABLE_BOOK);
-        if (!finalBook.isMainHand()) return;
+        boolean foundFinalBook = InvUtils.testInMainHand(Items.WRITABLE_BOOK);
+        if (foundFinalBook) return;
 
         // Check delay
         if (delayTimer > 0) {

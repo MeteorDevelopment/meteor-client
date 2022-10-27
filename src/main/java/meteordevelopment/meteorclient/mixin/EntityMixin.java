@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -17,7 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
-import meteordevelopment.meteorclient.utils.render.EntityShaders;
+import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -30,7 +30,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraft.world.event.GameEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,9 +48,6 @@ public abstract class EntityMixin {
 
     @Shadow public abstract BlockPos getBlockPos();
     @Shadow protected abstract BlockPos getVelocityAffectingPos();
-
-    @Shadow
-    public abstract void emitGameEvent(GameEvent event);
 
     @Redirect(method = "updateMovementInFluid", at = @At(value = "INVOKE", target = "Lnet/minecraft/fluid/FluidState;getVelocity(Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/util/math/Vec3d;"))
     private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
@@ -98,14 +94,15 @@ public abstract class EntityMixin {
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
         if ((Object) this == mc.player) {
             MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
-        } else if ((Object) this instanceof LivingEntity) {
+        }
+        else if ((Object) this instanceof LivingEntity) {
             MeteorClient.EVENT_BUS.post(LivingEntityMoveEvent.get((LivingEntity) (Object) this, movement));
         }
     }
 
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
     private void onGetTeamColorValue(CallbackInfoReturnable<Integer> info) {
-        if (EntityShaders.renderingOutlines) {
+        if (PostProcessShaders.rendering) {
             info.setReturnValue(Modules.get().get(ESP.class).getColor((Entity) (Object) this).getPacked());
         }
     }
@@ -114,13 +111,14 @@ public abstract class EntityMixin {
     private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
         if ((Object) this != mc.player) return blockState.getBlock();
         if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
+        if (blockState.getBlock() == Blocks.HONEY_BLOCK && Modules.get().get(NoSlow.class).honeyBlock()) return Blocks.STONE;
         return blockState.getBlock();
     }
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (!Utils.canUpdate()) return;
-        if (Modules.get().get(NoRender.class).noInvisibility() || Modules.get().get(ESP.class).shouldDrawOutline((Entity) (Object) this)) info.setReturnValue(false);
+        if (Modules.get().get(NoRender.class).noInvisibility() || !Modules.get().get(ESP.class).shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)

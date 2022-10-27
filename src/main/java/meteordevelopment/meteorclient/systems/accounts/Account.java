@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.accounts;
@@ -28,13 +28,6 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     }
 
     public abstract boolean fetchInfo();
-
-    public boolean fetchHead() {
-        String url = AccountUtils.getSkinUrl(cache.username);
-        if (url == null) return true;
-
-        return cache.loadHead(url);
-    }
 
     public boolean login() {
         YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();

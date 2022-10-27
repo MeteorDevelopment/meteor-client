@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -54,23 +54,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CrystalAura extends Module {
-    public enum YawStepMode {
-        Break,
-        All,
-    }
-
-    public enum AutoSwitchMode {
-        Normal,
-        Silent,
-        None
-    }
-
-    public enum SupportMode {
-        Disabled,
-        Accurate,
-        Fast
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgFacePlace = settings.createGroup("Face Place");
@@ -798,7 +781,7 @@ public class CrystalAura extends Module {
         if (!doPlace.get() || placeTimer > 0) return;
 
         // Return if there are no crystals in hotbar or offhand
-        if (!InvUtils.findInHotbar(Items.END_CRYSTAL).found()) return;
+        if (!InvUtils.testInHotbar(Items.END_CRYSTAL)) return;
 
         // Return if there are no crystals in either hand and auto switch mode is none
         if (autoSwitch.get() == AutoSwitchMode.None && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) return;
@@ -1022,10 +1005,10 @@ public class CrystalAura extends Module {
         ((IRaycastContext) raycastContext).set(playerEyePos, vec3d, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
 
         BlockHitResult result = mc.world.raycast(raycastContext);
-        boolean behindWall = result == null || !result.getBlockPos().equals(blockPos);
-        double distance = mc.player.getPos().distanceTo(vec3d);
 
-        return distance > (behindWall ? (place ? placeWallsRange : breakWallsRange).get() : (place ? placeRange : breakRange).get());
+        if (result == null || !result.getBlockPos().equals(blockPos)) // Is behind wall
+            return !PlayerUtils.isWithin(vec3d, (place ? placeWallsRange : breakWallsRange).get());
+        return !PlayerUtils.isWithin(vec3d, (place ? placeRange : breakRange).get());
     }
 
     private PlayerEntity getNearestTarget() {
@@ -1033,7 +1016,7 @@ public class CrystalAura extends Module {
         double nearestDistance = Double.MAX_VALUE;
 
         for (PlayerEntity target : targets) {
-            double distance = target.squaredDistanceTo(mc.player);
+            double distance = PlayerUtils.squaredDistanceTo(target);
 
             if (distance < nearestDistance) {
                 nearestTarget = target;
@@ -1083,17 +1066,17 @@ public class CrystalAura extends Module {
         for (PlayerEntity player : mc.world.getPlayers()) {
             if (player.getAbilities().creativeMode || player == mc.player) continue;
 
-            if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && player.distanceTo(mc.player) <= targetRange.get()) {
+            if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && PlayerUtils.isWithin(player, targetRange.get())) {
                 targets.add(player);
             }
         }
 
         // Fake players
-        for (PlayerEntity player : FakePlayerManager.getPlayers()) {
-            if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && player.distanceTo(mc.player) <= targetRange.get()) {
-                targets.add(player);
+        FakePlayerManager.forEach(fp -> {
+            if (!fp.isDead() && fp.isAlive() && Friends.get().shouldAttack(fp) && PlayerUtils.isWithin(fp, targetRange.get())) {
+                targets.add(fp);
             }
-        }
+        });
     }
 
     private boolean intersectsWithEntities(Box box) {
@@ -1141,5 +1124,22 @@ public class CrystalAura extends Module {
             TextRenderer.get().end();
             NametagUtils.end();
         }
+    }
+
+    public enum YawStepMode {
+        Break,
+        All,
+    }
+
+    public enum AutoSwitchMode {
+        Normal,
+        Silent,
+        None
+    }
+
+    public enum SupportMode {
+        Disabled,
+        Accurate,
+        Fast
     }
 }

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.commands.arguments;
@@ -18,8 +18,12 @@ import net.minecraft.util.Identifier;
 import java.util.concurrent.CompletableFuture;
 
 public class SettingValueArgumentType implements ArgumentType<String> {
-    public static SettingValueArgumentType value() {
+    public static SettingValueArgumentType create() {
         return new SettingValueArgumentType();
+    }
+
+    public static String get(CommandContext<?> context) {
+        return context.getArgument("value", String.class);
     }
 
     @Override
@@ -34,7 +38,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
         Setting<?> setting;
 
         try {
-            setting = SettingArgumentType.getSetting(context);
+            setting = SettingArgumentType.get(context);
         } catch (CommandSyntaxException ignored) {
             return null;
         }

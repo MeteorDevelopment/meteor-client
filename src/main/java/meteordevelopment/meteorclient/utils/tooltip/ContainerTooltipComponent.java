@@ -1,11 +1,12 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.tooltip;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.font.TextRenderer;
@@ -19,7 +20,7 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
 public class ContainerTooltipComponent implements TooltipComponent, MeteorTooltipData {
-    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new Identifier("meteor-client", "textures/container.png");
+    private static final Identifier TEXTURE_CONTAINER_BACKGROUND = new MeteorIdentifier("textures/container.png");
 
     private final DefaultedList<ItemStack> items;
     private final Color color;

@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -31,7 +31,7 @@ public class AutoWeb extends Module {
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
         .name("target-priority")
-        .description("How to select the player to target.")
+        .description("How to filter targets within range.")
         .defaultValue(SortPriority.LowestDistance)
         .build()
     );
@@ -60,8 +60,8 @@ public class AutoWeb extends Module {
     private void onTick(TickEvent.Pre event) {
         if (TargetUtils.isBadTarget(target, range.get())) {
             target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+            if (TargetUtils.isBadTarget(target, range.get())) return;
         }
-        if (TargetUtils.isBadTarget(target, range.get())) return;
 
         BlockUtils.place(target.getBlockPos(), InvUtils.findInHotbar(Items.COBWEB), rotate.get(), 0, false);
 

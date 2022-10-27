@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -54,7 +54,7 @@ public class AimAssist extends Module {
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
         .name("priority")
-        .description("How to select target from entities in range.")
+        .description("How to filter targets within range.")
         .defaultValue(SortPriority.LowestHealth)
         .build()
     );
@@ -95,7 +95,7 @@ public class AimAssist extends Module {
     private void onTick(TickEvent.Post event) {
         target = TargetUtils.get(entity -> {
             if (!entity.isAlive()) return false;
-            if (mc.player.distanceTo(entity) >= range.get()) return false;
+            if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
             if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 

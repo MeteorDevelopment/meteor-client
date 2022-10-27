@@ -1,9 +1,0 @@
-version: 2
-updates:
-  - package-ecosystem: "gradle"
-    directory: "/"
-    schedule:
-      interval: "daily"
-    commit-message:
-      prefix: "gradle"
-      include: "scope"

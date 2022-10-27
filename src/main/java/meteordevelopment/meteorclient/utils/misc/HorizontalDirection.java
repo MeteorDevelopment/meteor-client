@@ -1,19 +1,19 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.misc;
 
 public enum HorizontalDirection {
     South("South", "Z+", false, 0, 0, 1),
-    SouthEast("South East", "Z+ X+", true, -45, 1, 1),
+    SouthEast("South East", "X+ Z+", true, -45, 1, 1),
     West("West", "X-", false, 90, -1, 0),
-    NorthWest("North West", "Z- X-", true, 135, -1, -1),
+    NorthWest("North West", "X- Z-", true, 135, -1, -1),
     North("North", "Z-", false, 180, 0, -1),
-    NorthEast("North East", "Z- X+", true, -135, 1, -1),
+    NorthEast("North East", "X+ Z-", true, -135, 1, -1),
     East("East", "X+", false, -90, 1, 0),
-    SouthWest("South West", "Z+ X-", true, 45, -1, 1);
+    SouthWest("South West", "X- Z+", true, 45, -1, 1);
 
     public final String name;
     public final String axis;

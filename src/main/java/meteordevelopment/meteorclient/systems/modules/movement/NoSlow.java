@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.movement;
@@ -39,6 +39,13 @@ public class NoSlow extends Module {
         .min(1)
         .sliderMin(1)
         .visible(() -> web.get() == WebMode.Timer)
+        .build()
+    );
+
+    private final Setting<Boolean> honeyBlock = sgGeneral.add(new BoolSetting.Builder()
+        .name("honey-block")
+        .description("Whether or not Honey Block will not slow you down.")
+        .defaultValue(true)
         .build()
     );
 
@@ -87,6 +94,10 @@ public class NoSlow extends Module {
 
     public boolean items() {
         return isActive() && items.get();
+    }
+
+    public boolean honeyBlock() {
+        return isActive() && honeyBlock.get();
     }
 
     public boolean soulSand() {

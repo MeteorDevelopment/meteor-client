@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.render;
@@ -155,11 +155,32 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noMessageSignatureIndicator = sgHUD.add(new BoolSetting.Builder()
+        .name("message-signature-indicator")
+        .description("Disables chat message signature indicator on the left of the message.")
+        .defaultValue(false)
+        .build()
+    );
+
     // World
 
     private final Setting<Boolean> noWeather = sgWorld.add(new BoolSetting.Builder()
         .name("weather")
         .description("Disables rendering of weather.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noBlindness = sgWorld.add(new BoolSetting.Builder()
+    .name("blindness")
+    .description("Disables rendering of blindness.")
+    .defaultValue(false)
+    .build()
+    );
+
+    private final Setting<Boolean> noDarkness = sgWorld.add(new BoolSetting.Builder()
+        .name("darkness")
+        .description("Disables rendering of darkness.")
         .defaultValue(false)
         .build()
     );
@@ -377,10 +398,22 @@ public class NoRender extends Module {
         return isActive() && noPotionIcons.get();
     }
 
+    public boolean noMessageSignatureIndicator() {
+        return isActive() && noMessageSignatureIndicator.get();
+    }
+
     // World
 
     public boolean noWeather() {
         return isActive() && noWeather.get();
+    }
+
+    public boolean noBlindness() {
+        return isActive() && noBlindness.get();
+    }
+
+    public boolean noDarkness() {
+        return isActive() && noDarkness.get();
     }
 
     public boolean noFog() {

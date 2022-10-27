@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.render.color;
@@ -230,6 +230,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     @Override
     public Color copy() {
         return new Color(r, g, b, a);
+    }
+
+    public SettingColor toSetting() {
+        return new SettingColor(r, g, b, a);
     }
 
     public void validate() {

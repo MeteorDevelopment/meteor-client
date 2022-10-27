@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui;
@@ -56,7 +56,7 @@ public abstract class WidgetScreen extends Screen {
 
     private List<Runnable> onClosed;
 
-    private boolean firstInit = true;
+    protected boolean firstInit = true;
 
     public WidgetScreen(GuiTheme theme, String title) {
         super(Text.literal(title));
@@ -221,6 +221,9 @@ public abstract class WidgetScreen extends Screen {
         }
         else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
             reload();
+            if (parent instanceof WidgetScreen wScreen) {
+                wScreen.reload();
+            }
             return true;
         }
 

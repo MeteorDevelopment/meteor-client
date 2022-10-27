@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -147,8 +147,8 @@ public class HoleFiller extends Module {
         for (Hole hole : holes) holePool.free(hole);
         holes.clear();
 
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
-        if (!block.found()) return;
+        boolean foundBlock = InvUtils.testInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem blockItem && blocks.get().contains(blockItem.getBlock()));
+        if (!foundBlock) return;
 
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
             if (!validHole(blockPos)) return;
@@ -189,7 +189,7 @@ public class HoleFiller extends Module {
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
         if (timer <= 0 && !holes.isEmpty()) {
-            FindItemResult block = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+            FindItemResult block = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem blockItem && blocks.get().contains(blockItem.getBlock()));
 
             BlockUtils.place(holes.get(0).blockPos, block, rotate.get(), 10, true);
 

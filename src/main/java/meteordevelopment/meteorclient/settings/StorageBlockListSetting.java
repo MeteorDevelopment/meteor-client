@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.settings;
@@ -9,7 +9,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.ObjectIterators;
-import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
@@ -109,7 +109,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     private static class SRegistry extends Registry<BlockEntityType<?>> {
         public SRegistry() {
-            super(RegistryKey.ofRegistry(new Identifier(MeteorClient.MOD_ID, "storage-blocks")), Lifecycle.stable());
+            super(RegistryKey.ofRegistry(new MeteorIdentifier("storage-blocks")), Lifecycle.stable());
         }
 
         @Override

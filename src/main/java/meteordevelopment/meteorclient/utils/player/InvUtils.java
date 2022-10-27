@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.utils.player;
@@ -19,6 +19,49 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class InvUtils {
     private static final Action ACTION = new Action();
     public static int previousSlot = -1;
+
+    // Predicates
+
+    public static boolean testInMainHand(Predicate<ItemStack> predicate) {
+        return predicate.test(mc.player.getMainHandStack());
+    }
+
+    public static boolean testInMainHand(Item... items) {
+        return testInMainHand(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
+    }
+
+    public static boolean testInOffHand(Predicate<ItemStack> predicate) {
+        return predicate.test(mc.player.getOffHandStack());
+    }
+
+    public static boolean testInOffHand(Item... items) {
+        return testInOffHand(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
+    }
+
+    public static boolean testInHotbar(Predicate<ItemStack> predicate) {
+        if (testInMainHand(predicate)) return true;
+        if (testInOffHand(predicate)) return true;
+
+        for (int i = SlotUtils.HOTBAR_START; i < SlotUtils.HOTBAR_END; i++) {
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (predicate.test(stack)) return true;
+        }
+
+        return false;
+    }
+
+    public static boolean testInHotbar(Item... items) {
+        return testInHotbar(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
+    }
 
     // Finding items
 
@@ -57,10 +100,13 @@ public class InvUtils {
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood) {
+        if (mc.player == null) return new FindItemResult(0, 0);
         return find(isGood, 0, mc.player.getInventory().size());
     }
 
     public static FindItemResult find(Predicate<ItemStack> isGood, int start, int end) {
+        if (mc.player == null) return new FindItemResult(0, 0);
+
         int slot = -1, count = 0;
 
         for (int i = start; i <= end; i++) {
@@ -95,6 +141,7 @@ public class InvUtils {
     public static boolean swap(int slot, boolean swapBack) {
         if (slot < 0 || slot > 8) return false;
         if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
+        else if (!swapBack) previousSlot = -1;
 
         mc.player.getInventory().selectedSlot = slot;
         ((IClientPlayerInteractionManager) mc.interactionManager).syncSelected();

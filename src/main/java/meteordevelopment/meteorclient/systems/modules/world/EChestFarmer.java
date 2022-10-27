@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.world;
@@ -134,7 +134,7 @@ public class EChestFarmer extends Module {
         }
 
         // Disable if the block is too far away
-        if (PlayerUtils.distanceTo(target) > mc.interactionManager.getReachDistance()) {
+        if (!PlayerUtils.isWithinReach(target)) {
             error("Target block pos out of reach.");
             target = null;
             return;

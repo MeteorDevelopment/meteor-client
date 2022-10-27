@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.mixin;
@@ -10,6 +10,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
 import meteordevelopment.meteorclient.systems.modules.render.Nametags;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.client.render.Frustum;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderer;
@@ -32,9 +34,10 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
+        if (PostProcessShaders.rendering) info.cancel();
         if (Modules.get().get(NoRender.class).noNametags()) info.cancel();
         if (!(entity instanceof PlayerEntity)) return;
-        if (Modules.get().isActive(Nametags.class)) info.cancel();
+        if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode((PlayerEntity) entity) == null && Modules.get().get(Nametags.class).excludeBots())) info.cancel();
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)

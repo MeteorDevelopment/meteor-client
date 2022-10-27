@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.systems.modules.combat;
@@ -106,7 +106,7 @@ public class Quiver extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (arrowSlots.isEmpty() || !InvUtils.findInHotbar(Items.BOW).isMainHand()) {
+        if (arrowSlots.isEmpty() || !InvUtils.testInMainHand(Items.BOW)) {
             toggle();
             return;
         }

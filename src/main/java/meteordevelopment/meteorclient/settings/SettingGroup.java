@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.settings;
@@ -37,6 +37,10 @@ public class SettingGroup implements ISerializable<SettingGroup>, Iterable<Setti
         settings.add(setting);
 
         return setting;
+    }
+
+    public Setting<?> getByIndex(int index) {
+        return settings.get(index);
     }
 
     @Override

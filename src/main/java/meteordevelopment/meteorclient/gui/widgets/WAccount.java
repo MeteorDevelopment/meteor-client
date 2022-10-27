@@ -1,6 +1,6 @@
 /*
- * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client/).
- * Copyright (c) 2021 Meteor Development.
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
  */
 
 package meteordevelopment.meteorclient.gui.widgets;
@@ -28,13 +28,12 @@ public abstract class WAccount extends WHorizontalList {
     }
 
     protected abstract Color loggedInColor();
-
     protected abstract Color accountTypeColor();
 
     @Override
     public void init() {
         // Head
-        add(theme.texture(32, 32, account.getCache().shouldRotateHeadTexture() ? 90 : 0, account.getCache().getHeadTexture()));
+        add(theme.texture(32, 32, account.getCache().getHeadTexture().needsRotate() ? 90 : 0, account.getCache().getHeadTexture()));
 
         // Name
         WLabel name = add(theme.label(account.getUsername())).widget();
