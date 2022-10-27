@@ -101,7 +101,7 @@ public class RenderUtils {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Pre event) {
+    private static void onTick(TickEvent.Pre event) {
         if (renderBlocks.size() == 0) return;
 
         renderBlocks.forEach(RenderBlock::tick);
@@ -117,7 +117,7 @@ public class RenderUtils {
     }
 
     @EventHandler
-    private void onRender(Render3DEvent event) {
+    private static void onRender(Render3DEvent event) {
         renderBlocks.forEach(block -> block.render(event));
     }
 
