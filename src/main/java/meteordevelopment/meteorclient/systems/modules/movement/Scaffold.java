@@ -163,7 +163,7 @@ public class Scaffold extends Module {
                 pos = pos.add(0, -0.98f, 0);
                 pos.add(mc.player.getVelocity());
 
-                if (PlayerUtils.isWithin(prevBp, placeRange.get())) {
+                if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
                     List<BlockPos> blockPosArray = new ArrayList<>();
 
                     for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
