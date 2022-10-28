@@ -6,14 +6,13 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.IntSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.util.hit.HitResult;
 
 public class AutoClicker extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -31,7 +30,32 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
-        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .visible(() -> leftClickMode.get() == Mode.Press)
+        .build()
+    );
+
+
+    private final Setting<Boolean> smartDelay = sgGeneral.add(new BoolSetting.Builder()
+        .name("smart-delay")
+        .description("Uses the vanilla cooldown to attack entities.")
+        .defaultValue(true)
+        .visible(() -> leftClickMode.get() == Mode.Press)
+        .build()
+    );
+
+    private final Setting<Boolean> breakBlocks = sgGeneral.add(new BoolSetting.Builder()
+        .name("break-blocks")
+        .description("Allow breaking blocks when autoclicking.")
+        .defaultValue(true)
+        .visible(() -> leftClickMode.get() == Mode.Press)
+        .build()
+    );
+
+    private final Setting<Boolean> onlyWhenHoldingLeftClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("when-holding-left-click")
+        .description("Works only when holding left click.")
+        .defaultValue(true)
+        .visible(() -> leftClickMode.get() == Mode.Press)
         .build()
     );
 
@@ -48,7 +72,15 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
-        .visible(() -> rightClickMode.get() != Mode.Disabled)
+        .visible(() -> rightClickMode.get() == Mode.Press)
+        .build()
+    );
+
+    private final Setting<Boolean> onlyWhenHoldingRightClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("when-holding-right-click")
+        .description("Works only when holding right click.")
+        .defaultValue(true)
+        .visible(() -> rightClickMode.get() == Mode.Press)
         .build()
     );
 
@@ -79,10 +111,20 @@ public class AutoClicker extends Module {
             case Hold -> mc.options.attackKey.setPressed(true);
             case Press -> {
                 leftClickTimer++;
-                if (leftClickTimer > leftClickDelay.get()) {
-                    Utils.leftClick();
+                if (mc.currentScreen != null) break;
+                boolean block = mc.crosshairTarget.getType() == HitResult.Type.BLOCK;
+                if (breakBlocks.get() && block && Input.isPressedButton(mc.options.attackKey)) {
+                    mc.options.attackKey.setPressed(true);
                     leftClickTimer = 0;
+                    break;
                 }
+                if (smartDelay.get() ? mc.player.getAttackCooldownProgress(0) >= 1 : leftClickTimer > leftClickDelay.get())
+                    if (!onlyWhenHoldingLeftClick.get() || Input.isPressedButton(mc.options.attackKey)) {
+                        if (!breakBlocks.get() || !block) {
+                            Utils.leftClick();
+                            leftClickTimer = 0;
+                        }
+                    }
             }
         }
         switch (rightClickMode.get()) {
@@ -90,7 +132,9 @@ public class AutoClicker extends Module {
             case Hold -> mc.options.useKey.setPressed(true);
             case Press -> {
                 rightClickTimer++;
-                if (rightClickTimer > rightClickDelay.get()) {
+                if (mc.currentScreen != null) break;
+                if ((!onlyWhenHoldingRightClick.get() || Input.isPressedButton(mc.options.useKey))
+                    && rightClickTimer > rightClickDelay.get()) {
                     Utils.rightClick();
                     rightClickTimer = 0;
                 }

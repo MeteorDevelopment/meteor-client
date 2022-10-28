@@ -31,7 +31,10 @@ public class Input {
     }
 
     public static boolean isPressed(KeyBinding bind) {
-        return isKeyPressed(KeyBinds.getKey(bind));
+        return isKeyPressed(KeyBinds.getKey(bind)) || isButtonPressed(KeyBinds.getKey(bind));
+    }
+    public static boolean isPressedButton(KeyBinding bind) {
+        return isButtonPressed(KeyBinds.getKey(bind));
     }
 
     public static boolean isKeyPressed(int key) {
