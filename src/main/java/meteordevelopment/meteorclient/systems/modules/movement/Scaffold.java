@@ -11,10 +11,10 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -95,10 +95,18 @@ public class Scaffold extends Module {
 
     // Render
 
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+        .name("render")
+        .description("Whether to render blocks that have been placed.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(render::get)
         .build()
     );
 
@@ -106,6 +114,7 @@ public class Scaffold extends Module {
         .name("side-color")
         .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232, 10))
+        .visible(render::get)
         .build()
     );
 
@@ -113,11 +122,18 @@ public class Scaffold extends Module {
         .name("line-color")
         .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232))
+        .visible(render::get)
         .build()
     );
 
-    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
-    private final List<RenderBlock> renderBlocks = new ArrayList<>();
+    private final Setting<Integer> fadeDuration = sgRender.add(new IntSetting.Builder()
+       .name("fade-duration")
+       .description("How long for the rendered blocks to fade in ticks.")
+       .min(2)
+       .defaultValue(10)
+       .visible(render::get)
+       .build()
+    );
 
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
     private final BlockPos.Mutable prevBp = new BlockPos.Mutable();
@@ -133,23 +149,10 @@ public class Scaffold extends Module {
     public void onActivate() {
         lastWasSneaking = mc.options.sneakKey.isPressed();
         if (lastWasSneaking) lastSneakingY = mc.player.getY();
-
-        for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
-        renderBlocks.clear();
-    }
-
-    @Override
-    public void onDeactivate() {
-        for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
-        renderBlocks.clear();
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        // Ticking fade animation
-        renderBlocks.forEach(RenderBlock::tick);
-        renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
-
         if (airPlace.get()) {
             Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
             bp.set(vec.getX(), vec.getY(), vec.getZ());
@@ -222,7 +225,7 @@ public class Scaffold extends Module {
 
         if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
             // Render block if was placed
-            renderBlocks.add(renderBlockPool.get().set(bp));
+            if (render.get()) RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
 
             // Move player down so they are on top of the placed block ready to jump again
             if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir() && fastTower.get()) {
@@ -245,12 +248,6 @@ public class Scaffold extends Module {
 
         if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
         return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
-    }
-
-    @EventHandler
-    private void onRender(Render3DEvent event) {
-        renderBlocks.sort(Comparator.comparingInt(o -> -o.ticks));
-        renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeMode.get()));
     }
 
     // Rendering
