@@ -41,7 +41,7 @@ public class FakePlayer extends Module {
     );
 
     public FakePlayer() {
-        super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages. No need to active.");
+        super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages. No need to be active.");
     }
 
     @Override
