@@ -95,10 +95,18 @@ public class Scaffold extends Module {
 
     // Render
 
+    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
+        .name("render")
+        .description("Whether to render blocks that have been placed.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(render::get)
         .build()
     );
 
@@ -106,6 +114,7 @@ public class Scaffold extends Module {
         .name("side-color")
         .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232, 10))
+        .visible(render::get)
         .build()
     );
 
@@ -113,7 +122,17 @@ public class Scaffold extends Module {
         .name("line-color")
         .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(197, 137, 232))
+        .visible(render::get)
         .build()
+    );
+
+    private final Setting<Integer> fadeDuration = sgRender.add(new IntSetting.Builder()
+       .name("fade-duration")
+       .description("How long for the rendered blocks to fade in ticks.")
+       .min(2)
+       .defaultValue(10)
+       .visible(render::get)
+       .build()
     );
 
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
@@ -206,7 +225,7 @@ public class Scaffold extends Module {
 
         if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
             // Render block if was placed
-            RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
+            if (render.get()) RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
 
             // Move player down so they are on top of the placed block ready to jump again
             if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir() && fastTower.get()) {

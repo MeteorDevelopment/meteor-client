@@ -33,12 +33,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
     public static Vec3d center;
+
     private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
     private static final List<RenderBlock> renderBlocks = new ArrayList<>();
 
     @PostInit
-    private void init() {
-        MeteorClient.EVENT_BUS.subscribe(this);
+    public static void init() {
+        MeteorClient.EVENT_BUS.subscribe(RenderUtils.class);
     }
 
     // Items
@@ -106,7 +107,7 @@ public class RenderUtils {
 
         renderBlocks.forEach(RenderBlock::tick);
 
-        final Iterator<RenderBlock> iterator = renderBlocks.iterator();
+        Iterator<RenderBlock> iterator = renderBlocks.iterator();
         while (iterator.hasNext()) {
             RenderBlock next = iterator.next();
             if (next.ticks <= 0) {
@@ -129,7 +130,7 @@ public class RenderUtils {
         public int excludeDir;
 
         public int ticks, duration;
-        boolean fade, shrink;
+        public boolean fade, shrink;
 
         public RenderBlock set(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
             pos.set(blockPos);

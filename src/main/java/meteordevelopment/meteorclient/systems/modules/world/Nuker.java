@@ -212,6 +212,7 @@ public class Nuker extends Module {
         .name("nuke-block-mode")
         .description("How the shapes for broken blocks are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(enableRenderBreaking::get)
         .build()
     );
 
@@ -219,6 +220,7 @@ public class Nuker extends Module {
         .name("side-color")
         .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(255, 0, 0, 80))
+        .visible(enableRenderBreaking::get)
         .build()
     );
 
@@ -226,6 +228,7 @@ public class Nuker extends Module {
         .name("line-color")
         .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(255, 0, 0, 255))
+        .visible(enableRenderBreaking::get)
         .build()
     );
 
