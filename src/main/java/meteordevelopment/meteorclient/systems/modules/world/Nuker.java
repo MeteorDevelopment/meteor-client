@@ -13,13 +13,12 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Pool;
-import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -213,6 +212,7 @@ public class Nuker extends Module {
         .name("nuke-block-mode")
         .description("How the shapes for broken blocks are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(enableRenderBreaking::get)
         .build()
     );
 
@@ -220,6 +220,7 @@ public class Nuker extends Module {
         .name("side-color")
         .description("The side color of the target block rendering.")
         .defaultValue(new SettingColor(255, 0, 0, 80))
+        .visible(enableRenderBreaking::get)
         .build()
     );
 
@@ -227,15 +228,13 @@ public class Nuker extends Module {
         .name("line-color")
         .description("The line color of the target block rendering.")
         .defaultValue(new SettingColor(255, 0, 0, 255))
+        .visible(enableRenderBreaking::get)
         .build()
     );
 
 
     private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
     private final List<BlockPos.Mutable> blocks = new ArrayList<>();
-
-    private final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
-    private final List<RenderBlock> renderBlocks = new ArrayList<>();
 
     private boolean firstBlock;
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
@@ -258,26 +257,12 @@ public class Nuker extends Module {
     @Override
     public void onActivate() {
         firstBlock = true;
-        for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
-        renderBlocks.clear();
         timer = 0;
         noBlockTimer = 0;
     }
 
-    @Override
-    public void onDeactivate() {
-        for (RenderBlock renderBlock : renderBlocks) renderBlockPool.free(renderBlock);
-        renderBlocks.clear();
-    }
-
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (enableRenderBreaking.get()){
-            // Broken block
-            renderBlocks.sort(Comparator.comparingInt(o -> -o.ticks));
-            renderBlocks.forEach(renderBlock -> renderBlock.render(event, sideColor.get(), lineColor.get(), shapeModeBreak.get()));
-        }
-
         if (enableRenderBounding.get()){
             // Render bounding box if cube and should break stuff
             if (shape.get() != Shape.Sphere && mode.get() != Mode.Smash) {
@@ -290,9 +275,6 @@ public class Nuker extends Module {
 
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
-        renderBlocks.forEach(RenderBlock::tick);
-        renderBlocks.removeIf(renderBlock -> renderBlock.ticks <= 0);
-
         // Update timer
         if (timer > 0) {
             timer--;
@@ -425,7 +407,7 @@ public class Nuker extends Module {
                     BlockUtils.breakBlock(block, swingHand.get());
                 }
 
-                renderBlocks.add(renderBlockPool.get().set(block));
+                if (enableRenderBreaking.get()) RenderUtils.renderTickingBlock(block.toImmutable(), sideColor.get(), lineColor.get(), shapeModeBreak.get(), 0, 8, true, false);
                 lastBlockPos.set(block);
 
                 count++;
@@ -466,34 +448,5 @@ public class Nuker extends Module {
         double dY = Math.ceil(Math.abs(y2 - y1));
         double dZ = Math.ceil(Math.abs(z2 - z1));
         return Math.max(Math.max(dX, dY), dZ);
-    }
-
-    public static class RenderBlock {
-        public BlockPos.Mutable pos = new BlockPos.Mutable();
-        public int ticks;
-
-        public RenderBlock set(BlockPos blockPos) {
-            pos.set(blockPos);
-            ticks = 8;
-
-            return this;
-        }
-
-        public void tick() {
-            ticks--;
-        }
-
-        public void render(Render3DEvent event, Color sides, Color lines, ShapeMode shapeMode) {
-            int preSideA = sides.a;
-            int preLineA = lines.a;
-
-            sides.a *= (double) ticks / 8;
-            lines.a *= (double) ticks / 8;
-
-            event.renderer.box(pos, sides, lines, shapeMode, 0);
-
-            sides.a = preSideA;
-            lines.a = preLineA;
-        }
     }
 }
