@@ -101,6 +101,7 @@ public class Commands extends System<Commands> {
     }
 
     public void add(Command command) {
+        // Remove the previous command with the same name
         commands.removeIf(command1 -> command1.getName().equals(command.getName()));
         commandInstances.values().removeIf(command1 -> command1.getName().equals(command.getName()));
 
