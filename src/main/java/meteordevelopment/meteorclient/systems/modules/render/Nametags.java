@@ -40,7 +40,6 @@ import java.util.*;
 public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("Players");
-    private final SettingGroup sgItems = settings.createGroup("Items");
 
     // General
 
@@ -107,14 +106,14 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Boolean> excludeBots = sgItems.add(new BoolSetting.Builder()
+    //Players
+
+    private final Setting<Boolean> excludeBots = sgPlayers.add(new BoolSetting.Builder()
         .name("exclude-bots")
         .description("Only render non-bot nametags.")
         .defaultValue(true)
         .build()
     );
-
-    //Players
 
     private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
         .name("display-items")
@@ -204,9 +203,7 @@ public class Nametags extends Module {
         .build()
     );
 
-    //Items
-
-    private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
+    private final Setting<Boolean> itemCount = sgPlayers.add(new BoolSetting.Builder()
         .name("show-count")
         .description("Displays the number of items in the stack.")
         .defaultValue(true)

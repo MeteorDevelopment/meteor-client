@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
+import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -329,6 +330,18 @@ public class Utils {
         }
 
         return "";
+    }
+
+    public static String getModuleName(String name) {
+        boolean dupe = false;
+        for (Module module : Modules.get().getAll()) {
+            if (module.name.equals(name)) {
+                dupe = true;
+                break;
+            }
+        }
+        if (dupe) name += "*";
+        return name;
     }
 
     public static String nameToTitle(String name) {

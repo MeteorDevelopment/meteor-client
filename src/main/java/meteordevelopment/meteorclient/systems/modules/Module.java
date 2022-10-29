@@ -47,6 +47,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
     public boolean favorite = false;
 
     public Module(Category category, String name, String description) {
+        name = Utils.getModuleName(name);
         this.mc = MinecraftClient.getInstance();
         this.category = category;
         this.name = name;
