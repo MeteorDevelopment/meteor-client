@@ -40,6 +40,7 @@ import java.util.*;
 public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("Players");
+    private final SettingGroup sgItems = settings.createGroup("Items");
 
     // General
 
@@ -55,13 +56,6 @@ public class Nametags extends Module {
         .description("The scale of the nametag.")
         .defaultValue(1.5)
         .min(0.1)
-        .build()
-    );
-
-    private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
-        .name("self")
-        .description("Displays a nametag on your player if you're in Freecam or third person.")
-        .defaultValue(true)
         .build()
     );
 
@@ -106,7 +100,14 @@ public class Nametags extends Module {
         .build()
     );
 
-    //Players
+    // Players
+
+    private final Setting<Boolean> yourself = sgPlayers.add(new BoolSetting.Builder()
+        .name("self")
+        .description("Displays a nametag on your player if you're in Freecam or third person.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<Boolean> excludeBots = sgPlayers.add(new BoolSetting.Builder()
         .name("exclude-bots")
@@ -203,9 +204,11 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Boolean> itemCount = sgPlayers.add(new BoolSetting.Builder()
+    // Items
+
+    private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
         .name("show-count")
-        .description("Displays the number of items in the stack.")
+        .description("Displays the number of items in the stack when you .")
         .defaultValue(true)
         .build()
     );
