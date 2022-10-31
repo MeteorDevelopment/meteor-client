@@ -3,9 +3,10 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.commands;
+package meteordevelopment.meteorclient.systems.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
