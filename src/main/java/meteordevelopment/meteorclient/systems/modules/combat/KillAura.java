@@ -400,7 +400,7 @@ public class KillAura extends Module {
 
     @Override
     public String getInfoString() {
-        if (!targets.isEmpty()) EntityUtils.getName(getTarget());
+        if (!targets.isEmpty()) return EntityUtils.getName(getTarget());
         return null;
     }
 
