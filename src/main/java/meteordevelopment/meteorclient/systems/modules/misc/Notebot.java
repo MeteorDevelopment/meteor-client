@@ -433,6 +433,11 @@ public class Notebot extends Module {
 
             if (song.getNotesMap().containsKey(currentTick)) {
                 if (stage == Stage.Preview) onTickPreview();
+                else if (mc.player.getAbilities().creativeMode) {
+                    error("You need to be in survival mode.");
+                    stop();
+                    return;
+                }
                 else onTickPlay();
             }
 
