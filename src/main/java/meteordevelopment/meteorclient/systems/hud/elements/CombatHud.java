@@ -28,11 +28,9 @@ import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityGroup;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BedItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.SwordItem;
+import net.minecraft.item.*;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.registry.Registry;
 
@@ -81,6 +79,13 @@ public class CombatHud extends HudElement {
     private final Setting<Boolean> displayDistance = sgGeneral.add(new BoolSetting.Builder()
         .name("distance")
         .description("Shows the distance between you and the player.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> displayEstDamage = sgGeneral.add(new BoolSetting.Builder()
+        .name("estimated-damage")
+        .description("Shows the estimated damage you can do to the player.")
         .defaultValue(true)
         .build()
     );
@@ -175,6 +180,27 @@ public class CombatHud extends HudElement {
         .build()
     );
 
+    private final Setting<SettingColor> estDamage1 = sgGeneral.add(new ColorSetting.Builder()
+        .name("estimated-damage-stage-1")
+        .description("The color when the estimated damage is less than 1.")
+        .defaultValue(new SettingColor(255, 15, 15))
+        .build()
+    );
+
+    private final Setting<SettingColor> estDamage2 = sgGeneral.add(new ColorSetting.Builder()
+        .name("estimated-damage-stage-2")
+        .description("The color when the estimated damage is less than 5.")
+        .defaultValue(new SettingColor(255, 150, 15))
+        .build()
+    );
+
+    private final Setting<SettingColor> estDamage3 = sgGeneral.add(new ColorSetting.Builder()
+        .name("estimated-damage-stage-3")
+        .description("The color when the estimated damage is greater than 5.")
+        .defaultValue(new SettingColor(15, 255, 15))
+        .build()
+    );
+
     private PlayerEntity playerEntity;
 
     public CombatHud() {
@@ -245,6 +271,37 @@ public class CombatHud extends HudElement {
             else if (dist <= 50) distColor = distColor2.get();
             else distColor = distColor3.get();
 
+            // Armor Damage Reduction
+            double eDamage = 0;
+            float attackDamage;
+
+            assert mc.player != null;
+            ItemStack heldItem = mc.player.getMainHandStack();
+            if (heldItem.getItem() instanceof AxeItem || heldItem.getItem() instanceof SwordItem || heldItem.getItem() instanceof PickaxeItem || heldItem.getItem() instanceof ShovelItem) {
+                attackDamage = heldItem.getItem() instanceof AxeItem ? ((AxeItem) heldItem.getItem()).getAttackDamage() : heldItem.getItem() instanceof SwordItem ? ((SwordItem) heldItem.getItem()).getAttackDamage() : heldItem.getItem() instanceof PickaxeItem ? ((PickaxeItem) heldItem.getItem()).getAttackDamage() : ((ShovelItem) heldItem.getItem()).getAttackDamage();
+                attackDamage = attackDamage + EnchantmentHelper.getAttackDamage(heldItem, EntityGroup.DEFAULT);
+            } else if (heldItem.getItem() instanceof AirBlockItem || !(heldItem.getItem() instanceof BowItem) || !(heldItem.getItem() instanceof CrossbowItem) || !(heldItem.getItem() instanceof TridentItem)) {
+                attackDamage = 1;
+            } else {
+                attackDamage = 0;
+            }
+            int armorPoints = 0;
+            int armorToughness = 0;
+            for (ItemStack armorStack : playerEntity.getArmorItems()) {
+                if (armorStack.getItem() instanceof ArmorItem) {
+                    armorPoints += ((ArmorItem) armorStack.getItem()).getProtection();
+                    armorToughness += ((ArmorItem) armorStack.getItem()).getToughness();
+                }
+            }
+            if (!isInEditor()) {
+                eDamage = attackDamage * (1 - Math.max(armorPoints/5, armorPoints - (4*attackDamage)/(armorToughness+8))/25);
+            }
+            String eDamageText = String.format("%.1f", eDamage);
+            Color estDamageColor;
+            if (eDamage <= 1) estDamageColor = estDamage1.get();
+            else if (eDamage <= 5) estDamageColor = estDamage2.get();
+            else estDamageColor = estDamage3.get();
+
             // Status Text
             String friendText = "Unknown";
 
@@ -291,6 +348,7 @@ public class CombatHud extends HudElement {
             double breakWidth = TextRenderer.get().getWidth(breakText);
             double pingWidth = TextRenderer.get().getWidth(pingText);
             double friendWidth = TextRenderer.get().getWidth(friendText);
+            double distWidth = TextRenderer.get().getWidth(distText);
 
             TextRenderer.get().render(nameText, x, y, nameColor != null ? nameColor : primaryColor);
 
@@ -309,6 +367,10 @@ public class CombatHud extends HudElement {
             } else if (displayDistance.get()) {
                 TextRenderer.get().render(breakText, x + friendWidth, y, secondaryColor);
                 TextRenderer.get().render(distText, x + friendWidth + breakWidth, y, distColor);
+            }
+            if (displayEstDamage.get()) {
+                TextRenderer.get().render(breakText, x + friendWidth + breakWidth + pingWidth + breakWidth + distWidth, y, secondaryColor);
+                TextRenderer.get().render(eDamageText, x + friendWidth + breakWidth + pingWidth + breakWidth + distWidth + breakWidth, y, estDamageColor);
             }
 
             TextRenderer.get().end();
