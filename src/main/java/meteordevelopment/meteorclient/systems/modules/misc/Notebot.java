@@ -436,7 +436,7 @@ public class Notebot extends Module {
                 if (stage == Stage.Preview) onTickPreview();
                 else if (mc.player.getAbilities().creativeMode) {
                     error("You need to be in survival mode.");
-                    onSongEnd();
+                    forceStop();
                     return;
                 }
                 else onTickPlay();
