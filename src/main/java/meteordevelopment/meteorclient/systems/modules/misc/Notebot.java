@@ -428,7 +428,7 @@ public class Notebot extends Module {
 
             if (mc.player == null || currentTick > song.getLastTick()) {
                 // Stop the song after it is finished
-                stop();
+                onSongEnd();
                 return;
             }
 
@@ -436,7 +436,7 @@ public class Notebot extends Module {
                 if (stage == Stage.Preview) onTickPreview();
                 else if (mc.player.getAbilities().creativeMode) {
                     error("You need to be in survival mode.");
-                    stop();
+                    onSongEnd();
                     return;
                 }
                 else onTickPlay();
@@ -626,7 +626,7 @@ public class Notebot extends Module {
         disable();
     }
 
-    public void stop() {
+    public void onSongEnd() {
         if (autoPlay.get() && stage != Stage.Preview) {
             playRandomSong();
         } else {
