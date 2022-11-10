@@ -518,7 +518,7 @@ public class Notebot extends Module {
     }
 
     /**
-     * Set up a tune hits map which tells how many times player need to
+     * Set up a tune hits map which tells how many times player needs to
      * hit noteblock to obtain desired note level
      */
     private void setupTuneHitsMap() {
