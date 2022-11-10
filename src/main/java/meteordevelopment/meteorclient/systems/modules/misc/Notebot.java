@@ -407,14 +407,14 @@ public class Notebot extends Module {
             scanForNoteblocks();
             if (scannedNoteblocks.isEmpty()) {
                 error("Can't find any nearby noteblock!");
-                forceStop();
+                stop();
                 return;
             }
 
             setupNoteblocksMap();
             if (noteBlockPositions.isEmpty()) {
                 error("Can't find any valid noteblock to play song.");
-                forceStop();
+                stop();
                 return;
             }
             setupTuneHitsMap();
@@ -436,7 +436,7 @@ public class Notebot extends Module {
                 if (stage == Stage.Preview) onTickPreview();
                 else if (mc.player.getAbilities().creativeMode) {
                     error("You need to be in survival mode.");
-                    forceStop();
+                    stop();
                     return;
                 }
                 else onTickPlay();
@@ -569,7 +569,7 @@ public class Notebot extends Module {
 
         // Stop
         WButton stop = table.add(theme.button("Stop")).right().widget();
-        stop.action = this::forceStop;
+        stop.action = this::stop;
 
         return table;
     }
@@ -614,7 +614,7 @@ public class Notebot extends Module {
         }
     }
 
-    public void forceStop() {
+    public void stop() {
         info("Stopping.");
         if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks || stage == Stage.LoadingSong) {
             resetVariables();
@@ -630,7 +630,7 @@ public class Notebot extends Module {
         if (autoPlay.get() && stage != Stage.Preview) {
             playRandomSong();
         } else {
-            forceStop();
+            stop();
         }
     }
 
