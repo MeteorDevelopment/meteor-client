@@ -448,7 +448,7 @@ public class Notebot extends Module {
     }
 
     /**
-     * Setups a map of noteblocks positions
+     * Set up a map of noteblocks positions
      */
     private void setupNoteblocksMap() {
         noteBlockPositions.clear();
@@ -517,7 +517,7 @@ public class Notebot extends Module {
     }
 
     /**
-     * Setups a tune hits map which tells how many times player need to
+     * Set up a tune hits map which tells how many times player need to
      * hit noteblock to obtain desired note level
      */
     private void setupTuneHitsMap() {
