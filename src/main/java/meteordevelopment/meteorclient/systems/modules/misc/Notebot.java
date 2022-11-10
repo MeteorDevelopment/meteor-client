@@ -427,6 +427,7 @@ public class Notebot extends Module {
             if (!isPlaying) return;
 
             if (mc.player == null || currentTick > song.getLastTick()) {
+                // Stop the music after it is finished
                 stop();
                 return;
             }
