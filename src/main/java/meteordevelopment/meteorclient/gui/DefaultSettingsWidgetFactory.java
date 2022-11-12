@@ -29,19 +29,30 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
-    protected interface Factory {
+    @FunctionalInterface
+    public interface Factory {
         void create(WTable table, Setting<?> setting);
     }
 
     private static final SettingColor WHITE = new SettingColor();
+    private static final Map<Class<?>, Function<GuiTheme, Factory>> customFactories = new HashMap<>();
 
     private final GuiTheme theme;
     private final Map<Class<?>, Factory> factories = new HashMap<>();
 
+    public static void registerCustomFactory(Class<?> settingClass, Function<GuiTheme, Factory> factoryFunction) {
+        customFactories.put(settingClass, factoryFunction);
+    }
+
+    public static void unregisterCustomFactory(Class<?> settingClass) {
+        customFactories.remove(settingClass);
+    }
+    
     public DefaultSettingsWidgetFactory(GuiTheme theme) {
         this.theme = theme;
 
@@ -73,6 +84,10 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
         factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
+
+        for (var factory : customFactories.entrySet()) {
+            factories.put(factory.getKey(), factory.getValue().apply(theme));
+        }
     }
 
     @Override
