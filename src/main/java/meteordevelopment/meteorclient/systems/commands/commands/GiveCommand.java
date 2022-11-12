@@ -12,6 +12,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.Commands;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.command.CommandSource;
@@ -39,7 +40,7 @@ public class GiveCommand extends Command {
             FindItemResult fir = InvUtils.find(ItemStack::isEmpty, 0, 8);
             if (!fir.found()) throw NO_SPACE.create();
 
-            mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(fir.slot(), item));
+            mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + fir.slot(), item));
 
             return SINGLE_SUCCESS;
         }).then(argument("number", IntegerArgumentType.integer()).executes(context -> {
@@ -49,7 +50,7 @@ public class GiveCommand extends Command {
             FindItemResult fir = InvUtils.find(ItemStack::isEmpty, 0, 8);
             if (!fir.found()) throw NO_SPACE.create();
 
-            mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(fir.slot(), item));
+            mc.getNetworkHandler().sendPacket(new CreativeInventoryActionC2SPacket(36 + fir.slot(), item));
 
             return SINGLE_SUCCESS;
         })));
