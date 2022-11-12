@@ -33,29 +33,15 @@ import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
-    @FunctionalInterface
-    public interface Factory {
-        void create(WTable table, Setting<?> setting);
-    }
-
+public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private static final SettingColor WHITE = new SettingColor();
-    private static final Map<Class<?>, Function<GuiTheme, Factory>> customFactories = new HashMap<>();
 
-    private final GuiTheme theme;
-    private final Map<Class<?>, Factory> factories = new HashMap<>();
-
-    public static void registerCustomFactory(Class<?> settingClass, Function<GuiTheme, Factory> factoryFunction) {
-        customFactories.put(settingClass, factoryFunction);
-    }
-
-    public static void unregisterCustomFactory(Class<?> settingClass) {
-        customFactories.remove(settingClass);
-    }
-    
     public DefaultSettingsWidgetFactory(GuiTheme theme) {
-        this.theme = theme;
+        super(theme);
+    }
 
+    @Override
+    protected void registerDefaultFactories() {
         factories.put(BoolSetting.class, (table, setting) -> boolW(table, (BoolSetting) setting));
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
         factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));
@@ -84,10 +70,6 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
         factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
-
-        for (var factory : customFactories.entrySet()) {
-            factories.put(factory.getKey(), factory.getValue().apply(theme));
-        }
     }
 
     @Override
@@ -136,7 +118,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
             table.add(theme.label(setting.title)).top().marginTop(settingTitleTopMargin()).widget().tooltip = setting.description;
 
-            Factory factory = factories.get(setting.getClass());
+            Factory factory = getFactory(setting.getClass());
             if (factory != null) factory.create(table, setting);
 
             table.row();
