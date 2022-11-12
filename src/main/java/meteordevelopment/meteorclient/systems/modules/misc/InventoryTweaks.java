@@ -22,13 +22,13 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.AbstractSkullBlock;
+import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
@@ -198,7 +198,7 @@ public class InventoryTweaks extends Module {
         }
     }
 
-    // Sorting
+    // Sorting and armour swapping
 
     @EventHandler
     private void onKey(KeyEvent event) {
@@ -244,18 +244,18 @@ public class InventoryTweaks extends Module {
         if (mc.currentScreen != null) {
             if (!(mc.currentScreen instanceof InventoryScreen screen)) return false;
             Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
-            if (focusedSlot == null || !(focusedSlot.getStack().getItem() instanceof ArmorItem)) return false;
+            if (focusedSlot == null || !isWearable(focusedSlot.getStack())) return false;
 
             ItemStack itemStack = focusedSlot.getStack();
             EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
 
-            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
-                focusedSlot.getIndex(), SlotActionType.SWAP, mc.player);
+            //the way mojang handles the inventory is awful, and it took me too long to figure this out
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(focusedSlot.getIndex()),
+                SlotUtils.ARMOR_START + equipmentSlot.getEntitySlotId(), SlotActionType.SWAP, mc.player);
 
         } else {
             ItemStack itemStack = mc.player.getMainHandStack();
-            if (!(itemStack.getItem() instanceof ArmorItem)) return false;
-
+            if (!isWearable(itemStack)) return false;
             EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
 
             mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
@@ -263,6 +263,14 @@ public class InventoryTweaks extends Module {
 
         }
         return true;
+    }
+
+    private boolean isWearable(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+
+        if (Wearable.class.isAssignableFrom(item.getClass())) return true;
+        return item instanceof BlockItem &&
+            ((((BlockItem) item).getBlock() instanceof AbstractSkullBlock) || (((BlockItem) item).getBlock() instanceof CarvedPumpkinBlock));
     }
 
     @EventHandler
