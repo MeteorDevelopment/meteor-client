@@ -25,7 +25,7 @@ public class InGameOverlayRendererMixin {
 
     @Inject(method = "renderUnderwaterOverlay", at = @At("HEAD"), cancellable = true)
     private static void onRenderUnderwaterOverlay(MinecraftClient minecraftClient, MatrixStack matrixStack, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noWaterOverlay()) info.cancel();
+        if (Modules.get().get(NoRender.class).noLiquidOverlay()) info.cancel();
     }
 
     @Inject(method = "renderInWallOverlay", at = @At("HEAD"), cancellable = true)

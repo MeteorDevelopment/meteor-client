@@ -76,9 +76,9 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noWaterOverlay = sgOverlay.add(new BoolSetting.Builder()
-        .name("water-overlay")
-        .description("Disables rendering of the water overlay.")
+    private final Setting<Boolean> noLiquidOverlay = sgOverlay.add(new BoolSetting.Builder()
+        .name("liquid-overlay")
+        .description("Disables rendering of the liquid overlay.")
         .defaultValue(false)
         .build()
     );
@@ -348,8 +348,8 @@ public class NoRender extends Module {
         return isActive() && noFireOverlay.get();
     }
 
-    public boolean noWaterOverlay() {
-        return isActive() && noWaterOverlay.get();
+    public boolean noLiquidOverlay() {
+        return isActive() && noLiquidOverlay.get();
     }
 
     public boolean noPowderedSnowOverlay() {
