@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -424,7 +425,7 @@ public class Nuker extends Module {
         });
     }
 
-    @EventHandler
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
         event.cooldown = 0;
     }

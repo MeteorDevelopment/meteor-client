@@ -11,8 +11,6 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.world.Nuker;
 import meteordevelopment.orbit.EventHandler;
 
 public class BreakDelay extends Module {
@@ -31,9 +29,8 @@ public class BreakDelay extends Module {
         super(Categories.Player, "break-delay", "Changes the delay between breaking blocks.");
     }
 
-    @EventHandler
+    @EventHandler()
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
-        if (!Modules.get().isActive(Nuker.class))
-            event.cooldown = cooldown.get();
+        event.cooldown = cooldown.get();
     }
 }
