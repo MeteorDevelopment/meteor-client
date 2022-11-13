@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.events.world.UnloadChunkEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -31,6 +32,7 @@ import net.minecraft.world.chunk.Chunk;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -75,6 +77,16 @@ public class Search extends Module {
         .build()
     );
 
+    private final Setting<Integer> limit = sgGeneral.add(new IntSetting.Builder()
+        .name("limit")
+        .description("Render limit.")
+        .defaultValue(10000)
+        .min(1000)
+        .sliderMax(100000)
+        .onChanged((i) -> onActivate())
+        .build()
+    );
+
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private final Long2ObjectMap<SChunk> chunks = new Long2ObjectOpenHashMap<>();
@@ -90,6 +102,7 @@ public class Search extends Module {
 
     @Override
     public void onActivate() {
+        if (mc.world == null) return;
         synchronized (chunks) {
             chunks.clear();
             groups.clear();
@@ -156,10 +169,19 @@ public class Search extends Module {
         searchChunk(event.chunk, event);
     }
 
+    @EventHandler
+    private void onChunkUnload(UnloadChunkEvent event) {
+        chunks.remove(event.chunk.getPos().toLong());
+    }
+
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
         MeteorExecutor.execute(() -> {
             if (!isActive()) return;
             SChunk schunk = SChunk.searchChunk(chunk, blocks.get());
+
+            AtomicLong blocks = new AtomicLong(0);
+            chunks.forEach((l, c) -> blocks.addAndGet(c.size()));
+            if (blocks.get() > limit.get()) return;
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
@@ -236,7 +258,7 @@ public class Search extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         synchronized (chunks) {
-            for (Iterator<SChunk> it = chunks.values().iterator(); it.hasNext();) {
+            for (Iterator<SChunk> it = chunks.values().iterator(); it.hasNext(); ) {
                 SChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
@@ -248,12 +270,11 @@ public class Search extends Module {
                     });
 
                     it.remove();
-                }
-                else chunk.render(event);
+                } else chunk.render(event);
             }
 
             if (tracers.get()) {
-                for (Iterator<SGroup> it = groups.iterator(); it.hasNext();) {
+                for (Iterator<SGroup> it = groups.iterator(); it.hasNext(); ) {
                     SGroup group = it.next();
 
                     if (group.blocks.isEmpty()) it.remove();

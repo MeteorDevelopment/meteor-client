@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
+import meteordevelopment.meteorclient.events.world.UnloadChunkEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosionS2CPacket;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
@@ -60,6 +61,12 @@ public abstract class ClientPlayNetworkHandlerMixin {
     private void onChunkData(ChunkDataS2CPacket packet, CallbackInfo info) {
         WorldChunk chunk = client.world.getChunk(packet.getX(), packet.getZ());
         MeteorClient.EVENT_BUS.post(ChunkDataEvent.get(chunk));
+    }
+
+    @Inject(method = "onUnloadChunk", at = @At("TAIL"))
+    private void onUnloadChunk(UnloadChunkS2CPacket packet, CallbackInfo info) {
+        WorldChunk chunk = client.world.getChunk(packet.getX(), packet.getZ());
+        MeteorClient.EVENT_BUS.post(UnloadChunkEvent.get(chunk));
     }
 
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
