@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.render.search;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
@@ -25,6 +26,9 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.play.GameJoinS2CPacket;
+import net.minecraft.network.packet.s2c.play.PlayerRespawnS2CPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
@@ -32,7 +36,7 @@ import net.minecraft.world.chunk.Chunk;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -165,13 +169,25 @@ public class Search extends Module {
     }
 
     @EventHandler
+    private void onReadPacket(PacketEvent.Receive event) {
+        synchronized (chunks) {
+            if (event.packet instanceof DisconnectS2CPacket
+                || event.packet instanceof GameJoinS2CPacket
+                || event.packet instanceof PlayerRespawnS2CPacket)
+                onDeactivate();
+        }
+    }
+
+    @EventHandler
     private void onChunkData(ChunkDataEvent event) {
         searchChunk(event.chunk, event);
     }
 
     @EventHandler
     private void onChunkUnload(UnloadChunkEvent event) {
-        chunks.remove(event.chunk.getPos().toLong());
+        synchronized (chunks) {
+            chunks.remove(event.chunk.getPos().toLong());
+        }
     }
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
@@ -179,12 +195,13 @@ public class Search extends Module {
             if (!isActive()) return;
             SChunk schunk = SChunk.searchChunk(chunk, blocks.get());
 
-            AtomicLong blocks = new AtomicLong(0);
-            chunks.forEach((l, c) -> blocks.addAndGet(c.size()));
-            if (blocks.get() > limit.get()) return;
+            AtomicInteger blocks = new AtomicInteger(0);
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
+                    chunks.forEach((l, c) -> blocks.addAndGet(c.size()));
+                    if (blocks.get() > limit.get()) return;
+
                     chunks.put(chunk.getPos().toLong(), schunk);
                     schunk.update();
 
