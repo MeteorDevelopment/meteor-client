@@ -179,9 +179,7 @@ public class ESP extends Module {
     }
 
     private void drawBoundingBox(Render3DEvent event, Entity entity) {
-        Color color;
-        if (distance.get()) color = getColorFromDistance(entity);
-        else color = getColor(entity);
+        Color color = getColor(entity);
         lineColor.set(color);
         sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
 
@@ -233,9 +231,7 @@ public class ESP extends Module {
             if (checkCorner(box.maxX + x, box.maxY + y, box.maxZ + z, pos1, pos2)) continue;
 
             // Setup color
-            Color color;
-            if (distance.get()) color = getColorFromDistance(entity);
-            else color = getColor(entity);
+            Color color = getColor(entity);
             lineColor.set(color);
             sideColor.set(color).a((int) (sideColor.a * fillOpacity.get()));
 
@@ -303,22 +299,16 @@ public class ESP extends Module {
     }
 
     public Color getEntityTypeColor(Entity entity) {
-        Color color = getColorFromDistance(entity);
-        if (entity instanceof PlayerEntity) {
-            if (distance.get()) return color;
-            else return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-        }
-        if (distance.get()) {
-            return color;
-        } else {
-            return switch (entity.getType().getSpawnGroup()) {
-                case CREATURE -> animalsColor.get();
-                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                case MONSTER -> monstersColor.get();
-                case AMBIENT -> ambientColor.get();
-                default -> miscColor.get();
-            };
-        }
+        if (distance.get()) return getColorFromDistance(entity);
+        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+
+        return switch (entity.getType().getSpawnGroup()) {
+            case CREATURE -> animalsColor.get();
+            case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
+            case MONSTER -> monstersColor.get();
+            case AMBIENT -> ambientColor.get();
+            default -> miscColor.get();
+        };
     }
 
     private Color getColorFromDistance(Entity entity) {
