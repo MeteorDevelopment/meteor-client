@@ -120,9 +120,10 @@ public class AutoAnvil extends Module {
         }
 
         // Check distance + alive
-        if (TargetUtils.isBadTarget(target, range.get()))
+        if (TargetUtils.isBadTarget(target, range.get())) {
             target = TargetUtils.getPlayerTarget(range.get(), priority.get());
-        if (TargetUtils.isBadTarget(target, range.get())) return;
+            if (TargetUtils.isBadTarget(target, range.get())) return;
+        }
 
         if (placeButton.get()) {
             FindItemResult floorBlock = InvUtils.findInHotbar(itemStack -> Block.getBlockFromItem(itemStack.getItem()) instanceof AbstractPressurePlateBlock || Block.getBlockFromItem(itemStack.getItem()) instanceof AbstractButtonBlock);

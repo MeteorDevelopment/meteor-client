@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.utils.network;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import meteordevelopment.meteorclient.utils.other.JsonDateDeserializer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,11 +18,15 @@ import java.net.URISyntaxException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Date;
 import java.util.stream.Stream;
 
 public class Http {
     private static final HttpClient CLIENT = HttpClient.newHttpClient();
-    private static final Gson GSON = new Gson();
+
+    private static final Gson GSON = new GsonBuilder()
+        .registerTypeAdapter(Date.class, new JsonDateDeserializer())
+        .create();
 
     private enum Method {
         GET,

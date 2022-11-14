@@ -41,13 +41,11 @@ public class FakePlayer extends Module {
     );
 
     public FakePlayer() {
-        super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages.");
+        super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages. No need to be active.");
     }
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        if (!isActive()) return null;
-
         WHorizontalList w = theme.horizontalList();
 
         WButton spawn = w.add(theme.button("Spawn")).widget();
@@ -57,7 +55,7 @@ public class FakePlayer extends Module {
 
         WButton clear = w.add(theme.button("Clear")).widget();
         clear.action = () -> {
-            FakePlayerManager.add(name.get(), health.get(), copyInv.get());
+            FakePlayerManager.clear();
         };
 
         return w;

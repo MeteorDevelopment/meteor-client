@@ -63,8 +63,9 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
         WTable left = abc(pairs -> registry.forEach(t -> {
             if (skipValue(t) || collection.contains(t)) return;
 
-            int words = Utils.search(getValueName(t), filterText);
-            if (words > 0) pairs.add(new Pair<>(t, words));
+            int words = Utils.searchInWords(getValueName(t), filterText);
+            int diff = Utils.searchLevenshteinDefault(getValueName(t), filterText, false);
+            if (words > 0 || diff <= getValueName(t).length() / 2) pairs.add(new Pair<>(t, -diff));
         }), true, t -> {
             addValue(registry, t);
 
@@ -79,8 +80,9 @@ public abstract class LeftRightListSettingScreen<T> extends WindowScreen {
             for (T value : collection) {
                 if (skipValue(value)) continue;
 
-                int words = Utils.search(getValueName(value), filterText);
-                if (words > 0) pairs.add(new Pair<>(value, words));
+                int words = Utils.searchInWords(getValueName(value), filterText);
+                int diff = Utils.searchLevenshteinDefault(getValueName(value), filterText, false);
+                if (words > 0 || diff <= getValueName(value).length() / 2) pairs.add(new Pair<>(value, -diff));
             }
         }, false, t -> {
             removeValue(registry, t);

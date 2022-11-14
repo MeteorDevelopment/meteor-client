@@ -8,11 +8,14 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.KeybindSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
+import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 
@@ -29,8 +32,22 @@ public class Blink extends Module {
         .build()
     );
 
+    private final Setting<Keybind> cancelBlink = sgGeneral.add(new KeybindSetting.Builder()
+        .name("cancel-blink")
+        .description("Cancels sending packets and sends you back to your original position.")
+        .defaultValue(Keybind.none())
+        .action(() -> {
+            cancelled = true;
+            if (isActive()) toggle();
+        })
+        .build()
+    );
+
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
     private FakePlayerEntity model;
+    private final Vec3 start = new Vec3();
+
+    private boolean cancelled = false;
     private int timer = 0;
 
     public Blink() {
@@ -45,21 +62,14 @@ public class Blink extends Module {
             model.hideWhenInsideCamera = true;
             model.spawn();
         }
+        start.set(mc.player.getPos());
     }
 
     @Override
     public void onDeactivate() {
-        synchronized (packets) {
-            packets.forEach(mc.player.networkHandler::sendPacket);
-            packets.clear();
-        }
-
-        if (model != null) {
-            model.despawn();
-            model = null;
-        }
-
-        timer = 0;
+        dumpPackets(!cancelled);
+        if (cancelled) mc.player.setPos(start.x, start.y, start.z);
+        cancelled = false;
     }
 
     @EventHandler
@@ -91,5 +101,19 @@ public class Blink extends Module {
     @Override
     public String getInfoString() {
         return String.format("%.1f", timer / 20f);
+    }
+
+    private void dumpPackets(boolean send) {
+        synchronized (packets) {
+            if (send) packets.forEach(mc.player.networkHandler::sendPacket);
+            packets.clear();
+        }
+
+        if (model != null) {
+            model.despawn();
+            model = null;
+        }
+
+        timer = 0;
     }
 }

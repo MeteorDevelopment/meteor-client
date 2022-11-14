@@ -9,10 +9,7 @@ import io.netty.buffer.Unpooled;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
-import meteordevelopment.meteorclient.settings.StringSetting;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -27,15 +24,23 @@ import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.StringUtils;
 
-import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 public class ServerSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Boolean> spoofBrand = sgGeneral.add(new BoolSetting.Builder()
+        .name("spoof-brand")
+        .description("Whether or not to spoof the brand.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<String> brand = sgGeneral.add(new StringSetting.Builder()
         .name("brand")
         .description("Specify the brand that will be send to the server.")
         .defaultValue("vanilla")
+        .visible(spoofBrand::get)
         .build()
     );
 
@@ -46,8 +51,23 @@ public class ServerSpoof extends Module {
         .build()
     );
 
+    private final Setting<Boolean> blockChannels = sgGeneral.add(new BoolSetting.Builder()
+        .name("block-channels")
+        .description("Whether or not to block some channels.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
+        .name("channels")
+        .description("If the channel contains the keyword, this outgoing channel will be blocked.")
+        .defaultValue("minecraft:register")
+        .visible(blockChannels::get)
+        .build()
+    );
+
     public ServerSpoof() {
-        super(Categories.Misc, "server-spoof", "Spoof client brand and/or resource pack.");
+        super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
 
         MeteorClient.EVENT_BUS.subscribe(new Listener());
     }
@@ -60,31 +80,39 @@ public class ServerSpoof extends Module {
             CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
             Identifier id = packet.getChannel();
 
-            if (id.equals(CustomPayloadC2SPacket.BRAND)) {
+            if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
                 packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
-            }
-            else if (StringUtils.containsIgnoreCase(packet.getData().toString(StandardCharsets.UTF_8), "fabric") && brand.get().equalsIgnoreCase("fabric")) {
-                event.cancel();
+
+            if (blockChannels.get()) {
+                for (String channel : channels.get()) {
+                    if (StringUtils.containsIgnoreCase(channel, id.toString())) {
+                        event.cancel();
+                        return;
+                    }
+                }
             }
         }
 
         @EventHandler
         private void onPacketRecieve(PacketEvent.Receive event) {
-            if (!isActive() || !resourcePack.get()) return;
-            if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
-            event.cancel();
-            MutableText msg = Text.literal("This server has ");
-            msg.append(packet.isRequired() ? "a required " : "an optional ");
-            MutableText link = Text.literal("resource pack");
-            link.setStyle(link.getStyle()
-                .withColor(Formatting.BLUE)
-                .withUnderline(true)
-                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
-                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
-            );
-            msg.append(link);
-            msg.append(".");
-            info(msg);
+            if (!isActive()) return;
+
+            if (resourcePack.get()) {
+                if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
+                event.cancel();
+                MutableText msg = Text.literal("This server has ");
+                msg.append(packet.isRequired() ? "a required " : "an optional ");
+                MutableText link = Text.literal("resource pack");
+                link.setStyle(link.getStyle()
+                    .withColor(Formatting.BLUE)
+                    .withUnderline(true)
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
+                );
+                msg.append(link);
+                msg.append(".");
+                info(msg);
+            }
         }
     }
 }

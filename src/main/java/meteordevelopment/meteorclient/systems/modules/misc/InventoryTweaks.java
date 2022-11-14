@@ -20,18 +20,21 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
-import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.player.InventorySorter;
+import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.AbstractSkullBlock;
+import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
+import net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
@@ -80,6 +83,13 @@ public class InventoryTweaks extends Module {
     private final Setting<Boolean> armorStorage = sgGeneral.add(new BoolSetting.Builder()
         .name("armor-storage")
         .description("Allows you to put normal items in your armor slots.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> armorSwap = sgGeneral.add(new BoolSetting.Builder()
+        .name("armor-swap")
+        .description("Lets you swap between pieces of armor by right clicking on it.")
         .defaultValue(true)
         .build()
     );
@@ -138,7 +148,7 @@ public class InventoryTweaks extends Module {
         .name("auto-steal")
         .description("Automatically removes all possible items when you open a container.")
         .defaultValue(false)
-        .onChanged(val -> checkAutoStealSetttings())
+        .onChanged(val -> checkAutoStealSettings())
         .build()
     );
 
@@ -146,7 +156,7 @@ public class InventoryTweaks extends Module {
         .name("auto-dump")
         .description("Automatically dumps all possible items when you open a container.")
         .defaultValue(false)
-        .onChanged(val -> checkAutoStealSetttings())
+        .onChanged(val -> checkAutoStealSettings())
         .build()
     );
 
@@ -189,20 +199,34 @@ public class InventoryTweaks extends Module {
         }
     }
 
-    // Sorting
+    // Sorting and armour swapping
 
     @EventHandler
     private void onKey(KeyEvent event) {
-        if (event.action == KeyAction.Press && sortingKey.get().matches(true, event.key)) sort();
+        if (event.action != KeyAction.Press) return;
+
+        if (sortingKey.get().matches(true, event.key)) {
+            if (sort()) event.cancel();
+        }
+        if (mc.options.useKey.matchesKey(event.key, 0) && armorSwap()) {
+            if (swapArmor()) event.cancel();
+        }
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action == KeyAction.Press && sortingKey.get().matches(false, event.button)) sort();
+        if (event.action != KeyAction.Press) return;
+
+        if (sortingKey.get().matches(false, event.button)) {
+            if (sort()) event.cancel();
+        }
+        if (mc.options.useKey.matchesMouse(event.button) && armorSwap()) {
+            if (swapArmor()) event.cancel();
+        }
     }
 
-    private void sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return;
+    private boolean sort() {
+        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return false;
 
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             FindItemResult empty = InvUtils.findEmpty();
@@ -211,9 +235,43 @@ public class InventoryTweaks extends Module {
         }
 
         Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
-        if (focusedSlot == null) return;
+        if (focusedSlot == null) return false;
 
         sorter = new InventorySorter(screen, focusedSlot);
+        return true;
+    }
+
+    private boolean swapArmor() {  // would mixin to use method in ArmorItem, but it's buggy and unreliable on servers
+        if (mc.currentScreen != null) {
+            if (!(mc.currentScreen instanceof InventoryScreen screen)) return false;
+            Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
+            if (focusedSlot == null || !isWearable(focusedSlot.getStack())) return false;
+
+            ItemStack itemStack = focusedSlot.getStack();
+            EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
+
+            //the way mojang handles the inventory is awful, and it took me too long to figure this out
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(focusedSlot.getIndex()),
+                SlotUtils.ARMOR_START + equipmentSlot.getEntitySlotId(), SlotActionType.SWAP, mc.player);
+
+        } else {
+            ItemStack itemStack = mc.player.getMainHandStack();
+            if (!isWearable(itemStack)) return false;
+            EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
+
+            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
+                mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
+
+        }
+        return true;
+    }
+
+    private boolean isWearable(ItemStack itemStack) {
+        Item item = itemStack.getItem();
+
+        if (item instanceof Wearable) return true;
+        return item instanceof BlockItem blockItem &&
+            (blockItem.getBlock() instanceof AbstractSkullBlock || blockItem.getBlock() instanceof CarvedPumpkinBlock);
     }
 
     @EventHandler
@@ -261,7 +319,7 @@ public class InventoryTweaks extends Module {
 
     // Auto Steal
 
-    private void checkAutoStealSetttings() {
+    private void checkAutoStealSettings() {
         if (autoSteal.get() && autoDump.get()) {
             ChatUtils.error("You can't enable Auto Steal and Auto Dump at the same time!");
             autoDump.set(false);
@@ -323,5 +381,9 @@ public class InventoryTweaks extends Module {
 
     public boolean armorStorage() {
         return isActive() && armorStorage.get();
+    }
+
+    public boolean armorSwap() {
+        return isActive() && armorSwap.get();
     }
 }

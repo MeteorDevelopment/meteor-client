@@ -92,10 +92,18 @@ public class ESP extends Module {
 
     // Colors
 
+    public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
+        .name("distance-colors")
+        .description("Changes the color of tracers depending on distance.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<SettingColor> playersColor = sgColors.add(new ColorSetting.Builder()
         .name("players-color")
         .description("The other player's color.")
         .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> !distance.get())
         .build()
     );
 
@@ -103,6 +111,7 @@ public class ESP extends Module {
         .name("animals-color")
         .description("The animal's color.")
         .defaultValue(new SettingColor(25, 255, 25, 255))
+        .visible(() -> !distance.get())
         .build()
     );
 
@@ -110,6 +119,7 @@ public class ESP extends Module {
         .name("water-animals-color")
         .description("The water animal's color.")
         .defaultValue(new SettingColor(25, 25, 255, 255))
+        .visible(() -> !distance.get())
         .build()
     );
 
@@ -117,6 +127,7 @@ public class ESP extends Module {
         .name("monsters-color")
         .description("The monster's color.")
         .defaultValue(new SettingColor(255, 25, 25, 255))
+        .visible(() -> !distance.get())
         .build()
     );
 
@@ -124,6 +135,7 @@ public class ESP extends Module {
         .name("ambient-color")
         .description("The ambient's color.")
         .defaultValue(new SettingColor(25, 25, 25, 255))
+        .visible(() -> !distance.get())
         .build()
     );
 
@@ -131,12 +143,14 @@ public class ESP extends Module {
         .name("misc-color")
         .description("The misc color.")
         .defaultValue(new SettingColor(175, 175, 175, 255))
+        .visible(() -> !distance.get())
         .build()
     );
 
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
     private final Color baseColor = new Color();
+    private final Color distanceColor = new Color(255, 255, 255);
 
     private final Vec3 pos1 = new Vec3();
     private final Vec3 pos2 = new Vec3();
@@ -285,6 +299,7 @@ public class ESP extends Module {
     }
 
     public Color getEntityTypeColor(Entity entity) {
+        if (distance.get()) return getColorFromDistance(entity);
         if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
 
         return switch (entity.getType().getSpawnGroup()) {
@@ -294,6 +309,31 @@ public class ESP extends Module {
             case AMBIENT -> ambientColor.get();
             default -> miscColor.get();
         };
+    }
+
+    private Color getColorFromDistance(Entity entity) {
+        // Credit to Icy from Stackoverflow
+        double distance = PlayerUtils.distanceToCamera(entity);
+        double percent = distance / 60;
+
+        if (percent < 0 || percent > 1) {
+            distanceColor.set(0, 255, 0, 255);
+            return distanceColor;
+        }
+
+        int r, g;
+
+        if (percent < 0.5) {
+            r = 255;
+            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
+        }
+        else {
+            g = 255;
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
+        }
+
+        distanceColor.set(r, g, 0, 255);
+        return distanceColor;
     }
 
     @Override
