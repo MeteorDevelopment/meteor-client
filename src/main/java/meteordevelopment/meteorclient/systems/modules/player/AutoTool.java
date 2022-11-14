@@ -173,7 +173,6 @@ public class AutoTool extends Module {
         if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooSaplingBlock))
             score += 9000 + (item.getMaterial().getMiningLevel() * 1000);
 
-
         return score;
     }
 
