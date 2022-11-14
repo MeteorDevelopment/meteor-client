@@ -26,10 +26,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -38,10 +35,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     public DefaultSettingsWidgetFactory(GuiTheme theme) {
         super(theme);
-    }
 
-    @Override
-    protected void registerDefaultFactories() {
         factories.put(BoolSetting.class, (table, setting) -> boolW(table, (BoolSetting) setting));
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
         factories.put(DoubleSetting.class, (table, setting) -> doubleW(table, (DoubleSetting) setting));

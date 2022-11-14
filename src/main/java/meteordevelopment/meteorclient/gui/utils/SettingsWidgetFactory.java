@@ -24,8 +24,6 @@ public abstract class SettingsWidgetFactory {
 
     public SettingsWidgetFactory(GuiTheme theme) {
         this.theme = theme;
-
-        registerDefaultFactories();
     }
 
     /** {@code SettingsWidgetFactory.registerCustomFactory(SomeSetting.class, (theme) -> (table, setting) -> {//create widget})} */
@@ -36,8 +34,6 @@ public abstract class SettingsWidgetFactory {
     public static void unregisterCustomFactory(Class<?> settingClass) {
         customFactories.remove(settingClass);
     }
-
-    protected abstract void registerDefaultFactories();
 
     public abstract WWidget create(GuiTheme theme, Settings settings, String filter);
 
