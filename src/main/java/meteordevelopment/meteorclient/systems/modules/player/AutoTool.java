@@ -71,12 +71,12 @@ public class AutoTool extends Module {
         .build()
     );
 
-    private final Setting<Integer> switchDelay = sgGeneral.add((new IntSetting.Builder()
+    private final Setting<Integer> switchDelay = sgGeneral.add(new IntSetting.Builder()
         .name("switch-delay")
         .description("Delay in ticks before switching tools.")
         .defaultValue(0)
         .build()
-    ));
+    );
 
     private boolean wasPressed;
     private boolean shouldSwitch;
