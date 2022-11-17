@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render.search;
+package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
@@ -12,12 +12,12 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
 
-public class SBlockDataScreen extends WindowScreen {
-    private final SBlockData blockData;
+public class ESPBlockDataScreen extends WindowScreen {
+    private final ESPBlockData blockData;
     private final Block block;
-    private final BlockDataSetting<SBlockData> setting;
+    private final BlockDataSetting<ESPBlockData> setting;
 
-    public SBlockDataScreen(GuiTheme theme, SBlockData blockData, Block block, BlockDataSetting<SBlockData> setting) {
+    public ESPBlockDataScreen(GuiTheme theme, ESPBlockData blockData, Block block, BlockDataSetting<ESPBlockData> setting) {
         super(theme, "Configure Block");
 
         this.blockData = blockData;
@@ -95,7 +95,7 @@ public class SBlockDataScreen extends WindowScreen {
         add(theme.settings(settings)).expandX();
     }
 
-    private void changed(SBlockData blockData, Block block, BlockDataSetting<SBlockData> setting) {
+    private void changed(ESPBlockData blockData, Block block, BlockDataSetting<ESPBlockData> setting) {
         if (!blockData.isChanged() && block != null && setting != null) {
             setting.get().put(block, blockData);
             setting.onChanged();
