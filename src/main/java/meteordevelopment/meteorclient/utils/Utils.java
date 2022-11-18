@@ -268,12 +268,6 @@ public class Utils {
         // Populate matrix
         int[][] d = new int[textLength + 1][filterLength + 1];
 
-        for (int i = 0; i < textLength; i++) {
-            for (int j = 0; j < filterLength; j++) {
-                d[i][j] = 0;
-            }
-        }
-
         for (int i = 0; i <= textLength; i++) {
             d[i][0] = i * delCost;
         }
