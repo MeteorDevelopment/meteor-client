@@ -6,12 +6,19 @@
 package meteordevelopment.meteorclient.utils.render.color;
 
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 
 public class SettingColor extends Color {
     public boolean rainbow;
 
     public SettingColor() {
         super();
+    }
+
+    public SettingColor(int packed) {
+        super(packed);
     }
 
     public SettingColor(int r, int g, int b) {
@@ -38,6 +45,22 @@ public class SettingColor extends Color {
     public SettingColor(SettingColor color) {
         super(color);
         this.rainbow = color.rainbow;
+    }
+
+    public SettingColor(java.awt.Color color) {
+        super(color);
+    }
+
+    public SettingColor(Formatting formatting) {
+        super(formatting);
+    }
+
+    public SettingColor(TextColor textColor) {
+        super(textColor);
+    }
+
+    public SettingColor(Style style) {
+        super(style);
     }
 
     public SettingColor rainbow(boolean rainbow) {

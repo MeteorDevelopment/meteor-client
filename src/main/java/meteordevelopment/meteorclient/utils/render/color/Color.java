@@ -8,7 +8,11 @@ package meteordevelopment.meteorclient.utils.render.color;
 import meteordevelopment.meteorclient.utils.misc.ICopyable;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Style;
+import net.minecraft.text.TextColor;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
 
 @SuppressWarnings("unused")
 public class Color implements ICopyable<Color>, ISerializable<Color> {
@@ -37,7 +41,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         this.r = r;
         this.g = g;
         this.b = b;
-        a = 255;
+        this.a = 255;
 
         validate();
     }
@@ -61,10 +65,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public Color(int packed) {
-        r = toRGBAR(packed);
-        g = toRGBAG(packed);
-        b = toRGBAB(packed);
-        a = toRGBAA(packed);
+        this.r = toRGBAR(packed);
+        this.g = toRGBAG(packed);
+        this.b = toRGBAB(packed);
+        this.a = toRGBAA(packed);
     }
 
     public Color(Color color) {
@@ -79,6 +83,42 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         this.g = color.getGreen();
         this.b = color.getBlue();
         this.a = color.getAlpha();
+    }
+
+    public Color(Formatting formatting) {
+        if (formatting.isColor()) {
+            this.r = toRGBAR(formatting.getColorValue());
+            this.g = toRGBAG(formatting.getColorValue());
+            this.b = toRGBAB(formatting.getColorValue());
+            this.a = toRGBAA(formatting.getColorValue());
+        } else {
+            this.r = 255;
+            this.g = 255;
+            this.b = 255;
+            this.a = 255;
+        }
+    }
+
+    public Color(TextColor textColor) {
+        this.r = toRGBAR(textColor.getRgb());
+        this.g = toRGBAG(textColor.getRgb());
+        this.b = toRGBAB(textColor.getRgb());
+        this.a = toRGBAA(textColor.getRgb());
+    }
+
+    public Color(Style style) {
+        TextColor textColor = style.getColor();
+        if (textColor == null) {
+            this.r = 255;
+            this.g = 255;
+            this.b = 255;
+            this.a = 255;
+        } else {
+            this.r = toRGBAR(textColor.getRgb());
+            this.g = toRGBAG(textColor.getRgb());
+            this.b = toRGBAB(textColor.getRgb());
+            this.a = toRGBAA(textColor.getRgb());
+        }
     }
 
     public static int fromRGBA(int r, int g, int b, int a) {
@@ -236,6 +276,18 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return new SettingColor(r, g, b, a);
     }
 
+    public TextColor toTextColor() {
+        return new TextColor(getPacked());
+    }
+
+    public Style toStyle() {
+        return Style.EMPTY.withColor(toTextColor());
+    }
+
+    public Style styleWith(Style style) {
+        return style.withColor(toTextColor());
+    }
+
     public void validate() {
         if (r < 0) r = 0;
         else if (r > 255) r = 255;
@@ -252,6 +304,10 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
 
     public Vec3d getVec3d() {
         return new Vec3d(r / 255.0, g / 255.0, b / 255.0);
+    }
+
+    public Vec3f getVec3f() {
+        return new Vec3f(r / 255.0f, g / 255.0f, b / 255.0f);
     }
 
     public int getPacked() {
