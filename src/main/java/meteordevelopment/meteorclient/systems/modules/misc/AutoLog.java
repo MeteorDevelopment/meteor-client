@@ -140,7 +140,7 @@ public class AutoLog extends Module {
 
             else if (Utils.canUpdate()
                     && !mc.player.isDead()
-                    && mc.player.getHealth() >= health.get()) {
+                    && mc.player.getHealth() > health.get()) {
                 toggle();
                 disableHealthListener();
            }
