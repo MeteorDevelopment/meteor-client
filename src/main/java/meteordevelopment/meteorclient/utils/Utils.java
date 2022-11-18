@@ -205,15 +205,17 @@ public class Utils {
     }
 
     public static Color getShulkerColor(ItemStack shulkerItem) {
-        if (!(shulkerItem.getItem() instanceof BlockItem)) return WHITE;
-        Block block = ((BlockItem) shulkerItem.getItem()).getBlock();
-        if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
-        if (!(block instanceof ShulkerBoxBlock)) return WHITE;
-        ShulkerBoxBlock shulkerBlock = (ShulkerBoxBlock) ShulkerBoxBlock.getBlockFromItem(shulkerItem.getItem());
-        DyeColor dye = shulkerBlock.getColor();
-        if (dye == null) return WHITE;
-        final float[] colors = dye.getColorComponents();
-        return new Color(colors[0], colors[1], colors[2], 1f);
+        if (shulkerItem.getItem() instanceof BlockItem blockItem) {
+            Block block = blockItem.getBlock();
+            if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
+            if (block instanceof ShulkerBoxBlock shulkerBlock) {
+                DyeColor dye = shulkerBlock.getColor();
+                if (dye == null) return WHITE;
+                final float[] colors = dye.getColorComponents();
+                return new Color(colors[0], colors[1], colors[2], 1f);
+            }
+        }
+        return WHITE;
     }
 
     public static boolean hasItems(ItemStack itemStack) {
