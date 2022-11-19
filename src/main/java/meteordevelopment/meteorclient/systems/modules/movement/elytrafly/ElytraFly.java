@@ -354,6 +354,10 @@ public class ElytraFly extends Module {
         }
     }
 
+    public boolean canPacketEfly() {
+        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem && !mc.player.isOnGround();
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         currentMode.onTick();
