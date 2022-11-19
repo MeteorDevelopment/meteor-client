@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.events.world.UnloadChunkEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -20,10 +19,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
@@ -36,7 +33,6 @@ import net.minecraft.world.chunk.Chunk;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class Search extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -96,8 +92,6 @@ public class Search extends Module {
     private final Long2ObjectMap<SChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final List<SGroup> groups = new UnorderedArrayList<>();
 
-    private Dimension lastDimension;
-
     public Search() {
         super(Categories.Render, "search", "Searches for specified blocks.");
 
@@ -115,8 +109,6 @@ public class Search extends Module {
         for (Chunk chunk : Utils.chunks()) {
             searchChunk(chunk, null);
         }
-
-        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -168,6 +160,15 @@ public class Search extends Module {
         }
     }
 
+    public boolean overLimit(SChunk c) {
+        int blockNum = 0;
+        for (SChunk chunk : chunks.values()) {
+            blockNum += chunk.size();
+        }
+        int limit = Math.max(this.limit.get() - blockNum, 0);
+        return c.size() > limit;
+    }
+
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
         synchronized (chunks) {
@@ -195,13 +196,9 @@ public class Search extends Module {
             if (!isActive()) return;
             SChunk schunk = SChunk.searchChunk(chunk, blocks.get());
 
-            AtomicInteger blocks = new AtomicInteger(0);
-
             if (schunk.size() > 0) {
                 synchronized (chunks) {
-                    chunks.forEach((l, c) -> blocks.addAndGet(c.size()));
-                    if (blocks.get() > limit.get()) return;
-
+                    if(overLimit(schunk)) return;
                     chunks.put(chunk.getPos().toLong(), schunk);
                     schunk.update();
 
@@ -245,8 +242,9 @@ public class Search extends Module {
 
                     blockPos.set(bx, by, bz);
 
-                    if (added) chunk.add(blockPos);
+                    if (added && !overLimit(chunk)) chunk.add(blockPos);
                     else chunk.remove(blockPos);
+
 
                     // Update neighbour blocks
                     for (int x = -1; x < 2; x++) {
@@ -261,15 +259,6 @@ public class Search extends Module {
                 }
             });
         }
-    }
-
-    @EventHandler
-    private void onPostTick(TickEvent.Post event) {
-        Dimension dimension = PlayerUtils.getDimension();
-
-        if (lastDimension != dimension) onActivate();
-
-        lastDimension = dimension;
     }
 
     @EventHandler
