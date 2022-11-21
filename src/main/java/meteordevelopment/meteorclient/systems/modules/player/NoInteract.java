@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
@@ -71,7 +72,7 @@ public class NoInteract extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-hit")
         .description("Cancel entity hitting.")
-        .onlyAttackable()
+        .filter(EntityUtils::isAttackable)
         .build()
     );
 
@@ -85,7 +86,7 @@ public class NoInteract extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-interact")
         .description("Cancel entity interaction.")
-        .onlyAttackable()
+        .filter(EntityUtils::isAttackable)
         .build()
     );
 

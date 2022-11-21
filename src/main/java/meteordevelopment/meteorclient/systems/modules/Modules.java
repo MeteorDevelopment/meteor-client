@@ -501,6 +501,7 @@ public class Modules extends System<Modules> {
         add(new Marker());
         add(new Nametags());
         add(new NoRender());
+        add(new RideStats());
         add(new Search());
         add(new StorageESP());
         add(new TimeChanger());

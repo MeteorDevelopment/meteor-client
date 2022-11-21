@@ -135,7 +135,7 @@ public class KillAura extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
-        .onlyAttackable()
+        .filter(EntityUtils::isAttackable)
         .build()
     );
 

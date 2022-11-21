@@ -44,7 +44,7 @@ public class BowAimbot extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
-        .onlyAttackable()
+        .filter(EntityUtils::isAttackable)
         .build()
     );
 

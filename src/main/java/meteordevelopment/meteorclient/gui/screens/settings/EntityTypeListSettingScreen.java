@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Pair;
@@ -25,7 +24,6 @@ import net.minecraft.util.registry.Registry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class EntityTypeListSettingScreen extends WindowScreen {
@@ -70,7 +68,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         for (EntityType<?> entityType : setting.get().keySet()) {
             if (!setting.get().getBoolean(entityType)) continue;
 
-            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
+            if (setting.filter == null || setting.filter.test(entityType)) {
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE -> hasAnimal++;
                     case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> hasWaterAnimal++;
@@ -134,7 +132,7 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         miscT = misc.add(theme.table()).expandX().widget();
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
-            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
+            if (setting.filter == null || setting.filter.test(entityType)) {
                 switch (entityType.getSpawnGroup()) {
                     case CREATURE -> {
                         animalsE.add(entityType);
