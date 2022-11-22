@@ -123,6 +123,11 @@ public abstract class EntityMixin {
         if (Modules.get().get(NoRender.class).noInvisibility() || !Modules.get().get(ESP.class).shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
     }
 
+    @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
+    private void isGlowing(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().get(NoRender.class).noGlowing()) info.setReturnValue(false);
+    }
+
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
     private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
         double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
