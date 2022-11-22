@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.elements.TextHud;
@@ -18,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(CrashReport.class)
@@ -28,6 +30,31 @@ public class CrashReportMixin {
         sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
         if (!MeteorClient.DEV_BUILD.isEmpty()) {
             sb.append("Dev Build: ").append(MeteorClient.DEV_BUILD).append("\n");
+        }
+
+        if (!AddonManager.ADDONS.isEmpty()) {
+            sb.append("\n[[ Addons ]]\n");
+            for (var addon : AddonManager.ADDONS) {
+                sb.append(addon.name);
+
+                List<String> authors = new ArrayList<>(List.of(addon.authors));
+                authors.removeIf(s -> s.equals("seasnail") || s.equals("seasnail8169"));
+
+                if (!authors.isEmpty()) {
+                    sb.append(" (");
+                    for (int i = 0; i < authors.size(); i++) {
+                        if (i > 0) sb.append(i == authors.size() - 1 ? " & " : ", ");
+                        sb.append(authors.get(i));
+                    }
+                    sb.append(')');
+                }
+
+                sb.append("; v").append(addon.version);
+
+                String commit = addon.getCommit();
+                if (commit != null && !commit.isBlank()) sb.append("; commit ").append(commit);
+                sb.append('\n');
+            }
         }
 
         if (Modules.get() != null) {

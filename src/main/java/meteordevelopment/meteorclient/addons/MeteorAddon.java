@@ -17,6 +17,9 @@ public abstract class MeteorAddon {
     /** This field is automatically assigned from the meteor-client:color property in fabric.mod.json file. */
     public final Color color = new Color(255, 255, 255);
 
+    /** This field is automatically assigned from fabric.mod.json file. */
+    public String version;
+
     public abstract void onInitialize();
 
     public void onRegisterCategories() {}

@@ -49,6 +49,7 @@ public class AddonManager {
             ModMetadata metadata = FabricLoader.getInstance().getModContainer(MeteorClient.MOD_ID).get().getMetadata();
 
             MeteorClient.ADDON.name = metadata.getName();
+            MeteorClient.ADDON.version = metadata.getVersion().getFriendlyString();
             MeteorClient.ADDON.authors = new String[metadata.getAuthors().size()];
             if (metadata.containsCustomValue(MeteorClient.MOD_ID + ":color")) {
                 MeteorClient.ADDON.color.parse(metadata.getCustomValue(MeteorClient.MOD_ID + ":color").getAsString());
@@ -66,6 +67,7 @@ public class AddonManager {
             MeteorAddon addon = entrypoint.getEntrypoint();
 
             addon.name = metadata.getName();
+            addon.version = metadata.getVersion().getFriendlyString();
             addon.authors = new String[metadata.getAuthors().size()];
             if (metadata.containsCustomValue(MeteorClient.MOD_ID + ":color")) {
                 addon.color.parse(metadata.getCustomValue(MeteorClient.MOD_ID + ":color").getAsString());
