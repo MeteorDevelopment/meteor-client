@@ -23,7 +23,6 @@ import net.minecraft.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowHeight;

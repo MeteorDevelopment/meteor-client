@@ -25,7 +25,6 @@ import net.minecraft.util.registry.Registry;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Consumer;
 
 public class EntityTypeListSettingScreen extends WindowScreen {
