@@ -19,7 +19,6 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
@@ -60,7 +59,6 @@ public class Nuker extends Module {
         .visible(() -> shape.get() != Shape.Cube)
         .build()
     );
-
 
     private final Setting<Integer> range_up = sgGeneral.add(new IntSetting.Builder()
         .name("up")
@@ -178,7 +176,6 @@ public class Nuker extends Module {
 
     // Rendering
 
-    // Bounding box
     private final Setting<Boolean> enableRenderBounding = sgRender.add(new BoolSetting.Builder()
         .name("bounding-box")
         .description("Enable rendering bounding box for Cube and Uniform Cube.")
@@ -206,8 +203,6 @@ public class Nuker extends Module {
         .defaultValue(new SettingColor(16,106,144, 255))
         .build()
     );
-
-    // Broken blocks
 
     private final Setting<Boolean> enableRenderBreaking = sgRender.add(new BoolSetting.Builder()
         .name("broken-blocks")
@@ -275,7 +270,6 @@ public class Nuker extends Module {
                 event.renderer.box(box, sideColorBox.get(), lineColorBox.get(), shapeModeBox.get(), 0);
             }
         }
-
     }
 
     @EventHandler
@@ -370,7 +364,6 @@ public class Nuker extends Module {
         // Break block if found
         BlockIterator.after(() -> {
             // Sort blocks
-
 			if (sortMode.get() == SortMode.TopDown)
                 blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
             else if (sortMode.get() != SortMode.None)
@@ -443,7 +436,6 @@ public class Nuker extends Module {
         Closest,
         Furthest,
         TopDown
-
     }
 
     public enum Shape {
