@@ -516,7 +516,6 @@ public class Modules extends System<Modules> {
         add(new Blur());
         add(new PopChams());
         add(new TunnelESP());
-        add(new CustomFOV());
     }
 
     private void initWorld() {
