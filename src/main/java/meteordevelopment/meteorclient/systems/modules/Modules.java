@@ -110,8 +110,7 @@ public class Modules extends System<Modules> {
     }
 
     public static void registerCategory(Category category) {
-        if (!Categories.REGISTERING)
-            throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
+        if (!Categories.REGISTERING) throw new RuntimeException("Modules.registerCategory - Cannot register category outside of onRegisterCategories callback.");
 
         CATEGORIES.add(category);
     }
@@ -239,10 +238,12 @@ public class Modules extends System<Modules> {
         if (moduleToBind.keybind.canBindTo(isKey, value)) {
             moduleToBind.keybind.set(isKey, value);
             moduleToBind.info("Bound to (highlight)%s(default).", moduleToBind.keybind);
-        } else if (value == GLFW.GLFW_KEY_ESCAPE) {
+        }
+        else if (value == GLFW.GLFW_KEY_ESCAPE) {
             moduleToBind.keybind.set(Keybind.none());
             moduleToBind.info("Removed bind.");
-        } else return false;
+        }
+        else return false;
 
         MeteorClient.EVENT_BUS.post(ModuleBindChangedEvent.get(moduleToBind));
         moduleToBind = null;
@@ -615,7 +616,6 @@ public class Modules extends System<Modules> {
         public Set<Identifier> getIds() {
             return null;
         }
-
         @Override
         public boolean containsId(Identifier id) {
             return false;
