@@ -133,6 +133,7 @@
     "RenderLayersMixin",
     "RenderTickCounterMixin",
     "ResourceReloadLoggerAccessor",
+    "RideableMixin",
     "ScreenMixin",
     "SectionedEntityCacheAccessor",
     "ShulkerBoxBlockMixin",
