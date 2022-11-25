@@ -72,7 +72,7 @@ public class EntityControl extends Module {
 
     private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
         .name("in-water")
-        .description("Use speed only not in water.")
+        .description("Use speed only in water.")
         .defaultValue(false)
         .visible(entitySpeed::get)
         .build()
