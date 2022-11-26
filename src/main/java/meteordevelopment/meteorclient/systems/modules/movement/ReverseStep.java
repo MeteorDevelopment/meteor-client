@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -14,6 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BedBlock;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
 
 public class ReverseStep extends Module {
@@ -24,6 +26,13 @@ public class ReverseStep extends Module {
         .description("How fast to fall in blocks per second.")
         .defaultValue(3)
         .min(0)
+        .build()
+    );
+
+    private final Setting<Boolean> vehicles = sgGeneral.add(new BoolSetting.Builder()
+        .name("vehicles")
+        .description("Also works for vehicles.")
+        .defaultValue(false)
         .build()
     );
 
@@ -41,9 +50,19 @@ public class ReverseStep extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (!mc.player.isOnGround() || mc.player.isHoldingOntoLadder() || mc.player.isSubmergedInWater() || mc.player.isInLava() ||mc.options.jumpKey.isPressed() || mc.player.noClip || mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0) return;
+        Entity e = mc.player.getVehicle();
+        if (vehicles.get() && e != null) {
+            if (canSnap(e)) ((IVec3d) e.getVelocity()).setY(-fallSpeed.get());
+        } else {
+            if (mc.player.isHoldingOntoLadder() || mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0) return;
+            if (!isOnBed() && canSnap(mc.player)) ((IVec3d) mc.player.getVelocity()).setY(-fallSpeed.get());
+        }
+    }
 
-        if (!isOnBed() && !mc.world.isSpaceEmpty(mc.player.getBoundingBox().offset(0.0, (float) -(fallDistance.get() + 0.01), 0.0))) ((IVec3d) mc.player.getVelocity()).setY(-fallSpeed.get());
+    private boolean canSnap(Entity entity) {
+        if (!entity.isOnGround() || entity.isSubmergedInWater() || entity.isInLava() || mc.options.jumpKey.isPressed() || entity.noClip)
+            return false;
+        return !mc.world.isSpaceEmpty(entity.getBoundingBox().offset(0.0, (float) -(fallDistance.get() + 0.01), 0.0));
     }
 
     private boolean isOnBed() {
