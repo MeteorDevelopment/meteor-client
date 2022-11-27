@@ -58,14 +58,12 @@ public class ColorSettingScreen extends WindowScreen {
         SettingColor parsed;
 
         if ((parsed = parseRGBA(clipboard)) != null) {
-            setting.get().rainbow(false);
             setting.set(parsed);
             setting.get().validate();
             return true;
         }
 
         if ((parsed = parseHex(clipboard)) != null) {
-            setting.get().rainbow(false);
             setting.set(parsed);
             setting.get().validate();
             return true;

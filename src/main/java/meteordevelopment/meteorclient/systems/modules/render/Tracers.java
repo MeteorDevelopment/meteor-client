@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -36,6 +37,22 @@ public class Tracers extends Module {
         .build()
     );
 
+    public final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Doesn't draw tracers to friends.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-invisible")
+        .description("Shows invisibile entities.")
+        .defaultValue(true)
+        .build()
+    );
+
+    // Appearance
+
     private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
         .name("target")
         .description("What part of the entity to target.")
@@ -56,13 +73,6 @@ public class Tracers extends Module {
         .defaultValue(256)
         .min(0)
         .sliderMax(256)
-        .build()
-    );
-
-    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
-        .name("show-invisible")
-        .description("Shows invisibile entities.")
-        .defaultValue(true)
         .build()
     );
 
@@ -136,7 +146,7 @@ public class Tracers extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
+            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
 
             Color color;
 

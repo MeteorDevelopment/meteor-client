@@ -26,24 +26,15 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
-    protected interface Factory {
-        void create(WTable table, Setting<?> setting);
-    }
-
+public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private static final SettingColor WHITE = new SettingColor();
 
-    private final GuiTheme theme;
-    private final Map<Class<?>, Factory> factories = new HashMap<>();
-
     public DefaultSettingsWidgetFactory(GuiTheme theme) {
-        this.theme = theme;
+        super(theme);
 
         factories.put(BoolSetting.class, (table, setting) -> boolW(table, (BoolSetting) setting));
         factories.put(IntSetting.class, (table, setting) -> intW(table, (IntSetting) setting));
@@ -121,7 +112,7 @@ public class DefaultSettingsWidgetFactory implements SettingsWidgetFactory {
 
             table.add(theme.label(setting.title)).top().marginTop(settingTitleTopMargin()).widget().tooltip = setting.description;
 
-            Factory factory = factories.get(setting.getClass());
+            Factory factory = getFactory(setting.getClass());
             if (factory != null) factory.create(table, setting);
 
             table.row();
