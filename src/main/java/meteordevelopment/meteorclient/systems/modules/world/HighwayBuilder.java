@@ -792,7 +792,7 @@ public class HighwayBuilder extends Module {
                 if (itemStack.isEmpty()) return i;
 
                 // Return if the slot contains a tool and replacing tools is enabled
-                if (replaceTools && AutoTool.isTool(itemStack)) return i;
+                if (replaceTools && AutoTool.isTool(itemStack.getItem())) return i;
 
                 // Store the slot if it contains thrash
                 if (b.trashItems.get().contains(itemStack.getItem())) thrashSlot = i;

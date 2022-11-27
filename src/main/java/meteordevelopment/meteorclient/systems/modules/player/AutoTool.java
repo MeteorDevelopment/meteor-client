@@ -23,15 +23,21 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.ShearsItem;
-import net.minecraft.item.SwordItem;
-import net.minecraft.item.ToolItem;
+import net.minecraft.item.*;
 
+import java.util.List;
 import java.util.function.Predicate;
 
 public class AutoTool extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
+        .name("blacklist")
+        .description("Doesn't use selected items.")
+        .defaultValue(Items.NETHERITE_SWORD)
+        .filter(AutoTool::isTool)
+        .build()
+    );
 
     private final Setting<EnchantPreference> prefer = sgGeneral.add(new EnumSetting.Builder<EnchantPreference>()
         .name("prefer")
@@ -123,6 +129,7 @@ public class AutoTool extends Module {
 
         for (int i = 0; i < 9; i++) {
             double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
+            if (blacklist.get().contains(mc.player.getInventory().getStack(i).getItem())) score = -1;
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -131,7 +138,7 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack.getItem()))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -141,7 +148,7 @@ public class AutoTool extends Module {
         // Anti break
         currentStack = mc.player.getMainHandStack();
 
-        if (shouldStopUsing(currentStack) && isTool(currentStack)) {
+        if (shouldStopUsing(currentStack) && isTool(currentStack.getItem())) {
             mc.options.attackKey.setPressed(false);
             event.setCancelled(true);
         }
@@ -152,7 +159,7 @@ public class AutoTool extends Module {
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
-        if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+        if (!good.test(itemStack) || !isTool(itemStack.getItem())) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
@@ -173,12 +180,11 @@ public class AutoTool extends Module {
         if (itemStack.getItem() instanceof SwordItem item && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooSaplingBlock))
             score += 9000 + (item.getMaterial().getMiningLevel() * 1000);
 
-
         return score;
     }
 
-    public static boolean isTool(ItemStack itemStack) {
-        return itemStack.getItem() instanceof ToolItem || itemStack.getItem() instanceof ShearsItem;
+    public static boolean isTool(Item item) {
+        return item instanceof ToolItem || item instanceof ShearsItem;
     }
 
     public enum EnchantPreference {
