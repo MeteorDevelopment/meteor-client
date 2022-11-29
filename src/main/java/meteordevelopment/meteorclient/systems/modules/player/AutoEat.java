@@ -81,7 +81,7 @@ public class AutoEat extends Module {
     private int slot, prevSlot;
 
     private final List<Class<? extends Module>> wasAura = new ArrayList<>();
-    private boolean wasBaritone;
+    private boolean wasBaritone = false;
 
     public AutoEat() {
         super(Categories.Player, "auto-eat", "Automatically eats food.");
@@ -159,8 +159,7 @@ public class AutoEat extends Module {
         }
 
         // Pause baritone
-        wasBaritone = false;
-        if (pauseBaritone.get()) {
+        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasBaritone) {
             wasBaritone = true;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
         }
@@ -193,6 +192,7 @@ public class AutoEat extends Module {
 
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
+            wasBaritone = false;
             BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
         }
     }

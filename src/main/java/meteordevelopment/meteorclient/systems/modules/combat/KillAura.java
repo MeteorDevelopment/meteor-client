@@ -241,7 +241,7 @@ public class KillAura extends Module {
 
     private final List<Entity> targets = new ArrayList<>();
     private int hitDelayTimer, switchTimer;
-    private boolean wasPathing;
+    private boolean wasPathing = false;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
