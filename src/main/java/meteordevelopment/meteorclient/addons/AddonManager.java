@@ -66,7 +66,10 @@ public class AddonManager {
             MeteorAddon addon = entrypoint.getEntrypoint();
 
             addon.name = metadata.getName();
+
+            if (metadata.getAuthors().isEmpty()) throw new RuntimeException("Addon %s requires at least 1 author to be defined in it's fabric.mod.json. See https://fabricmc.net/wiki/documentation:fabric_mod_json_spec".formatted(addon.name));
             addon.authors = new String[metadata.getAuthors().size()];
+
             if (metadata.containsCustomValue(MeteorClient.MOD_ID + ":color")) {
                 addon.color.parse(metadata.getCustomValue(MeteorClient.MOD_ID + ":color").getAsString());
             }
