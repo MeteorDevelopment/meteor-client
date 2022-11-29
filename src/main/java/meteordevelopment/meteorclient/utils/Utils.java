@@ -47,7 +47,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Range;
 
 import java.io.File;
@@ -55,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -307,6 +307,14 @@ public class Utils {
         return Math.sqrt(dX * dX + dY * dY + dZ * dZ);
     }
 
+    public static String getFileWorldName() {
+        String name = getWorldName();
+
+        Pattern pattern = Pattern.compile("[\\s\\\\/:*?\"<>|]");
+
+        return pattern.matcher(name).replaceAll("_");
+    }
+
     public static String getWorldName() {
         // Singleplayer
         if (mc.isInSingleplayer()) {
@@ -321,11 +329,7 @@ public class Utils {
 
         // Multiplayer
         if (mc.getCurrentServerEntry() != null) {
-            String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
-            if (SystemUtils.IS_OS_WINDOWS) {
-                name = name.replace(":", "_");
-            }
-            return name;
+            return mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
         }
 
         return "";
