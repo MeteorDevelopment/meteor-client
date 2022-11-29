@@ -59,14 +59,17 @@ public class TitleScreenCredits {
         Credit credit = new Credit(addon);
 
         credit.sections.add(new Section(addon.name, addon.color.getPacked()));
-        credit.sections.add(new Section(" by ", GRAY));
 
-        for (int i = 0; i < addon.authors.length; i++) {
-            if (i > 0) {
-                credit.sections.add(new Section(i == addon.authors.length - 1 ? " & " : ", ", GRAY));
+        if (addon.authors.length >= 1) {
+            credit.sections.add(new Section(" by ", GRAY));
+
+            for (int i = 0; i < addon.authors.length; i++) {
+                if (i > 0) {
+                    credit.sections.add(new Section(i == addon.authors.length - 1 ? " & " : ", ", GRAY));
+                }
+
+                credit.sections.add(new Section(addon.authors[i], WHITE));
             }
-
-            credit.sections.add(new Section(addon.authors[i], WHITE));
         }
 
         credit.calculateWidth();
