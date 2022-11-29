@@ -68,6 +68,8 @@ public class Utils {
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
+    
+    public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
 
     @PreInit
     public static void init() {
@@ -308,11 +310,7 @@ public class Utils {
     }
 
     public static String getFileWorldName() {
-        String name = getWorldName();
-
-        Pattern pattern = Pattern.compile("[\\s\\\\/:*?\"<>|]");
-
-        return pattern.matcher(name).replaceAll("_");
+        return FILE_NAME_INVALID_CHARS_PATTERN.matcher(getWorldName()).replaceAll("_");
     }
 
     public static String getWorldName() {
