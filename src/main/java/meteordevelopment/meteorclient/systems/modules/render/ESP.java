@@ -50,6 +50,17 @@ public class ESP extends Module {
         .build()
     );
 
+    public final Setting<Double> glowMultiplier = sgGeneral.add(new DoubleSetting.Builder()
+        .name("glow-multiplier")
+        .description("Multiplier for glow effect")
+        .visible(() -> mode.get() == Mode.Shader)
+        .decimalPlaces(3)
+        .defaultValue(3.5)
+        .min(0)
+        .sliderMax(10)
+        .build()
+    );
+
     public final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-self")
         .description("Ignores yourself drawing the shader.")
