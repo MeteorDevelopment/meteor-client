@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.EntityControl;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemSteerable;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.PigEntity;
@@ -22,10 +23,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class RideableMixin {
     @Inject(method = "isSaddled", at = @At("HEAD"), cancellable = true)
     private void isSaddled(CallbackInfoReturnable<Boolean> info) {
-        if (mc.player != null && mc.player.getVehicle() instanceof ItemSteerable && mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0)
-            return;
-
-        if (Modules.get().get(EntityControl.class).saddleSpoof()) {
+        if (Modules.get().get(EntityControl.class).saddleSpoof((Entity) (Object) this)) {
+            if (mc.player != null && mc.player.getVehicle() instanceof ItemSteerable && mc.player.forwardSpeed == 0 && mc.player.sidewaysSpeed == 0)
+                return;
             info.setReturnValue(true);
         }
     }

@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.JumpingMount;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
@@ -23,6 +24,8 @@ import net.minecraft.util.math.Vec3d;
 
 public class EntityControl extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgSpeed = settings.createGroup("speed");
+    private final SettingGroup sgFly = settings.createGroup("fly");
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
@@ -45,14 +48,14 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> entitySpeed = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> entitySpeed = sgSpeed.add(new BoolSetting.Builder()
         .name("entity-speed")
         .description("Makes you go faster when riding entities.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> speed = sgSpeed.add(new DoubleSetting.Builder()
         .name("speed")
         .description("Horizontal speed in blocks per second.")
         .defaultValue(10)
@@ -62,7 +65,7 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> onlyOnGround = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> onlyOnGround = sgSpeed.add(new BoolSetting.Builder()
         .name("only-on-ground")
         .description("Use speed only when standing on a block.")
         .defaultValue(false)
@@ -70,7 +73,7 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> inWater = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> inWater = sgSpeed.add(new BoolSetting.Builder()
         .name("in-water")
         .description("Use speed only in water.")
         .defaultValue(false)
@@ -78,14 +81,14 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> fly = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> fly = sgFly.add(new BoolSetting.Builder()
         .name("fly")
         .description("Lets you fly with entities.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> verticalSpeed = sgFly.add(new DoubleSetting.Builder()
         .name("vertical-speed")
         .description("Vertical speed in blocks per second.")
         .defaultValue(6)
@@ -95,7 +98,7 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Double> fallSpeed = sgGeneral.add(new DoubleSetting.Builder()
+    private final Setting<Double> fallSpeed = sgFly.add(new DoubleSetting.Builder()
         .name("fall-speed")
         .description("How fast you fall in blocks per second.")
         .defaultValue(0.1)
@@ -174,8 +177,16 @@ public class EntityControl extends Module {
         return isActive() && inBoat;
     }
 
-    public boolean saddleSpoof() {
-        return isActive() && saddleSpoof.get();
+    public boolean saddleSpoof(Entity entity) {
+        return isActive() && saddleSpoof.get() && entities.get().getBoolean(entity.getType());
+    }
+
+    public boolean cancelJump() {
+        Entity e = mc.player.getVehicle();
+        if (e instanceof JumpingMount) {
+            return isActive() && fly.get() && entities.get().getBoolean(e.getType());
+        }
+        return false;
     }
 
     public EntityControl() {
