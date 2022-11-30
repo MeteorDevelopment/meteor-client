@@ -5,28 +5,25 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.commands.Command;
-import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.command.CommandSource;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class InputCommand extends Command {
-    private static final Map<KeyBinding, String> validKeys = new HashMap<>();
-    static {
-        validKeys.put(mc.options.forwardKey, "forwards");
-        validKeys.put(mc.options.backKey, "backwards");
-        validKeys.put(mc.options.leftKey, "left");
-        validKeys.put(mc.options.rightKey, "right");
-        validKeys.put(mc.options.jumpKey, "jump");
-        validKeys.put(mc.options.sneakKey, "sneak");
-        validKeys.put(mc.options.useKey, "use");
-        validKeys.put(mc.options.attackKey, "attack");
-    }
+    private static final Map<KeyBinding, String> keys = Map.of(
+        mc.options.forwardKey, "forwards",
+        mc.options.backKey, "backwards",
+        mc.options.leftKey, "left",
+        mc.options.rightKey, "right",
+        mc.options.jumpKey, "jump",
+        mc.options.sneakKey, "sneak",
+        mc.options.useKey, "use",
+        mc.options.attackKey, "attack"
+    );
 
     public InputCommand() {
         super("input", "Keyboard input simulation.");
@@ -34,11 +31,11 @@ public class InputCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        for (KeyBinding keyBinding : validKeys.keySet()) {
-            builder.then(literal(validKeys.get(keyBinding))
+        for (Map.Entry<KeyBinding, String> keyBinding : keys.entrySet()) {
+            builder.then(literal(keyBinding.getValue())
                 .then(argument("ticks", IntegerArgumentType.integer(1))
                     .executes(context -> {
-                        new KeypressHandler(keyBinding, context.getArgument("ticks", Integer.class));
+                        new KeypressHandler(keyBinding.getKey(), context.getArgument("ticks", Integer.class));
                         return SINGLE_SUCCESS;
                     })
                 )
@@ -64,8 +61,6 @@ public class InputCommand extends Command {
                 key.setPressed(false);
                 MeteorClient.EVENT_BUS.unsubscribe(this);
             }
-
-            ChatUtils.info("%s pressed: %b".formatted(validKeys.get(key), key.isPressed()));
         }
     }
 }
