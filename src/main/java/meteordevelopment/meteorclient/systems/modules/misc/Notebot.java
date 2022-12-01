@@ -407,14 +407,14 @@ public class Notebot extends Module {
             scanForNoteblocks();
             if (scannedNoteblocks.isEmpty()) {
                 error("Can't find any nearby noteblock!");
-                forceStop();
+                stop();
                 return;
             }
 
             setupNoteblocksMap();
             if (noteBlockPositions.isEmpty()) {
                 error("Can't find any valid noteblock to play song.");
-                forceStop();
+                stop();
                 return;
             }
             setupTuneHitsMap();
@@ -427,12 +427,18 @@ public class Notebot extends Module {
             if (!isPlaying) return;
 
             if (mc.player == null || currentTick > song.getLastTick()) {
-                stop();
+                // Stop the song after it is finished
+                onSongEnd();
                 return;
             }
 
             if (song.getNotesMap().containsKey(currentTick)) {
                 if (stage == Stage.Preview) onTickPreview();
+                else if (mc.player.getAbilities().creativeMode) {
+                    error("You need to be in survival mode.");
+                    stop();
+                    return;
+                }
                 else onTickPlay();
             }
 
@@ -442,6 +448,9 @@ public class Notebot extends Module {
         }
     }
 
+    /**
+     * Set up a map of noteblocks positions
+     */
     private void setupNoteblocksMap() {
         noteBlockPositions.clear();
 
@@ -508,6 +517,10 @@ public class Notebot extends Module {
         }
     }
 
+    /**
+     * Set up a tune hits map which tells how many times player needs to
+     * hit noteblock to obtain desired note level
+     */
     private void setupTuneHitsMap() {
         tuneHits.clear();
 
@@ -556,12 +569,16 @@ public class Notebot extends Module {
 
         // Stop
         WButton stop = table.add(theme.button("Stop")).right().widget();
-        stop.action = this::forceStop;
+        stop.action = this::stop;
 
         return table;
     }
 
-
+    /**
+     * Gets status for GUI
+     *
+     * @return A status
+     */
     public String getStatus() {
         if (!this.isActive()) return "Module disabled.";
         if (song == null) return "No song loaded.";
@@ -571,6 +588,9 @@ public class Notebot extends Module {
         else return String.format("Stage: %s.", stage.toString());
     }
 
+    /**
+     * Plays a song after loading and tuning
+     */
     public void play() {
         if (mc.player == null) return;
         if (mc.player.getAbilities().creativeMode && stage != Stage.Preview) {
@@ -594,7 +614,7 @@ public class Notebot extends Module {
         }
     }
 
-    public void forceStop() {
+    public void stop() {
         info("Stopping.");
         if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks || stage == Stage.LoadingSong) {
             resetVariables();
@@ -606,11 +626,11 @@ public class Notebot extends Module {
         disable();
     }
 
-    public void stop() {
+    public void onSongEnd() {
         if (autoPlay.get() && stage != Stage.Preview) {
             playRandomSong();
         } else {
-            forceStop();
+            stop();
         }
     }
 
@@ -631,6 +651,11 @@ public class Notebot extends Module {
         if (!isActive()) toggle();
     }
 
+    /**
+     * Loads and plays song
+     *
+     * @param file Song supported by one of {@link SongDecoder}
+     */
     public void loadSong(File file) {
         if (!isActive()) toggle();
         if (!loadFileToMap(file, () -> stage = Stage.SetUp)) {
@@ -641,6 +666,11 @@ public class Notebot extends Module {
         updateStatus();
     }
 
+    /**
+     * Loads and previews the song
+     *
+     * @param file Song supported by one of {@link SongDecoder}
+     */
     public void previewSong(File file) {
         if (!isActive()) toggle();
         loadFileToMap(file, () -> {
@@ -650,7 +680,14 @@ public class Notebot extends Module {
         updateStatus();
     }
 
-    private boolean loadFileToMap(File file, Runnable callback) {
+    /**
+     * Loads and plays song directly
+     *
+     * @param file Song supported by one of {@link SongDecoder}
+     * @param callback Callback that is run when song has been loaded
+     * @return Success
+     */
+    public boolean loadFileToMap(File file, Runnable callback) {
         if (!file.exists() || !file.isFile()) {
             error("File not found");
             return false;
@@ -686,6 +723,9 @@ public class Notebot extends Module {
         return true;
     }
 
+    /**
+     * Scans noteblocks nearby and adds them to the map
+     */
     private void scanForNoteblocks() {
         if (mc.interactionManager == null || mc.world == null || mc.player == null) return;
         scannedNoteblocks.clear();
@@ -727,6 +767,9 @@ public class Notebot extends Module {
         }
     }
 
+    /**
+     * Tunes noteblocks. This method is called per tick.
+     */
     private void tune() {
         if (tuneHits.isEmpty()) {
             if (anyNoteblockTuned) {
@@ -877,7 +920,7 @@ public class Notebot extends Module {
         return sb.toString().trim();
     }
 
-    private enum Stage {
+    public enum Stage {
         None,
         LoadingSong,
         SetUp,

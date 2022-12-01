@@ -11,7 +11,6 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.NotebotSongArgumentType;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -69,7 +68,7 @@ public class NotebotCommand extends Command {
 
         builder.then(literal("stop").executes(ctx -> {
             Notebot notebot = Modules.get().get(Notebot.class);
-            notebot.forceStop();
+            notebot.stop();
             return SINGLE_SUCCESS;
         }));
 

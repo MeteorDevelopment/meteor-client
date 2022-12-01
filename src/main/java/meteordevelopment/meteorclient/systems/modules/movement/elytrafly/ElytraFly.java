@@ -23,7 +23,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Material;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
@@ -82,6 +81,30 @@ public class ElytraFly extends Module {
         .defaultValue(1)
         .min(0)
         .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    public final Setting<Boolean> acceleration = sgGeneral.add(new BoolSetting.Builder()
+        .name("acceleration")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    public final Setting<Double> accelerationStep = sgGeneral.add(new DoubleSetting.Builder()
+        .name("acceleration-step")
+        .min(0.1)
+        .max(5)
+        .defaultValue(1)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get())
+        .build()
+    );
+
+    public final Setting<Double> accelerationMin = sgGeneral.add(new DoubleSetting.Builder()
+        .name("acceleration-start")
+        .min(0.1)
+        .defaultValue(0)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get())
         .build()
     );
 
@@ -295,6 +318,7 @@ public class ElytraFly extends Module {
             currentMode.handleFallMultiplier();
             currentMode.handleAutopilot();
 
+            currentMode.handleAcceleration();
             currentMode.handleHorizontalSpeed(event);
             currentMode.handleVerticalSpeed(event);
 
@@ -352,6 +376,10 @@ public class ElytraFly extends Module {
                 }
             }
         }
+    }
+
+    public boolean canPacketEfly() {
+        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem && !mc.player.isOnGround();
     }
 
     @EventHandler

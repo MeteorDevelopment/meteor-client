@@ -1007,8 +1007,8 @@ public class CrystalAura extends Module {
         BlockHitResult result = mc.world.raycast(raycastContext);
 
         if (result == null || !result.getBlockPos().equals(blockPos)) // Is behind wall
-            return PlayerUtils.isWithin(vec3d, (place ? placeWallsRange : breakWallsRange).get());
-        return PlayerUtils.isWithin(vec3d, (place ? placeRange : breakRange).get());
+            return !PlayerUtils.isWithin(vec3d, (place ? placeWallsRange : breakWallsRange).get());
+        return !PlayerUtils.isWithin(vec3d, (place ? placeRange : breakRange).get());
     }
 
     private PlayerEntity getNearestTarget() {

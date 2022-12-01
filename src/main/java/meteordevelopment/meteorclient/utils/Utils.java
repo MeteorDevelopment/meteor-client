@@ -47,7 +47,6 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.SystemUtils;
 import org.jetbrains.annotations.Range;
 
 import java.io.File;
@@ -55,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.*;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -68,6 +68,8 @@ public class Utils {
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
+    
+    public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
 
     @PreInit
     public static void init() {
@@ -205,15 +207,17 @@ public class Utils {
     }
 
     public static Color getShulkerColor(ItemStack shulkerItem) {
-        if (!(shulkerItem.getItem() instanceof BlockItem)) return WHITE;
-        Block block = ((BlockItem) shulkerItem.getItem()).getBlock();
-        if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
-        if (!(block instanceof ShulkerBoxBlock)) return WHITE;
-        ShulkerBoxBlock shulkerBlock = (ShulkerBoxBlock) ShulkerBoxBlock.getBlockFromItem(shulkerItem.getItem());
-        DyeColor dye = shulkerBlock.getColor();
-        if (dye == null) return WHITE;
-        final float[] colors = dye.getColorComponents();
-        return new Color(colors[0], colors[1], colors[2], 1f);
+        if (shulkerItem.getItem() instanceof BlockItem blockItem) {
+            Block block = blockItem.getBlock();
+            if (block == Blocks.ENDER_CHEST) return BetterTooltips.ECHEST_COLOR;
+            if (block instanceof ShulkerBoxBlock shulkerBlock) {
+                DyeColor dye = shulkerBlock.getColor();
+                if (dye == null) return WHITE;
+                final float[] colors = dye.getColorComponents();
+                return new Color(colors[0], colors[1], colors[2], 1f);
+            }
+        }
+        return WHITE;
     }
 
     public static boolean hasItems(ItemStack itemStack) {
@@ -266,12 +270,6 @@ public class Utils {
         // Populate matrix
         int[][] d = new int[textLength + 1][filterLength + 1];
 
-        for (int i = 0; i < textLength; i++) {
-            for (int j = 0; j < filterLength; j++) {
-                d[i][j] = 0;
-            }
-        }
-
         for (int i = 0; i <= textLength; i++) {
             d[i][0] = i * delCost;
         }
@@ -307,6 +305,10 @@ public class Utils {
         return Math.sqrt(dX * dX + dY * dY + dZ * dZ);
     }
 
+    public static String getFileWorldName() {
+        return FILE_NAME_INVALID_CHARS_PATTERN.matcher(getWorldName()).replaceAll("_");
+    }
+
     public static String getWorldName() {
         // Singleplayer
         if (mc.isInSingleplayer()) {
@@ -321,11 +323,7 @@ public class Utils {
 
         // Multiplayer
         if (mc.getCurrentServerEntry() != null) {
-            String name = mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
-            if (SystemUtils.IS_OS_WINDOWS) {
-                name = name.replace(":", "_");
-            }
-            return name;
+            return mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
         }
 
         return "";

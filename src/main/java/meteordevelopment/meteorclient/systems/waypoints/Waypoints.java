@@ -191,7 +191,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     @Override
     public File getFile() {
         if (!Utils.canUpdate()) return null;
-        return new File(new File(MeteorClient.FOLDER, "waypoints"), Utils.getWorldName() + ".nbt");
+        return new File(new File(MeteorClient.FOLDER, "waypoints"), Utils.getFileWorldName() + ".nbt");
     }
 
     public boolean isEmpty() {

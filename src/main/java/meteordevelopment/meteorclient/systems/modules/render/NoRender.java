@@ -76,9 +76,9 @@ public class NoRender extends Module {
         .build()
     );
 
-    private final Setting<Boolean> noWaterOverlay = sgOverlay.add(new BoolSetting.Builder()
-        .name("water-overlay")
-        .description("Disables rendering of the water overlay.")
+    private final Setting<Boolean> noLiquidOverlay = sgOverlay.add(new BoolSetting.Builder()
+        .name("liquid-overlay")
+        .description("Disables rendering of the liquid overlay.")
         .defaultValue(false)
         .build()
     );
@@ -297,6 +297,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noGlowing = sgEntity.add(new BoolSetting.Builder()
+        .name("glowing")
+        .description("Disables rendering of the glowing effect")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> noMobInSpawner = sgEntity.add(new BoolSetting.Builder()
         .name("spawner-entities")
         .description("Disables rendering of spinning mobs inside of mob spawners")
@@ -348,8 +355,8 @@ public class NoRender extends Module {
         return isActive() && noFireOverlay.get();
     }
 
-    public boolean noWaterOverlay() {
-        return isActive() && noWaterOverlay.get();
+    public boolean noLiquidOverlay() {
+        return isActive() && noLiquidOverlay.get();
     }
 
     public boolean noPowderedSnowOverlay() {
@@ -485,6 +492,10 @@ public class NoRender extends Module {
 
     public boolean noInvisibility() {
         return isActive() && noInvisibility.get();
+    }
+
+    public boolean noGlowing() {
+        return isActive() && noGlowing.get();
     }
 
     public boolean noMobInSpawner() {
