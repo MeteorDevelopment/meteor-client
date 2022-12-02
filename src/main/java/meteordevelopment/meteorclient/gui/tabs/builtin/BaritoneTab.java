@@ -205,6 +205,7 @@ public class BaritoneTab extends Tab {
         descriptions = new HashMap<>();
         addDescription("acceptableThrowawayItems", "Blocks that Baritone is allowed to place (as throwaway, for sneak bridging, pillaring, etc.)");
         addDescription("allowBreak", "Allow Baritone to break blocks");
+        addDescription("allowBreakAnyway", "Blocks that baritone will be allowed to break even with allowBreak set to false");
         addDescription("allowDiagonalAscend","Allow diagonal ascending");
         addDescription("allowDiagonalDescend", "Allow descending diagonally");
         addDescription("allowDownward", "Allow mining the block directly beneath its feet");
@@ -232,7 +233,7 @@ public class BaritoneTab extends Tab {
         addDescription("avoidBreakingMultiplier", "this multiplies the break speed, if set above 1 it's \"encourage breaking\" instead");
         addDescription("avoidUpdatingFallingBlocks", "If this setting is true, Baritone will never break a block that is adjacent to an unsupported falling block.");
         addDescription("axisHeight", "The \"axis\" command (aka GoalAxis) will go to a axis, or diagonal axis, at this Y level.");
-        addDescription("backfill", "Fill in blocks behind you");
+        addDescription("backfill", "Fill in blocks behind you (stealth +100)");
         addDescription("backtrackCostFavoringCoefficient", "Set to 1.0 to effectively disable this feature");
         addDescription("blacklistClosestOnFailure", "When GetToBlockProcess or MineProcess fails to calculate a path, instead of just giving up, mark the closest instance of that block as \"unreachable\" and go towards the next closest.");
         addDescription("blockBreakAdditionalPenalty", "This is just a tiebreaker to make it less likely to break blocks if it can avoid it.");
@@ -254,7 +255,7 @@ public class BaritoneTab extends Tab {
         addDescription("buildRepeatSneaky", "Don't notify schematics that they are moved.");
         addDescription("buildSkipBlocks", "A list of blocks to be treated as correct.");
         addDescription("buildSubstitutes", "A mapping of blocks to blocks to be built instead");
-        addDescription("buildValidSubstitutes", "A mapping of blocks to blocks treated as correct in their position");
+        addDescription("buildValidSubstitutes", "A mapping of blocks to blocks treated as correct in their position.");
         addDescription("cachedChunksExpirySeconds", "Cached chunks (regardless of if they're in RAM or saved to disk) expire and are deleted after this number of seconds -1 to disable");
         addDescription("cachedChunksOpacity", "0.0f = not visible, fully transparent (instead of setting this to 0, turn off renderCachedChunks) 1.0f = fully opaque");
         addDescription("cancelOnGoalInvalidation", "Cancel the current path if the goal has changed, and the path originally ended in the goal but doesn't anymore.");
@@ -277,7 +278,6 @@ public class BaritoneTab extends Tab {
         addDescription("colorSelectionPos1", "The color of the selection pos 1");
         addDescription("colorSelectionPos2", "The color of the selection pos 2");
         addDescription("considerPotionEffects", "For example, if you have Mining Fatigue or Haste, adjust the costs of breaking blocks accordingly.");
-        addDescription("containerMemory", "Remember the contents of containers (chests, echests, furnaces)");
         addDescription("costHeuristic", "This is the big A* setting.");
         addDescription("costVerificationLookahead", "Stop 5 movements before anything that made the path COST_INF.");
         addDescription("cutoffAtLoadBoundary", "After calculating a path (potentially through cached chunks), artificially cut it off to just the part that is entirely within currently loaded chunks.");
@@ -285,6 +285,8 @@ public class BaritoneTab extends Tab {
         addDescription("disableCompletionCheck", "Turn this on if your exploration filter is enormous, you don't want it to check if it's done, and you are just fine with it just hanging on completion");
         addDescription("disconnectOnArrival", "Disconnect from the server upon arriving at your goal");
         addDescription("distanceTrim", "Trim incorrect positions too far away, helps performance but hurts reliability in very large schematics");
+        addDescription("doBedWaypoints", "Allows baritone to save bed waypoints when interacting with beds");
+        addDescription("doDeathWaypoints", "Allows baritone to save death waypoints");
         addDescription("echoCommands", "Echo commands to chat when they are run");
         addDescription("enterPortal", "When running a goto towards a nether portal block, walk all the way into the portal instead of stopping one block before.");
         addDescription("exploreChunkSetMinimumSize", "Take the 10 closest chunks, even if they aren't strictly tied for distance metric from origin.");
@@ -311,7 +313,6 @@ public class BaritoneTab extends Tab {
         addDescription("legitMineIncludeDiagonals", "Magically see ores that are separated diagonally from existing ores.");
         addDescription("legitMineYLevel", "What Y level to go to for legit strip mining");
         addDescription("logAsToast", "Shows popup message in the upper right corner, similarly to when you make an advancement");
-        // addDescription("logger", "The function that is called when Baritone will log to chat.");
         addDescription("mapArtMode", "Build in map art mode, which makes baritone only care about the top block in each column");
         addDescription("maxCachedWorldScanCount", "After finding this many instances of the target block in the cache, it will stop expanding outward the chunk search.");
         addDescription("maxCostIncrease", "If a movement's cost increases by more than this amount between calculation and execution (due to changes in the environment / world), cancel and recalculate");
@@ -322,9 +323,11 @@ public class BaritoneTab extends Tab {
         addDescription("mineGoalUpdateInterval", "Rescan for the goal once every 5 ticks.");
         addDescription("mineScanDroppedItems", "While mining, should it also consider dropped items of the correct type as a pathing destination (as well as ore blocks)?");
         addDescription("minimumImprovementRepropagation", "Don't repropagate cost improvements below 0.01 ticks.");
-        addDescription("minYLevelWhileMining", "Sets the minimum y level whilst mining - set to 0 to turn off.");
+        addDescription("minYLevelWhileMining", "Sets the minimum y level whilst mining - set to 0 to turn off. if world has negative y values, subtract the min world height to get the value to put here");
         addDescription("mobAvoidanceCoefficient", "Set to 1.0 to effectively disable this feature");
+        addDescription("mobAvoidanceRadius", "Distance to avoid mobs.");
         addDescription("mobSpawnerAvoidanceCoefficient", "Set to 1.0 to effectively disable this feature");
+        addDescription("mobSpawnerAvoidanceRadius", "Distance to avoid mob spawners.");
         addDescription("movementTimeoutTicks", "If a movement takes this many ticks more than its initial cost estimate, cancel it");
         addDescription("notificationOnBuildFinished", "Desktop notification on build finished");
         addDescription("notificationOnExploreFinished", "Desktop notification on explore finished");
@@ -353,6 +356,7 @@ public class BaritoneTab extends Tab {
         addDescription("primaryTimeoutMS", "Pathing ends after this amount of time, but only if a path has been found");
         addDescription("pruneRegionsFromRAM", "On save, delete from RAM any cached regions that are more than 1024 blocks away from the player");
         addDescription("randomLooking", "How many degrees to randomize the pitch and yaw every tick.");
+        addDescription("randomLooking113", "How many degrees to randomize the yaw every tick. Set to 0 to disable");
         addDescription("renderCachedChunks", "Render cached chunks as semitransparent.");
         addDescription("renderGoal", "Render the goal");
         addDescription("renderGoalAnimated", "Render the goal as a sick animated thingy instead of just a box (also controls animation of GoalXZ if renderGoalXZBeacon is enabled)");
@@ -390,6 +394,7 @@ public class BaritoneTab extends Tab {
         addDescription("toaster", "The function that is called when Baritone will show a toast.");
         addDescription("toastTimer", "The time of how long the message in the pop-up will display");
         addDescription("useSwordToMine", "Use sword to mine.");
+        addDescription("verboseCommandExceptions", "Print out ALL command exceptions as a stack trace to stdout, even simple syntax errors");
         addDescription("walkOnWaterOnePenalty", "Walking on water uses up hunger really quick, so penalize it");
         addDescription("walkWhileBreaking", "Don't stop walking forward when you need to break blocks in your way");
         addDescription("worldExploringChunkOffset", "While exploring the world, offset the closest unloaded chunk by this much in both axes.");
