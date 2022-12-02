@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.mixin.SectionedEntityCacheAccessor;
 import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
 import meteordevelopment.meteorclient.mixin.WorldAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -136,6 +137,32 @@ public class EntityUtils {
         if (entity == null) return null;
         if (entity instanceof PlayerEntity) return entity.getEntityName();
         return entity.getType().getName().getString();
+    }
+
+    public static Color getColorFromDistance(Entity entity) {
+        // Credit to Icy from Stackoverflow
+        Color distanceColor = new Color(255, 255, 255);
+        double distance = PlayerUtils.distanceToCamera(entity);
+        double percent = distance / 60;
+
+        if (percent < 0 || percent > 1) {
+            distanceColor.set(0, 255, 0, 255);
+            return distanceColor;
+        }
+
+        int r, g;
+
+        if (percent < 0.5) {
+            r = 255;
+            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
+        }
+        else {
+            g = 255;
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
+        }
+
+        distanceColor.set(r, g, 0, 255);
+        return distanceColor;
     }
 
     public static boolean intersectsWithEntity(Box box, Predicate<Entity> predicate) {
