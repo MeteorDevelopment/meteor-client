@@ -47,6 +47,13 @@ public class AutoTool extends Module {
         .build()
     );
 
+    private final Setting<Boolean> useSwords = sgGeneral.add(new BoolSetting.Builder()
+        .name("use-swords")
+        .description("Whether or not to use swords in auto tool.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("anti-break")
         .description("Stops you from breaking your tool.")
@@ -122,7 +129,7 @@ public class AutoTool extends Module {
         bestSlot = -1;
 
         for (int i = 0; i < 9; i++) {
-            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
+            double score = getScore(mc.player.getInventory().getStack(i), blockState, silkTouchForEnderChest.get(), useSwords.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack));
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -131,7 +138,7 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), useSwords.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -151,7 +158,7 @@ public class AutoTool extends Module {
         return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean useSwords, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
 
         if (silkTouchEnderChest
@@ -159,6 +166,8 @@ public class AutoTool extends Module {
             && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
             return -1;
         }
+
+        if (!useSwords && itemStack.getItem() instanceof SwordItem) return -1;
 
         double score = 0;
 
