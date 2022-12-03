@@ -31,20 +31,20 @@ public class NotebotSongArgumentType implements ArgumentType<Path> {
     public Path parse(StringReader reader) throws CommandSyntaxException {
         final String text = reader.getRemaining();
         reader.setCursor(reader.getTotalLength());
-        System.out.println("READER: "+text);
-        return MeteorClient.FOLDER.toPath().resolve("notebot/"+text);
+        System.out.println("READER: " + text);
+        return MeteorClient.FOLDER.toPath().resolve("notebot/" + text);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
         try {
             return CommandSource.suggestMatching(Files.list(MeteorClient.FOLDER.toPath().resolve("notebot"))
-                .filter(SongDecoders::hasDecoder)
-                .map(path -> path.getFileName().toString()),
+                    .filter(SongDecoders::hasDecoder)
+                    .map(path -> path.getFileName().toString()),
                 builder
             );
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            return Suggestions.empty();
         }
     }
 }
