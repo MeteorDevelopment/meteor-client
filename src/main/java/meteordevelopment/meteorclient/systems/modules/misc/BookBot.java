@@ -173,7 +173,7 @@ public class BookBot extends Module {
 
         // If somehow it failed, just dont do anything until it tries again
         boolean foundFinalBook = InvUtils.testInMainHand(Items.WRITABLE_BOOK);
-        if (foundFinalBook) return;
+        if (!foundFinalBook) return;
 
         // Check delay
         if (delayTimer > 0) {
