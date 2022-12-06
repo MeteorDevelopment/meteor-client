@@ -55,7 +55,6 @@ public abstract class ItemStackMixin {
 
     @ModifyVariable(method = "getTooltip", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/ItemStack;getHideFlags()I"))
     private int onGetHideFlags(int flag) {
-        BetterTooltips betterTooltips = Modules.get().get(BetterTooltips.class);
-        return betterTooltips.hideFlagsToggle() ? flag & betterTooltips.hideFlags() : flag;
+        return Modules.get().get(BetterTooltips.class).hideFlags(flag);
     }
 }

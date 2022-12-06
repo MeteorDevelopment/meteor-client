@@ -167,13 +167,6 @@ public class BetterTooltips extends Module {
 
     //Hide flags
 
-    private final Setting<Boolean> hideFlags = sgHideFlags.add(new BoolSetting.Builder()
-        .name("hide-flags")
-        .description("Disables some HideFlags nbt tag.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
         .name("enchantments")
         .description("Show enchantments.")
@@ -461,28 +454,28 @@ public class BetterTooltips extends Module {
         return isActive() && middleClickOpen.get();
     }
 
-    public boolean hideFlagsToggle() {
-        return isActive() && hideFlags.get();
+    public int hideFlags(int flags) {
+        if (enchantments.get())
+            flags = testFlags(flags, 0);
+        if (attributes.get())
+            flags = testFlags(flags, 1);
+        if (unbreakable.get())
+            flags = testFlags(flags, 2);
+        if (canDestroy.get())
+            flags = testFlags(flags, 3);
+        if (canPlaceOn.get())
+            flags = testFlags(flags, 4);
+        if (etc.get())
+            flags = testFlags(flags, 5);
+        if (dye.get())
+            flags = testFlags(flags, 6);
+
+        return flags;
     }
 
-    public int hideFlags() {
-        byte flags = 127;
-
-        if (enchantments.get())
-            flags &= 126;
-        if (attributes.get())
-            flags &= 125;
-        if (unbreakable.get())
-            flags &= 123;
-        if (canDestroy.get())
-            flags &= 119;
-        if (canPlaceOn.get())
-            flags &= 111;
-        if (etc.get())
-            flags &= 95;
-        if (dye.get())
-            flags &= 63;
-
+    private static int testFlags(int flags, int tooltipSection) {
+        int s = 1 << tooltipSection;
+        if ((flags & s) != 0) flags ^= s;
         return flags;
     }
 
