@@ -54,6 +54,7 @@ public class BetterTooltips extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPreviews = settings.createGroup("Previews");
     private final SettingGroup sgOther = settings.createGroup("Other");
+    private final SettingGroup sgHideFlags = settings.createGroup("Hide Flags");
 
     // General
 
@@ -75,13 +76,6 @@ public class BetterTooltips extends Module {
     private final Setting<Boolean> middleClickOpen = sgGeneral.add(new BoolSetting.Builder()
         .name("middle-click-open")
         .description("Opens a GUI window with the inventory of the storage block when you middle click the item.")
-        .defaultValue(true)
-        .build()
-    );
-
-    public final Setting<Boolean> alwaysShow = sgGeneral.add(new BoolSetting.Builder()
-        .name("always-show")
-        .description("Disables the HideFlags nbt tag.")
         .defaultValue(true)
         .build()
     );
@@ -142,7 +136,7 @@ public class BetterTooltips extends Module {
     );
 
     private final Setting<Boolean> entities = sgPreviews.add(new BoolSetting.Builder()
-        .name("entities")
+        .name("buckets")
         .description("Shows entities in buckets when hovering over it in an inventory.")
         .defaultValue(true)
         .build()
@@ -168,6 +162,64 @@ public class BetterTooltips extends Module {
         .name("beehive")
         .description("Displays information about a beehive or bee nest.")
         .defaultValue(true)
+        .build()
+    );
+
+    //Hide flags
+
+    private final Setting<Boolean> hideFlags = sgHideFlags.add(new BoolSetting.Builder()
+        .name("hide-flags")
+        .description("Disables some HideFlags nbt tag.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
+        .name("enchantments")
+        .description("Show enchantments.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> attributes = sgHideFlags.add(new BoolSetting.Builder()
+        .name("attributes")
+        .description("Show item attributes.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> unbreakable = sgHideFlags.add(new BoolSetting.Builder()
+        .name("unbreakable")
+        .description("Show \"Unbreakable\" tag.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> canDestroy = sgHideFlags.add(new BoolSetting.Builder()
+        .name("can-destroy")
+        .description("Show \"CanDestroy\" tag.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> canPlaceOn = sgHideFlags.add(new BoolSetting.Builder()
+        .name("can-place-on")
+        .description("Show \"CanPlaceOn\" tag.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> etc = sgHideFlags.add(new BoolSetting.Builder()
+        .name("etc")
+        .description("Show potion effects, firework status, book author, etc.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> dye = sgHideFlags.add(new BoolSetting.Builder()
+        .name("dye")
+        .description("Show dyed item tags.")
+        .defaultValue(false)
         .build()
     );
 
@@ -409,8 +461,29 @@ public class BetterTooltips extends Module {
         return isActive() && middleClickOpen.get();
     }
 
-    public boolean alwaysShow() {
-        return isActive() && alwaysShow.get();
+    public boolean hideFlagsToggle() {
+        return isActive() && hideFlags.get();
+    }
+
+    public int hideFlags() {
+        byte flags = 127;
+
+        if (enchantments.get())
+            flags &= 126;
+        if (attributes.get())
+            flags &= 125;
+        if (unbreakable.get())
+            flags &= 123;
+        if (canDestroy.get())
+            flags &= 119;
+        if (canPlaceOn.get())
+            flags &= 111;
+        if (etc.get())
+            flags &= 95;
+        if (dye.get())
+            flags &= 63;
+
+        return flags;
     }
 
     public boolean previewShulkers() {

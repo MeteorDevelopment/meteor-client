@@ -21,6 +21,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -52,10 +53,9 @@ public abstract class ItemStackMixin {
         }
     }
 
-    @Inject(method = "getHideFlags", at = @At("HEAD"), cancellable = true)
-    private void onGetHideFlags(CallbackInfoReturnable<Integer> cir) {
-        if (Modules.get().get(BetterTooltips.class).alwaysShow()) {
-            cir.setReturnValue(0);
-        }
+    @ModifyVariable(method = "getTooltip", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/ItemStack;getHideFlags()I"))
+    private int onGetHideFlags(int flag) {
+        BetterTooltips betterTooltips = Modules.get().get(BetterTooltips.class);
+        return betterTooltips.hideFlagsToggle() ? flag & betterTooltips.hideFlags() : flag;
     }
 }
