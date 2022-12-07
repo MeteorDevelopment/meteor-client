@@ -44,6 +44,7 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)
     private void shouldRender(T entity, Frustum frustum, double x, double y, double z, CallbackInfoReturnable<Boolean> cir) {
+        if (Modules.get().get(NoRender.class).noEntity(entity)) cir.cancel();
         if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.cancel();
     }
 

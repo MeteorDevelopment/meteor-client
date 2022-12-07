@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
@@ -282,6 +283,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> dropSpawnPacket = sgEntity.add(new BoolSetting.Builder()
+        .name("Drop Spawn Packets")
+        .description("WARNING! Drops all spawn packets of entities selected in the above list.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> noArmor = sgEntity.add(new BoolSetting.Builder()
         .name("armor")
         .description("Disables rendering of armor on entities.")
@@ -481,8 +489,16 @@ public class NoRender extends Module {
 
     // Entity
 
+    public boolean noEntity(Entity entity) {
+        return isActive() && entities.get().getBoolean(entity.getType());
+    }
+
     public boolean noEntity(EntityType<?> entity) {
         return isActive() && entities.get().getBoolean(entity);
+    }
+
+    public boolean getDropSpawnPacket() {
+        return isActive() && dropSpawnPacket.get();
     }
 
     public boolean noArmor() {
