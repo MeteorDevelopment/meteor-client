@@ -18,6 +18,4 @@ public class SectionVisibleEvent {
         INSTANCE.visible = visible;
         return INSTANCE;
     }
-
-
 }

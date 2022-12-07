@@ -367,19 +367,13 @@ public class BetterTooltips extends Module {
 
     @EventHandler
     private void onSectionVisible(SectionVisibleEvent event) {
-        if (enchantments.get() && event.section == ItemStack.TooltipSection.ENCHANTMENTS)
-            event.visible = true;
-        if (modifiers.get() && event.section == ItemStack.TooltipSection.MODIFIERS)
-            event.visible = true;
-        if (unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE)
-            event.visible = true;
-        if (canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY)
-            event.visible = true;
-        if (canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE)
-            event.visible = true;
-        if (misc.get() && event.section == ItemStack.TooltipSection.ADDITIONAL)
-            event.visible = true;
-        if (dye.get() && event.section == ItemStack.TooltipSection.DYE)
+        if (enchantments.get() && event.section == ItemStack.TooltipSection.ENCHANTMENTS ||
+            modifiers.get() && event.section == ItemStack.TooltipSection.MODIFIERS ||
+            unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE ||
+            canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY ||
+            canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE ||
+            misc.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
+            dye.get() && event.section == ItemStack.TooltipSection.DYE)
             event.visible = true;
     }
 
