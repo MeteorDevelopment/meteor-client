@@ -33,6 +33,7 @@ import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
@@ -383,10 +384,12 @@ public class InventoryTweaks extends Module {
     private void onInventory(InventoryEvent event) {
         ScreenHandler handler = mc.player.currentScreenHandler;
         if (event.packet.getSyncId() == handler.syncId) {
-            if (autoSteal.get()) {
-                steal(handler);
-            } else if (autoDump.get()) {
-                dump(handler);
+            if (handler instanceof GenericContainerScreenHandler || handler instanceof ShulkerBoxScreenHandler) {
+                if (autoSteal.get()) {
+                    steal(handler);
+                } else if (autoDump.get()) {
+                    dump(handler);
+                }
             }
         }
     }
