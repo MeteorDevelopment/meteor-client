@@ -9,8 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
+import meteordevelopment.meteorclient.events.game.SectionVisibleEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
@@ -21,7 +20,6 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -53,8 +51,9 @@ public abstract class ItemStackMixin {
         }
     }
 
-    @ModifyVariable(method = "getTooltip", at = @At(value = "INVOKE_ASSIGN", target = "Lnet/minecraft/item/ItemStack;getHideFlags()I"))
-    private int onGetHideFlags(int flag) {
-        return Modules.get().get(BetterTooltips.class).hideFlags(flag);
+    @Inject(method = "isSectionVisible", at = @At("RETURN"), cancellable = true)
+    private static void onSectionVisible(int flags, ItemStack.TooltipSection tooltipSection, CallbackInfoReturnable<Boolean> info) {
+        SectionVisibleEvent event = MeteorClient.EVENT_BUS.post(SectionVisibleEvent.get(tooltipSection, info.getReturnValueZ()));
+        info.setReturnValue(event.visible);
     }
 }

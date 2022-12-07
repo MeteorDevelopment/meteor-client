@@ -9,6 +9,7 @@ import com.google.gson.JsonSyntaxException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
+import meteordevelopment.meteorclient.events.game.SectionVisibleEvent;
 import meteordevelopment.meteorclient.events.render.TooltipDataEvent;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
@@ -174,9 +175,9 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> attributes = sgHideFlags.add(new BoolSetting.Builder()
-        .name("attributes")
-        .description("Show item attributes.")
+    private final Setting<Boolean> modifiers = sgHideFlags.add(new BoolSetting.Builder()
+        .name("modifiers")
+        .description("Show item modifiers.")
         .defaultValue(false)
         .build()
     );
@@ -202,8 +203,8 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> etc = sgHideFlags.add(new BoolSetting.Builder()
-        .name("etc")
+    private final Setting<Boolean> misc = sgHideFlags.add(new BoolSetting.Builder()
+        .name("misc")
         .description("Show potion effects, firework status, book author, etc.")
         .defaultValue(false)
         .build()
@@ -364,6 +365,24 @@ public class BetterTooltips extends Module {
         }
     }
 
+    @EventHandler
+    private void onSectionVisible(SectionVisibleEvent event) {
+        if (enchantments.get() && event.section == ItemStack.TooltipSection.ENCHANTMENTS)
+            event.visible = true;
+        if (modifiers.get() && event.section == ItemStack.TooltipSection.MODIFIERS)
+            event.visible = true;
+        if (unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE)
+            event.visible = true;
+        if (canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY)
+            event.visible = true;
+        if (canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE)
+            event.visible = true;
+        if (misc.get() && event.section == ItemStack.TooltipSection.ADDITIONAL)
+            event.visible = true;
+        if (dye.get() && event.section == ItemStack.TooltipSection.DYE)
+            event.visible = true;
+    }
+
     public void applyCompactShulkerTooltip(ItemStack stack, List<Text> tooltip) {
         NbtCompound tag = stack.getSubNbt("BlockEntityTag");
 
@@ -452,31 +471,6 @@ public class BetterTooltips extends Module {
 
     public boolean middleClickOpen() {
         return isActive() && middleClickOpen.get();
-    }
-
-    public int hideFlags(int flags) {
-        if (enchantments.get())
-            flags = testFlags(flags, 0);
-        if (attributes.get())
-            flags = testFlags(flags, 1);
-        if (unbreakable.get())
-            flags = testFlags(flags, 2);
-        if (canDestroy.get())
-            flags = testFlags(flags, 3);
-        if (canPlaceOn.get())
-            flags = testFlags(flags, 4);
-        if (etc.get())
-            flags = testFlags(flags, 5);
-        if (dye.get())
-            flags = testFlags(flags, 6);
-
-        return flags;
-    }
-
-    private static int testFlags(int flags, int tooltipSection) {
-        int s = 1 << tooltipSection;
-        if ((flags & s) != 0) flags ^= s;
-        return flags;
     }
 
     public boolean previewShulkers() {
