@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.CloseHandledScreenC2SPacketAccessor;
@@ -366,14 +367,6 @@ public class InventoryTweaks extends Module {
         return isActive() && buttons.get();
     }
 
-    public boolean autoSteal() {
-        return isActive() && autoSteal.get();
-    }
-
-    public boolean autoDump() {
-        return isActive() && autoDump.get();
-    }
-
     public boolean mouseDragItemMove() {
         return isActive() && mouseDragItemMove.get();
     }
@@ -384,5 +377,17 @@ public class InventoryTweaks extends Module {
 
     public boolean armorSwap() {
         return isActive() && armorSwap.get();
+    }
+
+    @EventHandler
+    private void onInventory(InventoryEvent event) {
+        ScreenHandler handler = mc.player.currentScreenHandler;
+        if (event.packet.getSyncId() == handler.syncId) {
+            if (autoSteal.get()) {
+                steal(handler);
+            } else if (autoDump.get()) {
+                dump(handler);
+            }
+        }
     }
 }
