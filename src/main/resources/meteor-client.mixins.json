@@ -137,7 +137,7 @@
     "ShulkerBoxBlockMixin",
     "ShulkerBoxScreenMixin",
     "SignBlockEntityRendererMixin",
-    "SignEditScreenAccessor",
+    "AbstractSignEditScreenAccessor",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",
     "SlimeBlockMixin",

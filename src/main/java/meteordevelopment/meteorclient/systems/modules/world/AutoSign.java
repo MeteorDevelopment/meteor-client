@@ -7,7 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.SignEditScreenAccessor;
+import meteordevelopment.meteorclient.mixin.AbstractSignEditScreenAccessor;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -38,7 +38,7 @@ public class AutoSign extends Module {
     private void onOpenScreen(OpenScreenEvent event) {
         if (!(event.screen instanceof SignEditScreen) || text == null) return;
 
-        SignBlockEntity sign = ((SignEditScreenAccessor) event.screen).getSign();
+        SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
 
         mc.player.networkHandler.sendPacket(new UpdateSignC2SPacket(sign.getPos(), text[0], text[1], text[2], text[3]));
 

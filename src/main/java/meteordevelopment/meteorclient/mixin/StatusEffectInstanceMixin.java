@@ -17,7 +17,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(StatusEffectInstance.class)
 public class StatusEffectInstanceMixin {
-    @Shadow private int duration;
+    @Shadow int duration;
 
     @Inject(method = "updateDuration", at = @At("HEAD"), cancellable = true)
     private void tick(CallbackInfoReturnable<Integer> info) {

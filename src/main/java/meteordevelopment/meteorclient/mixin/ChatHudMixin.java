@@ -102,7 +102,7 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(MatrixStack matrices, int tickDelta, CallbackInfo ci) {
+    private void onRender(MatrixStack matrices, int currentTick, int mouseX, int mouseY, CallbackInfo ci) {
         if (!Modules.get().get(BetterChat.class).displayPlayerHeads()) return;
         if (mc.options.getChatVisibility().getValue() == ChatVisibility.HIDDEN) return;
         int maxLineCount = mc.inGameHud.getChatHud().getVisibleLineCount();
@@ -117,7 +117,7 @@ public abstract class ChatHudMixin implements IChatHud {
         for(int m = 0; m + this.scrolledLines < this.visibleMessages.size() && m < maxLineCount; ++m) {
             ChatHudLine.Visible chatHudLine = this.visibleMessages.get(m + this.scrolledLines);
             if (chatHudLine != null) {
-                int x = tickDelta - chatHudLine.addedTime();
+                int x = currentTick - chatHudLine.addedTime();
                 if (x < 200 || isChatFocused()) {
                     double o = isChatFocused() ? 1.0D : getMessageOpacityMultiplier(x);
                     if (o * d > 0.01D) {
@@ -188,7 +188,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     private static Identifier getMessageTexture(String message) {
         if (mc.getNetworkHandler() == null) return null;
-        for (String part : message.split("(§.)|[^\\w]")) {
+        for (String part : message.split("(§.)|\\W")) {
             if (part.isBlank()) continue;
             PlayerListEntry p = mc.getNetworkHandler().getPlayerListEntry(part);
             if (p != null) {

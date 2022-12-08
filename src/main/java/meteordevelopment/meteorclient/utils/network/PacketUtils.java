@@ -7,17 +7,17 @@ package meteordevelopment.meteorclient.utils.network;
 
 import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import net.minecraft.network.Packet;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryEntryList;
-import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -396,7 +396,7 @@ public class PacketUtils {
         return C2S_PACKETS.keySet();
     }
 
-    private static class PacketRegistry extends Registry<Class<? extends Packet<?>>> {
+    private static class PacketRegistry extends SimpleRegistry<Class<? extends Packet<?>>> {
         public PacketRegistry() {
             super(RegistryKey.ofRegistry(new MeteorIdentifier("packets")), Lifecycle.stable());
         }
@@ -473,7 +473,7 @@ public class PacketUtils {
         }
 
         @Override
-        public Optional<RegistryEntry<Class<? extends Packet<?>>>> getRandom(Random random) {
+        public Optional<RegistryEntry.Reference<Class<? extends Packet<?>>>> getRandom(Random random) {
             return Optional.empty();
         }
 
@@ -483,22 +483,17 @@ public class PacketUtils {
         }
 
         @Override
-        public RegistryEntry<Class<? extends Packet<?>>> getOrCreateEntry(RegistryKey<Class<? extends Packet<?>>> key) {
-            return null;
-        }
-
-        @Override
         public RegistryEntry.Reference<Class<? extends Packet<?>>> createEntry(Class<? extends Packet<?>> value) {
             return null;
         }
 
         @Override
-        public Optional<RegistryEntry<Class<? extends Packet<?>>>> getEntry(int rawId) {
+        public Optional<RegistryEntry.Reference<Class<? extends Packet<?>>>> getEntry(int rawId) {
             return Optional.empty();
         }
 
         @Override
-        public Optional<RegistryEntry<Class<? extends Packet<?>>>> getEntry(RegistryKey<Class<? extends Packet<?>>> key) {
+        public Optional<RegistryEntry.Reference<Class<? extends Packet<?>>>> getEntry(RegistryKey<Class<? extends Packet<?>>> key) {
             return Optional.empty();
         }
 
@@ -528,20 +523,10 @@ public class PacketUtils {
         }
 
         @Override
-        public boolean containsTag(TagKey<Class<? extends Packet<?>>> tag) {
-            return false;
-        }
-
-        @Override
         public void clearTags() {}
 
         @Override
         public void populateTags(Map<TagKey<Class<? extends Packet<?>>>, List<RegistryEntry<Class<? extends Packet<?>>>>> tagEntries) {}
-
-        @Override
-        public DataResult<RegistryEntry<Class<? extends Packet<?>>>> getOrCreateEntryDataResult(RegistryKey<Class<? extends Packet<?>>> key) {
-            return null;
-        }
 
         @Override
         public Set<RegistryKey<Class<? extends Packet<?>>>> getKeys() {
