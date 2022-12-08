@@ -284,7 +284,7 @@ public class NoRender extends Module {
     );
 
     private final Setting<Boolean> dropSpawnPacket = sgEntity.add(new BoolSetting.Builder()
-        .name("Drop Spawn Packets")
+        .name("drop-spawn-packets")
         .description("WARNING! Drops all spawn packets of entities selected in the above list.")
         .defaultValue(false)
         .build()
