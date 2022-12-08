@@ -79,6 +79,17 @@ public class StorageESP extends Module {
         .build()
     );
 
+    public final Setting<Double> glowMultiplier = sgGeneral.add(new DoubleSetting.Builder()
+        .name("glow-multiplier")
+        .description("Multiplier for glow effect")
+        .visible(() -> mode.get() == Mode.Shader)
+        .decimalPlaces(3)
+        .defaultValue(3.5)
+        .min(0)
+        .sliderMax(10)
+        .build()
+    );
+
     private final Setting<SettingColor> chest = sgGeneral.add(new ColorSetting.Builder()
             .name("chest")
             .description("The color of chests.")
