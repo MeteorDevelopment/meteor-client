@@ -15,6 +15,10 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
@@ -49,7 +53,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         try {
             for (String value : values) {
-                BlockEntityType<?> block = parseId(Registry.BLOCK_ENTITY_TYPE, value);
+                BlockEntityType<?> block = parseId(Registries.BLOCK_ENTITY_TYPE, value);
                 if (block != null) blocks.add(block);
             }
         } catch (Exception ignored) {}
@@ -64,14 +68,14 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.BLOCK_ENTITY_TYPE.getIds();
+        return Registries.BLOCK_ENTITY_TYPE.getIds();
     }
 
     @Override
     public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (BlockEntityType<?> type : get()) {
-            Identifier id = Registry.BLOCK_ENTITY_TYPE.getId(type);
+            Identifier id = Registries.BLOCK_ENTITY_TYPE.getId(type);
             if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
@@ -85,7 +89,7 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            BlockEntityType<?> type = Registry.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString()));
+            BlockEntityType<?> type = Registries.BLOCK_ENTITY_TYPE.get(new Identifier(tagI.asString()));
             if (type != null) get().add(type);
         }
 

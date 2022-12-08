@@ -21,9 +21,9 @@ import java.nio.ByteBuffer;
 public class VertexBufferMixin {
     @Shadow private int indexBufferId;
 
-    @Inject(method = "configureIndexBuffer", at = @At("RETURN"))
-    private void onConfigureIndexBuffer(BufferBuilder.DrawArrayParameters parameters, ByteBuffer data, CallbackInfoReturnable<RenderSystem.IndexBuffer> info) {
+    @Inject(method = "uploadIndexBuffer", at = @At("RETURN"))
+    private void onConfigureIndexBuffer(BufferBuilder.DrawParameters parameters, ByteBuffer indexBuffer, CallbackInfoReturnable<RenderSystem.ShapeIndexBuffer> info) {
         if (info.getReturnValue() == null) GL.CURRENT_IBO = this.indexBufferId;
-        else GL.CURRENT_IBO = ((IndexBufferAccessor) (Object) info.getReturnValue()).getId();
+        else GL.CURRENT_IBO = ((ShapeIndexBufferAccessor) (Object) info.getReturnValue()).getId();
     }
 }

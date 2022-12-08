@@ -1,5 +1,5 @@
 plugins {
-    id 'fabric-loom' version '0.12-SNAPSHOT'
+    id 'fabric-loom' version '1.0-SNAPSHOT'
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
 }
@@ -49,7 +49,10 @@ dependencies {
     modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false }
 
 	// Baritone (https://github.com/MeteorDevelopment/baritone)
-    modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+
+    //TODO 1.19.3 baritone
+    //modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+    modInclude "baritone:fabric:1.19.2-SNAPSHOT"
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"

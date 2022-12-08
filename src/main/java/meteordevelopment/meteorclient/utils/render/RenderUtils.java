@@ -22,8 +22,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -73,7 +73,7 @@ public class RenderUtils {
             bobView(bobViewMatrices);
             bobViewMatrices.peek().getPositionMatrix().invert();
 
-            pos = ((IMatrix4f) (Object) bobViewMatrices.peek().getPositionMatrix()).mul(pos);
+            pos = ((IMatrix4f) bobViewMatrices.peek().getPositionMatrix()).mul(pos);
         }
 
         center = new Vec3d(pos.x, -pos.y, pos.z)
@@ -92,8 +92,8 @@ public class RenderUtils {
             float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
 
             matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), -(-Math.abs(MathHelper.cos(h * 3.1415927f) * i)), 0);
-            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(MathHelper.sin(h * 3.1415927f) * i * 3));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(h * 3.1415927f) * i * 3));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
         }
     }
 

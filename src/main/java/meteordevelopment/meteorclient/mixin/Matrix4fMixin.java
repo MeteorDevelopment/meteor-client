@@ -7,49 +7,49 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.mixininterface.IMatrix4f;
 import meteordevelopment.meteorclient.utils.misc.Vec4;
-import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Matrix4f.class)
 public class Matrix4fMixin implements IMatrix4f {
-    @Shadow protected float a00;
-    @Shadow protected float a10;
-    @Shadow protected float a20;
-    @Shadow protected float a30;
+    @Shadow(remap = false)float m00;
+    @Shadow(remap = false)float m10;
+    @Shadow(remap = false)float m20;
+    @Shadow(remap = false)float m30;
 
-    @Shadow protected float a01;
-    @Shadow protected float a11;
-    @Shadow protected float a21;
-    @Shadow protected float a31;
+    @Shadow(remap = false)float m01;
+    @Shadow(remap = false)float m11;
+    @Shadow(remap = false)float m21;
+    @Shadow(remap = false)float m31;
 
-    @Shadow protected float a02;
-    @Shadow protected float a12;
-    @Shadow protected float a22;
-    @Shadow protected float a32;
+    @Shadow(remap = false)float m02;
+    @Shadow(remap = false)float m12;
+    @Shadow(remap = false)float m22;
+    @Shadow(remap = false)float m32;
 
-    @Shadow protected float a03;
-    @Shadow protected float a13;
-    @Shadow protected float a23;
-    @Shadow protected float a33;
+    @Shadow(remap = false)float m03;
+    @Shadow(remap = false)float m13;
+    @Shadow(remap = false) float m23;
+    @Shadow(remap = false)float m33;
 
     @Override
     public void multiplyMatrix(Vec4 v, Vec4 out) {
         out.set(
-                a00 * v.x + a01 * v.y + a02 * v.z + a03 * v.w,
-                a10 * v.x + a11 * v.y + a12 * v.z + a13 * v.w,
-                a20 * v.x + a21 * v.y + a22 * v.z + a23 * v.w,
-                a30 * v.x + a31 * v.y + a32 * v.z + a33 * v.w
+                m00 * v.x + m01 * v.y + m02 * v.z + m03 * v.w,
+                m10 * v.x + m11 * v.y + m12 * v.z + m13 * v.w,
+                m20 * v.x + m21 * v.y + m22 * v.z + m23 * v.w,
+                m30 * v.x + m31 * v.y + m32 * v.z + m33 * v.w
         );
     }
 
     @Override
     public Vec3d mul(Vec3d vec) {
         return new Vec3d(
-            vec.x * a00 + vec.y * a01 + vec.z * a02 + a03,
-            vec.x * a10 + vec.y * a11 + vec.z * a12 + a13,
-            vec.x * a20 + vec.y * a21 + vec.z * a22 + a23
+            vec.x * m00 + vec.y * m01 + vec.z * m02 + m03,
+            vec.x * m10 + vec.y * m11 + vec.z * m12 + m13,
+            vec.x * m20 + vec.y * m21 + vec.z * m22 + m23
         );
     }
 }

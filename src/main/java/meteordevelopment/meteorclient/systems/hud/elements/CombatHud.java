@@ -33,8 +33,8 @@ import net.minecraft.item.BedItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -431,7 +431,7 @@ public class CombatHud extends HudElement {
     public static List<Enchantment> getDefaultEnchantments() {
         List<Enchantment> enchantments = new ArrayList<>();
 
-        for (Enchantment enchantment : Registry.ENCHANTMENT) {
+        for (Enchantment enchantment : Registries.ENCHANTMENT) {
             enchantments.add(enchantment);
         }
 

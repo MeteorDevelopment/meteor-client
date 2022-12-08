@@ -38,12 +38,12 @@ import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Matrix4f;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.registry.Registry;
 import net.minecraft.world.chunk.Chunk;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +68,7 @@ public class Utils {
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
-    
+
     public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
 
     @PreInit
@@ -128,7 +128,7 @@ public class Utils {
             for (int i = 0; i < listTag.size(); ++i) {
                 NbtCompound tag = listTag.getCompound(i);
 
-                Registry.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent((enchantment) -> enchantments.put(enchantment, tag.getInt("lvl")));
+                Registries.ENCHANTMENT.getOrEmpty(Identifier.tryParse(tag.getString("id"))).ifPresent((enchantment) -> enchantments.put(enchantment, tag.getInt("lvl")));
             }
         }
     }
@@ -226,9 +226,9 @@ public class Utils {
     }
 
     public static Object2IntMap<StatusEffect> createStatusEffectMap() {
-        Object2IntMap<StatusEffect> map = new Object2IntArrayMap<>(Registry.STATUS_EFFECT.getIds().size());
+        Object2IntMap<StatusEffect> map = new Object2IntArrayMap<>(Registries.STATUS_EFFECT.getIds().size());
 
-        Registry.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
+        Registries.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
 
         return map;
     }
@@ -500,7 +500,7 @@ public class Utils {
         }
 
         // Check if item already has the enchantment and modify the level
-        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+        String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
 
         for (NbtElement _t : listTag) {
             NbtCompound t = (NbtCompound) _t;
@@ -531,7 +531,7 @@ public class Utils {
         if (!nbt.contains("Enchantments", 9)) return;
         NbtList list = nbt.getList("Enchantments", 10);
 
-        String enchId = Registry.ENCHANTMENT.getId(enchantment).toString();
+        String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();
 
         for (Iterator<NbtElement> it = list.iterator(); it.hasNext();) {
             NbtCompound ench = (NbtCompound) it.next();

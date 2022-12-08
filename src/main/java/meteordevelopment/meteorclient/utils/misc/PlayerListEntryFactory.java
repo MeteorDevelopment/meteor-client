@@ -12,11 +12,13 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
 
+import java.util.List;
+
 public class PlayerListEntryFactory extends PlayerListS2CPacket {
     private static final PlayerListEntryFactory INSTANCE = new PlayerListEntryFactory();
 
     public PlayerListEntryFactory() {
-        super(null, new ServerPlayerEntity[0]);
+        super(null, List.of(new ServerPlayerEntity[0]));
     }
 
     public static Entry create(GameProfile profile, int latency, GameMode gameMode, Text displayName, PlayerPublicKey.PublicKeyData publicKeyData) {

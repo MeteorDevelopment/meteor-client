@@ -14,15 +14,17 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.command.CommandSource;
-import net.minecraft.command.argument.EnchantmentArgumentType;
+import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.text.Text;
-import net.minecraft.util.registry.Registry;
 
 import java.util.function.Function;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import static meteordevelopment.meteorclient.systems.commands.Commands.REGISTRY_ACCESS;
 
 public class EnchantCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
@@ -34,7 +36,7 @@ public class EnchantCommand extends Command {
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
-        builder.then(literal("one").then(argument("enchantment", EnchantmentArgumentType.enchantment())
+        builder.then(literal("one").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT))
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
                 one(context, enchantment -> context.getArgument("level", Integer.class));
                 return SINGLE_SUCCESS;
@@ -75,7 +77,7 @@ public class EnchantCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("remove").then(argument("enchantment", EnchantmentArgumentType.enchantment()).executes(context -> {
+        builder.then(literal("remove").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT)).executes(context -> {
             ItemStack itemStack = tryGetItemStack();
             Utils.removeEnchantment(itemStack, context.getArgument("enchantment", Enchantment.class));
 
@@ -96,7 +98,7 @@ public class EnchantCommand extends Command {
     private void all(boolean onlyPossible, Function<Enchantment, Integer> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        for (Enchantment enchantment : Registry.ENCHANTMENT) {
+        for (Enchantment enchantment : Registries.ENCHANTMENT) {
             if (!onlyPossible || enchantment.isAcceptableItem(itemStack)) {
                 Utils.addEnchantment(itemStack, enchantment, level.apply(enchantment));
             }
