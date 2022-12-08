@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.PickItemsEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.ContainerSlotUpdateEvent;
+import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosionS2CPacket;
@@ -78,6 +79,11 @@ public abstract class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
     private void onContainerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(ContainerSlotUpdateEvent.get(packet));
+    }
+
+    @Inject(method = "onInventory", at = @At("TAIL"))
+    private void onInventory(InventoryS2CPacket packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(InventoryEvent.get(packet));
     }
 
     @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/EntitiesDestroyS2CPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
