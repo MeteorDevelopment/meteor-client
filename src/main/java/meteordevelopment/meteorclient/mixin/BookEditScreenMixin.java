@@ -41,66 +41,73 @@ public abstract class BookEditScreenMixin extends Screen {
         super(title);
     }
 
-    @Shadow protected abstract void updateButtons();
+    @Shadow
+    protected abstract void updateButtons();
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(4, 4, 120, 20, Text.literal("Copy"), button -> {
-            NbtList listTag = new NbtList();
-            pages.stream().map(NbtString::of).forEach(listTag::add);
+        addDrawableChild(new ButtonWidget.Builder(Text.literal("Copy"), button -> {
+                NbtList listTag = new NbtList();
+                pages.stream().map(NbtString::of).forEach(listTag::add);
 
-            NbtCompound tag = new NbtCompound();
-            tag.put("pages", listTag);
-            tag.putInt("currentPage", currentPage);
+                NbtCompound tag = new NbtCompound();
+                tag.put("pages", listTag);
+                tag.putInt("currentPage", currentPage);
 
-            FastByteArrayOutputStream bytes = new FastByteArrayOutputStream();
-            DataOutputStream out = new DataOutputStream(bytes);
-            try {
-                NbtIo.write(tag, out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            try {
-                GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
-            } catch (OutOfMemoryError exception) {
-                GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), exception.toString());
-            }
-        }));
-
-        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, Text.literal("Paste"), button -> {
-            String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().getHandle());
-            if (clipboard == null) return;
-
-            byte[] bytes;
-            try {
-                bytes = Base64.getDecoder().decode(clipboard);
-            } catch (IllegalArgumentException ignored) {
-                return;
-            }
-            DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
-
-            try {
-                NbtCompound tag = NbtIo.read(in);
-
-                NbtList listTag = tag.getList("pages", 8).copy();
-
-                pages.clear();
-                for(int i = 0; i < listTag.size(); ++i) {
-                    pages.add(listTag.getString(i));
+                FastByteArrayOutputStream bytes = new FastByteArrayOutputStream();
+                DataOutputStream out = new DataOutputStream(bytes);
+                try {
+                    NbtIo.write(tag, out);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
 
-                if (pages.isEmpty()) {
-                    pages.add("");
+                try {
+                    GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+                } catch (OutOfMemoryError exception) {
+                    GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), exception.toString());
                 }
+            })
+            .position(4, 4)
+            .size(120, 20)
+            .build());
 
-                currentPage = tag.getInt("currentPage");
+        addDrawableChild(new ButtonWidget.Builder(Text.literal("Paste"), button -> {
+                String clipboard = GLFW.glfwGetClipboardString(mc.getWindow().getHandle());
+                if (clipboard == null) return;
 
-                dirty = true;
-                updateButtons();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }));
+                byte[] bytes;
+                try {
+                    bytes = Base64.getDecoder().decode(clipboard);
+                } catch (IllegalArgumentException ignored) {
+                    return;
+                }
+                DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
+
+                try {
+                    NbtCompound tag = NbtIo.read(in);
+
+                    NbtList listTag = tag.getList("pages", 8).copy();
+
+                    pages.clear();
+                    for (int i = 0; i < listTag.size(); ++i) {
+                        pages.add(listTag.getString(i));
+                    }
+
+                    if (pages.isEmpty()) {
+                        pages.add("");
+                    }
+
+                    currentPage = tag.getInt("currentPage");
+
+                    dirty = true;
+                    updateButtons();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            })
+            .position(4, 4 + 20 + 2)
+            .size(120, 20)
+            .build());
     }
 }
