@@ -22,6 +22,7 @@ import net.minecraft.util.math.Vec3d;
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
+    
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The mode for Flight.")
@@ -61,7 +62,6 @@ public class Flight extends Module {
     );
 
     // Anti Kick
-    private int delayLeft = delay.get();
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
         .name("off-time")
         .description("The amount of delay, in milliseconds, to fly down a bit to reset floating ticks.")
@@ -70,6 +70,8 @@ public class Flight extends Module {
         .sliderRange(1, 20)
         .build()
     );
+    
+    private int delayLeft = delay.get();
     private int offLeft = offTime.get();
     private boolean flip;
     private float lastYaw;
