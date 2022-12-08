@@ -760,9 +760,9 @@ public class Notebot extends Module {
     private void onTickPreview() {
         for (Note note : song.getNotesMap().get(currentTick)) {
             if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-                mc.player.playSound(note.getInstrument().getSound(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
+                mc.player.playSound(note.getInstrument().getSound().value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             } else {
-                mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP, 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
+                mc.player.playSound(SoundEvents.BLOCK_NOTE_BLOCK_HARP.value(), 2f, (float) Math.pow(2.0D, (note.getNoteLevel() - 12) / 12.0D));
             }
         }
     }

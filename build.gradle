@@ -50,7 +50,7 @@ dependencies {
 
 	// Baritone (https://github.com/MeteorDevelopment/baritone)
 
-    //TODO 1.19.3 baritone
+    //TODO-1193 baritone
     //modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
     modInclude "baritone:fabric:1.19.2-SNAPSHOT"
 
