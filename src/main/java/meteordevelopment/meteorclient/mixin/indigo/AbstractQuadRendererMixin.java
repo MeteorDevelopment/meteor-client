@@ -56,7 +56,7 @@ public abstract class AbstractQuadRendererMixin {
         } else {
             final Vector3f faceNormal = quad.faceNormal();
             normalVec.set(faceNormal.x(), faceNormal.y(), faceNormal.z());
-            normalVec.transform(normalMatrix);
+            normalVec.mul(normalMatrix);
         }
 
         for (int i = 0; i < 4; i++) {
@@ -69,10 +69,10 @@ public abstract class AbstractQuadRendererMixin {
 
             if (useNormals) {
                 normalVec.set(quad.normalX(i), quad.normalY(i), quad.normalZ(i));
-                normalVec.transform(normalMatrix);
+                normalVec.mul(normalMatrix);
             }
 
-            buff.normal(normalVec.getX(), normalVec.getY(), normalVec.getZ());
+            buff.normal(normalVec.x(), normalVec.y(), normalVec.z());
             buff.next();
         }
     }

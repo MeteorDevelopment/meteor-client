@@ -20,6 +20,8 @@ import net.minecraft.item.*;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -88,14 +90,14 @@ public class ProjectileEntitySimulator {
         }
         else {
             Vec3d vec3d = user.getOppositeRotationVector(1.0F);
-            Quaternion quaternion = new Quaternion(new Vec3f(vec3d), (float) simulated, true);
+            Quaternionf quaternionf = new Quaternionf().setAngleAxis(simulated * 0.017453292f, vec3d.x, vec3d.y, vec3d.z);
             Vec3d vec3d2 = user.getRotationVec(1.0F);
-            Vec3f vector3f = new Vec3f(vec3d2);
-            vector3f.rotate(quaternion);
+            Vector3f vector3f = vec3d2.toVector3f().rotate(quaternionf);
+            vector3f.rotate(quaternionf);
 
-            x = vector3f.getX();
-            y = vector3f.getY();
-            z = vector3f.getZ();
+            x = vector3f.x();
+            y = vector3f.y();
+            z = vector3f.z();
         }
 
         velocity.set(x, y, z).normalize().multiply(speed);

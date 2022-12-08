@@ -16,14 +16,14 @@ import net.minecraft.util.math.MathHelper;
 
 public class ContainerButtonWidget extends ButtonWidget {
     public ContainerButtonWidget(int x, int y, int width, int height, Text message, PressAction onPress) {
-        super(x, y, width, height, message, onPress);
+        super(x, y, width, height, message, onPress, ButtonWidget.DEFAULT_NARRATION_SUPPLIER);
     }
 
     @Override
     public void renderButton(MatrixStack matrices, int mouseX, int mouseY, float delta) {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         TextRenderer textRenderer = minecraftClient.textRenderer;
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, WIDGETS_TEXTURE);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
         RenderSystem.enableBlend();

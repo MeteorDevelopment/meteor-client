@@ -33,7 +33,7 @@ public class VanillaTextRenderer implements TextRenderer {
     private VanillaTextRenderer() {
         // Use INSTANCE
 
-        emptyMatrix.loadIdentity();
+        emptyMatrix.identity();
     }
 
     @Override

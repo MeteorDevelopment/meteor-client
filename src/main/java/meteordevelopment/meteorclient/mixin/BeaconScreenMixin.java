@@ -29,6 +29,7 @@ import java.util.List;
 
 @Mixin(BeaconScreen.class)
 public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandler> {
+    //This warning is normal, do not change the code here
     @Shadow
     protected abstract <T extends ClickableWidget> void addButton(T button);
 
