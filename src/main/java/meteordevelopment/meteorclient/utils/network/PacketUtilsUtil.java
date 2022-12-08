@@ -156,7 +156,7 @@ public class PacketUtilsUtil {
     }
 """;
 
-//    @PostInit
+    //    @PostInit
     public static void main(String[] args) throws IOException {
         // Generate PacketUtils.java
         File file = new File(System.getProperty("user.dir") + "/PacketUtils.java");
@@ -182,14 +182,13 @@ public class PacketUtilsUtil {
         writer.write("import net.minecraft.network.Packet;\n");
         writer.write("import net.minecraft.util.Identifier;\n");
         writer.write("import net.minecraft.registry.Registry;\n");
-        writer.write("import net.minecraft.registry.RegistryEntry;\n");
-        writer.write("import net.minecraft.registry.RegistryEntryList;\n");
         writer.write("import net.minecraft.registry.RegistryKey;\n");
-        writer.write("import net.minecraft.registry.SimpleRegistry\n;");
+        writer.write("import net.minecraft.registry.SimpleRegistry;\n");
+        writer.write("import net.minecraft.registry.entry.RegistryEntry;\n");
+        writer.write("import net.minecraft.registry.entry.RegistryEntryList;\n");
         writer.write("import net.minecraft.registry.tag.TagKey;\n");
         writer.write("import org.jetbrains.annotations.NotNull;\n");
         writer.write("import net.minecraft.util.math.random.Random;\n");
-        writer.write("import com.mojang.serialization.DataResult;\n");
         writer.write("import java.util.*;\n");
         writer.write("import java.util.stream.Stream;\n");
 
