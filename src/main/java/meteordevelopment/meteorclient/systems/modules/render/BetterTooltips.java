@@ -136,8 +136,8 @@ public class BetterTooltips extends Module {
         .build()
     );
 
-    private final Setting<Boolean> entities = sgPreviews.add(new BoolSetting.Builder()
-        .name("buckets")
+    private final Setting<Boolean> entitiesInBuckets = sgPreviews.add(new BoolSetting.Builder()
+        .name("entities-in-buckets.")
         .description("Shows entities in buckets when hovering over it in an inventory.")
         .defaultValue(true)
         .build()
@@ -170,49 +170,49 @@ public class BetterTooltips extends Module {
 
     private final Setting<Boolean> enchantments = sgHideFlags.add(new BoolSetting.Builder()
         .name("enchantments")
-        .description("Show enchantments.")
+        .description("Show enchantments when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> modifiers = sgHideFlags.add(new BoolSetting.Builder()
         .name("modifiers")
-        .description("Show item modifiers.")
+        .description("Show item modifiers when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> unbreakable = sgHideFlags.add(new BoolSetting.Builder()
         .name("unbreakable")
-        .description("Show \"Unbreakable\" tag.")
+        .description("Show \"Unbreakable\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> canDestroy = sgHideFlags.add(new BoolSetting.Builder()
         .name("can-destroy")
-        .description("Show \"CanDestroy\" tag.")
+        .description("Show \"CanDestroy\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> canPlaceOn = sgHideFlags.add(new BoolSetting.Builder()
         .name("can-place-on")
-        .description("Show \"CanPlaceOn\" tag.")
+        .description("Show \"CanPlaceOn\" tag when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> misc = sgHideFlags.add(new BoolSetting.Builder()
-        .name("misc")
-        .description("Show potion effects, firework status, book author, etc.")
+    private final Setting<Boolean> additional = sgHideFlags.add(new BoolSetting.Builder()
+        .name("additional")
+        .description("Show potion effects, firework status, book author, etc when it's hidden.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> dye = sgHideFlags.add(new BoolSetting.Builder()
         .name("dye")
-        .description("Show dyed item tags.")
+        .description("Show dyed item tags when it's hidden.")
         .defaultValue(false)
         .build()
     );
@@ -304,7 +304,7 @@ public class BetterTooltips extends Module {
             || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
             || (event.itemStack.getItem() == Items.WRITTEN_BOOK && books.get() && !previewBooks())
-            || (event.itemStack.getItem() instanceof EntityBucketItem && entities.get() && !previewEntities())
+            || (event.itemStack.getItem() instanceof EntityBucketItem && entitiesInBuckets.get() && !previewEntities())
             || (event.itemStack.getItem() instanceof BannerItem && banners.get() && !previewBanners())
             || (event.itemStack.getItem() instanceof BannerPatternItem && banners.get()  && !previewBanners())
             || (event.itemStack.getItem() == Items.SHIELD && banners.get() && !previewBanners())) {
@@ -372,7 +372,7 @@ public class BetterTooltips extends Module {
             unbreakable.get() && event.section == ItemStack.TooltipSection.UNBREAKABLE ||
             canDestroy.get() && event.section == ItemStack.TooltipSection.CAN_DESTROY ||
             canPlaceOn.get() && event.section == ItemStack.TooltipSection.CAN_PLACE ||
-            misc.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
+            additional.get() && event.section == ItemStack.TooltipSection.ADDITIONAL ||
             dye.get() && event.section == ItemStack.TooltipSection.DYE)
             event.visible = true;
     }
@@ -492,7 +492,7 @@ public class BetterTooltips extends Module {
     }
 
     private boolean previewEntities() {
-        return isPressed() && entities.get();
+        return isPressed() && entitiesInBuckets.get();
     }
 
     private boolean isPressed() {
