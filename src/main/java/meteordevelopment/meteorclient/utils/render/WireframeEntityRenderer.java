@@ -317,7 +317,8 @@ public class WireframeEntityRenderer {
             matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90.0F));
             boatEntityModel.setAngles(boatEntity, event.tickDelta, 0.0F, -0.1F, 0.0F, 0.0F);
             boatEntityModel.getParts().forEach(modelPart -> render(event.renderer, modelPart));
-            if (!boatEntity.isSubmergedInWater()) render(event.renderer, ((ModelWithWaterPatch) boatEntityModel).getWaterPatch());
+            if (!boatEntity.isSubmergedInWater() && boatEntityModel instanceof ModelWithWaterPatch modelWithWaterPatch)
+                render(event.renderer, modelWithWaterPatch.getWaterPatch());
 
             matrices.pop();
         }
