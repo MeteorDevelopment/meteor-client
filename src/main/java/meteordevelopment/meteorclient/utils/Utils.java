@@ -156,7 +156,7 @@ public class Utils {
     }
 
     public static void unscaledProjection() {
-        RenderSystem.setProjectionMatrix((new Matrix4f()).setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(),0, 1000, 3000));
+        RenderSystem.setProjectionMatrix(new Matrix4f().setOrtho(0, mc.getWindow().getFramebufferWidth(), mc.getWindow().getFramebufferHeight(),0, 1000, 3000));
         rendering3D = false;
     }
 
