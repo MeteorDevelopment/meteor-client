@@ -17,6 +17,7 @@ public abstract class Tab {
         this.name = name;
     }
 
+    //fixme-1193 Screen is upside-down and sometimes invisible
     public void openScreen(GuiTheme theme) {
         TabScreen screen = this.createScreen(theme);
         screen.addDirect(theme.topBar()).top().centerX();

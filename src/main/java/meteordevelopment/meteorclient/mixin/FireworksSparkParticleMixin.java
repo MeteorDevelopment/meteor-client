@@ -15,7 +15,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 @Mixin(FireworksSparkParticle.FireworkParticle.class)
 public class FireworksSparkParticleMixin {
     @Inject(method = "addExplosionParticle", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/particle/FireworksSparkParticle$Explosion;setTrail(Z)V"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
-    private void onAddExplosion(double x, double y, double z, double velocityX, double velocityY, double velocityZ, int[] colors, int[] fadeColors, boolean trail1, boolean flicker, CallbackInfo info, double velocityZ1, int[] arg6, int[] arg7, boolean trail, boolean arg9, FireworksSparkParticle.Explosion explosion) {
+    private void onAddExplosion(double x, double y, double z, double velocityX, double velocityY, double velocityZ, int[] colors, int[] fadeColors, boolean trail, boolean flicker, CallbackInfo info, FireworksSparkParticle.Explosion explosion) {
         if (explosion == null) info.cancel();
     }
 }

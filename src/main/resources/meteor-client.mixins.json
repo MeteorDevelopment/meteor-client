@@ -31,7 +31,6 @@
     "BrewingStandScreenMixin",
     "BufferBuilderAccessor",
     "BufferRendererAccessor",
-    "CactusBlockMixin",
     "CameraMixin",
     "CapabilityTrackerMixin",
     "ChatHudAccessor",
