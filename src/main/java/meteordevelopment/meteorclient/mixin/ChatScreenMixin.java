@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class ChatScreenMixin {
     @Shadow protected TextFieldWidget chatField;
     @Shadow abstract public boolean sendMessage(String chatText, boolean addToHistory);
-    
+
     private boolean ignoreChatMessage;
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/TextFieldWidget;setMaxLength(I)V", shift = At.Shift.AFTER))
@@ -49,7 +49,7 @@ public abstract class ChatScreenMixin {
                 ignoreChatMessage = false;
             }
 
-            info.cancel();
+            info.setReturnValue(true);
             return;
         }
 
@@ -60,7 +60,7 @@ public abstract class ChatScreenMixin {
                 ChatUtils.error(e.getMessage());
             }
 
-            info.cancel();
+            info.setReturnValue(true);
         }
     }
 }
