@@ -552,6 +552,7 @@ public class MeteorStarscript {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(itemStack.getCount() <= 1 ? name : String.format("%s %dx", name, itemStack.getCount())))
             .set("name", Value.string(name))
+            .set("id", Value.string(Registry.ITEM.getId(itemStack.getItem()).toString()))
             .set("count", Value.number(itemStack.getCount()))
             .set("durability", Value.number(durability))
             .set("max_durability", Value.number(itemStack.getMaxDamage()))
@@ -561,6 +562,7 @@ public class MeteorStarscript {
     public static Value wrap(BlockPos blockPos, BlockState blockState) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(Names.get(blockState.getBlock())))
+            .set("id", Value.string(Registry.BLOCK.getId(blockState.getBlock()).toString()))
             .set("pos", Value.map(new ValueMap()
                 .set("_toString", posString(blockPos.getX(), blockPos.getY(), blockPos.getZ()))
                 .set("x", Value.number(blockPos.getX()))
@@ -573,6 +575,7 @@ public class MeteorStarscript {
     public static Value wrap(Entity entity) {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(entity.getName().getString()))
+            .set("id", Value.string(Registry.ENTITY_TYPE.getId(entity.getType()).toString()))
             .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth() : 0))
             .set("pos", Value.map(new ValueMap()
                 .set("_toString", posString(entity.getX(), entity.getY(), entity.getZ()))
