@@ -63,6 +63,10 @@ public class Rotations {
         rotate(yaw, pitch, 0, callback);
     }
 
+    public static void rotate(double yaw, double pitch, int priority) {
+        rotate(yaw, pitch, priority, null);
+    }
+
     public static void rotate(double yaw, double pitch) {
         rotate(yaw, pitch, 0, null);
     }
