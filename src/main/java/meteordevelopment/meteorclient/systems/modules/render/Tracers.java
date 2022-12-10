@@ -88,7 +88,7 @@ public class Tracers extends Module {
 
     public final Setting<Boolean> friendOverride = sgColors.add(new BoolSetting.Builder()
         .name("show-friend-colors")
-        .description("whether or not to override the distance color of friends with the friend color.")
+        .description("Whether or not to override the distance color of friends with the friend color.")
         .defaultValue(true)
         .visible(() -> distance.get() && !ignoreFriends.get())
         .build()
