@@ -9,8 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
+import meteordevelopment.meteorclient.events.game.SectionVisibleEvent;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.LivingEntity;
@@ -52,10 +51,9 @@ public abstract class ItemStackMixin {
         }
     }
 
-    @Inject(method = "getHideFlags", at = @At("HEAD"), cancellable = true)
-    private void onGetHideFlags(CallbackInfoReturnable<Integer> cir) {
-        if (Modules.get().get(BetterTooltips.class).alwaysShow()) {
-            cir.setReturnValue(0);
-        }
+    @Inject(method = "isSectionVisible", at = @At("RETURN"), cancellable = true)
+    private static void onSectionVisible(int flags, ItemStack.TooltipSection tooltipSection, CallbackInfoReturnable<Boolean> info) {
+        SectionVisibleEvent event = MeteorClient.EVENT_BUS.post(SectionVisibleEvent.get(tooltipSection, info.getReturnValueZ()));
+        info.setReturnValue(event.visible);
     }
 }
