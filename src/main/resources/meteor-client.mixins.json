@@ -10,6 +10,7 @@
     "AbstractClientPlayerEntityMixin",
     "AbstractFurnaceScreenHandlerMixin",
     "AbstractFurnaceScreenMixin",
+    "AbstractSignEditScreenAccessor",
     "ArmorFeatureRendererMixin",
     "BackgroundRendererMixin",
     "BannerBlockEntityRendererMixin",
@@ -89,7 +90,6 @@
     "HorseBaseEntityMixin",
     "HorseScreenHandlerAccessor",
     "IdentifierAccessor",
-    "ShapeIndexBufferAccessor",
     "InGameHudMixin",
     "InGameOverlayRendererMixin",
     "ItemEntityMixin",
@@ -133,10 +133,10 @@
     "ResourceReloadLoggerAccessor",
     "ScreenMixin",
     "SectionedEntityCacheAccessor",
+    "ShapeIndexBufferAccessor",
     "ShulkerBoxBlockMixin",
     "ShulkerBoxScreenMixin",
     "SignBlockEntityRendererMixin",
-    "AbstractSignEditScreenAccessor",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",
     "SlimeBlockMixin",
@@ -158,5 +158,8 @@
   ],
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "mixins": [
+    "CactusBlockMixin"
+  ]
 }

@@ -62,7 +62,7 @@ import java.util.stream.Stream;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Modules extends System<Modules> {
-    public static final ModuleRegistry REGISTRY = new ModuleRegistry();
+    public static ModuleRegistry REGISTRY;
 
     private static final List<Category> CATEGORIES = new ArrayList<>();
 
@@ -83,6 +83,7 @@ public class Modules extends System<Modules> {
 
     @Override
     public void init() {
+        REGISTRY = new ModuleRegistry();
         initCombat();
         initPlayer();
         initMovement();
@@ -520,6 +521,7 @@ public class Modules extends System<Modules> {
 
     private void initWorld() {
         add(new AirPlace());
+        add(new AntiCactus());
         add(new Ambience());
         add(new AutoBreed());
         add(new AutoBrewer());
