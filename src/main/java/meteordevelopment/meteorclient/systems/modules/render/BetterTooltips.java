@@ -137,7 +137,7 @@ public class BetterTooltips extends Module {
     );
 
     private final Setting<Boolean> entitiesInBuckets = sgPreviews.add(new BoolSetting.Builder()
-        .name("entities-in-buckets.")
+        .name("entities-in-buckets")
         .description("Shows entities in buckets when hovering over it in an inventory.")
         .defaultValue(true)
         .build()
