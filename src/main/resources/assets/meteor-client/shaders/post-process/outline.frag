@@ -7,6 +7,7 @@ uniform sampler2D u_Texture;
 uniform int u_Width;
 uniform float u_FillOpacity;
 uniform int u_ShapeMode;
+uniform float u_GlowMultiplier;
 
 out vec4 color;
 
@@ -37,7 +38,7 @@ void main() {
         float minDist = u_Width * u_Width;
 
         if (dist > minDist) center.a = 0.0;
-        else center.a = min((1.0 - (dist / minDist)) * 3.5, 1.0);
+        else center.a = min((1.0 - (dist / minDist)) * u_GlowMultiplier, 1.0);
     }
 
     color = center;

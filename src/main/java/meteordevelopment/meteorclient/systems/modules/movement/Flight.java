@@ -20,20 +20,9 @@ import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Vec3d;
 
 public class Flight extends Module {
-    public enum Mode {
-        Abilities,
-        Velocity
-    }
-
-    public enum AntiKickMode {
-        Normal,
-        Packet,
-        None
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
-
+    
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The mode for Flight.")
@@ -44,7 +33,6 @@ public class Flight extends Module {
         })
         .build()
     );
-
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
         .description("Your speed when flying.")
@@ -58,16 +46,12 @@ public class Flight extends Module {
         .defaultValue(false)
         .build()
     );
-
-    // Anti Kick
-
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
         .description("The mode for anti kick.")
         .defaultValue(AntiKickMode.Packet)
         .build()
     );
-
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
         .name("delay")
         .description("The amount of delay, in ticks, between flying down a bit and return to original position")
@@ -77,6 +61,7 @@ public class Flight extends Module {
         .build()
     );
 
+    // Anti Kick
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
         .name("off-time")
         .description("The amount of delay, in milliseconds, to fly down a bit to reset floating ticks.")
@@ -85,13 +70,16 @@ public class Flight extends Module {
         .sliderRange(1, 20)
         .build()
     );
+    
+    private int delayLeft = delay.get();
+    private int offLeft = offTime.get();
+    private boolean flip;
+    private float lastYaw;
+    private double lastPacketY = Double.MAX_VALUE;
 
     public Flight() {
         super(Categories.Movement, "flight", "FLYYYY! No Fall is recommended with this module.");
     }
-
-    private int delayLeft = delay.get();
-    private int offLeft = offTime.get();
 
     @Override
     public void onActivate() {
@@ -109,9 +97,6 @@ public class Flight extends Module {
         }
     }
 
-    private boolean flip;
-    private float lastYaw;
-
     @EventHandler
     private void onPreTick(TickEvent.Pre event) {
         float currentYaw = mc.player.getYaw();
@@ -124,9 +109,9 @@ public class Flight extends Module {
 
     @EventHandler
     private void onPostTick(TickEvent.Post event) {
-        if (delayLeft > 0) delayLeft --;
+        if (delayLeft > 0) delayLeft--;
 
-        if (offLeft <= 0 && delayLeft <= 0){
+        if (offLeft <= 0 && delayLeft <= 0) {
             delayLeft = delay.get();
             offLeft = offTime.get();
 
@@ -147,7 +132,7 @@ public class Flight extends Module {
                 ((ClientPlayerEntityAccessor) mc.player).setTicksSinceLastPositionPacketSent(20);
             }
 
-            offLeft --;
+            offLeft--;
 
             if (shouldReturn) return;
         }
@@ -180,7 +165,17 @@ public class Flight extends Module {
         }
     }
 
-    private double lastPacketY = Double.MAX_VALUE;
+    private void antiKickPacket(PlayerMoveC2SPacket packet, double currentY) {
+        // maximum time we can be "floating" is 80 ticks, so 4 seconds max
+        if (this.delayLeft <= 0 && this.lastPacketY != Double.MAX_VALUE &&
+            shouldFlyDown(currentY, this.lastPacketY) && isEntityOnAir(mc.player)) {
+            // actual check is for >= -0.03125D, but we have to do a bit more than that
+            // due to the fact that it's a bigger or *equal* to, and not just a bigger than
+            ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
+        } else {
+            lastPacketY = currentY;
+        }
+    }
 
     /**
      * @see ServerPlayNetworkHandler#onPlayerMove(PlayerMoveC2SPacket)
@@ -191,15 +186,31 @@ public class Flight extends Module {
 
         double currentY = packet.getY(Double.MAX_VALUE);
         if (currentY != Double.MAX_VALUE) {
-            // maximum time we can be "floating" is 80 ticks, so 4 seconds max
-            if (this.delayLeft <= 0 && this.lastPacketY != Double.MAX_VALUE &&
-                shouldFlyDown(currentY, this.lastPacketY) && isEntityOnAir(mc.player)) {
-                // actual check is for >= -0.03125D but we have to do a bit more than that
-                // probably due to compression or some shit idk
-                ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
+            antiKickPacket(packet, currentY);
+        } else {
+            // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
+            // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
+            PlayerMoveC2SPacket fullPacket;
+            if (packet.changesLook()) {
+                fullPacket = new PlayerMoveC2SPacket.Full(
+                    mc.player.getX(),
+                    mc.player.getY(),
+                    mc.player.getZ(),
+                    packet.getYaw(0),
+                    packet.getPitch(0),
+                    packet.isOnGround()
+                );
             } else {
-                lastPacketY = currentY;
+                fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
+                    mc.player.getX(),
+                    mc.player.getY(),
+                    mc.player.getZ(),
+                    packet.isOnGround()
+                );
             }
+            event.cancel();
+            antiKickPacket(fullPacket, mc.player.getY());
+            mc.getNetworkHandler().sendPacket(fullPacket);
         }
     }
 
@@ -219,5 +230,16 @@ public class Flight extends Module {
     // Copied from ServerPlayNetworkHandler#isEntityOnAir
     private boolean isEntityOnAir(Entity entity) {
         return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
+    }
+
+    public enum Mode {
+        Abilities,
+        Velocity
+    }
+
+    public enum AntiKickMode {
+        Normal,
+        Packet,
+        None
     }
 }

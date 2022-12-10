@@ -46,8 +46,5 @@ public abstract class ShulkerBoxScreenMixin extends HandledScreen<ShulkerBoxScre
                 button -> invTweaks.dump(handler))
             );
         }
-
-        if (invTweaks.autoSteal()) invTweaks.steal(handler);
-        if (invTweaks.autoDump()) invTweaks.dump(handler);
     }
 }
