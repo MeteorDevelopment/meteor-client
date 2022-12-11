@@ -17,7 +17,9 @@ public class Meteor implements ClientModInitializer {
     public void onInitializeClient() {
         MeteorAPI api = MeteorAPI.getInstance();
         LOG.info("Meteor API: v{}", api.getVersion());
-        
+
+        api.getAddons().add(TestAddon.INSTANCE);
+
         api.getCommands().add(new SayCommand());
     }
 }

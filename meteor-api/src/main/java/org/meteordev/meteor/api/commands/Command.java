@@ -7,9 +7,13 @@ package org.meteordev.meteor.api.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.minecraft.command.CommandSource;
+import org.meteordev.meteor.api.addons.Addon;
 
 /** Base interface to create a Meteor command. */
 public interface Command {
+    /** The addon the command belongs to. */
+    Addon getAddon();
+
     /** @return the main name for the command. */
     String getName();
 

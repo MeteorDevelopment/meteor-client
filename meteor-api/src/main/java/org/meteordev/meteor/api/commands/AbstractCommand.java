@@ -9,16 +9,27 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import net.minecraft.command.CommandSource;
+import org.meteordev.meteor.api.MeteorAPI;
+import org.meteordev.meteor.api.addons.Addon;
 
 /** Default implementation of the {@link Command} API. */
 public abstract class AbstractCommand implements Command {
+    protected final Addon addon;
     protected final String name, description;
     protected final String[] aliases;
 
-    public AbstractCommand(String name, String description, String... aliases) {
+    public AbstractCommand(Addon addon, String name, String description, String... aliases) {
+        this.addon = addon;
         this.name = name;
         this.description = description;
         this.aliases = aliases;
+
+        MeteorAPI.getInstance().getAddons().checkValid(addon);
+    }
+
+    @Override
+    public Addon getAddon() {
+        return addon;
     }
 
     @Override

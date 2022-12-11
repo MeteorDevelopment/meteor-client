@@ -46,9 +46,9 @@ public abstract class ChatInputSuggestorMixin {
             reader.setCursor(reader.getCursor() + length);
 
             // Pretty much copy&paste from the refresh method
-            CommandDispatcher<CommandSource> commandDispatcher = CommandManagerImpl.INSTANCE.getDispatcher();
+            CommandDispatcher<CommandSource> commandDispatcher = CommandManagerImpl.INSTANCE.dispatcher;
             if (this.parse == null) {
-                this.parse = commandDispatcher.parse(reader, CommandManagerImpl.INSTANCE.getCommandSource());
+                this.parse = commandDispatcher.parse(reader, CommandManagerImpl.INSTANCE.commandSource);
             }
 
             int cursor = textField.getCursor();

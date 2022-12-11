@@ -8,4 +8,7 @@ package org.meteordev.meteor.api.commands;
 public interface CommandManager extends Iterable<Command> {
     /** Adds the command. If there already is a command with the same name it is overwritten. */
     void add(Command command);
+
+    /** @return the command with the provided name or null. */
+    Command get(String name);
 }

@@ -13,7 +13,7 @@ import org.meteordev.meteor.api.commands.AbstractCommand;
 
 public class SayCommand extends AbstractCommand {
     public SayCommand() {
-        super("say", "Sends a message in the chat.");
+        super(TestAddon.INSTANCE, "say", "Sends a message in the chat.");
     }
 
     @Override
