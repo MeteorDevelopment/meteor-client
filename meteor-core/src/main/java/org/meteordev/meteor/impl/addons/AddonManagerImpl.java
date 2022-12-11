@@ -16,23 +16,31 @@ import java.util.Map;
 public class AddonManagerImpl implements AddonManager {
     public static final AddonManagerImpl INSTANCE = new AddonManagerImpl();
 
-    private final Map<String, Addon> addons = new HashMap<>();
+    private final Map<String, Addon> addonsId = new HashMap<>();
+    private final Map<Class<? extends Addon>, Addon> addonsClass = new HashMap<>();
 
     private AddonManagerImpl() {}
 
     @Override
     public void add(Addon addon) {
-        addons.put(addon.getId(), addon);
+        addonsId.put(addon.getId(), addon);
+        addonsClass.put(addon.getClass(), addon);
     }
 
     @Override
     public Addon get(String id) {
-        return addons.get(id);
+        return addonsId.get(id);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends Addon> T get(Class<T> klass) {
+        return (T) addonsClass.get(klass);
     }
 
     @NotNull
     @Override
     public Iterator<Addon> iterator() {
-        return addons.values().iterator();
+        return addonsId.values().iterator();
     }
 }

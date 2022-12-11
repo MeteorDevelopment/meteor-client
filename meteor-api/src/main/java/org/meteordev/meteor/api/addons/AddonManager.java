@@ -12,6 +12,9 @@ public interface AddonManager extends Iterable<Addon> {
     /** @return the addon with the provided id or null. */
     Addon get(String id);
 
+    /** @return the addon with the provided class or null. */
+    <T extends Addon> T get(Class<T> klass);
+
     /** @throws IllegalStateException if the provided addon has not yet been added to the manager. */
     default void checkValid(String id) {
         if (get(id) == null) {

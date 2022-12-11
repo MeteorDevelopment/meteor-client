@@ -5,6 +5,8 @@
 
 package org.meteordev.meteor.impl;
 
+import meteordevelopment.orbit.EventBus;
+import meteordevelopment.orbit.IEventBus;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
@@ -19,6 +21,8 @@ public class MeteorAPIImpl implements MeteorAPI {
 
     private ModMetadata metadata;
 
+    private final IEventBus eventBus = new EventBus();
+
     private MeteorAPIImpl() {}
 
     @Override
@@ -30,6 +34,11 @@ public class MeteorAPIImpl implements MeteorAPI {
     @Override
     public AddonManager getAddons() {
         return AddonManagerImpl.INSTANCE;
+    }
+
+    @Override
+    public IEventBus getEventBus() {
+        return eventBus;
     }
 
     @Override

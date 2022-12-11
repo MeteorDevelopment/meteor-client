@@ -15,6 +15,9 @@ dependencies {
     // API
     implementation(project(path = ":meteor-api", configuration = "namedElements"))
     include(project(path = ":meteor-api", configuration = "namedElements"))
+
+    // Orbit
+    include("meteordevelopment:orbit:${project.property("orbit_version")}")
 }
 
 tasks.withType<ProcessResources> {
