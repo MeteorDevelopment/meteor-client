@@ -10,9 +10,9 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
 import meteordevelopment.meteorclient.utils.misc.Pool;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -21,12 +21,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
-import net.minecraft.util.registry.Registry;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,7 +100,7 @@ public class Trajectories extends Module {
 
     private final ProjectileEntitySimulator simulator = new ProjectileEntitySimulator();
 
-    private final Pool<Vec3> vec3s = new Pool<>(Vec3::new);
+    private final Pool<Vector3d> vec3s = new Pool<>(Vector3d::new);
     private final List<Path> paths = new ArrayList<>();
 
     public Trajectories() {
@@ -113,7 +114,7 @@ public class Trajectories extends Module {
     private List<Item> getDefaultItems() {
         List<Item> items = new ArrayList<>();
 
-        for (Item item : Registry.ITEM) {
+        for (Item item : Registries.ITEM) {
             if (itemFilter(item)) items.add(item);
         }
 
@@ -181,7 +182,7 @@ public class Trajectories extends Module {
     }
 
     private class Path {
-        private final List<Vec3> points = new ArrayList<>();
+        private final List<Vector3d> points = new ArrayList<>();
 
         private boolean hitQuad, hitQuadHorizontal;
         private double hitQuadX1, hitQuadY1, hitQuadZ1, hitQuadX2, hitQuadY2, hitQuadZ2;
@@ -189,7 +190,7 @@ public class Trajectories extends Module {
         private Entity entity;
 
         public void clear() {
-            for (Vec3 point : points) vec3s.free(point);
+            for (Vector3d point : points) vec3s.free(point);
             points.clear();
 
             hitQuad = false;
@@ -250,20 +251,20 @@ public class Trajectories extends Module {
                     hitQuadY2 += 0.25;
                 }
 
-                points.add(vec3s.get().set(result.getPos()));
+                points.add(Utils.set(vec3s.get(), result.getPos()));
             }
             else if (result.getType() == HitResult.Type.ENTITY) {
                 entity = ((EntityHitResult) result).getEntity();
 
-                points.add(vec3s.get().set(result.getPos()).add(0, entity.getHeight() / 2, 0));
+                points.add(Utils.set(vec3s.get(), result.getPos()).add(0, entity.getHeight() / 2, 0));
             }
         }
 
         public void render(Render3DEvent event) {
             // Render path
-            Vec3 lastPoint = null;
+            Vector3d lastPoint = null;
 
-            for (Vec3 point : points) {
+            for (Vector3d point : points) {
                 if (lastPoint != null) event.renderer.line(lastPoint.x, lastPoint.y, lastPoint.z, point.x, point.y, point.z, lineColor.get());
                 lastPoint = point;
             }

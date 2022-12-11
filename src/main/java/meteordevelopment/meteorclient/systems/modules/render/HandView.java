@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.util.Hand;
-import net.minecraft.util.math.Vec3f;
+import net.minecraft.util.math.RotationAxis;
 
 public class HandView extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -79,15 +79,15 @@ public class HandView extends Module {
     private void onHeldItemRender(HeldItemRendererEvent event) {
         if (!isActive()) return;
         if (event.hand == Hand.MAIN_HAND) {
-            event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationXMain.get().floatValue()));
-            event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYMain.get().floatValue()));
-            event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationZMain.get().floatValue()));
+            event.matrix.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotationXMain.get().floatValue()));
+            event.matrix.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotationYMain.get().floatValue()));
+            event.matrix.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotationZMain.get().floatValue()));
             event.matrix.scale(scaleXMain.get().floatValue(), scaleYMain.get().floatValue(), scaleZMain.get().floatValue());
             event.matrix.translate(posXMain.get().floatValue(), posYMain.get().floatValue(), posZMain.get().floatValue());
         } else {
-            event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationXOff.get().floatValue()));
-            event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYOff.get().floatValue()));
-            event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationZOff.get().floatValue()));
+            event.matrix.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotationXOff.get().floatValue()));
+            event.matrix.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotationYOff.get().floatValue()));
+            event.matrix.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotationZOff.get().floatValue()));
             event.matrix.scale(scaleXOff.get().floatValue(), scaleYOff.get().floatValue(), scaleZOff.get().floatValue());
             event.matrix.translate(posXOff.get().floatValue(), posYOff.get().floatValue(), posZOff.get().floatValue());
         }
@@ -100,16 +100,16 @@ public class HandView extends Module {
     private void onRenderArm(ArmRenderEvent event) {
         if (!isActive()) return;
 
-        event.matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(rotationXArm.get().floatValue()));
-        event.matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(rotationYArm.get().floatValue()));
-        event.matrix.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(rotationZArm.get().floatValue()));
+        event.matrix.multiply(RotationAxis.POSITIVE_X.rotationDegrees(rotationXArm.get().floatValue()));
+        event.matrix.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(rotationYArm.get().floatValue()));
+        event.matrix.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(rotationZArm.get().floatValue()));
         event.matrix.scale(scaleXArm.get().floatValue(), scaleYArm.get().floatValue(), scaleZArm.get().floatValue());
         event.matrix.translate(posXArm.get().floatValue(), posYArm.get().floatValue(), posZArm.get().floatValue());
     }
 
     private void applyServerRotations(MatrixStack matrix) {
-        matrix.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(mc.player.getPitch() - Rotations.serverPitch));
-        matrix.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(mc.player.getYaw() - Rotations.serverYaw));
+        matrix.multiply(RotationAxis.POSITIVE_X.rotationDegrees(mc.player.getPitch() - Rotations.serverPitch));
+        matrix.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(mc.player.getYaw() - Rotations.serverYaw));
     }
 
     public enum SwingMode {

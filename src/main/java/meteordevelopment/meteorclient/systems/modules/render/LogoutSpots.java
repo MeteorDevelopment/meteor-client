@@ -15,7 +15,6 @@ import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -25,6 +24,7 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -195,7 +195,7 @@ public class LogoutSpots extends Module {
         return Integer.toString(players.size());
     }
 
-    private static final Vec3 pos = new Vec3();
+    private static final Vector3d pos = new Vector3d();
 
     private class Entry {
         public final double x, y, z;

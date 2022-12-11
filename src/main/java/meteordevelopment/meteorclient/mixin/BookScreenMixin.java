@@ -46,24 +46,29 @@ public class BookScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        addDrawableChild(new ButtonWidget(4, 4, 120, 20, Text.literal("Copy"), button -> {
-            NbtList listTag = new NbtList();
-            for (int i = 0; i < contents.getPageCount(); i++) listTag.add(NbtString.of(contents.getPage(i).getString()));
+        addDrawableChild(
+            new ButtonWidget.Builder(Text.literal("Copy"), button -> {
+                    NbtList listTag = new NbtList();
+                    for (int i = 0; i < contents.getPageCount(); i++) listTag.add(NbtString.of(contents.getPage(i).getString()));
 
-            NbtCompound tag = new NbtCompound();
-            tag.put("pages", listTag);
-            tag.putInt("currentPage", pageIndex);
+                    NbtCompound tag = new NbtCompound();
+                    tag.put("pages", listTag);
+                    tag.putInt("currentPage", pageIndex);
 
-            FastByteArrayOutputStream bytes = new FastByteArrayOutputStream();
-            DataOutputStream out = new DataOutputStream(bytes);
-            try {
-                NbtIo.write(tag, out);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                    FastByteArrayOutputStream bytes = new FastByteArrayOutputStream();
+                    DataOutputStream out = new DataOutputStream(bytes);
+                    try {
+                        NbtIo.write(tag, out);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
 
-            GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
-        }));
+                    GLFW.glfwSetClipboardString(mc.getWindow().getHandle(), Base64.getEncoder().encodeToString(bytes.array));
+                })
+                .position(4, 4)
+                .size(120, 20)
+                .build()
+        );
 
         // Edit title & author
         ItemStack itemStack = mc.player.getMainHandStack();
@@ -78,8 +83,13 @@ public class BookScreenMixin extends Screen {
         ItemStack book = itemStack; // Fuck you Java
         Hand hand2 = hand; // Honestly
 
-        addDrawableChild(new ButtonWidget(4, 4 + 20 + 2, 120, 20, Text.literal("Edit title & author"), button -> {
-            mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
-        }));
+        addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Edit title & author"), button -> {
+                    mc.setScreen(new EditBookTitleAndAuthorScreen(GuiThemes.get(), book, hand2));
+                })
+                .position(4, 4 + 20 + 2)
+                .size(120, 20)
+                .build()
+        );
     }
 }

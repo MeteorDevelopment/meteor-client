@@ -215,7 +215,7 @@ public class BlockUtils {
     public static boolean isClickable(Block block) {
         return block instanceof CraftingTableBlock
             || block instanceof AnvilBlock
-            || block instanceof AbstractButtonBlock
+            || block instanceof ButtonBlock
             || block instanceof AbstractPressurePlateBlock
             || block instanceof BlockWithEntity
             || block instanceof BedBlock

@@ -53,7 +53,7 @@ public class MeteorToast implements Toast {
             justUpdated = false;
         }
 
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
@@ -101,6 +101,6 @@ public class MeteorToast implements Toast {
 
     // Addons: @Override this method in a subclass if you want a different sound
     public SoundInstance getSound() {
-        return PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME, 1.2f, 1);
+        return PositionedSoundInstance.master(SoundEvents.BLOCK_NOTE_BLOCK_CHIME.value(), 1.2f, 1);
     }
 }

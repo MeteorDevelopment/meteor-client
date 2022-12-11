@@ -44,8 +44,8 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "onEntitySpawn", at = @At("HEAD"), cancellable = true)
     private void onEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo info) {
-        if (packet != null && packet.getEntityTypeId() != null) {
-            if (Modules.get().get(NoRender.class).noEntity(packet.getEntityTypeId()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
+        if (packet != null && packet.getEntityType() != null) {
+            if (Modules.get().get(NoRender.class).noEntity(packet.getEntityType()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
                 info.cancel();
             }
         }

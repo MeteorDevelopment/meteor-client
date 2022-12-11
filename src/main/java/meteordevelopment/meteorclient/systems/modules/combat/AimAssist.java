@@ -12,17 +12,18 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
+import org.joml.Vector3d;
 
 public class AimAssist extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -84,7 +85,7 @@ public class AimAssist extends Module {
         .build()
     );
 
-    private final Vec3 vec3d1 = new Vec3();
+    private final Vector3d vec3d1 = new Vector3d();
     private Entity target;
 
     public AimAssist() {
@@ -113,7 +114,7 @@ public class AimAssist extends Module {
     }
 
     private void aim(Entity target, double delta, boolean instant) {
-        vec3d1.set(target, delta);
+        Utils.set(vec3d1, target, delta);
 
         switch (bodyTarget.get()) {
             case Head -> vec3d1.add(0, target.getEyeHeight(target.getPose()), 0);

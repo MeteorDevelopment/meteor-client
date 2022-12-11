@@ -11,7 +11,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.util.math.Matrix4f;
+import org.joml.Matrix4f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -32,8 +32,6 @@ public class VanillaTextRenderer implements TextRenderer {
 
     private VanillaTextRenderer() {
         // Use INSTANCE
-
-        emptyMatrix.loadIdentity();
     }
 
     @Override

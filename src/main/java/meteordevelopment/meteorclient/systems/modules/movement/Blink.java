@@ -13,11 +13,12 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +46,7 @@ public class Blink extends Module {
 
     private final List<PlayerMoveC2SPacket> packets = new ArrayList<>();
     private FakePlayerEntity model;
-    private final Vec3 start = new Vec3();
+    private final Vector3d start = new Vector3d();
 
     private boolean cancelled = false;
     private int timer = 0;
@@ -62,7 +63,8 @@ public class Blink extends Module {
             model.hideWhenInsideCamera = true;
             model.spawn();
         }
-        start.set(mc.player.getPos());
+
+        Utils.set(start, mc.player.getPos());
     }
 
     @Override

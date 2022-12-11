@@ -7,8 +7,8 @@ package meteordevelopment.meteorclient.settings;
 
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -24,7 +24,7 @@ public class ItemSetting extends Setting<Item> {
 
     @Override
     protected Item parseImpl(String str) {
-        return parseId(Registry.ITEM, str);
+        return parseId(Registries.ITEM, str);
     }
 
     @Override
@@ -34,22 +34,22 @@ public class ItemSetting extends Setting<Item> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.ITEM.getIds();
+        return Registries.ITEM.getIds();
     }
 
     @Override
     public NbtCompound save(NbtCompound tag) {
-        tag.putString("value", Registry.ITEM.getId(get()).toString());
+        tag.putString("value", Registries.ITEM.getId(get()).toString());
 
         return tag;
     }
 
     @Override
     public Item load(NbtCompound tag) {
-        value = Registry.ITEM.get(new Identifier(tag.getString("value")));
+        value = Registries.ITEM.get(new Identifier(tag.getString("value")));
 
         if (filter != null && !filter.test(value)) {
-            for (Item item : Registry.ITEM) {
+            for (Item item : Registries.ITEM) {
                 if (filter.test(item)) {
                     value = item;
                     break;

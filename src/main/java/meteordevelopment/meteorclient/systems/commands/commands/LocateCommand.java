@@ -238,7 +238,7 @@ public class LocateCommand extends Command {
     private void onReadPacket(PacketEvent.Receive event) {
         if (event.packet instanceof EntitySpawnS2CPacket) {
             EntitySpawnS2CPacket packet = (EntitySpawnS2CPacket) event.packet;
-            if (packet.getEntityTypeId() == EntityType.EYE_OF_ENDER) {
+            if (packet.getEntityType() == EntityType.EYE_OF_ENDER) {
                 firstPosition(packet.getX(),packet.getY(),packet.getZ());
             }
         }

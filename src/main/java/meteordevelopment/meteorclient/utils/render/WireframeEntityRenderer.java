@@ -23,7 +23,11 @@ import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
+import org.joml.Matrix4f;
+import org.joml.Quaternionf;
+import org.joml.Vector4f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -271,20 +275,20 @@ public class WireframeEntityRenderer {
             matrices.translate(0.0D, -0.5D, 0.0D);
             if (crystalEntity.shouldShowBottom()) render(event.renderer, renderer.bottom);
 
-            if (chamsEnabled) matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j * chams.crystalsRotationSpeed.get().floatValue()));
-            else matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j));
+            if (chamsEnabled) matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * chams.crystalsRotationSpeed.get().floatValue()));
+            else matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             matrices.translate(0.0D, 1.5F + h / 2.0F, 0.0D);
-            matrices.multiply(new Quaternion(new Vec3f(EndCrystalEntityRenderer.SINE_45_DEGREES, 0.0F, EndCrystalEntityRenderer.SINE_45_DEGREES), 60.0F, true));
+            matrices.multiply(new Quaternionf().setAngleAxis(60.0F, EndCrystalEntityRenderer.SINE_45_DEGREES, 0.0F, EndCrystalEntityRenderer.SINE_45_DEGREES));
             if (!chamsEnabled || chams.renderFrame1.get()) render(event.renderer, renderer.frame);
             matrices.scale(0.875F, 0.875F, 0.875F);
-            matrices.multiply(new Quaternion(new Vec3f(EndCrystalEntityRenderer.SINE_45_DEGREES, 0.0F, EndCrystalEntityRenderer.SINE_45_DEGREES), 60.0F, true));
-            if (chamsEnabled) matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j * chams.crystalsRotationSpeed.get().floatValue()));
-            else matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j));
+            matrices.multiply(new Quaternionf().setAngleAxis(60.0F, EndCrystalEntityRenderer.SINE_45_DEGREES, 0.0F, EndCrystalEntityRenderer.SINE_45_DEGREES));
+            if (chamsEnabled) matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * chams.crystalsRotationSpeed.get().floatValue()));
+            else matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             if (!chamsEnabled || chams.renderFrame2.get()) render(event.renderer, renderer.frame);
             matrices.scale(0.875F, 0.875F, 0.875F);
-            matrices.multiply(new Quaternion(new Vec3f(EndCrystalEntityRenderer.SINE_45_DEGREES, 0.0F, EndCrystalEntityRenderer.SINE_45_DEGREES), 60.0F, true));
-            if (chamsEnabled) matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j * chams.crystalsRotationSpeed.get().floatValue()));
-            else matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(j));
+            matrices.multiply(new Quaternionf().setAngleAxis(60.0F, EndCrystalEntityRenderer.SINE_45_DEGREES, 0.0F, EndCrystalEntityRenderer.SINE_45_DEGREES));
+            if (chamsEnabled) matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j * chams.crystalsRotationSpeed.get().floatValue()));
+            else matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(j));
             if (!chamsEnabled || chams.renderCore.get()) render(event.renderer, renderer.core);
             matrices.pop();
             matrices.pop();
@@ -294,26 +298,26 @@ public class WireframeEntityRenderer {
 
             matrices.push();
             matrices.translate(0.0D, 0.375D, 0.0D);
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(180.0F - MathHelper.lerp(event.tickDelta, entity.prevYaw, entity.getYaw())));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(180.0F - MathHelper.lerp(event.tickDelta, entity.prevYaw, entity.getYaw())));
             float h = (float)boatEntity.getDamageWobbleTicks() - event.tickDelta;
             float j = boatEntity.getDamageWobbleStrength() - event.tickDelta;
             if (j < 0.0F) j = 0.0F;
 
             if (h > 0.0F) {
-                matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(MathHelper.sin(h) * h * j / 10.0F * (float)boatEntity.getDamageWobbleSide()));
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(MathHelper.sin(h) * h * j / 10.0F * (float)boatEntity.getDamageWobbleSide()));
             }
 
             float k = boatEntity.interpolateBubbleWobble(event.tickDelta);
             if (!MathHelper.approximatelyEquals(k, 0.0F)) {
-                matrices.multiply(new Quaternion(new Vec3f(1.0F, 0.0F, 1.0F), boatEntity.interpolateBubbleWobble(event.tickDelta), true));
+                matrices.multiply(new Quaternionf().setAngleAxis(boatEntity.interpolateBubbleWobble(event.tickDelta), 1.0F, 0.0F, 1.0F));
             }
 
-            BoatEntityModel boatEntityModel = renderer.texturesAndModels.get(boatEntity.getBoatType()).getSecond();
+            CompositeEntityModel<BoatEntity> boatEntityModel = renderer.texturesAndModels.get(boatEntity.getVariant()).getSecond();
             matrices.scale(-1.0F, -1.0F, 1.0F);
-            matrices.multiply(Vec3f.POSITIVE_Y.getDegreesQuaternion(90.0F));
+            matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(90.0F));
             boatEntityModel.setAngles(boatEntity, event.tickDelta, 0.0F, -0.1F, 0.0F, 0.0F);
             boatEntityModel.getParts().forEach(modelPart -> render(event.renderer, modelPart));
-            if (!boatEntity.isSubmergedInWater()) render(event.renderer, boatEntityModel.getWaterPatch());
+            if (!boatEntity.isSubmergedInWater() && boatEntityModel instanceof ModelWithWaterPatch modelWithWaterPatch) render(event.renderer, modelWithWaterPatch.getWaterPatch());
 
             matrices.pop();
         }
@@ -346,33 +350,33 @@ public class WireframeEntityRenderer {
 
         for (ModelPart.Quad quad : cuboid.sides) {
             // Transform positions
-            pos1.set(quad.vertices[0].pos.getX() / 16, quad.vertices[0].pos.getY() / 16, quad.vertices[0].pos.getZ() / 16, 1);
-            pos1.transform(matrix);
+            pos1.set(quad.vertices[0].pos.x / 16, quad.vertices[0].pos.y / 16, quad.vertices[0].pos.z / 16, 1);
+            pos1.mul(matrix);
 
-            pos2.set(quad.vertices[1].pos.getX() / 16, quad.vertices[1].pos.getY() / 16, quad.vertices[1].pos.getZ() / 16, 1);
-            pos2.transform(matrix);
+            pos2.set(quad.vertices[1].pos.x / 16, quad.vertices[1].pos.y / 16, quad.vertices[1].pos.z / 16, 1);
+            pos2.mul(matrix);
 
-            pos3.set(quad.vertices[2].pos.getX() / 16, quad.vertices[2].pos.getY() / 16, quad.vertices[2].pos.getZ() / 16, 1);
-            pos3.transform(matrix);
+            pos3.set(quad.vertices[2].pos.x / 16, quad.vertices[2].pos.y / 16, quad.vertices[2].pos.z / 16, 1);
+            pos3.mul(matrix);
 
-            pos4.set(quad.vertices[3].pos.getX() / 16, quad.vertices[3].pos.getY() / 16, quad.vertices[3].pos.getZ() / 16, 1);
-            pos4.transform(matrix);
+            pos4.set(quad.vertices[3].pos.x / 16, quad.vertices[3].pos.y / 16, quad.vertices[3].pos.z / 16, 1);
+            pos4.mul(matrix);
 
             // Render
             if (shapeMode.sides()) {
                 renderer.triangles.quad(
-                    renderer.triangles.vec3(offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ()).color(sideColor).next(),
-                    renderer.triangles.vec3(offsetX + pos2.getX(), offsetY + pos2.getY(), offsetZ + pos2.getZ()).color(sideColor).next(),
-                    renderer.triangles.vec3(offsetX + pos3.getX(), offsetY + pos3.getY(), offsetZ + pos3.getZ()).color(sideColor).next(),
-                    renderer.triangles.vec3(offsetX + pos4.getX(), offsetY + pos4.getY(), offsetZ + pos4.getZ()).color(sideColor).next()
+                    renderer.triangles.vec3(offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z).color(sideColor).next(),
+                    renderer.triangles.vec3(offsetX + pos2.x, offsetY + pos2.y, offsetZ + pos2.z).color(sideColor).next(),
+                    renderer.triangles.vec3(offsetX + pos3.x, offsetY + pos3.y, offsetZ + pos3.z).color(sideColor).next(),
+                    renderer.triangles.vec3(offsetX + pos4.x, offsetY + pos4.y, offsetZ + pos4.z).color(sideColor).next()
                 );
             }
 
             if (shapeMode.lines()) {
-                renderer.line(offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ(), offsetX + pos2.getX(), offsetY + pos2.getY(), offsetZ + pos2.getZ(), lineColor);
-                renderer.line(offsetX + pos2.getX(), offsetY + pos2.getY(), offsetZ + pos2.getZ(), offsetX + pos3.getX(), offsetY + pos3.getY(), offsetZ + pos3.getZ(), lineColor);
-                renderer.line(offsetX + pos3.getX(), offsetY + pos3.getY(), offsetZ + pos3.getZ(), offsetX + pos4.getX(), offsetY + pos4.getY(), offsetZ + pos4.getZ(), lineColor);
-                renderer.line(offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ(), offsetX + pos1.getX(), offsetY + pos1.getY(), offsetZ + pos1.getZ(), lineColor);
+                renderer.line(offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z, offsetX + pos2.x, offsetY + pos2.y, offsetZ + pos2.z, lineColor);
+                renderer.line(offsetX + pos2.x, offsetY + pos2.y, offsetZ + pos2.z, offsetX + pos3.x, offsetY + pos3.y, offsetZ + pos3.z, lineColor);
+                renderer.line(offsetX + pos3.x, offsetY + pos3.y, offsetZ + pos3.z, offsetX + pos4.x, offsetY + pos4.y, offsetZ + pos4.z, lineColor);
+                renderer.line(offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z, offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z, lineColor);
             }
         }
     }

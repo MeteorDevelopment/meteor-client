@@ -9,7 +9,7 @@ accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMa
 
 accessible   method  net/minecraft/text/TextColor <init> (I)V
 
-accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity cachedScoreboardEntry Lnet/minecraft/client/network/PlayerListEntry;
+accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity playerListEntry Lnet/minecraft/client/network/PlayerListEntry;
 
 accessible   field   net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
 accessible   field   net/minecraft/client/model/ModelPart children Ljava/util/Map;
@@ -70,3 +70,5 @@ accessible   class   net/minecraft/client/gui/screen/ingame/BeaconScreen$EffectB
 accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadState
 
 accessible   field   net/minecraft/block/AbstractBlock collidable Z
+
+accessible   field   net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/item/ItemGroup;

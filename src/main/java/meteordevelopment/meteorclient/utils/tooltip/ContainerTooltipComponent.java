@@ -49,7 +49,7 @@ public class ContainerTooltipComponent implements TooltipComponent, MeteorToolti
     public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
 
         // Background
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
         RenderSystem.setShaderTexture(0, TEXTURE_CONTAINER_BACKGROUND);
         DrawableHelper.drawTexture(matrices, x, y, z, 0, 0, 176, 67, 176, 67);

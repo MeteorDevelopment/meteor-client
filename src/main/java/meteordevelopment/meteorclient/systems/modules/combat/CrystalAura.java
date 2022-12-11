@@ -26,7 +26,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -47,6 +46,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.RaycastContext;
+import org.joml.Vector3d;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -455,7 +455,7 @@ public class CrystalAura extends Module {
 
     private final Vec3d vec3d = new Vec3d(0, 0, 0);
     private final Vec3d playerEyePos = new Vec3d(0, 0, 0);
-    private final Vec3 vec3 = new Vec3();
+    private final Vector3d vec3 = new Vector3d();
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
     private final Box box = new Box(0, 0, 0, 0, 0, 0);
 

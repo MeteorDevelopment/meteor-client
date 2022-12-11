@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
@@ -28,6 +27,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import org.joml.Vector3d;
 
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -172,9 +172,9 @@ public class ESP extends Module {
     private final Color sideColor = new Color();
     private final Color baseColor = new Color();
 
-    private final Vec3 pos1 = new Vec3();
-    private final Vec3 pos2 = new Vec3();
-    private final Vec3 pos = new Vec3();
+    private final Vector3d pos1 = new Vector3d();
+    private final Vector3d pos2 = new Vector3d();
+    private final Vector3d pos = new Vector3d();
 
     private int count;
 
@@ -273,7 +273,7 @@ public class ESP extends Module {
         Renderer2D.COLOR.render(null);
     }
 
-    private boolean checkCorner(double x, double y, double z, Vec3 min, Vec3 max) {
+    private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {
         pos.set(x, y, z);
         if (!NametagUtils.to2D(pos, 1)) return true;
 

@@ -11,13 +11,13 @@ import meteordevelopment.meteorclient.settings.ItemListSetting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 
 import java.util.function.Predicate;
 
 public class ItemListSettingScreen extends LeftRightListSettingScreen<Item> {
     public ItemListSettingScreen(GuiTheme theme, ItemListSetting setting) {
-        super(theme, "Select Items", setting, setting.get(), Registry.ITEM);
+        super(theme, "Select Items", setting, setting.get(), Registries.ITEM);
     }
 
     @Override
