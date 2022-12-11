@@ -9,6 +9,8 @@ import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.ModMetadata;
 import org.meteordev.meteor.api.MeteorAPI;
+import org.meteordev.meteor.api.commands.CommandManager;
+import org.meteordev.meteor.impl.commands.CommandManagerImpl;
 
 public class MeteorAPIImpl implements MeteorAPI {
     public static final MeteorAPIImpl INSTANCE = new MeteorAPIImpl();
@@ -21,6 +23,11 @@ public class MeteorAPIImpl implements MeteorAPI {
     public String getVersion() {
         checkMetadata();
         return metadata.getVersion().toString();
+    }
+
+    @Override
+    public CommandManager getCommands() {
+        return CommandManagerImpl.INSTANCE;
     }
 
     private void checkMetadata() {

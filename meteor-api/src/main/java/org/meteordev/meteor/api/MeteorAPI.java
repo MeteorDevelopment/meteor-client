@@ -6,6 +6,7 @@
 package org.meteordev.meteor.api;
 
 import org.jetbrains.annotations.NotNull;
+import org.meteordev.meteor.api.commands.CommandManager;
 
 public interface MeteorAPI {
     @SuppressWarnings("DataFlowIssue")
@@ -14,5 +15,9 @@ public interface MeteorAPI {
         return null;
     }
 
+    /** @return the version of the API. */
     String getVersion();
+
+    /** @return the command manager. */
+    CommandManager getCommands();
 }

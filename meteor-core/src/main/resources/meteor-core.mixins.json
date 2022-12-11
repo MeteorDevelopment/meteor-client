@@ -3,7 +3,9 @@
   "package": "org.meteordev.meteor.impl.mixin",
   "compatibilityLevel": "JAVA_17",
   "client": [
-    "MeteorAPIMixin"
+    "MeteorAPIMixin",
+    "commands.ChatScreeMixin",
+    "commands.ChatInputSuggestorMixin"
   ],
   "injectors": {
     "defaultRequire": 1
