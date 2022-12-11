@@ -40,7 +40,7 @@ public class SodiumFluidRendererMixin {
     private void onRender(BlockRenderView world, FluidState fluidState, BlockPos pos, BlockPos offset, ChunkModelBuilder buffers, CallbackInfoReturnable<Boolean> info) {
         int alpha = Xray.getAlpha(fluidState.getBlockState(), pos);
 
-        if (alpha == 0) info.cancel();
+        if (alpha == 0) info.setReturnValue(false);
         else alphas.set(alpha);
     }
 
