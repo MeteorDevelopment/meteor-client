@@ -23,7 +23,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import org.joml.Matrix3f;
 import org.joml.Vector3f;
 
 import java.util.ArrayList;
@@ -72,9 +71,7 @@ public class RenderUtils {
             MatrixStack bobViewMatrices = new MatrixStack();
 
             bobView(bobViewMatrices);
-            bobViewMatrices.peek().getPositionMatrix().invert();
-
-            pos.mul(bobViewMatrices.peek().getPositionMatrix().get3x3(new Matrix3f()));
+            pos.mulPosition(bobViewMatrices.peek().getPositionMatrix().invert());
         }
 
         center = new Vec3d(pos.x, -pos.y, pos.z)
