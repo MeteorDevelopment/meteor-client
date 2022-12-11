@@ -194,13 +194,13 @@ public class NotebotCommand extends Command {
         }
 
         if (noteLevel == -1) {
-            error("Error while bruteforcing a note level! Sound: "+soundPacket.getSound()+" Pitch: "+pitch);
+            error("Error while bruteforcing a note level! Sound: " + soundPacket.getSound().value() + " Pitch: " + pitch);
             return null;
         }
 
         Instrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
         if (instrument == null) {
-            error("Can't find the instrument from sound! Sound: "+soundPacket.getSound());
+            error("Can't find the instrument from sound! Sound: " + soundPacket.getSound().value());
             return null;
         }
 
