@@ -10,8 +10,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +37,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         try {
             for (String value : values) {
-                Item item = parseId(Registry.ITEM, value);
+                Item item = parseId(Registries.ITEM, value);
                 if (item != null && (filter == null || filter.test(item))) items.add(item);
             }
         } catch (Exception ignored) {}
@@ -57,14 +57,14 @@ public class ItemListSetting extends Setting<List<Item>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.ITEM.getIds();
+        return Registries.ITEM.getIds();
     }
 
     @Override
     public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Item item : get()) {
-            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registry.ITEM.getId(item).toString()));
+            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registries.ITEM.getId(item).toString()));
         }
         tag.put("value", valueTag);
 
@@ -77,7 +77,7 @@ public class ItemListSetting extends Setting<List<Item>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            Item item = Registry.ITEM.get(new Identifier(tagI.asString()));
+            Item item = Registries.ITEM.get(new Identifier(tagI.asString()));
 
             if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
         }

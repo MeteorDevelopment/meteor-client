@@ -5,13 +5,10 @@
 
 package meteordevelopment.meteorclient.utils.entity.fakeplayer;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.player.PlayerEntity;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -19,7 +16,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     public boolean doNotPush, hideWhenInsideCamera;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
-        super(mc.world, new GameProfile(UUID.randomUUID(), name), player.getPublicKey());
+        super(mc.world, player.getGameProfile());
 
         copyPositionAndRotation(player);
 
@@ -63,10 +60,10 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     @Nullable
     @Override
     protected PlayerListEntry getPlayerListEntry() {
-        if (cachedScoreboardEntry == null) {
-            cachedScoreboardEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        if (playerListEntry == null) {
+            playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         }
 
-        return cachedScoreboardEntry;
+        return playerListEntry;
     }
 }

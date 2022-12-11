@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.SpeedMode;
 import meteordevelopment.meteorclient.systems.modules.movement.speed.SpeedModes;
-import meteordevelopment.meteorclient.utils.misc.Vec2;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import org.joml.Vector2d;
 
 public class Strafe extends SpeedMode {
 
@@ -56,7 +56,7 @@ public class Strafe extends SpeedMode {
             speed = Math.min(speed, System.currentTimeMillis() - timer > 1250L ? 0.44D : 0.43D);
         }
 
-        Vec2 change = transformStrafe(speed);
+        Vector2d change = transformStrafe(speed);
 
         double velX = change.x;
         double velZ = change.y;
@@ -70,14 +70,14 @@ public class Strafe extends SpeedMode {
         ((IVec3d) event.movement).setXZ(velX, velZ);
     }
 
-    private Vec2 transformStrafe(double speed) {
+    private Vector2d transformStrafe(double speed) {
         float forward = mc.player.input.movementForward;
         float side = mc.player.input.movementSideways;
         float yaw = mc.player.prevYaw + (mc.player.getYaw() - mc.player.prevYaw) * mc.getTickDelta();
 
         double velX, velZ;
 
-        if (forward == 0.0f && side == 0.0f) return new Vec2(0, 0);
+        if (forward == 0.0f && side == 0.0f) return new Vector2d(0, 0);
 
         else if (forward != 0.0f) {
             if (side >= 1.0f) {
@@ -101,7 +101,7 @@ public class Strafe extends SpeedMode {
         velX = (double) forward * speed * mx + (double) side * speed * mz;
         velZ = (double) forward * speed * mz - (double) side * speed * mx;
 
-        return new Vec2(velX, velZ);
+        return new Vector2d(velX, velZ);
     }
 
     @Override

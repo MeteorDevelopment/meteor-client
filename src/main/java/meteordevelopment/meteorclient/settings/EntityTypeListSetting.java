@@ -14,8 +14,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.function.Consumer;
 
@@ -41,7 +41,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
         try {
             for (String value : values) {
-                EntityType<?> entity = parseId(Registry.ENTITY_TYPE, value);
+                EntityType<?> entity = parseId(Registries.ENTITY_TYPE, value);
                 if (entity != null) entities.put(entity, true);
             }
         } catch (Exception ignored) {}
@@ -56,7 +56,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.ENTITY_TYPE.getIds();
+        return Registries.ENTITY_TYPE.getIds();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
         NbtList valueTag = new NbtList();
         for (EntityType<?> entityType : get().keySet()) {
             if (get().getBoolean(entityType)) {
-                valueTag.add(NbtString.of(Registry.ENTITY_TYPE.getId(entityType).toString()));
+                valueTag.add(NbtString.of(Registries.ENTITY_TYPE.getId(entityType).toString()));
             }
         }
         tag.put("value", valueTag);
@@ -78,7 +78,7 @@ public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            EntityType<?> type = Registry.ENTITY_TYPE.get(new Identifier(tagI.asString()));
+            EntityType<?> type = Registries.ENTITY_TYPE.get(new Identifier(tagI.asString()));
             if (!onlyAttackable || EntityUtils.isAttackable(type)) get().put(type, true);
         }
 

@@ -12,7 +12,7 @@ import net.minecraft.text.Style;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
+import org.joml.Vector3f;
 
 @SuppressWarnings("unused")
 public class Color implements ICopyable<Color>, ISerializable<Color> {
@@ -306,8 +306,8 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         return new Vec3d(r / 255.0, g / 255.0, b / 255.0);
     }
 
-    public Vec3f getVec3f() {
-        return new Vec3f(r / 255.0f, g / 255.0f, b / 255.0f);
+    public Vector3f getVec3f() {
+        return new Vector3f(r / 255.0f, g / 255.0f, b / 255.0f);
     }
 
     public int getPacked() {

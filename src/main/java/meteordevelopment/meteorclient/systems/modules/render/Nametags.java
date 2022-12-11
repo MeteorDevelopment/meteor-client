@@ -18,7 +18,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
@@ -34,6 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
+import org.joml.Vector3d;
 
 import java.util.*;
 
@@ -222,7 +222,7 @@ public class Nametags extends Module {
     private final Color GREY = new Color(150, 150, 150);
     private final Color BLUE = new Color(20, 170, 170);
 
-    private final Vec3 pos = new Vec3();
+    private final Vector3d pos = new Vector3d();
     private final double[] itemWidths = new double[6];
 
     private final List<Entity> entityList = new ArrayList<>();
@@ -278,7 +278,7 @@ public class Nametags extends Module {
         for (int i = count - 1; i > -1; i--) {
             Entity entity = entityList.get(i);
 
-            pos.set(entity, event.tickDelta);
+            Utils.set(pos, entity, event.tickDelta);
             pos.add(0, getHeight(entity), 0);
 
             EntityType<?> type = entity.getType();

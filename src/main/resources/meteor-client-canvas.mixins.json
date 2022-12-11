@@ -4,7 +4,6 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
-    "CanvasWorldRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

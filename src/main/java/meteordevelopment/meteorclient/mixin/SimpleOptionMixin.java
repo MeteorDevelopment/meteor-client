@@ -77,7 +77,7 @@ public class SimpleOptionMixin<T> {
     private SimpleOption.Callbacks<T> createCallback() {
         return new SimpleOption.Callbacks<>() {
             @Override
-            public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width) {
+            public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width, Consumer<T> changeCallback) {
                 return null;
             }
 

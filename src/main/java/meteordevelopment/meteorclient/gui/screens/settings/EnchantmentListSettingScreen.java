@@ -10,13 +10,13 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.enchantment.Enchantment;
-import net.minecraft.util.registry.Registry;
+import net.minecraft.registry.Registries;
 
 import java.util.List;
 
 public class EnchantmentListSettingScreen extends LeftRightListSettingScreen<Enchantment> {
     public EnchantmentListSettingScreen(GuiTheme theme, Setting<List<Enchantment>> setting) {
-        super(theme, "Select Enchantments", setting, setting.get(), Registry.ENCHANTMENT);
+        super(theme, "Select Enchantments", setting, setting.get(), Registries.ENCHANTMENT);
     }
 
     @Override
