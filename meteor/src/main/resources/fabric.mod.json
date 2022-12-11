@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor",
+  "name": "Meteor",
+  "version": "${version}",
+
+  "environment": "client",
+
+  "entrypoints": {
+    "client": [
+      "org.meteordev.meteor.Meteor"
+    ]
+  }
+}

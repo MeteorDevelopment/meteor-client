@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor-api",
+  "name": "Meteor API",
+  "version": "${version}",
+
+  "environment": "client",
+
+  "custom": {
+    "modmenu": {
+      "badges": [ "library" ],
+      "parent": "meteor-core"
+    }
+  }
+}

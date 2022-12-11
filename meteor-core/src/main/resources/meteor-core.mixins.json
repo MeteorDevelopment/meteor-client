@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "org.meteordev.meteor.impl.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "client": [
+    "MeteorAPIMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

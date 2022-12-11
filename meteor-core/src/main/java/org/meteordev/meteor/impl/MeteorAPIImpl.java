@@ -1,0 +1,35 @@
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package org.meteordev.meteor.impl;
+
+import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.ModContainer;
+import net.fabricmc.loader.api.metadata.ModMetadata;
+import org.meteordev.meteor.api.MeteorAPI;
+
+public class MeteorAPIImpl implements MeteorAPI {
+    public static final MeteorAPIImpl INSTANCE = new MeteorAPIImpl();
+
+    private ModMetadata metadata;
+
+    private MeteorAPIImpl() {}
+
+    @Override
+    public String getVersion() {
+        checkMetadata();
+        return metadata.getVersion().toString();
+    }
+
+    private void checkMetadata() {
+        if (metadata == null) {
+            ModContainer container = FabricLoader.getInstance().getModContainer("meteor-api").orElse(null);
+
+            if (container == null) throw new IllegalStateException("Mod 'meteor-api' is not loaded.");
+
+            metadata = container.getMetadata();
+        }
+    }
+}

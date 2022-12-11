@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "meteor-core",
+  "name": "Meteor Core",
+  "version": "${version}",
+
+  "environment": "client",
+  "mixins": [
+    "meteor-core.mixins.json"
+  ],
+
+  "custom": {
+    "modmenu": {
+      "badges": [ "library" ]
+    }
+  }
+}
