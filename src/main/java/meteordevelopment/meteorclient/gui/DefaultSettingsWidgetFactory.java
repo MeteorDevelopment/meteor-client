@@ -457,7 +457,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
             int size = getSize(setting);
 
             if (size != lastSize) {
-                text = "(" + size + " selected)";
+                set("(" + size + " selected)");
                 lastSize = size;
             }
 
