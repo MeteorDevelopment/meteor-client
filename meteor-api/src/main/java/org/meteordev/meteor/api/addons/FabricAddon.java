@@ -16,9 +16,8 @@ public abstract class FabricAddon implements Addon {
     private String[] authors;
 
     public FabricAddon(String id) {
-        ModContainer container = FabricLoader.getInstance().getModContainer(id).orElse(null);
-
-        if (container == null) throw new IllegalStateException("Mod with id '" + id + "' is not loaded.");
+        ModContainer container = FabricLoader.getInstance().getModContainer(id)
+            .orElseThrow(() -> new IllegalStateException("Mod with id '" + id + "' is not loaded."));
 
         metadata = container.getMetadata();
     }

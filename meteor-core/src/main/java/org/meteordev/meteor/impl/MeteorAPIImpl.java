@@ -48,9 +48,8 @@ public class MeteorAPIImpl implements MeteorAPI {
 
     private void checkMetadata() {
         if (metadata == null) {
-            ModContainer container = FabricLoader.getInstance().getModContainer("meteor-api").orElse(null);
-
-            if (container == null) throw new IllegalStateException("Mod with id 'meteor-api' is not loaded.");
+            ModContainer container = FabricLoader.getInstance().getModContainer("meteor-api")
+                .orElseThrow(() -> new IllegalStateException("Mod with id 'meteor-api' is not loaded."));
 
             metadata = container.getMetadata();
         }
