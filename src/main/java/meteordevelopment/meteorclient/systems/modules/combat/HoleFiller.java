@@ -237,11 +237,8 @@ public class HoleFiller extends Module {
         if (smart.get()) setTargets();
         holes.clear();
 
-        boolean foundBlock = InvUtils.testInHotbar(itemStack ->
-            itemStack.getItem() instanceof BlockItem blockItem
-            && blocks.get().contains(blockItem.getBlock())
-        );
-        if (!foundBlock) return;
+        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        if (!block.found()) return;
 
         BlockIterator.register(searchRadius.get(), searchRadius.get(), (blockPos, blockState) -> {
             if (!validHole(blockPos)) return;
@@ -280,7 +277,6 @@ public class HoleFiller extends Module {
 
         BlockIterator.after(() -> {
             if (timer <= 0 && !holes.isEmpty()) {
-                FindItemResult block = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem blockItem && blocks.get().contains(blockItem.getBlock()));
                 int bpt = 0;
 
                 for (Hole hole : holes) {
