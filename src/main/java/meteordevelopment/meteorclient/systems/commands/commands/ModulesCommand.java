@@ -47,6 +47,7 @@ public class ModulesCommand extends Command {
         tooltip.append(Text.literal(module.description).formatted(Formatting.WHITE));
 
         MutableText finalModule = Text.literal(module.title);
+        if (!module.isActive()) finalModule.formatted(Formatting.GRAY);
         if (!module.equals(Modules.get().getGroup(module.category).get(Modules.get().getGroup(module.category).size() - 1))) finalModule.append(Text.literal(", ").formatted(Formatting.GRAY));
         finalModule.setStyle(finalModule.getStyle().withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip)));
 
