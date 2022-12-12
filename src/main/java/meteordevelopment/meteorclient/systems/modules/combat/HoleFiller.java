@@ -314,6 +314,7 @@ public class HoleFiller extends Module {
     private boolean validHole(BlockPos pos) {
         if (mc.player.getBlockPos().equals(pos)) return false;
         if (distance(mc.player, pos, false) > placeRange.get()) return false;
+        if (mc.world.getBlockState(pos).getBlock() == Blocks.COBWEB) return false;
 
         if (smart.get() && !forceFill.get().isPressed()) {
             boolean validHole = false;
