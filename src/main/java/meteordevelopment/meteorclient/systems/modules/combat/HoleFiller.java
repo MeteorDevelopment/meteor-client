@@ -372,12 +372,8 @@ public class HoleFiller extends Module {
         return true;
     }
 
-    private Vec3d center(BlockPos pos) {
-        return new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-    }
-
     private double distance(PlayerEntity player, BlockPos pos, boolean feet) {
-        Vec3d center = center(pos);
+        Vec3d center = new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
         if (feet) center.add(0, 0.5, 0);
 
         Vec3d playerPos = player.getPos();
