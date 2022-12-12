@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.DiscordPresence;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.invoke.MethodHandles;
+import java.util.Optional;
 
 public class MeteorClient implements ClientModInitializer {
     public static final String MOD_ID = "meteor-client";
@@ -158,19 +160,18 @@ public class MeteorClient implements ClientModInitializer {
 
     // Hide HUD
 
-    private boolean wasWidgetScreen, wasHudHiddenRoot;
+    private boolean wasHidden, wasClosed;
 
     @EventHandler(priority = EventPriority.LOWEST)
     private void onOpenScreen(OpenScreenEvent event) {
-        boolean hideHud = GuiThemes.get().hideHUD();
+        if (!GuiThemes.get().hideHUD()) return;
 
-        if (hideHud) {
-            if (!wasWidgetScreen) wasHudHiddenRoot = mc.options.hudHidden;
-
-            if (event.screen instanceof WidgetScreen) mc.options.hudHidden = true;
-            else if (!wasHudHiddenRoot) mc.options.hudHidden = false;
+        if (event.screen == null) {
+            mc.options.hudHidden = wasHidden;
+            wasClosed = true;
+        } else {
+            if (wasClosed) wasHidden = mc.options.hudHidden;
+            mc.options.hudHidden = !(event.screen instanceof HudEditorScreen);
         }
-
-        wasWidgetScreen = event.screen instanceof WidgetScreen;
     }
 }
