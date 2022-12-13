@@ -17,7 +17,13 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -260,5 +266,50 @@ public class BlockUtils {
         }
 
         return false;
+    }
+
+    public static double getBreakDelta(int slot, BlockState state) {
+        float hardness = state.getHardness(null, null);
+        if (hardness == -1) return 0;
+        else {
+            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
+        }
+    }
+
+    private static double getBlockBreakingSpeed(int slot, BlockState block) {
+        double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
+
+        if (speed > 1) {
+            ItemStack tool = mc.player.getInventory().getStack(slot);
+
+            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
+
+            if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
+        }
+
+        if (StatusEffectUtil.hasHaste(mc.player)) {
+            speed *= 1 + (StatusEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
+        }
+
+        if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
+            float k = switch (mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+                case 0 -> 0.3F;
+                case 1 -> 0.09F;
+                case 2 -> 0.0027F;
+                default -> 8.1E-4F;
+            };
+
+            speed *= k;
+        }
+
+        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
+            speed /= 5.0F;
+        }
+
+        if (!mc.player.isOnGround()) {
+            speed /= 5.0F;
+        }
+
+        return speed;
     }
 }
