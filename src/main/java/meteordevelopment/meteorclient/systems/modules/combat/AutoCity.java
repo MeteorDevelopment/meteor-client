@@ -134,7 +134,6 @@ public class AutoCity extends Module {
     private PlayerEntity target;
     private BlockPos targetPos;
     private FindItemResult pick;
-    private boolean isMining;
     private float progress;
 
     public AutoCity() {
@@ -179,7 +178,6 @@ public class AutoCity extends Module {
     public void onDeactivate() {
         target = null;
         targetPos = null;
-        isMining = false;
     }
 
     @EventHandler
@@ -222,7 +220,6 @@ public class AutoCity extends Module {
         else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
 
         if (switchMode.get() == SwitchMode.Silent) InvUtils.swapBack();
-        isMining = true;
     }
 
     @EventHandler
