@@ -26,9 +26,11 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.entity.TntEntity;
+import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItem;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -316,19 +318,24 @@ public class HoleFiller extends Module {
         if (distance(mc.player, pos, false) > placeRange.get()) return false;
         if (mc.world.getBlockState(pos).getBlock() == Blocks.COBWEB) return false;
 
-        if (smart.get() && !forceFill.get().isPressed()) {
-            boolean validHole = false;
-            for (PlayerEntity target : targets) {
-                if (target.getY() > pos.getY()
-                    && !target.getBlockPos().equals(pos)
-                    && (distance(target, pos, true) < feetRange.get())
-                ) validHole = true;
+        if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return false;
+        if (((AbstractBlockAccessor) mc.world.getBlockState(pos.up()).getBlock()).isCollidable()) return false;
+
+        Box box = new Box(pos);
+        if (!mc.world.getOtherEntities(null, box, entity -> entity instanceof PlayerEntity
+            || entity instanceof TntEntity || entity instanceof EndCrystalEntity).isEmpty()) return false;
+
+        if (!smart.get() || forceFill.get().isPressed()) return true;
+
+        boolean validHole = false;
+        for (PlayerEntity target : targets) {
+            if (target.getY() > pos.getY() && (distance(target, pos, true) < feetRange.get())) {
+                validHole = true;
+                break;
             }
-            if (!validHole) return false;
         }
 
-        if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return false;
-        return !((AbstractBlockAccessor) mc.world.getBlockState(pos.up()).getBlock()).isCollidable();
+        return validHole;
     }
 
     private void setTargets() {
