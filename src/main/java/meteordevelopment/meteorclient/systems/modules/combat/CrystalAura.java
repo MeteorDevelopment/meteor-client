@@ -1071,13 +1071,6 @@ public class CrystalAura extends Module {
                 targets.add(player);
             }
         }
-
-        // Fake players
-        FakePlayerManager.forEach(fp -> {
-            if (!fp.isDead() && fp.isAlive() && Friends.get().shouldAttack(fp) && PlayerUtils.isWithin(fp, targetRange.get())) {
-                targets.add(fp);
-            }
-        });
     }
 
     private boolean intersectsWithEntities(Box box) {
