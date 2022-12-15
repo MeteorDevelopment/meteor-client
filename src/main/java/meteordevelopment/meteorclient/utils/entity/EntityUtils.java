@@ -39,7 +39,6 @@ import net.minecraft.world.entity.SimpleEntityLookup;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -114,14 +113,15 @@ public class EntityUtils {
 
     public static List<BlockPos> getSurroundBlocks(PlayerEntity player) {
         if (player == null) return null;
+        BlockPos.Mutable testPos = new BlockPos.Mutable();
 
         List<BlockPos> positions = new ArrayList<>();
 
         for (Direction direction : Direction.HORIZONTAL) {
-            BlockPos pos = player.getBlockPos().offset(direction);
+            testPos.set(player.getBlockPos()).offset(direction);
 
-            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN) {
-                positions.add(pos);
+            if (mc.world.getBlockState(testPos).getBlock() == Blocks.OBSIDIAN) {
+                positions.add(testPos);
             }
         }
 
@@ -132,19 +132,21 @@ public class EntityUtils {
     public static BlockPos getCityBlock(PlayerEntity player) {
         BlockPos bestPos = null;
         int bestScore = 0;
+        BlockPos.Mutable testPos = new BlockPos.Mutable();
 
         for (BlockPos pos : getSurroundBlocks(player)) {
             int score = 1;
 
             for (Direction direction : Direction.values()) {
-                Block block = mc.world.getBlockState(pos.offset(direction)).getBlock();
+                testPos.set(pos).offset(direction);
+                Block block = mc.world.getBlockState(testPos).getBlock();
 
                 if (direction == Direction.DOWN && block == Blocks.OBSIDIAN || block == Blocks.BEDROCK) {
                     score+= 2;
                     continue;
                 }
 
-                if (direction != Direction.UP && block instanceof AirBlock) {
+                if (direction != Direction.DOWN && block instanceof AirBlock) {
                     score++;
                 }
             }
