@@ -223,6 +223,9 @@ public class HoleFiller extends Module {
 
     private final List<PlayerEntity> targets = new ArrayList<>();
     private final List<Hole> holes = new ArrayList<>();
+
+    private final BlockPos.Mutable testPos = new BlockPos.Mutable();
+    private Vec3d testVec;
     private int timer;
 
     public HoleFiller() {
@@ -314,12 +317,16 @@ public class HoleFiller extends Module {
     }
 
     private boolean validHole(BlockPos pos) {
-        if (mc.player.getBlockPos().equals(pos)) return false;
-        if (distance(mc.player, pos, false) > placeRange.get()) return false;
-        if (mc.world.getBlockState(pos).getBlock() == Blocks.COBWEB) return false;
+        testPos.set(pos);
 
-        if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return false;
-        if (((AbstractBlockAccessor) mc.world.getBlockState(pos.up()).getBlock()).isCollidable()) return false;
+        if (mc.player.getBlockPos().equals(testPos)) return false;
+        if (distance(mc.player, testPos, false) > placeRange.get()) return false;
+        if (mc.world.getBlockState(testPos).getBlock() == Blocks.COBWEB) return false;
+
+        if (((AbstractBlockAccessor) mc.world.getBlockState(testPos).getBlock()).isCollidable()) return false;
+        testPos.add(0, 1, 0);
+        if (((AbstractBlockAccessor) mc.world.getBlockState(testPos).getBlock()).isCollidable()) return false;
+        testPos.add(0, -1, 0);
 
         Box box = new Box(pos);
         if (!mc.world.getOtherEntities(null, box, entity -> entity instanceof PlayerEntity
@@ -329,7 +336,7 @@ public class HoleFiller extends Module {
 
         boolean validHole = false;
         for (PlayerEntity target : targets) {
-            if (target.getY() > pos.getY() && (distance(target, pos, true) < feetRange.get())) {
+            if (target.getY() > testPos.getY() && (distance(target, testPos, true) < feetRange.get())) {
                 validHole = true;
                 break;
             }
@@ -350,12 +357,9 @@ public class HoleFiller extends Module {
             ) continue;
 
             if (onlyMoving.get()) {
-                Vec3d velocity = new Vec3d(
-                    player.getX() - player.prevX,
-                    player.getY() - player.prevY,
-                    player.getZ() - player.prevZ
-                );
-                if (velocity.length() == 0) continue;
+                if (player.getX() - player.prevX != 0) continue;
+                if (player.getY() - player.prevY != 0) continue;
+                if (player.getZ() - player.prevZ != 0) continue;
             }
 
             if (ignoreSafe.get()) {
@@ -370,7 +374,8 @@ public class HoleFiller extends Module {
         for (Direction dir : Direction.values()) {
             if (dir == Direction.UP || dir == Direction.DOWN) continue;
 
-            Block block = mc.world.getBlockState(target.getBlockPos().offset(dir)).getBlock();
+            testPos.set(target.getBlockPos().offset(dir));
+            Block block = mc.world.getBlockState(testPos).getBlock();
             if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK && block != Blocks.RESPAWN_ANCHOR
                 && block != Blocks.CRYING_OBSIDIAN && block != Blocks.NETHERITE_BLOCK) {
                 return false;
@@ -381,22 +386,20 @@ public class HoleFiller extends Module {
     }
 
     private double distance(PlayerEntity player, BlockPos pos, boolean feet) {
-        Vec3d center = new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
-        if (feet) center.add(0, 0.5, 0);
+        testVec = player.getPos();
+        if (!feet) testVec.add(0, player.getEyeHeight(mc.player.getPose()), 0);
 
-        Vec3d playerPos = player.getPos();
-        if (!feet) playerPos.add(0, player.getEyeHeight(mc.player.getPose()), 0);
         else if (predict.get()) {
-            playerPos.add(
+            testVec.add(
                 player.getX() - player.prevX,
                 player.getY() - player.prevY,
                 player.getZ() - player.prevZ
             );
         }
 
-        double i = playerPos.x - center.x;
-        double j = playerPos.y - center.y;
-        double k = playerPos.z - center.z;
+        double i = testVec.x - (pos.getX() + 0.5);
+        double j = testVec.y - (pos.getX() + ((feet) ? 1 : 0.5));
+        double k = testVec.z - (pos.getZ() + 0.5);
 
         return (Math.sqrt(i * i + j * j + k * k));
     }
