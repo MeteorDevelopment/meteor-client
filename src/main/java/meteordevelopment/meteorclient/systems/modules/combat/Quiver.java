@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -26,6 +27,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.potion.PotionUtil;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 
 import java.util.ArrayList;
@@ -102,6 +104,7 @@ public class Quiver extends Module {
     private FindItemResult bow;
     private boolean wasMainhand, wasHotbar;
     private int timer, prevSlot;
+    private BlockPos.Mutable testPos = new BlockPos.Mutable();
 
     public Quiver() {
         super(Categories.Combat, "quiver", "Shoots arrows at yourself.");
@@ -226,13 +229,13 @@ public class Quiver extends Module {
     }
 
     private boolean headIsOpen() {
-        BlockState pos1 = mc.world.getBlockState(mc.player.getBlockPos().up(2));
-        BlockState pos2 = mc.world.getBlockState(mc.player.getBlockPos().up(3));
+        testPos.set(mc.player.getBlockPos().add(0, 1, 0));
+        BlockState pos1 = mc.world.getBlockState(testPos);
+        if (((AbstractBlockAccessor) pos1.getBlock()).isCollidable())  return false;
 
-        boolean air1 = !((AbstractBlockAccessor) pos1.getBlock()).isCollidable();
-        boolean air2 = !((AbstractBlockAccessor) pos2.getBlock()).isCollidable();
-
-        return air1 && air2;
+        testPos.add(0, 1, 0);
+        BlockState pos2 = mc.world.getBlockState(testPos);
+        return !((AbstractBlockAccessor) pos2.getBlock()).isCollidable();
     }
 
     private boolean hasEffect(StatusEffect effect) {
@@ -247,7 +250,9 @@ public class Quiver extends Module {
         for (Direction dir : Direction.values()) {
             if (dir == Direction.UP || dir == Direction.DOWN) continue;
 
-            Block block = mc.world.getBlockState(target.getBlockPos().offset(dir)).getBlock();
+            testPos.set(target.getBlockPos()).offset(dir);
+            Block block = mc.world.getBlockState(testPos).getBlock();
+
             if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK && block != Blocks.RESPAWN_ANCHOR
                 && block != Blocks.CRYING_OBSIDIAN && block != Blocks.NETHERITE_BLOCK) {
                 return false;
