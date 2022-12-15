@@ -55,7 +55,7 @@ public class AutoCity extends Module {
 
     private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
         .name("switch-mode")
-        .description("How to switch to a pickaxe")
+        .description("How to switch to a pickaxe.")
         .defaultValue(SwitchMode.Normal)
         .build()
     );
@@ -86,7 +86,7 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
         .name("chat-info")
-        .description("If there is no block below a city block it will place one before mining.")
+        .description("Whether the module should send messages in chat.")
         .defaultValue(true)
         .build()
     );
@@ -95,7 +95,7 @@ public class AutoCity extends Module {
 
     private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
         .name("swing-hand")
-        .description("Whether to render your hand swinging")
+        .description("Whether to render your hand swinging.")
         .defaultValue(false)
         .build()
     );
