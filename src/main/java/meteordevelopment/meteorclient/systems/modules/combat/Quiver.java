@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -104,7 +103,7 @@ public class Quiver extends Module {
     private FindItemResult bow;
     private boolean wasMainhand, wasHotbar;
     private int timer, prevSlot;
-    private BlockPos.Mutable testPos = new BlockPos.Mutable();
+    private final BlockPos.Mutable testPos = new BlockPos.Mutable();
 
     public Quiver() {
         super(Categories.Combat, "quiver", "Shoots arrows at yourself.");
@@ -220,7 +219,7 @@ public class Quiver extends Module {
         }
 
         if (onlyInHoles.get() && !isSurrounded(mc.player)) {
-            if (chatInfo.get()) error("You are not in a hole!");
+            if (chatInfo.get()) error("You are not in a hole, disabling.");
             toggle();
             return false;
         }
