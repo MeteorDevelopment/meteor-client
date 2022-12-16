@@ -165,17 +165,18 @@ public class BowAimbot extends Module {
         // Set player rotation
         if (Float.isNaN(pitch)) {
             if (rotate.get()) {
-                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
-            } else {
                 mc.player.setYaw((float) Rotations.getYaw(target));
                 mc.player.setPitch((float) Rotations.getPitch(target));
+            } else {
+                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
             }
         } else {
+            Vec3d vec3d = new Vec3d(posX, posY, posZ);
             if (rotate.get()) {
-                Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
-            } else {
-                mc.player.setYaw((float) Rotations.getYaw(new Vec3d(posX, posY, posZ)));
+                mc.player.setYaw((float) Rotations.getYaw(vec3d));
                 mc.player.setPitch(pitch);
+            } else {
+                Rotations.rotate(Rotations.getYaw(vec3d), pitch);
             }
         }
     }
