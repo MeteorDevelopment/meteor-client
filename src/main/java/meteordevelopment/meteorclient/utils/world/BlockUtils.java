@@ -182,14 +182,17 @@ public class BlockUtils {
         }
     }
 
-    /** Needs to be used in {@link TickEvent.Pre} */
+    /**
+     * Needs to be used in {@link TickEvent.Pre}
+     */
     public static boolean breakBlock(BlockPos blockPos, boolean swing) {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
-        if (mc.interactionManager.isBreakingBlock()) mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+        if (mc.interactionManager.isBreakingBlock())
+            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
         else mc.interactionManager.attackBlock(pos, Direction.UP);
 
         if (swing) mc.player.swingHand(Hand.MAIN_HAND);
@@ -205,15 +208,29 @@ public class BlockUtils {
         if (!mc.player.isCreative() && state.getHardness(mc.world, blockPos) < 0) return false;
         return state.getOutlineShape(mc.world, blockPos) != VoxelShapes.empty();
     }
+
     public static boolean canBreak(BlockPos blockPos) {
         return canBreak(blockPos, mc.world.getBlockState(blockPos));
     }
 
-    public static boolean canInstaBreak(BlockPos blockPos, BlockState state) {
-        return mc.player.isCreative() || state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) >= 1;
+    public static boolean canInstaBreak(BlockPos blockPos, float breakSpeed) {
+        return mc.player.isCreative() || calcBlockBreakingDelta2(blockPos, breakSpeed) >= 1;
     }
+
     public static boolean canInstaBreak(BlockPos blockPos) {
-        return canInstaBreak(blockPos, mc.world.getBlockState(blockPos));
+        BlockState state = mc.world.getBlockState(blockPos);
+        return canInstaBreak(blockPos, mc.player.getBlockBreakingSpeed(state));
+    }
+
+    public static float calcBlockBreakingDelta2(BlockPos blockPos, float breakSpeed) {
+        BlockState state = mc.world.getBlockState(blockPos);
+        float f = state.getHardness(mc.world, blockPos);
+        if (f == -1.0F) {
+            return 0.0F;
+        } else {
+            int i = mc.player.canHarvest(state) ? 30 : 100;
+            return breakSpeed / f / (float) i;
+        }
     }
 
     // Other
@@ -237,7 +254,8 @@ public class BlockUtils {
             mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
 
         if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
-            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube())
+                return MobSpawn.Never;
             if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
