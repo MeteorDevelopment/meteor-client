@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render.search;
+package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -20,26 +20,26 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getRenderDistance;
 
-public class SChunk {
+public class ESPChunk {
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private final int x, z;
-    public Long2ObjectMap<SBlock> blocks;
+    public Long2ObjectMap<ESPBlock> blocks;
 
-    public SChunk(int x, int z) {
+    public ESPChunk(int x, int z) {
         this.x = x;
         this.z = z;
     }
 
-    public SBlock get(int x, int y, int z) {
-        return blocks == null ? null : blocks.get(SBlock.getKey(x, y, z));
+    public ESPBlock get(int x, int y, int z) {
+        return blocks == null ? null : blocks.get(ESPBlock.getKey(x, y, z));
     }
 
     public void add(BlockPos blockPos, boolean update) {
-        SBlock block = new SBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        ESPBlock block = new ESPBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
 
         if (blocks == null) blocks = new Long2ObjectOpenHashMap<>(64);
-        blocks.put(SBlock.getKey(blockPos), block);
+        blocks.put(ESPBlock.getKey(blockPos), block);
 
         if (update) block.update();
     }
@@ -50,20 +50,20 @@ public class SChunk {
 
     public void remove(BlockPos blockPos) {
         if (blocks != null) {
-            SBlock block = blocks.remove(SBlock.getKey(blockPos));
+            ESPBlock block = blocks.remove(ESPBlock.getKey(blockPos));
             if (block != null) block.group.remove(block);
         }
     }
 
     public void update() {
         if (blocks != null) {
-            for (SBlock block : blocks.values()) block.update();
+            for (ESPBlock block : blocks.values()) block.update();
         }
     }
 
     public void update(int x, int y, int z) {
         if (blocks != null) {
-            SBlock block = blocks.get(SBlock.getKey(x, y, z));
+            ESPBlock block = blocks.get(ESPBlock.getKey(x, y, z));
             if (block != null) block.update();
         }
     }
@@ -82,13 +82,13 @@ public class SChunk {
 
     public void render(Render3DEvent event) {
         if (blocks != null) {
-            for (SBlock block : blocks.values()) block.render(event);
+            for (ESPBlock block : blocks.values()) block.render(event);
         }
     }
 
 
-    public static SChunk searchChunk(Chunk chunk, List<Block> blocks) {
-        SChunk schunk = new SChunk(chunk.getPos().x, chunk.getPos().z);
+    public static ESPChunk searchChunk(Chunk chunk, List<Block> blocks) {
+        ESPChunk schunk = new ESPChunk(chunk.getPos().x, chunk.getPos().z);
         if (schunk.shouldBeDeleted()) return schunk;
 
         for (int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++) {

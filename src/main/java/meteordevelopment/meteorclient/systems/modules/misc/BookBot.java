@@ -166,14 +166,10 @@ public class BookBot extends Module {
         }
 
         // Move the book into hand
-        if (!writableBook.isMainHand()) {
+        if (!InvUtils.testInMainHand(Items.WRITABLE_BOOK)) {
             InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().selectedSlot);
             return;
         }
-
-        // If somehow it failed, just dont do anything until it tries again
-        FindItemResult finalBook = InvUtils.findInHotbar(Items.WRITABLE_BOOK);
-        if (!finalBook.isMainHand()) return;
 
         // Check delay
         if (delayTimer > 0) {

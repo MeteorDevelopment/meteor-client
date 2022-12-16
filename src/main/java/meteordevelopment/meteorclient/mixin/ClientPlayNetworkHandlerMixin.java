@@ -11,11 +11,13 @@ import meteordevelopment.meteorclient.events.entity.player.PickItemsEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.packets.ContainerSlotUpdateEvent;
+import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosionS2CPacket;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.world.ClientWorld;
@@ -32,10 +34,22 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ClientPlayNetworkHandler.class)
 public abstract class ClientPlayNetworkHandlerMixin {
-    @Shadow @Final private MinecraftClient client;
-    @Shadow private ClientWorld world;
+    @Shadow
+    @Final
+    private MinecraftClient client;
+    @Shadow
+    private ClientWorld world;
 
     private boolean worldNotNull;
+
+    @Inject(method = "onEntitySpawn", at = @At("HEAD"), cancellable = true)
+    private void onEntitySpawn(EntitySpawnS2CPacket packet, CallbackInfo info) {
+        if (packet != null && packet.getEntityType() != null) {
+            if (Modules.get().get(NoRender.class).noEntity(packet.getEntityType()) && Modules.get().get(NoRender.class).getDropSpawnPacket()) {
+                info.cancel();
+            }
+        }
+    }
 
     @Inject(method = "onGameJoin", at = @At("HEAD"))
     private void onGameJoinHead(GameJoinS2CPacket packet, CallbackInfo info) {
@@ -67,6 +81,11 @@ public abstract class ClientPlayNetworkHandlerMixin {
         MeteorClient.EVENT_BUS.post(ContainerSlotUpdateEvent.get(packet));
     }
 
+    @Inject(method = "onInventory", at = @At("TAIL"))
+    private void onInventory(InventoryS2CPacket packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(InventoryEvent.get(packet));
+    }
+
     @Inject(method = "onEntitiesDestroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/EntitiesDestroyS2CPacket;getEntityIds()Lit/unimi/dsi/fastutil/ints/IntList;"))
     private void onEntitiesDestroy(EntitiesDestroyS2CPacket packet, CallbackInfo ci) {
         for (int id : packet.getEntityIds()) {
@@ -74,14 +93,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
         }
     }
 
-    @Inject(
-        method = "onExplosion",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V",
-            shift = At.Shift.AFTER
-        )
-    )
+    @Inject(method = "onExplosion", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER))
     private void onExplosionVelocity(ExplosionS2CPacket packet, CallbackInfo ci) {
         Velocity velocity = Modules.get().get(Velocity.class);
         if (!velocity.explosions.get()) return;

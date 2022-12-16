@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render.search;
+package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -17,10 +17,10 @@ import net.minecraft.util.shape.VoxelShapes;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class SBlock {
+public class ESPBlock {
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    private static final Search search = Modules.get().get(Search.class);
+    private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
 
     public static final int FO = 1 << 1;
     public static final int FO_RI = 1 << 2;
@@ -48,36 +48,36 @@ public class SBlock {
     private BlockState state;
     public int neighbours;
 
-    public SGroup group;
+    public ESPGroup group;
 
     public boolean loaded = true;
 
-    public SBlock(int x, int y, int z) {
+    public ESPBlock(int x, int y, int z) {
         this.x = x;
         this.y = y;
         this.z = z;
     }
 
-    public SBlock getSideBlock(int side) {
+    public ESPBlock getSideBlock(int side) {
         switch (side) {
-            case FO: return search.getBlock(x, y, z + 1);
-            case BA: return search.getBlock(x, y, z - 1);
-            case LE: return search.getBlock(x - 1, y, z);
-            case RI: return search.getBlock(x + 1, y, z);
-            case TO: return search.getBlock(x, y + 1, z);
-            case BO: return search.getBlock(x, y - 1, z);
+            case FO: return blockEsp.getBlock(x, y, z + 1);
+            case BA: return blockEsp.getBlock(x, y, z - 1);
+            case LE: return blockEsp.getBlock(x - 1, y, z);
+            case RI: return blockEsp.getBlock(x + 1, y, z);
+            case TO: return blockEsp.getBlock(x, y + 1, z);
+            case BO: return blockEsp.getBlock(x, y - 1, z);
         }
 
         return null;
     }
 
     private void assignGroup() {
-        SGroup firstGroup = null;
+        ESPGroup firstGroup = null;
 
         for (int side : SIDES) {
             if ((neighbours & side) != side) continue;
 
-            SBlock neighbour = getSideBlock(side);
+            ESPBlock neighbour = getSideBlock(side);
             if (neighbour == null || neighbour.group == null) continue;
 
             if (firstGroup == null) {
@@ -89,7 +89,7 @@ public class SBlock {
         }
 
         if (firstGroup == null) {
-            firstGroup = search.newGroup(state.getBlock());
+            firstGroup = blockEsp.newGroup(state.getBlock());
         }
 
         firstGroup.add(this);
@@ -188,7 +188,7 @@ public class SBlock {
             z2 = z + shape.getMax(Direction.Axis.Z);
         }
 
-        SBlockData blockData = search.getBlockData(state.getBlock());
+        ESPBlockData blockData = blockEsp.getBlockData(state.getBlock());
 
         ShapeMode shapeMode = blockData.shapeMode;
         Color lineColor = blockData.lineColor;

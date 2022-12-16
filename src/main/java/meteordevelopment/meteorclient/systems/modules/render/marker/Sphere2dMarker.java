@@ -136,7 +136,7 @@ public class Sphere2dMarker extends BaseMarker {
 
         synchronized (blocks) {
             for (Block block : blocks) {
-                if (!limitRenderRange.get() || PlayerUtils.distanceTo(block.x, block.y, block.z) <= renderRange.get()) {
+                if (!limitRenderRange.get() || PlayerUtils.isWithin(block.x, block.y, block.z, renderRange.get())) {
                     event.renderer.box(block.x, block.y, block.z, block.x + 1, block.y + 1, block.z + 1, sideColor.get(), lineColor.get(), shapeMode.get(), block.excludeDir);
                 }
             }

@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render.search;
+package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -32,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-public class Search extends Module {
+public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     // General
@@ -46,11 +46,11 @@ public class Search extends Module {
         .build()
     );
 
-    private final Setting<SBlockData> defaultBlockConfig = sgGeneral.add(new GenericSetting.Builder<SBlockData>()
+    private final Setting<ESPBlockData> defaultBlockConfig = sgGeneral.add(new GenericSetting.Builder<ESPBlockData>()
         .name("default-block-config")
         .description("Default block config.")
         .defaultValue(
-            new SBlockData(
+            new ESPBlockData(
                 ShapeMode.Lines,
                 new SettingColor(0, 255, 200),
                 new SettingColor(0, 255, 200, 25),
@@ -61,7 +61,7 @@ public class Search extends Module {
         .build()
     );
 
-    private final Setting<Map<Block, SBlockData>> blockConfigs = sgGeneral.add(new BlockDataSetting.Builder<SBlockData>()
+    private final Setting<Map<Block, ESPBlockData>> blockConfigs = sgGeneral.add(new BlockDataSetting.Builder<ESPBlockData>()
         .name("block-configs")
         .description("Config for each block.")
         .defaultData(defaultBlockConfig)
@@ -77,13 +77,13 @@ public class Search extends Module {
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    private final Long2ObjectMap<SChunk> chunks = new Long2ObjectOpenHashMap<>();
-    private final List<SGroup> groups = new UnorderedArrayList<>();
+    private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
+    private final List<ESPGroup> groups = new UnorderedArrayList<>();
 
     private Dimension lastDimension;
 
-    public Search() {
-        super(Categories.Render, "search", "Searches for specified blocks.");
+    public BlockESP() {
+        super(Categories.Render, "block-esp", "Renders specified blocks through walls.");
 
         RainbowColors.register(this::onTickRainbow);
     }
@@ -114,38 +114,38 @@ public class Search extends Module {
         if (!isActive()) return;
 
         defaultBlockConfig.get().tickRainbow();
-        for (SBlockData blockData : blockConfigs.get().values()) blockData.tickRainbow();
+        for (ESPBlockData blockData : blockConfigs.get().values()) blockData.tickRainbow();
     }
 
-    SBlockData getBlockData(Block block) {
-        SBlockData blockData = blockConfigs.get().get(block);
+    ESPBlockData getBlockData(Block block) {
+        ESPBlockData blockData = blockConfigs.get().get(block);
         return blockData == null ? defaultBlockConfig.get() : blockData;
     }
 
     private void updateChunk(int x, int z) {
-        SChunk chunk = chunks.get(ChunkPos.toLong(x, z));
+        ESPChunk chunk = chunks.get(ChunkPos.toLong(x, z));
         if (chunk != null) chunk.update();
     }
 
     private void updateBlock(int x, int y, int z) {
-        SChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
+        ESPChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
         if (chunk != null) chunk.update(x, y, z);
     }
 
-    public SBlock getBlock(int x, int y, int z) {
-        SChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
+    public ESPBlock getBlock(int x, int y, int z) {
+        ESPChunk chunk = chunks.get(ChunkPos.toLong(x >> 4, z >> 4));
         return chunk == null ? null : chunk.get(x, y, z);
     }
 
-    public SGroup newGroup(Block block) {
+    public ESPGroup newGroup(Block block) {
         synchronized (chunks) {
-            SGroup group = new SGroup(block);
+            ESPGroup group = new ESPGroup(block);
             groups.add(group);
             return group;
         }
     }
 
-    public void removeGroup(SGroup group) {
+    public void removeGroup(ESPGroup group) {
         synchronized (chunks) {
             groups.remove(group);
         }
@@ -159,7 +159,7 @@ public class Search extends Module {
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
         MeteorExecutor.execute(() -> {
             if (!isActive()) return;
-            SChunk schunk = SChunk.searchChunk(chunk, blocks.get());
+            ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
             if (schunk.size() > 0) {
                 synchronized (chunks) {
@@ -195,10 +195,10 @@ public class Search extends Module {
         if (added || removed) {
             MeteorExecutor.execute(() -> {
                 synchronized (chunks) {
-                    SChunk chunk = chunks.get(key);
+                    ESPChunk chunk = chunks.get(key);
 
                     if (chunk == null) {
-                        chunk = new SChunk(chunkX, chunkZ);
+                        chunk = new ESPChunk(chunkX, chunkZ);
                         if (chunk.shouldBeDeleted()) return;
 
                         chunks.put(key, chunk);
@@ -236,12 +236,12 @@ public class Search extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         synchronized (chunks) {
-            for (Iterator<SChunk> it = chunks.values().iterator(); it.hasNext();) {
-                SChunk chunk = it.next();
+            for (Iterator<ESPChunk> it = chunks.values().iterator(); it.hasNext();) {
+                ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
                     MeteorExecutor.execute(() -> {
-                        for (SBlock block : chunk.blocks.values()) {
+                        for (ESPBlock block : chunk.blocks.values()) {
                             block.group.remove(block, false);
                             block.loaded = false;
                         }
@@ -253,8 +253,8 @@ public class Search extends Module {
             }
 
             if (tracers.get()) {
-                for (Iterator<SGroup> it = groups.iterator(); it.hasNext();) {
-                    SGroup group = it.next();
+                for (Iterator<ESPGroup> it = groups.iterator(); it.hasNext();) {
+                    ESPGroup group = it.next();
 
                     if (group.blocks.isEmpty()) it.remove();
                     else group.render(event);

@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -36,6 +38,22 @@ public class Tracers extends Module {
         .build()
     );
 
+    public final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Doesn't draw tracers to friends.")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-invisible")
+        .description("Shows invisibile entities.")
+        .defaultValue(true)
+        .build()
+    );
+
+    // Appearance
+
     private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
         .name("target")
         .description("What part of the entity to target.")
@@ -59,19 +77,20 @@ public class Tracers extends Module {
         .build()
     );
 
-    public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
-        .name("show-invisible")
-        .description("Shows invisibile entities.")
-        .defaultValue(true)
-        .build()
-    );
-
     // Colors
 
     public final Setting<Boolean> distance = sgColors.add(new BoolSetting.Builder()
         .name("distance-colors")
         .description("Changes the color of tracers depending on distance.")
         .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> friendOverride = sgColors.add(new BoolSetting.Builder()
+        .name("show-friend-colors")
+        .description("Whether or not to override the distance color of friends with the friend color.")
+        .defaultValue(true)
+        .visible(() -> distance.get() && !ignoreFriends.get())
         .build()
     );
 
@@ -124,7 +143,6 @@ public class Tracers extends Module {
     );
 
     private int count;
-    private final Color distanceColor = new Color(255, 255, 255);
 
     public Tracers() {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
@@ -136,23 +154,26 @@ public class Tracers extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (mc.player.distanceTo(entity) > maxDist.get() || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
+            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
 
             Color color;
 
             if (distance.get()) {
-                color = getColorFromDistance(entity);
+                if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                    color = Config.get().friendColor.get();
+                }
+                else color = EntityUtils.getColorFromDistance(entity);
             }
             else if (entity instanceof PlayerEntity) {
                 color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
             }
             else {
                 color = switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE                                                  -> animalsColor.get();
+                    case CREATURE -> animalsColor.get();
                     case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                    case MONSTER                                                   -> monstersColor.get();
-                    case AMBIENT                                                   -> ambientColor.get();
-                    default                                                        -> miscColor.get();
+                    case MONSTER -> monstersColor.get();
+                    case AMBIENT -> ambientColor.get();
+                    default -> miscColor.get();
                 };
             }
 
@@ -169,31 +190,6 @@ public class Tracers extends Module {
 
             count++;
         }
-    }
-
-    private Color getColorFromDistance(Entity entity) {
-        // Credit to Icy from Stackoverflow
-        double distance = mc.gameRenderer.getCamera().getPos().distanceTo(entity.getPos());
-        double percent = distance / 60;
-
-        if (percent < 0 || percent > 1) {
-            distanceColor.set(0, 255, 0, 255);
-            return distanceColor;
-        }
-
-        int r, g;
-
-        if (percent < 0.5) {
-            r = 255;
-            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
-        }
-        else {
-            g = 255;
-            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
-        }
-
-        distanceColor.set(r, g, 0, 255);
-        return distanceColor;
     }
 
     @Override

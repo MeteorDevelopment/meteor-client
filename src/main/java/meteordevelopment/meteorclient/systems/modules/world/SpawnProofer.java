@@ -86,8 +86,8 @@ public class SpawnProofer extends Module {
         }
 
         // Find slot
-        FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
-        if (!block.found()) {
+        boolean foundBlock = InvUtils.testInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        if (!foundBlock) {
             error("Found none of the chosen blocks in hotbar");
             toggle();
             return;
@@ -160,7 +160,7 @@ public class SpawnProofer extends Module {
     }
 
     private boolean isNonOpaqueBlock(Block block) {
-        return block instanceof AbstractButtonBlock ||
+        return block instanceof ButtonBlock ||
             block instanceof SlabBlock ||
             block instanceof AbstractPressurePlateBlock ||
             block instanceof TransparentBlock ||

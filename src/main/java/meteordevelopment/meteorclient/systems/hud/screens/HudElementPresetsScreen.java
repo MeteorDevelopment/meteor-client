@@ -50,8 +50,7 @@ public class HudElementPresetsScreen extends WindowScreen {
 
         // Presets
         for (HudElementInfo<?>.Preset preset : info.presets) {
-            int words = Utils.search(preset.title, searchBar.get());
-            if (words == 0) continue;
+            if (!Utils.searchTextDefault(preset.title, searchBar.get(), false)) continue;
 
             WHorizontalList l = add(theme.horizontalList()).expandX().widget();
 

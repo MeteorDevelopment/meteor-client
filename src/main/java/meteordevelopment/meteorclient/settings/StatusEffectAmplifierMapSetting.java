@@ -10,8 +10,8 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.function.Consumer;
 
@@ -34,7 +34,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
             for (String value : values) {
                 String[] split = value.split(" ");
 
-                StatusEffect effect = parseId(Registry.STATUS_EFFECT, split[0]);
+                StatusEffect effect = parseId(Registries.STATUS_EFFECT, split[0]);
                 int level = Integer.parseInt(split[1]);
 
                 effects.put(effect, level);
@@ -53,7 +53,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
     public NbtCompound save(NbtCompound tag) {
         NbtCompound valueTag = new NbtCompound();
         for (StatusEffect statusEffect : get().keySet()) {
-            Identifier id = Registry.STATUS_EFFECT.getId(statusEffect);
+            Identifier id = Registries.STATUS_EFFECT.getId(statusEffect);
             if (id != null) valueTag.putInt(id.toString(), get().getInt(statusEffect));
         }
         tag.put("value", valueTag);
@@ -67,7 +67,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Object2IntMap<Statu
 
         NbtCompound valueTag = tag.getCompound("value");
         for (String key : valueTag.getKeys()) {
-            StatusEffect statusEffect = Registry.STATUS_EFFECT.get(new Identifier(key));
+            StatusEffect statusEffect = Registries.STATUS_EFFECT.get(new Identifier(key));
             if (statusEffect != null) get().put(statusEffect, valueTag.getInt(key));
         }
 

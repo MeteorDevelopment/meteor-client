@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.tag.FluidTags;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockRenderView;
@@ -40,7 +40,7 @@ public class SodiumFluidRendererMixin {
     private void onRender(BlockRenderView world, FluidState fluidState, BlockPos pos, BlockPos offset, ChunkModelBuilder buffers, CallbackInfoReturnable<Boolean> info) {
         int alpha = Xray.getAlpha(fluidState.getBlockState(), pos);
 
-        if (alpha == 0) info.cancel();
+        if (alpha == 0) info.setReturnValue(false);
         else alphas.set(alpha);
     }
 

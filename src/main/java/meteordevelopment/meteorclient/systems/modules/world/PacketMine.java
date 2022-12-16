@@ -32,7 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.tag.FluidTags;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -202,51 +202,6 @@ public class PacketMine extends Module {
         }
     }
 
-    private double getBreakDelta(int slot, BlockState state) {
-        float hardness = state.getHardness(null, null);
-        if (hardness == -1) return 0;
-        else {
-            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
-        }
-    }
-
-    private double getBlockBreakingSpeed(int slot, BlockState block) {
-        double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
-
-        if (speed > 1) {
-            ItemStack tool = mc.player.getInventory().getStack(slot);
-
-            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
-
-            if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
-        }
-
-        if (StatusEffectUtil.hasHaste(mc.player)) {
-            speed *= 1 + (StatusEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
-        }
-
-        if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
-            float k = switch (mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
-                case 0 -> 0.3F;
-                case 1 -> 0.09F;
-                case 2 -> 0.0027F;
-                default -> 8.1E-4F;
-            };
-
-            speed *= k;
-        }
-
-        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
-            speed /= 5.0F;
-        }
-
-        if (!mc.player.isOnGround()) {
-            speed /= 5.0F;
-        }
-
-        return speed;
-    }
-
     public class MyBlock {
         public BlockPos blockPos;
         public BlockState blockState;
@@ -301,7 +256,7 @@ public class PacketMine extends Module {
                 }
             }
 
-            progress += getBreakDelta(bestSlot != -1 ? bestSlot : mc.player.getInventory().selectedSlot, blockState);
+            progress += BlockUtils.getBreakDelta(bestSlot != -1 ? bestSlot : mc.player.getInventory().selectedSlot, blockState);
         }
 
         private void sendMinePackets() {

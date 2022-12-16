@@ -13,6 +13,9 @@ import meteordevelopment.meteorclient.mixin.SectionedEntityCacheAccessor;
 import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
 import meteordevelopment.meteorclient.mixin.WorldAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.block.AirBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -34,8 +37,8 @@ import net.minecraft.world.entity.EntityTrackingSection;
 import net.minecraft.world.entity.SectionedEntityCache;
 import net.minecraft.world.entity.SimpleEntityLookup;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
@@ -110,32 +113,85 @@ public class EntityUtils {
 
     public static List<BlockPos> getSurroundBlocks(PlayerEntity player) {
         if (player == null) return null;
+        BlockPos.Mutable testPos = new BlockPos.Mutable();
 
         List<BlockPos> positions = new ArrayList<>();
 
-        for (Direction direction : Direction.values()) {
-            if (direction == Direction.UP || direction == Direction.DOWN) continue;
+        for (Direction direction : Direction.HORIZONTAL) {
+            testPos.set(player.getBlockPos()).offset(direction);
 
-            BlockPos pos = player.getBlockPos().offset(direction);
-
-            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN) {
-                positions.add(pos);
+            if (mc.world.getBlockState(testPos).getBlock() == Blocks.OBSIDIAN) {
+                positions.add(testPos);
             }
         }
 
         return positions;
     }
 
+    @Nullable
     public static BlockPos getCityBlock(PlayerEntity player) {
-        List<BlockPos> posList = getSurroundBlocks(player);
-        posList.sort(Comparator.comparingDouble(PlayerUtils::distanceTo));
-        return posList.isEmpty() ? null : posList.get(0);
+        BlockPos bestPos = null;
+        int bestScore = 0;
+        BlockPos.Mutable testPos = new BlockPos.Mutable();
+
+        for (BlockPos pos : getSurroundBlocks(player)) {
+            int score = 1;
+
+            for (Direction direction : Direction.values()) {
+                testPos.set(pos).offset(direction);
+                Block block = mc.world.getBlockState(testPos).getBlock();
+
+                if (direction == Direction.DOWN && block == Blocks.OBSIDIAN || block == Blocks.BEDROCK) {
+                    score+= 2;
+                    continue;
+                }
+
+                if (direction != Direction.DOWN && block instanceof AirBlock) {
+                    score++;
+                }
+            }
+
+            score -= PlayerUtils.distanceTo(pos);
+
+            if (score >= bestScore) {
+                bestPos = pos;
+                bestScore = score;
+            }
+        }
+
+        return bestPos;
     }
 
     public static String getName(Entity entity) {
         if (entity == null) return null;
         if (entity instanceof PlayerEntity) return entity.getEntityName();
         return entity.getType().getName().getString();
+    }
+
+    public static Color getColorFromDistance(Entity entity) {
+        // Credit to Icy from Stackoverflow
+        Color distanceColor = new Color(255, 255, 255);
+        double distance = PlayerUtils.distanceToCamera(entity);
+        double percent = distance / 60;
+
+        if (percent < 0 || percent > 1) {
+            distanceColor.set(0, 255, 0, 255);
+            return distanceColor;
+        }
+
+        int r, g;
+
+        if (percent < 0.5) {
+            r = 255;
+            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
+        }
+        else {
+            g = 255;
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
+        }
+
+        distanceColor.set(r, g, 0, 255);
+        return distanceColor;
     }
 
     public static boolean intersectsWithEntity(Box box, Predicate<Entity> predicate) {

@@ -241,7 +241,7 @@ public class KillAura extends Module {
 
     private final List<Entity> targets = new ArrayList<>();
     private int hitDelayTimer, switchTimer;
-    private boolean wasPathing;
+    private boolean wasPathing = false;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -265,11 +265,6 @@ public class KillAura extends Module {
                 wasPathing = false;
             }
             return;
-        }
-
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
-            wasPathing = true;
         }
 
         Entity primary = targets.get(0);
@@ -305,6 +300,11 @@ public class KillAura extends Module {
 
         if (!itemInHand()) return;
 
+        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            wasPathing = true;
+        }
+
         if (delayCheck()) targets.forEach(this::attack);
 
         if (randomTeleport.get() && !onlyWhenLook.get()) {
@@ -327,10 +327,10 @@ public class KillAura extends Module {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
         if (noRightClick.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return false;
-        if (PlayerUtils.distanceTo(entity) > range.get()) return false;
+        if (!PlayerUtils.isWithin(entity, range.get())) return false;
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (!nametagged.get() && entity.hasCustomName()) return false;
-        if (!PlayerUtils.canSeeEntity(entity) && PlayerUtils.distanceTo(entity) > wallsRange.get()) return false;
+        if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
                 && tameable.getOwnerUuid() != null
@@ -400,7 +400,7 @@ public class KillAura extends Module {
 
     @Override
     public String getInfoString() {
-        if (!targets.isEmpty()) EntityUtils.getName(getTarget());
+        if (!targets.isEmpty()) return EntityUtils.getName(getTarget());
         return null;
     }
 

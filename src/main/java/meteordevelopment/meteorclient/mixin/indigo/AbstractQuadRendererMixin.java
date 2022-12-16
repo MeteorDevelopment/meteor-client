@@ -11,9 +11,9 @@ import net.fabricmc.fabric.impl.client.indigo.renderer.render.AbstractQuadRender
 import net.fabricmc.fabric.impl.client.indigo.renderer.render.BlockRenderInfo;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumer;
-import net.minecraft.util.math.Matrix3f;
-import net.minecraft.util.math.Matrix4f;
-import net.minecraft.util.math.Vec3f;
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,7 +28,7 @@ import java.util.function.Function;
 public abstract class AbstractQuadRendererMixin {
     @Final @Shadow protected BlockRenderInfo blockInfo;
     @Final @Shadow protected Function<RenderLayer, VertexConsumer> bufferFunc;
-    @Final @Shadow protected Vec3f normalVec;
+    @Final @Shadow protected Vector3f normalVec;
 
     @Shadow protected abstract Matrix3f normalMatrix();
     @Shadow protected abstract Matrix4f matrix();
@@ -48,15 +48,15 @@ public abstract class AbstractQuadRendererMixin {
     //https://github.com/FabricMC/fabric/blob/351679a7decdd3044d778e74001de67463bee205/fabric-renderer-indigo/src/main/java/net/fabricmc/fabric/impl/client/indigo/renderer/render/AbstractQuadRenderer.java#L86
     //Again, nasty problem with mixins and for loops, hopefully I can fix this at a later date - Wala
     @Unique
-    private void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vec3f normalVec, int alpha) {
+    private void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vector3f normalVec, int alpha) {
         final boolean useNormals = quad.hasVertexNormals();
 
         if (useNormals) {
             quad.populateMissingNormals();
         } else {
-            final Vec3f faceNormal = quad.faceNormal();
-            normalVec.set(faceNormal.getX(), faceNormal.getY(), faceNormal.getZ());
-            normalVec.transform(normalMatrix);
+            final Vector3f faceNormal = quad.faceNormal();
+            normalVec.set(faceNormal.x, faceNormal.y, faceNormal.z);
+            normalVec.mul(normalMatrix);
         }
 
         for (int i = 0; i < 4; i++) {
@@ -69,10 +69,10 @@ public abstract class AbstractQuadRendererMixin {
 
             if (useNormals) {
                 normalVec.set(quad.normalX(i), quad.normalY(i), quad.normalZ(i));
-                normalVec.transform(normalMatrix);
+                normalVec.mul(normalMatrix);
             }
 
-            buff.normal(normalVec.getX(), normalVec.getY(), normalVec.getZ());
+            buff.normal(normalVec.x, normalVec.y, normalVec.z);
             buff.next();
         }
     }

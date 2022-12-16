@@ -22,7 +22,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.render.Camera;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -197,7 +196,7 @@ public class PlayerUtils {
                 }
                 // Check for players holding swords
                 else if (entity instanceof PlayerEntity && damageTaken < DamageUtils.getSwordDamage((PlayerEntity) entity, true)) {
-                    if (!Friends.get().isFriend((PlayerEntity) entity) && mc.player.getPos().distanceTo(entity.getPos()) < 5) {
+                    if (!Friends.get().isFriend((PlayerEntity) entity) && isWithin(entity, 5)) {
                         if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
                             damageTaken = DamageUtils.getSwordDamage((PlayerEntity) entity, true);
                         }
@@ -245,19 +244,89 @@ public class PlayerUtils {
     }
 
     public static double distanceTo(double x, double y, double z) {
+        return Math.sqrt(squaredDistanceTo(x, y, z));
+    }
+
+    public static double squaredDistanceTo(Entity entity) {
+        return squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ());
+    }
+
+    public static double squaredDistanceTo(BlockPos blockPos) {
+        return squaredDistanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
+    public static double squaredDistanceTo(double x, double y, double z) {
         float f = (float) (mc.player.getX() - x);
         float g = (float) (mc.player.getY() - y);
         float h = (float) (mc.player.getZ() - z);
-        return MathHelper.sqrt(f * f + g * g + h * h);
+        return f * f + g * g + h * h;
+    }
+
+    public static boolean isWithin(Entity entity, double r) {
+        return squaredDistanceTo(entity.getX(), entity.getY(), entity.getZ()) <= r * r;
+    }
+
+    public static boolean isWithin(Vec3d vec3d, double r) {
+        return squaredDistanceTo(vec3d.getX(), vec3d.getY(), vec3d.getZ()) <= r * r;
+    }
+
+    public static boolean isWithin(BlockPos blockPos, double r) {
+        return squaredDistanceTo(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= r * r;
+    }
+
+    public static boolean isWithin(double x, double y, double z, double r) {
+        return squaredDistanceTo(x, y, z) <= r * r;
     }
 
     public static double distanceToCamera(double x, double y, double z) {
-        Camera camera = mc.gameRenderer.getCamera();
-        return Math.sqrt(camera.getPos().squaredDistanceTo(x, y, z));
+        return Math.sqrt(squaredDistanceToCamera(x, y, z));
     }
 
     public static double distanceToCamera(Entity entity) {
         return distanceToCamera(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ());
+    }
+
+    public static double squaredDistanceToCamera(double x, double y, double z) {
+        return mc.gameRenderer.getCamera().getPos().squaredDistanceTo(x, y, z);
+    }
+
+    public static double squaredDistanceToCamera(Entity entity) {
+        return squaredDistanceToCamera(entity.getX(), entity.getY() + entity.getEyeHeight(entity.getPose()), entity.getZ());
+    }
+
+    public static boolean isWithinCamera(Entity entity, double r) {
+        return squaredDistanceToCamera(entity.getX(), entity.getY(), entity.getZ()) <= r * r;
+    }
+
+    public static boolean isWithinCamera(Vec3d vec3d, double r) {
+        return squaredDistanceToCamera(vec3d.getX(), vec3d.getY(), vec3d.getZ()) <= r * r;
+    }
+
+    public static boolean isWithinCamera(BlockPos blockPos, double r) {
+        return squaredDistanceToCamera(blockPos.getX(), blockPos.getY(), blockPos.getZ()) <= r * r;
+    }
+
+    public static boolean isWithinCamera(double x, double y, double z, double r) {
+        return squaredDistanceToCamera(x, y, z) <= r * r;
+    }
+
+    public static boolean isWithinReach(Entity entity) {
+        return isWithinReach(entity.getX(), entity.getY(), entity.getZ());
+    }
+
+    public static boolean isWithinReach(Vec3d vec3d) {
+        return isWithinReach(vec3d.getX(), vec3d.getY(), vec3d.getZ());
+    }
+
+    public static boolean isWithinReach(BlockPos blockPos) {
+        return isWithinReach(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+    }
+
+    public static boolean isWithinReach(double x, double y, double z) {
+        float f = (float) (mc.player.getX() - x);
+        float g = (float) (mc.player.getEyeY() - y);
+        float h = (float) (mc.player.getZ() - z);
+        return (f * f + g * g + h * h) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
     }
 
     public static Dimension getDimension() {

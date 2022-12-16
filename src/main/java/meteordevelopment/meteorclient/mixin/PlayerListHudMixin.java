@@ -37,7 +37,7 @@ public class PlayerListHudMixin {
         if (betterTab.isActive()) info.setReturnValue(betterTab.getPlayerName(playerListEntry));
     }
 
-    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", ordinal = 1), index = 0)
+    @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
     private int modifyWidth(int width) {
         BetterTab module = Modules.get().get(BetterTab.class);
 

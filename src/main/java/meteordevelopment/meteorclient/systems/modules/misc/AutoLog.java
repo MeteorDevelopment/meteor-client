@@ -94,11 +94,12 @@ public class AutoLog extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.getHealth() <= 0) {
+        float playerHealth = mc.player.getHealth();
+        if (playerHealth <= 0) {
             this.toggle();
             return;
         }
-        if (mc.player.getHealth() <= health.get()) {
+        if (playerHealth <= health.get()) {
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] Health was lower than " + health.get() + ".")));
             if(smartToggle.get()) {
                 this.toggle();
@@ -106,7 +107,7 @@ public class AutoLog extends Module {
             }
         }
 
-        if(smart.get() && mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
+        if(smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
             mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] Health was going to be lower than " + health.get() + ".")));
             if (toggleOff.get()) this.toggle();
         }
@@ -118,14 +119,14 @@ public class AutoLog extends Module {
                         if (toggleOff.get()) this.toggle();
                         break;
                 }
-                if (mc.player.distanceTo(entity) < 8 && instantDeath.get() && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
-                        > mc.player.getHealth() + mc.player.getAbsorptionAmount()) {
+                if (PlayerUtils.isWithin(entity, 8) && instantDeath.get() && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
+                        > playerHealth + mc.player.getAbsorptionAmount()) {
                     mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] Anti-32k measures.")));
                     if (toggleOff.get()) this.toggle();
                     break;
                 }
             }
-            if (entity instanceof EndCrystalEntity && mc.player.distanceTo(entity) < range.get() && crystalLog.get()) {
+            if (entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get()) && crystalLog.get()) {
                 mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] End Crystal appeared within specified range.")));
                 if (toggleOff.get()) this.toggle();
             }
@@ -139,7 +140,7 @@ public class AutoLog extends Module {
 
             else if (Utils.canUpdate()
                     && !mc.player.isDead()
-                    && mc.player.getHealth() >= health.get()) {
+                    && mc.player.getHealth() > health.get()) {
                 toggle();
                 disableHealthListener();
            }

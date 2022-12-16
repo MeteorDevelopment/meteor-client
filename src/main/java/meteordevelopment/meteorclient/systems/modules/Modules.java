@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.systems.modules;
 
 import com.google.common.collect.Ordering;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -30,7 +29,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
-import meteordevelopment.meteorclient.systems.modules.render.search.Search;
+import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -44,13 +43,14 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
-import net.minecraft.tag.TagKey;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.SimpleRegistry;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.registry.entry.RegistryEntryList;
+import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.util.registry.RegistryEntry;
-import net.minecraft.util.registry.RegistryEntryList;
-import net.minecraft.util.registry.RegistryKey;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -168,26 +168,28 @@ public class Modules extends System<Modules> {
     }
 
     public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
 
         for (Module module : this.moduleInstances.values()) {
-            int words = Utils.search(module.title, text);
-            if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
+            int score = Utils.searchLevenshteinDefault(module.title, text, false);
+            modules.put(module, modules.getOrDefault(module, 0) + score);
         }
 
         return modules.keySet();
     }
 
     public Set<Module> searchSettingTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural().reverse());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
 
         for (Module module : this.moduleInstances.values()) {
+            int lowest = Integer.MAX_VALUE;
             for (SettingGroup sg : module.settings) {
                 for (Setting<?> setting : sg) {
-                    int words = Utils.search(setting.title, text);
-                    if (words > 0) modules.put(module, modules.getOrDefault(module, 0) + words);
+                    int score = Utils.searchLevenshteinDefault(setting.title, text, false);
+                    if (score < lowest) lowest = score;
                 }
             }
+            modules.put(module, modules.getOrDefault(module, 0) + lowest);
         }
 
         return modules.keySet();
@@ -499,7 +501,7 @@ public class Modules extends System<Modules> {
         add(new Marker());
         add(new Nametags());
         add(new NoRender());
-        add(new Search());
+        add(new BlockESP());
         add(new StorageESP());
         add(new TimeChanger());
         add(new Tracers());
@@ -534,6 +536,7 @@ public class Modules extends System<Modules> {
         add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
+        add(new NoGhostBlocks());
         add(new Nuker());
         add(new StashFinder());
         add(new SpawnProofer());
@@ -566,7 +569,7 @@ public class Modules extends System<Modules> {
         add(new InventoryTweaks());
     }
 
-    public static class ModuleRegistry extends Registry<Module> {
+    public static class ModuleRegistry extends SimpleRegistry<Module> {
         public ModuleRegistry() {
             super(RegistryKey.ofRegistry(new MeteorIdentifier("modules")), Lifecycle.stable());
         }
@@ -647,7 +650,7 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public Optional<RegistryEntry<Module>> getRandom(Random random) {
+        public Optional<RegistryEntry.Reference<Module>> getRandom(Random random) {
             return Optional.empty();
         }
 
@@ -657,27 +660,17 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public RegistryEntry<Module> getOrCreateEntry(RegistryKey<Module> key) {
-            return null;
-        }
-
-        @Override
-        public DataResult<RegistryEntry<Module>> getOrCreateEntryDataResult(RegistryKey<Module> key) {
-            return null;
-        }
-
-        @Override
         public RegistryEntry.Reference<Module> createEntry(Module value) {
             return null;
         }
 
         @Override
-        public Optional<RegistryEntry<Module>> getEntry(int rawId) {
+        public Optional<RegistryEntry.Reference<Module>> getEntry(int rawId) {
             return Optional.empty();
         }
 
         @Override
-        public Optional<RegistryEntry<Module>> getEntry(RegistryKey<Module> key) {
+        public Optional<RegistryEntry.Reference<Module>> getEntry(RegistryKey<Module> key) {
             return Optional.empty();
         }
 
@@ -707,19 +700,10 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public boolean containsTag(TagKey<Module> tag) {
-            return false;
-        }
+        public void clearTags() {}
 
         @Override
-        public void clearTags() {
-
-        }
-
-        @Override
-        public void populateTags(Map<TagKey<Module>, List<RegistryEntry<Module>>> tagEntries) {
-
-        }
+        public void populateTags(Map<TagKey<Module>, List<RegistryEntry<Module>>> tagEntries) {}
 
         private static class ModuleIterator implements Iterator<Module> {
             private final Iterator<Module> iterator = Modules.get().getAll().iterator();

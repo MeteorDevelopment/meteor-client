@@ -17,9 +17,9 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -42,6 +42,13 @@ public class SelfTrap extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
+
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+            .name("whitelist")
+            .description("Which blocks to use.")
+            .defaultValue(Blocks.OBSIDIAN, Blocks.NETHERITE_BLOCK)
+            .build()
+    );
 
     private final Setting<TopMode> topPlacement = sgGeneral.add(new EnumSetting.Builder<TopMode>()
             .name("top-mode")
@@ -89,7 +96,7 @@ public class SelfTrap extends Module {
 
     private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
             .name("render")
-            .description("Renders a block overlay where the obsidian will be placed.")
+            .description("Renders a block overlay where the blocks will be placed.")
             .defaultValue(true)
             .build()
     );
@@ -120,7 +127,7 @@ public class SelfTrap extends Module {
     private int delay;
 
     public SelfTrap(){
-        super(Categories.Combat, "self-trap", "Places obsidian above your head.");
+        super(Categories.Combat, "self-trap", "Places blocks above your head.");
     }
 
     @Override
@@ -134,31 +141,34 @@ public class SelfTrap extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        FindItemResult obsidian = InvUtils.findInHotbar(Items.OBSIDIAN);
+        for (Block currentBlock : blocks.get()) {
+            FindItemResult itemResult = InvUtils.findInHotbar(currentBlock.asItem());
 
-        if (turnOff.get() && ((placed && placePositions.isEmpty()) || !obsidian.found())) {
-            toggle();
-            return;
-        }
-
-        if (!obsidian.found()) {
-            placePositions.clear();
-            return;
-        }
-
-        findPlacePos();
-
-        if (delay >= delaySetting.get() && placePositions.size() > 0) {
-            BlockPos blockPos = placePositions.get(placePositions.size() - 1);
-
-            if (BlockUtils.place(blockPos, obsidian, rotate.get(), 50)) {
-                placePositions.remove(blockPos);
-                placed = true;
+            if (turnOff.get() && ((placed && placePositions.isEmpty()) || !itemResult.found())) {
+                toggle();
+                continue;
             }
 
-            delay = 0;
+            if (!itemResult.found()) {
+                placePositions.clear();
+                continue;
+            }
+
+            findPlacePos(currentBlock);
+
+            if (delay >= delaySetting.get() && placePositions.size() > 0) {
+                BlockPos blockPos = placePositions.get(placePositions.size() - 1);
+
+                if (BlockUtils.place(blockPos, itemResult, rotate.get(), 50)) {
+                    placePositions.remove(blockPos);
+                    placed = true;
+                }
+
+                delay = 0;
+            }
+            else delay++;
+            return;
         }
-        else delay++;
     }
 
     @EventHandler
@@ -167,34 +177,34 @@ public class SelfTrap extends Module {
         for (BlockPos pos : placePositions) event.renderer.box(pos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 
-    private void findPlacePos() {
+    private void findPlacePos(Block block) {
         placePositions.clear();
         BlockPos pos = mc.player.getBlockPos();
 
         switch (topPlacement.get()) {
             case Full:
-                add(pos.add(0, 2, 0));
-                add(pos.add(1, 1, 0));
-                add(pos.add(-1, 1, 0));
-                add(pos.add(0, 1, 1));
-                add(pos.add(0, 1, -1));
+                add(pos.add(0, 2, 0), block);
+                add(pos.add(1, 1, 0), block);
+                add(pos.add(-1, 1, 0), block);
+                add(pos.add(0, 1, 1), block);
+                add(pos.add(0, 1, -1), block);
                 break;
             case Top:
-                add(pos.add(0, 2, 0));
+                add(pos.add(0, 2, 0), block);
                 break;
             case AntiFacePlace:
-                add(pos.add(1, 1, 0));
-                add(pos.add(-1, 1, 0));
-                add(pos.add(0, 1, 1));
-                add(pos.add(0, 1, -1));
+                add(pos.add(1, 1, 0), block);
+                add(pos.add(-1, 1, 0), block);
+                add(pos.add(0, 1, 1), block);
+                add(pos.add(0, 1, -1), block);
 
         }
 
-        if (bottomPlacement.get() == BottomMode.Single) add(pos.add(0, -1, 0));
+        if (bottomPlacement.get() == BottomMode.Single) add(pos.add(0, -1, 0), block);
     }
 
 
-    private void add(BlockPos blockPos) {
-        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
+    private void add(BlockPos blockPos, Block block) {
+        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
     }
 }

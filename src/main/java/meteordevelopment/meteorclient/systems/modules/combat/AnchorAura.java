@@ -249,9 +249,10 @@ public class AnchorAura extends Module {
         if (PlayerUtils.shouldPause(pauseOnMine.get(), pauseOnEat.get(), pauseOnDrink.get())) return;
         if (EntityUtils.getTotalHealth(mc.player) <= minHealth.get()) return;
 
-        if (TargetUtils.isBadTarget(target, targetRange.get()))
+        if (TargetUtils.isBadTarget(target, targetRange.get())) {
             target = TargetUtils.getPlayerTarget(targetRange.get(), targetPriority.get());
-        if (TargetUtils.isBadTarget(target, targetRange.get())) return;
+            if (TargetUtils.isBadTarget(target, targetRange.get())) return;
+        }
 
         FindItemResult anchor = InvUtils.findInHotbar(Items.RESPAWN_ANCHOR);
         FindItemResult glowStone = InvUtils.findInHotbar(Items.GLOWSTONE);

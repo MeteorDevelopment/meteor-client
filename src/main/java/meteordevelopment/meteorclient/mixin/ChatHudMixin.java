@@ -77,7 +77,7 @@ public abstract class ChatHudMixin implements IChatHud {
     private void onAddMessage(Text message, @Nullable MessageSignatureData signature, int ticks, @Nullable MessageIndicator indicator, boolean refresh, CallbackInfo info) {
         if (skipOnAddMessage) return;
 
-        ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, nextId));
+        ReceiveMessageEvent event = MeteorClient.EVENT_BUS.post(ReceiveMessageEvent.get(message, indicator, nextId));
 
         if (event.isCancelled()) info.cancel();
         else {
@@ -88,7 +88,7 @@ public abstract class ChatHudMixin implements IChatHud {
                 info.cancel();
 
                 skipOnAddMessage = true;
-                addMessage(event.getMessage(), signature, ticks, indicator, refresh);
+                addMessage(event.getMessage(), signature, ticks, event.getIndicator(), refresh);
                 skipOnAddMessage = false;
             }
         }
@@ -102,7 +102,7 @@ public abstract class ChatHudMixin implements IChatHud {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(MatrixStack matrices, int tickDelta, CallbackInfo ci) {
+    private void onRender(MatrixStack matrices, int currentTick, int mouseX, int mouseY, CallbackInfo info) {
         if (!Modules.get().get(BetterChat.class).displayPlayerHeads()) return;
         if (mc.options.getChatVisibility().getValue() == ChatVisibility.HIDDEN) return;
         int maxLineCount = mc.inGameHud.getChatHud().getVisibleLineCount();
@@ -117,7 +117,7 @@ public abstract class ChatHudMixin implements IChatHud {
         for(int m = 0; m + this.scrolledLines < this.visibleMessages.size() && m < maxLineCount; ++m) {
             ChatHudLine.Visible chatHudLine = this.visibleMessages.get(m + this.scrolledLines);
             if (chatHudLine != null) {
-                int x = tickDelta - chatHudLine.addedTime();
+                int x = currentTick - chatHudLine.addedTime();
                 if (x < 200 || isChatFocused()) {
                     double o = isChatFocused() ? 1.0D : getMessageOpacityMultiplier(x);
                     if (o * d > 0.01D) {

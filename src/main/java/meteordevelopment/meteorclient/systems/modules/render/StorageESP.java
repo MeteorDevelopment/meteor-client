@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.MeshVertexConsumerProvider;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.SimpleBlockRenderer;
@@ -75,6 +76,17 @@ public class StorageESP extends Module {
         .defaultValue(1)
         .range(1, 10)
         .sliderRange(1, 5)
+        .build()
+    );
+
+    public final Setting<Double> glowMultiplier = sgGeneral.add(new DoubleSetting.Builder()
+        .name("glow-multiplier")
+        .description("Multiplier for glow effect")
+        .visible(() -> mode.get() == Mode.Shader)
+        .decimalPlaces(3)
+        .defaultValue(3.5)
+        .min(0)
+        .sliderMax(10)
         .build()
     );
 
@@ -175,7 +187,7 @@ public class StorageESP extends Module {
             getBlockEntityColor(blockEntity);
 
             if (render) {
-                double dist = mc.player.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
+                double dist = PlayerUtils.squaredDistanceTo(blockEntity.getPos().getX() + 0.5, blockEntity.getPos().getY() + 0.5, blockEntity.getPos().getZ() + 0.5);
                 double a = 1;
                 if (dist <= fadeDistance.get() * fadeDistance.get()) a = dist / (fadeDistance.get() * fadeDistance.get());
 
@@ -242,6 +254,10 @@ public class StorageESP extends Module {
     @Override
     public String getInfoString() {
         return Integer.toString(count);
+    }
+
+    public boolean isShader() {
+        return isActive() && mode.get() == Mode.Shader;
     }
 
     public enum Mode {

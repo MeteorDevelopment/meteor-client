@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render.search;
+package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -16,20 +16,20 @@ import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.Set;
 
-public class SGroup {
-    private static final Search search = Modules.get().get(Search.class);
+public class ESPGroup {
+    private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
 
     private final Block block;
 
-    public final UnorderedArrayList<SBlock> blocks = new UnorderedArrayList<>();
+    public final UnorderedArrayList<ESPBlock> blocks = new UnorderedArrayList<>();
 
     private double sumX, sumY, sumZ;
 
-    public SGroup(Block block) {
+    public ESPGroup(Block block) {
         this.block = block;
     }
 
-    public void add(SBlock block, boolean removeFromOld, boolean splitGroup) {
+    public void add(ESPBlock block, boolean removeFromOld, boolean splitGroup) {
         blocks.add(block);
         sumX += block.x;
         sumY += block.y;
@@ -39,39 +39,39 @@ public class SGroup {
         block.group = this;
     }
 
-    public void add(SBlock block) {
+    public void add(ESPBlock block) {
         add(block, true, true);
     }
 
-    public void remove(SBlock block, boolean splitGroup) {
+    public void remove(ESPBlock block, boolean splitGroup) {
         blocks.remove(block);
         sumX -= block.x;
         sumY -= block.y;
         sumZ -= block.z;
 
-        if (blocks.isEmpty()) search.removeGroup(block.group);
+        if (blocks.isEmpty()) blockEsp.removeGroup(block.group);
         else if (splitGroup) {
             trySplit(block);
         }
     }
 
-    public void remove(SBlock block) {
+    public void remove(ESPBlock block) {
         remove(block, true);
     }
 
-    private void trySplit(SBlock block) {
-        Set<SBlock> neighbours = new ObjectOpenHashSet<>(6);
+    private void trySplit(ESPBlock block) {
+        Set<ESPBlock> neighbours = new ObjectOpenHashSet<>(6);
 
-        for (int side : SBlock.SIDES) {
+        for (int side : ESPBlock.SIDES) {
             if ((block.neighbours & side) == side) {
-                SBlock neighbour = block.getSideBlock(side);
+                ESPBlock neighbour = block.getSideBlock(side);
                 if (neighbour != null) neighbours.add(neighbour);
             }
         }
         if (neighbours.size() <= 1) return;
 
-        Set<SBlock> remainingBlocks = new ObjectOpenHashSet<>(blocks);
-        Queue<SBlock> blocksToCheck = new ArrayDeque<>();
+        Set<ESPBlock> remainingBlocks = new ObjectOpenHashSet<>(blocks);
+        Queue<ESPBlock> blocksToCheck = new ArrayDeque<>();
 
         blocksToCheck.offer(blocks.get(0));
         remainingBlocks.remove(blocks.get(0));
@@ -79,11 +79,11 @@ public class SGroup {
 
         loop: {
             while (!blocksToCheck.isEmpty()) {
-                SBlock b = blocksToCheck.poll();
+                ESPBlock b = blocksToCheck.poll();
 
-                for (int side : SBlock.SIDES) {
+                for (int side : ESPBlock.SIDES) {
                     if ((b.neighbours & side) != side) continue;
-                    SBlock neighbour = b.getSideBlock(side);
+                    ESPBlock neighbour = b.getSideBlock(side);
 
                     if (neighbour != null && remainingBlocks.contains(neighbour)) {
                         blocksToCheck.offer(neighbour);
@@ -97,12 +97,12 @@ public class SGroup {
         }
 
         if (neighbours.size() > 0) {
-            SGroup group = search.newGroup(this.block);
+            ESPGroup group = blockEsp.newGroup(this.block);
             group.blocks.ensureCapacity(remainingBlocks.size());
 
             blocks.removeIf(remainingBlocks::contains);
 
-            for (SBlock b : remainingBlocks) {
+            for (ESPBlock b : remainingBlocks) {
                 group.add(b, false, false);
 
                 sumX -= b.x;
@@ -113,18 +113,18 @@ public class SGroup {
             if (neighbours.size() > 1) {
                 block.neighbours = 0;
 
-                for (SBlock b : neighbours) {
+                for (ESPBlock b : neighbours) {
                     int x = b.x - block.x;
-                    if (x == 1) block.neighbours |= SBlock.RI;
-                    else if (x == -1) block.neighbours |= SBlock.LE;
+                    if (x == 1) block.neighbours |= ESPBlock.RI;
+                    else if (x == -1) block.neighbours |= ESPBlock.LE;
 
                     int y = b.y - block.y;
-                    if (y == 1) block.neighbours |= SBlock.TO;
-                    else if (y == -1) block.neighbours |= SBlock.BO;
+                    if (y == 1) block.neighbours |= ESPBlock.TO;
+                    else if (y == -1) block.neighbours |= ESPBlock.BO;
 
                     int z = b.z - block.z;
-                    if (z == 1) block.neighbours |= SBlock.FO;
-                    else if (z == -1) block.neighbours |= SBlock.BA;
+                    if (z == 1) block.neighbours |= ESPBlock.FO;
+                    else if (z == -1) block.neighbours |= ESPBlock.BA;
                 }
 
                 group.trySplit(block);
@@ -132,14 +132,14 @@ public class SGroup {
         }
     }
 
-    public void merge(SGroup group) {
+    public void merge(ESPGroup group) {
         blocks.ensureCapacity(blocks.size() + group.blocks.size());
-        for (SBlock block : group.blocks) add(block, false, false);
-        search.removeGroup(group);
+        for (ESPBlock block : group.blocks) add(block, false, false);
+        blockEsp.removeGroup(group);
     }
 
     public void render(Render3DEvent event) {
-        SBlockData blockData = search.getBlockData(block);
+        ESPBlockData blockData = blockEsp.getBlockData(block);
 
         if (blockData.tracer) {
             event.renderer.line(RenderUtils.center.x, RenderUtils.center.y, RenderUtils.center.z, sumX / blocks.size() + 0.5, sumY / blocks.size() + 0.5, sumZ / blocks.size() + 0.5, blockData.tracerColor);

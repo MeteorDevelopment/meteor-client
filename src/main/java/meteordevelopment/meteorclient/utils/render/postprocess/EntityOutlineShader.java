@@ -28,5 +28,6 @@ public class EntityOutlineShader extends EntityShader {
         shader.set("u_Width", esp.outlineWidth.get());
         shader.set("u_FillOpacity", esp.fillOpacity.get());
         shader.set("u_ShapeMode", esp.shapeMode.get().ordinal());
+        shader.set("u_GlowMultiplier", esp.glowMultiplier.get());
     }
 }

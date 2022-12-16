@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -22,6 +23,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPose;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MovementType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -121,6 +123,11 @@ public abstract class EntityMixin {
         if (Modules.get().get(NoRender.class).noInvisibility() || !Modules.get().get(ESP.class).shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
     }
 
+    @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
+    private void isGlowing(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().get(NoRender.class).noGlowing()) info.setReturnValue(false);
+    }
+
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
     private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
         double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
@@ -130,5 +137,12 @@ public abstract class EntityMixin {
     @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
     private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (player == null) info.setReturnValue(false);
+    }
+
+    @Inject(method = "getPose", at = @At("HEAD"), cancellable = true)
+    private void getPoseHook(CallbackInfoReturnable<EntityPose> info) {
+        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
+            info.setReturnValue(EntityPose.FALL_FLYING);
+        }
     }
 }

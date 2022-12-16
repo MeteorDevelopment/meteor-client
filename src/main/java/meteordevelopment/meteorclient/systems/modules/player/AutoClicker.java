@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.misc;
+package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.EnumSetting;
@@ -48,7 +48,7 @@ public class AutoClicker extends Module {
         .defaultValue(2)
         .min(0)
         .sliderMax(60)
-        .visible(() -> leftClickMode.get() != Mode.Disabled)
+        .visible(() -> rightClickMode.get() != Mode.Disabled)
         .build()
     );
 

@@ -18,7 +18,11 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.P
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Pitch40;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Items;
@@ -80,6 +84,30 @@ public class ElytraFly extends Module {
         .build()
     );
 
+    public final Setting<Boolean> acceleration = sgGeneral.add(new BoolSetting.Builder()
+        .name("acceleration")
+        .defaultValue(false)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .build()
+    );
+
+    public final Setting<Double> accelerationStep = sgGeneral.add(new DoubleSetting.Builder()
+        .name("acceleration-step")
+        .min(0.1)
+        .max(5)
+        .defaultValue(1)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get())
+        .build()
+    );
+
+    public final Setting<Double> accelerationMin = sgGeneral.add(new DoubleSetting.Builder()
+        .name("acceleration-start")
+        .min(0.1)
+        .defaultValue(0)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get())
+        .build()
+    );
+
     public final Setting<Boolean> stopInWater = sgGeneral.add(new BoolSetting.Builder()
         .name("stop-in-water")
         .description("Stops flying in water.")
@@ -91,6 +119,13 @@ public class ElytraFly extends Module {
         .name("no-unloaded-chunks")
         .description("Stops you from going into unloaded chunks.")
         .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> autoHover = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-hover")
+        .description("Automatically hover .3 blocks off ground when holding shift.")
+        .defaultValue(false)
         .build()
     );
 
@@ -283,6 +318,7 @@ public class ElytraFly extends Module {
             currentMode.handleFallMultiplier();
             currentMode.handleAutopilot();
 
+            currentMode.handleAcceleration();
             currentMode.handleHorizontalSpeed(event);
             currentMode.handleVerticalSpeed(event);
 
@@ -312,6 +348,38 @@ public class ElytraFly extends Module {
                 ((IVec3d) event.movement).set(0, currentMode.velY, 0);
             }
         }
+
+        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying()) {
+            BlockState underState = mc.world.getBlockState(mc.player.getBlockPos().down());
+            Block under = underState.getBlock();
+            BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
+            Block under2 = under2State.getBlock();
+
+            final boolean underCollidable = under.collidable || !underState.getFluidState().isEmpty();
+            final boolean under2Collidable = under2.collidable || !under2State.getFluidState().isEmpty();
+
+            if (!underCollidable && under2Collidable) {
+                ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
+
+                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
+            }
+
+            if (underCollidable) {
+                ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
+
+                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -50.f, 20.f));
+
+                if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
+                    ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
+                    mc.player.setSneaking(false);
+                    mc.player.input.sneaking = false;
+                }
+            }
+        }
+    }
+
+    public boolean canPacketEfly() {
+        return isActive() && flightMode.get() == ElytraFlightModes.Packet && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() instanceof ElytraItem && !mc.player.isOnGround();
     }
 
     @EventHandler

@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @Mixin(SimpleOption.class)
@@ -76,7 +77,7 @@ public class SimpleOptionMixin<T> {
     private SimpleOption.Callbacks<T> createCallback() {
         return new SimpleOption.Callbacks<>() {
             @Override
-            public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width) {
+            public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width, Consumer<T> changeCallback) {
                 return null;
             }
 
@@ -90,5 +91,25 @@ public class SimpleOptionMixin<T> {
                 return null;
             }
         };
+    }
+    @Shadow
+    T value;
+// Credit to https://github.com/seasnale/custom-fov
+    @Shadow @Final
+    private Consumer<T> changeCallback;
+
+    @Inject(
+        method = "setValue",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption$Callbacks;validate(Ljava/lang/Object;)Ljava/util/Optional;", shift = At.Shift.BEFORE),
+        cancellable = true
+    )
+    private void earlyReturn(T value, CallbackInfo ci) {
+        this.value = value;
+
+        if (MinecraftClient.getInstance().isRunning()) {
+            changeCallback.accept(value);
+        }
+
+        ci.cancel();
     }
 }

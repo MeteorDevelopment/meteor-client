@@ -22,7 +22,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.GUIMove;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -36,6 +36,7 @@ import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Vector3d;
 import org.lwjgl.glfw.GLFW;
 
 public class Freecam extends Module {
@@ -108,8 +109,8 @@ public class Freecam extends Module {
         .build()
     );
 
-    public final Vec3 pos = new Vec3();
-    public final Vec3 prevPos = new Vec3();
+    public final Vector3d pos = new Vector3d();
+    public final Vector3d prevPos = new Vector3d();
 
     private Perspective perspective;
     private double speedValue;
@@ -140,8 +141,8 @@ public class Freecam extends Module {
         perspective = mc.options.getPerspective();
         speedValue = speed.get();
 
-        pos.set(mc.gameRenderer.getCamera().getPos());
-        prevPos.set(mc.gameRenderer.getCamera().getPos());
+        Utils.set(pos, mc.gameRenderer.getCamera().getPos());
+        Utils.set(prevPos, mc.gameRenderer.getCamera().getPos());
 
         prevYaw = yaw;
         prevPitch = pitch;

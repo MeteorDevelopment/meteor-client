@@ -30,14 +30,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(EntityRenderer.class)
 public abstract class EntityRendererMixin<T extends Entity> implements IEntityRenderer {
-    @Shadow public abstract Identifier getTexture(Entity entity);
+    @Shadow
+    public abstract Identifier getTexture(Entity entity);
 
     @Inject(method = "renderLabelIfPresent", at = @At("HEAD"), cancellable = true)
     private void onRenderLabel(T entity, Text text, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, CallbackInfo info) {
         if (PostProcessShaders.rendering) info.cancel();
         if (Modules.get().get(NoRender.class).noNametags()) info.cancel();
         if (!(entity instanceof PlayerEntity)) return;
-        if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode((PlayerEntity) entity) == null && Modules.get().get(Nametags.class).excludeBots())) info.cancel();
+        if (Modules.get().get(Nametags.class).playerNametags() && !(EntityUtils.getGameMode((PlayerEntity) entity) == null && Modules.get().get(Nametags.class).excludeBots()))
+            info.cancel();
     }
 
     @Inject(method = "shouldRender", at = @At("HEAD"), cancellable = true)

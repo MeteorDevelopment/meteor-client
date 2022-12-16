@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.common.reflect.TypeToken;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -16,7 +15,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
@@ -27,17 +26,15 @@ import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import org.joml.Vector3d;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class EntityOwner extends Module {
     private static final Color BACKGROUND = new Color(0, 0, 0, 75);
     private static final Color TEXT = new Color(255, 255, 255);
-    private static final Type RESPONSE_TYPE = new TypeToken<List<UuidNameHistoryResponseItem>>() {}.getType();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -56,7 +53,7 @@ public class EntityOwner extends Module {
             .build()
     );
 
-    private final Vec3 pos = new Vec3();
+    private final Vector3d pos = new Vector3d();
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
@@ -79,7 +76,7 @@ public class EntityOwner extends Module {
             else continue;
 
             if (ownerUuid != null) {
-                pos.set(entity, event.tickDelta);
+                Utils.set(pos, entity, event.tickDelta);
                 pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
 
                 if (NametagUtils.to2D(pos, scale.get())) {
@@ -122,11 +119,11 @@ public class EntityOwner extends Module {
         // Makes a HTTP request to Mojang API
         MeteorExecutor.execute(() -> {
             if (isActive()) {
-                List<UuidNameHistoryResponseItem> res = Http.get("https://api.mojang.com/user/profiles/" + uuid.toString().replace("-", "") + "/names").sendJson(RESPONSE_TYPE);
+                ProfileResponse res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "")).sendJson(ProfileResponse.class);
 
                 if (isActive()) {
-                    if (res == null || res.size() <= 0) uuidToName.put(uuid, "Failed to get name");
-                    else uuidToName.put(uuid, res.get(res.size() - 1).name);
+                    if (res == null) uuidToName.put(uuid, "Failed to get name");
+                    else uuidToName.put(uuid, res.name);
                 }
             }
         });
@@ -136,7 +133,7 @@ public class EntityOwner extends Module {
         return name;
     }
 
-    public static class UuidNameHistoryResponseItem {
+    private static class ProfileResponse {
         public String name;
     }
 }

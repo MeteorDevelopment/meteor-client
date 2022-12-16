@@ -298,10 +298,11 @@ public class BetterChat extends Module {
             ((ChatHudAccessor) mc.inGameHud.getChatHud()).getMessages().remove(messageIndex);
 
             List<OrderedText> list = ChatMessages.breakRenderedChatMessageLines(originalMessage, MathHelper.floor((double)mc.inGameHud.getChatHud().getWidth() / mc.inGameHud.getChatHud().getChatScale()), mc.textRenderer);
-            int lines = list.size();
+            List<ChatHudLine.Visible> visibleMessages = ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages();
+            int lines = Math.min(list.size(), visibleMessages.size());
 
             for (int i = 0; i < lines; i++) {
-                ((ChatHudAccessor) mc.inGameHud.getChatHud()).getVisibleMessages().remove(messageIndex);
+                visibleMessages.remove(messageIndex);
             }
         }
 

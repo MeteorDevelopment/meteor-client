@@ -10,8 +10,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -35,7 +35,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
 
         try {
             for (String value : values) {
-                Enchantment ench = parseId(Registry.ENCHANTMENT, value);
+                Enchantment ench = parseId(Registries.ENCHANTMENT, value);
                 if (ench != null) enchs.add(ench);
             }
         } catch (Exception ignored) {}
@@ -50,14 +50,14 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.ENCHANTMENT.getIds();
+        return Registries.ENCHANTMENT.getIds();
     }
 
     @Override
     public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Enchantment ench : get()) {
-            Identifier id = Registry.ENCHANTMENT.getId(ench);
+            Identifier id = Registries.ENCHANTMENT.getId(ench);
             if (id != null) valueTag.add(NbtString.of(id.toString()));
         }
         tag.put("value", valueTag);
@@ -71,7 +71,7 @@ public class EnchantmentListSetting extends Setting<List<Enchantment>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            Enchantment enchantment = Registry.ENCHANTMENT.get(new Identifier(tagI.asString()));
+            Enchantment enchantment = Registries.ENCHANTMENT.get(new Identifier(tagI.asString()));
             if (enchantment != null) get().add(enchantment);
         }
 

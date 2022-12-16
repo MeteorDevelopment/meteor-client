@@ -10,7 +10,6 @@ import meteordevelopment.meteorclient.mixin.ProjectileInGroundAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MissHitResult;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.*;
 import net.minecraft.entity.projectile.thrown.*;
@@ -18,8 +17,13 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.*;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
+import org.joml.Quaterniond;
+import org.joml.Vector3d;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -29,8 +33,8 @@ public class ProjectileEntitySimulator {
     private static final Vec3d pos3d = new Vec3d(0, 0, 0);
     private static final Vec3d prevPos3d = new Vec3d(0, 0, 0);
 
-    public final Vec3 pos = new Vec3();
-    private final Vec3 velocity = new Vec3();
+    public final Vector3d pos = new Vector3d();
+    private final Vector3d velocity = new Vector3d();
 
     private double gravity;
     private double airDrag, waterDrag;
@@ -46,8 +50,10 @@ public class ProjectileEntitySimulator {
         }
         else if (item instanceof CrossbowItem) {
             if (!CrossbowItem.isCharged(itemStack)) return false;
-
-            set(user, 0, CrossbowItemAccessor.getSpeed(itemStack), simulated, 0.05000000074505806, 0.6, accurate, tickDelta);
+            if (CrossbowItem.hasProjectile(itemStack, Items.FIREWORK_ROCKET)) {
+                set(user, 0, CrossbowItemAccessor.getSpeed(itemStack), simulated, 0, 0.6, accurate, tickDelta);
+            }
+            else set(user, 0, CrossbowItemAccessor.getSpeed(itemStack), simulated, 0.05000000074505806, 0.6, accurate, tickDelta);
         }
         else if (item instanceof FishingRodItem) {
             setFishingBobber(user, tickDelta);
@@ -72,7 +78,7 @@ public class ProjectileEntitySimulator {
     }
 
     public void set(Entity user, double roll, double speed, double simulated, double gravity, double waterDrag, boolean accurate, double tickDelta) {
-        pos.set(user, tickDelta).add(0, user.getEyeHeight(user.getPose()), 0);
+        Utils.set(pos, user, tickDelta).add(0, user.getEyeHeight(user.getPose()), 0);
 
         double yaw = MathHelper.lerp(tickDelta, user.prevYaw, user.getYaw());
         double pitch = MathHelper.lerp(tickDelta, user.prevPitch, user.getPitch());
@@ -86,17 +92,17 @@ public class ProjectileEntitySimulator {
         }
         else {
             Vec3d vec3d = user.getOppositeRotationVector(1.0F);
-            Quaternion quaternion = new Quaternion(new Vec3f(vec3d), (float) simulated, true);
+            Quaterniond quaternion = new Quaterniond().setAngleAxis(simulated, vec3d.x, vec3d.y, vec3d.z);
             Vec3d vec3d2 = user.getRotationVec(1.0F);
-            Vec3f vector3f = new Vec3f(vec3d2);
+            Vector3d vector3f = new Vector3d(vec3d2.x, vec3d2.y, vec3d2.z);
             vector3f.rotate(quaternion);
 
-            x = vector3f.getX();
-            y = vector3f.getY();
-            z = vector3f.getZ();
+            x = vector3f.x;
+            y = vector3f.y;
+            z = vector3f.z;
         }
 
-        velocity.set(x, y, z).normalize().multiply(speed);
+        velocity.set(x, y, z).normalize().mul(speed);
 
         if (accurate) {
             Vec3d vel = user.getVelocity();
@@ -134,9 +140,9 @@ public class ProjectileEntitySimulator {
     }
 
     public void set(Entity entity, double speed, double gravity, double waterDrag, boolean accurate, double tickDelta) {
-        pos.set(entity, tickDelta);
+        Utils.set(pos, entity, tickDelta);
 
-        velocity.set(entity.getVelocity()).normalize().multiply(speed);
+        velocity.set(entity.getVelocity().x, entity.getVelocity().y, entity.getVelocity().z).normalize().mul(speed);
 
         if (accurate) {
             Vec3d vel = entity.getVelocity();
@@ -157,12 +163,12 @@ public class ProjectileEntitySimulator {
         double j = -Math.cos(-pitch * 0.017453292F);
         double k = Math.sin(-pitch * 0.017453292F);
 
-        pos.set(user, tickDelta).subtract(i * 0.3, 0, h * 0.3).add(0, user.getEyeHeight(user.getPose()), 0);
+        Utils.set(pos, user, tickDelta).sub(i * 0.3, 0, h * 0.3).add(0, user.getEyeHeight(user.getPose()), 0);
 
         velocity.set(-i, Utils.clamp(-(k / j), -5, 5), -h);
 
         double l = velocity.length();
-        velocity.multiply(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
+        velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
 
         gravity = 0.03;
         airDrag = 0.92;
@@ -175,8 +181,8 @@ public class ProjectileEntitySimulator {
         pos.add(velocity);
 
         // Update velocity
-        velocity.multiply(isTouchingWater() ? waterDrag : airDrag);
-        velocity.subtract(0, gravity, 0);
+        velocity.mul(isTouchingWater() ? waterDrag : airDrag);
+        velocity.sub(0, gravity, 0);
 
         // Check if below world
         if (pos.y < mc.world.getBottomY()) return MissHitResult.INSTANCE;

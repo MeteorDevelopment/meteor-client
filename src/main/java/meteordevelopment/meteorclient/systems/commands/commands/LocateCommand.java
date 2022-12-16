@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
@@ -144,9 +143,9 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("stronghold").executes(s -> {
-            FindItemResult eye = InvUtils.findInHotbar(Items.ENDER_EYE);
+            boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
-            if (eye.found()) {
+            if (foundEye) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
                 firstStart = null;
                 firstEnd = null;
@@ -237,15 +236,13 @@ public class LocateCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof EntitySpawnS2CPacket) {
-            EntitySpawnS2CPacket packet = (EntitySpawnS2CPacket) event.packet;
-            if (packet.getEntityTypeId() == EntityType.EYE_OF_ENDER) {
+        if (event.packet instanceof EntitySpawnS2CPacket packet) {
+            if (packet.getEntityType() == EntityType.EYE_OF_ENDER) {
                 firstPosition(packet.getX(),packet.getY(),packet.getZ());
             }
         }
-        if (event.packet instanceof PlaySoundS2CPacket) {
-            PlaySoundS2CPacket packet = (PlaySoundS2CPacket) event.packet;
-            if (packet.getSound() == SoundEvents.ENTITY_ENDER_EYE_DEATH) {
+        if (event.packet instanceof PlaySoundS2CPacket packet) {
+            if (packet.getSound().value() == SoundEvents.ENTITY_ENDER_EYE_DEATH) {
                 lastPosition(packet.getX(), packet.getY(), packet.getZ());
             }
         }

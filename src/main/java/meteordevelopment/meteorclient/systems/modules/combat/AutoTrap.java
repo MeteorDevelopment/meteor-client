@@ -20,8 +20,9 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.ArrayList;
@@ -32,6 +33,13 @@ public class AutoTrap extends Module {
     private final SettingGroup sgRender = settings.createGroup("Render");
 
     // General
+
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+        .name("whitelist")
+        .description("Which blocks to use.")
+        .defaultValue(Blocks.OBSIDIAN, Blocks.NETHERITE_BLOCK)
+        .build()
+    );
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
         .name("target-range")
@@ -132,7 +140,7 @@ public class AutoTrap extends Module {
     private int timer;
 
     public AutoTrap() {
-        super(Categories.Combat, "auto-trap", "Traps people in an obsidian box to prevent them from moving.");
+        super(Categories.Combat, "auto-trap", "Traps people in a box to prevent them from moving.");
     }
 
     @Override
@@ -156,30 +164,35 @@ public class AutoTrap extends Module {
             return;
         }
 
-        FindItemResult obsidian = InvUtils.findInHotbar(Items.OBSIDIAN);
+        for (Block currentBlock : blocks.get()) {
+            FindItemResult itemResult = InvUtils.findInHotbar(currentBlock.asItem());
 
-        if (!obsidian.isHotbar() && !obsidian.isOffhand()) {
-            placePositions.clear();
-            placed = false;
-            return;
-        }
-
-        if (TargetUtils.isBadTarget(target, range.get())) target = TargetUtils.getPlayerTarget(range.get(), priority.get());
-        if (TargetUtils.isBadTarget(target, range.get())) return;
-
-        fillPlaceArray(target);
-
-        if (timer >= delay.get() && placePositions.size() > 0) {
-            BlockPos blockPos = placePositions.get(placePositions.size() - 1);
-
-            if (BlockUtils.place(blockPos, obsidian, rotate.get(), 50, true)) {
-                placePositions.remove(blockPos);
-                placed = true;
+            if (!itemResult.isHotbar() && !itemResult.isOffhand()) {
+                placePositions.clear();
+                placed = false;
+                continue;
             }
 
-            timer = 0;
-        } else {
-            timer++;
+            if (TargetUtils.isBadTarget(target, range.get())) {
+                target = TargetUtils.getPlayerTarget(range.get(), priority.get());
+                if (TargetUtils.isBadTarget(target, range.get())) return;
+            }
+
+            fillPlaceArray(target);
+
+            if (timer >= delay.get() && placePositions.size() > 0) {
+                BlockPos blockPos = placePositions.get(placePositions.size() - 1);
+
+                if (BlockUtils.place(blockPos, itemResult, rotate.get(), 50, true)) {
+                    placePositions.remove(blockPos);
+                    placed = true;
+                }
+
+                timer = 0;
+            } else {
+                timer++;
+            }
+            return;
         }
     }
 

@@ -14,9 +14,9 @@ import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.util.Pair;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -166,7 +166,7 @@ public class InventorySorter {
         if (bestI.isEmpty() && !slotI.isEmpty()) return true;
         else if (!bestI.isEmpty() && slotI.isEmpty()) return false;
 
-        int c = Registry.ITEM.getId(bestI.getItem()).compareTo(Registry.ITEM.getId(slotI.getItem()));
+        int c = Registries.ITEM.getId(bestI.getItem()).compareTo(Registries.ITEM.getId(slotI.getItem()));
         if (c == 0) return slotI.getCount() > bestI.getCount();
 
         return c > 0;
