@@ -77,6 +77,30 @@ public class BowAimbot extends Module {
         .build()
     );
 
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Rotate player's view angle.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> predict = sgGeneral.add(new BoolSetting.Builder()
+        .name("predict")
+        .description("Predicts the projectile path using tick delta.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> predictStrength = sgGeneral.add(new DoubleSetting.Builder()
+        .name("predict-strength")
+        .description("Controls the prediction strength.")
+        .defaultValue(0.2)
+        .min(0)
+        .sliderMax(2)
+        .visible(predict::get)
+        .build()
+    );
+
     private boolean wasPathing;
     private Entity target;
 
@@ -93,7 +117,7 @@ public class BowAimbot extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (!PlayerUtils.isAlive() || !itemInHand()) return;
-        if (!InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
+        if (!mc.player.getAbilities().creativeMode && !InvUtils.find(itemStack -> itemStack.getItem() instanceof ArrowItem).found()) return;
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
@@ -137,9 +161,10 @@ public class BowAimbot extends Module {
         if (velocity > 1) velocity = 1;
 
         // Positions
-        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * tickDelta;
-        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * tickDelta;
-        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * tickDelta;
+        double delta = predict.get() ? mc.player.getEyePos().distanceTo(target.getBoundingBox().getCenter()) * predictStrength.get() : tickDelta;
+        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * delta;
+        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * delta;
+        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * delta;
 
         // Adjusting for hitbox heights
         posY -= 1.9f - target.getHeight();
@@ -157,9 +182,19 @@ public class BowAimbot extends Module {
 
         // Set player rotation
         if (Float.isNaN(pitch)) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
+            if (rotate.get()) {
+                Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
+            } else {
+                mc.player.setYaw((float) Rotations.getYaw(target));
+                mc.player.setPitch((float) Rotations.getPitch(target));
+            }
         } else {
-            Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
+            if (rotate.get()) {
+                Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
+            } else {
+                mc.player.setYaw((float) Rotations.getYaw(new Vec3d(posX, posY, posZ)));
+                mc.player.setPitch(pitch);
+            }
         }
     }
 

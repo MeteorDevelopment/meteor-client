@@ -44,6 +44,17 @@ public class InvUtils {
         });
     }
 
+    public static boolean testInHands(Predicate<ItemStack> predicate) {
+        return testInMainHand(predicate) || testInOffHand(predicate);
+    }
+
+    public static boolean testInHands(Item... items) {
+        return testInHands(itemStack -> {
+            for (var item : items) if (itemStack.isOf(item)) return true;
+            return false;
+        });
+    }
+
     public static boolean testInHotbar(Predicate<ItemStack> predicate) {
         if (testInMainHand(predicate)) return true;
         if (testInOffHand(predicate)) return true;

@@ -10,12 +10,17 @@ import meteordevelopment.meteorclient.mixin.ProjectileEntityAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
 import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.KeybindingPresser;
+import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -25,25 +30,34 @@ import java.util.*;
 
 public class ArrowDodge extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgMovement = settings.createGroup("Movement");
+    private final SettingGroup sgDodge = settings.createGroup("Dodge");
 
-    private final Setting<MoveType> moveType = sgMovement.add(new EnumSetting.Builder<MoveType>()
-        .name("move-type")
-        .description("The way you are moved by this module.")
-        .defaultValue(MoveType.Velocity)
+    private final Setting<DodgeMode> dodgeMode = sgDodge.add(new EnumSetting.Builder<DodgeMode>()
+        .name("dodge-mode")
+        .description("The dodge mode.")
+        .defaultValue(DodgeMode.Move)
         .build()
     );
 
-    private final Setting<Double> moveSpeed = sgMovement.add(new DoubleSetting.Builder()
+    private final Setting<MoveType> moveType = sgDodge.add(new EnumSetting.Builder<MoveType>()
+        .name("move-type")
+        .description("The way you are moved by this module.")
+        .defaultValue(MoveType.Velocity)
+        .visible(() -> dodgeMode.get() == DodgeMode.Move)
+        .build()
+    );
+
+    private final Setting<Double> moveSpeed = sgDodge.add(new DoubleSetting.Builder()
         .name("move-speed")
         .description("How fast should you be when dodging arrow.")
         .defaultValue(1)
         .min(0.01)
         .sliderRange(0.01, 5)
+        .visible(() -> dodgeMode.get() == DodgeMode.Move)
         .build()
     );
 
-    private final Setting<Double> distanceCheck = sgMovement.add(new DoubleSetting.Builder()
+    private final Setting<Double> distanceCheck = sgDodge.add(new DoubleSetting.Builder()
         .name("distance-check")
         .description("How far should an arrow be from the player to be considered not hitting.")
         .defaultValue(1)
@@ -102,13 +116,21 @@ public class ArrowDodge extends Module {
     private final ProjectileEntitySimulator simulator = new ProjectileEntitySimulator();
     private final Pool<Vector3d> vec3s = new Pool<>(Vector3d::new);
     private final List<Vector3d> points = new ArrayList<>();
+    private final KeybindingPresser keybindingPresser = new KeybindingPresser(mc.options.useKey);
 
     public ArrowDodge() {
         super(Categories.Combat, "arrow-dodge", "Tries to dodge arrows coming at you.");
     }
 
+    @Override
+    public void onDeactivate() {
+        keybindingPresser.stopIfPressed();
+    }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (!InvUtils.testInHands(Items.SHIELD)) keybindingPresser.stopIfPressed();
+
         for (Vector3d point : points) vec3s.free(point);
         points.clear();
 
@@ -126,24 +148,38 @@ public class ArrowDodge extends Module {
             }
         }
 
-        if (isValid(Vec3d.ZERO, false)) return; // no need to move
-
-        double speed = moveSpeed.get();
-        for (int i = 0; i < 500; i++) { // its not a while loop so it doesn't freeze if something is wrong
-            boolean didMove = false;
-            Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
-            for (Vec3d direction : possibleMoveDirections) {
-                Vec3d velocity = direction.multiply(speed);
-                if (isValid(velocity, true)) {
-                    move(velocity);
-                    didMove = true;
-                    break;
-                }
-            }
-            if (didMove) break;
-            speed += moveSpeed.get(); // move further
+        // no need to dodge
+        if (isValid(Vec3d.ZERO, false)) {
+            if (InvUtils.testInHands(Items.SHIELD)) keybindingPresser.stopIfPressed();
+            return;
         }
 
+        switch (dodgeMode.get()) {
+            case Move -> {
+                double speed = moveSpeed.get();
+                for (int i = 0; i < 500; i++) { // its not a while loop so it doesn't freeze if something is wrong
+                    boolean didMove = false;
+                    Collections.shuffle(possibleMoveDirections); //Make the direction unpredictable
+                    for (Vec3d direction : possibleMoveDirections) {
+                        Vec3d velocity = direction.multiply(speed);
+                        if (isValid(velocity, true)) {
+                            move(velocity);
+                            didMove = true;
+                            break;
+                        }
+                    }
+                    if (didMove) break;
+                    speed += moveSpeed.get(); // move further
+                }
+            }
+            case Shield -> {
+                Vector3d pos = points.get(0);
+                Vec3d projectilePos = new Vec3d(pos.x, pos.y, pos.z);
+                if (!EntityUtils.blockedByShield(projectilePos, mc.player))
+                    Rotations.rotate(Rotations.getYaw(projectilePos), Rotations.getPitch(projectilePos));
+                keybindingPresser.use();
+            }
+        }
     }
 
     private void move(Vec3d vel) {
@@ -191,5 +227,10 @@ public class ArrowDodge extends Module {
     public enum MoveType {
         Velocity,
         Packet
+    }
+
+    public enum DodgeMode {
+        Move,
+        Shield
     }
 }

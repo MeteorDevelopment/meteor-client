@@ -27,10 +27,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Box;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.*;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.entity.EntityLookup;
 import net.minecraft.world.entity.EntityTrackingSection;
@@ -248,5 +245,18 @@ public class EntityUtils {
     public static EntityGroup getGroup(Entity entity) {
         if (entity instanceof LivingEntity livingEntity) return livingEntity.getGroup();
         else return EntityGroup.DEFAULT;
+    }
+
+    public static boolean blockedByShield(Entity entity, Entity player) {
+        return blockedByShield(entity.getPos(), player);
+    }
+
+    public static boolean blockedByShield(Vec3d vec3d, Entity player) {
+        if (vec3d != null) {
+            Vec3d vec3d2 = vec3d.relativize(player.getPos()).normalize();
+            vec3d2 = new Vec3d(vec3d2.x, 0.0, vec3d2.z);
+            return vec3d2.dotProduct(player.getRotationVec(1.0F)) < 0.0;
+        }
+        return false;
     }
 }
