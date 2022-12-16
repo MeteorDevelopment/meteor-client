@@ -135,7 +135,7 @@ public class BlockUtils {
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
         // Check if intersects entities
-        return !checkEntities || mc.world.canPlace(mc.world.getBlockState(blockPos), blockPos, ShapeContext.absent());
+        return !checkEntities || mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent());
     }
 
     public static boolean canPlace(BlockPos blockPos) {

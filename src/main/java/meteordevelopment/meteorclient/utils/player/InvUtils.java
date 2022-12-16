@@ -122,7 +122,7 @@ public class InvUtils {
     }
 
     public static FindItemResult findFastestTool(BlockState state) {
-        float bestScore = -1;
+        float bestScore = 1;
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
