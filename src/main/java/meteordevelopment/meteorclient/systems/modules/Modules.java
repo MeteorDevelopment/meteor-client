@@ -521,7 +521,7 @@ public class Modules extends System<Modules> {
     private void initWorld() {
         add(new AirPlace());
         add(new Ambience());
-        add(new AntiCactus());
+        add(new Collisions());
         add(new AutoBreed());
         add(new AutoBrewer());
         add(new AutoMount());
