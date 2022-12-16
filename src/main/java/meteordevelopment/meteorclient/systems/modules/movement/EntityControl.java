@@ -19,11 +19,12 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.AbstractHorseEntity;
+import net.minecraft.entity.passive.PigEntity;
 
 public class EntityControl extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> maxJump = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> maxJump = sgGeneral.add(new BoolSetting.Builder()
             .name("max-jump")
             .description("Sets jump power to maximum.")
             .defaultValue(true)
@@ -32,23 +33,5 @@ public class EntityControl extends Module {
 
     public EntityControl() {
         super(Categories.Movement, "entity-control", "Lets you control rideable entities without a saddle.");
-    }
-
-    @Override
-    public void onDeactivate() {
-        if (!Utils.canUpdate() || mc.world.getEntities() == null) return;
-
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).setSaddled(false);
-        }
-    }
-
-    @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof AbstractHorseEntity) ((IHorseBaseEntity) entity).setSaddled(true);
-        }
-
-        if (maxJump.get()) ((ClientPlayerEntityAccessor) mc.player).setMountJumpStrength(1);
     }
 }

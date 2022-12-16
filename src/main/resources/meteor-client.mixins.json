@@ -155,7 +155,9 @@
     "WorldAccessor",
     "WorldChunkMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "WorldBorderMixin",
+    "AbstractHorseEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1
