@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.combat;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.AbstractBlockAccessor;
+import meteordevelopment.meteorclient.mixininterface.IBox;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -225,6 +226,7 @@ public class HoleFiller extends Module {
     private final List<Hole> holes = new ArrayList<>();
 
     private final BlockPos.Mutable testPos = new BlockPos.Mutable();
+    private final Box box = new Box(0, 0, 0, 0, 0, 0);
     private Vec3d testVec;
     private int timer;
 
@@ -328,7 +330,7 @@ public class HoleFiller extends Module {
         if (((AbstractBlockAccessor) mc.world.getBlockState(testPos).getBlock()).isCollidable()) return false;
         testPos.add(0, -1, 0);
 
-        Box box = new Box(pos);
+        ((IBox) box).set(pos);
         if (!mc.world.getOtherEntities(null, box, entity -> entity instanceof PlayerEntity
             || entity instanceof TntEntity || entity instanceof EndCrystalEntity).isEmpty()) return false;
 
