@@ -84,23 +84,6 @@ public class BowAimbot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> predict = sgGeneral.add(new BoolSetting.Builder()
-        .name("predict")
-        .description("Predicts the projectile path using tick delta.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Double> predictStrength = sgGeneral.add(new DoubleSetting.Builder()
-        .name("predict-strength")
-        .description("Controls the prediction strength.")
-        .defaultValue(0.2)
-        .min(0)
-        .sliderMax(2)
-        .visible(predict::get)
-        .build()
-    );
-
     private boolean wasPathing;
     private Entity target;
 
@@ -161,10 +144,9 @@ public class BowAimbot extends Module {
         if (velocity > 1) velocity = 1;
 
         // Positions
-        double delta = predict.get() ? mc.player.getEyePos().distanceTo(target.getBoundingBox().getCenter()) * predictStrength.get() : tickDelta;
-        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * delta;
-        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * delta;
-        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * delta;
+        double posX = target.getPos().getX() + (target.getPos().getX() - target.prevX) * tickDelta;
+        double posY = target.getPos().getY() + (target.getPos().getY() - target.prevY) * tickDelta;
+        double posZ = target.getPos().getZ() + (target.getPos().getZ() - target.prevZ) * tickDelta;
 
         // Adjusting for hitbox heights
         posY -= 1.9f - target.getHeight();
