@@ -427,7 +427,7 @@ public class Modules extends System<Modules> {
         add(new GhostHand());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
-        add(new NoBreakDelay());
+        add(new BreakDelay());
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
