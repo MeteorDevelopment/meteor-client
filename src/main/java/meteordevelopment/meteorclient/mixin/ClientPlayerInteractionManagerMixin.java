@@ -11,9 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.*;
 import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
-import meteordevelopment.meteorclient.systems.modules.player.NoBreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
-import meteordevelopment.meteorclient.systems.modules.world.Nuker;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -112,16 +110,22 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         info.setReturnValue(Modules.get().get(Reach.class).getReach());
     }
 
-    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
-    private void onMethod_2902SetField_3716Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (Modules.get().isActive(NoBreakDelay.class) || Modules.get().isActive(Nuker.class)) value = 0;
-        blockBreakingCooldown = value;
+    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", ordinal = 3))
+    private void updateBlockBreakingProgress3(ClientPlayerInteractionManager interactionManager, int value) {
+        BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
+        blockBreakingCooldown = event.cooldown;
+    }
+
+    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", ordinal = 4))
+    private void updateBlockBreakingProgress4(ClientPlayerInteractionManager interactionManager, int value) {
+        BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
+        blockBreakingCooldown = event.cooldown;
     }
 
     @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
-    private void onAttackBlockSetField_3719Proxy(ClientPlayerInteractionManager interactionManager, int value) {
-        if (Modules.get().isActive(NoBreakDelay.class) || Modules.get().isActive(Nuker.class)) value = 0;
-        blockBreakingCooldown = value;
+    private void attackBlock(ClientPlayerInteractionManager interactionManager, int value) {
+        BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
+        blockBreakingCooldown = event.cooldown;
     }
 
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)

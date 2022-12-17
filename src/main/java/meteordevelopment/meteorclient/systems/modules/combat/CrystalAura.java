@@ -24,7 +24,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
-import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
@@ -688,9 +687,10 @@ public class CrystalAura extends Module {
 
         // Check damage to targets and face place
         double damage = getDamageToTargets(entity.getPos(), blockPos, true, false);
-        boolean facePlaced = (facePlace.get() && shouldFacePlace(entity.getBlockPos()) || forceFacePlace.get().isPressed());
+        boolean shouldFacePlace = shouldFacePlace();
+        double minimumDamage = Math.min(minDamage.get(), shouldFacePlace ? 1.5 : minDamage.get());
 
-        if (!facePlaced && damage < minDamage.get()) return 0;
+        if (damage < minimumDamage) return 0;
 
         return damage;
     }
@@ -823,9 +823,10 @@ public class CrystalAura extends Module {
             // Check damage to targets and face place
             double damage = getDamageToTargets(vec3d, bp, false, !hasBlock && support.get() == SupportMode.Fast);
 
-            boolean facePlaced = (facePlace.get() && shouldFacePlace(blockPos)) || (forceFacePlace.get().isPressed());
+            boolean shouldFacePlace = shouldFacePlace();
+            double minimumDamage = Math.min(minDamage.get(), shouldFacePlace ? 1.5 : minDamage.get());
 
-            if (!facePlaced && damage < minDamage.get()) return;
+            if (damage < minimumDamage) return;
 
             // Check if it can be placed
             double x = bp.getX();
@@ -977,21 +978,21 @@ public class CrystalAura extends Module {
 
     // Face place
 
-    private boolean shouldFacePlace(BlockPos crystal) {
+    private boolean shouldFacePlace() {
+        if (!facePlace.get()) return false;
+
+        if (forceFacePlace.get().isPressed()) return true;
+
         // Checks if the provided crystal position should face place to any target
         for (PlayerEntity target : targets) {
-            BlockPos pos = target.getBlockPos();
+            if (EntityUtils.getTotalHealth(target) <= facePlaceHealth.get()) return true;
 
-            if (crystal.getY() == pos.getY() + 1 && Math.abs(pos.getX() - crystal.getX()) <= 1 && Math.abs(pos.getZ() - crystal.getZ()) <= 1) {
-                if (EntityUtils.getTotalHealth(target) <= facePlaceHealth.get()) return true;
-
-                for (ItemStack itemStack : target.getArmorItems()) {
-                    if (itemStack == null || itemStack.isEmpty()) {
-                        if (facePlaceArmor.get()) return true;
-                    }
-                    else {
-                        if ((double) (itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage() * 100 <= facePlaceDurability.get()) return true;
-                    }
+            for (ItemStack itemStack : target.getArmorItems()) {
+                if (itemStack == null || itemStack.isEmpty()) {
+                    if (facePlaceArmor.get()) return true;
+                }
+                else {
+                    if ((double) (itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage() * 100 <= facePlaceDurability.get()) return true;
                 }
             }
         }
@@ -1070,13 +1071,6 @@ public class CrystalAura extends Module {
                 targets.add(player);
             }
         }
-
-        // Fake players
-        FakePlayerManager.forEach(fp -> {
-            if (!fp.isDead() && fp.isAlive() && Friends.get().shouldAttack(fp) && PlayerUtils.isWithin(fp, targetRange.get())) {
-                targets.add(fp);
-            }
-        });
     }
 
     private boolean intersectsWithEntities(Box box) {

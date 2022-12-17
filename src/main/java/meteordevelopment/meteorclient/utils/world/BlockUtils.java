@@ -17,7 +17,13 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
+import net.minecraft.entity.effect.StatusEffectUtil;
+import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
+import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -135,7 +141,7 @@ public class BlockUtils {
         if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
 
         // Check if intersects entities
-        return !checkEntities || mc.world.canPlace(mc.world.getBlockState(blockPos), blockPos, ShapeContext.absent());
+        return !checkEntities || mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent());
     }
 
     public static boolean canPlace(BlockPos blockPos) {
@@ -176,14 +182,17 @@ public class BlockUtils {
         }
     }
 
-    /** Needs to be used in {@link TickEvent.Pre} */
+    /**
+     * Needs to be used in {@link TickEvent.Pre}
+     */
     public static boolean breakBlock(BlockPos blockPos, boolean swing) {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
-        if (mc.interactionManager.isBreakingBlock()) mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
+        if (mc.interactionManager.isBreakingBlock())
+            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
         else mc.interactionManager.attackBlock(pos, Direction.UP);
 
         if (swing) mc.player.swingHand(Hand.MAIN_HAND);
@@ -199,15 +208,29 @@ public class BlockUtils {
         if (!mc.player.isCreative() && state.getHardness(mc.world, blockPos) < 0) return false;
         return state.getOutlineShape(mc.world, blockPos) != VoxelShapes.empty();
     }
+
     public static boolean canBreak(BlockPos blockPos) {
         return canBreak(blockPos, mc.world.getBlockState(blockPos));
     }
 
-    public static boolean canInstaBreak(BlockPos blockPos, BlockState state) {
-        return mc.player.isCreative() || state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) >= 1;
+    public static boolean canInstaBreak(BlockPos blockPos, float breakSpeed) {
+        return mc.player.isCreative() || calcBlockBreakingDelta2(blockPos, breakSpeed) >= 1;
     }
+
     public static boolean canInstaBreak(BlockPos blockPos) {
-        return canInstaBreak(blockPos, mc.world.getBlockState(blockPos));
+        BlockState state = mc.world.getBlockState(blockPos);
+        return canInstaBreak(blockPos, mc.player.getBlockBreakingSpeed(state));
+    }
+
+    public static float calcBlockBreakingDelta2(BlockPos blockPos, float breakSpeed) {
+        BlockState state = mc.world.getBlockState(blockPos);
+        float f = state.getHardness(mc.world, blockPos);
+        if (f == -1.0F) {
+            return 0.0F;
+        } else {
+            int i = mc.player.canHarvest(state) ? 30 : 100;
+            return breakSpeed / f / (float) i;
+        }
     }
 
     // Other
@@ -231,7 +254,8 @@ public class BlockUtils {
             mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
 
         if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
-            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube()) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube())
+                return MobSpawn.Never;
             if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
@@ -260,5 +284,50 @@ public class BlockUtils {
         }
 
         return false;
+    }
+
+    public static double getBreakDelta(int slot, BlockState state) {
+        float hardness = state.getHardness(null, null);
+        if (hardness == -1) return 0;
+        else {
+            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
+        }
+    }
+
+    private static double getBlockBreakingSpeed(int slot, BlockState block) {
+        double speed = mc.player.getInventory().main.get(slot).getMiningSpeedMultiplier(block);
+
+        if (speed > 1) {
+            ItemStack tool = mc.player.getInventory().getStack(slot);
+
+            int efficiency = EnchantmentHelper.getLevel(Enchantments.EFFICIENCY, tool);
+
+            if (efficiency > 0 && !tool.isEmpty()) speed += efficiency * efficiency + 1;
+        }
+
+        if (StatusEffectUtil.hasHaste(mc.player)) {
+            speed *= 1 + (StatusEffectUtil.getHasteAmplifier(mc.player) + 1) * 0.2F;
+        }
+
+        if (mc.player.hasStatusEffect(StatusEffects.MINING_FATIGUE)) {
+            float k = switch (mc.player.getStatusEffect(StatusEffects.MINING_FATIGUE).getAmplifier()) {
+                case 0 -> 0.3F;
+                case 1 -> 0.09F;
+                case 2 -> 0.0027F;
+                default -> 8.1E-4F;
+            };
+
+            speed *= k;
+        }
+
+        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
+            speed /= 5.0F;
+        }
+
+        if (!mc.player.isOnGround()) {
+            speed /= 5.0F;
+        }
+
+        return speed;
     }
 }
