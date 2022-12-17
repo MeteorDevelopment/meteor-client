@@ -503,6 +503,7 @@ public class Modules extends System<Modules> {
         add(new NoRender());
         add(new BlockESP());
         add(new StorageESP());
+        add(new TextureRotations());
         add(new TimeChanger());
         add(new Tracers());
         add(new Trail());
