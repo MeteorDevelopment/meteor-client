@@ -61,6 +61,13 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
+        .name("rotate")
+        .description("Determines when you should rotate towards the target.")
+        .defaultValue(RotationMode.Always)
+        .build()
+    );
+
     private final Setting<Boolean> autoSwitch = sgGeneral.add(new BoolSetting.Builder()
         .name("auto-switch")
         .description("Switches to your selected weapon when attacking the target.")
@@ -75,17 +82,18 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<RotationMode> rotation = sgGeneral.add(new EnumSetting.Builder<RotationMode>()
-        .name("rotate")
-        .description("Determines when you should rotate towards the target.")
-        .defaultValue(RotationMode.Always)
-        .build()
-    );
-
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-combat")
         .description("Freezes Baritone temporarily until you are finished attacking the entity.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<ShieldMode> shieldMode = sgGeneral.add(new EnumSetting.Builder<ShieldMode>()
+        .name("shield-mode")
+        .description("Will try and use an axe to break target shields.")
+        .defaultValue(ShieldMode.Break)
+        .visible(() -> autoSwitch.get() && weapon.get() != Weapon.Axe)
         .build()
     );
 
@@ -112,20 +120,6 @@ public class KillAura extends Module {
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 5)
-        .build()
-    );
-
-    private final Setting<Boolean> ignorePassive = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-passive")
-        .description("Will only attack sometimes passive mobs if they are targeting you.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> ignoreTamed = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-tamed")
-        .description("Will avoid attacking mobs you tamed.")
-        .defaultValue(false)
         .build()
     );
 
@@ -161,10 +155,17 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> ignoreShield = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-shield")
-        .description("Attacks only if the blow is not blocked by a shield.")
+    private final Setting<Boolean> ignorePassive = sgTargeting.add(new BoolSetting.Builder()
+        .name("ignore-passive")
+        .description("Will only attack sometimes passive mobs if they are targeting you.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreTamed = sgTargeting.add(new BoolSetting.Builder()
+        .name("ignore-tamed")
+        .description("Will avoid attacking mobs you tamed.")
+        .defaultValue(false)
         .build()
     );
 
@@ -180,7 +181,7 @@ public class KillAura extends Module {
     private final Setting<Boolean> pauseOnUse = sgTiming.add(new BoolSetting.Builder()
         .name("pause-on-use")
         .description("Does not attack while using an item.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -272,10 +273,22 @@ public class KillAura extends Module {
                 };
             });
 
+            if (shouldShieldBreak()) {
+                FindItemResult axeResult = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof AxeItem);
+                if (axeResult.found()) weaponResult = axeResult;
+            }
+
             InvUtils.swap(weaponResult.slot(), false);
         }
 
         if (!itemInHand()) return;
+
+        Box hitbox = primary.getBoundingBox();
+        ((IVec3d) hitVec).set(
+            MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
+            MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
+            MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ)
+        );
 
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
         if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
@@ -291,6 +304,18 @@ public class KillAura extends Module {
         if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
             switchTimer = switchDelay.get();
         }
+    }
+
+    private boolean shouldShieldBreak() {
+        for (Entity target : targets) {
+            if (target instanceof PlayerEntity player) {
+                if (player.blockedByShield(DamageSource.player(mc.player)) && shieldMode.get() == ShieldMode.Break) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private boolean entityCheck(Entity entity) {
@@ -322,7 +347,7 @@ public class KillAura extends Module {
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
-            if (ignoreShield.get() && player.blockedByShield(DamageSource.player(mc.player))) return false;
+            if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(DamageSource.player(mc.player))) return false;
         }
         return !(entity instanceof AnimalEntity animal) || babies.get() || !animal.isBaby();
     }
@@ -376,6 +401,8 @@ public class KillAura extends Module {
     }
 
     private boolean itemInHand() {
+        if (shouldShieldBreak()) return mc.player.getMainHandStack().getItem() instanceof AxeItem;
+
         return switch (weapon.get()) {
             case Axe -> mc.player.getMainHandStack().getItem() instanceof AxeItem;
             case Sword -> mc.player.getMainHandStack().getItem() instanceof SwordItem;
@@ -405,6 +432,12 @@ public class KillAura extends Module {
     public enum RotationMode {
         Always,
         OnHit,
+        None
+    }
+
+    public enum ShieldMode {
+        Ignore,
+        Break,
         None
     }
 }
