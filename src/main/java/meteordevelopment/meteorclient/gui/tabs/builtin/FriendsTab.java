@@ -76,6 +76,15 @@ public class FriendsTab extends Tab {
             table.clear();
             if (Friends.get().isEmpty()) return;
 
+            Friends.get().forEach(friend ->
+                MeteorExecutor.execute(() -> {
+                    if (friend.headTextureNeedsUpdate()) {
+                        friend.updateInfo();
+                        reload();
+                    }
+                })
+            );
+
             for (Friend friend : Friends.get()) {
                 table.add(theme.texture(32, 32, friend.getHead().needsRotate() ? 90 : 0, friend.getHead()));
                 table.add(theme.label(friend.getName()));
