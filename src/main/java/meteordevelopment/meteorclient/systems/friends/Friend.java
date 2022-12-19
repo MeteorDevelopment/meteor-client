@@ -19,14 +19,15 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class Friend implements ISerializable<Friend>, Comparable<Friend> {
-    public String name;
-    private @Nullable UUID id;
-    private @Nullable PlayerHeadTexture headTexture;
+    public volatile String name;
+    private volatile @Nullable UUID id;
+    private volatile @Nullable PlayerHeadTexture headTexture;
+    private volatile boolean updating;
 
     public Friend(String name, @Nullable UUID id) {
         this.name = name;
         this.id = id;
-        this.headTexture = PlayerHeadUtils.fetchHead(id);
+        this.headTexture = null;
     }
 
     public Friend(PlayerEntity player) {
@@ -45,11 +46,17 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     }
 
     public void updateInfo() {
+        updating = true;
         APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
         if (res == null || res.name == null || res.id == null) return;
         name = res.name;
         id = UUIDTypeAdapter.fromString(res.id);
         headTexture = PlayerHeadUtils.fetchHead(id);
+        updating = false;
+    }
+
+    public boolean headTextureNeedsUpdate() {
+        return !this.updating && headTexture == null;
     }
 
     @Override
