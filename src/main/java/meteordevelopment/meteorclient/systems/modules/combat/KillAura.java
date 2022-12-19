@@ -141,16 +141,16 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> babies = sgTargeting.add(new BoolSetting.Builder()
-        .name("babies")
+    private final Setting<Boolean> ignoreBabies = sgTargeting.add(new BoolSetting.Builder()
+        .name("ignore-babies")
         .description("Whether or not to attack baby variants of the entity.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> nametagged = sgTargeting.add(new BoolSetting.Builder()
-        .name("nametagged")
-        .description("Whether or not to attack mobs with a name tag.")
+    private final Setting<Boolean> ignoreNamed = sgTargeting.add(new BoolSetting.Builder()
+        .name("ignore-named")
+        .description("Whether or not to attack mobs with a name.")
         .defaultValue(false)
         .build()
     );
@@ -229,7 +229,7 @@ public class KillAura extends Module {
     private final List<Entity> targets = new ArrayList<>();
     private final TimerUtil hitTimer = new TimerUtil();
     private final Vec3d hitVec = new Vec3d(0, 0, 0);
-    private int tickTimer, switchTimer;
+    private int switchTimer;
     private boolean wasPathing = false;
 
     public KillAura() {
@@ -238,7 +238,6 @@ public class KillAura extends Module {
 
     @Override
     public void onDeactivate() {
-        tickTimer = 0;
         targets.clear();
     }
 
@@ -331,7 +330,7 @@ public class KillAura extends Module {
         if (!PlayerUtils.isWithin(hitVec, range.get())) return false;
 
         if (!entities.get().getBoolean(entity.getType())) return false;
-        if (!nametagged.get() && entity.hasCustomName()) return false;
+        if (ignoreNamed.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
             if (entity instanceof Tameable tameable
@@ -349,7 +348,7 @@ public class KillAura extends Module {
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(DamageSource.player(mc.player))) return false;
         }
-        return !(entity instanceof AnimalEntity animal) || babies.get() || !animal.isBaby();
+        return !(entity instanceof AnimalEntity animal) || !ignoreBabies.get() || !animal.isBaby();
     }
 
     private boolean delayCheck() {
@@ -359,19 +358,13 @@ public class KillAura extends Module {
         }
 
         if (customDelay.get()) {
-            if (tickTimer > 0) {
-                if (!TPSSync.get()) tickTimer--;
-                else tickTimer -= 1 * (TickRate.INSTANCE.getTickRate() / 20);
-                return false;
-            } else {
-                tickTimer = hitDelay.get();
-                return true;
-            }
-        }
-        else {
+            double delay = hitDelay.get();
+            if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
+            return hitTimer.hasPassedTicks((long) delay);
+        } else {
             long delay = fixedDelay();
             if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
-            return hitTimer.passedMillis(delay);
+            return hitTimer.hasPassedMillis(delay);
         }
     }
 
