@@ -24,7 +24,7 @@ public class TimerUtil {
 
     public long passedTicks() {
         long remainder = passedMillis() % 50;
-        return (passedMillis() / 50) + ((remainder > 25) ? 1 : 0);
+        return (passedMillis() - remainder) / 50;
     }
 
     public boolean hasPassedMillis(long time) {
