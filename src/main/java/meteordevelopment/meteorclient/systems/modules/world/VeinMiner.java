@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -129,8 +129,7 @@ public class VeinMiner extends Module {
         .build()
     );
 
-    private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
-    private final List<MyBlock> blocks = new ArrayList<>();
+    private final PooledList<MyBlock> blockPool = new PooledList<>(MyBlock::new);
     private final List<BlockPos> foundBlockPositions = new ArrayList<>();
 
     private int tick = 0;
@@ -141,13 +140,12 @@ public class VeinMiner extends Module {
 
     @Override
     public void onDeactivate() {
-        for (MyBlock block : blocks) blockPool.free(block);
-        blocks.clear();
+        blockPool.clear();
         foundBlockPositions.clear();
     }
 
     private boolean isMiningBlock(BlockPos pos) {
-        for (MyBlock block : blocks) {
+        for (MyBlock block : blockPool) {
             if (block.blockPos.equals(pos)) return true;
         }
 
@@ -170,29 +168,29 @@ public class VeinMiner extends Module {
         if (!isMiningBlock(event.blockPos)) {
             MyBlock block = blockPool.get();
             block.set(event);
-            blocks.add(block);
             mineNearbyBlocks(block.originalBlock.asItem(),event.blockPos,event.direction,depth.get());
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        blocks.removeIf(MyBlock::shouldRemove);
+        blockPool.removeIf(MyBlock::shouldRemove);
 
-        if (!blocks.isEmpty()) {
-            if (tick < delay.get() && !blocks.get(0).mining) {
+        if (!blockPool.isEmpty()) {
+            MyBlock firstElement = blockPool.peekList();
+            if (tick < delay.get() && !firstElement.mining) {
                 tick++;
                 return;
             }
             tick = 0;
-            blocks.get(0).mine();
+            firstElement.mine();
         }
     }
 
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (render.get()) {
-            for (MyBlock block : blocks) block.render(event);
+            for (MyBlock block : blockPool) block.render(event);
         }
     }
 
@@ -266,7 +264,6 @@ public class VeinMiner extends Module {
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
                 MyBlock block = blockPool.get();
                 block.set(neighbour,dir);
-                blocks.add(block);
                 mineNearbyBlocks(item, neighbour, dir, depth-1);
             }
         }

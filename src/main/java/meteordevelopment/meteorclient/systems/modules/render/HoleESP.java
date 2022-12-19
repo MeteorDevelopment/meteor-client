@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
@@ -24,9 +24,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class HoleESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -155,8 +152,7 @@ public class HoleESP extends Module {
             .build()
     );
 
-    private final Pool<Hole> holePool = new Pool<>(Hole::new);
-    private final List<Hole> holes = new ArrayList<>();
+    private final PooledList<Hole> holePool = new PooledList<>(Hole::new);
 
     private final byte NULL = 0;
 
@@ -166,8 +162,7 @@ public class HoleESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Hole hole : holes) holePool.free(hole);
-        holes.clear();
+        holePool.clear();
 
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
             if (!validHole(blockPos)) return;
@@ -199,10 +194,10 @@ public class HoleESP extends Module {
             }
 
             if (obsidian + bedrock == 5 && air == null) {
-                holes.add(holePool.get().set(blockPos, obsidian == 5 ? Hole.Type.Obsidian : (bedrock == 5 ? Hole.Type.Bedrock : Hole.Type.Mixed), NULL));
+                holePool.get().set(blockPos, obsidian == 5 ? Hole.Type.Obsidian : (bedrock == 5 ? Hole.Type.Bedrock : Hole.Type.Mixed), NULL);
             }
             else if (obsidian + bedrock == 8 && doubles.get() && air != null) {
-                holes.add(holePool.get().set(blockPos, obsidian == 8 ? Hole.Type.Obsidian : (bedrock == 8 ? Hole.Type.Bedrock : Hole.Type.Mixed), Dir.get(air)));
+                holePool.get().set(blockPos, obsidian == 8 ? Hole.Type.Obsidian : (bedrock == 8 ? Hole.Type.Bedrock : Hole.Type.Mixed), Dir.get(air));
             }
         });
     }
@@ -223,7 +218,7 @@ public class HoleESP extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        for (HoleESP.Hole hole : holes) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
+        for (HoleESP.Hole hole : holePool) hole.render(event.renderer, shapeMode.get(), height.get(), topQuad.get(), bottomQuad.get());
     }
 
     private static class Hole {

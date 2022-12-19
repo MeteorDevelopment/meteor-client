@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.Dimension;
@@ -23,9 +23,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkStatus;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class VoidESP extends Module {
     private static final Direction[] SIDES = { Direction.EAST, Direction.NORTH, Direction.SOUTH, Direction.WEST };
@@ -92,8 +89,7 @@ public class VoidESP extends Module {
 
     private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    private final Pool<Void> voidHolePool = new Pool<>(Void::new);
-    private final List<Void> voidHoles = new ArrayList<>();
+    private final PooledList<Void> voidHolePool = new PooledList<>(Void::new);
 
     public VoidESP() {
         super(Categories.Render, "void-esp", "Renders holes in bedrock layers that lead to the void.");
@@ -120,7 +116,7 @@ public class VoidESP extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        voidHoles.clear();
+        voidHolePool.clear();
         if (PlayerUtils.getDimension() == Dimension.End) return;
 
         int px = mc.player.getBlockPos().getX();
@@ -130,12 +126,12 @@ public class VoidESP extends Module {
         for (int x = px - radius; x <= px + radius; x++) {
             for (int z = pz - radius; z <= pz + radius; z++) {
                 blockPos.set(x, mc.world.getBottomY(), z);
-                if (isHole(blockPos, false)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, mc.world.getBottomY(), z), false));
+                if (isHole(blockPos, false)) voidHolePool.get().set(blockPos.set(x, mc.world.getBottomY(), z), false);
 
                 // Check for nether roof
                 if (netherRoof.get() && PlayerUtils.getDimension() == Dimension.Nether) {
                     blockPos.set(x, 127, z);
-                    if (isHole(blockPos, true)) voidHoles.add(voidHolePool.get().set(blockPos.set(x, 127, z), true));
+                    if (isHole(blockPos, true)) voidHolePool.get().set(blockPos.set(x, 127, z), true);
                 }
             }
         }
@@ -143,7 +139,7 @@ public class VoidESP extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        for (Void voidHole : voidHoles) voidHole.render(event);
+        for (Void voidHole : voidHolePool) voidHole.render(event);
     }
 
     private class Void {

@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.BlockState;
@@ -23,9 +23,7 @@ import java.util.function.BiConsumer;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockIterator {
-    private static final Pool<Callback> callbackPool = new Pool<>(Callback::new);
-    private static final List<Callback> callbacks = new ArrayList<>();
-
+    private static final PooledList<Callback> callbackPool = new PooledList<>(Callback::new);
     private static final List<Runnable> afterCallbacks = new ArrayList<>();
 
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
@@ -58,13 +56,13 @@ public class BlockIterator {
                     int dy = Math.abs(y - py);
                     int dz = Math.abs(z - pz);
 
-                    for (Iterator<Callback> it = callbacks.iterator(); it.hasNext(); ) {
+                    for (Iterator<Callback> it = callbackPool.iterator(); it.hasNext(); ) {
                         Callback callback = it.next();
 
                         if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
                             disableCurrent = false;
                             callback.function.accept(blockPos, blockState);
-                            if (disableCurrent) it.remove();
+                            if (disableCurrent) callbackPool.free(callback, it);
                         }
                     }
                 }
@@ -74,8 +72,7 @@ public class BlockIterator {
         hRadius = 0;
         vRadius = 0;
 
-        for (Callback callback : callbacks) callbackPool.free(callback);
-        callbacks.clear();
+        callbackPool.clear();
 
         for (Runnable callback : afterCallbacks) callback.run();
         afterCallbacks.clear();
@@ -90,8 +87,6 @@ public class BlockIterator {
         callback.function = function;
         callback.hRadius = horizontalRadius;
         callback.vRadius = verticalRadius;
-
-        callbacks.add(callback);
     }
 
     public static void disableCurrent() {

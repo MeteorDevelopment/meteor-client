@@ -15,7 +15,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BreakIndicators;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -24,22 +24,13 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.effect.StatusEffectUtil;
-import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.shape.VoxelShape;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class PacketMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -121,8 +112,7 @@ public class PacketMine extends Module {
         .build()
     );
 
-    private final Pool<MyBlock> blockPool = new Pool<>(MyBlock::new);
-    public final List<MyBlock> blocks = new ArrayList<>();
+    public final PooledList<MyBlock> blockPool = new PooledList<>(MyBlock::new);
 
     private boolean swapped, shouldUpdateSlot;
 
@@ -137,8 +127,7 @@ public class PacketMine extends Module {
 
     @Override
     public void onDeactivate() {
-        for (MyBlock block : blocks) blockPool.free(block);
-        blocks.clear();
+        blockPool.clear();
         if (shouldUpdateSlot) {
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
             shouldUpdateSlot = false;
@@ -154,12 +143,12 @@ public class PacketMine extends Module {
         swapped = false;
 
         if (!isMiningBlock(event.blockPos)) {
-            blocks.add(blockPool.get().set(event));
+            blockPool.get().set(event);
         }
     }
 
     public boolean isMiningBlock(BlockPos pos) {
-        for (MyBlock block : blocks) {
+        for (MyBlock block : blockPool) {
             if (block.blockPos.equals(pos)) return true;
         }
 
@@ -168,17 +157,17 @@ public class PacketMine extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        blocks.removeIf(MyBlock::shouldRemove);
+        blockPool.removeIf(MyBlock::shouldRemove);
 
         if (shouldUpdateSlot) {
             mc.player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(mc.player.getInventory().selectedSlot));
             shouldUpdateSlot = false;
         }
 
-        if (!blocks.isEmpty()) blocks.get(0).mine();
+        if (!blockPool.isEmpty()) blockPool.peekList().mine();
 
         if (!swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
-            for (MyBlock block : blocks) {
+            for (MyBlock block : blockPool) {
                 if (block.isReady()) {
                     FindItemResult slot = InvUtils.findFastestTool(block.blockState);
                     if (!slot.found() || mc.player.getInventory().selectedSlot == slot.slot()) continue;
@@ -194,7 +183,7 @@ public class PacketMine extends Module {
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (render.get()) {
-            for (MyBlock block : blocks) {
+            for (MyBlock block : blockPool) {
                 if (Modules.get().get(BreakIndicators.class).isActive() && Modules.get().get(BreakIndicators.class).packetMine.get() && block.mining) {
                     continue;
                 } else block.render(event);

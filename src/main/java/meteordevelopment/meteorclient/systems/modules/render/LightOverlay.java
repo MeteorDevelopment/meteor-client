@@ -14,16 +14,13 @@ import meteordevelopment.meteorclient.renderer.Shaders;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.math.BlockPos;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LightOverlay extends Module {
     public enum Spawn {
@@ -83,8 +80,7 @@ public class LightOverlay extends Module {
             .build()
     );
 
-    private final Pool<Cross> crossPool = new Pool<>(Cross::new);
-    private final List<Cross> crosses = new ArrayList<>();
+    private final PooledList<Cross> crossPool = new PooledList<>(Cross::new);
 
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
 
@@ -96,18 +92,17 @@ public class LightOverlay extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Cross cross : crosses) crossPool.free(cross);
-        crosses.clear();
+        crossPool.clear();
 
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
             switch (BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get())) {
                 case Never:
                     break;
                 case Potential:
-                    crosses.add(crossPool.get().set(blockPos, true));
+                    crossPool.get().set(blockPos, true);
                     break;
                 case Always:
-                    crosses.add((crossPool.get().set(blockPos, false)));
+                    crossPool.get().set(blockPos, false);
                     break;
             }
         });
@@ -115,12 +110,12 @@ public class LightOverlay extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (crosses.isEmpty()) return;
+        if (crossPool.isEmpty()) return;
 
         mesh.depthTest = !seeThroughBlocks.get();
         mesh.begin();
 
-        for (Cross cross : crosses) cross.render();
+        for (Cross cross : crossPool) cross.render();
 
         mesh.end();
         mesh.render(event.matrices);

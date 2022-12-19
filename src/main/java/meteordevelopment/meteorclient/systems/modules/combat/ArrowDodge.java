@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.ProjectileEntitySimulator;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.ArrowEntity;
@@ -100,8 +100,7 @@ public class ArrowDodge extends Module {
     );
 
     private final ProjectileEntitySimulator simulator = new ProjectileEntitySimulator();
-    private final Pool<Vector3d> vec3s = new Pool<>(Vector3d::new);
-    private final List<Vector3d> points = new ArrayList<>();
+    private final PooledList<Vector3d> vec3Pool = new PooledList<>(Vector3d::new);
 
     public ArrowDodge() {
         super(Categories.Combat, "arrow-dodge", "Tries to dodge arrows coming at you.");
@@ -109,8 +108,7 @@ public class ArrowDodge extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        for (Vector3d point : points) vec3s.free(point);
-        points.clear();
+        vec3Pool.clear();
 
         for (Entity e : mc.world.getEntities()) {
             if (!(e instanceof ProjectileEntity)) continue;
@@ -121,7 +119,7 @@ public class ArrowDodge extends Module {
             }
             if (!simulator.set(e, accurate.get(), 0.5D)) continue;
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
-                points.add(vec3s.get().set(simulator.pos));
+                vec3Pool.get().set(simulator.pos);
                 if (simulator.tick() != null) break;
             }
         }
@@ -165,7 +163,7 @@ public class ArrowDodge extends Module {
         Vec3d playerPos = mc.player.getPos().add(velocity);
         Vec3d headPos = playerPos.add(0, 1, 0);
 
-        for (Vector3d pos : points) {
+        for (Vector3d pos : vec3Pool) {
             Vec3d projectilePos = new Vec3d(pos.x, pos.y, pos.z);
             if (projectilePos.isInRange(playerPos, distanceCheck.get())) return false;
             if (projectilePos.isInRange(headPos, distanceCheck.get())) return false;

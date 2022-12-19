@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.PostInit;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
@@ -25,17 +25,14 @@ import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
 import org.joml.Vector3f;
 
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
     public static Vec3d center;
 
-    private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
-    private static final List<RenderBlock> renderBlocks = new ArrayList<>();
+    private static final PooledList<RenderBlock> renderBlockPool = new PooledList<>(RenderBlock::new);
 
     @PostInit
     public static void init() {
@@ -96,28 +93,22 @@ public class RenderUtils {
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
-        renderBlocks.add(renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink));
+        renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink);
     }
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        if (renderBlocks.size() == 0) return;
+        if (renderBlockPool.isEmpty()) return;
 
-        renderBlocks.forEach(RenderBlock::tick);
-
-        Iterator<RenderBlock> iterator = renderBlocks.iterator();
-        while (iterator.hasNext()) {
-            RenderBlock next = iterator.next();
-            if (next.ticks <= 0) {
-                iterator.remove();
-                renderBlockPool.free(next);
-            }
+        for (Iterator<RenderBlock> it = renderBlockPool.iterator(); it.hasNext(); ) {
+            RenderBlock renderBlock = it.next();
+            if (--renderBlock.ticks <= 0) renderBlockPool.free(renderBlock, it);
         }
     }
 
     @EventHandler
     private static void onRender(Render3DEvent event) {
-        renderBlocks.forEach(block -> block.render(event));
+        renderBlockPool.forEach(block -> block.render(event));
     }
 
     public static class RenderBlock {
@@ -142,10 +133,6 @@ public class RenderUtils {
             this.duration = duration;
 
             return this;
-        }
-
-        public void tick() {
-            ticks--;
         }
 
         public void render(Render3DEvent event) {

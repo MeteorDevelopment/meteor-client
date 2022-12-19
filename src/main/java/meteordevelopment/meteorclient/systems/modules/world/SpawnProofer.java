@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
@@ -18,7 +18,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.*;
 import net.minecraft.util.math.BlockPos;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class SpawnProofer extends Module {
@@ -69,9 +68,7 @@ public class SpawnProofer extends Module {
             .build()
     );
 
-
-    private final Pool<BlockPos.Mutable> spawnPool = new Pool<>(BlockPos.Mutable::new);
-    private final List<BlockPos.Mutable> spawns = new ArrayList<>();
+    private final PooledList<BlockPos.Mutable> spawnPool = new PooledList<>(BlockPos.Mutable::new);
     private int ticksWaited;
 
     public SpawnProofer() {
@@ -94,15 +91,14 @@ public class SpawnProofer extends Module {
         }
 
         // Find spawn locations
-        for (BlockPos.Mutable blockPos : spawns) spawnPool.free(blockPos);
-        spawns.clear();
+        spawnPool.clear();
         BlockIterator.register(range.get(), range.get(), (blockPos, blockState) -> {
             BlockUtils.MobSpawn spawn = BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get());
 
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
                     spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
 
-                spawns.add(spawnPool.get().set(blockPos));
+                spawnPool.get().set(blockPos);
             }
         });
     }
@@ -115,7 +111,7 @@ public class SpawnProofer extends Module {
             return;
         }
 
-        if (spawns.isEmpty()) return;
+        if (spawnPool.isEmpty()) return;
 
         // Find slot
         FindItemResult block = InvUtils.findInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
@@ -127,7 +123,7 @@ public class SpawnProofer extends Module {
 
         // Place blocks
         if (delay.get() == 0) {
-            for (BlockPos blockPos : spawns) BlockUtils.place(blockPos, block, rotate.get(), -50, false);
+            for (BlockPos blockPos : spawnPool) BlockUtils.place(blockPos, block, rotate.get(), -50, false);
         }
         else {
             // Check if light source
@@ -135,9 +131,9 @@ public class SpawnProofer extends Module {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
-                BlockPos.Mutable selectedBlockPos = spawns.get(0);
+                BlockPos.Mutable selectedBlockPos = spawnPool.peekList();
 
-                for (BlockPos blockPos : spawns) {
+                for (BlockPos blockPos : spawnPool) {
                     int lightLevel = mc.world.getLightLevel(blockPos);
                     if (lightLevel < lowestLightLevel) {
                         lowestLightLevel = lightLevel;
@@ -148,7 +144,7 @@ public class SpawnProofer extends Module {
                 BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
             }
             else {
-                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
+                BlockUtils.place(spawnPool.peekList(), block, rotate.get(), -50, false);
             }
         }
 

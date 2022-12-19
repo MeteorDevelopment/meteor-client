@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.Pool;
+import meteordevelopment.meteorclient.utils.misc.PooledList;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
@@ -28,7 +28,6 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -237,8 +236,7 @@ public class Nuker extends Module {
         .build()
     );
 
-    private final Pool<BlockPos.Mutable> blockPosPool = new Pool<>(BlockPos.Mutable::new);
-    private final List<BlockPos.Mutable> blocks = new ArrayList<>();
+    private final PooledList<BlockPos.Mutable> blockPosPool = new PooledList<>(BlockPos.Mutable::new);
 
     private boolean firstBlock;
     private final BlockPos.Mutable lastBlockPos = new BlockPos.Mutable();
@@ -360,19 +358,19 @@ public class Nuker extends Module {
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
 
             // Add block
-            blocks.add(blockPosPool.get().set(blockPos));
+            blockPosPool.get().set(blockPos);
         });
 
         // Break block if found
         BlockIterator.after(() -> {
             // Sort blocks
 			if (sortMode.get() == SortMode.TopDown)
-                blocks.sort(Comparator.comparingDouble(value -> -1*value.getY()));
+                blockPosPool.sortList(Comparator.comparingDouble(value -> -1*value.getY()));
             else if (sortMode.get() != SortMode.None)
-                blocks.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
+                blockPosPool.sortList(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
             // Check if some block was found
-            if (blocks.isEmpty()) {
+            if (blockPosPool.isEmpty()) {
                 // If no block was found for long enough then set firstBlock flag to true to not wait before breaking another again
                 if (noBlockTimer++ >= delay.get()) firstBlock = true;
                 return;
@@ -382,11 +380,11 @@ public class Nuker extends Module {
             }
 
             // Update timer
-            if (!firstBlock && !lastBlockPos.equals(blocks.get(0))) {
+            BlockPos.Mutable firstElement = blockPosPool.peekList();
+            if (!firstBlock && !lastBlockPos.equals(firstElement)) {
                 timer = delay.get();
 
-                firstBlock = false;
-                lastBlockPos.set(blocks.get(0));
+                lastBlockPos.set(firstElement);
 
                 if (timer > 0) return;
             }
@@ -394,7 +392,7 @@ public class Nuker extends Module {
             // Break
             int count = 0;
 
-            for (BlockPos block : blocks) {
+            for (BlockPos block : blockPosPool) {
                 if (count >= maxBlocksPerTick.get()) break;
 
                 boolean canInstaMine = BlockUtils.canInstaBreak(block);
@@ -417,8 +415,7 @@ public class Nuker extends Module {
             firstBlock = false;
 
             // Clear current block positions
-            for (BlockPos.Mutable blockPos : blocks) blockPosPool.free(blockPos);
-            blocks.clear();
+            blockPosPool.clear();
         });
     }
     

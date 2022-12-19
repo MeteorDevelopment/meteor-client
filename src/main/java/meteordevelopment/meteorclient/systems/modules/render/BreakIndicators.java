@@ -23,7 +23,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.shape.VoxelShape;
 
-import java.util.List;
 import java.util.Map;
 
 public class BreakIndicators extends Module {
@@ -69,8 +68,8 @@ public class BreakIndicators extends Module {
     private void onRender(Render3DEvent event) {
         renderNormal(event);
 
-        if (packetMine.get() && !Modules.get().get(PacketMine.class).blocks.isEmpty()) {
-            renderPacket(event, Modules.get().get(PacketMine.class).blocks);
+        if (packetMine.get() && !Modules.get().get(PacketMine.class).blockPool.isEmpty()) {
+            renderPacket(event, Modules.get().get(PacketMine.class).blockPool);
         }
     }
 
@@ -110,7 +109,7 @@ public class BreakIndicators extends Module {
         });
     }
 
-    private void renderPacket(Render3DEvent event, List<PacketMine.MyBlock> blocks) {
+    private void renderPacket(Render3DEvent event, Iterable<PacketMine.MyBlock> blocks) {
         for (PacketMine.MyBlock block : blocks) {
             if (block.mining && block.progress != Double.POSITIVE_INFINITY) {
                 VoxelShape shape = block.blockState.getOutlineShape(mc.world, block.blockPos);
