@@ -49,7 +49,6 @@ import net.minecraft.world.RaycastContext;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -419,10 +418,17 @@ public class CrystalAura extends Module {
 
     // Render
 
-    private final Setting<Boolean> renderSwing = sgRender.add(new BoolSetting.Builder()
-        .name("swing")
-        .description("Renders hand swinging client-side.")
-        .defaultValue(true)
+    public final Setting<SwingMode> swingMode = sgRender.add(new EnumSetting.Builder<SwingMode>()
+        .name("swing-mode")
+        .description("How to swing when placing.")
+        .defaultValue(SwingMode.Both)
+        .build()
+    );
+
+    private final Setting<RenderMode> renderMode = sgRender.add(new EnumSetting.Builder<RenderMode>()
+        .name("render-mode")
+        .description("The mode to render in.")
+        .defaultValue(RenderMode.Normal)
         .build()
     );
 
@@ -815,8 +821,8 @@ public class CrystalAura extends Module {
         Hand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
         if (hand == null) hand = Hand.MAIN_HAND;
 
-        if (renderSwing.get()) mc.player.swingHand(hand);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+        if (swingMode.get().client()) mc.player.swingHand(hand);
+        if (swingMode.get().packet()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
 
         attacks++;
     }
@@ -839,7 +845,7 @@ public class CrystalAura extends Module {
 
         // Return if there are no crystals in either hand and auto switch mode is none
         if (autoSwitch.get() != AutoSwitchMode.None) {
-            if (noGapSwitch.get() && autoSwitch.get() == AutoSwitchMode.Normal) {
+            if (noGapSwitch.get() && autoSwitch.get() == AutoSwitchMode.Normal && offItem != Items.END_CRYSTAL) {
                 if (mainItem == Items.ENCHANTED_GOLDEN_APPLE
                 || offItem == Items.ENCHANTED_GOLDEN_APPLE
                 || mainItem == Items.GOLDEN_APPLE
@@ -978,8 +984,8 @@ public class CrystalAura extends Module {
             // Place crystal
             mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
 
-            if (renderSwing.get()) mc.player.swingHand(hand);
-            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+            if (swingMode.get().client()) mc.player.swingHand(hand);
+            if (swingMode.get().packet()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
 
             placing = true;
             placingTimer = 4;
@@ -991,7 +997,7 @@ public class CrystalAura extends Module {
         }
         else {
             // Place support block
-            BlockUtils.place(supportBlock, item, false, 0, renderSwing.get(), true, false);
+            BlockUtils.place(supportBlock, item, false, 0, swingMode.get().client(), true, false);
             placeTimer += supportDelay.get();
 
             if (supportDelay.get() == 0) placeCrystal(result, damage, null);
@@ -1165,6 +1171,8 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
+        if (renderMode.get() == RenderMode.None) return;
+
         if (renderTimer > 0 && render.get()) {
             event.renderer.box(renderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
@@ -1187,7 +1195,7 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        if (!render.get() || renderTimer <= 0 || !renderDamageText.get()) return;
+        if (renderMode.get() == RenderMode.None || !renderDamageText.get() || renderTimer <= 0) return;
 
         vec3.set(renderPos.getX() + 0.5, renderPos.getY() + 0.5, renderPos.getZ() + 0.5);
 
@@ -1230,5 +1238,27 @@ public class CrystalAura extends Module {
         public boolean equals(PauseMode process) {
             return this == process || this == PauseMode.Both;
         }
+    }
+
+    public enum SwingMode {
+        Both,
+        Packet,
+        Client,
+        None;
+
+        public boolean packet() {
+            return this == Packet || this == Both;
+        }
+
+        public boolean client() {
+            return this == Client || this == Both;
+        }
+    }
+
+    public enum RenderMode {
+        Normal,
+        Smooth,
+        Fade,
+        None
     }
 }
