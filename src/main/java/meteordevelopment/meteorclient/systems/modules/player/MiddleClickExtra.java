@@ -10,7 +10,6 @@ package meteordevelopment.meteorclient.systems.modules.player;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -20,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.KeybindingPresser;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
@@ -72,7 +72,9 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
-    private boolean isUsing;
+    private final KeybindingPresser keybindingPresser = new KeybindingPresser(mc.options.useKey,
+        () -> !InvUtils.testInHands(Items.BOW) || BowItem.getPullProgress(mc.player.getItemUseTime()) < 1);
+
 
     public MiddleClickExtra() {
         super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click.");
@@ -80,7 +82,8 @@ public class MiddleClickExtra extends Module {
 
     @Override
     public void onDeactivate() {
-        stopIfUsing();
+        keybindingPresser.stopIfPressed();
+        InvUtils.swapBack();
     }
 
     @EventHandler
@@ -102,41 +105,19 @@ public class MiddleClickExtra extends Module {
                 InvUtils.swapBack();
             }
             case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-            case Longer -> {
-                mc.options.useKey.setPressed(true);
-                isUsing = true;
-            }
-        }
-    }
-
-    @EventHandler
-    private void onTick(TickEvent.Pre event) {
-        if (isUsing) {
-            boolean pressed = true;
-
-            if (mc.player.getMainHandStack().getItem() instanceof BowItem) {
-                pressed = BowItem.getPullProgress(mc.player.getItemUseTime()) < 1;
-            }
-
-            mc.options.useKey.setPressed(pressed);
+            case Longer -> keybindingPresser.press();
         }
     }
 
     @EventHandler
     private void onFinishUsingItem(FinishUsingItemEvent event) {
-        stopIfUsing();
+        keybindingPresser.stopIfPressed();
+        InvUtils.swapBack();
     }
 
     @EventHandler
     private void onStoppedUsingItem(StoppedUsingItemEvent event) {
-        stopIfUsing();
-    }
-
-    private void stopIfUsing() {
-        if (isUsing) {
-            mc.options.useKey.setPressed(false);
-            InvUtils.swapBack();
-            isUsing = false;
-        }
+        keybindingPresser.stopIfPressed();
+        InvUtils.swapBack();
     }
 }

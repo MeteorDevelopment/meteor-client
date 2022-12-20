@@ -42,6 +42,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.registry.Registries;
 import net.minecraft.util.DyeColor;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.UseAction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -628,5 +629,9 @@ public class Utils {
     public static boolean ipFilter(String text, char character) {
         if (text.contains(":") && character == ':') return false;
         return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
+    }
+
+    public static boolean usableStack(ItemStack itemStack) {
+        return itemStack.getUseAction() != UseAction.NONE;
     }
 }

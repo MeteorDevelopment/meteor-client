@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -135,14 +136,7 @@ public class Offhand extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
-    }
-
-    private boolean usableItem() {
-        return mc.player.getMainHandStack().getItem() == Items.BOW
-            || mc.player.getMainHandStack().getItem() == Items.TRIDENT
-            || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
-            || mc.player.getMainHandStack().getItem().isFood();
+        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !InvUtils.testInMainHand(Utils::usableStack) && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     @Override
