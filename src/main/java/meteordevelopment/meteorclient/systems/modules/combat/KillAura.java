@@ -34,6 +34,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.passive.WolfEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
@@ -342,6 +343,7 @@ public class KillAura extends Module {
             if (entity instanceof EndermanEntity enderman && !enderman.isAngryAt(mc.player)) return false;
             if (entity instanceof ZombifiedPiglinEntity piglin && !piglin.isAngryAt(mc.player)) return false;
             if (entity instanceof WolfEntity wolf && !wolf.isAttacking()) return false;
+            if (entity instanceof LlamaEntity llama && !llama.isAttacking()) return false;
         }
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
