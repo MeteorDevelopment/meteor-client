@@ -30,6 +30,7 @@ import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Blocks;
@@ -346,24 +347,47 @@ public class CrystalAura extends Module {
 
     // Pause
 
-    private final Setting<Boolean> eatPause = sgPause.add(new BoolSetting.Builder()
+    public final Setting<PauseMode> pauseOnEat = sgPause.add(new EnumSetting.Builder<PauseMode>()
         .name("pause-on-eat")
-        .description("Pauses Crystal Aura when eating.")
-        .defaultValue(true)
+        .description("What to pause.")
+        .defaultValue(PauseMode.Place)
         .build()
     );
 
-    private final Setting<Boolean> drinkPause = sgPause.add(new BoolSetting.Builder()
+    public final Setting<PauseMode> pauseOnDrink = sgPause.add(new EnumSetting.Builder<PauseMode>()
         .name("pause-on-drink")
-        .description("Pauses Crystal Aura when drinking.")
+        .description("What to pause.")
+        .defaultValue(PauseMode.Place)
+        .build()
+    );
+
+    public final Setting<PauseMode> pauseOnMine = sgPause.add(new EnumSetting.Builder<PauseMode>()
+        .name("pause-on-mine")
+        .description("What to pause.")
+        .defaultValue(PauseMode.None)
+        .build()
+    );
+
+    private final Setting<Boolean> pauseOnLag = sgPause.add(new BoolSetting.Builder()
+        .name("pause-on-lag")
+        .description("Whether to pause if the server is not responding.")
         .defaultValue(true)
         .build()
     );
 
-    private final Setting<Boolean> minePause = sgPause.add(new BoolSetting.Builder()
-        .name("pause-on-mine")
-        .description("Pauses Crystal Aura when mining.")
-        .defaultValue(false)
+    public final Setting<List<Module>> pauseModules = sgPause.add(new ModuleListSetting.Builder()
+        .name("pause-modules")
+        .description("Pauses while any of the selected modules are active.")
+        .defaultValue(BedAura.class)
+        .build()
+    );
+
+    public final Setting<Double> pauseHealth = sgPause.add(new DoubleSetting.Builder()
+        .name("pause-health")
+        .description("Pauses when you go below a certain health.")
+        .defaultValue(5)
+        .range(0,36)
+        .sliderRange(0,36)
         .build()
     );
 
@@ -448,6 +472,8 @@ public class CrystalAura extends Module {
     );
 
     // Fields
+
+    private Item mainItem, offItem;
 
     private int breakTimer, placeTimer, switchTimer, ticksPassed;
     private final List<PlayerEntity> targets = new ArrayList<>();
@@ -565,6 +591,9 @@ public class CrystalAura extends Module {
         if (renderTimer > 0) renderTimer--;
         if (breakRenderTimer > 0) breakRenderTimer--;
 
+        mainItem = mc.player.getMainHandStack().getItem();
+        offItem = mc.player.getOffHandStack().getItem();
+
         // Update waiting to explode crystals and mark them as existing if reached threshold
         for (IntIterator it = waitingToExplode.keySet().iterator(); it.hasNext();) {
             int id = it.nextInt();
@@ -578,9 +607,6 @@ public class CrystalAura extends Module {
                 waitingToExplode.put(id, ticks + 1);
             }
         }
-
-        // Check pause settings
-        if (PlayerUtils.shouldPause(minePause.get(), eatPause.get(), drinkPause.get())) return;
 
         // Set player eye pos
         ((IVec3d) playerEyePos).set(mc.player.getPos().x, mc.player.getPos().y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getPos().z);
@@ -644,6 +670,7 @@ public class CrystalAura extends Module {
 
     private void doBreak() {
         if (!doBreak.get() || breakTimer > 0 || switchTimer > 0 || attacks >= attackFrequency.get()) return;
+        if (shouldPause(PauseMode.Break)) return;
 
         double bestDamage = 0;
         Entity crystal = null;
@@ -779,6 +806,7 @@ public class CrystalAura extends Module {
 
     private void doPlace() {
         if (!doPlace.get() || placeTimer > 0) return;
+        if (shouldPause(PauseMode.Place)) return;
 
         // Return if there are no crystals in hotbar or offhand
         if (!InvUtils.testInHotbar(Items.END_CRYSTAL)) return;
@@ -1002,6 +1030,18 @@ public class CrystalAura extends Module {
 
     // Others
 
+    private boolean shouldPause(PauseMode process) {
+        if (mc.player.isUsingItem() || mc.options.useKey.isPressed()) {
+            if (pauseOnEat.get().equals(process) && (mainItem.isFood() || offItem.isFood())) return true;
+            if (pauseOnDrink.get().equals(process) && (mainItem instanceof PotionItem || offItem instanceof PotionItem)) return true;
+        }
+
+        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return true;
+        for (Module module : pauseModules.get()) if (module.isActive()) return true;
+        if (pauseOnMine.get().equals(process) && mc.interactionManager.isBreakingBlock()) return true;
+        return (EntityUtils.getTotalHealth(mc.player) <= pauseHealth.get());
+    }
+
     private boolean isOutOfRange(Vec3d vec3d, BlockPos blockPos, boolean place) {
         ((IRaycastContext) raycastContext).set(playerEyePos, vec3d, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
 
@@ -1135,5 +1175,16 @@ public class CrystalAura extends Module {
         Disabled,
         Accurate,
         Fast
+    }
+
+    public enum PauseMode {
+        Both,
+        Place,
+        Break,
+        None;
+
+        public boolean equals(PauseMode process) {
+            return this == process || this == PauseMode.Both;
+        }
     }
 }
