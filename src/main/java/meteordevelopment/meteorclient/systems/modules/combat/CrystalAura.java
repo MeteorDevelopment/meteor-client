@@ -49,12 +49,14 @@ import net.minecraft.world.RaycastContext;
 import org.joml.Vector3d;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class CrystalAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgSwitch = settings.createGroup("Switch");
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgFacePlace = settings.createGroup("Face Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
@@ -104,10 +106,17 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<AutoSwitchMode> autoSwitch = sgGeneral.add(new EnumSetting.Builder<AutoSwitchMode>()
-        .name("auto-switch")
-        .description("Switches to crystals in your hotbar once a target is found.")
-        .defaultValue(AutoSwitchMode.Normal)
+    private final Setting<Boolean> antiSuicide = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-suicide")
+        .description("Will not place and break crystals if they will kill you.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreNakeds = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-nakeds")
+        .description("Ignore players with no items.")
+        .defaultValue(false)
         .build()
     );
 
@@ -135,9 +144,41 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiSuicide = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-suicide")
-        .description("Will not place and break crystals if they will kill you.")
+    // Switch
+
+    private final Setting<AutoSwitchMode> autoSwitch = sgSwitch.add(new EnumSetting.Builder<AutoSwitchMode>()
+        .name("auto-switch")
+        .description("Switches to crystals in your hotbar once a target is found.")
+        .defaultValue(AutoSwitchMode.Normal)
+        .build()
+    );
+
+    private final Setting<Integer> switchDelay = sgSwitch.add(new IntSetting.Builder()
+        .name("switch-delay")
+        .description("The delay in ticks to wait to break a crystal after switching hotbar slot.")
+        .defaultValue(0)
+        .min(0)
+        .build()
+    );
+
+    private final Setting<Boolean> noGapSwitch = sgSwitch.add(new BoolSetting.Builder()
+        .name("no-gap-switch")
+        .description("Won't auto switch if you're holding a gapple.")
+        .defaultValue(true)
+        .visible(() -> autoSwitch.get() == AutoSwitchMode.Normal)
+        .build()
+    );
+
+    private final Setting<Boolean> noBowSwitch = sgSwitch.add(new BoolSetting.Builder()
+        .name("no-bow-switch")
+        .description("Won't auto switch if you're holding a bow.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> antiWeakness = sgSwitch.add(new BoolSetting.Builder()
+        .name("anti-weakness")
+        .description("Switches to tools with so you can break crystals with the weakness effect.")
         .defaultValue(true)
         .build()
     );
@@ -170,7 +211,7 @@ public class CrystalAura extends Module {
     );
 
     private final Setting<Double> placeWallsRange = sgPlace.add(new DoubleSetting.Builder()
-        .name("place-walls-range")
+        .name("walls-range")
         .description("Range in which to place crystals when behind blocks.")
         .defaultValue(4.5)
         .min(0)
@@ -272,14 +313,6 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Integer> switchDelay = sgBreak.add(new IntSetting.Builder()
-        .name("switch-delay")
-        .description("The delay in ticks to wait to break a crystal after switching hotbar slot.")
-        .defaultValue(0)
-        .min(0)
-        .build()
-    );
-
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
         .name("break-range")
         .description("Range in which to break crystals.")
@@ -290,7 +323,7 @@ public class CrystalAura extends Module {
     );
 
     private final Setting<Double> breakWallsRange = sgBreak.add(new DoubleSetting.Builder()
-        .name("break-walls-range")
+        .name("walls-range")
         .description("Range in which to break crystals when behind blocks.")
         .defaultValue(4.5)
         .min(0)
@@ -334,13 +367,6 @@ public class CrystalAura extends Module {
     private final Setting<Boolean> fastBreak = sgBreak.add(new BoolSetting.Builder()
         .name("fast-break")
         .description("Ignores break delay and tries to break the crystal as soon as it's spawned in the world.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> antiWeakness = sgBreak.add(new BoolSetting.Builder()
-        .name("anti-weakness")
-        .description("Switches to tools with high enough damage to explode the crystal with weakness effect.")
         .defaultValue(true)
         .build()
     );
@@ -812,7 +838,15 @@ public class CrystalAura extends Module {
         if (!InvUtils.testInHotbar(Items.END_CRYSTAL)) return;
 
         // Return if there are no crystals in either hand and auto switch mode is none
-        if (autoSwitch.get() == AutoSwitchMode.None && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) return;
+        if (autoSwitch.get() != AutoSwitchMode.None) {
+            if (noGapSwitch.get() && autoSwitch.get() == AutoSwitchMode.Normal) {
+                if (mainItem == Items.ENCHANTED_GOLDEN_APPLE
+                || offItem == Items.ENCHANTED_GOLDEN_APPLE
+                || mainItem == Items.GOLDEN_APPLE
+                || offItem == Items.GOLDEN_APPLE) return;
+            }
+            if (noBowSwitch.get() && (mainItem == Items.BOW || offItem == Items.BOW)) return;
+        } else if (mainItem != Items.END_CRYSTAL && offItem != Items.END_CRYSTAL) return;
 
         // Check for multiplace
         for (Entity entity : mc.world.getEntities()) {
@@ -1106,10 +1140,20 @@ public class CrystalAura extends Module {
         // Players
         for (PlayerEntity player : mc.world.getPlayers()) {
             if (player.getAbilities().creativeMode || player == mc.player) continue;
+            if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
+            if (player.distanceTo(mc.player) > targetRange.get()) continue;
 
-            if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && PlayerUtils.isWithin(player, targetRange.get())) {
-                targets.add(player);
+            if (ignoreNakeds.get()) {
+                if (player.getOffHandStack().isEmpty()
+                    && player.getMainHandStack().isEmpty()
+                    && player.getInventory().armor.get(0).isEmpty()
+                    && player.getInventory().armor.get(1).isEmpty()
+                    && player.getInventory().armor.get(2).isEmpty()
+                    && player.getInventory().armor.get(3).isEmpty()
+                ) continue;
             }
+
+            targets.add(player);
         }
     }
 
@@ -1117,7 +1161,7 @@ public class CrystalAura extends Module {
         return EntityUtils.intersectsWithEntity(box, entity -> !entity.isSpectator() && !removed.contains(entity.getId()));
     }
 
-    // Render
+    // Rendering
 
     @EventHandler
     private void onRender(Render3DEvent event) {
