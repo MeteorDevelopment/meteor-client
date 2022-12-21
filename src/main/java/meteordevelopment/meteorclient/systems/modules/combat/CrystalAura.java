@@ -150,7 +150,7 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
+    public final Setting<Integer> placeDelay = sgPlace.add(new IntSetting.Builder()
         .name("place-delay")
         .description("The delay in ticks to wait to place a crystal after it's exploded.")
         .defaultValue(0)
@@ -464,6 +464,7 @@ public class CrystalAura extends Module {
     private final IntSet placedCrystals = new IntOpenHashSet();
     private boolean placing;
     private int placingTimer;
+    public int kaTimer;
     private final BlockPos.Mutable placingCrystalBlockPos = new BlockPos.Mutable();
 
     private final IntSet removed = new IntOpenHashSet();
@@ -502,6 +503,7 @@ public class CrystalAura extends Module {
 
         placing = false;
         placingTimer = 0;
+        kaTimer = 0;
 
         attacks = 0;
 
@@ -545,6 +547,8 @@ public class CrystalAura extends Module {
             if (placingTimer > 0) placingTimer--;
             else placing = false;
         }
+
+        if (kaTimer > 0) kaTimer--;
 
         if (ticksPassed < 20) ticksPassed++;
         else {
@@ -921,6 +925,7 @@ public class CrystalAura extends Module {
 
             placing = true;
             placingTimer = 4;
+            kaTimer = 8;
             placingCrystalBlockPos.set(result.getBlockPos()).move(0, 1, 0);
 
             renderTimer = renderTime.get();
