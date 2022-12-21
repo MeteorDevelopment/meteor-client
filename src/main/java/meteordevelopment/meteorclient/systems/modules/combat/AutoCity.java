@@ -151,7 +151,7 @@ public class AutoCity extends Module {
 
         targetPos = EntityUtils.getCityBlock(target);
         if (targetPos == null || PlayerUtils.distanceTo(targetPos) > breakRange.get()) {
-            if (chatInfo.get()) error("Couldn't find a target, disabling.");
+            if (chatInfo.get()) error("Couldn't find a good block, disabling.");
             toggle();
             return;
         }
