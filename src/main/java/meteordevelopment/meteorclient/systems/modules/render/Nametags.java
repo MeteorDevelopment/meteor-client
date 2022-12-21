@@ -415,7 +415,8 @@ public class Nametags extends Module {
         String pingText = " [" + ping + "ms]";
 
         // Pops
-        String popsText = " [" + getPops(player) + "]";
+        Notifier notifier = Modules.get().get(Notifier.class);
+        String popsText = " [" + getPops(player, notifier) + "]";
 
         // Distance
         double dist = Math.round(PlayerUtils.distanceToCamera(player) * 10.0) / 10.0;
@@ -432,7 +433,6 @@ public class Nametags extends Module {
 
         boolean renderPlayerDistance = player != mc.cameraEntity || Modules.get().isActive(Freecam.class);
 
-        Notifier notifier = Modules.get().get(Notifier.class);
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
         if (displayPops.get() && notifier.totemPops.get() && notifier.isActive()) width += popsWidth;
@@ -652,8 +652,7 @@ public class Nametags extends Module {
         };
     }
 
-    private int getPops(PlayerEntity player) {
-        Notifier notifier = Modules.get().get(Notifier.class);
+    private int getPops(PlayerEntity player, Notifier notifier) {
         if (notifier == null || !notifier.isActive()) return 0;
         return notifier.totemPopMap.getOrDefault(player.getUuid(), 0);
     }
