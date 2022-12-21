@@ -417,6 +417,7 @@ public class Modules extends System<Modules> {
         add(new AutoEat());
         add(new AutoFish());
         add(new AutoGap());
+        add(new AutoGrind());
         add(new AutoMend());
         add(new AutoReplenish());
         add(new AutoTool());
