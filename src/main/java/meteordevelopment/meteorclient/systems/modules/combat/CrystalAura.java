@@ -925,7 +925,7 @@ public class CrystalAura extends Module {
 
             placing = true;
             placingTimer = 4;
-            kaTimer = placeDelay.get();
+            kaTimer = 8;
             placingCrystalBlockPos.set(result.getBlockPos()).move(0, 1, 0);
 
             renderTimer = renderTime.get();
