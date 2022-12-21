@@ -83,6 +83,13 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> onlyOnLook = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-on-look")
+        .description("Only attacks when holding left click.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
         .name("pause-on-combat")
         .description("Freezes Baritone temporarily until you are finished attacking the entity.")
@@ -250,7 +257,16 @@ public class KillAura extends Module {
         if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;
         if (pauseOnCA.get() && ca.isActive() && ca.kaTimer > 0) return;
 
-        TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
+
+        if (onlyOnLook.get()) {
+            if (mc.targetedEntity == null) return;
+            if (!entityCheck(mc.targetedEntity)) return;
+
+            targets.add(mc.targetedEntity);
+        } else {
+            TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
+        }
+
         if (targets.isEmpty()) {
             if (wasPathing) {
                 BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
