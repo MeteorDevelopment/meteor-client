@@ -393,8 +393,7 @@ public class KillAura extends Module {
 
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
-
-        info("Attacking entity " + target.getEntityName());
+        
         hitTimer = 0;
     }
 
