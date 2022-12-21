@@ -84,13 +84,13 @@ public class KillAura extends Module {
 
     private final Setting<Boolean> onlyOnLook = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-look")
-        .description("Only attacks when holding left click.")
+        .description("Only attacks when looking at an entity.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> pauseOnCombat = sgGeneral.add(new BoolSetting.Builder()
-        .name("pause-on-combat")
+        .name("pause-baritone")
         .description("Freezes Baritone temporarily until you are finished attacking the entity.")
         .defaultValue(true)
         .build()
@@ -393,7 +393,7 @@ public class KillAura extends Module {
 
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
-        
+
         hitTimer = 0;
     }
 
