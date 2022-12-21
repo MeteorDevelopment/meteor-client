@@ -24,7 +24,6 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.TickRate;
-import meteordevelopment.meteorclient.utils.world.TimerUtil;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -235,9 +234,8 @@ public class KillAura extends Module {
 
     CrystalAura ca = Modules.get().get(CrystalAura.class);
     private final List<Entity> targets = new ArrayList<>();
-    private final TimerUtil hitTimer = new TimerUtil();
     private final Vec3d hitVec = new Vec3d(0, 0, 0);
-    private int switchTimer;
+    private int switchTimer, hitTimer;
     private boolean wasPathing = false;
 
     public KillAura() {
@@ -376,13 +374,18 @@ public class KillAura extends Module {
         }
 
         if (customDelay.get()) {
+            if (hitTimer > 0) {
+                hitTimer--;
+                return false;
+            }
+
             double delay = hitDelay.get();
             if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
-            return hitTimer.hasPassedTicks((long) delay);
+            return hitTimer
         } else {
-            long delay = fixedDelay();
+            float delay = 0.5f;
             if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
-            return hitTimer.hasPassedMillis(delay);
+            return mc.player.getAttackCooldownProgress(delay) >= 1;
         }
     }
 
@@ -408,7 +411,7 @@ public class KillAura extends Module {
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
 
-        hitTimer.reset();
+        hitTimer = hitDelay.get();
     }
 
     private boolean itemInHand() {
