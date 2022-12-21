@@ -373,36 +373,15 @@ public class KillAura extends Module {
             return false;
         }
 
+        float delay = (customDelay.get()) ? hitDelay.get() : 0.5f;
+        if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
+
         if (customDelay.get()) {
-            if (hitTimer > 0) {
-                hitTimer--;
+            if (hitTimer < delay) {
+                hitTimer++;
                 return false;
-            }
-
-            double delay = hitDelay.get();
-            if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
-            return hitTimer
-        } else {
-            float delay = 0.5f;
-            if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
-            return mc.player.getAttackCooldownProgress(delay) >= 1;
-        }
-    }
-
-    private long fixedDelay() {
-        Item activeItem = mc.player.getMainHandStack().getItem();
-
-        if (activeItem instanceof SwordItem) return 625;
-        else if (activeItem instanceof TridentItem) return (long) (1000 / 1.1);
-        else if (activeItem instanceof PickaxeItem) return (long) (1000 / 1.2);
-        else if (activeItem instanceof ShovelItem
-            || activeItem == Items.GOLDEN_AXE || activeItem == Items.DIAMOND_AXE || activeItem == Items.NETHERITE_AXE
-            || activeItem == Items.WOODEN_HOE || activeItem == Items.GOLDEN_HOE) return 1000;
-        else if (activeItem == Items.WOODEN_AXE || activeItem == Items.STONE_AXE) return 1250;
-        else if (activeItem == Items.IRON_AXE) return (long) (1000 / 0.9);
-        else if (activeItem == Items.STONE_HOE) return 500;
-        else if (activeItem == Items.IRON_HOE) return 1000 / 3;
-        return 250;
+            } else return true;
+        } else return mc.player.getAttackCooldownProgress(delay) >= 1;
     }
 
     private void attack(Entity target) {
@@ -411,7 +390,7 @@ public class KillAura extends Module {
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
 
-        hitTimer = hitDelay.get();
+        hitTimer = 0;
     }
 
     private boolean itemInHand() {
