@@ -39,7 +39,7 @@ public class Notifier extends Module {
 
     // Totem Pops
 
-    private final Setting<Boolean> totemPops = sgTotemPops.add(new BoolSetting.Builder()
+    public final Setting<Boolean> totemPops = sgTotemPops.add(new BoolSetting.Builder()
         .name("totem-pops")
         .description("Notifies you when a player pops a totem.")
         .defaultValue(true)
@@ -85,7 +85,7 @@ public class Notifier extends Module {
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgVisualRange.add(new EntityTypeListSetting.Builder()
         .name("entities")
-        .description("Which entities to nofity about.")
+        .description("Which entities to notify about.")
         .defaultValue(EntityType.PLAYER)
         .build()
     );
@@ -104,7 +104,7 @@ public class Notifier extends Module {
         .build()
     );
 
-    private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
+    public final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
 
     private final Random random = new Random();
