@@ -256,13 +256,16 @@ public class KillAura extends Module {
         if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;
         if (pauseOnCA.get() && ca.isActive() && ca.kaTimer > 0) return;
 
-
         if (onlyOnLook.get()) {
-            if (mc.targetedEntity == null) return;
-            if (!entityCheck(mc.targetedEntity)) return;
+            Entity targeted = mc.targetedEntity;
 
+            if (targeted == null) return;
+            if (!entityCheck(targeted)) return;
+
+            targets.clear();
             targets.add(mc.targetedEntity);
         } else {
+            targets.clear();
             TargetUtils.getList(targets, this::entityCheck, priority.get(), maxTargets.get());
         }
 
@@ -391,6 +394,7 @@ public class KillAura extends Module {
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
 
+        info("Attacking entity " + target.getEntityName());
         hitTimer = 0;
     }
 
