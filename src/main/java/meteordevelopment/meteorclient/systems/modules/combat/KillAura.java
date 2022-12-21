@@ -127,6 +127,7 @@ public class KillAura extends Module {
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 5)
+        .visible(() -> !onlyOnLook.get())
         .build()
     );
 
@@ -199,7 +200,7 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> TPSSync = sgTiming.add(new BoolSetting.Builder()
+    private final Setting<Boolean> tpsSync = sgTiming.add(new BoolSetting.Builder()
         .name("TPS-sync")
         .description("Tries to sync attack delay with the server's TPS.")
         .defaultValue(true)
@@ -209,7 +210,7 @@ public class KillAura extends Module {
     private final Setting<Boolean> customDelay = sgTiming.add(new BoolSetting.Builder()
         .name("custom-delay")
         .description("Use a custom delay instead of the vanilla cooldown.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -374,7 +375,7 @@ public class KillAura extends Module {
         }
 
         float delay = (customDelay.get()) ? hitDelay.get() : 0.5f;
-        if (TPSSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
+        if (tpsSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
 
         if (customDelay.get()) {
             if (hitTimer < delay) {
