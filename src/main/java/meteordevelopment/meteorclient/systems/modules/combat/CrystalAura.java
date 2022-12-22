@@ -1232,7 +1232,7 @@ public class CrystalAura extends Module {
                 if (renderPlace.get() && placeRenderTimer > 0) {
                     event.renderer.box(placeRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 }
-                if (renderBreak.get() && placeRenderTimer > 0) {
+                if (renderBreak.get() && breakRenderTimer > 0) {
                     event.renderer.box(breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
                 }
             }
@@ -1282,7 +1282,7 @@ public class CrystalAura extends Module {
                     event.renderer.line(x, y, z, x, y, z + 1, lineColor.get());
                     event.renderer.line(x + 1, y, z, x + 1, y, z + 1, lineColor.get());
                     event.renderer.line(x, y, z + 1, x + 1, y, z + 1, lineColor.get());
-                    
+
                     event.renderer.line(x, y, z, x, y - height.get(), z, lineColor.get(), bottom);
                     event.renderer.line(x + 1, y, z, x + 1, y - height.get(), z, lineColor.get(), bottom);
                     event.renderer.line(x, y, z + 1, x, y - height.get(), z + 1, lineColor.get(), bottom);
