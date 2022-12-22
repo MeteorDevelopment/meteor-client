@@ -27,6 +27,7 @@ import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -432,17 +433,59 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-        .name("render")
+    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
+        .name("render-place")
         .description("Renders a block overlay over the block the crystals are being placed on.")
         .defaultValue(true)
+        .visible(() -> renderMode.get() == RenderMode.Normal)
+        .build()
+    );
+
+    private final Setting<Integer> placeRenderTime = sgRender.add(new IntSetting.Builder()
+        .name("place-time")
+        .description("How long to render placements.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Normal && renderPlace.get())
         .build()
     );
 
     private final Setting<Boolean> renderBreak = sgRender.add(new BoolSetting.Builder()
-        .name("break")
+        .name("render-break")
         .description("Renders a block overlay over the block the crystals are broken on.")
         .defaultValue(false)
+        .visible(() -> renderMode.get() == RenderMode.Normal)
+        .build()
+    );
+
+    private final Setting<Integer> breakRenderTime = sgRender.add(new IntSetting.Builder()
+        .name("break-time")
+        .description("How long to render breaking for.")
+        .defaultValue(13)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Normal && renderBreak.get())
+        .build()
+    );
+
+    private final Setting<Integer> smoothness = sgRender.add(new IntSetting.Builder()
+        .name("smoothness")
+        .description("How smoothly the render should move around.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Smooth)
+        .build()
+    );
+
+    private final Setting<Integer> renderTime = sgRender.add(new IntSetting.Builder()
+        .name("render-time")
+        .description("How long to render placements.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Smooth || renderMode.get() == RenderMode.Fading)
         .build()
     );
 
@@ -484,25 +527,6 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Integer> renderTime = sgRender.add(new IntSetting.Builder()
-        .name("render-time")
-        .description("How long to render for.")
-        .defaultValue(10)
-        .min(0)
-        .sliderMax(20)
-        .build()
-    );
-
-    private final Setting<Integer> renderBreakTime = sgRender.add(new IntSetting.Builder()
-        .name("break-time")
-        .description("How long to render breaking for.")
-        .defaultValue(13)
-        .min(0)
-        .sliderMax(20)
-        .visible(renderBreak::get)
-        .build()
-    );
-
     // Fields
 
     private Item mainItem, offItem;
@@ -541,9 +565,11 @@ public class CrystalAura extends Module {
     private double lastYaw, lastPitch;
     private int lastRotationTimer;
 
-    private int renderTimer, breakRenderTimer;
-    private final BlockPos.Mutable renderPos = new BlockPos.Mutable();
+    private int placeRenderTimer, breakRenderTimer;
+    private final BlockPos.Mutable placeRenderPos = new BlockPos.Mutable();
     private final BlockPos.Mutable breakRenderPos = new BlockPos.Mutable();
+    private Box renderBoxOne, renderBoxTwo;
+
     private double renderDamage;
 
     public CrystalAura() {
@@ -570,7 +596,7 @@ public class CrystalAura extends Module {
 
         lastRotationTimer = getLastRotationStopDelay();
 
-        renderTimer = 0;
+        placeRenderTimer = 0;
         breakRenderTimer = 0;
     }
 
@@ -620,7 +646,7 @@ public class CrystalAura extends Module {
         if (switchTimer > 0) switchTimer--;
 
         // Decrement render timers
-        if (renderTimer > 0) renderTimer--;
+        if (placeRenderTimer > 0) placeRenderTimer--;
         if (breakRenderTimer > 0) breakRenderTimer--;
 
         mainItem = mc.player.getMainHandStack().getItem();
@@ -803,7 +829,7 @@ public class CrystalAura extends Module {
 
             // Break render
             breakRenderPos.set(crystal.getBlockPos().down());
-            breakRenderTimer = renderBreakTime.get();
+            breakRenderTimer = breakRenderTime.get();
         }
     }
 
@@ -991,9 +1017,22 @@ public class CrystalAura extends Module {
             placingTimer = 4;
             placingCrystalBlockPos.set(result.getBlockPos()).move(0, 1, 0);
 
-            renderTimer = renderTime.get();
-            renderPos.set(result.getBlockPos());
+            placeRenderPos.set(result.getBlockPos());
             renderDamage = damage;
+
+            if (renderMode.get() == RenderMode.Normal) {
+                placeRenderTimer = placeRenderTime.get();
+            } else {
+                placeRenderTimer = renderTime.get();
+                if (renderMode.get() == RenderMode.Fading) {
+                    RenderUtils.renderTickingBlock(
+                        placeRenderPos, sideColor.get(),
+                        lineColor.get(), shapeMode.get(),
+                        0, renderTime.get(), true,
+                        false
+                    );
+                }
+            }
         }
         else {
             // Place support block
@@ -1173,31 +1212,49 @@ public class CrystalAura extends Module {
     private void onRender(Render3DEvent event) {
         if (renderMode.get() == RenderMode.None) return;
 
-        if (renderTimer > 0 && render.get()) {
-            event.renderer.box(renderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        }
+        switch (renderMode.get()) {
+            case Normal -> {
+                if (renderPlace.get() && placeRenderTimer > 0) {
+                    event.renderer.box(placeRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
+                if (renderBreak.get() && placeRenderTimer > 0) {
+                    event.renderer.box(breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
+            }
 
-        if (breakRenderTimer > 0 && renderBreak.get() && !mc.world.getBlockState(breakRenderPos).isAir()) {
-            int preSideA = sideColor.get().a;
-            sideColor.get().a -= 20;
-            sideColor.get().validate();
+            case Smooth -> {
+                if (placeRenderTimer <= 0) return;
 
-            int preLineA = lineColor.get().a;
-            lineColor.get().a -= 20;
-            lineColor.get().validate();
+                if (renderBoxOne == null) renderBoxOne = new Box(placeRenderPos);
+                if (renderBoxTwo == null) renderBoxTwo = new Box(placeRenderPos);
+                else ((IBox) renderBoxTwo).set(placeRenderPos);
 
-            event.renderer.box(breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                double offsetX = (renderBoxTwo.minX - renderBoxOne.minX) / smoothness.get();
+                double offsetY = (renderBoxTwo.minY - renderBoxOne.minY) / smoothness.get();
+                double offsetZ = (renderBoxTwo.minZ - renderBoxOne.minZ) / smoothness.get();
 
-            sideColor.get().a = preSideA;
-            lineColor.get().a = preLineA;
+                ((IBox) renderBoxOne).set(
+                    renderBoxOne.minX + offsetX,
+                    renderBoxOne.minY + offsetY,
+                    renderBoxOne.minZ + offsetZ,
+                    renderBoxOne.maxX + offsetX,
+                    renderBoxOne.maxY + offsetY,
+                    renderBoxOne.maxZ + offsetZ
+                );
+
+                event.renderer.box(renderBoxOne, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            }
         }
     }
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        if (renderMode.get() == RenderMode.None || !renderDamageText.get() || renderTimer <= 0) return;
+        if (renderMode.get() == RenderMode.None || !renderDamageText.get() || placeRenderTimer <= 0) return;
 
-        vec3.set(renderPos.getX() + 0.5, renderPos.getY() + 0.5, renderPos.getZ() + 0.5);
+        if (renderMode.get() == RenderMode.Smooth) {
+            if (renderBoxOne == null) return;
+            vec3.set(renderBoxOne.minX + 0.5, renderBoxOne.minY + 0.5, renderBoxOne.minZ + 0.5);
+        } else vec3.set(placeRenderPos.getX() + 0.5, placeRenderPos.getY() + 0.5, placeRenderPos.getZ() + 0.5);
 
         if (NametagUtils.to2D(vec3, damageTextScale.get())) {
             NametagUtils.begin(vec3);
@@ -1258,7 +1315,8 @@ public class CrystalAura extends Module {
     public enum RenderMode {
         Normal,
         Smooth,
-        Fade,
+        Fading,
+        Gradient,
         None
     }
 }
