@@ -39,7 +39,7 @@ public class Notifier extends Module {
 
     // Totem Pops
 
-    public final Setting<Boolean> totemPops = sgTotemPops.add(new BoolSetting.Builder()
+    private final Setting<Boolean> totemPops = sgTotemPops.add(new BoolSetting.Builder()
         .name("totem-pops")
         .description("Notifies you when a player pops a totem.")
         .defaultValue(true)
@@ -104,7 +104,7 @@ public class Notifier extends Module {
         .build()
     );
 
-    public final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
+    private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
 
     private final Random random = new Random();

@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
-import meteordevelopment.meteorclient.systems.modules.misc.Notifier;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -116,13 +115,6 @@ public class Nametags extends Module {
         .name("distance")
         .description("Shows the distance between you and the player.")
         .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> displayPops = sgPlayers.add(new BoolSetting.Builder()
-        .name("pops")
-        .description("Shows how many totems a player has popped. (Requires Notifier to be on)")
-        .defaultValue(true)
         .build()
     );
 
@@ -243,14 +235,6 @@ public class Nametags extends Module {
         .description("The color of the nametag names.")
         .defaultValue(new SettingColor(20, 170, 170))
         .visible(displayPing::get)
-        .build()
-    );
-
-    private final Setting<SettingColor> popsColor = sgRender.add(new ColorSetting.Builder()
-        .name("pops-color")
-        .description("The color of the nametag names.")
-        .defaultValue(new SettingColor(255, 150, 0))
-        .visible(displayPops::get)
         .build()
     );
 
@@ -414,10 +398,6 @@ public class Nametags extends Module {
         int ping = EntityUtils.getPing(player);
         String pingText = " [" + ping + "ms]";
 
-        // Pops
-        Notifier notifier = Modules.get().get(Notifier.class);
-        String popsText = " [" + getPops(player, notifier) + "]";
-
         // Distance
         double dist = Math.round(PlayerUtils.distanceToCamera(player) * 10.0) / 10.0;
         String distText = " " + dist + "m";
@@ -427,7 +407,6 @@ public class Nametags extends Module {
         double nameWidth = text.getWidth(name, shadow);
         double healthWidth = text.getWidth(healthText, shadow);
         double pingWidth = text.getWidth(pingText, shadow);
-        double popsWidth = text.getWidth(popsText, shadow);
         double distWidth = text.getWidth(distText, shadow);
         double width = nameWidth + healthWidth;
 
@@ -435,7 +414,6 @@ public class Nametags extends Module {
 
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
-        if (displayPops.get() && notifier.totemPops.get() && notifier.isActive()) width += popsWidth;
         if (displayDistance.get() && renderPlayerDistance) width += distWidth;
 
         double widthHalf = width / 2;
@@ -453,7 +431,6 @@ public class Nametags extends Module {
 
         hX = text.render(healthText, hX, hY, healthColor, shadow);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, pingColor.get(), shadow);
-        if (displayPops.get() && notifier.totemPops.get() && notifier.isActive()) hX = text.render(popsText, hX, hY, popsColor.get(), shadow);
         if (displayDistance.get() && renderPlayerDistance) text.render(distText, hX, hY, distanceColor.get(), shadow);
         text.end();
 
@@ -650,11 +627,6 @@ public class Nametags extends Module {
             case 5 -> entity.getOffHandStack();
             default -> ItemStack.EMPTY;
         };
-    }
-
-    private int getPops(PlayerEntity player, Notifier notifier) {
-        if (notifier == null || !notifier.isActive()) return 0;
-        return notifier.totemPopMap.getOrDefault(player.getUuid(), 0);
     }
 
     private void drawBg(double x, double y, double width, double height) {
