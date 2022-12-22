@@ -5,58 +5,44 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-//Created by squidoodly 06/07/2020
+// Created by squidoodly 06/07/2020
+// Modified by RickyTheRacc 12/22/2022
+// Miss you Squid
 
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.EnumSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friend;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 public class MiddleClickExtra extends Module {
-    private enum Type {
-        Immediate,
-        LongerSingleClick,
-        Longer
-    }
-
-    public enum Mode {
-        Pearl(Items.ENDER_PEARL, Type.Immediate),
-        Rocket(Items.FIREWORK_ROCKET, Type.Immediate),
-
-        Rod(Items.FISHING_ROD, Type.LongerSingleClick),
-
-        Bow(Items.BOW, Type.Longer),
-        Gap(Items.GOLDEN_APPLE, Type.Longer),
-        EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
-        Chorus(Items.CHORUS_FRUIT, Type.Longer),
-        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate);
-
-        private final Item item;
-        private final Type type;
-
-        Mode(Item item, Type type) {
-            this.item = item;
-            this.type = type;
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
+        .name("keybind")
+        .description("What key to press to use an item.")
+        .defaultValue(Keybind.fromKey(GLFW_MOUSE_BUTTON_MIDDLE))
+        .build()
+    );
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
@@ -65,17 +51,26 @@ public class MiddleClickExtra extends Module {
             .build()
     );
 
+    private final Setting<Boolean> message = sgGeneral.add(new BoolSetting.Builder()
+        .name("message")
+        .description("Message players when you add them as a friend..")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Friend)
+        .build()
+    );
+
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
-        .name("notify")
+        .name("chat-info")
         .description("Notifies you when you do not have the specified item in your hotbar.")
         .defaultValue(true)
         .build()
     );
 
-    private boolean isUsing;
+    private boolean isUsing, wasHotbar;
+    private int prevSlot;
 
     public MiddleClickExtra() {
-        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click.");
+        super(Categories.Player, "bind-click-extra", "Lets you use items when you press a button.");
     }
 
     @Override
@@ -85,29 +80,59 @@ public class MiddleClickExtra extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
+        if (event.action != KeyAction.Press || mc.currentScreen != null) return;
+        if (keybind.get().getValue() != event.button || !keybind.get().isPressed()) return;
 
-        FindItemResult result = InvUtils.findInHotbar(mode.get().item);
+        doAction();
+    }
 
+    @EventHandler
+    private void onKeyBoardButton(KeyEvent event) {
+        if (event.action != KeyAction.Press || mc.currentScreen != null) return;
+        if (keybind.get().getValue() != event.key || !keybind.get().isPressed()) return;
+
+        doAction();
+    }
+
+    private void doAction() {
+        if (mode.get() == Mode.Friend) {
+            if (mc.targetedEntity instanceof PlayerEntity player) {
+
+                if (!Friends.get().isFriend(player)) {
+                    Friends.get().add(new Friend(player));
+                    if (message.get()) {
+                        String text = "/msg " + player.getEntityName() +  " I just added you as a friend.";
+                        ChatUtils.sendPlayerMsg(text);
+                    }
+                } else Friends.get().remove(Friends.get().get(player));
+            }
+
+            return;
+        }
+
+        FindItemResult result = InvUtils.find(mode.get().item);
         if (!result.found()) {
             if (notify.get()) warning("Unable to find specified item.");
             return;
         }
 
-        InvUtils.swap(result.slot(), true);
+        wasHotbar = result.isHotbar();
+        if (wasHotbar) InvUtils.swap(result.slot(), true);
+        else {
+            prevSlot = result.slot();
+            InvUtils.move().from(result.slot()).to(mc.player.getInventory().selectedSlot);
+        }
 
-        switch (mode.get().type) {
-            case Immediate -> {
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                InvUtils.swapBack();
-            }
-            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-            case Longer -> {
-                mc.options.useKey.setPressed(true);
-                isUsing = true;
-            }
+
+        if (mode.get().type == Type.Short) {
+            mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+            swapBack();
+        } else {
+            mc.options.useKey.setPressed(true);
+            isUsing = true;
         }
     }
+
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
@@ -135,8 +160,36 @@ public class MiddleClickExtra extends Module {
     private void stopIfUsing() {
         if (isUsing) {
             mc.options.useKey.setPressed(false);
-            InvUtils.swapBack();
+            swapBack();
             isUsing = false;
+        }
+    }
+
+    private void swapBack() {
+        if (wasHotbar) InvUtils.swapBack();
+        else InvUtils.move().from(prevSlot).to(mc.player.getInventory().selectedSlot);
+    }
+
+    private enum Type {
+        Short,
+        Long
+    }
+
+    public enum Mode {
+        Pearl (Items.ENDER_PEARL, Type.Short),
+        Rocket (Items.FIREWORK_ROCKET, Type.Short),
+        Gap (Items.GOLDEN_APPLE, Type.Long),
+        EGap (Items.ENCHANTED_GOLDEN_APPLE, Type.Long),
+        Chorus (Items.CHORUS_FRUIT, Type.Long),
+        XP (Items.EXPERIENCE_BOTTLE, Type.Short),
+        Friend (null, null);
+
+        private final Item item;
+        private final Type type;
+
+        Mode(Item item, Type type) {
+            this.item = item;
+            this.type = type;
         }
     }
 }
