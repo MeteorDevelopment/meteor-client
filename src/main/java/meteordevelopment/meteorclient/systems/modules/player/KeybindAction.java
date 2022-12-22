@@ -29,12 +29,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
-import net.minecraft.text.Text;
 import net.minecraft.util.Hand;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
-public class MiddleClickExtra extends Module {
+public class KeybindAction extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
@@ -69,8 +68,8 @@ public class MiddleClickExtra extends Module {
     private boolean isUsing, wasHotbar;
     private int prevSlot;
 
-    public MiddleClickExtra() {
-        super(Categories.Player, "bind-click-extra", "Lets you use items when you press a button.");
+    public KeybindAction() {
+        super(Categories.Player, "keybind-action", "Lets you use items when you press a button.");
     }
 
     @Override
