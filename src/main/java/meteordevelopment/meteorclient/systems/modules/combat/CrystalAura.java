@@ -532,6 +532,14 @@ public class CrystalAura extends Module {
         .build()
     );
 
+    private final Setting<SettingColor> damageColor = sgRender.add(new ColorSetting.Builder()
+        .name("damage-color")
+        .description("The color of the damage text.")
+        .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> renderMode.get() != RenderMode.None && renderDamageText.get())
+        .build()
+    );
+
     private final Setting<Double> damageTextScale = sgRender.add(new DoubleSetting.Builder()
         .name("damage-scale")
         .description("How big the damage text should be.")
@@ -1308,7 +1316,7 @@ public class CrystalAura extends Module {
 
             String text = String.format("%.1f", renderDamage);
             double w = TextRenderer.get().getWidth(text) / 2;
-            TextRenderer.get().render(text, -w, 0, lineColor.get(), true);
+            TextRenderer.get().render(text, -w, 0, damageColor.get(), true);
 
             TextRenderer.get().end();
             NametagUtils.end();
