@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -479,6 +480,16 @@ public class CrystalAura extends Module {
         .build()
     );
 
+    private final Setting<Double> height = sgRender.add(new DoubleSetting.Builder()
+        .name("height")
+        .description("How tall the gradient should be.")
+        .defaultValue(0.7)
+        .min(0)
+        .sliderMax(1)
+        .visible(() -> renderMode.get() == RenderMode.Gradient)
+        .build()
+    );
+
     private final Setting<Integer> renderTime = sgRender.add(new IntSetting.Builder()
         .name("render-time")
         .description("How long to render placements.")
@@ -493,6 +504,7 @@ public class CrystalAura extends Module {
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(() -> renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -500,6 +512,7 @@ public class CrystalAura extends Module {
         .name("side-color")
         .description("The side color of the block overlay.")
         .defaultValue(new SettingColor(255, 255, 255, 45))
+        .visible(() -> shapeMode.get().sides() && renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -507,6 +520,7 @@ public class CrystalAura extends Module {
         .name("line-color")
         .description("The line color of the block overlay.")
         .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> shapeMode.get().lines() && renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -514,6 +528,7 @@ public class CrystalAura extends Module {
         .name("damage")
         .description("Renders crystal damage text in the block overlay.")
         .defaultValue(true)
+        .visible(() -> renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -523,7 +538,7 @@ public class CrystalAura extends Module {
         .defaultValue(1.25)
         .min(1)
         .sliderMax(4)
-        .visible(renderDamageText::get)
+        .visible(() -> renderMode.get() != RenderMode.None && renderDamageText.get())
         .build()
     );
 
@@ -1243,6 +1258,36 @@ public class CrystalAura extends Module {
                 );
 
                 event.renderer.box(renderBoxOne, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            }
+
+            case Gradient -> {
+                if (placeRenderTimer <= 0) return;
+
+                Color bottom = new Color(0, 0, 0, 0);
+
+                int x = placeRenderPos.getX();
+                int y = placeRenderPos.getY() + 1;
+                int z = placeRenderPos.getZ();
+
+                if (shapeMode.get().sides()) {
+                    event.renderer.quadHorizontal(x, y, z, x + 1, z + 1, sideColor.get());
+                    event.renderer.gradientQuadVertical(x, y, z, x + 1, y - height.get(), z, bottom, sideColor.get());
+                    event.renderer.gradientQuadVertical(x, y, z, x, y - height.get(), z + 1, bottom, sideColor.get());
+                    event.renderer.gradientQuadVertical(x + 1, y, z, x + 1, y - height.get(), z + 1, bottom, sideColor.get());
+                    event.renderer.gradientQuadVertical(x, y, z + 1, x + 1, y - height.get(), z + 1, bottom, sideColor.get());
+                }
+
+                if (shapeMode.get().lines()) {
+                    event.renderer.line(x, y, z, x + 1, y, z, lineColor.get());
+                    event.renderer.line(x, y, z, x, y, z + 1, lineColor.get());
+                    event.renderer.line(x + 1, y, z, x + 1, y, z + 1, lineColor.get());
+                    event.renderer.line(x, y, z + 1, x + 1, y, z + 1, lineColor.get());
+                    
+                    event.renderer.line(x, y, z, x, y - height.get(), z, lineColor.get(), bottom);
+                    event.renderer.line(x + 1, y, z, x + 1, y - height.get(), z, lineColor.get(), bottom);
+                    event.renderer.line(x, y, z + 1, x, y - height.get(), z + 1, lineColor.get(), bottom);
+                    event.renderer.line(x + 1, y, z + 1, x + 1, y - height.get(), z + 1, lineColor.get(), bottom);
+                }
             }
         }
     }
