@@ -1294,7 +1294,8 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        if (renderMode.get() == RenderMode.None || !renderDamageText.get() || placeRenderTimer <= 0) return;
+        if (renderMode.get() == RenderMode.None || !renderDamageText.get()) return;
+        if (placeRenderTimer <= 0 && breakRenderTimer <= 0) return;
 
         if (renderMode.get() == RenderMode.Smooth) {
             if (renderBoxOne == null) return;
