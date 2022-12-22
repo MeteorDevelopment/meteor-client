@@ -23,7 +23,7 @@ import java.security.SecureRandom;
 
 @Mixin(AbstractBlock.class)
 public class AbstractBlockMixin {
-    @Unique private long modifier = 0;
+    @Unique private final long modifier = new SecureRandom().nextLong();
 
     @Inject(method = "getAmbientOcclusionLightLevel", at = @At("HEAD"), cancellable = true)
     private void onGetAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos, CallbackInfoReturnable<Float> info) {
@@ -35,8 +35,6 @@ public class AbstractBlockMixin {
     @Inject(method = "getRenderingSeed", at = @At("HEAD"), cancellable = true)
     private void onGetRenderingSeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Long> info) {
         if(Modules.get().isActive(TextureRotations.class)) {
-            modifier = modifier == 0 ? new SecureRandom().nextLong() : modifier;
-
             long l = (long)pos.getX() * 2460155L ^ (long)pos.getZ() * 15578214L ^ (long)pos.getY();
             l = l * l * modifier + l * 11L;
 
