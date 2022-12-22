@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
-import meteordevelopment.meteorclient.mixininterface.IAbstractBlock;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.TextureRotations;
 import net.minecraft.block.AbstractBlock;
@@ -23,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.security.SecureRandom;
 
 @Mixin(AbstractBlock.class)
-public class AbstractBlockMixin implements IAbstractBlock {
+public class AbstractBlockMixin {
     @Unique private long modifier = 0;
 
     @Inject(method = "getAmbientOcclusionLightLevel", at = @At("HEAD"), cancellable = true)
@@ -35,16 +34,13 @@ public class AbstractBlockMixin implements IAbstractBlock {
 
     @Inject(method = "getRenderingSeed", at = @At("HEAD"), cancellable = true)
     private void onGetRenderingSeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Long> info) {
-        if(Modules.get().isActive(TextureRotations.class)) info.setReturnValue(getSeed(pos));
-    }
+        if(Modules.get().isActive(TextureRotations.class)) {
+            modifier = modifier == 0 ? new SecureRandom().nextLong() : modifier;
 
-    @Override
-    public long getSeed(BlockPos pos) {
-        modifier = modifier == 0 ? new SecureRandom().nextLong() : modifier;
+            long l = (long)pos.getX() * 2460155L ^ (long)pos.getZ() * 15578214L ^ (long)pos.getY();
+            l = l * l * modifier + l * 11L;
 
-        long l = (long)pos.getX() * 2460155L ^ (long)pos.getZ() * 15578214L ^ (long)pos.getY();
-        l = l * l * modifier + l * 11L;
-
-        return (l >> 16);
+            info.setReturnValue(l >> 16);
+        }
     }
 }
