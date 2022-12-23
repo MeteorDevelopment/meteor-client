@@ -38,27 +38,27 @@ public class KeybindAction extends Module {
 
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("keybind")
-        .description("What key to press to use an item.")
+        .description("Which key should trigger the action.")
         .defaultValue(Keybind.fromKey(GLFW_MOUSE_BUTTON_MIDDLE))
         .build()
     );
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
             .name("mode")
-            .description("Which item to use when you middle click.")
+            .description("Which item to use when the keybind is clicked.")
             .defaultValue(Mode.Pearl)
             .build()
     );
 
     private final Setting<Boolean> message = sgGeneral.add(new BoolSetting.Builder()
         .name("message")
-        .description("Message players when you add them as a friend..")
+        .description("Whether to message players when you add them as a friend.")
         .defaultValue(false)
         .visible(() -> mode.get() == Mode.Friend)
         .build()
     );
 
-    private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> chatInfo = sgGeneral.add(new BoolSetting.Builder()
         .name("chat-info")
         .description("Notifies you when you do not have the specified item in your hotbar.")
         .defaultValue(true)
@@ -111,7 +111,7 @@ public class KeybindAction extends Module {
 
         FindItemResult result = InvUtils.find(mode.get().item);
         if (!result.found()) {
-            if (notify.get()) warning("Unable to find specified item.");
+            if (chatInfo.get()) warning("Unable to find specified item.");
             return;
         }
 
