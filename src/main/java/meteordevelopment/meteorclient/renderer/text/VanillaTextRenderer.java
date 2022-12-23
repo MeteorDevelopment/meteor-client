@@ -11,6 +11,7 @@ import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import org.joml.Matrix4f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -62,6 +63,11 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public double render(String text, double x, double y, Color color, boolean shadow) {
+        return render(Text.empty().append(text), x, y, color, shadow);
+    }
+
+    @Override
+    public double render(Text text, double x, double y, Color color, boolean shadow) {
         boolean wasBuilding = building;
         if (!wasBuilding) begin();
 

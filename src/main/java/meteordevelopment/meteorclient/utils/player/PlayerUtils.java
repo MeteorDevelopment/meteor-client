@@ -28,6 +28,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.PotionItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ScoreboardObjective;
+import net.minecraft.scoreboard.ScoreboardPlayerScore;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -359,5 +364,15 @@ public class PlayerUtils {
         PlayerListEntry playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         if (playerListEntry == null) return 0;
         return playerListEntry.getLatency();
+    }
+
+    public static MutableText getScoreboardName(PlayerEntity player) {
+        Scoreboard scoreboard = player.getScoreboard();
+        ScoreboardObjective scoreboardObjective = scoreboard.getObjectiveForSlot(2);
+        if (scoreboardObjective != null) {
+            ScoreboardPlayerScore scoreboardPlayerScore = scoreboard.getPlayerScore(player.getEntityName(), scoreboardObjective);
+            return Text.literal(Integer.toString(scoreboardPlayerScore.getScore())).append(" ").append(scoreboardObjective.getDisplayName());
+        }
+        return null;
     }
 }

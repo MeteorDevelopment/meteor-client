@@ -9,10 +9,15 @@ import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 
 public interface TextRenderer {
     static TextRenderer get() {
         return Config.get().customFont.get() ? Fonts.RENDERER : VanillaTextRenderer.INSTANCE;
+    }
+
+    static TextRenderer get(boolean meteor) {
+        return meteor ? Fonts.RENDERER : VanillaTextRenderer.INSTANCE;
     }
 
     void setAlpha(double a);
@@ -30,6 +35,7 @@ public interface TextRenderer {
     double getHeight(boolean shadow);
     default double getHeight() { return getHeight(false); }
 
+    double render(Text text, double x, double y, Color color, boolean shadow);
     double render(String text, double x, double y, Color color, boolean shadow);
     default double render(String text, double x, double y, Color color) { return render(text, x, y, color, false); }
 

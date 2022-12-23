@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.renderer.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
 import org.lwjgl.BufferUtils;
 
 import java.nio.Buffer;
@@ -87,6 +88,11 @@ public class CustomTextRenderer implements TextRenderer {
     public double getHeight(boolean shadow) {
         Font font = building ? this.font : fonts[0];
         return (font.getHeight() + 1 + (shadow ? 1 : 0)) * scale;
+    }
+
+    @Override
+    public double render(Text text, double x, double y, Color color, boolean shadow) {
+        return render(text.getString(), x, y, color, shadow);
     }
 
     @Override

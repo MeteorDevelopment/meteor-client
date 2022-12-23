@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -30,6 +29,8 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
@@ -62,6 +63,13 @@ public class Nametags extends Module {
     private final Setting<Boolean> yourself = sgGeneral.add(new BoolSetting.Builder()
         .name("self")
         .description("Displays a nametag on your player if you're in Freecam or third person.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
+        .name("custom-font")
+        .description("Use meteor font on nametags.")
         .defaultValue(true)
         .build()
     );
@@ -109,13 +117,26 @@ public class Nametags extends Module {
 
     //Players
 
+    private final Setting<Boolean> objectives = sgPlayers.add(new BoolSetting.Builder()
+        .name("objectives")
+        .description("Show scoreboard objectives.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> teamFormat = sgPlayers.add(new BoolSetting.Builder()
+        .name("team-format")
+        .description("Use formatted team player name.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> excludeBots = sgPlayers.add(new BoolSetting.Builder()
         .name("exclude-bots")
         .description("Only render non-bot nametags.")
         .defaultValue(true)
         .build()
     );
-
 
     private final Setting<Boolean> displayItems = sgPlayers.add(new BoolSetting.Builder()
         .name("display-items")
@@ -273,7 +294,7 @@ public class Nametags extends Module {
     @EventHandler
     private void onRender2D(Render2DEvent event) {
         int count = getRenderCount();
-        boolean shadow = Config.get().customFont.get();
+        boolean shadow = customFont.get();
 
         for (int i = count - 1; i > -1; i--) {
             Entity entity = entityList.get(i);
@@ -316,7 +337,30 @@ public class Nametags extends Module {
     }
 
     private void renderNametagPlayer(PlayerEntity player, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
+        TextRenderer text = TextRenderer.get(customFont.get());
+
+        if (objectives.get()) {
+            MutableText scoreboardName = PlayerUtils.getScoreboardName(player);
+            if (scoreboardName != null) {
+                NametagUtils.begin(new Vector3d(pos).add(0,scale.get() * text.getHeight(customFont.get()),0));
+
+                double width = text.getWidth(scoreboardName.getString(), shadow);
+                double widthHalf = width / 2;
+                double hX = -widthHalf;
+                double heightDown = text.getHeight(shadow);
+                double hY = -heightDown;
+
+                drawBg(hX, hY, width, heightDown);
+
+                text.beginBig();
+
+                text.render(scoreboardName, hX, hY, names.get(), shadow);
+                text.end();
+
+                NametagUtils.end();
+            }
+        }
+
         NametagUtils.begin(pos);
 
         // Gamemode
@@ -334,13 +378,12 @@ public class Nametags extends Module {
         gmText = "[" + gmText + "] ";
 
         // Name
-        String name;
+        MutableText name = teamFormat.get() ? Text.literal(player.getEntityName()) : (MutableText) player.getDisplayName();
         Color nameColor = PlayerUtils.getPlayerColor(player, names.get());
 
-        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
-        else name = player.getEntityName();
+        if (player == mc.player) name = Text.literal(Modules.get().get(NameProtect.class).getName(name.getString()));
 
-        name = name + " ";
+        name.append(" ");
 
         // Health
         float absorption = player.getAbsorptionAmount();
@@ -364,7 +407,7 @@ public class Nametags extends Module {
 
         // Calc widths
         double gmWidth = text.getWidth(gmText, shadow);
-        double nameWidth = text.getWidth(name, shadow);
+        double nameWidth = text.getWidth(name.getString(), shadow);
         double healthWidth = text.getWidth(healthText, shadow);
         double pingWidth = text.getWidth(pingText, shadow);
         double distWidth = text.getWidth(distText, shadow);
@@ -489,7 +532,7 @@ public class Nametags extends Module {
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
+        TextRenderer text = TextRenderer.get(customFont.get());
         NametagUtils.begin(pos);
 
         String name = stack.getName().getString();
@@ -517,7 +560,7 @@ public class Nametags extends Module {
     }
 
     private void renderGenericNametag(LivingEntity entity, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
+        TextRenderer text = TextRenderer.get(customFont.get());
         NametagUtils.begin(pos);
 
         //Name
@@ -557,7 +600,7 @@ public class Nametags extends Module {
     }
 
     private void renderTntNametag(TntEntity entity, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
+        TextRenderer text = TextRenderer.get(customFont.get());
         NametagUtils.begin(pos);
 
         String fuseText = ticksToTime(entity.getFuse());
