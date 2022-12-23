@@ -27,6 +27,7 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -111,8 +112,12 @@ public abstract class ChatHudMixin implements IChatHud {
         double g = 9.0D * (mc.options.getChatLineSpacing().getValue() + 1.0D);
         double h = -8.0D * (mc.options.getChatLineSpacing().getValue() + 1.0D) + 4.0D * mc.options.getChatLineSpacing().getValue() + 8.0D;
 
+        float chatScale = (float) this.getChatScale();
+        float scaledHeight = mc.getWindow().getScaledHeight();
+
         matrices.push();
-        matrices.translate(2, -0.1f, 10);
+        matrices.scale(chatScale, chatScale, 1.0f);
+        matrices.translate(2.0f, MathHelper.floor((scaledHeight - 40) / chatScale) - g - 0.1f, 10.0f);
         RenderSystem.enableBlend();
         for(int m = 0; m + this.scrolledLines < this.visibleMessages.size() && m < maxLineCount; ++m) {
             ChatHudLine.Visible chatHudLine = this.visibleMessages.get(m + this.scrolledLines);
@@ -152,6 +157,9 @@ public abstract class ChatHudMixin implements IChatHud {
     @Shadow
     @Final
     private List<ChatHudLine> messages;
+
+    @Shadow
+    public abstract double getChatScale();
 
     private void drawIcon(MatrixStack matrices, String line, int y, float opacity) {
         if (METEOR_PREFIX_REGEX.matcher(line).find()) {
