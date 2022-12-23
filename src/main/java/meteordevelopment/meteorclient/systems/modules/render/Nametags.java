@@ -547,7 +547,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        hX = text.render(name, hX, hY, pingColor.get(), shadow);
+        hX = text.render(name, hX, hY, nameColor.get(), shadow);
         if (itemCount.get()) text.render(count, hX, hY, GOLD, shadow);
         text.end();
 
@@ -587,7 +587,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        hX = text.render(nameText, hX, hY, pingColor.get(), shadow);
+        hX = text.render(nameText, hX, hY, nameColor.get(), shadow);
         text.render(healthText, hX, hY, healthColor, shadow);
         text.end();
 
@@ -611,7 +611,7 @@ public class Nametags extends Module {
         double hX = -widthHalf;
         double hY = -heightDown;
 
-        text.render(fuseText, hX, hY, pingColor.get(), shadow);
+        text.render(fuseText, hX, hY, nameColor.get(), shadow);
         text.end();
 
         NametagUtils.end();
