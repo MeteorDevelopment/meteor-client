@@ -89,13 +89,23 @@ public class RenderUtils {
             float h = -(playerEntity.horizontalSpeed + g * f);
             float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
 
-            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), -(-Math.abs(MathHelper.cos(h * 3.1415927f) * i)), 0);
+            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), Math.abs(MathHelper.cos(h * 3.1415927f) * i), 0);
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(h * 3.1415927f) * i * 3));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
         }
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
+        // Ensure there aren't multiple fading blocks in one pos
+        Iterator<RenderBlock> iterator = renderBlocks.iterator();
+        while (iterator.hasNext()) {
+            RenderBlock next = iterator.next();
+            if (next.pos.equals(blockPos)) {
+                iterator.remove();
+                renderBlockPool.free(next);
+            }
+        }
+
         renderBlocks.add(renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink));
     }
 

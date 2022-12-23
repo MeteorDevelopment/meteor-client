@@ -27,9 +27,12 @@ import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.Blocks;
@@ -54,6 +57,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class CrystalAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final SettingGroup sgSwitch = settings.createGroup("Switch");
     private final SettingGroup sgPlace = settings.createGroup("Place");
     private final SettingGroup sgFacePlace = settings.createGroup("Face Place");
     private final SettingGroup sgBreak = settings.createGroup("Break");
@@ -103,10 +107,17 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<AutoSwitchMode> autoSwitch = sgGeneral.add(new EnumSetting.Builder<AutoSwitchMode>()
-        .name("auto-switch")
-        .description("Switches to crystals in your hotbar once a target is found.")
-        .defaultValue(AutoSwitchMode.Normal)
+    private final Setting<Boolean> antiSuicide = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-suicide")
+        .description("Will not place and break crystals if they will kill you.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreNakeds = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-nakeds")
+        .description("Ignore players with no items.")
+        .defaultValue(false)
         .build()
     );
 
@@ -134,9 +145,41 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiSuicide = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-suicide")
-        .description("Will not place and break crystals if they will kill you.")
+    // Switch
+
+    private final Setting<AutoSwitchMode> autoSwitch = sgSwitch.add(new EnumSetting.Builder<AutoSwitchMode>()
+        .name("auto-switch")
+        .description("Switches to crystals in your hotbar once a target is found.")
+        .defaultValue(AutoSwitchMode.Normal)
+        .build()
+    );
+
+    private final Setting<Integer> switchDelay = sgSwitch.add(new IntSetting.Builder()
+        .name("switch-delay")
+        .description("The delay in ticks to wait to break a crystal after switching hotbar slot.")
+        .defaultValue(0)
+        .min(0)
+        .build()
+    );
+
+    private final Setting<Boolean> noGapSwitch = sgSwitch.add(new BoolSetting.Builder()
+        .name("no-gap-switch")
+        .description("Won't auto switch if you're holding a gapple.")
+        .defaultValue(true)
+        .visible(() -> autoSwitch.get() == AutoSwitchMode.Normal)
+        .build()
+    );
+
+    private final Setting<Boolean> noBowSwitch = sgSwitch.add(new BoolSetting.Builder()
+        .name("no-bow-switch")
+        .description("Won't auto switch if you're holding a bow.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> antiWeakness = sgSwitch.add(new BoolSetting.Builder()
+        .name("anti-weakness")
+        .description("Switches to tools with so you can break crystals with the weakness effect.")
         .defaultValue(true)
         .build()
     );
@@ -169,7 +212,7 @@ public class CrystalAura extends Module {
     );
 
     private final Setting<Double> placeWallsRange = sgPlace.add(new DoubleSetting.Builder()
-        .name("place-walls-range")
+        .name("walls-range")
         .description("Range in which to place crystals when behind blocks.")
         .defaultValue(4.5)
         .min(0)
@@ -271,14 +314,6 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Integer> switchDelay = sgBreak.add(new IntSetting.Builder()
-        .name("switch-delay")
-        .description("The delay in ticks to wait to break a crystal after switching hotbar slot.")
-        .defaultValue(0)
-        .min(0)
-        .build()
-    );
-
     private final Setting<Double> breakRange = sgBreak.add(new DoubleSetting.Builder()
         .name("break-range")
         .description("Range in which to break crystals.")
@@ -289,7 +324,7 @@ public class CrystalAura extends Module {
     );
 
     private final Setting<Double> breakWallsRange = sgBreak.add(new DoubleSetting.Builder()
-        .name("break-walls-range")
+        .name("walls-range")
         .description("Range in which to break crystals when behind blocks.")
         .defaultValue(4.5)
         .min(0)
@@ -337,56 +372,124 @@ public class CrystalAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiWeakness = sgBreak.add(new BoolSetting.Builder()
-        .name("anti-weakness")
-        .description("Switches to tools with high enough damage to explode the crystal with weakness effect.")
-        .defaultValue(true)
-        .build()
-    );
-
     // Pause
 
-    private final Setting<Boolean> eatPause = sgPause.add(new BoolSetting.Builder()
-        .name("pause-on-eat")
-        .description("Pauses Crystal Aura when eating.")
-        .defaultValue(true)
+    public final Setting<PauseMode> pauseOnUse = sgPause.add(new EnumSetting.Builder<PauseMode>()
+        .name("pause-on-use")
+        .description("Which processes should be paused while using an item.")
+        .defaultValue(PauseMode.Place)
         .build()
     );
 
-    private final Setting<Boolean> drinkPause = sgPause.add(new BoolSetting.Builder()
-        .name("pause-on-drink")
-        .description("Pauses Crystal Aura when drinking.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> minePause = sgPause.add(new BoolSetting.Builder()
+    public final Setting<PauseMode> pauseOnMine = sgPause.add(new EnumSetting.Builder<PauseMode>()
         .name("pause-on-mine")
-        .description("Pauses Crystal Aura when mining.")
-        .defaultValue(false)
+        .description("Which processes should be paused while mining a block.")
+        .defaultValue(PauseMode.None)
+        .build()
+    );
+
+    private final Setting<Boolean> pauseOnLag = sgPause.add(new BoolSetting.Builder()
+        .name("pause-on-lag")
+        .description("Whether to pause if the server is not responding.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<List<Module>> pauseModules = sgPause.add(new ModuleListSetting.Builder()
+        .name("pause-modules")
+        .description("Pauses while any of the selected modules are active.")
+        .defaultValue(BedAura.class)
+        .build()
+    );
+
+    public final Setting<Double> pauseHealth = sgPause.add(new DoubleSetting.Builder()
+        .name("pause-health")
+        .description("Pauses when you go below a certain health.")
+        .defaultValue(5)
+        .range(0,36)
+        .sliderRange(0,36)
         .build()
     );
 
     // Render
 
-    private final Setting<Boolean> renderSwing = sgRender.add(new BoolSetting.Builder()
-        .name("swing")
-        .description("Renders hand swinging client-side.")
-        .defaultValue(true)
+    public final Setting<SwingMode> swingMode = sgRender.add(new EnumSetting.Builder<SwingMode>()
+        .name("swing-mode")
+        .description("How to swing when placing.")
+        .defaultValue(SwingMode.Both)
         .build()
     );
 
-    private final Setting<Boolean> render = sgRender.add(new BoolSetting.Builder()
-        .name("render")
+    private final Setting<RenderMode> renderMode = sgRender.add(new EnumSetting.Builder<RenderMode>()
+        .name("render-mode")
+        .description("The mode to render in.")
+        .defaultValue(RenderMode.Normal)
+        .build()
+    );
+
+    private final Setting<Boolean> renderPlace = sgRender.add(new BoolSetting.Builder()
+        .name("render-place")
         .description("Renders a block overlay over the block the crystals are being placed on.")
         .defaultValue(true)
+        .visible(() -> renderMode.get() == RenderMode.Normal)
+        .build()
+    );
+
+    private final Setting<Integer> placeRenderTime = sgRender.add(new IntSetting.Builder()
+        .name("place-time")
+        .description("How long to render placements.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Normal && renderPlace.get())
         .build()
     );
 
     private final Setting<Boolean> renderBreak = sgRender.add(new BoolSetting.Builder()
-        .name("break")
+        .name("render-break")
         .description("Renders a block overlay over the block the crystals are broken on.")
         .defaultValue(false)
+        .visible(() -> renderMode.get() == RenderMode.Normal)
+        .build()
+    );
+
+    private final Setting<Integer> breakRenderTime = sgRender.add(new IntSetting.Builder()
+        .name("break-time")
+        .description("How long to render breaking for.")
+        .defaultValue(13)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Normal && renderBreak.get())
+        .build()
+    );
+
+    private final Setting<Integer> smoothness = sgRender.add(new IntSetting.Builder()
+        .name("smoothness")
+        .description("How smoothly the render should move around.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Smooth)
+        .build()
+    );
+
+    private final Setting<Double> height = sgRender.add(new DoubleSetting.Builder()
+        .name("height")
+        .description("How tall the gradient should be.")
+        .defaultValue(0.7)
+        .min(0)
+        .sliderMax(1)
+        .visible(() -> renderMode.get() == RenderMode.Gradient)
+        .build()
+    );
+
+    private final Setting<Integer> renderTime = sgRender.add(new IntSetting.Builder()
+        .name("render-time")
+        .description("How long to render placements.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(20)
+        .visible(() -> renderMode.get() == RenderMode.Smooth || renderMode.get() == RenderMode.Fading)
         .build()
     );
 
@@ -394,6 +497,7 @@ public class CrystalAura extends Module {
         .name("shape-mode")
         .description("How the shapes are rendered.")
         .defaultValue(ShapeMode.Both)
+        .visible(() -> renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -401,6 +505,7 @@ public class CrystalAura extends Module {
         .name("side-color")
         .description("The side color of the block overlay.")
         .defaultValue(new SettingColor(255, 255, 255, 45))
+        .visible(() -> shapeMode.get().sides() && renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -408,6 +513,7 @@ public class CrystalAura extends Module {
         .name("line-color")
         .description("The line color of the block overlay.")
         .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> shapeMode.get().lines() && renderMode.get() != RenderMode.None)
         .build()
     );
 
@@ -415,6 +521,15 @@ public class CrystalAura extends Module {
         .name("damage")
         .description("Renders crystal damage text in the block overlay.")
         .defaultValue(true)
+        .visible(() -> renderMode.get() != RenderMode.None)
+        .build()
+    );
+
+    private final Setting<SettingColor> damageColor = sgRender.add(new ColorSetting.Builder()
+        .name("damage-color")
+        .description("The color of the damage text.")
+        .defaultValue(new SettingColor(255, 255, 255))
+        .visible(() -> renderMode.get() != RenderMode.None && renderDamageText.get())
         .build()
     );
 
@@ -424,30 +539,13 @@ public class CrystalAura extends Module {
         .defaultValue(1.25)
         .min(1)
         .sliderMax(4)
-        .visible(renderDamageText::get)
-        .build()
-    );
-
-    private final Setting<Integer> renderTime = sgRender.add(new IntSetting.Builder()
-        .name("render-time")
-        .description("How long to render for.")
-        .defaultValue(10)
-        .min(0)
-        .sliderMax(20)
-        .build()
-    );
-
-    private final Setting<Integer> renderBreakTime = sgRender.add(new IntSetting.Builder()
-        .name("break-time")
-        .description("How long to render breaking for.")
-        .defaultValue(13)
-        .min(0)
-        .sliderMax(20)
-        .visible(renderBreak::get)
+        .visible(() -> renderMode.get() != RenderMode.None && renderDamageText.get())
         .build()
     );
 
     // Fields
+
+    private Item mainItem, offItem;
 
     private int breakTimer, placeTimer, switchTimer, ticksPassed;
     private final List<PlayerEntity> targets = new ArrayList<>();
@@ -484,9 +582,11 @@ public class CrystalAura extends Module {
     private double lastYaw, lastPitch;
     private int lastRotationTimer;
 
-    private int renderTimer, breakRenderTimer;
-    private final BlockPos.Mutable renderPos = new BlockPos.Mutable();
+    private int placeRenderTimer, breakRenderTimer;
+    private final BlockPos.Mutable placeRenderPos = new BlockPos.Mutable();
     private final BlockPos.Mutable breakRenderPos = new BlockPos.Mutable();
+    private Box renderBoxOne, renderBoxTwo;
+
     private double renderDamage;
 
     public CrystalAura() {
@@ -514,7 +614,7 @@ public class CrystalAura extends Module {
 
         lastRotationTimer = getLastRotationStopDelay();
 
-        renderTimer = 0;
+        placeRenderTimer = 0;
         breakRenderTimer = 0;
     }
 
@@ -566,8 +666,11 @@ public class CrystalAura extends Module {
         if (switchTimer > 0) switchTimer--;
 
         // Decrement render timers
-        if (renderTimer > 0) renderTimer--;
+        if (placeRenderTimer > 0) placeRenderTimer--;
         if (breakRenderTimer > 0) breakRenderTimer--;
+
+        mainItem = mc.player.getMainHandStack().getItem();
+        offItem = mc.player.getOffHandStack().getItem();
 
         // Update waiting to explode crystals and mark them as existing if reached threshold
         for (IntIterator it = waitingToExplode.keySet().iterator(); it.hasNext();) {
@@ -582,9 +685,6 @@ public class CrystalAura extends Module {
                 waitingToExplode.put(id, ticks + 1);
             }
         }
-
-        // Check pause settings
-        if (PlayerUtils.shouldPause(minePause.get(), eatPause.get(), drinkPause.get())) return;
 
         // Set player eye pos
         ((IVec3d) playerEyePos).set(mc.player.getPos().x, mc.player.getPos().y + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getPos().z);
@@ -648,6 +748,7 @@ public class CrystalAura extends Module {
 
     private void doBreak() {
         if (!doBreak.get() || breakTimer > 0 || switchTimer > 0 || attacks >= attackFrequency.get()) return;
+        if (shouldPause(PauseMode.Break)) return;
 
         double bestDamage = 0;
         Entity crystal = null;
@@ -748,7 +849,7 @@ public class CrystalAura extends Module {
 
             // Break render
             breakRenderPos.set(crystal.getBlockPos().down());
-            breakRenderTimer = renderBreakTime.get();
+            breakRenderTimer = breakRenderTime.get();
         }
     }
 
@@ -766,8 +867,8 @@ public class CrystalAura extends Module {
         Hand hand = InvUtils.findInHotbar(Items.END_CRYSTAL).getHand();
         if (hand == null) hand = Hand.MAIN_HAND;
 
-        if (renderSwing.get()) mc.player.swingHand(hand);
-        else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+        if (swingMode.get().client()) mc.player.swingHand(hand);
+        if (swingMode.get().packet()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
 
         attacks++;
     }
@@ -783,12 +884,21 @@ public class CrystalAura extends Module {
 
     private void doPlace() {
         if (!doPlace.get() || placeTimer > 0) return;
+        if (shouldPause(PauseMode.Place)) return;
 
         // Return if there are no crystals in hotbar or offhand
         if (!InvUtils.testInHotbar(Items.END_CRYSTAL)) return;
 
         // Return if there are no crystals in either hand and auto switch mode is none
-        if (autoSwitch.get() == AutoSwitchMode.None && mc.player.getOffHandStack().getItem() != Items.END_CRYSTAL && mc.player.getMainHandStack().getItem() != Items.END_CRYSTAL) return;
+        if (autoSwitch.get() != AutoSwitchMode.None) {
+            if (noGapSwitch.get() && autoSwitch.get() == AutoSwitchMode.Normal && offItem != Items.END_CRYSTAL) {
+                if (mainItem == Items.ENCHANTED_GOLDEN_APPLE
+                || offItem == Items.ENCHANTED_GOLDEN_APPLE
+                || mainItem == Items.GOLDEN_APPLE
+                || offItem == Items.GOLDEN_APPLE) return;
+            }
+            if (noBowSwitch.get() && (mainItem == Items.BOW || offItem == Items.BOW)) return;
+        } else if (mainItem != Items.END_CRYSTAL && offItem != Items.END_CRYSTAL) return;
 
         // Check for multiplace
         for (Entity entity : mc.world.getEntities()) {
@@ -920,21 +1030,34 @@ public class CrystalAura extends Module {
             // Place crystal
             mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
 
-            if (renderSwing.get()) mc.player.swingHand(hand);
-            else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
+            if (swingMode.get().client()) mc.player.swingHand(hand);
+            if (swingMode.get().packet()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
 
             placing = true;
             placingTimer = 4;
             kaTimer = 8;
             placingCrystalBlockPos.set(result.getBlockPos()).move(0, 1, 0);
 
-            renderTimer = renderTime.get();
-            renderPos.set(result.getBlockPos());
+            placeRenderPos.set(result.getBlockPos());
             renderDamage = damage;
+
+            if (renderMode.get() == RenderMode.Normal) {
+                placeRenderTimer = placeRenderTime.get();
+            } else {
+                placeRenderTimer = renderTime.get();
+                if (renderMode.get() == RenderMode.Fading) {
+                    RenderUtils.renderTickingBlock(
+                        placeRenderPos, sideColor.get(),
+                        lineColor.get(), shapeMode.get(),
+                        0, renderTime.get(), true,
+                        false
+                    );
+                }
+            }
         }
         else {
             // Place support block
-            BlockUtils.place(supportBlock, item, false, 0, renderSwing.get(), true, false);
+            BlockUtils.place(supportBlock, item, false, 0, swingMode.get().client(), true, false);
             placeTimer += supportDelay.get();
 
             if (supportDelay.get() == 0) placeCrystal(result, damage, null);
@@ -1007,6 +1130,17 @@ public class CrystalAura extends Module {
 
     // Others
 
+    private boolean shouldPause(PauseMode process) {
+        if (mc.player.isUsingItem() || mc.options.useKey.isPressed()) {
+            if (pauseOnUse.get().equals(process)) return true;
+        }
+
+        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return true;
+        for (Module module : pauseModules.get()) if (module.isActive()) return true;
+        if (pauseOnMine.get().equals(process) && mc.interactionManager.isBreakingBlock()) return true;
+        return (EntityUtils.getTotalHealth(mc.player) <= pauseHealth.get());
+    }
+
     private boolean isOutOfRange(Vec3d vec3d, BlockPos blockPos, boolean place) {
         ((IRaycastContext) raycastContext).set(playerEyePos, vec3d, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
 
@@ -1071,10 +1205,20 @@ public class CrystalAura extends Module {
         // Players
         for (PlayerEntity player : mc.world.getPlayers()) {
             if (player.getAbilities().creativeMode || player == mc.player) continue;
+            if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
+            if (player.distanceTo(mc.player) > targetRange.get()) continue;
 
-            if (!player.isDead() && player.isAlive() && Friends.get().shouldAttack(player) && PlayerUtils.isWithin(player, targetRange.get())) {
-                targets.add(player);
+            if (ignoreNakeds.get()) {
+                if (player.getOffHandStack().isEmpty()
+                    && player.getMainHandStack().isEmpty()
+                    && player.getInventory().armor.get(0).isEmpty()
+                    && player.getInventory().armor.get(1).isEmpty()
+                    && player.getInventory().armor.get(2).isEmpty()
+                    && player.getInventory().armor.get(3).isEmpty()
+                ) continue;
             }
+
+            targets.add(player);
         }
     }
 
@@ -1082,35 +1226,86 @@ public class CrystalAura extends Module {
         return EntityUtils.intersectsWithEntity(box, entity -> !entity.isSpectator() && !removed.contains(entity.getId()));
     }
 
-    // Render
+    // Rendering
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (renderTimer > 0 && render.get()) {
-            event.renderer.box(renderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        }
+        if (renderMode.get() == RenderMode.None) return;
 
-        if (breakRenderTimer > 0 && renderBreak.get() && !mc.world.getBlockState(breakRenderPos).isAir()) {
-            int preSideA = sideColor.get().a;
-            sideColor.get().a -= 20;
-            sideColor.get().validate();
+        switch (renderMode.get()) {
+            case Normal -> {
+                if (renderPlace.get() && placeRenderTimer > 0) {
+                    event.renderer.box(placeRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
+                if (renderBreak.get() && breakRenderTimer > 0) {
+                    event.renderer.box(breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                }
+            }
 
-            int preLineA = lineColor.get().a;
-            lineColor.get().a -= 20;
-            lineColor.get().validate();
+            case Smooth -> {
+                if (placeRenderTimer <= 0) return;
 
-            event.renderer.box(breakRenderPos, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+                if (renderBoxOne == null) renderBoxOne = new Box(placeRenderPos);
+                if (renderBoxTwo == null) renderBoxTwo = new Box(placeRenderPos);
+                else ((IBox) renderBoxTwo).set(placeRenderPos);
 
-            sideColor.get().a = preSideA;
-            lineColor.get().a = preLineA;
+                double offsetX = (renderBoxTwo.minX - renderBoxOne.minX) / smoothness.get();
+                double offsetY = (renderBoxTwo.minY - renderBoxOne.minY) / smoothness.get();
+                double offsetZ = (renderBoxTwo.minZ - renderBoxOne.minZ) / smoothness.get();
+
+                ((IBox) renderBoxOne).set(
+                    renderBoxOne.minX + offsetX,
+                    renderBoxOne.minY + offsetY,
+                    renderBoxOne.minZ + offsetZ,
+                    renderBoxOne.maxX + offsetX,
+                    renderBoxOne.maxY + offsetY,
+                    renderBoxOne.maxZ + offsetZ
+                );
+
+                event.renderer.box(renderBoxOne, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+            }
+
+            case Gradient -> {
+                if (placeRenderTimer <= 0) return;
+
+                Color bottom = new Color(0, 0, 0, 0);
+
+                int x = placeRenderPos.getX();
+                int y = placeRenderPos.getY() + 1;
+                int z = placeRenderPos.getZ();
+
+                if (shapeMode.get().sides()) {
+                    event.renderer.quadHorizontal(x, y, z, x + 1, z + 1, sideColor.get());
+                    event.renderer.gradientQuadVertical(x, y, z, x + 1, y - height.get(), z, bottom, sideColor.get());
+                    event.renderer.gradientQuadVertical(x, y, z, x, y - height.get(), z + 1, bottom, sideColor.get());
+                    event.renderer.gradientQuadVertical(x + 1, y, z, x + 1, y - height.get(), z + 1, bottom, sideColor.get());
+                    event.renderer.gradientQuadVertical(x, y, z + 1, x + 1, y - height.get(), z + 1, bottom, sideColor.get());
+                }
+
+                if (shapeMode.get().lines()) {
+                    event.renderer.line(x, y, z, x + 1, y, z, lineColor.get());
+                    event.renderer.line(x, y, z, x, y, z + 1, lineColor.get());
+                    event.renderer.line(x + 1, y, z, x + 1, y, z + 1, lineColor.get());
+                    event.renderer.line(x, y, z + 1, x + 1, y, z + 1, lineColor.get());
+
+                    event.renderer.line(x, y, z, x, y - height.get(), z, lineColor.get(), bottom);
+                    event.renderer.line(x + 1, y, z, x + 1, y - height.get(), z, lineColor.get(), bottom);
+                    event.renderer.line(x, y, z + 1, x, y - height.get(), z + 1, lineColor.get(), bottom);
+                    event.renderer.line(x + 1, y, z + 1, x + 1, y - height.get(), z + 1, lineColor.get(), bottom);
+                }
+            }
         }
     }
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        if (!render.get() || renderTimer <= 0 || !renderDamageText.get()) return;
+        if (renderMode.get() == RenderMode.None || !renderDamageText.get()) return;
+        if (placeRenderTimer <= 0 && breakRenderTimer <= 0) return;
 
-        vec3.set(renderPos.getX() + 0.5, renderPos.getY() + 0.5, renderPos.getZ() + 0.5);
+        if (renderMode.get() == RenderMode.Smooth) {
+            if (renderBoxOne == null) return;
+            vec3.set(renderBoxOne.minX + 0.5, renderBoxOne.minY + 0.5, renderBoxOne.minZ + 0.5);
+        } else vec3.set(placeRenderPos.getX() + 0.5, placeRenderPos.getY() + 0.5, placeRenderPos.getZ() + 0.5);
 
         if (NametagUtils.to2D(vec3, damageTextScale.get())) {
             NametagUtils.begin(vec3);
@@ -1118,7 +1313,7 @@ public class CrystalAura extends Module {
 
             String text = String.format("%.1f", renderDamage);
             double w = TextRenderer.get().getWidth(text) / 2;
-            TextRenderer.get().render(text, -w, 0, lineColor.get(), true);
+            TextRenderer.get().render(text, -w, 0, damageColor.get(), true);
 
             TextRenderer.get().end();
             NametagUtils.end();
@@ -1140,5 +1335,39 @@ public class CrystalAura extends Module {
         Disabled,
         Accurate,
         Fast
+    }
+
+    public enum PauseMode {
+        Both,
+        Place,
+        Break,
+        None;
+
+        public boolean equals(PauseMode process) {
+            return this == process || this == PauseMode.Both;
+        }
+    }
+
+    public enum SwingMode {
+        Both,
+        Packet,
+        Client,
+        None;
+
+        public boolean packet() {
+            return this == Packet || this == Both;
+        }
+
+        public boolean client() {
+            return this == Client || this == Both;
+        }
+    }
+
+    public enum RenderMode {
+        Normal,
+        Smooth,
+        Fading,
+        Gradient,
+        None
     }
 }
