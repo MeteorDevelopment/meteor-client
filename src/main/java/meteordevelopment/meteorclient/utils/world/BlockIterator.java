@@ -62,7 +62,7 @@ public class BlockIterator {
                         if (dx <= callback.hRadius && dy <= callback.vRadius && dz <= callback.hRadius) {
                             disableCurrent = false;
                             callback.function.accept(blockPos, blockState);
-                            if (disableCurrent) callbackPool.free(callback, it);
+                            if (disableCurrent) it.remove();
                         }
                     }
                 }

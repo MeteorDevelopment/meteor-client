@@ -102,7 +102,7 @@ public class RenderUtils {
 
         for (Iterator<RenderBlock> it = renderBlockPool.iterator(); it.hasNext(); ) {
             RenderBlock renderBlock = it.next();
-            if (--renderBlock.ticks <= 0) renderBlockPool.free(renderBlock, it);
+            if (--renderBlock.ticks <= 0) it.remove();
         }
     }
 
