@@ -164,7 +164,7 @@ public class PacketMine extends Module {
             shouldUpdateSlot = false;
         }
 
-        if (!blockPool.isEmpty()) blockPool.get().mine();
+        if (!blockPool.isEmpty()) blockPool.getFirst().mine();
 
         if (!swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
             for (MyBlock block : blockPool) {

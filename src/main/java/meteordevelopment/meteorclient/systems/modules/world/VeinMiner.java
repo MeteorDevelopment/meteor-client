@@ -177,7 +177,7 @@ public class VeinMiner extends Module {
         blockPool.removeIf(MyBlock::shouldRemove);
 
         if (!blockPool.isEmpty()) {
-            MyBlock firstElement = blockPool.get();
+            MyBlock firstElement = blockPool.getFirst();
             if (tick < delay.get() && !firstElement.mining) {
                 tick++;
                 return;

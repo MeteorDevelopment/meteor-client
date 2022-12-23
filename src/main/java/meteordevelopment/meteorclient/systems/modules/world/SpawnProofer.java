@@ -131,7 +131,7 @@ public class SpawnProofer extends Module {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
-                BlockPos.Mutable selectedBlockPos = spawnPool.get();
+                BlockPos.Mutable selectedBlockPos = spawnPool.getFirst();
 
                 for (BlockPos blockPos : spawnPool) {
                     int lightLevel = mc.world.getLightLevel(blockPos);
@@ -144,7 +144,7 @@ public class SpawnProofer extends Module {
                 BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
             }
             else {
-                BlockUtils.place(spawnPool.get(), block, rotate.get(), -50, false);
+                BlockUtils.place(spawnPool.getFirst(), block, rotate.get(), -50, false);
             }
         }
 

@@ -380,7 +380,7 @@ public class Nuker extends Module {
             }
 
             // Update timer
-            BlockPos.Mutable firstElement = blockPosPool.get();
+            BlockPos.Mutable firstElement = blockPosPool.getFirst();
             if (!firstBlock && !lastBlockPos.equals(firstElement)) {
                 timer = delay.get();
 
