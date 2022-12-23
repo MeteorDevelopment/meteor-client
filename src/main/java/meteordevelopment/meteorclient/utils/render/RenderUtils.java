@@ -98,8 +98,17 @@ public class RenderUtils {
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
         RenderBlock block = new RenderBlock();
         block.set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink);
-        renderBlocks.remove(block);
-        renderBlockPool.free(block);
+
+        // Ensure there aren't multiple fading blocks in one pos
+        Iterator<RenderBlock> iterator = renderBlocks.iterator();
+        while (iterator.hasNext()) {
+            RenderBlock next = iterator.next();
+            if (next.pos.equals(block.pos)) {
+                iterator.remove();
+                renderBlockPool.free(next);
+            }
+        }
+
         renderBlocks.add(renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink));
     }
 
