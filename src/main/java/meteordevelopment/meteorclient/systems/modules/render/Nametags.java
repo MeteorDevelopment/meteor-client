@@ -391,7 +391,7 @@ public class Nametags extends Module {
         MutableText name = teamFormat.get() ? Text.literal(player.getEntityName()) : (MutableText) player.getDisplayName();
         Color nameColor = PlayerUtils.getPlayerColor(player, names.get());
 
-        if (player == mc.player) name = Text.literal(Modules.get().get(NameProtect.class).getName(name.getString()));
+        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(name);
 
         name.append(" ");
 

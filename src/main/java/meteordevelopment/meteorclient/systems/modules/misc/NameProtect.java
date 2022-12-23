@@ -10,6 +10,8 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
 
 public class NameProtect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -43,6 +45,14 @@ public class NameProtect extends Module {
     public String getName(String original) {
         if (name.get().length() > 0 && isActive()) {
             return name.get();
+        }
+
+        return original;
+    }
+
+    public MutableText getName(MutableText original) {
+        if (name.get().length() > 0 && isActive()) {
+            return Text.literal(name.get());
         }
 
         return original;
