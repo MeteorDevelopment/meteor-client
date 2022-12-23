@@ -216,13 +216,6 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Boolean> teamColors = sgRender.add(new BoolSetting.Builder()
-        .name("team-colors")
-        .description("Uses the player's team color for their name color.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
         .name("name-color")
         .description("The color of the nametag names.")
@@ -373,9 +366,7 @@ public class Nametags extends Module {
 
         // Name
         String name;
-        Color nameColor;
-        if (!teamColors.get()) nameColor = this.nameColor.get();
-        else nameColor = PlayerUtils.getPlayerColor(player, this.nameColor.get());
+        Color nameColor = PlayerUtils.getPlayerColor(player, this.nameColor.get());
 
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
         else name = player.getEntityName();
