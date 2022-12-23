@@ -68,7 +68,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public double render(String text, double x, double y, Color color, boolean shadow) {
-        return render(Text.empty().append(text), x, y, color, shadow);
+        return render(Text.literal(text), x, y, color, shadow);
     }
 
     @Override
