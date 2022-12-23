@@ -63,7 +63,7 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-self")
-        .description("Displays a nametag on your player if you're in Freecam or third person.")
+        .description("Ignore yourself when in third person or freecam.")
         .defaultValue(true)
         .build()
     );
