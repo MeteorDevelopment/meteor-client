@@ -374,23 +374,16 @@ public class CrystalAura extends Module {
 
     // Pause
 
-    public final Setting<PauseMode> pauseOnEat = sgPause.add(new EnumSetting.Builder<PauseMode>()
-        .name("pause-on-eat")
-        .description("What to pause.")
-        .defaultValue(PauseMode.Place)
-        .build()
-    );
-
-    public final Setting<PauseMode> pauseOnDrink = sgPause.add(new EnumSetting.Builder<PauseMode>()
-        .name("pause-on-drink")
-        .description("What to pause.")
+    public final Setting<PauseMode> pauseOnUse = sgPause.add(new EnumSetting.Builder<PauseMode>()
+        .name("pause-on-use")
+        .description("Which processes should be paused while using an item.")
         .defaultValue(PauseMode.Place)
         .build()
     );
 
     public final Setting<PauseMode> pauseOnMine = sgPause.add(new EnumSetting.Builder<PauseMode>()
         .name("pause-on-mine")
-        .description("What to pause.")
+        .description("Which processes should be paused while mining a block.")
         .defaultValue(PauseMode.None)
         .build()
     );
@@ -1134,8 +1127,7 @@ public class CrystalAura extends Module {
 
     private boolean shouldPause(PauseMode process) {
         if (mc.player.isUsingItem() || mc.options.useKey.isPressed()) {
-            if (pauseOnEat.get().equals(process) && (mainItem.isFood() || offItem.isFood())) return true;
-            if (pauseOnDrink.get().equals(process) && (mainItem instanceof PotionItem || offItem instanceof PotionItem)) return true;
+            if (pauseOnUse.get().equals(process)) return true;
         }
 
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return true;
