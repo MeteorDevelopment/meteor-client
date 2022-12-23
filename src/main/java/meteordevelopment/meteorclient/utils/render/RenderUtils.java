@@ -93,7 +93,7 @@ public class RenderUtils {
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
-        renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink);
+        renderBlockPool.acquire().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink);
     }
 
     @EventHandler

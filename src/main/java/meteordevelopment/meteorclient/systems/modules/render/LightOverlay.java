@@ -99,10 +99,10 @@ public class LightOverlay extends Module {
                 case Never:
                     break;
                 case Potential:
-                    crossPool.get().set(blockPos, true);
+                    crossPool.acquire().set(blockPos, true);
                     break;
                 case Always:
-                    crossPool.get().set(blockPos, false);
+                    crossPool.acquire().set(blockPos, false);
                     break;
             }
         });

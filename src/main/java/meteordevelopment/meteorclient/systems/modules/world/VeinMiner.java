@@ -166,7 +166,7 @@ public class VeinMiner extends Module {
         foundBlockPositions.clear();
 
         if (!isMiningBlock(event.blockPos)) {
-            MyBlock block = blockPool.get();
+            MyBlock block = blockPool.acquire();
             block.set(event);
             mineNearbyBlocks(block.originalBlock.asItem(),event.blockPos,event.direction,depth.get());
         }
@@ -177,7 +177,7 @@ public class VeinMiner extends Module {
         blockPool.removeIf(MyBlock::shouldRemove);
 
         if (!blockPool.isEmpty()) {
-            MyBlock firstElement = blockPool.peekList();
+            MyBlock firstElement = blockPool.get();
             if (tick < delay.get() && !firstElement.mining) {
                 tick++;
                 return;
@@ -262,7 +262,7 @@ public class VeinMiner extends Module {
         for(Vec3i neighbourOffset: blockNeighbours) {
             BlockPos neighbour = pos.add(neighbourOffset);
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
-                MyBlock block = blockPool.get();
+                MyBlock block = blockPool.acquire();
                 block.set(neighbour,dir);
                 mineNearbyBlocks(item, neighbour, dir, depth-1);
             }

@@ -119,7 +119,7 @@ public class ArrowDodge extends Module {
             }
             if (!simulator.set(e, accurate.get(), 0.5D)) continue;
             for (int i = 0; i < (simulationSteps.get() > 0 ? simulationSteps.get() : Integer.MAX_VALUE); i++) {
-                vec3Pool.get().set(simulator.pos);
+                vec3Pool.acquire().set(simulator.pos);
                 if (simulator.tick() != null) break;
             }
         }

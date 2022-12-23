@@ -194,10 +194,10 @@ public class HoleESP extends Module {
             }
 
             if (obsidian + bedrock == 5 && air == null) {
-                holePool.get().set(blockPos, obsidian == 5 ? Hole.Type.Obsidian : (bedrock == 5 ? Hole.Type.Bedrock : Hole.Type.Mixed), NULL);
+                holePool.acquire().set(blockPos, obsidian == 5 ? Hole.Type.Obsidian : (bedrock == 5 ? Hole.Type.Bedrock : Hole.Type.Mixed), NULL);
             }
             else if (obsidian + bedrock == 8 && doubles.get() && air != null) {
-                holePool.get().set(blockPos, obsidian == 8 ? Hole.Type.Obsidian : (bedrock == 8 ? Hole.Type.Bedrock : Hole.Type.Mixed), Dir.get(air));
+                holePool.acquire().set(blockPos, obsidian == 8 ? Hole.Type.Obsidian : (bedrock == 8 ? Hole.Type.Bedrock : Hole.Type.Mixed), Dir.get(air));
             }
         });
     }

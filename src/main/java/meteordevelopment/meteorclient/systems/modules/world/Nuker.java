@@ -358,16 +358,16 @@ public class Nuker extends Module {
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
 
             // Add block
-            blockPosPool.get().set(blockPos);
+            blockPosPool.acquire().set(blockPos);
         });
 
         // Break block if found
         BlockIterator.after(() -> {
             // Sort blocks
 			if (sortMode.get() == SortMode.TopDown)
-                blockPosPool.sortList(Comparator.comparingDouble(value -> -1*value.getY()));
+                blockPosPool.sort(Comparator.comparingDouble(value -> -1*value.getY()));
             else if (sortMode.get() != SortMode.None)
-                blockPosPool.sortList(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
+                blockPosPool.sort(Comparator.comparingDouble(value -> Utils.squaredDistance(pX, pY, pZ, value.getX() + 0.5, value.getY() + 0.5, value.getZ() + 0.5) * (sortMode.get() == SortMode.Closest ? 1 : -1)));
 
             // Check if some block was found
             if (blockPosPool.isEmpty()) {
@@ -380,7 +380,7 @@ public class Nuker extends Module {
             }
 
             // Update timer
-            BlockPos.Mutable firstElement = blockPosPool.peekList();
+            BlockPos.Mutable firstElement = blockPosPool.get();
             if (!firstBlock && !lastBlockPos.equals(firstElement)) {
                 timer = delay.get();
 
@@ -418,7 +418,7 @@ public class Nuker extends Module {
             blockPosPool.clear();
         });
     }
-    
+
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
         event.cooldown = 0;

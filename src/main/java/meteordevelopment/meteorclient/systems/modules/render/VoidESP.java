@@ -126,12 +126,12 @@ public class VoidESP extends Module {
         for (int x = px - radius; x <= px + radius; x++) {
             for (int z = pz - radius; z <= pz + radius; z++) {
                 blockPos.set(x, mc.world.getBottomY(), z);
-                if (isHole(blockPos, false)) voidHolePool.get().set(blockPos.set(x, mc.world.getBottomY(), z), false);
+                if (isHole(blockPos, false)) voidHolePool.acquire().set(blockPos.set(x, mc.world.getBottomY(), z), false);
 
                 // Check for nether roof
                 if (netherRoof.get() && PlayerUtils.getDimension() == Dimension.Nether) {
                     blockPos.set(x, 127, z);
-                    if (isHole(blockPos, true)) voidHolePool.get().set(blockPos.set(x, 127, z), true);
+                    if (isHole(blockPos, true)) voidHolePool.acquire().set(blockPos.set(x, 127, z), true);
                 }
             }
         }

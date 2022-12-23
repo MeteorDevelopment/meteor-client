@@ -143,7 +143,7 @@ public class PacketMine extends Module {
         swapped = false;
 
         if (!isMiningBlock(event.blockPos)) {
-            blockPool.get().set(event);
+            blockPool.acquire().set(event);
         }
     }
 
@@ -164,7 +164,7 @@ public class PacketMine extends Module {
             shouldUpdateSlot = false;
         }
 
-        if (!blockPool.isEmpty()) blockPool.peekList().mine();
+        if (!blockPool.isEmpty()) blockPool.get().mine();
 
         if (!swapped && autoSwitch.get() && (!mc.player.isUsingItem() || !notOnUse.get())) {
             for (MyBlock block : blockPool) {

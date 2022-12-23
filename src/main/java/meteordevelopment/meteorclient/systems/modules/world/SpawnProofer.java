@@ -98,7 +98,7 @@ public class SpawnProofer extends Module {
             if ((spawn == BlockUtils.MobSpawn.Always && (mode.get() == Mode.Always || mode.get() == Mode.Both)) ||
                     spawn == BlockUtils.MobSpawn.Potential && (mode.get() == Mode.Potential || mode.get() == Mode.Both)) {
 
-                spawnPool.get().set(blockPos);
+                spawnPool.acquire().set(blockPos);
             }
         });
     }
@@ -131,7 +131,7 @@ public class SpawnProofer extends Module {
 
                 // Find lowest light level
                 int lowestLightLevel = 16;
-                BlockPos.Mutable selectedBlockPos = spawnPool.peekList();
+                BlockPos.Mutable selectedBlockPos = spawnPool.get();
 
                 for (BlockPos blockPos : spawnPool) {
                     int lightLevel = mc.world.getLightLevel(blockPos);
@@ -144,7 +144,7 @@ public class SpawnProofer extends Module {
                 BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
             }
             else {
-                BlockUtils.place(spawnPool.peekList(), block, rotate.get(), -50, false);
+                BlockUtils.place(spawnPool.get(), block, rotate.get(), -50, false);
             }
         }
 

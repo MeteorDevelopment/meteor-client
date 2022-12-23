@@ -82,7 +82,7 @@ public class BlockIterator {
         hRadius = Math.max(hRadius, horizontalRadius);
         vRadius = Math.max(vRadius, verticalRadius);
 
-        Callback callback = callbackPool.get();
+        Callback callback = callbackPool.acquire();
 
         callback.function = function;
         callback.hRadius = horizontalRadius;
