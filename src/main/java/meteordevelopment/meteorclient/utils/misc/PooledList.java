@@ -76,8 +76,13 @@ public class PooledList<T> implements Iterable<T> {
     }
 
     /** Return the first element in the list. */
-    public T get() {
+    public T getFirst() {
         return list.get(0);
+    }
+
+    /** Return the last element in the list. */
+    public T getLast() {
+        return list.get(list.size() - 1);
     }
 
     public int indexOf(T object) {
