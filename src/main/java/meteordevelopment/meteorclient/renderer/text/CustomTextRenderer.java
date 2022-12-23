@@ -77,6 +77,11 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
+    public double getWidth(Text text, boolean shadow) {
+        return getWidth(text.getString(), text.getString().length(), shadow);
+    }
+
+    @Override
     public double getWidth(String text, int length, boolean shadow) {
         if (text.isEmpty()) return 0;
 

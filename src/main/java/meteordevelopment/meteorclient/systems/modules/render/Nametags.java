@@ -124,6 +124,16 @@ public class Nametags extends Module {
         .build()
     );
 
+    private final Setting<Double> objectivesRange = sgPlayers.add(new DoubleSetting.Builder()
+        .name("objectives-range")
+        .description("Only render objectives within this distance of your player.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(200)
+        .visible(objectives::get)
+        .build()
+    );
+
     private final Setting<Boolean> teamFormat = sgPlayers.add(new BoolSetting.Builder()
         .name("team-format")
         .description("Use formatted team player name.")
@@ -341,10 +351,10 @@ public class Nametags extends Module {
 
         if (objectives.get()) {
             MutableText scoreboardName = PlayerUtils.getScoreboardName(player);
-            if (scoreboardName != null) {
+            if (scoreboardName != null && PlayerUtils.distanceToCamera(player) < objectivesRange.get()) {
                 NametagUtils.begin(new Vector3d(pos).add(0,scale.get() * text.getHeight(customFont.get()),0));
 
-                double width = text.getWidth(scoreboardName.getString(), shadow);
+                double width = text.getWidth(scoreboardName, shadow);
                 double widthHalf = width / 2;
                 double hX = -widthHalf;
                 double heightDown = text.getHeight(shadow);
@@ -407,7 +417,7 @@ public class Nametags extends Module {
 
         // Calc widths
         double gmWidth = text.getWidth(gmText, shadow);
-        double nameWidth = text.getWidth(name.getString(), shadow);
+        double nameWidth = text.getWidth(name, shadow);
         double healthWidth = text.getWidth(healthText, shadow);
         double pingWidth = text.getWidth(pingText, shadow);
         double distWidth = text.getWidth(distText, shadow);

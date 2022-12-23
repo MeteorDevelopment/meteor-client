@@ -41,6 +41,11 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
+    public double getWidth(Text text, boolean shadow) {
+        return (mc.textRenderer.getWidth(text) + (shadow ? 1 : 0)) * scale;
+    }
+
+    @Override
     public double getWidth(String text, int length, boolean shadow) {
         if (text.isEmpty()) return 0;
 
