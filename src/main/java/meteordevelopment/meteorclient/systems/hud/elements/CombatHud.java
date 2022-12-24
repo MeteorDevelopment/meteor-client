@@ -196,14 +196,21 @@ public class CombatHud extends HudElement {
             Color primaryColor = TextHud.getSectionColor(0);
             Color secondaryColor = TextHud.getSectionColor(1);
 
+            // Band-aid fix
+            if (!Utils.canUpdate()) {
+                Renderer2D.COLOR.begin();
+                Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+                Renderer2D.COLOR.render(null);
+                return;
+            }
+            
+            playerEntity = Utils.canUpdate() ? TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance) : FakeClientPlayer.getPlayer();
+            if (playerEntity == null) return;
+
             // Background
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
             Renderer2D.COLOR.render(null);
-
-            if (!Utils.canUpdate()) return; // Band-aid fix
-            playerEntity = Utils.canUpdate() ? TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance) : FakeClientPlayer.getPlayer();
-            if (playerEntity == null) return;
 
             // Player Model
             InventoryScreen.drawEntity(
