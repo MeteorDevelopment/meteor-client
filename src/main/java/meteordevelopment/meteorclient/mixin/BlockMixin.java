@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.item.ItemConvertible;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -48,6 +49,6 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
             info.setReturnValue(slippy.friction.get().floatValue());
         }
 
-        if (Modules.get().get(NoSlow.class).slimeBlock()) info.setReturnValue(0.6F);
+        if (block == Blocks.SLIME_BLOCK && Modules.get().get(NoSlow.class).slimeBlock()) info.setReturnValue(0.6F);
     }
 }
