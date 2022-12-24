@@ -41,8 +41,11 @@ import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -1043,7 +1046,7 @@ public class CrystalAura extends Module {
         if (supportBlock == null) {
             // Place crystal
             if (autoSwitch.get() == AutoSwitchMode.Move) {
-                doMoveSwitch(item, () -> mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0)););
+                doMoveSwitch(item, () -> mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0)));
             } else mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
 
             if (swingMode.get().client()) mc.player.swingHand(hand);
@@ -1247,18 +1250,18 @@ public class CrystalAura extends Module {
             return;
         }
 
-        move(Wrapper.mc.player.getInventory().selectedSlot, itemResult.slot());
+        moveItem(mc.player.getInventory().selectedSlot, itemResult.slot());
         runnable.run();
-        move(Wrapper.mc.player.getInventory().selectedSlot, itemResult.slot());
+        moveItem(mc.player.getInventory().selectedSlot, itemResult.slot());
     }
 
     private void moveItem(int from, int to) {
-        ScreenHandler handler = Wrapper.mc.player.currentScreenHandler;
+        ScreenHandler handler = mc.player.currentScreenHandler;
 
         Int2ObjectArrayMap<ItemStack> stack = new Int2ObjectArrayMap<>();
         stack.put(to, handler.getSlot(to).getStack());
 
-        Wrapper.mc.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.getRevision(), PlayerInventory.MAIN_SIZE + from, to, SlotActionType.SWAP, handler.getCursorStack().copy(), stack));
+        mc.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.getRevision(), PlayerInventory.MAIN_SIZE + from, to, SlotActionType.SWAP, handler.getCursorStack().copy(), stack));
     }
 
     // Rendering
