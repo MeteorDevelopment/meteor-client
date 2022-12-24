@@ -95,8 +95,8 @@ public class PlayerModelHud extends HudElement {
         setSize(50 * scale.get(), 75 * scale.get());
 
         renderer.post(() -> {
-            PlayerEntity player = mc.player;
-            if (isInEditor()) player = FakeClientPlayer.getPlayer();
+            if (mc.player == null) return; // Band-aid fix
+            PlayerEntity player = mc.player != null ? mc.player : FakeClientPlayer.getPlayer();
 
             float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
@@ -104,7 +104,7 @@ public class PlayerModelHud extends HudElement {
             InventoryScreen.drawEntity((int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
         });
 
-        if (background.get()) {
+        if (background.get() || mc.player == null) { // Band-aid fix
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
     }
