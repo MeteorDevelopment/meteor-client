@@ -89,7 +89,6 @@ public class CrystalAura extends Module {
         .build()
     );
 
-
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
         .name("min-damage")
         .description("Minimum damage the crystal needs to deal to your target.")
@@ -151,6 +150,14 @@ public class CrystalAura extends Module {
         .name("auto-switch")
         .description("Switches to crystals in your hotbar once a target is found.")
         .defaultValue(AutoSwitchMode.Normal)
+        .build()
+    );
+
+    private final Setting<Boolean> allowInventory = sgSwitch.add(new BoolSetting.Builder()
+        .name("allow-inventory")
+        .description("Allows you to use crystals that are in the inventory.")
+        .defaultValue(true)
+        .visible(() -> autoSwitch.get() == AutoSwitchMode.Move)
         .build()
     );
 
@@ -981,8 +988,7 @@ public class CrystalAura extends Module {
 
                     placeTimer += placeDelay.get();
                 }
-            }
-            else {
+            } else {
                 placeCrystal(result, bestDamage.get(), isSupport.get() ? bestBlockPos.get() : null);
                 placeTimer += placeDelay.get();
             }
@@ -1016,11 +1022,19 @@ public class CrystalAura extends Module {
         Item targetItem = supportBlock == null ? Items.END_CRYSTAL : Items.OBSIDIAN;
 
         FindItemResult item = InvUtils.findInHotbar(targetItem);
-        if (!item.found()) return;
+        if (!item.found()) {
+            if (autoSwitch.get() == AutoSwitchMode.Move && allowInventory.get() && targetItem == Items.END_CRYSTAL) {
+                item = InvUtils.find(targetItem);
+            }
+
+            if (!item.found()) return;
+        }
 
         int prevSlot = mc.player.getInventory().selectedSlot;
 
-        if (autoSwitch.get() != AutoSwitchMode.None && !item.isOffhand()) InvUtils.swap(item.slot(), false);
+        if (autoSwitch.get() == AutoSwitchMode.Normal && autoSwitch.get() == AutoSwitchMode.Silent) {
+            if (!item.isOffhand()) InvUtils.swap(item.slot(), false);
+        }
 
         Hand hand = item.getHand();
         if (hand == null) return;
@@ -1028,7 +1042,9 @@ public class CrystalAura extends Module {
         // Place
         if (supportBlock == null) {
             // Place crystal
-            mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
+            if (autoSwitch.get() == AutoSwitchMode.Move) {
+                doMoveSwitch(item, () -> mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0)););
+            } else mc.player.networkHandler.sendPacket(new PlayerInteractBlockC2SPacket(hand, result, 0));
 
             if (swingMode.get().client()) mc.player.swingHand(hand);
             if (swingMode.get().packet()) mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(hand));
@@ -1054,8 +1070,7 @@ public class CrystalAura extends Module {
                     );
                 }
             }
-        }
-        else {
+        } else {
             // Place support block
             BlockUtils.place(supportBlock, item, false, 0, swingMode.get().client(), true, false);
             placeTimer += supportDelay.get();
@@ -1226,6 +1241,26 @@ public class CrystalAura extends Module {
         return EntityUtils.intersectsWithEntity(box, entity -> !entity.isSpectator() && !removed.contains(entity.getId()));
     }
 
+    private void doMoveSwitch(FindItemResult itemResult, Runnable runnable) {
+        if (itemResult.isOffhand()) {
+            runnable.run();
+            return;
+        }
+
+        move(Wrapper.mc.player.getInventory().selectedSlot, itemResult.slot());
+        runnable.run();
+        move(Wrapper.mc.player.getInventory().selectedSlot, itemResult.slot());
+    }
+
+    private void moveItem(int from, int to) {
+        ScreenHandler handler = Wrapper.mc.player.currentScreenHandler;
+
+        Int2ObjectArrayMap<ItemStack> stack = new Int2ObjectArrayMap<>();
+        stack.put(to, handler.getSlot(to).getStack());
+
+        Wrapper.mc.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(handler.syncId, handler.getRevision(), PlayerInventory.MAIN_SIZE + from, to, SlotActionType.SWAP, handler.getCursorStack().copy(), stack));
+    }
+
     // Rendering
 
     @EventHandler
@@ -1328,6 +1363,7 @@ public class CrystalAura extends Module {
     public enum AutoSwitchMode {
         Normal,
         Silent,
+        Move,
         None
     }
 
