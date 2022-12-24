@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Slippy;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.AbstractBlock;
@@ -46,5 +47,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         if (slippy.isActive() && !slippy.ignoredBlocks.get().contains(block)) {
             info.setReturnValue(slippy.friction.get().floatValue());
         }
+
+        if (Modules.get().get(NoSlow.class).slimeBlock()) info.setReturnValue(0.6F);
     }
 }
