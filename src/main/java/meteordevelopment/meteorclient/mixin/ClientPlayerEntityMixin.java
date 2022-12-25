@@ -11,10 +11,7 @@ import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
-import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
-import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
-import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -104,5 +101,10 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     @Redirect(method = "sendMovementPackets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
     private boolean isSneaking(ClientPlayerEntity clientPlayerEntity) {
         return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || clientPlayerEntity.isSneaking();
+    }
+
+    @Inject(method = "getMountJumpStrength", at = @At("HEAD"), cancellable = true)
+    private void onGetMountJumpStrength(CallbackInfoReturnable<Float> info) {
+        if (Modules.get().get(EntityControl.class).maxJump()) info.setReturnValue(1F);
     }
 }
