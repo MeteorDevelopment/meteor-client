@@ -78,7 +78,7 @@ public class NametagUtils {
 
     private static double getScale(Vector3d pos) {
         double dist = camera.distance(pos);
-        return Utils.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
+        return Math.max(10 / (dist + 2), 0.5);
     }
 
     private static void toScreen(Vector4f vec) {

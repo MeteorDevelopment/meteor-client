@@ -43,7 +43,7 @@ public class Nametags extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgPlayers = settings.createGroup("Players");
     private final SettingGroup sgItems = settings.createGroup("Items");
-    private final SettingGroup sgRender = settings.createGroup("Render");
+    private final SettingGroup sgColor = settings.createGroup("Colors");
 
     // General
 
@@ -72,13 +72,6 @@ public class Nametags extends Module {
     private final Setting<Boolean> customFont = sgGeneral.add(new BoolSetting.Builder()
         .name("custom-font")
         .description("Use meteor font on nametags.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> ignoreBots = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-bots")
-        .description("Only render non-bot nametags.")
         .defaultValue(true)
         .build()
     );
@@ -112,10 +105,17 @@ public class Nametags extends Module {
 
     //Players
 
+    private final Setting<Boolean> ignoreBots = sgPlayers.add(new BoolSetting.Builder()
+        .name("ignore-bots")
+        .description("Only render non-bot player nametags.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> displayHealth = sgPlayers.add(new BoolSetting.Builder()
         .name("health")
         .description("Shows the player's health.")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -143,7 +143,7 @@ public class Nametags extends Module {
     private final Setting<Boolean> objectives = sgPlayers.add(new BoolSetting.Builder()
         .name("objectives")
         .description("Show scoreboard objectives.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -160,7 +160,7 @@ public class Nametags extends Module {
     private final Setting<Boolean> teamFormat = sgPlayers.add(new BoolSetting.Builder()
         .name("team-format")
         .description("Use formatted team player name.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -246,23 +246,23 @@ public class Nametags extends Module {
         .build()
     );
 
-    // Render
+    // Colors
 
-    private final Setting<SettingColor> background = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> background = sgColor.add(new ColorSetting.Builder()
         .name("background-color")
         .description("The color of the nametag background.")
         .defaultValue(new SettingColor(0, 0, 0, 75))
         .build()
     );
 
-    private final Setting<SettingColor> nameColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> nameColor = sgColor.add(new ColorSetting.Builder()
         .name("name-color")
         .description("The color of the nametag names.")
         .defaultValue(new SettingColor())
         .build()
     );
 
-    private final Setting<SettingColor> pingColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> pingColor = sgColor.add(new ColorSetting.Builder()
         .name("ping-color")
         .description("The color of the nametag names.")
         .defaultValue(new SettingColor(20, 170, 170))
@@ -270,7 +270,7 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<SettingColor> gamemodeColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> gamemodeColor = sgColor.add(new ColorSetting.Builder()
         .name("gamemode-color")
         .description("The color of the nametag names.")
         .defaultValue(new SettingColor(232, 185, 35))
@@ -278,7 +278,7 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<SettingColor> distanceColor = sgRender.add(new ColorSetting.Builder()
+    private final Setting<SettingColor> distanceColor = sgColor.add(new ColorSetting.Builder()
         .name("distance-color")
         .description("The color of the nametag names.")
         .defaultValue(new SettingColor(150, 150, 150))
@@ -296,6 +296,8 @@ public class Nametags extends Module {
     private final double[] itemWidths = new double[6];
 
     private final List<Entity> entityList = new ArrayList<>();
+
+    private TextRenderer text;
 
     public Nametags() {
         super(Categories.Render, "nametags", "Displays customizable nametags above players.");
@@ -354,6 +356,7 @@ public class Nametags extends Module {
             EntityType<?> type = entity.getType();
 
             if (NametagUtils.to2D(pos, scale.get())) {
+                text = TextRenderer.get(customFont.get());
                 if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity, shadow);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
                 else if (type == EntityType.ITEM_FRAME)
@@ -386,30 +389,6 @@ public class Nametags extends Module {
     }
 
     private void renderNametagPlayer(PlayerEntity player, boolean shadow) {
-        TextRenderer text = TextRenderer.get(customFont.get());
-
-        if (objectives.get()) {
-            MutableText scoreboardName = PlayerUtils.getScoreboardName(player);
-            if (scoreboardName != null && PlayerUtils.distanceToCamera(player) < objectivesRange.get()) {
-                NametagUtils.begin(new Vector3d(pos).add(0,scale.get() * text.getHeight(customFont.get()),0));
-
-                double width = text.getWidth(scoreboardName, shadow);
-                double widthHalf = width / 2;
-                double hX = -widthHalf;
-                double heightDown = text.getHeight(shadow);
-                double hY = -heightDown;
-
-                drawBg(hX, hY, width, heightDown);
-
-                text.beginBig();
-
-                text.render(scoreboardName, hX, hY, nameColor.get(), shadow);
-                text.end();
-
-                NametagUtils.end();
-            }
-        }
-
         NametagUtils.begin(pos);
 
         // Gamemode
@@ -576,11 +555,26 @@ public class Nametags extends Module {
             }
         } else if (displayEnchants.get()) displayEnchants.set(false);
 
+        if (objectives.get()) {
+            MutableText scoreboardName = PlayerUtils.getScoreboardName(player);
+            if (scoreboardName != null && PlayerUtils.distanceToCamera(player) < objectivesRange.get()) {
+                double scoreboardWidth = text.getWidth(scoreboardName, shadow);
+                double scoreboardHeight = -heightDown + 2 + text.getHeight(shadow);
+                double scoreboardWidthHalf = scoreboardWidth / 2;
+
+                drawBg(-scoreboardWidthHalf, scoreboardHeight, scoreboardWidth, heightDown);
+
+                text.beginBig();
+
+                text.render(scoreboardName, -scoreboardWidthHalf, scoreboardHeight, nameColor, shadow);
+                text.end();
+            }
+        }
+
         NametagUtils.end();
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
-        TextRenderer text = TextRenderer.get(customFont.get());
         NametagUtils.begin(pos);
 
         String name = stack.getName().getString();
@@ -608,7 +602,6 @@ public class Nametags extends Module {
     }
 
     private void renderGenericNametag(LivingEntity entity, boolean shadow) {
-        TextRenderer text = TextRenderer.get(customFont.get());
         NametagUtils.begin(pos);
 
         //Name
@@ -631,7 +624,8 @@ public class Nametags extends Module {
         double healthWidth = text.getWidth(healthText, shadow);
         double heightDown = text.getHeight(shadow);
 
-        double width = nameWidth + healthWidth;
+        double width = nameWidth;
+        if (displayHealth.get()) width += healthWidth;
         double widthHalf = width / 2;
 
         drawBg(-widthHalf, -heightDown, width, heightDown);
@@ -641,14 +635,13 @@ public class Nametags extends Module {
         double hY = -heightDown;
 
         hX = text.render(nameText, hX, hY, nameColor.get(), shadow);
-        text.render(healthText, hX, hY, healthColor, shadow);
+        if (displayHealth.get()) text.render(healthText, hX, hY, healthColor, shadow);
         text.end();
 
         NametagUtils.end();
     }
 
     private void renderTntNametag(TntEntity entity, boolean shadow) {
-        TextRenderer text = TextRenderer.get(customFont.get());
         NametagUtils.begin(pos);
 
         String fuseText = ticksToTime(entity.getFuse());
