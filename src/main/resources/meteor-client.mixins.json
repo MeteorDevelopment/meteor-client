@@ -79,6 +79,7 @@
     "FireworkRocketEntityMixin",
     "FireworksSparkParticleMixin",
     "FireworksSparkParticleSubMixin",
+    "FishingBobberEntityMixin",
     "FluidRendererMixin",
     "FoliageColorsMixin",
     "GameOptionsMixin",
