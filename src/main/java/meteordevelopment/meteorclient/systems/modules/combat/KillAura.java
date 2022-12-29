@@ -246,7 +246,6 @@ public class KillAura extends Module {
     private final Vec3d hitVec = new Vec3d(0, 0, 0);
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
-    private int lastItem = -1;
 
     public KillAura() {
         super(Categories.Combat, "kill-aura", "Attacks specified entities around you.");
@@ -284,8 +283,7 @@ public class KillAura extends Module {
                 wasPathing = false;
             }
             if (autoSwitch.get() && switchBack.get()) {
-                InvUtils.swap(lastItem, false);
-                lastItem = -1;
+                InvUtils.swapBack();
             }
             return;
         }
@@ -308,11 +306,7 @@ public class KillAura extends Module {
                 FindItemResult axeResult = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof AxeItem);
                 if (axeResult.found()) weaponResult = axeResult;
             }
-            
-            if (switchBack.get() && lastItem == -1) {
-                lastItem = mc.player.getInventory().selectedSlot;
-            }
-            InvUtils.swap(weaponResult.slot(), false);
+            InvUtils.swap(weaponResult.slot(), switchBack.get());
         }
 
         if (!itemInHand()) return;
