@@ -7,10 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
-import meteordevelopment.meteorclient.settings.KeybindSetting;
-import meteordevelopment.meteorclient.settings.Setting;
-import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -33,6 +30,23 @@ public class Blink extends Module {
         .build()
     );
 
+    private final Setting<Boolean> fakeLag = sgGeneral.add(new BoolSetting.Builder()
+        .name("fake-lag")
+        .description("Make other people think you are lagging.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+        .name("delay")
+        .description("Send delay in ticks.")
+        .defaultValue(5)
+        .min(1)
+        .sliderMax(20)
+        .visible(fakeLag::get)
+        .build()
+    );
+
     private final Setting<Keybind> cancelBlink = sgGeneral.add(new KeybindSetting.Builder()
         .name("cancel-blink")
         .description("Cancels sending packets and sends you back to your original position.")
@@ -50,6 +64,7 @@ public class Blink extends Module {
 
     private boolean cancelled = false;
     private int timer = 0;
+    private boolean sending = false;
 
     public Blink() {
         super(Categories.Movement, "blink", "Allows you to essentially teleport while suspending motion updates.");
@@ -77,10 +92,15 @@ public class Blink extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         timer++;
+        if (fakeLag.get() && delay.get() <= timer) {
+            dumpPackets(true);
+            onActivate();
+        }
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
+        if (sending) return;
         if (!(event.packet instanceof PlayerMoveC2SPacket p)) return;
         event.cancel();
 
@@ -106,10 +126,12 @@ public class Blink extends Module {
     }
 
     private void dumpPackets(boolean send) {
+        sending = true;
         synchronized (packets) {
             if (send) packets.forEach(mc.player.networkHandler::sendPacket);
             packets.clear();
         }
+        sending = false;
 
         if (model != null) {
             model.despawn();
