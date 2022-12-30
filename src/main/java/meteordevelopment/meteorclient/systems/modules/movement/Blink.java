@@ -30,20 +30,19 @@ public class Blink extends Module {
         .build()
     );
 
-    private final Setting<Boolean> fakeLag = sgGeneral.add(new BoolSetting.Builder()
-        .name("fake-lag")
-        .description("Make other people think you are lagging.")
-        .defaultValue(false)
+    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
+        .name("delay")
+        .description("Send delay in ticks. 0 to disable.")
+        .defaultValue(0)
+        .sliderMax(20)
         .build()
     );
 
-    private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-        .name("delay")
-        .description("Send delay in ticks.")
-        .defaultValue(5)
-        .min(1)
-        .sliderMax(20)
-        .visible(fakeLag::get)
+    private final Setting<Integer> maxPackets = sgGeneral.add(new IntSetting.Builder()
+        .name("max-packets")
+        .description("Max stored packets before sending. 0 to disable.")
+        .defaultValue(0)
+        .sliderMax(50)
         .build()
     );
 
@@ -75,6 +74,7 @@ public class Blink extends Module {
         if (renderOriginal.get()) {
             model = new FakePlayerEntity(mc.player, mc.player.getGameProfile().getName(), 20, true);
             model.doNotPush = true;
+            model.canHit = false;
             model.hideWhenInsideCamera = true;
             model.spawn();
         }
@@ -92,8 +92,9 @@ public class Blink extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         timer++;
-        if (fakeLag.get() && delay.get() <= timer) {
-            dumpPackets(true);
+        if (delay.get() != 0 && delay.get() <= timer ||
+            maxPackets.get() != 0 && packets.size() > maxPackets.get()) {
+            onDeactivate();
             onActivate();
         }
     }
