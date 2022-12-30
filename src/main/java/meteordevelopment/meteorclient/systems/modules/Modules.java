@@ -556,6 +556,7 @@ public class Modules extends System<Modules> {
         add(new BetterChat());
         add(new BetterTab());
         add(new BookBot());
+        add(new ConditionToggle());
         add(new DiscordPresence());
         add(new MessageAura());
         add(new MiddleClickFriend());
