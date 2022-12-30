@@ -107,6 +107,9 @@ public class PlayerUtils {
         double x = MathHelper.floor(mc.player.getX()) + 0.5;
         double z = MathHelper.floor(mc.player.getZ()) + 0.5;
         mc.player.setPosition(x, mc.player.getY(), z);
+        Vec3d pVel = mc.player.getVelocity();
+        if (pVel.x < 0.1 || pVel.z < 0.1) return;
+        pVel.multiply(0.5);
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
     }
 

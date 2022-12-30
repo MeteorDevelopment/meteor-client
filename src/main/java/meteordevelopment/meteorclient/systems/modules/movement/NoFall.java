@@ -24,13 +24,10 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
@@ -53,7 +50,7 @@ public class NoFall extends Module {
     private final Setting<PlacedItem> placedItem = sgGeneral.add(new EnumSetting.Builder<PlacedItem>()
         .name("placed-item")
         .description("Which block to place.")
-        .defaultValue(PlacedItem.Bucket)
+        .defaultValue(PlacedItem.WaterBucket)
         .visible(() -> mode.get() == Mode.Place)
         .build()
     );
@@ -114,10 +111,8 @@ public class NoFall extends Module {
         if (!Modules.get().isActive(Flight.class)) {
             if (mc.player.isFallFlying()) return;
             if (mc.player.getVelocity().y > -0.5) return;
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-        } else {
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
         }
+        ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
     }
 
     @EventHandler
@@ -149,12 +144,10 @@ public class NoFall extends Module {
 
         // Bucket mode
         else if (mode.get() == Mode.Place) {
-            PlacedItem placedItem1 = autoDimension.get() && PlayerUtils.getDimension() == Dimension.Nether ? PlacedItem.PowderSnow : placedItem.get();
+            PlacedItem placedItem1 = autoDimension.get() && mc.world.getDimension().ultrawarm() ? PlacedItem.PowderSnow : placedItem.get();
             if (mc.player.fallDistance > 3 && !EntityUtils.isAboveWater(mc.player)) {
-                Item item = placedItem1.item;
-
                 // Place
-                FindItemResult findItemResult = InvUtils.findInHotbar(item);
+                FindItemResult findItemResult = InvUtils.findInHotbar(placedItem1.item);
                 if (!findItemResult.found()) return;
 
                 // Center player
@@ -166,11 +159,7 @@ public class NoFall extends Module {
                 // Place
                 if (result != null && result.getType() == HitResult.Type.BLOCK) {
                     targetPos = result.getBlockPos().up();
-                    if (placedItem1 == PlacedItem.Bucket)
-                        useItem(findItemResult, true, targetPos, true);
-                    else {
-                        useItem(findItemResult, placedItem1 == PlacedItem.PowderSnow, targetPos, false);
-                    }
+                    useItem(findItemResult, placedItem1 == PlacedItem.WaterBucket || placedItem1 == PlacedItem.PowderSnow, targetPos, placedItem1 == PlacedItem.WaterBucket);
                 }
             }
 
@@ -185,8 +174,6 @@ public class NoFall extends Module {
     }
 
     private void useItem(FindItemResult item, boolean placedWater, BlockPos blockPos, boolean interactItem) {
-        if (!item.found()) return;
-
         if (interactItem) {
             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
                 if (item.isOffhand()) {
@@ -216,7 +203,7 @@ public class NoFall extends Module {
     }
 
     public enum PlacedItem {
-        Bucket(Items.WATER_BUCKET, Blocks.WATER),
+        WaterBucket(Items.WATER_BUCKET, Blocks.WATER),
         PowderSnow(Items.POWDER_SNOW_BUCKET, Blocks.POWDER_SNOW),
         HayBale(Items.HAY_BLOCK, Blocks.HAY_BLOCK),
         Cobweb(Items.COBWEB, Blocks.COBWEB),
