@@ -32,7 +32,7 @@ public class Blink extends Module {
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
-        .description("Send delay in ticks. 0 to disable.")
+        .description("Re-blink delay in ticks. 0 to disable.")
         .defaultValue(0)
         .sliderMax(20)
         .build()
@@ -40,7 +40,7 @@ public class Blink extends Module {
 
     private final Setting<Integer> maxPackets = sgGeneral.add(new IntSetting.Builder()
         .name("max-packets")
-        .description("Max stored packets before sending. 0 to disable.")
+        .description("Max stored packets before re-blink. 0 to disable.")
         .defaultValue(0)
         .sliderMax(50)
         .build()
