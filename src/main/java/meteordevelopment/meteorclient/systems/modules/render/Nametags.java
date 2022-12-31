@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems.modules.render;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -247,12 +246,6 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Color WHITE = new Color(255, 255, 255);
-    private final Color RED = new Color(255, 25, 25);
-    private final Color AMBER = new Color(255, 105, 25);
-    private final Color GREEN = new Color(25, 252, 25);
-    private final Color GOLD = new Color(232, 185, 35);
-
     private final Vector3d pos = new Vector3d();
     private final double[] itemWidths = new double[6];
 
@@ -260,20 +253,6 @@ public class Nametags extends Module {
 
     public Nametags() {
         super(Categories.Render, "nametags", "Displays customizable nametags above players.");
-    }
-
-    private static String ticksToTime(int ticks) {
-        if (ticks > 20 * 3600) {
-            int h = ticks / 20 / 3600;
-            return h + " h";
-        } else if (ticks > 20 * 60) {
-            int m = ticks / 20 / 60;
-            return m + " m";
-        } else {
-            int s = ticks / 20;
-            int ms = (ticks % 20) / 2;
-            return s + "." + ms + " s";
-        }
     }
 
     @EventHandler
@@ -374,16 +353,7 @@ public class Nametags extends Module {
         name = name + " ";
 
         // Health
-        float absorption = player.getAbsorptionAmount();
-        int health = Math.round(player.getHealth() + absorption);
-        double healthPercentage = health / (player.getMaxHealth() + absorption);
-
-        String healthText = String.valueOf(health);
-        Color healthColor;
-
-        if (healthPercentage <= 0.333) healthColor = RED;
-        else if (healthPercentage <= 0.666) healthColor = AMBER;
-        else healthColor = GREEN;
+        String healthText = String.valueOf(Utils.getHealth(player));
 
         // Ping
         int ping = EntityUtils.getPing(player);
@@ -410,7 +380,7 @@ public class Nametags extends Module {
         double widthHalf = width / 2;
         double heightDown = text.getHeight(shadow);
 
-        drawBg(-widthHalf, -heightDown, width, heightDown);
+        RenderUtils.drawBg(-widthHalf, -heightDown, width, heightDown, background.get());
 
         // Render texts
         text.beginBig();
@@ -420,7 +390,7 @@ public class Nametags extends Module {
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, gamemodeColor.get(), shadow);
         hX = text.render(name, hX, hY, nameColor, shadow);
 
-        hX = text.render(healthText, hX, hY, healthColor, shadow);
+        hX = text.render(healthText, hX, hY, Utils.getHealthColor(player), shadow);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, pingColor.get(), shadow);
         if (displayDistance.get() && renderPlayerDistance) text.render(distText, hX, hY, distanceColor.get(), shadow);
         text.end();
@@ -494,8 +464,8 @@ public class Nametags extends Module {
                     for (Enchantment enchantment : enchantmentsToShow.keySet()) {
                         String enchantName = Utils.getEnchantSimpleName(enchantment, enchantLength.get()) + " " + enchantmentsToShow.get(enchantment);
 
-                        Color enchantColor = WHITE;
-                        if (enchantment.isCursed()) enchantColor = RED;
+                        Color enchantColor = Utils.WHITE;
+                        if (enchantment.isCursed()) enchantColor = Utils.RED;
 
                         enchantX = switch (enchantPos.get()) {
                             case Above -> x + (aW / 2) - (text.getWidth(enchantName, shadow) / 2);
@@ -532,14 +502,14 @@ public class Nametags extends Module {
         if (itemCount.get()) width += countWidth;
         double widthHalf = width / 2;
 
-        drawBg(-widthHalf, -heightDown, width, heightDown);
+        RenderUtils.drawBg(-widthHalf, -heightDown, width, heightDown, background.get());
 
         text.beginBig();
         double hX = -widthHalf;
         double hY = -heightDown;
 
         hX = text.render(name, hX, hY, nameColor.get(), shadow);
-        if (itemCount.get()) text.render(count, hX, hY, GOLD, shadow);
+        if (itemCount.get()) text.render(count, hX, hY, Utils.GOLD, shadow);
         text.end();
 
         NametagUtils.end();
@@ -554,16 +524,7 @@ public class Nametags extends Module {
         nameText += " ";
 
         //Health
-        float absorption = entity.getAbsorptionAmount();
-        int health = Math.round(entity.getHealth() + absorption);
-        double healthPercentage = health / (entity.getMaxHealth() + absorption);
-
-        String healthText = String.valueOf(health);
-        Color healthColor;
-
-        if (healthPercentage <= 0.333) healthColor = RED;
-        else if (healthPercentage <= 0.666) healthColor = AMBER;
-        else healthColor = GREEN;
+        String healthText = String.valueOf(Utils.getHealth(entity));
 
         double nameWidth = text.getWidth(nameText, shadow);
         double healthWidth = text.getWidth(healthText, shadow);
@@ -572,14 +533,14 @@ public class Nametags extends Module {
         double width = nameWidth + healthWidth;
         double widthHalf = width / 2;
 
-        drawBg(-widthHalf, -heightDown, width, heightDown);
+        RenderUtils.drawBg(-widthHalf, -heightDown, width, heightDown, background.get());
 
         text.beginBig();
         double hX = -widthHalf;
         double hY = -heightDown;
 
         hX = text.render(nameText, hX, hY, nameColor.get(), shadow);
-        text.render(healthText, hX, hY, healthColor, shadow);
+        text.render(healthText, hX, hY, Utils.getHealthColor(entity), shadow);
         text.end();
 
         NametagUtils.end();
@@ -589,14 +550,14 @@ public class Nametags extends Module {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
-        String fuseText = ticksToTime(entity.getFuse());
+        String fuseText = Utils.ticksToTime(entity.getFuse());
 
         double width = text.getWidth(fuseText, shadow);
         double heightDown = text.getHeight(shadow);
 
         double widthHalf = width / 2;
 
-        drawBg(-widthHalf, -heightDown, width, heightDown);
+        RenderUtils.drawBg(-widthHalf, -heightDown, width, heightDown, background.get());
 
         text.beginBig();
         double hX = -widthHalf;
@@ -618,12 +579,6 @@ public class Nametags extends Module {
             case 5 -> entity.getOffHandStack();
             default -> ItemStack.EMPTY;
         };
-    }
-
-    private void drawBg(double x, double y, double width, double height) {
-        Renderer2D.COLOR.begin();
-        Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2, background.get());
-        Renderer2D.COLOR.render(null);
     }
 
     public enum Position {

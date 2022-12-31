@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
@@ -107,6 +108,12 @@ public class RenderUtils {
         }
 
         renderBlocks.add(renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink));
+    }
+
+    public static void drawBg(double x, double y, double width, double height, Color bg) {
+        Renderer2D.COLOR.begin();
+        Renderer2D.COLOR.quad(x - 1, y - 1, width + 2, height + 2, bg);
+        Renderer2D.COLOR.render(null);
     }
 
     @EventHandler

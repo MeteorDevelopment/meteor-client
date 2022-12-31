@@ -34,6 +34,7 @@ import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
@@ -68,6 +69,10 @@ public class Utils {
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
     public static final Color WHITE = new Color(255, 255, 255);
+    public static final Color RED = new Color(255, 25, 25);
+    public static final Color AMBER = new Color(255, 105, 25);
+    public static final Color GREEN = new Color(25, 252, 25);
+    public static final Color GOLD = new Color(232, 185, 35);
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
@@ -628,5 +633,25 @@ public class Utils {
     public static boolean ipFilter(String text, char character) {
         if (text.contains(":") && character == ':') return false;
         return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
+    }
+
+    public static String ticksToTime(int ticks) {
+        if (ticks > 72000) return String.format("%.1fh", ticks / 72000d);
+        if (ticks > 1200) return String.format("%.1fm", ticks / 1200d);
+        else return String.format("%.1fs", ticks / 20d);
+    }
+
+    public static int getHealth(LivingEntity entity) {
+        float absorption = entity.getAbsorptionAmount();
+        return Math.round(entity.getHealth() + absorption);
+    }
+
+    public static Color getHealthColor(LivingEntity entity) {
+        float absorption = entity.getAbsorptionAmount();
+        int health = Math.round(entity.getHealth() + absorption);
+        double healthPercentage = health / (entity.getMaxHealth() + absorption);
+        if (healthPercentage <= 0.333) return RED;
+        else if (healthPercentage <= 0.666) return AMBER;
+        else return GREEN;
     }
 }

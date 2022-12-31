@@ -16,6 +16,7 @@ import java.util.UUID;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class FakePlayerEntity extends OtherClientPlayerEntity {
+    private boolean spawned;
     public boolean doNotPush, hideWhenInsideCamera;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
@@ -51,13 +52,17 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     }
 
     public void spawn() {
+        if (spawned) return;
         unsetRemoved();
         mc.world.addEntity(getId(), this);
+        spawned = true;
     }
 
     public void despawn() {
+        if (!spawned) return;
         mc.world.removeEntity(getId(), RemovalReason.DISCARDED);
         setRemoved(RemovalReason.DISCARDED);
+        spawned = false;
     }
 
     @Nullable
