@@ -126,16 +126,7 @@ public class ConditionToggle extends Module {
         if (event.packet instanceof DeathMessageS2CPacket packet) {
             Entity entity = mc.world.getEntityById(packet.getEntityId());
             if (entity == mc.player && death.get()) {
-                for (Module module : deathOffToggleModules.get()) {
-                    if (module.isActive()) {
-                        module.toggle();
-                    }
-                }
-                for (Module module : deathOnToggleModules.get()) {
-                    if (!module.isActive()) {
-                        module.toggle();
-                    }
-                }
+                toggleModules(deathOnToggleModules.get(), deathOffToggleModules.get());
             }
         }
     }
@@ -147,16 +138,7 @@ public class ConditionToggle extends Module {
         if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         if (damage.get()) {
-            for (Module module : damageOffToggleModules.get()) {
-                if (module.isActive()) {
-                    module.toggle();
-                }
-            }
-            for (Module module : damageOnToggleModules.get()) {
-                if (!module.isActive()) {
-                    module.toggle();
-                }
-            }
+            toggleModules(damageOnToggleModules.get(), damageOffToggleModules.get());
         }
     }
 
@@ -164,16 +146,7 @@ public class ConditionToggle extends Module {
     @EventHandler
     private void onGameLeft(GameLeftEvent event) {
         if (logout.get()) {
-            for (Module module : logoutOffToggleModules.get()) {
-                if (module.isActive()) {
-                    module.toggle();
-                }
-            }
-            for (Module module : logoutOnToggleModules.get()) {
-                if (!module.isActive()) {
-                    module.toggle();
-                }
-            }
+            toggleModules(logoutOffToggleModules.get(), logoutOnToggleModules.get());
         }
     }
 
@@ -181,29 +154,32 @@ public class ConditionToggle extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
-                if (!ignoreFriends.get() && entity != mc.player) {
-                    if (player.get()) {
-                        playerToggle();
-                    }
-                } else if (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity) entity)) {
-                    if (player.get()) {
-                        playerToggle();
+            if (entity instanceof PlayerEntity) {
+                if (entity.getUuid() != mc.player.getUuid()) {
+                    if (!ignoreFriends.get() && entity != mc.player) {
+                        if (player.get()) {
+                            toggleModules(playerOnToggleModules.get(), playerOffToggleModules.get());
+                        }
+                    } else if (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity) entity)) {
+                        if (player.get()) {
+                            toggleModules(playerOnToggleModules.get(), playerOffToggleModules.get());
+                        }
                     }
                 }
             }
         }
     }
 
-    private void playerToggle() {
-        for (Module module : playerOffToggleModules.get()) {
+    //toggle modules
+    private void toggleModules(List<Module> onModules, List<Module> offModules) {
+        for (Module module : offModules) {
             if (module.isActive()) {
                 module.toggle();
             }
         }
-        for (Module module : playerOnToggleModules.get()) {
+        for (Module module : onModules) {
             if (!module.isActive()) {
-                    module.toggle();
+                module.toggle();
             }
         }
     }
