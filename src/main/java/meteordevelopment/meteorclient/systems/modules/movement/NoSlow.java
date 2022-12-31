@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import meteordevelopment.meteorclient.events.entity.player.CobwebEntityCollisionEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -25,14 +24,14 @@ public class NoSlow extends Module {
         .build()
     );
 
-    public final Setting<WebMode> web = sgGeneral.add(new EnumSetting.Builder<WebMode>()
+    private final Setting<WebMode> web = sgGeneral.add(new EnumSetting.Builder<WebMode>()
         .name("web")
         .description("Whether or not cobwebs will not slow you down.")
         .defaultValue(WebMode.Vanilla)
         .build()
     );
 
-    public final Setting<Integer> webTimer = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Integer> webTimer = sgGeneral.add(new IntSetting.Builder()
         .name("web-timer")
         .description("The timer value for WebMode Timer.")
         .defaultValue(10)
@@ -44,14 +43,14 @@ public class NoSlow extends Module {
 
     private final Setting<Boolean> honeyBlock = sgGeneral.add(new BoolSetting.Builder()
         .name("honey-block")
-        .description("Whether or not Honey Block will not slow you down.")
+        .description("Whether or not honey blocks will not slow you down.")
         .defaultValue(true)
         .build()
     );
 
     private final Setting<Boolean> soulSand = sgGeneral.add(new BoolSetting.Builder()
         .name("soul-sand")
-        .description("Whether or not Soul Sand will not slow you down.")
+        .description("Whether or not soul sand will not slow you down.")
         .defaultValue(true)
         .build()
     );
@@ -59,6 +58,13 @@ public class NoSlow extends Module {
     private final Setting<Boolean> slimeBlock = sgGeneral.add(new BoolSetting.Builder()
         .name("slime-block")
         .description("Whether or not slime blocks will not slow you down.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> berryBush = sgGeneral.add(new BoolSetting.Builder()
+        .name("berry-bush")
+        .description("Whether or not berry bushes will not slow you down.")
         .defaultValue(true)
         .build()
     );
@@ -73,6 +79,13 @@ public class NoSlow extends Module {
     private final Setting<Boolean> sneaking = sgGeneral.add(new BoolSetting.Builder()
         .name("sneaking")
         .description("Whether or not sneaking will not slow you down.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> slowness = sgGeneral.add(new BoolSetting.Builder()
+        .name("slowness")
+        .description("Whether or not slowness will not slow you down.")
         .defaultValue(false)
         .build()
     );
@@ -108,13 +121,20 @@ public class NoSlow extends Module {
         return isActive() && slimeBlock.get();
     }
 
+    public boolean cobweb() {
+        return isActive() && web.get() == WebMode.Vanilla;
+    }
+
+    public boolean berryBush() {
+        return isActive() && berryBush.get();
+    }
+
     public boolean sneaking() {
         return isActive() && sneaking.get();
     }
 
-    @EventHandler
-    private void onWebEntityCollision(CobwebEntityCollisionEvent event) {
-        if (web.get() == WebMode.Vanilla) event.cancel();
+    public boolean slowness() {
+        return isActive() && slowness.get();
     }
 
     @EventHandler
