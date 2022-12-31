@@ -20,7 +20,7 @@ public class StorageOutlineShader extends PostProcessShader {
     @Override
     protected boolean shouldDraw() {
         if (storageESP == null) storageESP = Modules.get().get(StorageESP.class);
-        return true;
+        return storageESP.isShader();
     }
 
     @Override
@@ -33,5 +33,6 @@ public class StorageOutlineShader extends PostProcessShader {
         shader.set("u_Width", storageESP.outlineWidth.get());
         shader.set("u_FillOpacity", storageESP.fillOpacity.get() / 255.0);
         shader.set("u_ShapeMode", storageESP.shapeMode.get().ordinal());
+        shader.set("u_GlowMultiplier", storageESP.glowMultiplier.get());
     }
 }

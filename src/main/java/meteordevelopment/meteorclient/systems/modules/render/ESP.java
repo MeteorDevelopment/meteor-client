@@ -11,10 +11,11 @@ import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.misc.Vec3;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.WireframeEntityRenderer;
@@ -26,6 +27,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
+import org.joml.Vector3d;
 
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -47,6 +49,17 @@ public class ESP extends Module {
         .defaultValue(2)
         .range(1, 10)
         .sliderRange(1, 5)
+        .build()
+    );
+
+    public final Setting<Double> glowMultiplier = sgGeneral.add(new DoubleSetting.Builder()
+        .name("glow-multiplier")
+        .description("Multiplier for glow effect")
+        .visible(() -> mode.get() == Mode.Shader)
+        .decimalPlaces(3)
+        .defaultValue(3.5)
+        .min(0)
+        .sliderMax(10)
         .build()
     );
 
@@ -96,6 +109,14 @@ public class ESP extends Module {
         .name("distance-colors")
         .description("Changes the color of tracers depending on distance.")
         .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> friendOverride = sgColors.add(new BoolSetting.Builder()
+        .name("show-friend-colors")
+        .description("Whether or not to override the distance color of friends with the friend color.")
+        .defaultValue(true)
+        .visible(distance::get)
         .build()
     );
 
@@ -150,11 +171,10 @@ public class ESP extends Module {
     private final Color lineColor = new Color();
     private final Color sideColor = new Color();
     private final Color baseColor = new Color();
-    private final Color distanceColor = new Color(255, 255, 255);
 
-    private final Vec3 pos1 = new Vec3();
-    private final Vec3 pos2 = new Vec3();
-    private final Vec3 pos = new Vec3();
+    private final Vector3d pos1 = new Vector3d();
+    private final Vector3d pos2 = new Vector3d();
+    private final Vector3d pos = new Vector3d();
 
     private int count;
 
@@ -253,7 +273,7 @@ public class ESP extends Module {
         Renderer2D.COLOR.render(null);
     }
 
-    private boolean checkCorner(double x, double y, double z, Vec3 min, Vec3 max) {
+    private boolean checkCorner(double x, double y, double z, Vector3d min, Vector3d max) {
         pos.set(x, y, z);
         if (!NametagUtils.to2D(pos, 1)) return true;
 
@@ -299,41 +319,21 @@ public class ESP extends Module {
     }
 
     public Color getEntityTypeColor(Entity entity) {
-        if (distance.get()) return getColorFromDistance(entity);
-        if (entity instanceof PlayerEntity) return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-
-        return switch (entity.getType().getSpawnGroup()) {
-            case CREATURE -> animalsColor.get();
-            case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-            case MONSTER -> monstersColor.get();
-            case AMBIENT -> ambientColor.get();
-            default -> miscColor.get();
-        };
-    }
-
-    private Color getColorFromDistance(Entity entity) {
-        // Credit to Icy from Stackoverflow
-        double distance = PlayerUtils.distanceToCamera(entity);
-        double percent = distance / 60;
-
-        if (percent < 0 || percent > 1) {
-            distanceColor.set(0, 255, 0, 255);
-            return distanceColor;
+        if (distance.get()) {
+            if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                return Config.get().friendColor.get();
+            } else return EntityUtils.getColorFromDistance(entity);
+        } else if (entity instanceof PlayerEntity) {
+            return PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+        } else {
+            return switch (entity.getType().getSpawnGroup()) {
+                case CREATURE -> animalsColor.get();
+                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
+                case MONSTER -> monstersColor.get();
+                case AMBIENT -> ambientColor.get();
+                default -> miscColor.get();
+            };
         }
-
-        int r, g;
-
-        if (percent < 0.5) {
-            r = 255;
-            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
-        }
-        else {
-            g = 255;
-            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
-        }
-
-        distanceColor.set(r, g, 0, 255);
-        return distanceColor;
     }
 
     @Override

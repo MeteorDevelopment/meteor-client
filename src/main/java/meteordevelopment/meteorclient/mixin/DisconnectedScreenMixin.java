@@ -39,16 +39,25 @@ public abstract class DisconnectedScreenMixin extends Screen {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
 
-            reconnectBtn = addDrawableChild(new ButtonWidget(x, y, 200, 20, Text.literal(getText()),
-                button -> ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client,
-                ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address),
-                Modules.get().get(AutoReconnect.class).lastServerInfo)));
-            addDrawableChild(new ButtonWidget(x, y + 22, 200, 20, Text.literal("Toggle AutoReconnect"),
-                button -> {
-                    Modules.get().get(AutoReconnect.class).toggle();
-                    ((AbstractButtonWidgetAccessor) reconnectBtn).setText(Text.literal(getText()));
-                    time = Modules.get().get(AutoReconnect.class).time.get() * 20;
-                }));
+            reconnectBtn = addDrawableChild(
+                    new ButtonWidget.Builder(Text.literal(getText()), button -> {
+                        ConnectScreen.connect(new MultiplayerScreen(new TitleScreen()), client, ServerAddress.parse(Modules.get().get(AutoReconnect.class).lastServerInfo.address), Modules.get().get(AutoReconnect.class).lastServerInfo);
+                    })
+                    .position(x, y)
+                    .size(200, 20)
+                    .build()
+            );
+
+            addDrawableChild(
+                    new ButtonWidget.Builder(Text.literal("Toggle Auto Reconnect"), button -> {
+                        Modules.get().get(AutoReconnect.class).toggle();
+                        ((AbstractButtonWidgetAccessor) reconnectBtn).setText(Text.literal(getText()));
+                        time = Modules.get().get(AutoReconnect.class).time.get() * 20;
+                    })
+                    .position(x, y + 22)
+                    .size(200, 20)
+                    .build()
+            );
         }
     }
 

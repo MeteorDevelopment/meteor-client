@@ -9,7 +9,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IMatrix4f;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.misc.Pool;
@@ -22,8 +21,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RotationAxis;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3f;
+import org.joml.Vector3f;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -65,15 +65,13 @@ public class RenderUtils {
     public static void updateScreenCenter() {
         MinecraftClient mc = MinecraftClient.getInstance();
 
-        Vec3d pos = new Vec3d(0, 0, 1);
+        Vector3f pos = new Vector3f(0, 0, 1);
 
         if (mc.options.getBobView().getValue()) {
             MatrixStack bobViewMatrices = new MatrixStack();
 
             bobView(bobViewMatrices);
-            bobViewMatrices.peek().getPositionMatrix().invert();
-
-            pos = ((IMatrix4f) (Object) bobViewMatrices.peek().getPositionMatrix()).mul(pos);
+            pos.mulPosition(bobViewMatrices.peek().getPositionMatrix().invert());
         }
 
         center = new Vec3d(pos.x, -pos.y, pos.z)
@@ -91,13 +89,23 @@ public class RenderUtils {
             float h = -(playerEntity.horizontalSpeed + g * f);
             float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
 
-            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), -(-Math.abs(MathHelper.cos(h * 3.1415927f) * i)), 0);
-            matrices.multiply(Vec3f.POSITIVE_Z.getDegreesQuaternion(MathHelper.sin(h * 3.1415927f) * i * 3));
-            matrices.multiply(Vec3f.POSITIVE_X.getDegreesQuaternion(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
+            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), Math.abs(MathHelper.cos(h * 3.1415927f) * i), 0);
+            matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(h * 3.1415927f) * i * 3));
+            matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
         }
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
+        // Ensure there aren't multiple fading blocks in one pos
+        Iterator<RenderBlock> iterator = renderBlocks.iterator();
+        while (iterator.hasNext()) {
+            RenderBlock next = iterator.next();
+            if (next.pos.equals(blockPos)) {
+                iterator.remove();
+                renderBlockPool.free(next);
+            }
+        }
+
         renderBlocks.add(renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink));
     }
 

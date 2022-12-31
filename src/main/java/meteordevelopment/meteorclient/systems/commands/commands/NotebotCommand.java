@@ -27,7 +27,10 @@ import net.minecraft.util.Util;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -137,7 +140,7 @@ public class NotebotCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound().getId().getPath().contains("note_block")) {
+        if (event.packet instanceof PlaySoundS2CPacket sound && sound.getSound().value().getId().getPath().contains("note_block")) {
             if (ticks == -1) ticks = 0;
             List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
             var note = getNote(sound);
@@ -191,13 +194,13 @@ public class NotebotCommand extends Command {
         }
 
         if (noteLevel == -1) {
-            error("Error while bruteforcing a note level! Sound: "+soundPacket.getSound()+" Pitch: "+pitch);
+            error("Error while bruteforcing a note level! Sound: " + soundPacket.getSound().value() + " Pitch: " + pitch);
             return null;
         }
 
-        Instrument instrument = getInstrumentFromSound(soundPacket.getSound());
+        Instrument instrument = getInstrumentFromSound(soundPacket.getSound().value());
         if (instrument == null) {
-            error("Can't find the instrument from sound! Sound: "+soundPacket.getSound());
+            error("Can't find the instrument from sound! Sound: " + soundPacket.getSound().value());
             return null;
         }
 

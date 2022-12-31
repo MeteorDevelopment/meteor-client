@@ -10,8 +10,8 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.registry.Registries;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,7 +40,7 @@ public class BlockListSetting extends Setting<List<Block>> {
 
         try {
             for (String value : values) {
-                Block block = parseId(Registry.BLOCK, value);
+                Block block = parseId(Registries.BLOCK, value);
                 if (block != null && (filter == null || filter.test(block))) blocks.add(block);
             }
         } catch (Exception ignored) {}
@@ -55,14 +55,14 @@ public class BlockListSetting extends Setting<List<Block>> {
 
     @Override
     public Iterable<Identifier> getIdentifierSuggestions() {
-        return Registry.BLOCK.getIds();
+        return Registries.BLOCK.getIds();
     }
 
     @Override
     protected NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Block block : get()) {
-            valueTag.add(NbtString.of(Registry.BLOCK.getId(block).toString()));
+            valueTag.add(NbtString.of(Registries.BLOCK.getId(block).toString()));
         }
         tag.put("value", valueTag);
 
@@ -75,7 +75,7 @@ public class BlockListSetting extends Setting<List<Block>> {
 
         NbtList valueTag = tag.getList("value", 8);
         for (NbtElement tagI : valueTag) {
-            Block block = Registry.BLOCK.get(new Identifier(tagI.asString()));
+            Block block = Registries.BLOCK.get(new Identifier(tagI.asString()));
 
             if (filter == null || filter.test(block)) get().add(block);
         }

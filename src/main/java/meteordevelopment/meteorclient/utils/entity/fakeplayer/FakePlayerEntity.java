@@ -19,7 +19,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     public boolean doNotPush, hideWhenInsideCamera;
 
     public FakePlayerEntity(PlayerEntity player, String name, float health, boolean copyInv) {
-        super(mc.world, new GameProfile(UUID.randomUUID(), name), player.getPublicKey());
+        super(mc.world, new GameProfile(UUID.randomUUID(), name));
 
         copyPositionAndRotation(player);
 
@@ -63,10 +63,10 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
     @Nullable
     @Override
     protected PlayerListEntry getPlayerListEntry() {
-        if (cachedScoreboardEntry == null) {
-            cachedScoreboardEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
+        if (playerListEntry == null) {
+            playerListEntry = mc.getNetworkHandler().getPlayerListEntry(mc.player.getUuid());
         }
 
-        return cachedScoreboardEntry;
+        return playerListEntry;
     }
 }

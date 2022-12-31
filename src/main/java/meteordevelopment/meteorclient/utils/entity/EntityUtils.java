@@ -13,6 +13,9 @@ import meteordevelopment.meteorclient.mixin.SectionedEntityCacheAccessor;
 import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
 import meteordevelopment.meteorclient.mixin.WorldAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.block.AirBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.entity.BlockEntity;
@@ -24,6 +27,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -34,15 +38,16 @@ import net.minecraft.world.entity.EntityTrackingSection;
 import net.minecraft.world.entity.SectionedEntityCache;
 import net.minecraft.world.entity.SimpleEntityLookup;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import javax.annotation.Nullable;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityUtils {
+    private static BlockPos.Mutable testPos = new BlockPos.Mutable();
+
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
     }
@@ -108,34 +113,60 @@ public class EntityUtils {
         return x < d && z < d;
     }
 
-    public static List<BlockPos> getSurroundBlocks(PlayerEntity player) {
+    public static BlockPos getCityBlock(PlayerEntity player) {
         if (player == null) return null;
 
-        List<BlockPos> positions = new ArrayList<>();
+        double bestDistance = 6;
+        Direction bestDirection = null;
 
-        for (Direction direction : Direction.values()) {
-            if (direction == Direction.UP || direction == Direction.DOWN) continue;
+        for (Direction direction : Direction.HORIZONTAL) {
+            testPos.set(player.getBlockPos().offset(direction));
 
-            BlockPos pos = player.getBlockPos().offset(direction);
+            Block block = mc.world.getBlockState(testPos).getBlock();
+            if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
+            && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
 
-            if (mc.world.getBlockState(pos).getBlock() == Blocks.OBSIDIAN) {
-                positions.add(pos);
+            double testDistance = PlayerUtils.distanceTo(testPos);
+            if (testDistance < bestDistance) {
+                bestDistance = testDistance;
+                bestDirection = direction;
             }
         }
 
-        return positions;
-    }
-
-    public static BlockPos getCityBlock(PlayerEntity player) {
-        List<BlockPos> posList = getSurroundBlocks(player);
-        posList.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
-        return posList.isEmpty() ? null : posList.get(0);
+        if (bestDirection == null) return null;
+        return player.getBlockPos().offset(bestDirection);
     }
 
     public static String getName(Entity entity) {
         if (entity == null) return null;
         if (entity instanceof PlayerEntity) return entity.getEntityName();
         return entity.getType().getName().getString();
+    }
+
+    public static Color getColorFromDistance(Entity entity) {
+        // Credit to Icy from Stackoverflow
+        Color distanceColor = new Color(255, 255, 255);
+        double distance = PlayerUtils.distanceToCamera(entity);
+        double percent = distance / 60;
+
+        if (percent < 0 || percent > 1) {
+            distanceColor.set(0, 255, 0, 255);
+            return distanceColor;
+        }
+
+        int r, g;
+
+        if (percent < 0.5) {
+            r = 255;
+            g = (int) (255 * percent / 0.5);  // Closer to 0.5, closer to yellow (255,255,0)
+        }
+        else {
+            g = 255;
+            r = 255 - (int) (255 * (percent - 0.5) / 0.5); // Closer to 1.0, closer to green (0,255,0)
+        }
+
+        distanceColor.set(r, g, 0, 255);
+        return distanceColor;
     }
 
     public static boolean intersectsWithEntity(Box box, Predicate<Entity> predicate) {

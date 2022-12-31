@@ -85,7 +85,7 @@ public class MiddleClickExtra extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE) return;
+        if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
 
         FindItemResult result = InvUtils.findInHotbar(mode.get().item);
 

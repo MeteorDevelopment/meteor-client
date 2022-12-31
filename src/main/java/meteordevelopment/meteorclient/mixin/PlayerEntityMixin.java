@@ -10,22 +10,34 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
+import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
+import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
+    @Shadow
+    public abstract PlayerAbilities getAbilities();
+
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -48,8 +60,18 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
         SpeedMine module = Modules.get().get(SpeedMine.class);
         if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal) return;
+        float breakSpeed = cir.getReturnValue();
+        float breakSpeedMod = (float) (breakSpeed * module.modifier.get());
 
-        cir.setReturnValue((float) (cir.getReturnValue() * module.modifier.get()));
+        HitResult result = mc.crosshairTarget;
+        if (result != null && result.getType() == HitResult.Type.BLOCK) {
+            BlockPos pos = ((BlockHitResult) result).getBlockPos();
+            if (module.modifier.get() < 1 || (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod)))
+                cir.setReturnValue(breakSpeedMod);
+            else
+                cir.setReturnValue(0.9f / BlockUtils.calcBlockBreakingDelta2(pos, 1));
+        }
+
     }
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
@@ -57,4 +79,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
     }
+
+    @Inject(method = "getMovementSpeed", at = @At("RETURN"), cancellable = true)
+    private void onGetMovementSpeed(CallbackInfoReturnable<Float> info) {
+        if (!Modules.get().get(NoSlow.class).slowness()) return;
+        float walkSpeed = getAbilities().getWalkSpeed();
+        if (info.getReturnValueF() < walkSpeed) {
+            if (isSprinting()) info.setReturnValue((float) (walkSpeed * 1.30000001192092896));
+            else info.setReturnValue(walkSpeed);
+        }
+    }
+
 }
