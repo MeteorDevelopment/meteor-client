@@ -10,12 +10,14 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
+import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
@@ -23,6 +25,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -32,6 +35,9 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntity {
+    @Shadow
+    public abstract PlayerAbilities getAbilities();
+
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> entityType, World world) {
         super(entityType, world);
     }
@@ -73,4 +79,15 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
     }
+
+    @Inject(method = "getMovementSpeed", at = @At("RETURN"), cancellable = true)
+    private void onGetMovementSpeed(CallbackInfoReturnable<Float> info) {
+        if (!Modules.get().get(NoSlow.class).slowness()) return;
+        float walkSpeed = getAbilities().getWalkSpeed();
+        if (info.getReturnValueF() < walkSpeed) {
+            if (isSprinting()) info.setReturnValue((float) (walkSpeed * 1.30000001192092896));
+            else info.setReturnValue(walkSpeed);
+        }
+    }
+
 }
