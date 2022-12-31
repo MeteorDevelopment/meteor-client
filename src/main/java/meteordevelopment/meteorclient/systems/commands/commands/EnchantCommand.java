@@ -20,6 +20,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 
 import java.util.function.Function;
@@ -89,8 +90,8 @@ public class EnchantCommand extends Command {
     private void one(CommandContext<CommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        Enchantment enchantment = context.getArgument("enchantment", Enchantment.class);
-        Utils.addEnchantment(itemStack, enchantment, level.apply(enchantment));
+        RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
+        Utils.addEnchantment(itemStack, enchantment.value(), level.apply(enchantment.value()));
 
         syncItem();
     }
