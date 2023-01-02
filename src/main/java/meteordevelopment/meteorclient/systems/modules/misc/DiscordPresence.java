@@ -257,13 +257,15 @@ public class DiscordPresence extends Module {
                 else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Reading credits");
                 else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
                 else {
-                    String className = mc.currentScreen.getClass().getName();
                     boolean setState = false;
-                    for (var pair : customStates) {
-                        if (className.startsWith(pair.getLeft())) {
-                            rpc.setState(pair.getRight());
-                            setState = true;
-                            break;
+                    if (mc.currentScreen != null) {
+                        String className = mc.currentScreen.getClass().getName();
+                        for (var pair : customStates) {
+                            if (className.startsWith(pair.getLeft())) {
+                                rpc.setState(pair.getRight());
+                                setState = true;
+                                break;
+                            }
                         }
                     }
                     if (!setState) rpc.setState("In main menu");
