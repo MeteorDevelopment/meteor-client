@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.accounts.types.CrackedAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.MicrosoftAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.YggdrasilAccount;
 import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -74,6 +75,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
             try {
                 Account<?> account = switch (type) {
                     case Cracked ->     new CrackedAccount(null).fromTag(t);
+                    case Yggdrasil ->     new YggdrasilAccount(null, null, null).fromTag(t);
                     case Microsoft ->   new MicrosoftAccount(null).fromTag(t);
                     case TheAltening -> new TheAlteningAccount(null).fromTag(t);
                 };

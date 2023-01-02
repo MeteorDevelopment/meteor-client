@@ -5,8 +5,12 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.UserApiService;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.SocialInteractionsManager;
 import net.minecraft.client.resource.ResourceReloadLogger;
+import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.Session;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -40,4 +44,20 @@ public interface MinecraftClientAccessor {
 
     @Invoker("doAttack")
     boolean leftClick();
+
+    @Mutable
+    @Accessor("sessionService")
+    void setSessionService(MinecraftSessionService sessionService);
+
+    @Mutable
+    @Accessor("socialInteractionsManager")
+    void setSocialInteractionsManager(SocialInteractionsManager socialInteractionsManager);
+
+    @Mutable
+    @Accessor("userApiService")
+    void setUserApiService(UserApiService userApiService);
+
+    @Mutable
+    @Accessor("skinProvider")
+    void setSkinProvider(PlayerSkinProvider skinProvider);
 }

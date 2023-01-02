@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.accounts;
 
 public enum AccountType {
     Cracked,
+    Yggdrasil,
     Microsoft,
     TheAltening
 }
