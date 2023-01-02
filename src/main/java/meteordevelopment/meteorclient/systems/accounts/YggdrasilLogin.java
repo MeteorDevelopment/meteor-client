@@ -69,15 +69,21 @@ public class YggdrasilLogin {
         }
     }
 
-    public static void applyYggdrasilAccount(YggdrasilAuthenticationService services, Session session, String server) throws AuthenticationException {
-        ((MinecraftClientAccessor) mc).setSession(session);
-        MinecraftSessionService service = server.equals("") ? new YggdrasilLogin.LocalYggdrasilMinecraftSessionService(services, server) : services.createMinecraftSessionService();
-        ((MinecraftClientAccessor) mc).setSessionService(service);
-        UserApiService userApiService = services.createUserApiService(session.getAccessToken());
-        ((MinecraftClientAccessor) mc).setUserApiService(userApiService);
-        ((MinecraftClientAccessor) mc).setSocialInteractionsManager(new SocialInteractionsManager(mc, userApiService));
+    public static void applyYggdrasilAccount(LocalYggdrasilAuthenticationService authService, Session session) throws AuthenticationException {
+        MinecraftSessionService service;
+        if (authService.server.equals(""))
+            service = new LocalYggdrasilMinecraftSessionService(authService, authService.server);
+        else service = authService.createMinecraftSessionService();
         File skinDir = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir();
+        ((MinecraftClientAccessor) mc).setSession(session);
+        ((MinecraftClientAccessor) mc).setSessionService(service);
         ((MinecraftClientAccessor) mc).setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinDir, service));
+        try {
+            // If available
+            UserApiService userApiService = authService.createUserApiService(session.getAccessToken());
+            ((MinecraftClientAccessor) mc).setUserApiService(userApiService);
+            ((MinecraftClientAccessor) mc).setSocialInteractionsManager(new SocialInteractionsManager(mc, userApiService));
+        } catch (Exception ignored) {}
     }
 
     public static class LocalYggdrasilApi implements Environment {

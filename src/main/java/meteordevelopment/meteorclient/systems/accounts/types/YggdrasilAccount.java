@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
@@ -45,8 +44,8 @@ public class YggdrasilAccount extends Account<YggdrasilAccount> {
     public boolean login() {
         try {
             Session session = YggdrasilLogin.login(name, password, server);
-            YggdrasilAuthenticationService service = new YggdrasilLogin.LocalYggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), server);
-            YggdrasilLogin.applyYggdrasilAccount(service, session, server);
+            YggdrasilLogin.LocalYggdrasilAuthenticationService service = new YggdrasilLogin.LocalYggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), server);
+            YggdrasilLogin.applyYggdrasilAccount(service, session);
             cache.username = session.getUsername();
             return true;
         } catch (AuthenticationException e) {
