@@ -15,7 +15,6 @@ import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.InsecureTextureException;
 import com.mojang.authlib.minecraft.MinecraftProfileTexture;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
@@ -24,7 +23,6 @@ import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.network.SocialInteractionsManager;
 import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.Session;
 import org.apache.logging.log4j.LogManager;
@@ -70,20 +68,11 @@ public class YggdrasilLogin {
     }
 
     public static void applyYggdrasilAccount(LocalYggdrasilAuthenticationService authService, Session session) throws AuthenticationException {
-        MinecraftSessionService service;
-        if (authService.server.equals(""))
-            service = new LocalYggdrasilMinecraftSessionService(authService, authService.server);
-        else service = authService.createMinecraftSessionService();
+        MinecraftSessionService service = new LocalYggdrasilMinecraftSessionService(authService, authService.server);
         File skinDir = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir();
         ((MinecraftClientAccessor) mc).setSession(session);
         ((MinecraftClientAccessor) mc).setSessionService(service);
         ((MinecraftClientAccessor) mc).setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinDir, service));
-        try {
-            // If available
-            UserApiService userApiService = authService.createUserApiService(session.getAccessToken());
-            ((MinecraftClientAccessor) mc).setUserApiService(userApiService);
-            ((MinecraftClientAccessor) mc).setSocialInteractionsManager(new SocialInteractionsManager(mc, userApiService));
-        } catch (Exception ignored) {}
     }
 
     public static class LocalYggdrasilApi implements Environment {
@@ -137,7 +126,7 @@ public class YggdrasilLogin {
 
         public LocalYggdrasilMinecraftSessionService(YggdrasilAuthenticationService service, String serverUrl) {
             super(service, new LocalYggdrasilApi(serverUrl));
-            String data = Http.get("https://" + serverUrl + "/api/yggdrasil").sendString();
+            String data = Http.get(serverUrl).sendString();
             JsonObject json = JsonParser.parseString(data).getAsJsonObject();
             this.publicKey = getPublicKey(json.get("signaturePublickey").getAsString());
         }
