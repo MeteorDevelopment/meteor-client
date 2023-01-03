@@ -18,6 +18,9 @@ import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
 public class Reach extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgTpHit = settings.createGroup("TP Hit");
@@ -102,13 +105,7 @@ public class Reach extends Module {
             PlayerMoveC2SPacket movePacket = new PlayerMoveC2SPacket.PositionAndOnGround(newPos.x, newPos.y, newPos.z, false);
             mc.player.networkHandler.sendPacket(movePacket);
 
-            if (i % packetAmount.get() == 0) {
-                try {
-                    Thread.sleep(packetDelay.get());
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
+            if (i % packetAmount.get() == 0) Executors.newSingleThreadScheduledExecutor().schedule(() -> {}, packetDelay.get(), TimeUnit.MILLISECONDS);
         }
     }
 }
