@@ -9,13 +9,11 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
@@ -84,9 +82,7 @@ public class Reach extends Module {
 
             sendMovePackets(initialPos, target.getPos());
 
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target, Target.Body));
-            mc.interactionManager.attackEntity(mc.player, target);
-            mc.player.swingHand(Hand.MAIN_HAND);
+            mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(target, false));
 
             sendMovePackets(target.getPos(), initialPos);
             mc.player.setPosition(initialPos);
