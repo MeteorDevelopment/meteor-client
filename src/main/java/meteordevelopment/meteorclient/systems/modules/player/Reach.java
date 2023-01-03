@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
@@ -77,7 +78,7 @@ public class Reach extends Module {
         Entity target = mc.targetedEntity;
         if (target == null) return;
 
-        (new Thread(() -> {
+        MeteorExecutor.execute(() -> {
             Vec3d initialPos = mc.player.getPos();
 
             sendMovePackets(initialPos, target.getPos());
@@ -86,7 +87,7 @@ public class Reach extends Module {
 
             sendMovePackets(target.getPos(), initialPos);
             mc.player.setPosition(initialPos);
-        })).start();
+        });
     }
 
     public float getReach() {
