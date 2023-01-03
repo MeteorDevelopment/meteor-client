@@ -20,15 +20,11 @@ import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.response.MinecraftTexturesPayload;
 import com.mojang.util.UUIDTypeAdapter;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
-import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.Session;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.io.File;
 import java.net.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.security.KeyFactory;
@@ -37,8 +33,6 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class YggdrasilLogin {
     public static Session login(String name, String password, String server) throws AuthenticationException {
@@ -67,12 +61,9 @@ public class YggdrasilLogin {
         }
     }
 
-    public static void applyYggdrasilAccount(LocalYggdrasilAuthenticationService authService, Session session) throws AuthenticationException {
+    public static void applyYggdrasilAccount(LocalYggdrasilAuthenticationService authService, Session session) {
         MinecraftSessionService service = new LocalYggdrasilMinecraftSessionService(authService, authService.server);
-        File skinDir = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir();
-        ((MinecraftClientAccessor) mc).setSession(session);
-        ((MinecraftClientAccessor) mc).setSessionService(service);
-        ((MinecraftClientAccessor) mc).setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinDir, service));
+        AccountUtils.setMinecraftService(authService, service, session);
     }
 
     public static class LocalYggdrasilApi implements Environment {
