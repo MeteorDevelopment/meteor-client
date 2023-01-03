@@ -34,7 +34,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.*;
 
-public class YggdrasilLogin {
+public class CustomYggdrasilLogin {
     public static Session login(String name, String password, String server) throws AuthenticationException {
         try {
             String url = server + "/authserver/authenticate";
@@ -63,7 +63,7 @@ public class YggdrasilLogin {
 
     public static void applyYggdrasilAccount(LocalYggdrasilAuthenticationService authService, Session session) {
         MinecraftSessionService service = new LocalYggdrasilMinecraftSessionService(authService, authService.server);
-        AccountUtils.setMinecraftService(authService, service, session);
+        AccountUtils.applyLoginEnvironment(authService, service, session);
     }
 
     public static class LocalYggdrasilApi implements Environment {

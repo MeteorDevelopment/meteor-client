@@ -9,11 +9,11 @@ import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
-import meteordevelopment.meteorclient.systems.accounts.types.YggdrasilAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.CustomYggdrasilAccount;
 
-public class AddYggdrasilAccountScreen extends AddAccountScreen {
-    public AddYggdrasilAccountScreen(GuiTheme theme, AccountsScreen parent) {
-        super(theme, "Add Yggdrasil Account", parent);
+public class AddCustomYggdrasilAccountScreen extends AddAccountScreen {
+    public AddCustomYggdrasilAccountScreen(GuiTheme theme, AccountsScreen parent) {
+        super(theme, "Add Custom Yggdrasil Account", parent);
     }
 
     @Override
@@ -39,7 +39,7 @@ public class AddYggdrasilAccountScreen extends AddAccountScreen {
         // Add
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
-            YggdrasilAccount account = new YggdrasilAccount(username.get(), password.get(), server.get());
+            CustomYggdrasilAccount account = new CustomYggdrasilAccount(username.get(), password.get(), server.get());
             if (!username.get().isEmpty() && !password.get().isEmpty() && !Accounts.get().exists(account)) {
                 AccountsScreen.addAccount(this, parent, account);
             }

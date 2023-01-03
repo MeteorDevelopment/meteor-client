@@ -18,6 +18,7 @@ import net.minecraft.client.report.ReporterEnvironment;
 import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.ProfileKeys;
 import net.minecraft.client.util.Session;
+import net.minecraft.network.encryption.SignatureVerifier;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -57,10 +58,17 @@ public class AccountUtils {
         }
     }
 
-    public static MinecraftSessionService setMinecraftService(YggdrasilAuthenticationService authService, MinecraftSessionService sessService, Session session) {
+    public static MinecraftSessionService resetLoginEnvironment() {
+        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy());
+        return AccountUtils.applyLoginEnvironment(authenticationService, authenticationService.createMinecraftSessionService(), mc.getSession());
+    }
+
+    public static MinecraftSessionService applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService, Session session) {
         File skinDir = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir();
         ((MinecraftClientAccessor) mc).setSession(session);
+        ((MinecraftClientAccessor) mc).setAuthenticationService(authService);
         ((MinecraftClientAccessor) mc).setSessionService(sessService);
+        ((MinecraftClientAccessor) mc).setServicesSignatureVerifier(SignatureVerifier.create(authService.getServicesKey()));
         ((MinecraftClientAccessor) mc).setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinDir, sessService));
         UserApiService apiService = createUserApiService(authService, session);
         ((MinecraftClientAccessor) mc).setUserApiService(apiService);

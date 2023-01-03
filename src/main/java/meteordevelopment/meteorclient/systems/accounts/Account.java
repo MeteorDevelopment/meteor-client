@@ -30,7 +30,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        if (!(AccountUtils.setMinecraftService(((MinecraftClientAccessor) mc).getAuthenticationService(), mc.getSessionService(), mc.getSession()) instanceof YggdrasilMinecraftSessionService service)) return true;
+        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) AccountUtils.resetLoginEnvironment();
         AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/");
         AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/join");
         AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/hasJoined");
