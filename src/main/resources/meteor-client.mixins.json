@@ -140,7 +140,7 @@
     "ShulkerBoxScreenMixin",
     "SignBlockEntityRendererMixin",
     "SimpleEntityLookupAccessor",
-    "SimpleOptionAccessor",
+    "SimpleOptionMixin",
     "SimpleRegistryMixin",
     "SlimeBlockMixin",
     "SlotMixin",
