@@ -5,46 +5,40 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.client.option.GameOptions;
 import net.minecraft.client.option.SimpleOption;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 @Mixin(SimpleOption.class)
 public class SimpleOptionMixin<T> {
-    @Shadow @Final @Mutable private SimpleOption.Callbacks<T> callbacks;
+    @Shadow T value;
 
-    @Unique private SimpleOption.Callbacks<T> aCallbacks;
+    @Shadow @Final
+    private Consumer<T> changeCallback;
 
-    @Inject(method = "setValue", at = @At("HEAD"))
-    private void onSetValueHead(T value, CallbackInfo info) {
-        if (MinecraftClient.getInstance().options == null) return;
+    @Inject(method = "setValue", at = @At("HEAD"), cancellable = true)
+    private void onSetValue(T value, CallbackInfo info) {
+        GameOptions options = MinecraftClient.getInstance().options;
+        if (options == null) return;
 
-        SimpleOption.Callbacks<T> c = getCallbacks();
+        if ((Object) this == options.getGamma() || (Object) this == options.getFov()) {
+            this.value = value;
 
-        if (c != null) {
-            aCallbacks = this.callbacks;
-            this.callbacks = c;
-        }
-    }
+            if (MinecraftClient.getInstance().isRunning()) {
+                changeCallback.accept(value);
+            }
 
-    @Inject(method = "setValue", at = @At("RETURN"))
-    public void onSetValueReturn(T value, CallbackInfo info) {
-        if (aCallbacks != null) {
-            this.callbacks = aCallbacks;
-            aCallbacks = null;
+            info.cancel();
         }
     }
 
@@ -55,61 +49,7 @@ public class SimpleOptionMixin<T> {
         if (options == null) return;
 
         if ((Object) this == options.getGamma()) {
-            info.setReturnValue((Codec<T>) Codec.either(Codec.doubleRange(Double.MIN_VALUE, Double.MAX_VALUE), Codec.BOOL).xmap(either -> either.map(value -> value, value -> value ? 1.0 : 0.0), Either::left));
+            info.setReturnValue((Codec<T>) Codec.DOUBLE);
         }
-    }
-
-    @Unique
-    public SimpleOption.Callbacks<T> getCallbacks() {
-        GameOptions options = MinecraftClient.getInstance().options;
-
-        if ((Object) this == options.getGamma()) {
-            return createCallback();
-        }
-        else if ((Object) this == options.getFov()) {
-            return createCallback();
-        }
-
-        return null;
-    }
-
-    @NotNull
-    private SimpleOption.Callbacks<T> createCallback() {
-        return new SimpleOption.Callbacks<>() {
-            @Override
-            public Function<SimpleOption<T>, ClickableWidget> getButtonCreator(SimpleOption.TooltipFactory<T> tooltipFactory, GameOptions gameOptions, int x, int y, int width, Consumer<T> changeCallback) {
-                return null;
-            }
-
-            @Override
-            public Optional<T> validate(T value) {
-                return Optional.of(value);
-            }
-
-            @Override
-            public Codec<T> codec() {
-                return null;
-            }
-        };
-    }
-    @Shadow
-    T value;
-// Credit to https://github.com/seasnale/custom-fov
-    @Shadow @Final
-    private Consumer<T> changeCallback;
-
-    @Inject(
-        method = "setValue",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/SimpleOption$Callbacks;validate(Ljava/lang/Object;)Ljava/util/Optional;", shift = At.Shift.BEFORE),
-        cancellable = true
-    )
-    private void earlyReturn(T value, CallbackInfo ci) {
-        this.value = value;
-
-        if (MinecraftClient.getInstance().isRunning()) {
-            changeCallback.accept(value);
-        }
-
-        ci.cancel();
     }
 }

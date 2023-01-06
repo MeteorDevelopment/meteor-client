@@ -27,6 +27,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -38,14 +39,15 @@ import net.minecraft.world.entity.SectionedEntityCache;
 import net.minecraft.world.entity.SimpleEntityLookup;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityUtils {
+    private static BlockPos.Mutable testPos = new BlockPos.Mutable();
+
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
     }
@@ -111,55 +113,28 @@ public class EntityUtils {
         return x < d && z < d;
     }
 
-    public static List<BlockPos> getSurroundBlocks(PlayerEntity player) {
+    public static BlockPos getCityBlock(PlayerEntity player) {
         if (player == null) return null;
-        BlockPos.Mutable testPos = new BlockPos.Mutable();
 
-        List<BlockPos> positions = new ArrayList<>();
+        double bestDistance = 6;
+        Direction bestDirection = null;
 
         for (Direction direction : Direction.HORIZONTAL) {
-            testPos.set(player.getBlockPos()).offset(direction);
+            testPos.set(player.getBlockPos().offset(direction));
 
-            if (mc.world.getBlockState(testPos).getBlock() == Blocks.OBSIDIAN) {
-                positions.add(testPos);
+            Block block = mc.world.getBlockState(testPos).getBlock();
+            if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
+            && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
+
+            double testDistance = PlayerUtils.distanceTo(testPos);
+            if (testDistance < bestDistance) {
+                bestDistance = testDistance;
+                bestDirection = direction;
             }
         }
 
-        return positions;
-    }
-
-    @Nullable
-    public static BlockPos getCityBlock(PlayerEntity player) {
-        BlockPos bestPos = null;
-        int bestScore = 0;
-        BlockPos.Mutable testPos = new BlockPos.Mutable();
-
-        for (BlockPos pos : getSurroundBlocks(player)) {
-            int score = 1;
-
-            for (Direction direction : Direction.values()) {
-                testPos.set(pos).offset(direction);
-                Block block = mc.world.getBlockState(testPos).getBlock();
-
-                if (direction == Direction.DOWN && block == Blocks.OBSIDIAN || block == Blocks.BEDROCK) {
-                    score+= 2;
-                    continue;
-                }
-
-                if (direction != Direction.DOWN && block instanceof AirBlock) {
-                    score++;
-                }
-            }
-
-            score -= PlayerUtils.distanceTo(pos);
-
-            if (score >= bestScore) {
-                bestPos = pos;
-                bestScore = score;
-            }
-        }
-
-        return bestPos;
+        if (bestDirection == null) return null;
+        return player.getBlockPos().offset(bestDirection);
     }
 
     public static String getName(Entity entity) {
