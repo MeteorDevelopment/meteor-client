@@ -65,6 +65,7 @@ public class WTable extends WContainer {
     }
 
     public List<Cell<?>> getRow(int i) {
+        if (i < 0 || i >= rows.size()) return null;
         return rows.get(i);
     }
 
