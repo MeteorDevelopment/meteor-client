@@ -80,7 +80,8 @@ public class EnchantCommand extends Command {
 
         builder.then(literal("remove").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(Commands.REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT)).executes(context -> {
             ItemStack itemStack = tryGetItemStack();
-            Utils.removeEnchantment(itemStack, context.getArgument("enchantment", Enchantment.class));
+            RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
+            Utils.removeEnchantment(itemStack, enchantment.value());
 
             syncItem();
             return SINGLE_SUCCESS;
