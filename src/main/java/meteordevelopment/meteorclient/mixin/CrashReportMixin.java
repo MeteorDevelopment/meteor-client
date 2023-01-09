@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.systems.hud.elements.TextHud;
 import meteordevelopment.meteorclient.systems.modules.Category;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import net.minecraft.Bootstrap;
 import net.minecraft.util.crash.CrashReport;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,6 +25,12 @@ import java.util.List;
 public class CrashReportMixin {
     @Inject(method = "addStackTrace", at = @At("TAIL"))
     private void onAddStackTrace(StringBuilder sb, CallbackInfo info) {
+        try {
+            Bootstrap.ensureBootstrapped(() -> "");
+        } catch (Exception e) {
+            return;
+        }
+
         sb.append("\n\n-- Meteor Client --\n\n");
         sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
         if (!MeteorClient.DEV_BUILD.isEmpty()) {

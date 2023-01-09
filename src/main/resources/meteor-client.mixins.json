@@ -141,7 +141,6 @@
     "SignBlockEntityRendererMixin",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",
-    "SimpleRegistryMixin",
     "SlimeBlockMixin",
     "SlotMixin",
     "SoundSystemMixin",
