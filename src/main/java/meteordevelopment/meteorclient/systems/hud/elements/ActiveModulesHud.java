@@ -137,7 +137,8 @@ public class ActiveModulesHud extends HudElement {
     private final List<Module> modules = new ArrayList<>();
 
     private final Color rainbow = new Color(255, 255, 255);
-    private double rainbowHue1, rainbowHue2;
+    private double rainbowHue1;
+    private double rainbowHue2;
 
     private double prevX;
     private double prevTextLength;
@@ -160,19 +161,10 @@ public class ActiveModulesHud extends HudElement {
             if (!hiddenModules.get().contains(module)) modules.add(module);
         }
 
-        modules.sort((o1, o2) -> {
-            double _1 = getModuleWidth(renderer, o1);
-            double _2 = getModuleWidth(renderer, o2);
-
-            if (sort.get() == Sort.Smallest) {
-                double temp = _1;
-                _1 = _2;
-                _2 = temp;
-            }
-
-            int a = Double.compare(_1, _2);
-            if (a == 0) return 0;
-            return a < 0 ? 1 : -1;
+        modules.sort((e1, e2) -> switch (sort.get()) {
+            case Alphabetical -> e1.title.compareTo(e2.title);
+            case Biggest -> Integer.compare(e2.title.length(), e1.title.length());
+            case Smallest -> Integer.compare(e1.title.length(), e2.title.length());
         });
 
         double width = 0;
@@ -296,6 +288,7 @@ public class ActiveModulesHud extends HudElement {
     }
 
     public enum Sort {
+        Alphabetical,
         Biggest,
         Smallest
     }
