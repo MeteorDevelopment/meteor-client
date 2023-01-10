@@ -163,8 +163,8 @@ public class ActiveModulesHud extends HudElement {
 
         modules.sort((e1, e2) -> switch (sort.get()) {
             case Alphabetical -> e1.title.compareTo(e2.title);
-            case Biggest -> Integer.compare(e2.title.length(), e1.title.length());
-            case Smallest -> Integer.compare(e1.title.length(), e2.title.length());
+            case Biggest -> Double.compare(getModuleWidth(renderer, e2), getModuleWidth(renderer, e1));
+            case Smallest -> Double.compare(getModuleWidth(renderer, e1), getModuleWidth(renderer, e2));
         });
 
         double width = 0;
