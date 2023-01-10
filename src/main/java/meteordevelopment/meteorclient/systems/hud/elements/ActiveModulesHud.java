@@ -212,22 +212,21 @@ public class ActiveModulesHud extends HudElement {
         Module module = modules.get(index);
         Color color = flatColor.get();
 
-        ColorMode colorMode = this.colorMode.get();
-        if (colorMode == ColorMode.Random) color = module.color;
-        else if (colorMode == ColorMode.Rainbow) {
-            rainbowHue2 += rainbowSpread.get();
-            int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
-
-            rainbow.r = Color.toRGBAR(c);
-            rainbow.g = Color.toRGBAG(c);
-            rainbow.b = Color.toRGBAB(c);
-
-            color = rainbow;
+        switch (colorMode.get()) {
+            case Random -> color = module.color;
+            case Rainbow -> {
+                rainbowHue2 += rainbowSpread.get();
+                int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
+                rainbow.r = Color.toRGBAR(c);
+                rainbow.g = Color.toRGBAG(c);
+                rainbow.b = Color.toRGBAB(c);
+                color = rainbow;
+            }
         }
 
         renderer.text(module.title, x, y, color, shadow.get());
 
-		double emptySpace = renderer.textWidth(" ", shadow.get());
+        double emptySpace = renderer.textWidth(" ", shadow.get());
         double textHeight = renderer.textHeight(shadow.get());
         double textLength = renderer.textWidth(module.title, shadow.get());
 
