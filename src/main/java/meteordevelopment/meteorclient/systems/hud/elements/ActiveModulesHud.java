@@ -152,7 +152,6 @@ public class ActiveModulesHud extends HudElement {
 
     private final List<Module> modules = new ArrayList<>();
 
-    private final Color rainbow = new Color(255, 255, 255);
     private double rainbowHue1;
     private double rainbowHue2;
 
