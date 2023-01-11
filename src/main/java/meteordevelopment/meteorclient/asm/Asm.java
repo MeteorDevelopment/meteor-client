@@ -68,7 +68,9 @@ public class Asm {
     }
 
     private void export(String name, byte[] bytes) {
-        if (export) try {
+        if (!export) return;
+
+        try {
             Path path = Path.of(FabricLoader.getInstance().getGameDir().toString(), ".meteor.asm.out", name.replace('.', '/') + ".class");
             new File(path.toUri()).getParentFile().mkdirs();
             Files.write(path, bytes);

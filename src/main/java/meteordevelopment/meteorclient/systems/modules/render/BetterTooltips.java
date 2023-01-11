@@ -278,20 +278,22 @@ public class BetterTooltips extends Module {
         }
 
         // Item size tooltip
-        if (byteSize.get()) try {
-            event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
+        if (byteSize.get()) {
+            try {
+                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
 
-            int byteCount = ByteCountDataOutput.INSTANCE.getCount();
-            String count;
+                int byteCount = ByteCountDataOutput.INSTANCE.getCount();
+                String count;
 
-            ByteCountDataOutput.INSTANCE.reset();
+                ByteCountDataOutput.INSTANCE.reset();
 
-            if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-            else count = String.format("%d bytes", byteCount);
+                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
+                else count = String.format("%d bytes", byteCount);
 
-            event.list.add(Text.literal(count).formatted(Formatting.GRAY));
-        } catch (IOException e) {
-            e.printStackTrace();
+                event.list.add(Text.literal(count).formatted(Formatting.GRAY));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
         // Hold to preview tooltip

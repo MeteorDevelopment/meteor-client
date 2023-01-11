@@ -332,10 +332,12 @@ public class InventoryTweaks extends Module {
             if (!handler.getSlot(i).hasStack()) continue;
 
             int sleep = getSleepTime();
-            if (sleep > 0) try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
 
             // Exit if user closes screen

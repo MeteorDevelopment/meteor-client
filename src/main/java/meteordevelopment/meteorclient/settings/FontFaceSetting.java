@@ -25,10 +25,12 @@ public class FontFaceSetting extends Setting<FontFace> {
         if (split.length != 2) return null;
 
         for (FontFamily family : Fonts.FONT_FAMILIES) {
-            if (family.getName().replace(" ", "").equals(split[0])) try {
-                return family.get(FontInfo.Type.valueOf(split[1]));
-            } catch (IllegalArgumentException ignored) {
-                return null;
+            if (family.getName().replace(" ", "").equals(split[0])) {
+                try {
+                    return family.get(FontInfo.Type.valueOf(split[1]));
+                } catch (IllegalArgumentException ignored) {
+                    return null;
+                }
             }
         }
 

@@ -68,7 +68,9 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         File[] files = iconsFolder.listFiles();
         if (files == null) return;
         for (File file : files) {
-            if (file.getName().endsWith(".png")) try {
+            if (!file.getName().endsWith(".png")) continue;
+
+            try {
                 String name = file.getName().replace(".png", "");
                 AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
                 icons.put(name, texture);

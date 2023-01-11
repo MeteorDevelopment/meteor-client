@@ -192,22 +192,26 @@ public class StashFinder extends Module {
 
         // Try to load json
         File file = getJsonFile();
-        if (file.exists()) try {
-            FileReader reader = new FileReader(file);
-            chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {
-            }.getType());
-            reader.close();
+        if (file.exists()) {
+            try {
+                FileReader reader = new FileReader(file);
+                chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {
+                }.getType());
+                reader.close();
 
-            for (Chunk chunk : chunks) chunk.calculatePos();
+                for (Chunk chunk : chunks) chunk.calculatePos();
 
-            loaded = true;
-        } catch (Exception ignored) {
-            if (chunks == null) chunks = new ArrayList<>();
+                loaded = true;
+            } catch (Exception ignored) {
+                if (chunks == null) chunks = new ArrayList<>();
+            }
         }
 
         // Try to load csv
         file = getCsvFile();
-        if (!loaded && file.exists()) try {
+        if (loaded || !file.exists()) return;
+
+        try {
             BufferedReader reader = new BufferedReader(new FileReader(file));
             reader.readLine();
 

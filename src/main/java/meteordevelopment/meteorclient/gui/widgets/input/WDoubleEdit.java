@@ -96,10 +96,12 @@ public class WDoubleEdit extends WHorizontalList {
             if (text.isEmpty()) validate = false;
         } else good = Character.isDigit(c);
 
-        if (good && validate) try {
-            Double.parseDouble(text + c);
-        } catch (NumberFormatException ignored) {
-            good = false;
+        if (good && validate) {
+            try {
+                Double.parseDouble(text + c);
+            } catch (NumberFormatException ignored) {
+                good = false;
+            }
         }
 
         return good;

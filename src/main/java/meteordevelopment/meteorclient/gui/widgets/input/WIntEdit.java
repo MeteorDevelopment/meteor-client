@@ -83,10 +83,12 @@ public class WIntEdit extends WHorizontalList {
             validate = false;
         } else good = Character.isDigit(c);
 
-        if (good && validate) try {
-            Integer.parseInt(text + c);
-        } catch (NumberFormatException ignored) {
-            good = false;
+        if (good && validate) {
+            try {
+                Integer.parseInt(text + c);
+            } catch (NumberFormatException ignored) {
+                good = false;
+            }
         }
 
         return good;
