@@ -100,7 +100,9 @@ public class WMeteorTextBox extends WTextBox implements MeteorWidget {
         if (cursorTimer >= 1) {
             cursorVisible = !cursorVisible;
             cursorTimer = 0;
-        } else cursorTimer += delta * 1.75;
+        } else {
+            cursorTimer += delta * 1.75;
+        }
 
         renderBackground(renderer, this, false, false);
 

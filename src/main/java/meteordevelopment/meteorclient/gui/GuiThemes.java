@@ -115,7 +115,6 @@ public class GuiThemes {
 
         try {
             NbtCompound tag = get().toTag();
-
             THEMES_FOLDER.mkdirs();
             NbtIo.write(tag, new File(THEMES_FOLDER, get().name + ".nbt"));
         } catch (IOException e) {

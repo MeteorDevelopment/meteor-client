@@ -69,12 +69,14 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         for (EntityType<?> entityType : setting.get().keySet()) {
             if (!setting.get().getBoolean(entityType)) continue;
 
-            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) switch (entityType.getSpawnGroup()) {
-                case CREATURE -> hasAnimal++;
-                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> hasWaterAnimal++;
-                case MONSTER -> hasMonster++;
-                case AMBIENT -> hasAmbient++;
-                case MISC -> hasMisc++;
+            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
+                switch (entityType.getSpawnGroup()) {
+                    case CREATURE -> hasAnimal++;
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> hasWaterAnimal++;
+                    case MONSTER -> hasMonster++;
+                    case AMBIENT -> hasAmbient++;
+                    case MISC -> hasMisc++;
+                }
             }
         }
 
@@ -131,26 +133,28 @@ public class EntityTypeListSettingScreen extends WindowScreen {
         miscT = misc.add(theme.table()).expandX().widget();
 
         Consumer<EntityType<?>> entityTypeForEach = entityType -> {
-            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) switch (entityType.getSpawnGroup()) {
-                case CREATURE -> {
-                    animalsE.add(entityType);
-                    addEntityType(animalsT, animalsC, entityType);
-                }
-                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
-                    waterAnimalsE.add(entityType);
-                    addEntityType(waterAnimalsT, waterAnimalsC, entityType);
-                }
-                case MONSTER -> {
-                    monstersE.add(entityType);
-                    addEntityType(monstersT, monstersC, entityType);
-                }
-                case AMBIENT -> {
-                    ambientE.add(entityType);
-                    addEntityType(ambientT, ambientC, entityType);
-                }
-                case MISC -> {
-                    miscE.add(entityType);
-                    addEntityType(miscT, miscC, entityType);
+            if (!setting.onlyAttackable || EntityUtils.isAttackable(entityType)) {
+                switch (entityType.getSpawnGroup()) {
+                    case CREATURE -> {
+                        animalsE.add(entityType);
+                        addEntityType(animalsT, animalsC, entityType);
+                    }
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
+                        waterAnimalsE.add(entityType);
+                        addEntityType(waterAnimalsT, waterAnimalsC, entityType);
+                    }
+                    case MONSTER -> {
+                        monstersE.add(entityType);
+                        addEntityType(monstersT, monstersC, entityType);
+                    }
+                    case AMBIENT -> {
+                        ambientE.add(entityType);
+                        addEntityType(ambientT, ambientC, entityType);
+                    }
+                    case MISC -> {
+                        miscE.add(entityType);
+                        addEntityType(miscT, miscC, entityType);
+                    }
                 }
             }
         };
@@ -202,7 +206,9 @@ public class EntityTypeListSettingScreen extends WindowScreen {
             if (checked) {
                 setting.get().put(entityType, true);
                 changed = true;
-            } else if (setting.get().removeBoolean(entityType)) changed = true;
+            } else if (setting.get().removeBoolean(entityType)) {
+                changed = true;
+            }
         }
 
         if (changed) {
@@ -241,26 +247,28 @@ public class EntityTypeListSettingScreen extends WindowScreen {
                         hasMisc++;
                     }
                 }
-            } else if (setting.get().removeBoolean(entityType)) switch (entityType.getSpawnGroup()) {
-                case CREATURE -> {
-                    hasAnimal--;
-                    if (hasAnimal == 0) tableCheckbox.checked = false;
-                }
-                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
-                    hasWaterAnimal--;
-                    if (hasWaterAnimal == 0) tableCheckbox.checked = false;
-                }
-                case MONSTER -> {
-                    hasMonster--;
-                    if (hasMonster == 0) tableCheckbox.checked = false;
-                }
-                case AMBIENT -> {
-                    hasAmbient--;
-                    if (hasAmbient == 0) tableCheckbox.checked = false;
-                }
-                case MISC -> {
-                    hasMisc--;
-                    if (hasMisc == 0) tableCheckbox.checked = false;
+            } else if (setting.get().removeBoolean(entityType)) {
+                switch (entityType.getSpawnGroup()) {
+                    case CREATURE -> {
+                        hasAnimal--;
+                        if (hasAnimal == 0) tableCheckbox.checked = false;
+                    }
+                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> {
+                        hasWaterAnimal--;
+                        if (hasWaterAnimal == 0) tableCheckbox.checked = false;
+                    }
+                    case MONSTER -> {
+                        hasMonster--;
+                        if (hasMonster == 0) tableCheckbox.checked = false;
+                    }
+                    case AMBIENT -> {
+                        hasAmbient--;
+                        if (hasAmbient == 0) tableCheckbox.checked = false;
+                    }
+                    case MISC -> {
+                        hasMisc--;
+                        if (hasMisc == 0) tableCheckbox.checked = false;
+                    }
                 }
             }
 

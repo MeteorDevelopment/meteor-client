@@ -59,7 +59,9 @@ public class ModulesScreen extends TabScreen {
         w.padding = 0;
         w.spacing = 0;
 
-        if (theme.categoryIcons()) w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon)).pad(2);
+        if (theme.categoryIcons()) {
+            w.beforeHeaderInit = wContainer -> wContainer.add(theme.item(category.icon)).pad(2);
+        }
 
         c.add(w);
         w.view.scrollOnlyWhenMouseOver = true;

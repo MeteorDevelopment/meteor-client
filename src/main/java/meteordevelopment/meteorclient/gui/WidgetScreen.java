@@ -45,14 +45,12 @@ public abstract class WidgetScreen extends Screen {
 
     protected final GuiTheme theme;
 
-    public boolean locked;
-    public boolean lockedAllowClose;
+    public boolean locked, lockedAllowClose;
     private boolean closed;
     private boolean onClose;
     private boolean debug;
 
-    private double lastMouseX;
-    private double lastMouseY;
+    private double lastMouseX, lastMouseY;
 
     public double animProgress;
 
@@ -72,7 +70,9 @@ public abstract class WidgetScreen extends Screen {
         if (parent != null) {
             animProgress = 1;
 
-            if (this instanceof TabScreen && parent instanceof TabScreen) parent = ((TabScreen) parent).parent;
+            if (this instanceof TabScreen && parent instanceof TabScreen) {
+                parent = ((TabScreen) parent).parent;
+            }
         }
     }
 
@@ -311,7 +311,9 @@ public abstract class WidgetScreen extends Screen {
             Input.setCursorStyle(CursorStyle.Default);
 
             loopWidgets(root, widget -> {
-                if (widget instanceof WTextBox textBox && textBox.isFocused()) textBox.setFocused(false);
+                if (widget instanceof WTextBox textBox && textBox.isFocused()) {
+                    textBox.setFocused(false);
+                }
             });
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
@@ -321,10 +323,12 @@ public abstract class WidgetScreen extends Screen {
                 for (Runnable action : onClosed) action.run();
             }
 
-            if (onClose) taskAfterRender = () -> {
-                locked = true;
-                mc.setScreen(parent);
-            };
+            if (onClose) {
+                taskAfterRender = () -> {
+                    locked = true;
+                    mc.setScreen(parent);
+                };
+            }
         }
     }
 

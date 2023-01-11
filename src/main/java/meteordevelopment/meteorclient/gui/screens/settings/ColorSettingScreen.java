@@ -453,7 +453,9 @@ public class ColorSettingScreen extends WindowScreen {
             if (calculateNow) {
                 double huePercentage = hueAngle / 360;
                 handleX = huePercentage * width;
-            } else calculateHandleXOnLayout = true;
+            } else {
+                calculateHandleXOnLayout = true;
+            }
         }
 
         @Override
@@ -554,8 +556,11 @@ public class ColorSettingScreen extends WindowScreen {
                 if (mouseX >= this.x && mouseX <= this.x + width) {
                     handleX += mouseX - lastMouseX;
                     handleX = Utils.clamp(handleX, 0, width);
-                } else if (handleX > 0 && mouseX < this.x) handleX = 0;
-                else if (handleX < width && mouseX > this.x + width) handleX = width;
+                } else if (handleX > 0 && mouseX < this.x) {
+                    handleX = 0;
+                } else if (handleX < width && mouseX > this.x + width) {
+                    handleX = width;
+                }
 
                 calculateHueAngleFromHandleX();
                 hsvChanged();

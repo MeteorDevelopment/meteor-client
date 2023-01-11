@@ -54,7 +54,9 @@ public class MeteorGuiTheme extends GuiTheme {
             .sliderRange(0.75, 4)
             .onSliderRelease()
             .onChanged(aDouble -> {
-                if (mc.currentScreen instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
+                if (mc.currentScreen instanceof WidgetScreen widgetScreen) {
+                    widgetScreen.invalidate();
+                }
             })
             .build()
     );
@@ -371,9 +373,7 @@ public class MeteorGuiTheme extends GuiTheme {
     }
 
     public class ThreeStateColorSetting {
-        private final Setting<SettingColor> normal;
-        private final Setting<SettingColor> hovered;
-        private final Setting<SettingColor> pressed;
+        private final Setting<SettingColor> normal, hovered, pressed;
 
         public ThreeStateColorSetting(SettingGroup group, String name, SettingColor c1, SettingColor c2, SettingColor c3) {
             normal = color(group, name, "Color of " + name + ".", c1);
