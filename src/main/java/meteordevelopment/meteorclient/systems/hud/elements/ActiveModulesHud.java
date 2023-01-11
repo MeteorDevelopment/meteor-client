@@ -236,11 +236,7 @@ public class ActiveModulesHud extends HudElement {
             }
             case Rainbow -> {
                 rainbowHue2 += rainbowSpread.get();
-                int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
-                rainbow.r = Color.toRGBAR(c);
-                rainbow.g = Color.toRGBAG(c);
-                rainbow.b = Color.toRGBAB(c);
-                color = rainbow;
+                color  = Color.fromHsv((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
             }
         }
 
