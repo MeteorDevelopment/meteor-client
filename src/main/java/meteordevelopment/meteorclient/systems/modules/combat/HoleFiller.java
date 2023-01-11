@@ -396,10 +396,10 @@ public class HoleFiller extends Module {
         );
 
         double i = testVec.x - (pos.getX() + 0.5);
-        double j = testVec.y - (pos.getY() + ((feet) ? 1 : 0.5));
+        double j = testVec.y - (pos.getY() + (feet ? 1 : 0.5));
         double k = testVec.z - (pos.getZ() + 0.5);
 
-        return (Math.sqrt(i * i + j * j + k * k));
+        return Math.sqrt(i * i + j * j + k * k);
     }
 
     private static class Hole {

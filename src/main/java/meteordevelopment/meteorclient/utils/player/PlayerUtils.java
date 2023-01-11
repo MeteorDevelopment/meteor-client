@@ -320,7 +320,7 @@ public class PlayerUtils {
         float f = (float) (mc.player.getX() - x);
         float g = (float) (mc.player.getEyeY() - y);
         float h = (float) (mc.player.getZ() - z);
-        return (f * f + g * g + h * h) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
+        return f * f + g * g + h * h <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
     }
 
     public static Dimension getDimension() {

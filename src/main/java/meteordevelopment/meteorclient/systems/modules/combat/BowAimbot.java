@@ -97,16 +97,18 @@ public class BowAimbot extends Module {
 
         target = TargetUtils.get(entity -> {
             if (entity == mc.player || entity == mc.cameraEntity) return false;
-            if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+            if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) {
+                return false;
+            }
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
             if (!nametagged.get() && entity.hasCustomName()) return false;
             if (!PlayerUtils.canSeeEntity(entity)) return false;
-            if (entity instanceof PlayerEntity) {
-                if (((PlayerEntity) entity).isCreative()) return false;
-                if (!Friends.get().shouldAttack((PlayerEntity) entity)) return false;
+            if (entity instanceof PlayerEntity playerEntity) {
+                if (playerEntity.isCreative()) return false;
+                if (!Friends.get().shouldAttack(playerEntity)) return false;
             }
-            return !(entity instanceof AnimalEntity) || babies.get() || !((AnimalEntity) entity).isBaby();
+            return !(entity instanceof AnimalEntity animalEntity) || babies.get() || !animalEntity.isBaby();
         }, priority.get());
 
         if (target == null) {

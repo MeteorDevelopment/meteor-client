@@ -82,8 +82,8 @@ public abstract class ChatHudMixin implements IChatHud {
 
         if (event.isCancelled()) info.cancel();
         else {
-            visibleMessages.removeIf((msg) -> ((IChatHudLine) (Object) msg).getId() == nextId && nextId != 0);
-            messages.removeIf((msg) -> ((IChatHudLine) (Object) msg).getId() == nextId && nextId != 0);
+            visibleMessages.removeIf(msg -> ((IChatHudLine) (Object) msg).getId() == nextId && nextId != 0);
+            messages.removeIf(msg -> ((IChatHudLine) (Object) msg).getId() == nextId && nextId != 0);
 
             if (event.isModified()) {
                 info.cancel();

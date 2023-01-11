@@ -376,7 +376,7 @@ public class KillAura extends Module {
             return false;
         }
 
-        float delay = (customDelay.get()) ? hitDelay.get() : 0.5f;
+        float delay = customDelay.get() ? hitDelay.get() : 0.5f;
         if (tpsSync.get()) delay /= (TickRate.INSTANCE.getTickRate() / 20);
 
         if (customDelay.get()) {

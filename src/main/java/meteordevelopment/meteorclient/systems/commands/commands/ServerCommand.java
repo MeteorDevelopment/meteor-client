@@ -95,14 +95,14 @@ public class ServerCommand extends Command {
             mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), "bukkit:ver "));
         } else {
             info("Please wait around 5 seconds...");
-            (new Thread(() -> completionStarts.chars().forEach(i -> {
+            new Thread(() -> completionStarts.chars().forEach(i -> {
                 mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), Character.toString(i)));
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            }))).start();
+            })).start();
         }
     }
 

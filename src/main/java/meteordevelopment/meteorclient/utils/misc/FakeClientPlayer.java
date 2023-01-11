@@ -40,7 +40,7 @@ public class FakeClientPlayer {
     public static PlayerEntity getPlayer() {
         String id = mc.getSession().getUuid();
 
-        if (player == null || (!id.equals(lastId))) {
+        if (player == null || !id.equals(lastId)) {
             if (world == null) {
                 world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getCurrentServerEntry(), mc.getSession().getProfile(), null), new ClientWorld.Properties(Difficulty.NORMAL, false, false), world.getRegistryKey(), world.getDimensionEntry(), 1, 1, mc::getProfiler, null, false, 0);
             }

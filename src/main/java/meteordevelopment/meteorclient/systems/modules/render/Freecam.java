@@ -371,7 +371,7 @@ public class Freecam extends Module {
         // TODO: This is very bad but you all can cope :cope:
         GUIMove guiMove = Modules.get().get(GUIMove.class);
         if (mc.currentScreen != null && !guiMove.isActive()) return true;
-        return (mc.currentScreen != null && guiMove.isActive() && guiMove.skip());
+        return mc.currentScreen != null && guiMove.isActive() && guiMove.skip();
     }
 
     public void changeLookDirection(double deltaX, double deltaY) {

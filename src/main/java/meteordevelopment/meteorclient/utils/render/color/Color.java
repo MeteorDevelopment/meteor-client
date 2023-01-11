@@ -122,7 +122,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public static int fromRGBA(int r, int g, int b, int a) {
-        return (r << 16) + (g << 8) + (b) + (a << 24);
+        return (r << 16) + (g << 8) + b + (a << 24);
     }
 
     public static int toRGBAR(int color) {

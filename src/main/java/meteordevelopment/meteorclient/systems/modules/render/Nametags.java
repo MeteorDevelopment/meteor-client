@@ -451,7 +451,7 @@ public class Nametags extends Module {
                 }
             }
 
-            double itemsHeight = (hasItems ? 32 : 0);
+            double itemsHeight = hasItems ? 32 : 0;
             double itemWidthTotal = 0;
             for (double w : itemWidths) itemWidthTotal += w;
             double itemWidthHalf = itemWidthTotal / 2;

@@ -1126,7 +1126,7 @@ public class CrystalAura extends Module {
         if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return true;
         for (Module module : pauseModules.get()) if (module.isActive()) return true;
         if (pauseOnMine.get().equals(process) && mc.interactionManager.isBreakingBlock()) return true;
-        return (EntityUtils.getTotalHealth(mc.player) <= pauseHealth.get());
+        return EntityUtils.getTotalHealth(mc.player) <= pauseHealth.get();
     }
 
     private boolean isOutOfRange(Vec3d vec3d, BlockPos blockPos, boolean place) {

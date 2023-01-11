@@ -104,7 +104,7 @@ public class FontUtils {
     public static void loadSystem(List<FontFamily> fontList, File dir) {
         if (!dir.exists() || !dir.isDirectory()) return;
 
-        File[] files = dir.listFiles((file) -> (file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory()));
+        File[] files = dir.listFiles(file -> file.isFile() && file.getName().endsWith(".ttf") || file.isDirectory());
         if (files == null) return;
 
         for (File file : files) {

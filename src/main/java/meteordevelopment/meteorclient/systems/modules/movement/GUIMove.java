@@ -122,7 +122,7 @@ public class GUIMove extends Module {
             float yaw = mc.player.getYaw();
             float pitch = mc.player.getPitch();
 
-            for (int i = 0; i < (rotateSpeed.get() * 2); i++) {
+            for (int i = 0; i < rotateSpeed.get() * 2; i++) {
                 if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= 0.5;
                 if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += 0.5;
                 if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= 0.5;

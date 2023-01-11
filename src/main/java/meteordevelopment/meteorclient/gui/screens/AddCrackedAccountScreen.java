@@ -34,7 +34,7 @@ public class AddCrackedAccountScreen extends AddAccountScreen {
         add.action = () -> {
             if (!name.get().isEmpty() && (name.get().length() < 17) && name.get().matches("^[a-zA-Z0-9_]+$")) {
                 CrackedAccount account = new CrackedAccount(name.get());
-                if (!(Accounts.get().exists(account))) AccountsScreen.addAccount(this, parent, account);
+                if (!Accounts.get().exists(account)) AccountsScreen.addAccount(this, parent, account);
             }
         };
 

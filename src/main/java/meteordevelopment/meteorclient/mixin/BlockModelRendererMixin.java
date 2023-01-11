@@ -43,7 +43,7 @@ public class BlockModelRendererMixin {
     @Unique
     private void rewriteBuffer(VertexConsumer vertexConsumer, int alpha) {
         if (vertexConsumer instanceof BufferBuilder bufferBuilder) {
-            BufferBuilderAccessor bufferBuilderAccessor = ((BufferBuilderAccessor) bufferBuilder);
+            BufferBuilderAccessor bufferBuilderAccessor = (BufferBuilderAccessor) bufferBuilder;
 
             int prevOffset = bufferBuilderAccessor.getElementOffset();
 
@@ -52,7 +52,7 @@ public class BlockModelRendererMixin {
 
                 for (int l = 1; l <= 4; l++) {
                     bufferBuilderAccessor.setElementOffset(prevOffset - i * l);
-                    bufferBuilder.putByte(15, (byte) (alpha));
+                    bufferBuilder.putByte(15, (byte) alpha);
                 }
 
                 bufferBuilderAccessor.setElementOffset(prevOffset);

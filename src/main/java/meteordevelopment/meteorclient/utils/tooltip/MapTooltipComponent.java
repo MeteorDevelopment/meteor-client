@@ -53,7 +53,7 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         // Background
         matrices.push();
         matrices.translate(x, y, z);
-        matrices.scale((float) (scale) * 2, (float) (scale) * 2, 0);
+        matrices.scale((float) scale * 2, (float) scale * 2, 0);
         matrices.scale((64 + 8) / 64f, (64 + 8) / 64f, 0);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE_MAP_BACKGROUND);

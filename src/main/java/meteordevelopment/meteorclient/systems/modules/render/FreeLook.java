@@ -95,7 +95,7 @@ public class FreeLook extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (arrows.get()) {
-            for (int i = 0; i < (arrowSpeed.get() * 2); i++) {
+            for (int i = 0; i < arrowSpeed.get() * 2; i++) {
                 switch (mode.get()) {
                     case Player -> {
                         if (Input.isKeyPressed(GLFW.GLFW_KEY_LEFT)) cameraYaw -= 0.5;

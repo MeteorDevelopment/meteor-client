@@ -107,7 +107,7 @@ public class LightOverlay extends Module {
                     crosses.add(crossPool.get().set(blockPos, true));
                     break;
                 case Always:
-                    crosses.add((crossPool.get().set(blockPos, false)));
+                    crosses.add(crossPool.get().set(blockPos, false));
                     break;
             }
         });

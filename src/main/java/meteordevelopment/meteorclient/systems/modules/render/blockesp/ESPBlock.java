@@ -264,7 +264,7 @@ public class ESPBlock {
 
 
     public static long getKey(int x, int y, int z) {
-        return ((long) y << 16) | ((long) (z & 15) << 8) | ((long) (x & 15));
+        return (long) y << 16 | (long) (z & 15) << 8 | (long) (x & 15);
     }
 
     public static long getKey(BlockPos blockPos) {

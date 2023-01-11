@@ -64,7 +64,9 @@ public class ItemListSetting extends Setting<List<Item>> {
     public NbtCompound save(NbtCompound tag) {
         NbtList valueTag = new NbtList();
         for (Item item : get()) {
-            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) valueTag.add(NbtString.of(Registries.ITEM.getId(item).toString()));
+            if (bypassFilterWhenSavingAndLoading || filter == null || filter.test(item)) {
+                valueTag.add(NbtString.of(Registries.ITEM.getId(item).toString()));
+            }
         }
         tag.put("value", valueTag);
 
@@ -79,7 +81,7 @@ public class ItemListSetting extends Setting<List<Item>> {
         for (NbtElement tagI : valueTag) {
             Item item = Registries.ITEM.get(new Identifier(tagI.asString()));
 
-            if (bypassFilterWhenSavingAndLoading || (filter == null || filter.test(item))) get().add(item);
+            if (bypassFilterWhenSavingAndLoading || filter == null || filter.test(item)) get().add(item);
         }
 
         return get();

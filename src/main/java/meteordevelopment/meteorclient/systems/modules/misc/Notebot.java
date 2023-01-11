@@ -698,7 +698,7 @@ public class Notebot extends Module {
     private void scanForNoteblocks() {
         if (mc.interactionManager == null || mc.world == null || mc.player == null) return;
         scannedNoteblocks.clear();
-        int min = (int) (-mc.interactionManager.getReachDistance()) - 2;
+        int min = (int) -mc.interactionManager.getReachDistance() - 2;
         int max = (int) mc.interactionManager.getReachDistance() + 2;
 
         // Scan for noteblocks horizontally

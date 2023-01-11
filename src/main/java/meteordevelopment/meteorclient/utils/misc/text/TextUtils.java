@@ -111,7 +111,7 @@ public class TextUtils {
                 textColor = stack.peek().getColor();
         } else {
             // Has a color defined, so use that
-            textColor = new Color((text.getStyle().getColor().getRgb()) | 0xFF000000); // Sets alpha to max. Some damn reason Color's packed ctor is in ARGB format, not RGBA
+            textColor = new Color(text.getStyle().getColor().getRgb() | 0xFF000000); // Sets alpha to max. Some damn reason Color's packed ctor is in ARGB format, not RGBA
         }
 
         ColoredText coloredText = new ColoredText(textString, textColor);

@@ -117,14 +117,14 @@ public class Notifier extends Module {
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (event.entity.getUuid().equals(mc.player.getUuid()) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Despawn) return;
+        if (event.entity.getUuid().equals(mc.player.getUuid()) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Despawn)
+            return;
 
-        if (event.entity instanceof PlayerEntity) {
-            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+        if (event.entity instanceof PlayerEntity playerEntity) {
+            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(playerEntity)) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
                 ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
             }
-        }
-        else {
+        } else {
             MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
             text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
             text.append(formatCoords(event.entity.getPos()));
@@ -135,10 +135,11 @@ public class Notifier extends Module {
 
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
-        if (event.entity.getUuid().equals(mc.player.getUuid()) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Spawn) return;
+        if (event.entity.getUuid().equals(mc.player.getUuid()) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Spawn)
+            return;
 
-        if (event.entity instanceof PlayerEntity) {
-            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+        if (event.entity instanceof PlayerEntity playerEntity) {
+            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(playerEntity)) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
                 ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
             }
         } else {
@@ -173,11 +174,11 @@ public class Notifier extends Module {
 
         Entity entity = p.getEntity(mc.world);
 
-        if (!(entity instanceof PlayerEntity)) return;
+        if (!(entity instanceof PlayerEntity playerEntity)) return;
 
         if ((entity.equals(mc.player) && totemsIgnoreOwn.get())
-            || (Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreOthers.get())
-            || (!Friends.get().isFriend(((PlayerEntity) entity)) && totemsIgnoreFriends.get())
+            || (Friends.get().isFriend(playerEntity) && totemsIgnoreOthers.get())
+            || (!Friends.get().isFriend(playerEntity) && totemsIgnoreFriends.get())
         ) return;
 
         synchronized (totemPopMap) {

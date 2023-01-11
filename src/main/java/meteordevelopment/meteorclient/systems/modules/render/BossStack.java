@@ -76,7 +76,7 @@ public class BossStack extends Module {
             event.iterator.forEachRemaining(bar -> {
                 String name = bar.getName().getString();
                 if (chosenBarMap.containsKey(name)) {
-                    barMap.compute(chosenBarMap.get(name), (clientBossBar, integer) -> (integer == null) ? 2 : integer + 1);
+                    barMap.compute(chosenBarMap.get(name), (clientBossBar, integer) -> integer == null ? 2 : integer + 1);
                 } else chosenBarMap.put(name, bar);
             });
             event.iterator = chosenBarMap.values().iterator();

@@ -129,7 +129,7 @@ public class HoleHud extends HudElement {
     }
 
     private void renderBreaking(HudRenderer renderer, double x, double y, double percent) {
-        renderer.quad(x, y, (16 * percent) * scale.get(), 16 * scale.get(), BG_COLOR);
+        renderer.quad(x, y, 16 * percent * scale.get(), 16 * scale.get(), BG_COLOR);
         renderer.quad(x, y, 16 * scale.get(), 1 * scale.get(), OL_COLOR);
         renderer.quad(x, y + 15 * scale.get(), 16 * scale.get(), 1 * scale.get(), OL_COLOR);
         renderer.quad(x, y, 1 * scale.get(), 16 * scale.get(), OL_COLOR);

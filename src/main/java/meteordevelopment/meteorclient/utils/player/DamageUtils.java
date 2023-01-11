@@ -192,8 +192,8 @@ public class DamageUtils {
 
     private static double resistanceReduction(LivingEntity player, double damage) {
         if (player.hasStatusEffect(StatusEffects.RESISTANCE)) {
-            int lvl = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1);
-            damage *= (1 - (lvl * 0.2));
+            int lvl = player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1;
+            damage *= 1 - (lvl * 0.2);
         }
 
         return damage < 0 ? 0 : damage;

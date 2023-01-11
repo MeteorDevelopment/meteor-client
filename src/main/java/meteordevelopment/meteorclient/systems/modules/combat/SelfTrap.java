@@ -144,7 +144,7 @@ public class SelfTrap extends Module {
         for (Block currentBlock : blocks.get()) {
             FindItemResult itemResult = InvUtils.findInHotbar(currentBlock.asItem());
 
-            if (turnOff.get() && ((placed && placePositions.isEmpty()) || !itemResult.found())) {
+            if (turnOff.get() && (placed && placePositions.isEmpty() || !itemResult.found())) {
                 toggle();
                 continue;
             }

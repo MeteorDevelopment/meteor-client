@@ -81,7 +81,7 @@ public abstract class EndCrystalEntityRendererMixin {
         Chams module = Modules.get().get(Chams.class);
         if (!module.isActive() || !module.crystals.get()) return;
 
-        args.set(0, ((float) args.get(0)) * module.crystalsRotationSpeed.get().floatValue());
+        args.set(0, (float) args.get(0) * module.crystalsRotationSpeed.get().floatValue());
     }
 
     // Core

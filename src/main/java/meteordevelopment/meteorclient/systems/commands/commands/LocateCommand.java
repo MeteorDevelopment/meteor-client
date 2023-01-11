@@ -249,7 +249,7 @@ public class LocateCommand extends Command {
     }
 
     private void lastPosition(double x, double y, double z) {
-        info("%s Eye of Ender's trajectory saved.", (this.firstEnd == null) ? "First" : "Second");
+        info("%s Eye of Ender's trajectory saved.", this.firstEnd == null ? "First" : "Second");
         Vec3d pos = new Vec3d(x, y, z);
         if (this.firstEnd == null) {
             this.firstEnd = pos;

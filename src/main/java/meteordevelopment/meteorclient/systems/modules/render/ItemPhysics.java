@@ -65,7 +65,7 @@ public class ItemPhysics extends Module {
         }
 
         boolean isAboveWater = event.itemEntity.world.getBlockState(event.itemEntity.getBlockPos()).getFluidState().getFluid().isIn(FluidTags.WATER);
-        if (!event.itemEntity.isOnGround() && (!event.itemEntity.isSubmergedInWater() && !isAboveWater)) {
+        if (!event.itemEntity.isOnGround() && !event.itemEntity.isSubmergedInWater() && !isAboveWater) {
             float rotation = ((float) event.itemEntity.getItemAge() + event.tickDelta) / 20.0F + event.itemEntity.uniqueOffset; // calculate rotation based on age and ticks
 
             if (!renderBlockFlat) {
@@ -119,9 +119,9 @@ public class ItemPhysics extends Module {
         float x;
         float y;
         if (!hasDepthInGui) {
-            float r = -0.0F * (float) (renderCount) * 0.5F * scaleX;
-            x = -0.0F * (float) (renderCount) * 0.5F * scaleY;
-            y = -0.09375F * (float) (renderCount) * 0.5F * scaleZ;
+            float r = -0.0F * (float) renderCount * 0.5F * scaleX;
+            x = -0.0F * (float) renderCount * 0.5F * scaleY;
+            y = -0.09375F * (float) renderCount * 0.5F * scaleZ;
             event.matrixStack.translate(r, x, y);
         }
 

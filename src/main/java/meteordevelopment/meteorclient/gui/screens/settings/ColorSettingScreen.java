@@ -571,7 +571,7 @@ public class ColorSettingScreen extends WindowScreen {
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            double sectionWidth = (width) / (HUE_COLORS.length - 1);
+            double sectionWidth = width / (HUE_COLORS.length - 1);
             double sectionX = x;
 
             for (int i = 0; i < HUE_COLORS.length - 1; i++) {

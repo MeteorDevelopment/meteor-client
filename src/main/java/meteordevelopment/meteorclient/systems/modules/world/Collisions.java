@@ -95,7 +95,7 @@ public class Collisions extends Module {
     }
 
     private boolean blockFilter(Block block) {
-        return (block instanceof AbstractFireBlock
+        return block instanceof AbstractFireBlock
             || block instanceof AbstractPressurePlateBlock
             || block instanceof TripwireBlock
             || block instanceof TripwireHookBlock
@@ -107,8 +107,7 @@ public class Collisions extends Module {
             || block instanceof TrapdoorBlock
             || block instanceof PowderSnowBlock
             || block instanceof AbstractCauldronBlock
-            || block instanceof HoneyBlock
-        );
+            || block instanceof HoneyBlock;
     }
 
     public boolean ignoreBorder() {
