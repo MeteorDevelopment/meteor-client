@@ -135,7 +135,7 @@ public class DamageUtils {
     // Bed damage
 
     public static double bedDamage(LivingEntity player, Vec3d bed) {
-        if (player instanceof PlayerEntity && ((PlayerEntity) player).getAbilities().creativeMode) return 0;
+        if (player instanceof PlayerEntity playerEntity && playerEntity.getAbilities().creativeMode) return 0;
 
         double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
         if (modDistance > 10) return 0;
@@ -219,7 +219,7 @@ public class DamageUtils {
         double g = (1 - Math.floor(1 / d) * d) / 2;
         double h = (1 - Math.floor(1 / f) * f) / 2;
 
-        if (!(d < 0) && !(e < 0) && !(f < 0)) {
+        if (d >= 0 && e >= 0 && f >= 0) {
             int i = 0;
             int j = 0;
 
@@ -267,7 +267,7 @@ public class DamageUtils {
             double e = blockHitResult2 == null ? Double.MAX_VALUE : raycastContext.getStart().squaredDistanceTo(blockHitResult2.getPos());
 
             return d <= e ? blockHitResult : blockHitResult2;
-        }, (raycastContext) -> {
+        }, raycastContext -> {
             Vec3d vec3d = raycastContext.getStart().subtract(raycastContext.getEnd());
             return BlockHitResult.createMissed(raycastContext.getEnd(), Direction.getFacing(vec3d.x, vec3d.y, vec3d.z), new BlockPos(raycastContext.getEnd()));
         });

@@ -61,8 +61,7 @@ public class Fonts {
         try {
             RENDERER = new CustomTextRenderer(fontFace);
             MeteorClient.EVENT_BUS.post(CustomFontChangedEvent.get());
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             if (fontFace.equals(DEFAULT_FONT)) {
                 throw new RuntimeException("Failed to load default font: " + fontFace, e);
             }
@@ -71,16 +70,14 @@ public class Fonts {
             load(Fonts.DEFAULT_FONT);
         }
 
-        if (mc.currentScreen instanceof WidgetScreen && Config.get().customFont.get()) {
-            ((WidgetScreen) mc.currentScreen).invalidate();
+        if (mc.currentScreen instanceof WidgetScreen widgetScreen && Config.get().customFont.get()) {
+            widgetScreen.invalidate();
         }
     }
 
     public static FontFamily getFamily(String name) {
         for (FontFamily fontFamily : Fonts.FONT_FAMILIES) {
-            if (fontFamily.getName().equalsIgnoreCase(name)) {
-                return fontFamily;
-            }
+            if (fontFamily.getName().equalsIgnoreCase(name)) return fontFamily;
         }
 
         return null;

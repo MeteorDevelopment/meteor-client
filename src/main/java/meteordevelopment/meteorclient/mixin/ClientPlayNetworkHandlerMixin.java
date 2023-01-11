@@ -121,8 +121,8 @@ public abstract class ClientPlayNetworkHandlerMixin {
         Entity itemEntity = client.world.getEntityById(packet.getEntityId());
         Entity entity = client.world.getEntityById(packet.getCollectorEntityId());
 
-        if (itemEntity instanceof ItemEntity && entity == client.player) {
-            MeteorClient.EVENT_BUS.post(PickItemsEvent.get(((ItemEntity) itemEntity).getStack(), packet.getStackAmount()));
+        if (itemEntity instanceof ItemEntity itemEntity1 && entity == client.player) {
+            MeteorClient.EVENT_BUS.post(PickItemsEvent.get(itemEntity1.getStack(), packet.getStackAmount()));
         }
     }
 

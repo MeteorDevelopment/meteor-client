@@ -108,13 +108,13 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     protected void setupAngles() {
-        float yaw = (float) (((System.currentTimeMillis() / 10)) % 360);
+        float yaw = (System.currentTimeMillis() / 10f) % 360;
         entity.setYaw(yaw);
         entity.setHeadYaw(yaw);
         entity.setPitch(0.f);
-        if (entity instanceof LivingEntity) {
-            if (entity instanceof GoatEntity) ((LivingEntity) entity).headYaw = yaw;
-            ((LivingEntity) entity).bodyYaw = yaw;
+        if (entity instanceof LivingEntity livingEntity) {
+            if (livingEntity instanceof GoatEntity goatEntity) goatEntity.headYaw = yaw;
+            livingEntity.bodyYaw = yaw;
         }
     }
 }

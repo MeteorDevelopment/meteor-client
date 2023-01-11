@@ -154,28 +154,24 @@ public class Tracers extends Module {
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
+            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity playerEntity && Friends.get().isFriend(playerEntity) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)))
+                continue;
 
             Color color;
 
             if (distance.get()) {
-                if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                if (friendOverride.get() && entity instanceof PlayerEntity playerEntity && Friends.get().isFriend(playerEntity)) {
                     color = Config.get().friendColor.get();
-                }
-                else color = EntityUtils.getColorFromDistance(entity);
-            }
-            else if (entity instanceof PlayerEntity) {
-                color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-            }
-            else {
-                color = switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE -> animalsColor.get();
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                    case MONSTER -> monstersColor.get();
-                    case AMBIENT -> ambientColor.get();
-                    default -> miscColor.get();
-                };
-            }
+                } else color = EntityUtils.getColorFromDistance(entity);
+            } else if (entity instanceof PlayerEntity playerEntity) {
+                color = PlayerUtils.getPlayerColor(playerEntity, playersColor.get());
+            } else color = switch (entity.getType().getSpawnGroup()) {
+                case CREATURE -> animalsColor.get();
+                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
+                case MONSTER -> monstersColor.get();
+                case AMBIENT -> ambientColor.get();
+                default -> miscColor.get();
+            };
 
             double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
             double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;

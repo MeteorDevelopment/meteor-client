@@ -332,7 +332,7 @@ public class InventoryTweaks extends Module {
     }
 
     private int getRows(ScreenHandler handler) {
-        return (handler instanceof GenericContainerScreenHandler ? ((GenericContainerScreenHandler) handler).getRows() : 3);
+        return handler instanceof GenericContainerScreenHandler gcsHandler ? gcsHandler.getRows() : 3;
     }
 
     private void moveSlots(ScreenHandler handler, int start, int end) {
@@ -385,11 +385,8 @@ public class InventoryTweaks extends Module {
         ScreenHandler handler = mc.player.currentScreenHandler;
         if (event.packet.getSyncId() == handler.syncId) {
             if (handler instanceof GenericContainerScreenHandler || handler instanceof ShulkerBoxScreenHandler) {
-                if (autoSteal.get()) {
-                    steal(handler);
-                } else if (autoDump.get()) {
-                    dump(handler);
-                }
+                if (autoSteal.get()) steal(handler);
+                else if (autoDump.get()) dump(handler);
             }
         }
     }

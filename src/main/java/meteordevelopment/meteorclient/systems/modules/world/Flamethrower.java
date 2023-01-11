@@ -103,7 +103,7 @@ public class Flamethrower extends Module {
             if (!entities.get().getBoolean(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
             if (entity.isFireImmune()) continue;
             if (entity == mc.player) continue;
-            if (!targetBabies.get() && entity instanceof LivingEntity && ((LivingEntity)entity).isBaby()) continue;
+            if (!targetBabies.get() && entity instanceof LivingEntity livingEntity && livingEntity.isBaby()) continue;
 
             boolean success = selectSlot();
 

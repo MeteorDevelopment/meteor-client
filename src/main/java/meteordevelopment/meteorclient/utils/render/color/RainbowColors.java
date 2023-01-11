@@ -87,7 +87,7 @@ public class RainbowColors {
         if (mc.currentScreen instanceof WidgetScreen) {
             for (SettingGroup group : GuiThemes.get().settings) {
                 for (Setting<?> setting : group) {
-                    if (setting instanceof ColorSetting) ((SettingColor) setting.get()).update();
+                    if (setting instanceof ColorSetting colorSetting) colorSetting.get().update();
                 }
             }
         }

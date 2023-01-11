@@ -73,14 +73,15 @@ public class AutoBreed extends Module {
         for (Entity entity : mc.world.getEntities()) {
             AnimalEntity animal;
 
-            if (!(entity instanceof AnimalEntity)) continue;
-            else animal = (AnimalEntity) entity;
+            if (!(entity instanceof AnimalEntity animalEntity)) continue;
+            else animal = animalEntity;
 
             if (!entities.get().getBoolean(animal.getType())
-                    || (animal.isBaby() && !ignoreBabies.get())
-                    || animalsFed.contains(animal)
-                    || !PlayerUtils.isWithin(animal, range.get())
-                    || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack())) continue;
+                || (animal.isBaby() && !ignoreBabies.get())
+                || animalsFed.contains(animal)
+                || !PlayerUtils.isWithin(animal, range.get())
+                || !animal.isBreedingItem(hand.get() == Hand.MAIN_HAND ? mc.player.getMainHandStack() : mc.player.getOffHandStack()))
+                continue;
 
             Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, () -> {
                 mc.interactionManager.interactEntity(mc.player, animal, hand.get());

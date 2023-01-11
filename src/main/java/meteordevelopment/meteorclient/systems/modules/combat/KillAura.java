@@ -236,7 +236,8 @@ public class KillAura extends Module {
     CrystalAura ca = Modules.get().get(CrystalAura.class);
     private final List<Entity> targets = new ArrayList<>();
     private final Vec3d hitVec = new Vec3d(0, 0, 0);
-    private int switchTimer, hitTimer;
+    private int switchTimer;
+    private int hitTimer;
     private boolean wasPathing = false;
 
     public KillAura() {
@@ -338,7 +339,7 @@ public class KillAura extends Module {
 
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
-        if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+        if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
         Box hitbox = entity.getBoundingBox();
         ((IVec3d)hitVec).set(

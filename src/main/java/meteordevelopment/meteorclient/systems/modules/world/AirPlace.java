@@ -92,11 +92,11 @@ public class AirPlace extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (!(hitResult instanceof BlockHitResult)
-            || !mc.world.getBlockState(((BlockHitResult) hitResult).getBlockPos()).getMaterial().isReplaceable()
+        if (!(hitResult instanceof BlockHitResult blockHitResult)
+            || !mc.world.getBlockState(blockHitResult.getBlockPos()).getMaterial().isReplaceable()
             || !(mc.player.getMainHandStack().getItem() instanceof BlockItem)
             || !render.get()) return;
 
-        event.renderer.box(((BlockHitResult) hitResult).getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        event.renderer.box(blockHitResult.getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
     }
 }

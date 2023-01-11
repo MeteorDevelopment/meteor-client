@@ -177,9 +177,7 @@ public class Scaffold extends Module {
                             }
                         }
                     }
-                    if (blockPosArray.size() == 0) {
-                        return;
-                    }
+                    if (blockPosArray.isEmpty()) return;
 
                     blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
 
@@ -244,7 +242,7 @@ public class Scaffold extends Module {
         Block block = ((BlockItem) itemStack.getItem()).getBlock();
 
         if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
-        else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
+        if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
 
         if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
         return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));

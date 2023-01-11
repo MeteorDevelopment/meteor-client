@@ -149,7 +149,7 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
         // Settings
         NbtElement settingsTag = tag.get("settings");
-        if (settingsTag instanceof NbtCompound) settings.fromTag((NbtCompound) settingsTag);
+        if (settingsTag instanceof NbtCompound nbtCompound) settings.fromTag(nbtCompound);
 
         boolean active = tag.getBoolean("active");
         if (active != isActive()) toggle();

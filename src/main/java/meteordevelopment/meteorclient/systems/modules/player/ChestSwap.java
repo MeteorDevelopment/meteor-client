@@ -60,13 +60,10 @@ public class ChestSwap extends Module {
     public void swap() {
         Item currentItem = mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem();
 
-        if (currentItem == Items.ELYTRA) {
-            equipChestplate();
-        } else if (currentItem instanceof ArmorItem && ((ArmorItem) currentItem).getSlotType() == EquipmentSlot.CHEST) {
+        if (currentItem == Items.ELYTRA) equipChestplate();
+        else if (currentItem instanceof ArmorItem armorItem && armorItem.getSlotType() == EquipmentSlot.CHEST) {
             equipElytra();
-        } else {
-            if (!equipChestplate()) equipElytra();
-        }
+        } else if (!equipChestplate()) equipElytra();
     }
 
     private boolean equipChestplate() {

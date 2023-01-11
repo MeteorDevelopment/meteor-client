@@ -123,7 +123,7 @@ public class LogoutSpots extends Module {
     private void updateLastPlayers() {
         lastPlayers.clear();
         for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity) lastPlayers.add((PlayerEntity) entity);
+            if (entity instanceof PlayerEntity playerEntity) lastPlayers.add(playerEntity);
         }
     }
 
@@ -139,9 +139,7 @@ public class LogoutSpots extends Module {
                 }
             }
 
-            if (toRemove != -1) {
-                players.remove(toRemove);
-            }
+            if (toRemove != -1) players.remove(toRemove);
         }
     }
 
@@ -152,9 +150,7 @@ public class LogoutSpots extends Module {
                 if (mc.getNetworkHandler().getPlayerList().stream().anyMatch(playerListEntry -> playerListEntry.getProfile().equals(entry.getProfile()))) continue;
 
                 for (PlayerEntity player : lastPlayers) {
-                    if (player.getUuid().equals(entry.getProfile().getId())) {
-                        add(new Entry(player));
-                    }
+                    if (player.getUuid().equals(entry.getProfile().getId())) add(new Entry(player));
                 }
             }
 
@@ -166,9 +162,7 @@ public class LogoutSpots extends Module {
         if (timer <= 0) {
             updateLastPlayers();
             timer = 10;
-        } else {
-            timer--;
-        }
+        } else timer--;
 
         Dimension dimension = PlayerUtils.getDimension();
         if (dimension != lastDimension) players.clear();
@@ -198,12 +192,18 @@ public class LogoutSpots extends Module {
     private static final Vector3d pos = new Vector3d();
 
     private class Entry {
-        public final double x, y, z;
-        public final double xWidth, zWidth, halfWidth, height;
+        public final double x;
+        public final double y;
+        public final double z;
+        public final double xWidth;
+        public final double zWidth;
+        public final double halfWidth;
+        public final double height;
 
         public final UUID uuid;
         public final String name;
-        public final int health, maxHealth;
+        public final int health;
+        public final int maxHealth;
         public final String healthText;
 
         public Entry(PlayerEntity entity) {

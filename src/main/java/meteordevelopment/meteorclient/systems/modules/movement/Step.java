@@ -73,11 +73,9 @@ public class Step extends Module {
     private void onTick(TickEvent.Post event) {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
-        if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
+        if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))) {
             mc.player.stepHeight = height.get().floatValue();
-        } else {
-            mc.player.stepHeight = prevStepHeight;
-        }
+        } else mc.player.stepHeight = prevStepHeight;
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, -1, 0));
     }
 
@@ -93,10 +91,10 @@ public class Step extends Module {
 
     private double getExplosionDamage(){
         Optional<EndCrystalEntity> crystal = Streams.stream(mc.world.getEntities())
-                .filter(entity -> entity instanceof EndCrystalEntity)
-                .filter(Entity::isAlive)
-                .max(Comparator.comparingDouble(o -> DamageUtils.crystalDamage(mc.player, o.getPos())))
-                .map(entity -> (EndCrystalEntity) entity);
+            .filter(EndCrystalEntity.class::isInstance)
+            .filter(Entity::isAlive)
+            .max(Comparator.comparingDouble(o -> DamageUtils.crystalDamage(mc.player, o.getPos())))
+            .map(EndCrystalEntity.class::cast);
         return crystal.map(endCrystalEntity -> DamageUtils.crystalDamage(mc.player, endCrystalEntity.getPos())).orElse(0.0);
     }
 

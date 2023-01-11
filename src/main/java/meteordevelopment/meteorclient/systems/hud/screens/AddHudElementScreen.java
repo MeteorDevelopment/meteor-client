@@ -26,7 +26,8 @@ import java.util.Map;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AddHudElementScreen extends WindowScreen {
-    private final int x, y;
+    private final int x;
+    private final int y;
     private final WTextBox searchBar;
 
     private Object firstObject;
@@ -78,20 +79,18 @@ public class AddHudElementScreen extends WindowScreen {
                 WLabel title = l.add(theme.label(item.title)).widget();
                 title.tooltip = item.description;
 
-                if (item.object instanceof HudElementInfo.Preset preset) {
+                if (item.object instanceof HudElementInfo<?>.Preset preset) {
                     WPlus add = l.add(theme.plus()).expandCellX().right().widget();
                     add.action = () -> runObject(preset);
 
                     if (firstObject == null) firstObject = preset;
-                }
-                else {
+                } else {
                     HudElementInfo<?> info = (HudElementInfo<?>) item.object;
 
                     if (info.hasPresets()) {
                         WButton open = l.add(theme.button(" > ")).expandCellX().right().widget();
                         open.action = () -> runObject(info);
-                    }
-                    else {
+                    } else {
                         WPlus add = l.add(theme.plus()).expandCellX().right().widget();
                         add.action = () -> runObject(info);
                     }
@@ -103,11 +102,10 @@ public class AddHudElementScreen extends WindowScreen {
     }
 
     private void runObject(Object object) {
-        if (object instanceof HudElementInfo.Preset preset) {
+        if (object instanceof HudElementInfo<?>.Preset preset) {
             Hud.get().add(preset, x, y);
             close();
-        }
-        else {
+        } else {
             HudElementInfo<?> info = (HudElementInfo<?>) object;
 
             if (info.hasPresets()) {
@@ -115,8 +113,7 @@ public class AddHudElementScreen extends WindowScreen {
                 screen.parent = parent;
 
                 mc.setScreen(screen);
-            }
-            else {
+            } else {
                 Hud.get().add(info, x, y);
                 close();
             }

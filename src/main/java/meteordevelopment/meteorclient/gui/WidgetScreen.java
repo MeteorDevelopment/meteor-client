@@ -45,12 +45,14 @@ public abstract class WidgetScreen extends Screen {
 
     protected final GuiTheme theme;
 
-    public boolean locked, lockedAllowClose;
+    public boolean locked;
+    public boolean lockedAllowClose;
     private boolean closed;
     private boolean onClose;
     private boolean debug;
 
-    private double lastMouseX, lastMouseY;
+    private double lastMouseX;
+    private double lastMouseY;
 
     public double animProgress;
 
@@ -221,9 +223,7 @@ public abstract class WidgetScreen extends Screen {
         }
         else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
             reload();
-            if (parent instanceof WidgetScreen wScreen) {
-                wScreen.reload();
-            }
+            if (parent instanceof WidgetScreen wScreen) wScreen.reload();
             return true;
         }
 
@@ -318,10 +318,7 @@ public abstract class WidgetScreen extends Screen {
             Input.setCursorStyle(CursorStyle.Default);
 
             loopWidgets(root, widget -> {
-                if (widget instanceof WTextBox textBox) {
-
-                    if (textBox.isFocused()) textBox.setFocused(false);
-                }
+                if (widget instanceof WTextBox textBox && textBox.isFocused()) textBox.setFocused(false);
             });
 
             MeteorClient.EVENT_BUS.unsubscribe(this);
@@ -343,8 +340,8 @@ public abstract class WidgetScreen extends Screen {
     private void loopWidgets(WWidget widget, Consumer<WWidget> action) {
         action.accept(widget);
 
-        if (widget instanceof WContainer) {
-            for (Cell<?> cell : ((WContainer) widget).cells) loopWidgets(cell.widget(), action);
+        if (widget instanceof WContainer wContainer) {
+            for (Cell<?> cell : wContainer.cells) loopWidgets(cell.widget(), action);
         }
     }
 

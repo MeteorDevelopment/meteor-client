@@ -179,13 +179,13 @@ public class NoInteract extends Module {
     private boolean shouldAttackEntity(Entity entity) {
         // Friends
         if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Hit) &&
-            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            entity instanceof PlayerEntity playerEntity && !Friends.get().shouldAttack(playerEntity)) {
             return false;
         }
 
         // Babies
         if ((babies.get() == InteractMode.Both || babies.get() == InteractMode.Hit) &&
-            entity instanceof AnimalEntity && ((AnimalEntity) entity).isBaby()) {
+            entity instanceof AnimalEntity animalEntity && animalEntity.isBaby()) {
             return false;
         }
 
@@ -212,13 +212,13 @@ public class NoInteract extends Module {
 
         // Friends
         if ((friends.get() == InteractMode.Both || friends.get() == InteractMode.Interact) &&
-            entity instanceof PlayerEntity && !Friends.get().shouldAttack((PlayerEntity) entity)) {
+            entity instanceof PlayerEntity playerEntity && !Friends.get().shouldAttack(playerEntity)) {
             return false;
         }
 
         // Babies
         if ((babies.get() == InteractMode.Both || babies.get() == InteractMode.Interact) &&
-            entity instanceof AnimalEntity && ((AnimalEntity) entity).isBaby()) {
+            entity instanceof AnimalEntity animalEntity && animalEntity.isBaby()) {
             return false;
         }
 

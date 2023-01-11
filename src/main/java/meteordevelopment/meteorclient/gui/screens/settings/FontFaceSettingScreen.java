@@ -55,9 +55,7 @@ public class FontFaceSettingScreen extends WindowScreen {
             if (row == null) return;
 
             WWidget widget = row.get(2).widget();
-            if (widget instanceof WButton button) {
-                button.action.run();
-            }
+            if (widget instanceof WButton button) button.action.run();
         };
 
         WView view = add(theme.view()).expandX().widget();

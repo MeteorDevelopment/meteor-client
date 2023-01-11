@@ -27,9 +27,7 @@ public class ProxiesImportScreen extends WindowScreen {
         super(theme, "Import Proxies");
         this.file = file;
         this.onClosed(() -> {
-            if (parent instanceof ProxiesScreen screen) {
-                screen.reload();
-            }
+            if (parent instanceof ProxiesScreen screen) screen.reload();
         });
     }
 
@@ -40,7 +38,8 @@ public class ProxiesImportScreen extends WindowScreen {
             WVerticalList list = add(theme.section("Log", false)).widget().add(theme.verticalList()).expandX().widget();
             Proxies proxies = Proxies.get();
             try {
-                int pog = 0, bruh = 0;
+                int success = 0;
+                int failure = 0;
                 for (String line : Files.readAllLines(file.toPath())) {
                     Matcher matcher = Proxies.PROXY_PATTERN.matcher(line);
 
@@ -57,21 +56,21 @@ public class ProxiesImportScreen extends WindowScreen {
 
                         if (proxies.add(proxy)) {
                             list.add(theme.label("Imported proxy: " + proxy.name.get()).color(Color.GREEN));
-                            pog++;
+                            success++;
                         }
                         else {
                             list.add(theme.label("Proxy already exists: " + proxy.name.get()).color(Color.ORANGE));
-                            bruh++;
+                            failure++;
                         }
                     }
                     else {
                         list.add(theme.label("Invalid proxy: " + line).color(Color.RED));
-                        bruh++;
+                        failure++;
                     }
                 }
                 add(theme
-                    .label("Successfully imported " + pog + "/" + (bruh + pog) + " proxies.")
-                    .color(Utils.lerp(Color.RED, Color.GREEN, (float) pog / (pog + bruh)))
+                    .label("Successfully imported " + success + "/" + (failure + success) + " proxies.")
+                    .color(Utils.lerp(Color.RED, Color.GREEN, (float) success / (success + failure)))
                 );
             } catch (IOException e) {
                 e.printStackTrace();

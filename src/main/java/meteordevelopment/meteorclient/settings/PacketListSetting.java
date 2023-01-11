@@ -87,8 +87,8 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
         get().clear();
 
         NbtElement valueTag = tag.get("value");
-        if (valueTag instanceof NbtList) {
-            for (NbtElement t : (NbtList) valueTag) {
+        if (valueTag instanceof NbtList nbtList) {
+            for (NbtElement t : nbtList) {
                 Class<? extends Packet<?>> packet = PacketUtils.getPacket(t.asString());
                 if (packet != null && (filter == null || filter.test(packet))) get().add(packet);
             }
