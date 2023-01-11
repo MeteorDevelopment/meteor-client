@@ -14,7 +14,7 @@ public enum KeyAction {
 
     public static KeyAction get(int action) {
         if (action == GLFW.GLFW_PRESS) return Press;
-        else if (action == GLFW.GLFW_RELEASE) return Release;
-        else return Repeat;
+        if (action == GLFW.GLFW_RELEASE) return Release;
+        return Repeat;
     }
 }

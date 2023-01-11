@@ -227,10 +227,9 @@ public class BlockUtils {
         BlockState state = mc.world.getBlockState(blockPos);
         float f = state.getHardness(mc.world, blockPos);
         if (f == -1.0F) return 0.0F;
-        else {
-            int i = mc.player.canHarvest(state) ? 30 : 100;
-            return breakSpeed / f / (float) i;
-        }
+
+        int i = mc.player.canHarvest(state) ? 30 : 100;
+        return breakSpeed / f / (float) i;
     }
 
     // Other
@@ -260,14 +259,14 @@ public class BlockUtils {
         }
 
         if (mc.world.getLightLevel(blockPos, 0) <= spawnLightLimit) return MobSpawn.Potential;
-        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= spawnLightLimit) return MobSpawn.Always;
+        if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= spawnLightLimit) return MobSpawn.Always;
 
         return MobSpawn.Never;
     }
 
     public static boolean topSurface(BlockState blockState) {
         if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
-        else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
+        return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
     }
 
     public enum MobSpawn {

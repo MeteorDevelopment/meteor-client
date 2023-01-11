@@ -27,9 +27,6 @@ public class BlockCollisionSpliteratorMixin {
             ? MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state, pos, shape, CollisionShapeEvent.CollisionType.BLOCK))
             : MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state.getFluidState().getBlockState(), pos, shape, CollisionShapeEvent.CollisionType.FLUID));
 
-        if (event.isCancelled())
-            return VoxelShapes.empty();
-        else
-            return event.shape;
+        return event.isCancelled() ? VoxelShapes.empty() : event.shape;
     }
 }

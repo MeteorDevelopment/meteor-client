@@ -79,8 +79,8 @@ public class TargetUtils {
         boolean e2l = e2 instanceof LivingEntity;
 
         if (!e1l && !e2l) return 0;
-        else if (e1l && !e2l) return 1;
-        else if (!e1l) return -1;
+        if (e1l && !e2l) return 1;
+        if (!e1l) return -1;
 
         return Float.compare(((LivingEntity) e1).getHealth(), ((LivingEntity) e2).getHealth());
     }
@@ -90,8 +90,8 @@ public class TargetUtils {
         boolean e2l = e2 instanceof LivingEntity;
 
         if (!e1l && !e2l) return 0;
-        else if (e1l && !e2l) return 1;
-        else if (!e1l) return -1;
+        if (e1l && !e2l) return 1;
+        if (!e1l) return -1;
 
         double e1yaw = Math.abs(Rotations.getYaw(e1) - mc.player.getYaw());
         double e2yaw = Math.abs(Rotations.getYaw(e2) - mc.player.getYaw());

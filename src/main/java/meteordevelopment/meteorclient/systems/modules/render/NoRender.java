@@ -469,7 +469,7 @@ public class NoRender extends Module {
 
     public BannerRenderMode getBannerRenderMode() {
         if (!isActive()) return BannerRenderMode.Everything;
-        else return bannerRender.get();
+        return bannerRender.get();
     }
 
     public boolean noFireworkExplosions() {

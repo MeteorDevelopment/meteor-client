@@ -383,8 +383,10 @@ public class KillAura extends Module {
             if (hitTimer < delay) {
                 hitTimer++;
                 return false;
-            } else return true;
-        } else return mc.player.getAttackCooldownProgress(delay) >= 1;
+            }
+            return true;
+        }
+        return mc.player.getAttackCooldownProgress(delay) >= 1;
     }
 
     private void attack(Entity target) {

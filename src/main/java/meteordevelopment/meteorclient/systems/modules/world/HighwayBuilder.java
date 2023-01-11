@@ -612,11 +612,11 @@ public class HighwayBuilder extends Module {
                     b.setState(Center);
                     return;
                 }
-                else if (b.lastState == Center) {
+                if (b.lastState == Center) {
                     b.setState(ThrowOutTrash);
                     return;
                 }
-                else if (b.lastState == ThrowOutTrash) {
+                if (b.lastState == ThrowOutTrash) {
                     b.setState(PlaceEChestBlockade);
                     return;
                 }
@@ -965,7 +965,7 @@ public class HighwayBuilder extends Module {
                     pos = it.next();
 
                     if (predicate.test(pos)) return true;
-                    else pos = null;
+                    pos = null;
                 }
             }
 

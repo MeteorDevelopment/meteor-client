@@ -16,7 +16,7 @@ public record FindItemResult(int slot, int count) {
 
     public Hand getHand() {
         if (slot == SlotUtils.OFFHAND) return Hand.OFF_HAND;
-        else if (slot == mc.player.getInventory().selectedSlot) return Hand.MAIN_HAND;
+        if (slot == mc.player.getInventory().selectedSlot) return Hand.MAIN_HAND;
         return null;
     }
 

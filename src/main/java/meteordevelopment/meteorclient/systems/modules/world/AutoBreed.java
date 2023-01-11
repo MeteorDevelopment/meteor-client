@@ -74,7 +74,7 @@ public class AutoBreed extends Module {
             AnimalEntity animal;
 
             if (!(entity instanceof AnimalEntity animalEntity)) continue;
-            else animal = animalEntity;
+            animal = animalEntity;
 
             if (!entities.get().getBoolean(animal.getType())
                 || (animal.isBaby() && !ignoreBabies.get())

@@ -76,8 +76,7 @@ public class Strafe extends SpeedMode {
         double velX, velZ;
 
         if (forward == 0.0f && side == 0.0f) return new Vector2d(0, 0);
-
-        else if (forward != 0.0f) {
+        if (forward != 0.0f) {
             if (side >= 1.0f) {
                 yaw += (float) (forward > 0.0f ? -45 : 45);
                 side = 0.0f;
@@ -86,11 +85,8 @@ public class Strafe extends SpeedMode {
                 side = 0.0f;
             }
 
-            if (forward > 0.0f)
-                forward = 1.0f;
-
-            else if (forward < 0.0f)
-                forward = -1.0f;
+            if (forward > 0.0f) forward = 1.0f;
+            else if (forward < 0.0f) forward = -1.0f;
         }
 
         double mx = Math.cos(Math.toRadians(yaw + 90.0f));

@@ -21,8 +21,8 @@ public class BoolSetting extends Setting<Boolean> {
     @Override
     protected Boolean parseImpl(String str) {
         if (str.equalsIgnoreCase("true") || str.equalsIgnoreCase("1")) return true;
-        else if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0")) return false;
-        else if (str.equalsIgnoreCase("toggle")) return !get();
+        if (str.equalsIgnoreCase("false") || str.equalsIgnoreCase("0")) return false;
+        if (str.equalsIgnoreCase("toggle")) return !get();
         return null;
     }
 

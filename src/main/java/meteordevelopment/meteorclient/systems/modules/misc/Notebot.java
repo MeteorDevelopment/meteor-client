@@ -569,7 +569,7 @@ public class Notebot extends Module {
         if (isPlaying) return String.format("Playing song. %d/%d", currentTick, song.getLastTick());
         if (stage == Stage.Playing || stage == Stage.Preview) return "Ready to play.";
         if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks) return "Setting up the noteblocks.";
-        else return String.format("Stage: %s.", stage.toString());
+        return String.format("Stage: %s.", stage.toString());
     }
 
     /**

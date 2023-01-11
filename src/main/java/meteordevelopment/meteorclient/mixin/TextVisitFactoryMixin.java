@@ -22,6 +22,6 @@ public abstract class TextVisitFactoryMixin {
             index = 0)
     private static String adjustText(String text) {
         if (Modules.get() != null) return Modules.get().get(NameProtect.class).replaceName(text);
-        else return text;
+        return text;
     }
 }

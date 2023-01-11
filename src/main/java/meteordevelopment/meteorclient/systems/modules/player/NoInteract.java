@@ -198,8 +198,7 @@ public class NoInteract extends Module {
             return false;
         }
 
-        else return entityHitMode.get() != ListMode.WhiteList ||
-            entityHit.get().getBoolean(entity.getType());
+        return entityHitMode.get() != ListMode.WhiteList || entityHit.get().getBoolean(entity.getType());
     }
 
     private boolean shouldInteractEntity(Entity entity, Hand hand) {
@@ -230,8 +229,7 @@ public class NoInteract extends Module {
             entityInteract.get().getBoolean(entity.getType())) {
             return false;
         }
-        else return entityInteractMode.get() != ListMode.WhiteList ||
-            entityInteract.get().getBoolean(entity.getType());
+        return entityInteractMode.get() != ListMode.WhiteList || entityInteract.get().getBoolean(entity.getType());
     }
 
     public enum HandMode {

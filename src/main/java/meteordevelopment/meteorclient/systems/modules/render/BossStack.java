@@ -55,7 +55,9 @@ public class BossStack extends Module {
         if (hideName.get()) {
             event.name = Text.of("");
             return;
-        } else if (barMap.isEmpty() || !stack.get()) return;
+        }
+        if (barMap.isEmpty() || !stack.get()) return;
+
         ClientBossBar bar = event.bossBar;
         Integer integer = barMap.get(bar);
         barMap.remove(bar);

@@ -270,23 +270,22 @@ public class BetterChat extends Module {
                 returnText = message.append(Text.literal(" (2)").formatted(Formatting.GRAY));
                 break;
             }
-            else {
-                Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
-                if (!matcher.matches()) continue;
+            Matcher matcher = antiSpamRegex.matcher(oldMessage);
 
-                String group = matcher.group(matcher.groupCount());
-                int number = Integer.parseInt(group.substring(1, group.length() - 1));
+            if (!matcher.matches()) continue;
 
-                String counter = " (" + number + ")";
+            String group = matcher.group(matcher.groupCount());
+            int number = Integer.parseInt(group.substring(1, group.length() - 1));
 
-                if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
-                    message.getSiblings().remove(message.getSiblings().size() - 1);
-                    originalMessage = message.copy();
-                    messageIndex = i;
-                    returnText = message.append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
-                    break;
-                }
+            String counter = " (" + number + ")";
+
+            if (oldMessage.substring(0, oldMessage.length() - counter.length()).equals(newMessage)) {
+                message.getSiblings().remove(message.getSiblings().size() - 1);
+                originalMessage = message.copy();
+                messageIndex = i;
+                returnText = message.append(Text.literal(" (" + (number + 1) + ")").formatted(Formatting.GRAY));
+                break;
             }
         }
 
@@ -385,8 +384,8 @@ public class BetterChat extends Module {
 
     private String getAffix(String text, boolean smallcaps, boolean random) {
         if (random) return String.format("(%03d) ", Utils.random(0, 1000));
-        else if (smallcaps) return applyFancy(text);
-        else return text;
+        if (smallcaps) return applyFancy(text);
+        return text;
     }
 
     // Coords Protection

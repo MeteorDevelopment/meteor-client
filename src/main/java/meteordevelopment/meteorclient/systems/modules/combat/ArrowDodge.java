@@ -176,7 +176,8 @@ public class ArrowDodge extends Module {
 
             // check if target pos is air
             if (!mc.world.getBlockState(blockPos).getCollisionShape(mc.world, blockPos).isEmpty()) return false;
-            else if (!mc.world.getBlockState(blockPos.up()).getCollisionShape(mc.world, blockPos.up()).isEmpty()) return false;
+            if (!mc.world.getBlockState(blockPos.up()).getCollisionShape(mc.world, blockPos.up()).isEmpty())
+                return false;
 
             if (groundCheck.get()) {
                 // check if ground under target is solid

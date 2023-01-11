@@ -87,13 +87,13 @@ public enum HorizontalDirection {
         if (yaw < 0) yaw += 360;
 
         if (yaw >= 337.5 || yaw < 22.5) return South;
-        else if (yaw >= 22.5 && yaw < 67.5) return SouthWest;
-        else if (yaw >= 67.5 && yaw < 112.5) return West;
-        else if (yaw >= 112.5 && yaw < 157.5) return NorthWest;
-        else if (yaw >= 157.5 && yaw < 202.5) return North;
-        else if (yaw >= 202.5 && yaw < 247.5) return NorthEast;
-        else if (yaw >= 247.5 && yaw < 292.5) return East;
-        else if (yaw >= 292.5 && yaw < 337.5) return SouthEast;
+        if (yaw >= 22.5 && yaw < 67.5) return SouthWest;
+        if (yaw >= 67.5 && yaw < 112.5) return West;
+        if (yaw >= 112.5 && yaw < 157.5) return NorthWest;
+        if (yaw >= 157.5 && yaw < 202.5) return North;
+        if (yaw >= 202.5 && yaw < 247.5) return NorthEast;
+        if (yaw >= 247.5 && yaw < 292.5) return East;
+        if (yaw >= 292.5 && yaw < 337.5) return SouthEast;
 
         return South;
     }

@@ -162,7 +162,7 @@ public class InventorySorter {
         ItemStack slotI = slot.itemStack;
 
         if (bestI.isEmpty() && !slotI.isEmpty()) return true;
-        else if (!bestI.isEmpty() && slotI.isEmpty()) return false;
+        if (!bestI.isEmpty() && slotI.isEmpty()) return false;
 
         int c = Registries.ITEM.getId(bestI.getItem()).compareTo(Registries.ITEM.getId(slotI.getItem()));
         if (c == 0) return slotI.getCount() > bestI.getCount();
@@ -175,7 +175,7 @@ public class InventorySorter {
 
         if (slot.inventory instanceof PlayerInventory && (!(screen instanceof CreativeInventoryScreen) || ((ISlot) slot).getId() > 8)) {
             if (SlotUtils.isHotbar(i)) return InvPart.Hotbar;
-            else if (SlotUtils.isMain(i)) return InvPart.Player;
+            if (SlotUtils.isMain(i)) return InvPart.Player;
         }
         else if ((screen instanceof GenericContainerScreen || screen instanceof ShulkerBoxScreen) && slot.inventory instanceof SimpleInventory) {
             return InvPart.Main;

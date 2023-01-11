@@ -266,14 +266,14 @@ public class Nametags extends Module {
         if (ticks > 20 * 3600) {
             int h = ticks / 20 / 3600;
             return h + " h";
-        } else if (ticks > 20 * 60) {
+        }
+        if (ticks > 20 * 60) {
             int m = ticks / 20 / 60;
             return m + " m";
-        } else {
-            int s = ticks / 20;
-            int ms = (ticks % 20) / 2;
-            return s + "." + ms + " s";
         }
+        int s = ticks / 20;
+        int ms = (ticks % 20) / 2;
+        return s + "." + ms + " s";
     }
 
     @EventHandler

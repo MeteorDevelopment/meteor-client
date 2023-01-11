@@ -77,10 +77,10 @@ public class AutoWeapon extends Module {
             }
         }
         if (weapon.get() == Weapon.Sword && threshold.get() > damageA - damageS) return slotS;
-        else if (weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA) return slotA;
-        else if (weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS) return slotA;
-        else if (weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA) return slotS;
-        else return mc.player.getInventory().selectedSlot;
+        if (weapon.get() == Weapon.Axe && threshold.get() > damageS - damageA) return slotA;
+        if (weapon.get() == Weapon.Sword && threshold.get() < damageA - damageS) return slotA;
+        if (weapon.get() == Weapon.Axe && threshold.get() < damageS - damageA) return slotS;
+        return mc.player.getInventory().selectedSlot;
     }
 
     public enum Weapon {

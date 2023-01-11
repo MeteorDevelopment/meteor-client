@@ -111,7 +111,7 @@ public class AutoEat extends Module {
                         return;
                     }
                     // Otherwise change to the new slot
-                    else changeSlot(slot);
+                    changeSlot(slot);
                 }
 
                 // Continue eating

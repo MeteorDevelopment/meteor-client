@@ -103,7 +103,7 @@ public class Anchor extends Module {
         }
 
         if (wasInHole && holeX == x && holeZ == z) return;
-        else if (wasInHole) wasInHole = false;
+        if (wasInHole) wasInHole = false;
 
         if (mc.player.getPitch() < minPitch.get()) return;
 

@@ -220,6 +220,6 @@ public class EntityUtils {
 
     public static EntityGroup getGroup(Entity entity) {
         if (entity instanceof LivingEntity livingEntity) return livingEntity.getGroup();
-        else return EntityGroup.DEFAULT;
+        return EntityGroup.DEFAULT;
     }
 }

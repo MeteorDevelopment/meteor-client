@@ -36,26 +36,27 @@ public class SlotUtils {
         ScreenHandler handler = mc.player.currentScreenHandler;
 
         if (handler instanceof PlayerScreenHandler) return survivalInventory(i);
-        else if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
-        else if (handler instanceof GenericContainerScreenHandler) return genericContainer(i, ((GenericContainerScreenHandler) handler).getRows());
-        else if (handler instanceof CraftingScreenHandler) return craftingTable(i);
-        else if (handler instanceof FurnaceScreenHandler) return furnace(i);
-        else if (handler instanceof BlastFurnaceScreenHandler) return furnace(i);
-        else if (handler instanceof SmokerScreenHandler) return furnace(i);
-        else if (handler instanceof Generic3x3ContainerScreenHandler) return generic3x3(i);
-        else if (handler instanceof EnchantmentScreenHandler) return enchantmentTable(i);
-        else if (handler instanceof BrewingStandScreenHandler) return brewingStand(i);
-        else if (handler instanceof MerchantScreenHandler) return villager(i);
-        else if (handler instanceof BeaconScreenHandler) return beacon(i);
-        else if (handler instanceof AnvilScreenHandler) return anvil(i);
-        else if (handler instanceof HopperScreenHandler) return hopper(i);
-        else if (handler instanceof ShulkerBoxScreenHandler) return genericContainer(i, 3);
-        else if (handler instanceof HorseScreenHandler) return horse(handler, i);
-        else if (handler instanceof CartographyTableScreenHandler) return cartographyTable(i);
-        else if (handler instanceof GrindstoneScreenHandler) return grindstone(i);
-        else if (handler instanceof LecternScreenHandler) return lectern();
-        else if (handler instanceof LoomScreenHandler) return loom(i);
-        else if (handler instanceof StonecutterScreenHandler) return stonecutter(i);
+        if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
+        if (handler instanceof GenericContainerScreenHandler gcsHandler)
+            return genericContainer(i, gcsHandler.getRows());
+        if (handler instanceof CraftingScreenHandler) return craftingTable(i);
+        if (handler instanceof FurnaceScreenHandler) return furnace(i);
+        if (handler instanceof BlastFurnaceScreenHandler) return furnace(i);
+        if (handler instanceof SmokerScreenHandler) return furnace(i);
+        if (handler instanceof Generic3x3ContainerScreenHandler) return generic3x3(i);
+        if (handler instanceof EnchantmentScreenHandler) return enchantmentTable(i);
+        if (handler instanceof BrewingStandScreenHandler) return brewingStand(i);
+        if (handler instanceof MerchantScreenHandler) return villager(i);
+        if (handler instanceof BeaconScreenHandler) return beacon(i);
+        if (handler instanceof AnvilScreenHandler) return anvil(i);
+        if (handler instanceof HopperScreenHandler) return hopper(i);
+        if (handler instanceof ShulkerBoxScreenHandler) return genericContainer(i, 3);
+        if (handler instanceof HorseScreenHandler) return horse(handler, i);
+        if (handler instanceof CartographyTableScreenHandler) return cartographyTable(i);
+        if (handler instanceof GrindstoneScreenHandler) return grindstone(i);
+        if (handler instanceof LecternScreenHandler) return lectern();
+        if (handler instanceof LoomScreenHandler) return loom(i);
+        if (handler instanceof StonecutterScreenHandler) return stonecutter(i);
 
         return -1;
     }

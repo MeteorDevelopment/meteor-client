@@ -422,9 +422,9 @@ public class Surround extends Module {
         // Unbreakable eg. bedrock
         if (blockState.getBlock().getHardness() < 0) return BlockType.Safe;
         // Blast resistant eg. obsidian
-        else if (blockState.getBlock().getBlastResistance() >= 600) return BlockType.Normal;
+        if (blockState.getBlock().getBlastResistance() >= 600) return BlockType.Normal;
         // Anything else
-        else return BlockType.Unsafe;
+        return BlockType.Unsafe;
     }
 
     private Color getSideColor(BlockPos pos) {

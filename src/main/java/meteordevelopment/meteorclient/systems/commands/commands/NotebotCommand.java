@@ -201,38 +201,22 @@ public class NotebotCommand extends Command {
 
     private Instrument getInstrumentFromSound(SoundEvent sound) {
         String path = sound.getId().getPath();
-        if (path.contains("harp"))
-            return Instrument.HARP;
-        else if (path.contains("basedrum"))
-            return Instrument.BASEDRUM;
-        else if (path.contains("snare"))
-            return Instrument.SNARE;
-        else if (path.contains("hat"))
-            return Instrument.HAT;
-        else if (path.contains("bass"))
-            return Instrument.BASS;
-        else if (path.contains("flute"))
-            return Instrument.FLUTE;
-        else if (path.contains("bell"))
-            return Instrument.BELL;
-        else if (path.contains("guitar"))
-            return Instrument.GUITAR;
-        else if (path.contains("chime"))
-            return Instrument.CHIME;
-        else if (path.contains("xylophone"))
-            return Instrument.XYLOPHONE;
-        else if (path.contains("iron_xylophone"))
-            return Instrument.IRON_XYLOPHONE;
-        else if (path.contains("cow_bell"))
-            return Instrument.COW_BELL;
-        else if (path.contains("didgeridoo"))
-            return Instrument.DIDGERIDOO;
-        else if (path.contains("bit"))
-            return Instrument.BIT;
-        else if (path.contains("banjo"))
-            return Instrument.BANJO;
-        else if (path.contains("pling"))
-            return Instrument.PLING;
+        if (path.contains("harp")) return Instrument.HARP;
+        if (path.contains("basedrum")) return Instrument.BASEDRUM;
+        if (path.contains("snare")) return Instrument.SNARE;
+        if (path.contains("hat")) return Instrument.HAT;
+        if (path.contains("bass")) return Instrument.BASS;
+        if (path.contains("flute")) return Instrument.FLUTE;
+        if (path.contains("bell")) return Instrument.BELL;
+        if (path.contains("guitar")) return Instrument.GUITAR;
+        if (path.contains("chime")) return Instrument.CHIME;
+        if (path.contains("xylophone")) return Instrument.XYLOPHONE;
+        if (path.contains("iron_xylophone")) return Instrument.IRON_XYLOPHONE;
+        if (path.contains("cow_bell")) return Instrument.COW_BELL;
+        if (path.contains("didgeridoo")) return Instrument.DIDGERIDOO;
+        if (path.contains("bit")) return Instrument.BIT;
+        if (path.contains("banjo")) return Instrument.BANJO;
+        if (path.contains("pling")) return Instrument.PLING;
         return null;
     }
 }

@@ -28,8 +28,8 @@ public class PeekCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
             if (Utils.openContainer(mc.player.getMainHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
-            else if (Utils.openContainer(mc.player.getOffHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
-            else throw NOT_HOLDING_SHULKER_BOX.create();
+            if (Utils.openContainer(mc.player.getOffHandStack(), ITEMS, true)) return SINGLE_SUCCESS;
+            throw NOT_HOLDING_SHULKER_BOX.create();
         });
     }
 }

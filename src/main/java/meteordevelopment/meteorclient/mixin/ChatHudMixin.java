@@ -172,7 +172,8 @@ public abstract class ChatHudMixin implements IChatHud {
             RenderSystem.setShaderColor(1, 1, 1, 1);
             matrices.pop();
             return;
-        } else if (BARITONE_PREFIX_REGEX.matcher(line).find()) {
+        }
+        if (BARITONE_PREFIX_REGEX.matcher(line).find()) {
             RenderSystem.setShaderTexture(0, BARITONE_CHAT_ICON);
             matrices.push();
             RenderSystem.setShaderColor(1, 1, 1, opacity);

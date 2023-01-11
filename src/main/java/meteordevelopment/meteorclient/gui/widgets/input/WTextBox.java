@@ -204,7 +204,7 @@ public abstract class WTextBox extends WWidget {
             }
             return true;
         }
-        else if (control && key == GLFW_KEY_X) {
+        if (control && key == GLFW_KEY_X) {
             if (cursor != selectionStart || cursor != selectionEnd) {
                 mc.keyboard.setClipboard(text.substring(selectionStart, selectionEnd));
                 clearSelection();
@@ -212,21 +212,18 @@ public abstract class WTextBox extends WWidget {
 
             return true;
         }
-        else if (control && key == GLFW_KEY_A) {
+        if (control && key == GLFW_KEY_A) {
             cursor = text.length();
             selectionStart = 0;
             selectionEnd = cursor;
-        }
-        else if (mods == ((MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT) && key == GLFW_KEY_A) {
+        } else if (mods == ((MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL) | GLFW_MOD_SHIFT) && key == GLFW_KEY_A) {
             resetSelection();
-        }
-        else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
+        } else if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
             setFocused(false);
 
             if (actionOnUnfocused != null) actionOnUnfocused.run();
             return true;
-        }
-        else if (key == GLFW_KEY_TAB && completionsW != null) {
+        } else if (key == GLFW_KEY_TAB && completionsW != null) {
             String completion = ((ICompletionItem) completionsW.cells.get(getSelectedCompletion()).widget()).getCompletion();
 
             StringBuilder sb = new StringBuilder(text.length() + completion.length() + 1);
@@ -293,7 +290,7 @@ public abstract class WTextBox extends WWidget {
             if (!text.equals(preText)) runAction();
             return true;
         }
-        else if (key == GLFW_KEY_BACKSPACE) {
+        if (key == GLFW_KEY_BACKSPACE) {
             if (cursor > 0 && cursor == selectionStart && cursor == selectionEnd) {
                 String preText = text;
 
@@ -312,7 +309,7 @@ public abstract class WTextBox extends WWidget {
 
             return true;
         }
-        else if (key == GLFW_KEY_DELETE) {
+        if (key == GLFW_KEY_DELETE) {
             if (cursor < text.length()) {
                 if (cursor == selectionStart && cursor == selectionEnd) {
                     String preText = text;
@@ -331,27 +328,23 @@ public abstract class WTextBox extends WWidget {
 
             return true;
         }
-        else if (key == GLFW_KEY_LEFT) {
+        if (key == GLFW_KEY_LEFT) {
             if (cursor > 0) {
                 if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
                     cursor -= countToNextSpace(true);
                     resetSelection();
-                }
-                else if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                } else if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
                     cursor = 0;
                     resetSelection();
-                }
-                else if (altShift) {
+                } else if (altShift) {
                     if (cursor == selectionEnd && cursor != selectionStart) {
                         cursor -= countToNextSpace(true);
                         selectionEnd = cursor;
-                    }
-                    else {
+                    } else {
                         cursor -= countToNextSpace(true);
                         selectionStart = cursor;
                     }
-                }
-                else if (controlShift) {
+                } else if (controlShift) {
                     if (cursor == selectionEnd && cursor != selectionStart) selectionEnd = selectionStart;
                     selectionStart = 0;
 
@@ -362,8 +355,7 @@ public abstract class WTextBox extends WWidget {
                     else selectionStart = cursor - 1;
 
                     cursor--;
-                }
-                else {
+                } else {
                     if (cursor == selectionEnd && cursor != selectionStart) cursor = selectionStart;
                     else cursor--;
 
@@ -371,8 +363,7 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            }
-            else if (selectionStart != selectionEnd && selectionStart == 0 && mods == 0) {
+            } else if (selectionStart != selectionEnd && selectionStart == 0 && mods == 0) {
                 cursor = 0;
                 resetSelection();
                 cursorChanged();
@@ -380,27 +371,23 @@ public abstract class WTextBox extends WWidget {
 
             return true;
         }
-        else if (key == GLFW_KEY_RIGHT) {
+        if (key == GLFW_KEY_RIGHT) {
             if (cursor < text.length()) {
                 if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT)) {
                     cursor += countToNextSpace(false);
                     resetSelection();
-                }
-                else if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
+                } else if (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)) {
                     cursor = text.length();
                     resetSelection();
-                }
-                else if (altShift) {
+                } else if (altShift) {
                     if (cursor == selectionStart && cursor != selectionEnd) {
                         cursor += countToNextSpace(false);
                         selectionStart = cursor;
-                    }
-                    else {
+                    } else {
                         cursor += countToNextSpace(false);
                         selectionEnd = cursor;
                     }
-                }
-                else if (controlShift) {
+                } else if (controlShift) {
                     if (cursor == selectionStart && cursor != selectionEnd) selectionStart = selectionEnd;
                     cursor = text.length();
                     selectionEnd = cursor;
@@ -410,8 +397,7 @@ public abstract class WTextBox extends WWidget {
                     else selectionEnd = cursor + 1;
 
                     cursor++;
-                }
-                else {
+                } else {
                     if (cursor == selectionStart && cursor != selectionEnd) cursor = selectionEnd;
                     else cursor++;
 
@@ -419,8 +405,7 @@ public abstract class WTextBox extends WWidget {
                 }
 
                 cursorChanged();
-            }
-            else if (selectionStart != selectionEnd && selectionEnd == text.length() && mods == 0) {
+            } else if (selectionStart != selectionEnd && selectionEnd == text.length() && mods == 0) {
                 cursor = text.length();
                 resetSelection();
                 cursorChanged();
@@ -428,7 +413,7 @@ public abstract class WTextBox extends WWidget {
 
             return true;
         }
-        else if (key == GLFW_KEY_DOWN && completionsW != null) {
+        if (key == GLFW_KEY_DOWN && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == Math.min(5, completions.size() - 1)) {
@@ -436,15 +421,14 @@ public abstract class WTextBox extends WWidget {
                     completionsStart++;
                     createCompletions(completionsStart + currentI);
                 }
-            }
-            else {
+            } else {
                 ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
                 ((ICompletionItem) completionsW.cells.get(currentI + 1).widget()).setSelected(true);
             }
 
             return true;
         }
-        else if (key == GLFW_KEY_UP && completionsW != null) {
+        if (key == GLFW_KEY_UP && completionsW != null) {
             int currentI = getSelectedCompletion();
 
             if (currentI == 0) {
@@ -452,8 +436,7 @@ public abstract class WTextBox extends WWidget {
                     completionsStart--;
                     createCompletions(completionsStart + currentI);
                 }
-            }
-            else {
+            } else {
                 ((ICompletionItem) completionsW.cells.get(currentI).widget()).setSelected(false);
                 ((ICompletionItem) completionsW.cells.get(currentI - 1).widget()).setSelected(true);
             }
@@ -537,7 +520,7 @@ public abstract class WTextBox extends WWidget {
             if (j < 0) break;
 
             if (hadNonSpace && Character.isWhitespace(text.charAt(j))) break;
-            else if (!Character.isWhitespace(text.charAt(j))) hadNonSpace = true;
+            if (!Character.isWhitespace(text.charAt(j))) hadNonSpace = true;
 
             count++;
         }

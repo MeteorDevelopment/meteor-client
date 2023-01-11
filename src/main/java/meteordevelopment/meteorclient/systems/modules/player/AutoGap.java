@@ -144,7 +144,7 @@ public class AutoGap extends Module {
                         return;
                     }
                     // Otherwise change to the new slot
-                    else changeSlot(slot);
+                    changeSlot(slot);
                 }
 
                 // Continue eating
@@ -302,7 +302,7 @@ public class AutoGap extends Module {
                     break;
                 }
                 // If gap was found and preferEGap is false we can return the current slot
-                else if (item == Items.GOLDEN_APPLE && !preferEGap) {
+                if (item == Items.GOLDEN_APPLE && !preferEGap) {
                     slot = i;
                     currentItem = item;
 

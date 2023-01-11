@@ -304,40 +304,40 @@ public class AnchorAura extends Module {
 
     private BlockPos findPlacePos(BlockPos targetPlacePos) {
         switch (placePositions.get()) {
-            case All:
+            case All -> {
                 if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
-                else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
-                else if (isValidPlace(targetPlacePos.add(1, 0, 0))) return targetPlacePos.add(1, 0, 0);
-                else if (isValidPlace(targetPlacePos.add(-1, 0, 0))) return targetPlacePos.add(-1, 0, 0);
-                else if (isValidPlace(targetPlacePos.add(0, 0, 1))) return targetPlacePos.add(0, 0, 1);
-                else if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
-                else if (isValidPlace(targetPlacePos.add(1, 1, 0))) return targetPlacePos.add(1, 1, 0);
-                else if (isValidPlace(targetPlacePos.add(-1, -1, 0))) return targetPlacePos.add(-1, -1, 0);
-                else if (isValidPlace(targetPlacePos.add(0, 1, 1))) return targetPlacePos.add(0, 1, 1);
-                else if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
-                break;
-            case Above:
                 if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
-                break;
-            case AboveAndBelow:
+                if (isValidPlace(targetPlacePos.add(1, 0, 0))) return targetPlacePos.add(1, 0, 0);
+                if (isValidPlace(targetPlacePos.add(-1, 0, 0))) return targetPlacePos.add(-1, 0, 0);
+                if (isValidPlace(targetPlacePos.add(0, 0, 1))) return targetPlacePos.add(0, 0, 1);
+                if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
+                if (isValidPlace(targetPlacePos.add(1, 1, 0))) return targetPlacePos.add(1, 1, 0);
+                if (isValidPlace(targetPlacePos.add(-1, -1, 0))) return targetPlacePos.add(-1, -1, 0);
+                if (isValidPlace(targetPlacePos.add(0, 1, 1))) return targetPlacePos.add(0, 1, 1);
+                if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
+            }
+            case Above -> {
+                if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
+            }
+            case AboveAndBelow -> {
                 if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
-                else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
-                break;
+                if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
+            }
         }
         return null;
     }
 
     private BlockPos findBreakPos(BlockPos targetPos) {
         if (isValidBreak(targetPos.down())) return targetPos.down();
-        else if (isValidBreak(targetPos.up(2))) return targetPos.up(2);
-        else if (isValidBreak(targetPos.add(1, 0, 0))) return targetPos.add(1, 0, 0);
-        else if (isValidBreak(targetPos.add(-1, 0, 0))) return targetPos.add(-1, 0, 0);
-        else if (isValidBreak(targetPos.add(0, 0, 1))) return targetPos.add(0, 0, 1);
-        else if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
-        else if (isValidBreak(targetPos.add(1, 1, 0))) return targetPos.add(1, 1, 0);
-        else if (isValidBreak(targetPos.add(-1, -1, 0))) return targetPos.add(-1, -1, 0);
-        else if (isValidBreak(targetPos.add(0, 1, 1))) return targetPos.add(0, 1, 1);
-        else if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
+        if (isValidBreak(targetPos.up(2))) return targetPos.up(2);
+        if (isValidBreak(targetPos.add(1, 0, 0))) return targetPos.add(1, 0, 0);
+        if (isValidBreak(targetPos.add(-1, 0, 0))) return targetPos.add(-1, 0, 0);
+        if (isValidBreak(targetPos.add(0, 0, 1))) return targetPos.add(0, 0, 1);
+        if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
+        if (isValidBreak(targetPos.add(1, 1, 0))) return targetPos.add(1, 1, 0);
+        if (isValidBreak(targetPos.add(-1, -1, 0))) return targetPos.add(-1, -1, 0);
+        if (isValidBreak(targetPos.add(0, 1, 1))) return targetPos.add(0, 1, 1);
+        if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
         return null;
     }
 
