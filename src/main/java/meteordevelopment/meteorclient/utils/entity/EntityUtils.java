@@ -80,9 +80,7 @@ public class EntityUtils {
             if (state.getMaterial().blocksMovement()) break;
 
             Fluid fluid = state.getFluidState().getFluid();
-            if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
-                return true;
-            }
+            if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) return true;
 
             blockPos.move(0, -1, 0);
         }

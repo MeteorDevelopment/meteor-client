@@ -153,9 +153,7 @@ public class PacketMine extends Module {
 
         swapped = false;
 
-        if (!isMiningBlock(event.blockPos)) {
-            blocks.add(blockPool.get().set(event));
-        }
+        if (!isMiningBlock(event.blockPos)) blocks.add(blockPool.get().set(event));
     }
 
     public boolean isMiningBlock(BlockPos pos) {
@@ -195,9 +193,9 @@ public class PacketMine extends Module {
     private void onRender(Render3DEvent event) {
         if (render.get()) {
             for (MyBlock block : blocks) {
-                if (Modules.get().get(BreakIndicators.class).isActive() && Modules.get().get(BreakIndicators.class).packetMine.get() && block.mining) {
-                    continue;
-                } else block.render(event);
+                if (!(Modules.get().get(BreakIndicators.class).isActive() && Modules.get().get(BreakIndicators.class).packetMine.get() && block.mining)) {
+                    block.render(event);
+                }
             }
         }
     }
@@ -267,10 +265,7 @@ public class PacketMine extends Module {
 
                     mining = true;
                 }
-            }
-            else {
-                timer--;
-            }
+            } else timer--;
         }
 
         public void render(Render3DEvent event) {
@@ -294,9 +289,7 @@ public class PacketMine extends Module {
 
             if (isReady()) {
                 event.renderer.box(x1, y1, z1, x2, y2, z2, readySideColor.get(), readyLineColor.get(), shapeMode.get(), 0);
-            } else {
-                event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-            }
+            } else event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor.get(), lineColor.get(), shapeMode.get(), 0);
         }
     }
 }

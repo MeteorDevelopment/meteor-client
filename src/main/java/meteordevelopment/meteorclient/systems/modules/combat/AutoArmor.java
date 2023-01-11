@@ -268,9 +268,7 @@ public class AutoArmor extends Module {
             score = applyAntiBreakScore(score, itemStack);
 
             // Calculate durability
-            if (!itemStack.isEmpty()) {
-                durability = itemStack.getMaxDamage() - itemStack.getDamage();
-            }
+            if (!itemStack.isEmpty()) durability = itemStack.getMaxDamage() - itemStack.getDamage();
         }
 
         public int getSortScore() {
@@ -299,11 +297,7 @@ public class AutoArmor extends Module {
         }
 
         private int applyAntiBreakScore(int score, ItemStack itemStack) {
-            if (antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10) {
-                return -1;
-            }
-
-            return score;
+            return antiBreak.get() && itemStack.isDamageable() && itemStack.getMaxDamage() - itemStack.getDamage() <= 10 ? -1 : score;
         }
     }
 }

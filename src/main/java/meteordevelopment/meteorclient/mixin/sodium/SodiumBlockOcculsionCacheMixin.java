@@ -23,8 +23,6 @@ public class SodiumBlockOcculsionCacheMixin {
     private void shouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
         Xray xray = Modules.get().get(Xray.class);
 
-        if (xray.isActive()) {
-            info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));
-        }
+        if (xray.isActive()) info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));
     }
 }

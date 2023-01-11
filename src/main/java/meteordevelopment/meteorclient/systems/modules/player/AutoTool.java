@@ -126,9 +126,7 @@ public class AutoTool extends Module {
         if (ticks <= 0 && shouldSwitch && bestSlot != -1) {
             InvUtils.swap(bestSlot, switchBack.get());
             shouldSwitch = false;
-        } else {
-            ticks--;
-        }
+        } else ticks--;
 
         wasPressed = mc.options.attackKey.isPressed();
     }

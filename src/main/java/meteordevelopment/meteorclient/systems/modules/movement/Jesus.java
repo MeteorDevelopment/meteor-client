@@ -173,15 +173,13 @@ public class Jesus extends Module {
             else fluidHeight = mc.player.getFluidHeight(FluidTags.WATER);
 
             double swimHeight = mc.player.getSwimHeight();
+            LivingEntityAccessor accessor = (LivingEntityAccessor) mc.player;
 
-            if (mc.player.isTouchingWater() && fluidHeight > swimHeight) {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.WATER);
-            } else if (mc.player.isOnGround() && fluidHeight <= swimHeight && ((LivingEntityAccessor) mc.player).getJumpCooldown() == 0) {
+            if (mc.player.isTouchingWater() && fluidHeight > swimHeight) accessor.swimUpwards(FluidTags.WATER);
+            else if (mc.player.isOnGround() && fluidHeight <= swimHeight && accessor.getJumpCooldown() == 0) {
                 mc.player.jump();
-                ((LivingEntityAccessor) mc.player).setJumpCooldown(10);
-            } else {
-                ((LivingEntityAccessor) mc.player).swimUpwards(FluidTags.LAVA);
-            }
+                accessor.setJumpCooldown(10);
+            } else accessor.swimUpwards(FluidTags.LAVA);
         }
 
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
@@ -253,13 +251,9 @@ public class Jesus extends Module {
         double z = packet.getZ(0);
 
         // Create new packet
-        Packet<?> newPacket;
-        if (packet instanceof PlayerMoveC2SPacket.PositionAndOnGround) {
-            newPacket = new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true);
-        }
-        else {
-            newPacket = new PlayerMoveC2SPacket.Full(x, y, z, packet.getYaw(0), packet.getPitch(0), true);
-        }
+        Packet<?> newPacket = packet instanceof PlayerMoveC2SPacket.PositionAndOnGround
+            ? new PlayerMoveC2SPacket.PositionAndOnGround(x, y, z, true)
+            : new PlayerMoveC2SPacket.Full(x, y, z, packet.getYaw(0), packet.getPitch(0), true);
 
         // Send new packet
         mc.getNetworkHandler().getConnection().send(newPacket);

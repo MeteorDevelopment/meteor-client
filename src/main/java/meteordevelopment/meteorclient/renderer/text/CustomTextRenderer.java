@@ -52,9 +52,7 @@ public class CustomTextRenderer implements TextRenderer {
 
         if (!scaleOnly) mesh.begin();
 
-        if (big) {
-            this.font = fonts[fonts.length - 1];
-        }
+        if (big) this.font = fonts[fonts.length - 1];
         else {
             double scaleA = Math.floor(scale * 10) / 10;
 
@@ -103,10 +101,7 @@ public class CustomTextRenderer implements TextRenderer {
             font.render(mesh, text, x, y, color, scale);
 
             SHADOW_COLOR.a = preShadowA;
-        }
-        else {
-            width = font.render(mesh, text, x, y, color, scale);
-        }
+        } else width = font.render(mesh, text, x, y, color, scale);
 
         if (!wasBuilding) end();
         return width;

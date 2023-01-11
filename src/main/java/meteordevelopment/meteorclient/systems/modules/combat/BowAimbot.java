@@ -156,11 +156,8 @@ public class BowAimbot extends Module {
         float pitch = (float) -Math.toDegrees(Math.atan((velocitySq - Math.sqrt(velocitySq * velocitySq - g * (g * hDistanceSq + 2 * relativeY * velocitySq))) / (g * hDistance)));
 
         // Set player rotation
-        if (Float.isNaN(pitch)) {
-            Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
-        } else {
-            Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
-        }
+        if (Float.isNaN(pitch)) Rotations.rotate(Rotations.getYaw(target), Rotations.getPitch(target));
+        else Rotations.rotate(Rotations.getYaw(new Vec3d(posX, posY, posZ)), pitch);
     }
 
     @Override

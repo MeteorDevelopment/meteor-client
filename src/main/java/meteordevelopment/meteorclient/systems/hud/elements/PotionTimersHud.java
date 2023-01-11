@@ -121,9 +121,7 @@ public class PotionTimersHud extends HudElement {
         double x = this.x + border.get();
         double y = this.y + border.get();
 
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
 
         if (mc.player == null || isInEditor()) {
             renderer.text("Potion Timers 0:00", x, y, color, shadow.get(), getScale());

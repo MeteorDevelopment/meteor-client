@@ -102,26 +102,21 @@ public class ItemHud extends HudElement {
                 renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
                 renderer.line(x, y + getHeight(), x + getWidth(), y, Color.GRAY);
             }
-        }
-        else {
-            renderer.post(() -> {
-                MatrixStack matrices = RenderSystem.getModelViewStack();
+        } else renderer.post(() -> {
+            MatrixStack matrices = RenderSystem.getModelViewStack();
 
-                matrices.push();
-                matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
+            matrices.push();
+            matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
 
-                double x = this.x + border.get();
-                double y = this.y + border.get();
+            double x = this.x + border.get();
+            double y = this.y + border.get();
 
-                render(itemStack, (int) (x / scale.get()), (int) (y / scale.get()));
+            render(itemStack, (int) (x / scale.get()), (int) (y / scale.get()));
 
-                matrices.pop();
-            });
-        }
+            matrices.pop();
+        });
 
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
     }
 
     private void render(ItemStack itemStack, int x, int y) {

@@ -320,9 +320,7 @@ public class KillAura extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
-            switchTimer = switchDelay.get();
-        }
+        if (event.packet instanceof UpdateSelectedSlotC2SPacket) switchTimer = switchDelay.get();
     }
 
     private boolean shouldShieldBreak() {

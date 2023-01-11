@@ -81,12 +81,8 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
         double x = this.x + pad;
         double w = width - pad * 2;
 
-        if (theme.moduleAlignment.get() == AlignmentX.Center) {
-            x += w / 2 - titleWidth / 2;
-        }
-        else if (theme.moduleAlignment.get() == AlignmentX.Right) {
-            x += w - titleWidth;
-        }
+        if (theme.moduleAlignment.get() == AlignmentX.Center) x += w / 2 - titleWidth / 2;
+        else if (theme.moduleAlignment.get() == AlignmentX.Right) x += w - titleWidth;
 
         renderer.text(module.title, x, y + pad, theme.textColor.get(), false);
     }

@@ -498,9 +498,7 @@ public class Utils {
         if (!tag.contains("Enchantments", 9)) {
             listTag = new NbtList();
             tag.put("Enchantments", listTag);
-        } else {
-            listTag = tag.getList("Enchantments", 10);
-        }
+        } else listTag = tag.getList("Enchantments", 10);
 
         // Check if item already has the enchantment and modify the level
         String enchId = Registries.ENCHANTMENT.getId(enchantment).toString();

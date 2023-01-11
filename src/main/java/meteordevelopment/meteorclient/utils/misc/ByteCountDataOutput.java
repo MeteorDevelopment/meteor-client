@@ -97,13 +97,10 @@ public class ByteCountDataOutput implements DataOutput {
         long utflen = 0;
         for (int cpos = 0; cpos < s.length(); cpos++) {
             char c = s.charAt(cpos);
-            if (c >= 0x0001 && c <= 0x007F) {
-                utflen++;
-            } else if (c > 0x07FF) {
-                utflen += 3;
-            } else {
-                utflen += 2;
-            }
+
+            if (c >= 0x0001 && c <= 0x007F) utflen++;
+            else if (c > 0x07FF) utflen += 3;
+            else utflen += 2;
         }
         return utflen;
     }

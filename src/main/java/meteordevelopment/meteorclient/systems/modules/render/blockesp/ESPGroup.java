@@ -50,9 +50,7 @@ public class ESPGroup {
         sumZ -= block.z;
 
         if (blocks.isEmpty()) blockEsp.removeGroup(block.group);
-        else if (splitGroup) {
-            trySplit(block);
-        }
+        else if (splitGroup) trySplit(block);
     }
 
     public void remove(ESPBlock block) {

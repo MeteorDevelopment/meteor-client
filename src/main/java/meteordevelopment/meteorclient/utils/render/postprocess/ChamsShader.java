@@ -42,9 +42,7 @@ public class ChamsShader extends EntityShader {
             ByteBuffer data = null;
             for (String fileFormat : FILE_FORMATS) {
                 Optional<Resource> optional = mc.getResourceManager().getResource(new MeteorIdentifier("textures/chams." + fileFormat));
-                if (optional.isEmpty() || optional.get().getInputStream() == null) {
-                    continue;
-                }
+                if (optional.isEmpty() || optional.get().getInputStream() == null) continue;
 
                 data = TextureUtil.readResource(optional.get().getInputStream());
                 break;

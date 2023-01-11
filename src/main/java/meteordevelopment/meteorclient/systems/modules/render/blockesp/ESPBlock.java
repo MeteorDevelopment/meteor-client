@@ -80,17 +80,11 @@ public class ESPBlock {
             ESPBlock neighbour = getSideBlock(side);
             if (neighbour == null || neighbour.group == null) continue;
 
-            if (firstGroup == null) {
-                firstGroup = neighbour.group;
-            }
-            else {
-                if (firstGroup != neighbour.group) firstGroup.merge(neighbour.group);
-            }
+            if (firstGroup == null) firstGroup = neighbour.group;
+            else if (firstGroup != neighbour.group) firstGroup.merge(neighbour.group);
         }
 
-        if (firstGroup == null) {
-            firstGroup = blockEsp.newGroup(state.getBlock());
-        }
+        if (firstGroup == null) firstGroup = blockEsp.newGroup(state.getBlock());
 
         firstGroup.add(this);
     }
@@ -194,9 +188,7 @@ public class ESPBlock {
         Color lineColor = blockData.lineColor;
         Color sideColor = blockData.sideColor;
 
-        if (neighbours == 0) {
-            event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
-        }
+        if (neighbours == 0) event.renderer.box(x1, y1, z1, x2, y2, z2, sideColor, lineColor, shapeMode, 0);
         else {
             // Lines
             if (shapeMode.lines()) {
@@ -255,29 +247,17 @@ public class ESPBlock {
             // Sides
             if (shapeMode.sides()) {
                 // Bottom
-                if ((neighbours & BO) != BO) {
-                    event.renderer.quadHorizontal(x1, y1, z1, x2, z2, sideColor);
-                }
+                if ((neighbours & BO) != BO) event.renderer.quadHorizontal(x1, y1, z1, x2, z2, sideColor);
                 // Top
-                if ((neighbours & TO) != TO) {
-                    event.renderer.quadHorizontal(x1, y2, z1, x2, z2, sideColor);
-                }
+                if ((neighbours & TO) != TO) event.renderer.quadHorizontal(x1, y2, z1, x2, z2, sideColor);
                 // Front
-                if ((neighbours & FO) != FO) {
-                    event.renderer.quadVertical(x1, y1, z2, x2, y2, z2, sideColor);
-                }
+                if ((neighbours & FO) != FO) event.renderer.quadVertical(x1, y1, z2, x2, y2, z2, sideColor);
                 // Back
-                if ((neighbours & BA) != BA) {
-                    event.renderer.quadVertical(x1, y1, z1, x2, y2, z1, sideColor);
-                }
+                if ((neighbours & BA) != BA) event.renderer.quadVertical(x1, y1, z1, x2, y2, z1, sideColor);
                 // Right
-                if ((neighbours & RI) != RI) {
-                    event.renderer.quadVertical(x2, y1, z1, x2, y2, z2, sideColor);
-                }
+                if ((neighbours & RI) != RI) event.renderer.quadVertical(x2, y1, z1, x2, y2, z2, sideColor);
                 // Left
-                if ((neighbours & LE) != LE) {
-                    event.renderer.quadVertical(x1, y1, z1, x1, y2, z2, sideColor);
-                }
+                if ((neighbours & LE) != LE) event.renderer.quadVertical(x1, y1, z1, x1, y2, z2, sideColor);
             }
         }
     }

@@ -98,15 +98,12 @@ public class WBlockPosEdit extends WHorizontalList {
         if (c == '-' && text.isEmpty()) {
             good = true;
             validate = false;
-        }
-        else good = Character.isDigit(c);
+        } else good = Character.isDigit(c);
 
-        if (good && validate) {
-            try {
-                Integer.parseInt(text + c);
-            } catch (NumberFormatException ignored) {
-                good = false;
-            }
+        if (good && validate) try {
+            Integer.parseInt(text + c);
+        } catch (NumberFormatException ignored) {
+            good = false;
         }
 
         return good;
@@ -128,27 +125,21 @@ public class WBlockPosEdit extends WHorizontalList {
         textBoxX.actionOnUnfocused = () -> {
             lastValue = value;
             if (textBoxX.get().isEmpty()) set(new BlockPos(0, 0, 0));
-            else {
-                set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
-            }
+            else set(new BlockPos(Integer.parseInt(textBoxX.get()), value.getY(), value.getZ()));
             newValueCheck();
         };
 
         textBoxY.actionOnUnfocused = () -> {
             lastValue = value;
             if (textBoxY.get().isEmpty()) set(new BlockPos(0, 0, 0));
-            else {
-                set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
-            }
+            else set(new BlockPos(value.getX(), Integer.parseInt(textBoxY.get()), value.getZ()));
             newValueCheck();
         };
 
         textBoxZ.actionOnUnfocused = () -> {
             lastValue = value;
             if (textBoxZ.get().isEmpty()) set(new BlockPos(0, 0, 0));
-            else {
-                set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
-            }
+            else set(new BlockPos(value.getX(), value.getY(), Integer.parseInt(textBoxZ.get())));
             newValueCheck();
         };
     }

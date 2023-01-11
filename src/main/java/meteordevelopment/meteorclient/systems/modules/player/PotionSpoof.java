@@ -60,9 +60,7 @@ public class PotionSpoof extends Module {
                 StatusEffectInstance instance = mc.player.getStatusEffect(statusEffect);
                 ((StatusEffectInstanceAccessor) instance).setAmplifier(level - 1);
                 if (instance.getDuration() < 20) ((StatusEffectInstanceAccessor) instance).setDuration(20);
-            } else {
-                mc.player.addStatusEffect(new StatusEffectInstance(statusEffect, 20, level - 1));
-            }
+            } else mc.player.addStatusEffect(new StatusEffectInstance(statusEffect, 20, level - 1));
         }
     }
 }

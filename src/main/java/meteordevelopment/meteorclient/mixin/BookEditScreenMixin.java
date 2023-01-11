@@ -96,9 +96,7 @@ public abstract class BookEditScreenMixin extends Screen {
                             pages.add(listTag.getString(i));
                         }
 
-                        if (pages.isEmpty()) {
-                            pages.add("");
-                        }
+                        if (pages.isEmpty()) pages.add("");
 
                         currentPage = tag.getInt("currentPage");
 

@@ -103,8 +103,6 @@ public class PlayerModelHud extends HudElement {
             InventoryScreen.drawEntity((int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
         });
 
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
     }
 }

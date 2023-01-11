@@ -63,9 +63,7 @@ public abstract class System<T> implements ISerializable<T> {
         try {
             if (folder != null) file = new File(folder, file.getName());
 
-            if (file.exists()) {
-                fromTag(NbtIo.read(file));
-            }
+            if (file.exists()) fromTag(NbtIo.read(file));
         } catch (IOException e) {
             e.printStackTrace();
         }

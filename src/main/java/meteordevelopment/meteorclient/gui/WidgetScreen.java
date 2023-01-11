@@ -72,9 +72,7 @@ public abstract class WidgetScreen extends Screen {
         if (parent != null) {
             animProgress = 1;
 
-            if (this instanceof TabScreen && parent instanceof TabScreen) {
-                parent = ((TabScreen) parent).parent;
-            }
+            if (this instanceof TabScreen && parent instanceof TabScreen) parent = ((TabScreen) parent).parent;
         }
     }
 
@@ -197,12 +195,9 @@ public abstract class WidgetScreen extends Screen {
                     textBox.setCursorMax();
 
                     done.set(true);
-                }
-                else {
-                    if (textBox.isFocused()) {
-                        textBox.setFocused(false);
-                        foundFocused.set(true);
-                    }
+                } else if (textBox.isFocused()) {
+                    textBox.setFocused(false);
+                    foundFocused.set(true);
                 }
 
                 if (firstTextBox.get() == null) firstTextBox.set(textBox);
@@ -218,10 +213,8 @@ public abstract class WidgetScreen extends Screen {
 
         boolean control = MinecraftClient.IS_SYSTEM_MAC ? modifiers == GLFW_MOD_SUPER : modifiers == GLFW_MOD_CONTROL;
 
-        if (control && keyCode == GLFW_KEY_C && toClipboard()) {
-            return true;
-        }
-        else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
+        if (control && keyCode == GLFW_KEY_C && toClipboard()) return true;
+        if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
             reload();
             if (parent instanceof WidgetScreen wScreen) wScreen.reload();
             return true;
@@ -328,12 +321,10 @@ public abstract class WidgetScreen extends Screen {
                 for (Runnable action : onClosed) action.run();
             }
 
-            if (onClose) {
-                taskAfterRender = () -> {
-                    locked = true;
-                    mc.setScreen(parent);
-                };
-            }
+            if (onClose) taskAfterRender = () -> {
+                locked = true;
+                mc.setScreen(parent);
+            };
         }
     }
 

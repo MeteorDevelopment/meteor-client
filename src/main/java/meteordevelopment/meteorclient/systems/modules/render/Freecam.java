@@ -247,12 +247,8 @@ public class Freecam extends Module {
             velZ *= diagonal;
         }
 
-        if (this.up) {
-            velY += s * speedValue;
-        }
-        if (this.down) {
-            velY -= s * speedValue;
-        }
+        if (this.up) velY += s * speedValue;
+        if (this.down) velY -= s * speedValue;
 
         prevPos.set(pos);
         pos.set(pos.x + velX, pos.y + velY, pos.z + velZ);
@@ -288,10 +284,7 @@ public class Freecam extends Module {
         else if (mc.options.sneakKey.matchesKey(event.key, 0)) {
             down = event.action != KeyAction.Release;
             mc.options.sneakKey.setPressed(false);
-        }
-        else {
-            cancel = false;
-        }
+        } else cancel = false;
 
         if (cancel) event.cancel();
     }
@@ -325,10 +318,7 @@ public class Freecam extends Module {
         else if (mc.options.sneakKey.matchesMouse(event.button)) {
             down = event.action != KeyAction.Release;
             mc.options.sneakKey.setPressed(false);
-        }
-        else {
-            cancel = false;
-        }
+        } else cancel = false;
 
         if (cancel) event.cancel();
     }

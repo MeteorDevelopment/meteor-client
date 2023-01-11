@@ -84,10 +84,7 @@ public class YesNoPrompt {
 
         if (!RenderSystem.isOnRenderThread()) {
             RenderSystem.recordRenderCall(() -> mc.setScreen(new PromptScreen(theme)));
-        }
-        else {
-            mc.setScreen(new PromptScreen(theme));
-        }
+        } else mc.setScreen(new PromptScreen(theme));
     }
 
     private class PromptScreen extends WindowScreen {

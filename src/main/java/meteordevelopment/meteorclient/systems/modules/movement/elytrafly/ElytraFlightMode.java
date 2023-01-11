@@ -179,9 +179,7 @@ public class ElytraFlightMode {
                 acceleration + elytraFly.accelerationMin.get() + elytraFly.accelerationStep.get() * .1,
                 elytraFly.horizontalSpeed.get()
             );
-        } else {
-            acceleration = 0;
-        }
+        } else acceleration = 0;
     }
 
     protected double getSpeed() {

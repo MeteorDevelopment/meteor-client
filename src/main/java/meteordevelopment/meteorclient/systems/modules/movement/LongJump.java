@@ -226,10 +226,7 @@ public class LongJump extends Module {
 
                 if (airTicks - 1 >= 0 && airTicks - 1 < motion.length) {
                     mc.player.setVelocity((forward * motion[(airTicks - 1)] * 3 * cos) * glideMultiplier.get(), mc.player.getVelocity().y, (forward * motion[(airTicks - 1)] * 3 * sin) * glideMultiplier.get());
-                }
-                else {
-                    mc.player.setVelocity(0, mc.player.getVelocity().y, 0);
-                }
+                } else mc.player.setVelocity(0, mc.player.getVelocity().y, 0);
             }
             else {
                 if (autoDisable.get() && jumped) {
@@ -281,9 +278,7 @@ public class LongJump extends Module {
         double strafe = mc.player.sidewaysSpeed;
         float yaw = mc.player.getYaw();
 
-        if (!PlayerUtils.isMoving()) {
-            ((IVec3d) event.movement).setXZ(0, 0);
-        }
+        if (!PlayerUtils.isMoving()) ((IVec3d) event.movement).setXZ(0, 0);
         else {
             if (forward != 0) {
                 if (strafe > 0) yaw += ((forward > 0) ? -45 : 45);

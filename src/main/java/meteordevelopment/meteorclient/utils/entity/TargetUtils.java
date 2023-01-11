@@ -28,9 +28,7 @@ public class TargetUtils {
     public static Entity get(Predicate<Entity> isGood, SortPriority sortPriority) {
         ENTITIES.clear();
         getList(ENTITIES, isGood, sortPriority, 1);
-        if (!ENTITIES.isEmpty()) {
-            return ENTITIES.get(0);
-        }
+        if (!ENTITIES.isEmpty()) return ENTITIES.get(0);
 
         return null;
     }

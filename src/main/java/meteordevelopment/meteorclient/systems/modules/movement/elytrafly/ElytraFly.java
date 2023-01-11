@@ -285,13 +285,9 @@ public class ElytraFly extends Module {
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
             Modules.get().get(ChestSwap.class).swap();
-        } else if (chestSwap.get() == ChestSwapMode.WaitForGround) {
-            enableGroundListener();
-        }
+        } else if (chestSwap.get() == ChestSwapMode.WaitForGround) enableGroundListener();
 
-        if (mc.player.isFallFlying() && instaDrop.get()) {
-            enableInstaDropListener();
-        }
+        if (mc.player.isFallFlying() && instaDrop.get()) enableInstaDropListener();
 
         currentMode.onDeactivate();
     }
@@ -324,20 +320,18 @@ public class ElytraFly extends Module {
 
             int chunkX = (int) ((mc.player.getX() + currentMode.velX) / 16);
             int chunkZ = (int) ((mc.player.getZ() + currentMode.velZ) / 16);
+            IVec3d vector = (IVec3d) event.movement;
+
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
-                    ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
-                } else {
-                    ((IVec3d) event.movement).set(0, currentMode.velY, 0);
-                }
-            } else ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+                    vector.set(currentMode.velX, currentMode.velY, currentMode.velZ);
+                } else vector.set(0, currentMode.velY, 0);
+            } else vector.set(currentMode.velX, currentMode.velY, currentMode.velZ);
 
             currentMode.onPlayerMove();
-        } else {
-            if (currentMode.lastForwardPressed) {
-                mc.options.forwardKey.setPressed(false);
-                currentMode.lastForwardPressed = false;
-            }
+        } else if (currentMode.lastForwardPressed) {
+            mc.options.forwardKey.setPressed(false);
+            currentMode.lastForwardPressed = false;
         }
 
         if (noCrash.get() && mc.player.isFallFlying()) {
@@ -433,9 +427,7 @@ public class ElytraFly extends Module {
             if (mc.player != null && mc.player.isFallFlying()) {
                 mc.player.setVelocity(0, 0, 0);
                 mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
-            } else {
-                disableInstaDropListener();
-            }
+            } else disableInstaDropListener();
         }
     }
 

@@ -121,12 +121,9 @@ public class Blur extends Module {
                     fadeEndAt = -1;
                 }
             }
-        }
-        else {
-            if (shouldRender) {
-                enabled = true;
-                fadeEndAt = System.currentTimeMillis() + fadeTime.get();
-            }
+        } else if (shouldRender) {
+            enabled = true;
+            fadeEndAt = System.currentTimeMillis() + fadeTime.get();
         }
 
         if (!enabled) return;
@@ -151,10 +148,7 @@ public class Blur extends Module {
         if (time < fadeEndAt) {
             if (shouldRender) progress = 1 - (fadeEndAt - time) / fadeTime.get().doubleValue();
             else progress = (fadeEndAt - time) / fadeTime.get().doubleValue();
-        }
-        else {
-            fadeEndAt = -1;
-        }
+        } else fadeEndAt = -1;
 
         // Render the blur
         shader.set("u_Radius", Math.floor(radius.get() * progress));

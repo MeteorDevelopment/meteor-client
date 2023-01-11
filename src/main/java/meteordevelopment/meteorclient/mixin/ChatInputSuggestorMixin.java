@@ -49,17 +49,13 @@ public abstract class ChatInputSuggestorMixin {
             assert this.client.player != null;
             // Pretty much copy&paste from the refresh method
             CommandDispatcher<CommandSource> commandDispatcher = Commands.get().getDispatcher();
-            if (this.parse == null) {
-                this.parse = commandDispatcher.parse(reader, Commands.get().getCommandSource());
-            }
+            if (this.parse == null) this.parse = commandDispatcher.parse(reader, Commands.get().getCommandSource());
 
             int cursor = textField.getCursor();
             if (cursor >= 1 && (this.window == null || !this.completingSuggestions)) {
                 this.pendingSuggestions = commandDispatcher.getCompletionSuggestions(this.parse, cursor);
                 this.pendingSuggestions.thenRun(() -> {
-                    if (this.pendingSuggestions.isDone()) {
-                        this.showCommandSuggestions();
-                    }
+                    if (this.pendingSuggestions.isDone()) this.showCommandSuggestions();
                 });
             }
             ci.cancel();

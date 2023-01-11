@@ -193,9 +193,8 @@ public class AntiAFK extends Module {
             if (sendMessages.get() && !messages.isEmpty())
                 if (timer <= 0) {
                     int i;
-                    if (randomMessage.get()) {
-                        i = Utils.random(0, messages.size());
-                    } else {
+                    if (randomMessage.get()) i = Utils.random(0, messages.size());
+                    else {
                         if (messageI >= messages.size()) messageI = 0;
                         i = messageI++;
                     }
@@ -203,9 +202,7 @@ public class AntiAFK extends Module {
                     ChatUtils.sendPlayerMsg(messages.get(i));
 
                     timer = delay.get() * 20;
-                } else {
-                    timer--;
-                }
+                } else timer--;
 
             //Strafe
             if (strafe.get() && strafeTimer == 20) {
@@ -280,9 +277,7 @@ public class AntiAFK extends Module {
         if (tag.contains("messages")) {
             NbtList messagesTag = tag.getList("messages", 8);
             for (NbtElement messageTag : messagesTag) messages.add(messageTag.asString());
-        } else {
-            messages.add("This is an AntiAFK message. Meteor on Crack!");
-        }
+        } else messages.add("This is an AntiAFK message. Meteor on Crack!");
 
         return super.fromTag(tag);
     }

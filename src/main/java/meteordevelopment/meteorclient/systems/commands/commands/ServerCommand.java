@@ -115,9 +115,7 @@ public class ServerCommand extends Command {
 
         if (!plugins.isEmpty()) {
             info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
-        } else {
-            error("No plugins found.");
-        }
+        } else error("No plugins found.");
 
         ticks = 0;
         plugins.clear();
@@ -218,12 +216,7 @@ public class ServerCommand extends Command {
                 MeteorClient.EVENT_BUS.unsubscribe(this);
                 ticks = 0;
             }
-        }
-        else {
-            if (ticks >= 100) {
-                printPlugins();
-            }
-        }
+        } else if (ticks >= 100) printPlugins();
     }
 
     @EventHandler
@@ -241,18 +234,14 @@ public class ServerCommand extends Command {
                 for (Suggestion suggestion : matches.getList()) {
                     if (bukkitMode) {
                         String pluginName = suggestion.getText();
-                        if (!plugins.contains(pluginName)) {
-                            plugins.add(pluginName);
-                        }
+                        if (!plugins.contains(pluginName)) plugins.add(pluginName);
                     }
                     else {
                         String[] command = suggestion.getText().split(":");
                         if (command.length > 1) {
                             String pluginName = command[0].replace("/", "");
 
-                            if (!plugins.contains(pluginName)) {
-                                plugins.add(pluginName);
-                            }
+                            if (!plugins.contains(pluginName)) plugins.add(pluginName);
                         }
                     }
                 }
@@ -265,10 +254,8 @@ public class ServerCommand extends Command {
     }
 
     private String formatName(String name) {
-        if (ANTICHEAT_LIST.contains(name.toLowerCase())) {
-            return String.format("%s%s(default)", Formatting.RED, name);
-        }
-        else if (StringUtils.containsIgnoreCase(name, "exploit") || StringUtils.containsIgnoreCase(name, "cheat") || StringUtils.containsIgnoreCase(name, "illegal")) {
+        if (ANTICHEAT_LIST.contains(name.toLowerCase())) return String.format("%s%s(default)", Formatting.RED, name);
+        if (StringUtils.containsIgnoreCase(name, "exploit") || StringUtils.containsIgnoreCase(name, "cheat") || StringUtils.containsIgnoreCase(name, "illegal")) {
             return String.format("%s%s(default)", Formatting.RED, name);
         }
 

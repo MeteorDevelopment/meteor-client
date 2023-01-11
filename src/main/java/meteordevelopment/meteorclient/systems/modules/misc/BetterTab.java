@@ -102,14 +102,12 @@ public class BetterTab extends Module {
         if (gamemode.get()) {
             GameMode gm = playerListEntry.getGameMode();
             String gmText = "?";
-            if (gm != null) {
-                gmText = switch (gm) {
-                    case SPECTATOR -> "Sp";
-                    case SURVIVAL -> "S";
-                    case CREATIVE -> "C";
-                    case ADVENTURE -> "A";
-                };
-            }
+            if (gm != null) gmText = switch (gm) {
+                case SPECTATOR -> "Sp";
+                case SURVIVAL -> "S";
+                case CREATIVE -> "C";
+                case ADVENTURE -> "A";
+            };
             MutableText text = Text.literal("");
             text.append(name);
             text.append(" [" + gmText + "]");

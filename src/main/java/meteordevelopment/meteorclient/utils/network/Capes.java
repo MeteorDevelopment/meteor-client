@@ -60,9 +60,7 @@ public class Capes {
             if (lines != null) lines.forEach(s -> {
                 String[] split = s.split(" ");
 
-                if (split.length >= 2) {
-                    if (!URLS.containsKey(split[0])) URLS.put(split[0], split[1]);
-                }
+                if (split.length >= 2 && !URLS.containsKey(split[0])) URLS.put(split[0], split[1]);
             });
         });
 
@@ -132,22 +130,18 @@ public class Capes {
             MeteorExecutor.execute(() -> {
                 try {
                     String url = URLS.get(name);
-                    if (url == null) {
-                        synchronized (TO_RETRY) {
-                            TO_REMOVE.add(this);
-                            downloading = false;
-                            return;
-                        }
+                    if (url == null) synchronized (TO_RETRY) {
+                        TO_REMOVE.add(this);
+                        downloading = false;
+                        return;
                     }
 
                     InputStream in = Http.get(url).sendInputStream();
-                    if (in == null) {
-                        synchronized (TO_RETRY) {
-                            TO_RETRY.add(this);
-                            retryTimer = 10 * 20;
-                            downloading = false;
-                            return;
-                        }
+                    if (in == null) synchronized (TO_RETRY) {
+                        TO_RETRY.add(this);
+                        retryTimer = 10 * 20;
+                        downloading = false;
+                        return;
                     }
 
                     img = NativeImage.read(in);
@@ -170,9 +164,8 @@ public class Capes {
         }
 
         public boolean tick() {
-            if (retryTimer > 0) {
-                retryTimer--;
-            } else {
+            if (retryTimer > 0) retryTimer--;
+            else {
                 download();
                 return true;
             }

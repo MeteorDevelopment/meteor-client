@@ -152,9 +152,7 @@ public class Proxy implements ISerializable<Proxy> {
 
     @Override
     public Proxy fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
-        }
+        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
 
         return this;
     }

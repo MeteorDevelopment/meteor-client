@@ -38,16 +38,13 @@ public class EndermanLook extends Module {
             if (mc.player.getAbilities().creativeMode || !shouldLook()) return;
 
             Rotations.rotate(mc.player.getYaw(), 90, -75, null);
-        }
-        else {
-            for (Entity entity : mc.world.getEntities()) {
-                if (!(entity instanceof EndermanEntity enderman)) continue;
+        } else for (Entity entity : mc.world.getEntities()) {
+            if (!(entity instanceof EndermanEntity enderman)) continue;
 
-                if (enderman.isAngry() || !enderman.isAlive() || !mc.player.canSee(enderman)) continue;
+            if (enderman.isAngry() || !enderman.isAlive() || !mc.player.canSee(enderman)) continue;
 
-                Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
-                break;
-            }
+            Rotations.rotate(Rotations.getYaw(enderman), Rotations.getPitch(enderman, Target.Head), -75, null);
+            break;
         }
     }
 

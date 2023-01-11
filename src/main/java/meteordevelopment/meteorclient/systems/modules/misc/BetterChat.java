@@ -236,16 +236,12 @@ public class BetterChat extends Module {
             message = Text.literal("").append(timestamp).append(message);
         }
 
-        if (playerHeads.get()) {
-            message = Text.literal("  ").append(message);
-        }
+        if (playerHeads.get()) message = Text.literal("  ").append(message);
 
         if (antiSpam.get()) {
             Text antiSpammed = appendAntiSpam(message);
 
-            if (antiSpammed != null) {
-                message = antiSpammed;
-            }
+            if (antiSpammed != null) message = antiSpammed;
         }
 
         event.setMessage(message);

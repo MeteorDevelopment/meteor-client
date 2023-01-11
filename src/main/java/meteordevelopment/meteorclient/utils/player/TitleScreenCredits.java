@@ -45,11 +45,9 @@ public class TitleScreenCredits {
                 GithubRepo repo = credit.addon.getRepo();
                 Response res = Http.get(String.format("https://api.github.com/repos/%s/branches/%s", repo.getOwnerName(), repo.branch())).sendJson(Response.class);
 
-                if (res != null && !credit.addon.getCommit().equals(res.commit.sha)) {
-                    synchronized (credit.sections) {
-                        credit.sections.add(1, new Section("*", RED));
-                        credit.calculateWidth();
-                    }
+                if (res != null && !credit.addon.getCommit().equals(res.commit.sha)) synchronized (credit.sections) {
+                    credit.sections.add(1, new Section("*", RED));
+                    credit.calculateWidth();
                 }
             }
         });
@@ -62,9 +60,7 @@ public class TitleScreenCredits {
         credit.sections.add(new Section(" by ", GRAY));
 
         for (int i = 0; i < addon.authors.length; i++) {
-            if (i > 0) {
-                credit.sections.add(new Section(i == addon.authors.length - 1 ? " & " : ", ", GRAY));
-            }
+            if (i > 0) credit.sections.add(new Section(i == addon.authors.length - 1 ? " & " : ", ", GRAY));
 
             credit.sections.add(new Section(addon.authors[i], WHITE));
         }

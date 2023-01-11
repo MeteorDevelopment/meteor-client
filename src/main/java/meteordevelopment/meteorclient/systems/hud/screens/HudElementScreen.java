@@ -110,9 +110,7 @@ public class HudElementScreen extends WindowScreen {
     public void tick() {
         super.tick();
 
-        if (settingsC1 != null) {
-            element.settings.tick(settingsC1, theme);
-        }
+        if (settingsC1 != null) element.settings.tick(settingsC1, theme);
 
         settings.tick(settingsC2, theme);
     }

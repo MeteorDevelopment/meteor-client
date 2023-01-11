@@ -229,17 +229,11 @@ public class BedAura extends Module {
             }
         }
 
-        if (breakPos == null) {
-            placePos = findPlace(target);
-        }
+        if (breakPos == null) placePos = findPlace(target);
 
         // Place bed
-        if (timer <= 0 && placeBed(placePos)) {
-            timer = delay.get();
-        }
-        else {
-            timer--;
-        }
+        if (timer <= 0 && placeBed(placePos)) timer = delay.get();
+        else timer--;
 
         if (breakPos == null) breakPos = findBreak();
         breakBed(breakPos);

@@ -73,9 +73,7 @@ public class NotebotSongsScreen extends WindowScreen {
             table.row();
         }
 
-        if (noSongsFound.get()) {
-            table.add(theme.label("No songs found.")).expandCellX().center();
-        }
+        if (noSongsFound.get()) table.add(theme.label("No songs found.")).expandCellX().center();
     }
 
     private void addPath(Path path) {

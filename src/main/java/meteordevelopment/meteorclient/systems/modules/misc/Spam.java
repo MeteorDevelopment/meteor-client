@@ -90,9 +90,7 @@ public class Spam extends Module {
 
     @EventHandler
     private void onScreenOpen(OpenScreenEvent event) {
-        if (disableOnDisconnect.get() && event.screen instanceof DisconnectedScreen) {
-            toggle();
-        }
+        if (disableOnDisconnect.get() && event.screen instanceof DisconnectedScreen) toggle();
     }
 
     @EventHandler
@@ -106,24 +104,17 @@ public class Spam extends Module {
 
         if (timer <= 0) {
             int i;
-            if (random.get()) {
-                i = Utils.random(0, messages.get().size());
-            }
+            if (random.get()) i = Utils.random(0, messages.get().size());
             else {
                 if (messageI >= messages.get().size()) messageI = 0;
                 i = messageI++;
             }
 
             String text = messages.get().get(i);
-            if (bypass.get()) {
-                text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
-            }
+            if (bypass.get()) text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
 
             ChatUtils.sendPlayerMsg(text);
             timer = delay.get();
-        }
-        else {
-            timer--;
-        }
+        } else timer--;
     }
 }

@@ -41,10 +41,8 @@ public class PlayerEntityRendererMixin {
 
         if (chams.isActive() && chams.hand.get()) {
             Color color = chams.handColor.get();
-            modelPart.render(matrices, vertices, light, overlay, color.r/255f, color.g/255f, color.b/255f, color.a/255f);
-        } else {
-            modelPart.render(matrices, vertices, light, overlay);
-        }
+            modelPart.render(matrices, vertices, light, overlay, color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
+        } else modelPart.render(matrices, vertices, light, overlay);
     }
 
     @Redirect(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 1))
@@ -55,9 +53,7 @@ public class PlayerEntityRendererMixin {
 
         if (chams.isActive() && chams.hand.get()) {
             Color color = chams.handColor.get();
-            modelPart.render(matrices, vertices, light, overlay, color.r/255f, color.g/255f, color.b/255f, color.a/255f);
-        } else {
-            modelPart.render(matrices, vertices, light, overlay);
-        }
+            modelPart.render(matrices, vertices, light, overlay, color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
+        } else modelPart.render(matrices, vertices, light, overlay);
     }
 }

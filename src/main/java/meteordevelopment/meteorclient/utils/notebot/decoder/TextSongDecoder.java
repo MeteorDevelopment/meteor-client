@@ -56,9 +56,7 @@ public class TextSongDecoder extends SongDecoder {
             try {
                 key = Integer.parseInt(parts[0]);
                 val = Integer.parseInt(parts[1]);
-                if (parts.length > 2) {
-                    type = Integer.parseInt(parts[2]);
-                }
+                if (parts.length > 2) type = Integer.parseInt(parts[2]);
             } catch (NumberFormatException e) {
                 notebot.warning("Invalid character at line %d", lineNumber);
                 continue;

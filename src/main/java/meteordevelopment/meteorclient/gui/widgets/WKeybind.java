@@ -63,9 +63,7 @@ public class WKeybind extends WHorizontalList {
     public void reset() {
         listening = false;
         refreshLabel();
-        if (Modules.get().isBinding()) {
-            Modules.get().setModuleToBind(null);
-        }
+        if (Modules.get().isBinding()) Modules.get().setModuleToBind(null);
     }
 
     private void refreshLabel() {

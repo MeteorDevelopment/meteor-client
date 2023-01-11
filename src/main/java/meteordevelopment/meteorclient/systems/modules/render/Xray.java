@@ -133,9 +133,7 @@ public class Xray extends Module {
 
             return alpha;
         }
-        else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            return xray.opacity.get();
-        }
+        if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) return xray.opacity.get();
 
         return -1;
     }

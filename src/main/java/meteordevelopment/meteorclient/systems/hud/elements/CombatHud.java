@@ -409,17 +409,15 @@ public class CombatHud extends HudElement {
     }
 
     private ItemStack getItem(int i) {
-        if (isInEditor()) {
-            return switch (i) {
-                case 0 -> Items.END_CRYSTAL.getDefaultStack();
-                case 1 -> Items.NETHERITE_BOOTS.getDefaultStack();
-                case 2 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 3 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 4 -> Items.NETHERITE_HELMET.getDefaultStack();
-                case 5 -> Items.TOTEM_OF_UNDYING.getDefaultStack();
-                default -> ItemStack.EMPTY;
-            };
-        }
+        if (isInEditor()) return switch (i) {
+            case 0 -> Items.END_CRYSTAL.getDefaultStack();
+            case 1 -> Items.NETHERITE_BOOTS.getDefaultStack();
+            case 2 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
+            case 3 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+            case 4 -> Items.NETHERITE_HELMET.getDefaultStack();
+            case 5 -> Items.TOTEM_OF_UNDYING.getDefaultStack();
+            default -> ItemStack.EMPTY;
+        };
 
         if (playerEntity == null) return ItemStack.EMPTY;
 

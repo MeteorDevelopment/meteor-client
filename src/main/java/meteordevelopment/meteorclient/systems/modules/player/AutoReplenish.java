@@ -87,9 +87,7 @@ public class AutoReplenish extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (mc.currentScreen == null && prevHadOpenScreen) {
-            fillItems();
-        }
+        if (mc.currentScreen == null && prevHadOpenScreen) fillItems();
 
         prevHadOpenScreen = mc.currentScreen != null;
         if (mc.player.currentScreenHandler.getStacks().size() != 46 || mc.currentScreen != null) return;
@@ -108,10 +106,7 @@ public class AutoReplenish extends Module {
                 ItemStack stack = mc.player.getOffHandStack();
                 checkSlot(SlotUtils.OFFHAND, stack);
             }
-        }
-        else {
-            tickDelayLeft--;
-        }
+        } else tickDelayLeft--;
     }
 
     private void checkSlot(int slot, ItemStack stack) {
@@ -130,11 +125,7 @@ public class AutoReplenish extends Module {
                 addSlots(slot, findItem(prevStack, slot, threshold.get() - stack.getCount() + 1));
             }
             // Unstackable items
-            else {
-                if (unstackable.get()) {
-                    addSlots(slot, findItem(prevStack, slot, 1));
-                }
-            }
+            else if (unstackable.get()) addSlots(slot, findItem(prevStack, slot, 1));
         }
 
         setItem(slot, stack);

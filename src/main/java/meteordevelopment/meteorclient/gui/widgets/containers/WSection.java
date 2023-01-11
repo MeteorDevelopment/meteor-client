@@ -105,9 +105,7 @@ public abstract class WSection extends WVerticalList {
 
     @Override
     protected void renderWidget(WWidget widget, GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-        if (expanded || animProgress > 0 || widget instanceof WHeader) {
-            widget.render(renderer, mouseX, mouseY, delta);
-        }
+        if (expanded || animProgress > 0 || widget instanceof WHeader) widget.render(renderer, mouseX, mouseY, delta);
     }
 
     @Override

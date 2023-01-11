@@ -102,9 +102,8 @@ public class LiquidFiller extends Module {
         if (timer < delay.get()) {
             timer++;
             return;
-        } else {
-            timer = 0;
         }
+        timer = 0;
 
         // Find slot with a block
         FindItemResult item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
@@ -118,9 +117,7 @@ public class LiquidFiller extends Module {
 
                 PlaceIn placeIn = placeInLiquids.get();
                 if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                    if (BlockUtils.place(blockPos, item, rotate.get(), 0, true)) {
-                        BlockIterator.disableCurrent();
-                    }
+                    if (BlockUtils.place(blockPos, item, rotate.get(), 0, true)) BlockIterator.disableCurrent();
                 }
             }
         });

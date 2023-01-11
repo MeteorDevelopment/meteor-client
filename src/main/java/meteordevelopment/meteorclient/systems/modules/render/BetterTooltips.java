@@ -249,12 +249,10 @@ public class BetterTooltips extends Module {
             else if (event.itemStack.getItem().isFood()) {
                 FoodComponent food = event.itemStack.getItem().getFoodComponent();
 
-                if (food != null) {
-                    food.getStatusEffects().forEach((e) -> {
-                        StatusEffectInstance effect = e.getFirst();
-                        event.list.add(1, getStatusText(effect));
-                    });
-                }
+                if (food != null) food.getStatusEffects().forEach(e -> {
+                    StatusEffectInstance effect = e.getFirst();
+                    event.list.add(1, getStatusText(effect));
+                });
             }
         }
 
@@ -280,22 +278,20 @@ public class BetterTooltips extends Module {
         }
 
         // Item size tooltip
-        if (byteSize.get()) {
-            try {
-                event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
+        if (byteSize.get()) try {
+            event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
 
-                int byteCount = ByteCountDataOutput.INSTANCE.getCount();
-                String count;
+            int byteCount = ByteCountDataOutput.INSTANCE.getCount();
+            String count;
 
-                ByteCountDataOutput.INSTANCE.reset();
+            ByteCountDataOutput.INSTANCE.reset();
 
-                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                else count = String.format("%d bytes", byteCount);
+            if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
+            else count = String.format("%d bytes", byteCount);
 
-                event.list.add(Text.literal(count).formatted(Formatting.GRAY));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            event.list.add(Text.literal(count).formatted(Formatting.GRAY));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         // Hold to preview tooltip
@@ -381,9 +377,7 @@ public class BetterTooltips extends Module {
         NbtCompound tag = stack.getSubNbt("BlockEntityTag");
 
         if (tag != null) {
-            if (tag.contains("LootTable", 8)) {
-                tooltip.add(Text.literal("???????"));
-            }
+            if (tag.contains("LootTable", 8)) tooltip.add(Text.literal("???????"));
 
             if (tag.contains("Items", 9)) {
                 DefaultedList<ItemStack> items = DefaultedList.ofSize(27, ItemStack.EMPTY);
@@ -415,10 +409,7 @@ public class BetterTooltips extends Module {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
             text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.durationToString(effect, 1)));
-        }
-        else {
-            text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1)));
-        }
+        } else text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1)));
 
         if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
         return text.formatted(Formatting.RED);

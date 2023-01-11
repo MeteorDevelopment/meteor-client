@@ -47,9 +47,7 @@ public class InventorySorter {
         if (invalid) return true;
         if (currentActionI >= actions.size()) return true;
 
-        if (timer >= delay) {
-            timer = 0;
-        }
+        if (timer >= delay) timer = 0;
         else {
             timer++;
             return false;
@@ -208,9 +206,7 @@ public class InventorySorter {
 
         public List<MySlot> get(ItemStack itemStack) {
             for (var entry : map) {
-                if (areEqual(itemStack, entry.getLeft())) {
-                    return entry.getRight();
-                }
+                if (areEqual(itemStack, entry.getLeft())) return entry.getRight();
             }
 
             List<MySlot> list = new ArrayList<>();

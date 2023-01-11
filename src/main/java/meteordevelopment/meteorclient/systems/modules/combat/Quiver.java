@@ -178,18 +178,16 @@ public class Quiver extends Module {
         if (!charging) {
             InvUtils.move().from(arrowSlots.get(0)).to(9);
             mc.options.useKey.setPressed(true);
-        } else {
-            if (BowItem.getPullProgress(mc.player.getItemUseTime()) >= 0.12) {
-                int targetSlot = arrowSlots.get(0);
-                arrowSlots.remove(0);
+        } else if (BowItem.getPullProgress(mc.player.getItemUseTime()) >= 0.12) {
+            int targetSlot = arrowSlots.get(0);
+            arrowSlots.remove(0);
 
-                mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
-                mc.options.useKey.setPressed(false);
-                mc.interactionManager.stopUsingItem(mc.player);
-                if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);
+            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.LookAndOnGround(mc.player.getYaw(), -90, mc.player.isOnGround()));
+            mc.options.useKey.setPressed(false);
+            mc.interactionManager.stopUsingItem(mc.player);
+            if (targetSlot != 9) InvUtils.move().from(9).to(targetSlot);
 
-                timer = cooldown.get();
-            }
+            timer = cooldown.get();
         }
     }
 

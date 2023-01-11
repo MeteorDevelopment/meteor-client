@@ -75,22 +75,21 @@ public class NbtCommand extends Command {
         builder.then(literal("get").executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
-            if (stack == null) {
-                error("You must hold an item in your main hand.");
-            } else {
+            if (stack == null) error("You must hold an item in your main hand.");
+            else {
                 NbtCompound tag = stack.getNbt();
 
                 MutableText copyButton = Text.literal("NBT");
                 copyButton.setStyle(copyButton.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(
-                                ClickEvent.Action.RUN_COMMAND,
-                                this.toString("copy")
-                        ))
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                Text.literal("Copy the NBT data to your clipboard.")
-                        )));
+                    .withFormatting(Formatting.UNDERLINE)
+                    .withClickEvent(new ClickEvent(
+                        ClickEvent.Action.RUN_COMMAND,
+                        this.toString("copy")
+                    ))
+                    .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        Text.literal("Copy the NBT data to your clipboard.")
+                    )));
 
                 MutableText text = Text.literal("");
                 text.append(copyButton);
@@ -107,18 +106,17 @@ public class NbtCommand extends Command {
         builder.then(literal("copy").executes(context -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
-            if (stack == null) {
-                error("You must hold an item in your main hand.");
-            } else {
+            if (stack == null) error("You must hold an item in your main hand.");
+            else {
                 NbtCompound tag = stack.getOrCreateNbt();
                 mc.keyboard.setClipboard(tag.toString());
                 MutableText nbt = Text.literal("NBT");
                 nbt.setStyle(nbt.getStyle()
-                        .withFormatting(Formatting.UNDERLINE)
-                        .withHoverEvent(new HoverEvent(
-                                HoverEvent.Action.SHOW_TEXT,
-                                NbtHelper.toPrettyPrintedText(tag)
-                        )));
+                    .withFormatting(Formatting.UNDERLINE)
+                    .withHoverEvent(new HoverEvent(
+                        HoverEvent.Action.SHOW_TEXT,
+                        NbtHelper.toPrettyPrintedText(tag)
+                    )));
 
                 MutableText text = Text.literal("");
                 text.append(nbt);

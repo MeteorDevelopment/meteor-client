@@ -96,9 +96,8 @@ public abstract class EntityMixin {
     private void onMove(MovementType type, Vec3d movement, CallbackInfo info) {
         if ((Object) this == mc.player) {
             MeteorClient.EVENT_BUS.post(PlayerMoveEvent.get(type, movement));
-        }
-        else if ((Object) this instanceof LivingEntity) {
-            MeteorClient.EVENT_BUS.post(LivingEntityMoveEvent.get((LivingEntity) (Object) this, movement));
+        } else if ((Object) this instanceof LivingEntity livingEntity) {
+            MeteorClient.EVENT_BUS.post(LivingEntityMoveEvent.get(livingEntity, movement));
         }
     }
 

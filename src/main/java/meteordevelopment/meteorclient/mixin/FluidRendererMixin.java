@@ -30,9 +30,7 @@ public class FluidRendererMixin {
     private void onRender(BlockRenderView world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState, CallbackInfo info) {
         Ambience ambience = Modules.get().get(Ambience.class);
 
-        if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {
-            alphas.set(-2);
-        }
+        if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) alphas.set(-2);
         else {
             // Xray and Wallhack
             int alpha = Xray.getAlpha(fluidState.getBlockState(), pos);

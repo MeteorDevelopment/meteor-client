@@ -149,9 +149,7 @@ public class Burrow extends Module {
         if (automatic.get()) {
             if (instant.get()) shouldBurrow = true;
             else mc.player.jump();
-        } else {
-            info("Waiting for manual jump.");
-        }
+        } else info("Waiting for manual jump.");
     }
 
     @Override
@@ -212,9 +210,7 @@ public class Burrow extends Module {
 
         if (instant.get()) {
             mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ(), false));
-        } else {
-            mc.player.updatePosition(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ());
-        }
+        } else mc.player.updatePosition(mc.player.getX(), mc.player.getY() + rubberbandHeight.get(), mc.player.getZ());
     }
 
     private FindItemResult getItem() {

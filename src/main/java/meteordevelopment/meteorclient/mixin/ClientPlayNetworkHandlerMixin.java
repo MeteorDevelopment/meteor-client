@@ -71,9 +71,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Inject(method = "onGameJoin", at = @At("TAIL"))
     private void onGameJoinTail(GameJoinS2CPacket packet, CallbackInfo info) {
-        if (worldNotNull) {
-            MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
-        }
+        if (worldNotNull) MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
 
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
     }

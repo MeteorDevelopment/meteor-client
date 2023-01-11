@@ -79,9 +79,7 @@ public class EntityOwner extends Module {
                 Utils.set(pos, entity, event.tickDelta);
                 pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
 
-                if (NametagUtils.to2D(pos, scale.get())) {
-                    renderNametag(getOwnerName(ownerUuid));
-                }
+                if (NametagUtils.to2D(pos, scale.get())) renderNametag(getOwnerName(ownerUuid));
             }
         }
     }

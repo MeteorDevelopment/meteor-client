@@ -25,15 +25,8 @@ public abstract class AddAccountScreen extends WindowScreen {
             if (timer > 2) {
                 add.set(getNext(add));
                 timer = 0;
-            }
-            else {
-                timer++;
-            }
-        }
-
-        else if (!add.getText().equals("Add")) {
-            add.set("Add");
-        }
+            } else timer++;
+        } else if (!add.getText().equals("Add")) add.set("Add");
     }
 
     private String getNext(WButton add) {

@@ -22,8 +22,6 @@ public class ItemMixin {
     @Inject(method = "getTooltipData", at=@At("HEAD"), cancellable = true)
     private void onTooltipData(ItemStack stack, CallbackInfoReturnable<Optional<TooltipData>> cir) {
         TooltipDataEvent event = MeteorClient.EVENT_BUS.post(TooltipDataEvent.get(stack));
-        if (event.tooltipData != null) {
-            cir.setReturnValue(Optional.of(event.tooltipData));
-        }
+        if (event.tooltipData != null) cir.setReturnValue(Optional.of(event.tooltipData));
     }
 }

@@ -29,9 +29,8 @@ public class PathFinder {
 
     public PathBlock getNextPathBlock() {
         PathBlock nextBlock = new PathBlock(new BlockPos(getNextStraightPos()));
-        if (isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
-            return nextBlock;
-        } else if (!isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
+        if (isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) return nextBlock;
+        if (!isSolidFloor(nextBlock.blockPos) && isAirAbove(nextBlock.blockPos)) {
             int drop = getDrop(nextBlock.blockPos);
             if (getDrop(nextBlock.blockPos) < 3) {
                 nextBlock = new PathBlock(new BlockPos(nextBlock.blockPos.getX(), nextBlock.blockPos.getY() - drop, nextBlock.blockPos.getZ()));
@@ -137,14 +136,13 @@ public class PathFinder {
         if (target != null && mc.player != null) {
             if (!PlayerUtils.isWithin(target, 3)) {
                 if (currentPathBlock == null) currentPathBlock = getNextPathBlock();
-                if (mc.player.getPos().distanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .1)
+                if (mc.player.getPos().distanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .1) {
                     currentPathBlock = getNextPathBlock();
+                }
                 lookAtDestination(currentPathBlock);
-                if (!mc.options.forwardKey.isPressed())
-                    mc.options.forwardKey.setPressed(true);
+                if (!mc.options.forwardKey.isPressed()) mc.options.forwardKey.setPressed(true);
             } else {
-                if (mc.options.forwardKey.isPressed())
-                    mc.options.forwardKey.setPressed(false);
+                if (mc.options.forwardKey.isPressed()) mc.options.forwardKey.setPressed(false);
                 path.clear();
                 currentPathBlock = null;
             }

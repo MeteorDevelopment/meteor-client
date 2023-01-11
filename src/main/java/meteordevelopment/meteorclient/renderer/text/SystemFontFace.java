@@ -16,9 +16,7 @@ public class SystemFontFace extends FontFace {
 
     @Override
     public InputStream toStream() {
-        if (!path.toFile().exists()) {
-            throw new RuntimeException("Tried to load font that no longer exists.");
-        }
+        if (!path.toFile().exists()) throw new RuntimeException("Tried to load font that no longer exists.");
 
         InputStream in = FontUtils.stream(path.toFile());
         if (in == null) throw new RuntimeException("Failed to load font from " + path + ".");

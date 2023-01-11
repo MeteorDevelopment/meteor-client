@@ -98,9 +98,7 @@ public class FontUtils {
         if (fontInfo == null) return;
 
         FontFace fontFace = new BuiltinFontFace(fontInfo, builtin);
-        if (!addFont(fontList, fontFace)) {
-            MeteorClient.LOG.warn("Failed to load builtin font {}", fontFace);
-        }
+        if (!addFont(fontList, fontFace)) MeteorClient.LOG.warn("Failed to load builtin font {}", fontFace);
     }
 
     public static void loadSystem(List<FontFamily> fontList, File dir) {
@@ -128,9 +126,7 @@ public class FontUtils {
             if (isBuiltin) continue;
 
             FontFace fontFace = new SystemFontFace(fontInfo, file.toPath());
-            if (!addFont(fontList, fontFace)) {
-                MeteorClient.LOG.warn("Failed to load system font {}", fontFace);
-            }
+            if (!addFont(fontList, fontFace)) MeteorClient.LOG.warn("Failed to load system font {}", fontFace);
         }
     }
 

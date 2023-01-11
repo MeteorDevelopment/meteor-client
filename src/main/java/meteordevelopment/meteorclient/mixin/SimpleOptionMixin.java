@@ -34,9 +34,7 @@ public class SimpleOptionMixin<T> {
         if ((Object) this == options.getGamma() || (Object) this == options.getFov()) {
             this.value = value;
 
-            if (MinecraftClient.getInstance().isRunning()) {
-                changeCallback.accept(value);
-            }
+            if (MinecraftClient.getInstance().isRunning()) changeCallback.accept(value);
 
             info.cancel();
         }
@@ -48,8 +46,6 @@ public class SimpleOptionMixin<T> {
         GameOptions options = MinecraftClient.getInstance().options;
         if (options == null) return;
 
-        if ((Object) this == options.getGamma()) {
-            info.setReturnValue((Codec<T>) Codec.DOUBLE);
-        }
+        if ((Object) this == options.getGamma()) info.setReturnValue((Codec<T>) Codec.DOUBLE);
     }
 }

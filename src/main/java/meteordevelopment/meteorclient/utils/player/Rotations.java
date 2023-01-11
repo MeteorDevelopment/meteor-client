@@ -146,9 +146,7 @@ public class Rotations {
 
             rotations.clear();
             i = 0;
-        } else if (sentLastRotation) {
-            resetPreRotation();
-        }
+        } else if (sentLastRotation) resetPreRotation();
     }
 
     private static void resetPreRotation() {

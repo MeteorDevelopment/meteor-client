@@ -344,9 +344,7 @@ public class ColorSettingScreen extends WindowScreen {
 
         @Override
         public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-            if (dragging) {
-                dragging = false;
-            }
+            if (dragging) dragging = false;
 
             return false;
         }
@@ -354,19 +352,13 @@ public class ColorSettingScreen extends WindowScreen {
         @Override
         public void onMouseMoved(double mouseX, double mouseY, double lastMouseX, double lastMouseY) {
             if (dragging) {
-                if (mouseX >= this.x && mouseX <= this.x + width) {
-                    handleX += mouseX - lastMouseX;
-                } else {
-                    if (handleX > 0 && mouseX < this.x) handleX = 0;
-                    else if (handleX < width && mouseX > this.x + width) handleX = width;
-                }
+                if (mouseX >= this.x && mouseX <= this.x + width) handleX += mouseX - lastMouseX;
+                else if (handleX > 0 && mouseX < this.x) handleX = 0;
+                else if (handleX < width && mouseX > this.x + width) handleX = width;
 
-                if (mouseY >= this.y && mouseY <= this.y + height) {
-                    handleY += mouseY - lastMouseY;
-                } else {
-                    if (handleY > 0 && mouseY < this.y) handleY = 0;
-                    else if (handleY < height && mouseY > this.y + height) handleY = height;
-                }
+                if (mouseY >= this.y && mouseY <= this.y + height) handleY += mouseY - lastMouseY;
+                else if (handleY > 0 && mouseY < this.y) handleY = 0;
+                else if (handleY < height && mouseY > this.y + height) handleY = height;
 
                 handleMoved();
             }
@@ -461,9 +453,7 @@ public class ColorSettingScreen extends WindowScreen {
             if (calculateNow) {
                 double huePercentage = hueAngle / 360;
                 handleX = huePercentage * width;
-            } else {
-                calculateHandleXOnLayout = true;
-            }
+            } else calculateHandleXOnLayout = true;
         }
 
         @Override
@@ -553,9 +543,7 @@ public class ColorSettingScreen extends WindowScreen {
 
         @Override
         public boolean onMouseReleased(double mouseX, double mouseY, int button) {
-            if (dragging) {
-                dragging = false;
-            }
+            if (dragging) dragging = false;
 
             return mouseOver;
         }
@@ -566,10 +554,8 @@ public class ColorSettingScreen extends WindowScreen {
                 if (mouseX >= this.x && mouseX <= this.x + width) {
                     handleX += mouseX - lastMouseX;
                     handleX = Utils.clamp(handleX, 0, width);
-                } else {
-                    if (handleX > 0 && mouseX < this.x) handleX = 0;
-                    else if (handleX < width && mouseX > this.x + width) handleX = width;
-                }
+                } else if (handleX > 0 && mouseX < this.x) handleX = 0;
+                else if (handleX < width && mouseX > this.x + width) handleX = width;
 
                 calculateHueAngleFromHandleX();
                 hsvChanged();

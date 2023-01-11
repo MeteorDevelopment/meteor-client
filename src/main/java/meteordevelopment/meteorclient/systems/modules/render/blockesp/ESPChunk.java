@@ -56,9 +56,8 @@ public class ESPChunk {
     }
 
     public void update() {
-        if (blocks != null) {
-            for (ESPBlock block : blocks.values()) block.update();
-        }
+        if (blocks == null) return;
+        for (ESPBlock block : blocks.values()) block.update();
     }
 
     public void update(int x, int y, int z) {
@@ -81,9 +80,8 @@ public class ESPChunk {
     }
 
     public void render(Render3DEvent event) {
-        if (blocks != null) {
-            for (ESPBlock block : blocks.values()) block.render(event);
-        }
+        if (blocks == null) return;
+        for (ESPBlock block : blocks.values()) block.render(event);
     }
 
 

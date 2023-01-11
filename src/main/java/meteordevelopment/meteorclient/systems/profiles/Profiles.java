@@ -45,9 +45,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
 
     public Profile get(String name) {
         for (Profile profile : this) {
-            if (profile.name.get().equalsIgnoreCase(name)) {
-                return profile;
-            }
+            if (profile.name.get().equalsIgnoreCase(name)) return profile;
         }
 
         return null;
@@ -65,9 +63,7 @@ public class Profiles extends System<Profiles> implements Iterable<Profile> {
     @EventHandler
     private void onGameJoined(GameJoinedEvent event) {
         for (Profile profile : this) {
-            if (profile.loadOnJoin.get().contains(Utils.getWorldName())) {
-                profile.load();
-            }
+            if (profile.loadOnJoin.get().contains(Utils.getWorldName())) profile.load();
         }
     }
 

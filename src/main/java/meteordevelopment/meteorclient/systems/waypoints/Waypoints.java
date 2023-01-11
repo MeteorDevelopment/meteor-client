@@ -66,36 +66,28 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         }
 
         File[] files = iconsFolder.listFiles();
-        if (files == null) {
-            return;
-        }
+        if (files == null) return;
         for (File file : files) {
-            if (file.getName().endsWith(".png")) {
-                try {
-                    String name = file.getName().replace(".png", "");
-                    AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
-                    icons.put(name, texture);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+            if (file.getName().endsWith(".png")) try {
+                String name = file.getName().replace(".png", "");
+                AbstractTexture texture = new NativeImageBackedTexture(NativeImage.read(new FileInputStream(file)));
+                icons.put(name, texture);
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
 
     public boolean add(Waypoint waypoint) {
         Waypoint added = waypoints.put(waypoint.name.get().toLowerCase(Locale.ROOT), waypoint);
-        if (added != null) {
-            save();
-        }
+        if (added != null) save();
 
         return added != null;
     }
 
     public boolean remove(Waypoint waypoint) {
         Waypoint removed = waypoints.remove(waypoint.name.get().toLowerCase(Locale.ROOT));
-        if (removed != null) {
-            save();
-        }
+        if (removed != null) save();
 
         return removed != null;
     }

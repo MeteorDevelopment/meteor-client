@@ -85,9 +85,7 @@ public class AutoMend extends Module {
 
         if (itemStack.isEmpty()) return false;
 
-        if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0) {
-            return itemStack.getDamage() != 0;
-        }
+        if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0) return itemStack.getDamage() != 0;
 
         return !force.get();
     }
@@ -97,9 +95,7 @@ public class AutoMend extends Module {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (blacklist.get().contains(itemStack.getItem())) continue;
 
-            if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0 && itemStack.getDamage() > 0) {
-                return i;
-            }
+            if (EnchantmentHelper.getLevel(Enchantments.MENDING, itemStack) > 0 && itemStack.getDamage() > 0) return i;
         }
 
         return -1;

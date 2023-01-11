@@ -225,9 +225,7 @@ public class LocateCommand extends Command {
     private Vec3d findByBlockList(List<Block> blockList) {
         List<BlockPos> posList = BaritoneAPI.getProvider().getWorldScanner().scanChunkRadius(BaritoneAPI.getProvider().getPrimaryBaritone().getPlayerContext(),
                 blockList,64,10,32);
-        if (posList.isEmpty()) {
-            return null;
-        }
+        if (posList.isEmpty()) return null;
         if (posList.size() < 3) {
             warning("Only %d block(s) found. This search might be a false positive.", posList.size());
         }
@@ -236,26 +234,18 @@ public class LocateCommand extends Command {
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
-        if (event.packet instanceof EntitySpawnS2CPacket packet) {
-            if (packet.getEntityType() == EntityType.EYE_OF_ENDER) {
-                firstPosition(packet.getX(),packet.getY(),packet.getZ());
-            }
+        if (event.packet instanceof EntitySpawnS2CPacket packet && packet.getEntityType() == EntityType.EYE_OF_ENDER) {
+            firstPosition(packet.getX(), packet.getY(), packet.getZ());
         }
-        if (event.packet instanceof PlaySoundS2CPacket packet) {
-            if (packet.getSound().value() == SoundEvents.ENTITY_ENDER_EYE_DEATH) {
-                lastPosition(packet.getX(), packet.getY(), packet.getZ());
-            }
+        if (event.packet instanceof PlaySoundS2CPacket packet && packet.getSound().value() == SoundEvents.ENTITY_ENDER_EYE_DEATH) {
+            lastPosition(packet.getX(), packet.getY(), packet.getZ());
         }
     }
 
     private void firstPosition(double x, double y, double z) {
         Vec3d pos = new Vec3d(x, y, z);
-        if (this.firstStart == null) {
-            this.firstStart = pos;
-        }
-        else {
-            this.secondStart = pos;
-        }
+        if (this.firstStart == null) this.firstStart = pos;
+        else this.secondStart = pos;
     }
 
     private void lastPosition(double x, double y, double z) {

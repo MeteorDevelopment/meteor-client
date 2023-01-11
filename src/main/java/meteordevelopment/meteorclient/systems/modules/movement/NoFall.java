@@ -115,9 +115,7 @@ public class NoFall extends Module {
             if (mc.player.isFallFlying()) return;
             if (mc.player.getVelocity().y > -0.5) return;
             ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-        } else {
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
-        }
+        } else ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(true);
     }
 
     @EventHandler
@@ -168,9 +166,7 @@ public class NoFall extends Module {
                     targetPos = result.getBlockPos().up();
                     if (placedItem1 == PlacedItem.Bucket)
                         useItem(findItemResult, true, targetPos, true);
-                    else {
-                        useItem(findItemResult, placedItem1 == PlacedItem.PowderSnow, targetPos, false);
-                    }
+                    else useItem(findItemResult, placedItem1 == PlacedItem.PowderSnow, targetPos, false);
                 }
             }
 
@@ -187,19 +183,15 @@ public class NoFall extends Module {
     private void useItem(FindItemResult item, boolean placedWater, BlockPos blockPos, boolean interactItem) {
         if (!item.found()) return;
 
-        if (interactItem) {
-            Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
-                if (item.isOffhand()) {
-                    mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
-                } else {
-                    InvUtils.swap(item.slot(), true);
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                    InvUtils.swapBack();
-                }
-            });
-        } else {
-            BlockUtils.place(blockPos, item, true, 10, true);
-        }
+        if (interactItem) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
+            if (item.isOffhand()) mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
+            else {
+                InvUtils.swap(item.slot(), true);
+                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                InvUtils.swapBack();
+            }
+        });
+        else BlockUtils.place(blockPos, item, true, 10, true);
 
         this.placedWater = placedWater;
     }

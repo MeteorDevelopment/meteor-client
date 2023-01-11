@@ -43,9 +43,7 @@ public class NametagUtils {
 
     public static boolean to2D(Vector3d pos, double scale, boolean distanceScaling) {
         NametagUtils.scale = scale;
-        if (distanceScaling) {
-            NametagUtils.scale *= getScale(pos);
-        }
+        if (distanceScaling) NametagUtils.scale *= getScale(pos);
 
         vec4.set(cameraNegated.x + pos.x, cameraNegated.y + pos.y, cameraNegated.z + pos.z, 1);
 

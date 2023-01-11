@@ -40,9 +40,7 @@ public class Accounts extends System<Accounts> implements Iterable<Account<?>> {
     }
 
     public void remove(Account<?> account) {
-        if (accounts.remove(account)) {
-            save();
-        }
+        if (accounts.remove(account)) save();
     }
 
     public int size() {

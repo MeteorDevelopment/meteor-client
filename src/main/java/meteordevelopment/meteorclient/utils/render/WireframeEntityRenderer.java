@@ -149,107 +149,92 @@ public class WireframeEntityRenderer {
                         render(event.renderer, mo.rightArm);
                         render(event.renderer, mo.leftLeg);
                         render(event.renderer, mo.rightLeg);
-                    }
-                    else m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+                    } else m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
                     matrices.pop();
+                } else if (model instanceof BipedEntityModel mo) {
+                    render(event.renderer, mo.head);
+                    render(event.renderer, mo.body);
+                    render(event.renderer, mo.leftArm);
+                    render(event.renderer, mo.rightArm);
+                    render(event.renderer, mo.leftLeg);
+                    render(event.renderer, mo.rightLeg);
+                } else {
+                    m.getHeadParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+                    m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
                 }
-                else {
-                    if (model instanceof BipedEntityModel mo) {
-                        render(event.renderer, mo.head);
-                        render(event.renderer, mo.body);
-                        render(event.renderer, mo.leftArm);
-                        render(event.renderer, mo.rightArm);
-                        render(event.renderer, mo.leftLeg);
-                        render(event.renderer, mo.rightLeg);
-                    }
-                    else {
-                        m.getHeadParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
-                        m.getBodyParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
-                    }
-                }
+            } else if (model instanceof SinglePartEntityModel m) render(event.renderer, m.getPart());
+            else if (model instanceof CompositeEntityModel m) {
+                m.getParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
+            } else if (model instanceof LlamaEntityModel m) if (m.child) {
+                matrices.push();
+                matrices.scale(0.71428573F, 0.64935064F, 0.7936508F);
+                matrices.translate(0.0D, 1.3125D, 0.2199999988079071D);
+                render(event.renderer, m.head);
+                matrices.pop();
+                matrices.push();
+                matrices.scale(0.625F, 0.45454544F, 0.45454544F);
+                matrices.translate(0.0D, 2.0625D, 0.0D);
+                render(event.renderer, m.body);
+                matrices.pop();
+                matrices.push();
+                matrices.scale(0.45454544F, 0.41322312F, 0.45454544F);
+                matrices.translate(0.0D, 2.0625D, 0.0D);
+                render(event.renderer, m.rightHindLeg);
+                render(event.renderer, m.leftHindLeg);
+                render(event.renderer, m.rightFrontLeg);
+                render(event.renderer, m.leftFrontLeg);
+                render(event.renderer, m.rightChest);
+                render(event.renderer, m.leftChest);
+                matrices.pop();
+            } else {
+                render(event.renderer, m.head);
+                render(event.renderer, m.body);
+                render(event.renderer, m.rightHindLeg);
+                render(event.renderer, m.leftHindLeg);
+                render(event.renderer, m.rightFrontLeg);
+                render(event.renderer, m.leftFrontLeg);
+                render(event.renderer, m.rightChest);
+                render(event.renderer, m.leftChest);
             }
-            else {
-                if (model instanceof SinglePartEntityModel m) {
-                    render(event.renderer, m.getPart());
-                }
-                else if (model instanceof CompositeEntityModel m) {
-                    m.getParts().forEach(modelPart -> render(event.renderer, (ModelPart) modelPart));
-                }
-                else if (model instanceof LlamaEntityModel m) {
-                    if (m.child) {
-                        matrices.push();
-                        matrices.scale(0.71428573F, 0.64935064F, 0.7936508F);
-                        matrices.translate(0.0D, 1.3125D, 0.2199999988079071D);
-                        render(event.renderer, m.head);
-                        matrices.pop();
-                        matrices.push();
-                        matrices.scale(0.625F, 0.45454544F, 0.45454544F);
-                        matrices.translate(0.0D, 2.0625D, 0.0D);
-                        render(event.renderer, m.body);
-                        matrices.pop();
-                        matrices.push();
-                        matrices.scale(0.45454544F, 0.41322312F, 0.45454544F);
-                        matrices.translate(0.0D, 2.0625D, 0.0D);
-                        render(event.renderer, m.rightHindLeg);
-                        render(event.renderer, m.leftHindLeg);
-                        render(event.renderer, m.rightFrontLeg);
-                        render(event.renderer, m.leftFrontLeg);
-                        render(event.renderer, m.rightChest);
-                        render(event.renderer, m.leftChest);
-                        matrices.pop();
-                    }
-                    else {
-                        render(event.renderer, m.head);
-                        render(event.renderer, m.body);
-                        render(event.renderer, m.rightHindLeg);
-                        render(event.renderer, m.leftHindLeg);
-                        render(event.renderer, m.rightFrontLeg);
-                        render(event.renderer, m.leftFrontLeg);
-                        render(event.renderer, m.rightChest);
-                        render(event.renderer, m.leftChest);
-                    }
-                }
-                else if (model instanceof RabbitEntityModel m) {
-                    if (m.child) {
-                        matrices.push();
-                        matrices.scale(0.56666666F, 0.56666666F, 0.56666666F);
-                        matrices.translate(0.0D, 1.375D, 0.125D);
-                        render(event.renderer, m.head);
-                        render(event.renderer, m.leftEar);
-                        render(event.renderer, m.rightEar);
-                        render(event.renderer, m.nose);
-                        matrices.pop();
-                        matrices.push();
-                        matrices.scale(0.4F, 0.4F, 0.4F);
-                        matrices.translate(0.0D, 2.25D, 0.0D);
-                        render(event.renderer, m.leftHindLeg);
-                        render(event.renderer, m.rightHindLeg);
-                        render(event.renderer, m.leftHaunch);
-                        render(event.renderer, m.rightHaunch);
-                        render(event.renderer, m.body);
-                        render(event.renderer, m.leftFrontLeg);
-                        render(event.renderer, m.rightFrontLeg);
-                        render(event.renderer, m.tail);
-                        matrices.pop();
-                    }
-                    else {
-                        matrices.push();
-                        matrices.scale(0.6F, 0.6F, 0.6F);
-                        matrices.translate(0.0D, 1.0D, 0.0D);
-                        render(event.renderer, m.leftHindLeg);
-                        render(event.renderer, m.rightHindLeg);
-                        render(event.renderer, m.leftHaunch);
-                        render(event.renderer, m.rightHaunch);
-                        render(event.renderer, m.body);
-                        render(event.renderer, m.leftFrontLeg);
-                        render(event.renderer, m.rightFrontLeg);
-                        render(event.renderer, m.head);
-                        render(event.renderer, m.rightEar);
-                        render(event.renderer, m.leftEar);
-                        render(event.renderer, m.tail);
-                        render(event.renderer, m.nose);
-                        matrices.pop();
-                    }
+            else if (model instanceof RabbitEntityModel m) {
+                if (m.child) {
+                    matrices.push();
+                    matrices.scale(0.56666666F, 0.56666666F, 0.56666666F);
+                    matrices.translate(0.0D, 1.375D, 0.125D);
+                    render(event.renderer, m.head);
+                    render(event.renderer, m.leftEar);
+                    render(event.renderer, m.rightEar);
+                    render(event.renderer, m.nose);
+                    matrices.pop();
+                    matrices.push();
+                    matrices.scale(0.4F, 0.4F, 0.4F);
+                    matrices.translate(0.0D, 2.25D, 0.0D);
+                    render(event.renderer, m.leftHindLeg);
+                    render(event.renderer, m.rightHindLeg);
+                    render(event.renderer, m.leftHaunch);
+                    render(event.renderer, m.rightHaunch);
+                    render(event.renderer, m.body);
+                    render(event.renderer, m.leftFrontLeg);
+                    render(event.renderer, m.rightFrontLeg);
+                    render(event.renderer, m.tail);
+                    matrices.pop();
+                } else {
+                    matrices.push();
+                    matrices.scale(0.6F, 0.6F, 0.6F);
+                    matrices.translate(0.0D, 1.0D, 0.0D);
+                    render(event.renderer, m.leftHindLeg);
+                    render(event.renderer, m.rightHindLeg);
+                    render(event.renderer, m.leftHaunch);
+                    render(event.renderer, m.rightHaunch);
+                    render(event.renderer, m.body);
+                    render(event.renderer, m.leftFrontLeg);
+                    render(event.renderer, m.rightFrontLeg);
+                    render(event.renderer, m.head);
+                    render(event.renderer, m.rightEar);
+                    render(event.renderer, m.leftEar);
+                    render(event.renderer, m.tail);
+                    render(event.renderer, m.nose);
+                    matrices.pop();
                 }
             }
         }
@@ -363,14 +348,12 @@ public class WireframeEntityRenderer {
             pos4.mul(matrix);
 
             // Render
-            if (shapeMode.sides()) {
-                renderer.triangles.quad(
-                    renderer.triangles.vec3(offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z).color(sideColor).next(),
-                    renderer.triangles.vec3(offsetX + pos2.x, offsetY + pos2.y, offsetZ + pos2.z).color(sideColor).next(),
-                    renderer.triangles.vec3(offsetX + pos3.x, offsetY + pos3.y, offsetZ + pos3.z).color(sideColor).next(),
-                    renderer.triangles.vec3(offsetX + pos4.x, offsetY + pos4.y, offsetZ + pos4.z).color(sideColor).next()
-                );
-            }
+            if (shapeMode.sides()) renderer.triangles.quad(
+                renderer.triangles.vec3(offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z).color(sideColor).next(),
+                renderer.triangles.vec3(offsetX + pos2.x, offsetY + pos2.y, offsetZ + pos2.z).color(sideColor).next(),
+                renderer.triangles.vec3(offsetX + pos3.x, offsetY + pos3.y, offsetZ + pos3.z).color(sideColor).next(),
+                renderer.triangles.vec3(offsetX + pos4.x, offsetY + pos4.y, offsetZ + pos4.z).color(sideColor).next()
+            );
 
             if (shapeMode.lines()) {
                 renderer.line(offsetX + pos1.x, offsetY + pos1.y, offsetZ + pos1.z, offsetX + pos2.x, offsetY + pos2.y, offsetZ + pos2.z, lineColor);

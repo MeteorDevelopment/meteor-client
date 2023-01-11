@@ -123,9 +123,7 @@ public class Offhand extends Module {
             if (autoTotem.isActive()) {
                 FindItemResult totem = InvUtils.find(itemStack -> itemStack.getItem() == Items.TOTEM_OF_UNDYING, hotbar.get() ? 0 : 9, 35);
 
-                if (totem.found() && !totem.isOffhand()) {
-                    InvUtils.move().from(totem.slot()).toOffhand();
-                }
+                if (totem.found() && !totem.isOffhand()) InvUtils.move().from(totem.slot()).toOffhand();
             } else {
                 FindItemResult empty = InvUtils.find(ItemStack::isEmpty, hotbar.get() ? 0 : 9, 35);
                 if (empty.found()) InvUtils.move().fromOffhand().to(empty.slot());

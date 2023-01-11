@@ -199,9 +199,7 @@ public abstract class ChatHudMixin implements IChatHud {
         for (String part : message.split("(§.)|[^\\w]")) {
             if (part.isBlank()) continue;
             PlayerListEntry p = mc.getNetworkHandler().getPlayerListEntry(part);
-            if (p != null) {
-                return p.getSkinTexture();
-            }
+            if (p != null) return p.getSkinTexture();
         }
         return null;
     }

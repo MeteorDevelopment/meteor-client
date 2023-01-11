@@ -364,9 +364,7 @@ public class HoleFiller extends Module {
                 if (player.getZ() - player.prevZ != 0) continue;
             }
 
-            if (ignoreSafe.get()) {
-                if (isSurrounded(player)) continue;
-            }
+            if (ignoreSafe.get() && isSurrounded(player)) continue;
 
             targets.add(player);
         }
@@ -391,13 +389,11 @@ public class HoleFiller extends Module {
         testVec = player.getPos();
         if (!feet) testVec.add(0, player.getEyeHeight(mc.player.getPose()), 0);
 
-        else if (predict.get()) {
-            testVec.add(
-                player.getX() - player.prevX,
-                player.getY() - player.prevY,
-                player.getZ() - player.prevZ
-            );
-        }
+        else if (predict.get()) testVec.add(
+            player.getX() - player.prevX,
+            player.getY() - player.prevY,
+            player.getZ() - player.prevZ
+        );
 
         double i = testVec.x - (pos.getX() + 0.5);
         double j = testVec.y - (pos.getY() + ((feet) ? 1 : 0.5));

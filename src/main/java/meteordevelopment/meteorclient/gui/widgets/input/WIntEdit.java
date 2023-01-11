@@ -81,15 +81,12 @@ public class WIntEdit extends WHorizontalList {
         if (c == '-' && !text.contains("-") && textBox.cursor == 0) {
             good = true;
             validate = false;
-        }
-        else good = Character.isDigit(c);
+        } else good = Character.isDigit(c);
 
-        if (good && validate) {
-            try {
-                Integer.parseInt(text + c);
-            } catch (NumberFormatException ignored) {
-                good = false;
-            }
+        if (good && validate) try {
+            Integer.parseInt(text + c);
+        } catch (NumberFormatException ignored) {
+            good = false;
         }
 
         return good;

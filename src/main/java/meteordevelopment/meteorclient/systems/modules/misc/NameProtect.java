@@ -33,17 +33,13 @@ public class NameProtect extends Module {
     }
 
     public String replaceName(String string) {
-        if (string != null && isActive()) {
-            return string.replace(username, name.get());
-        }
+        if (string != null && isActive()) return string.replace(username, name.get());
 
         return string;
     }
 
     public String getName(String original) {
-        if (name.get().length() > 0 && isActive()) {
-            return name.get();
-        }
+        if (name.get().length() > 0 && isActive()) return name.get();
 
         return original;
     }

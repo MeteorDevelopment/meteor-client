@@ -136,10 +136,7 @@ public class HudRenderer {
             font.render(mesh, text, x, y, color, scale);
 
             CustomTextRenderer.SHADOW_COLOR.a = preShadowA;
-        }
-        else {
-            width = font.render(mesh, text, x, y, color, scale);
-        }
+        } else width = font.render(mesh, text, x, y, color, scale);
 
         return width;
     }

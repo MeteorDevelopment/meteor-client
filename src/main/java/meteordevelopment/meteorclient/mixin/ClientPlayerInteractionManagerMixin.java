@@ -64,18 +64,16 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
         ScreenHandler screenHandler = player.currentScreenHandler;
 
-        if (screenHandler instanceof PlayerScreenHandler) {
-            if (slotId >= 5 && slotId <= 8) {
-                int armorSlot = (8 - slotId) + 36;
-                if (actionType == SlotActionType.PICKUP && !screenHandler.getCursorStack().isEmpty()) {
-                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
-                    clickSlot(syncId, 17, button, SlotActionType.PICKUP, player); //inv slot <-> cursor slot
-                    clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
-                    ci.cancel();
-                } else if (actionType == SlotActionType.SWAP) {
-                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                    ci.cancel();
-                }
+        if (screenHandler instanceof PlayerScreenHandler && slotId >= 5 && slotId <= 8) {
+            int armorSlot = (8 - slotId) + 36;
+            if (actionType == SlotActionType.PICKUP && !screenHandler.getCursorStack().isEmpty()) {
+                clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
+                clickSlot(syncId, 17, button, SlotActionType.PICKUP, player); //inv slot <-> cursor slot
+                clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
+                ci.cancel();
+            } else if (actionType == SlotActionType.SWAP) {
+                clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
+                ci.cancel();
             }
         }
     }

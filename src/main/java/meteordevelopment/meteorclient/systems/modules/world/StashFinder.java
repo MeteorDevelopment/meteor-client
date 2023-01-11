@@ -192,46 +192,43 @@ public class StashFinder extends Module {
 
         // Try to load json
         File file = getJsonFile();
-        if (file.exists()) {
-            try {
-                FileReader reader = new FileReader(file);
-                chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {}.getType());
-                reader.close();
+        if (file.exists()) try {
+            FileReader reader = new FileReader(file);
+            chunks = GSON.fromJson(reader, new TypeToken<List<Chunk>>() {
+            }.getType());
+            reader.close();
 
-                for (Chunk chunk : chunks) chunk.calculatePos();
+            for (Chunk chunk : chunks) chunk.calculatePos();
 
-                loaded = true;
-            } catch (Exception ignored) {
-                if (chunks == null) chunks = new ArrayList<>();
-            }
+            loaded = true;
+        } catch (Exception ignored) {
+            if (chunks == null) chunks = new ArrayList<>();
         }
 
         // Try to load csv
         file = getCsvFile();
-        if (!loaded && file.exists()) {
-            try {
-                BufferedReader reader = new BufferedReader(new FileReader(file));
-                reader.readLine();
+        if (!loaded && file.exists()) try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            reader.readLine();
 
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] values = line.split(" ");
-                    Chunk chunk = new Chunk(new ChunkPos(Integer.parseInt(values[0]), Integer.parseInt(values[1])));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                String[] values = line.split(" ");
+                Chunk chunk = new Chunk(new ChunkPos(Integer.parseInt(values[0]), Integer.parseInt(values[1])));
 
-                    chunk.chests = Integer.parseInt(values[2]);
-                    chunk.shulkers = Integer.parseInt(values[3]);
-                    chunk.enderChests = Integer.parseInt(values[4]);
-                    chunk.furnaces = Integer.parseInt(values[5]);
-                    chunk.dispensersDroppers = Integer.parseInt(values[6]);
-                    chunk.hoppers = Integer.parseInt(values[7]);
+                chunk.chests = Integer.parseInt(values[2]);
+                chunk.shulkers = Integer.parseInt(values[3]);
+                chunk.enderChests = Integer.parseInt(values[4]);
+                chunk.furnaces = Integer.parseInt(values[5]);
+                chunk.dispensersDroppers = Integer.parseInt(values[6]);
+                chunk.hoppers = Integer.parseInt(values[7]);
 
-                    chunks.add(chunk);
-                }
-
-                reader.close();
-            } catch (Exception ignored) {
-                if (chunks == null) chunks = new ArrayList<>();
+                chunks.add(chunk);
             }
+
+            reader.close();
+        } catch (Exception ignored) {
+            if (chunks == null) chunks = new ArrayList<>();
         }
     }
 

@@ -73,11 +73,9 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     public boolean parse(String str) {
         T newValue = parseImpl(str);
 
-        if (newValue != null) {
-            if (isValueValid(newValue)) {
-                value = newValue;
-                onChanged();
-            }
+        if (newValue != null && isValueValid(newValue)) {
+            value = newValue;
+            onChanged();
         }
 
         return newValue != null;

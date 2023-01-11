@@ -206,24 +206,16 @@ public class InventoryTweaks extends Module {
     private void onKey(KeyEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(true, event.key)) {
-            if (sort()) event.cancel();
-        }
-        if (mc.options.useKey.matchesKey(event.key, 0) && armorSwap()) {
-            if (swapArmor()) event.cancel();
-        }
+        if (sortingKey.get().matches(true, event.key) && sort()) event.cancel();
+        if (mc.options.useKey.matchesKey(event.key, 0) && armorSwap() && swapArmor()) event.cancel();
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(false, event.button)) {
-            if (sort()) event.cancel();
-        }
-        if (mc.options.useKey.matchesMouse(event.button) && armorSwap()) {
-            if (swapArmor()) event.cancel();
-        }
+        if (sortingKey.get().matches(false, event.button) && sort()) event.cancel();
+        if (mc.options.useKey.matchesMouse(event.button) && armorSwap() && swapArmor()) event.cancel();
     }
 
     private boolean sort() {
@@ -340,12 +332,10 @@ public class InventoryTweaks extends Module {
             if (!handler.getSlot(i).hasStack()) continue;
 
             int sleep = getSleepTime();
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+            if (sleep > 0) try {
+                Thread.sleep(sleep);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
 
             // Exit if user closes screen

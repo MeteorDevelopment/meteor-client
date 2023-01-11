@@ -71,9 +71,7 @@ public class Macro implements ISerializable<Macro> {
             for (Script script : scripts) {
                 String message = MeteorStarscript.run(script);
 
-                if (message != null) {
-                    ChatUtils.sendPlayerMsg(message);
-                }
+                if (message != null) ChatUtils.sendPlayerMsg(message);
             }
 
             return true;
@@ -93,9 +91,7 @@ public class Macro implements ISerializable<Macro> {
 
     @Override
     public Macro fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
-        }
+        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
 
         return this;
     }

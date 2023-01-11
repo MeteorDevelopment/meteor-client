@@ -186,12 +186,8 @@ public abstract class WTextBox extends WWidget {
     public boolean onMouseReleased(double mouseX, double mouseY, int button) {
         selecting = false;
 
-        if (selectionStart < preSelectionCursor && preSelectionCursor == selectionEnd) {
-            cursor = selectionStart;
-        }
-        else if (selectionEnd > preSelectionCursor && preSelectionCursor == selectionStart) {
-            cursor = selectionEnd;
-        }
+        if (selectionStart < preSelectionCursor && preSelectionCursor == selectionEnd) cursor = selectionStart;
+        else if (selectionEnd > preSelectionCursor && preSelectionCursor == selectionStart) cursor = selectionEnd;
 
         return false;
     }
@@ -237,6 +233,7 @@ public abstract class WTextBox extends WWidget {
             String a = text.substring(0, cursor);
             sb.append(a);
 
+            //noinspection SingleStatementInBlock
             for (int i = 0; i < completion.length() - 1; i++) {
                 if (a.endsWith(completion.substring(0, completion.length() - i - 1))) {
                     completion = completion.substring(completion.length() - i - 1);
@@ -311,10 +308,7 @@ public abstract class WTextBox extends WWidget {
                 resetSelection();
 
                 if (!text.equals(preText)) runAction();
-            }
-            else if (cursor != selectionStart || cursor != selectionEnd) {
-                clearSelection();
-            }
+            } else if (cursor != selectionStart || cursor != selectionEnd) clearSelection();
 
             return true;
         }
@@ -332,10 +326,7 @@ public abstract class WTextBox extends WWidget {
                     text = text.substring(0, cursor) + text.substring(cursor + count);
 
                     if (!text.equals(preText)) runAction();
-                }
-                else {
-                    clearSelection();
-                }
+                } else clearSelection();
             }
 
             return true;
@@ -361,30 +352,20 @@ public abstract class WTextBox extends WWidget {
                     }
                 }
                 else if (controlShift) {
-                    if (cursor == selectionEnd && cursor != selectionStart) {
-                        selectionEnd = selectionStart;
-                    }
+                    if (cursor == selectionEnd && cursor != selectionStart) selectionEnd = selectionStart;
                     selectionStart = 0;
 
                     cursor = 0;
                 }
                 else if (shift) {
-                    if (cursor == selectionEnd && cursor != selectionStart) {
-                        selectionEnd = cursor - 1;
-                    }
-                    else {
-                        selectionStart = cursor - 1;
-                    }
+                    if (cursor == selectionEnd && cursor != selectionStart) selectionEnd = cursor - 1;
+                    else selectionStart = cursor - 1;
 
                     cursor--;
                 }
                 else {
-                    if (cursor == selectionEnd && cursor != selectionStart) {
-                        cursor = selectionStart;
-                    }
-                    else {
-                        cursor--;
-                    }
+                    if (cursor == selectionEnd && cursor != selectionStart) cursor = selectionStart;
+                    else cursor--;
 
                     resetSelection();
                 }
@@ -420,29 +401,19 @@ public abstract class WTextBox extends WWidget {
                     }
                 }
                 else if (controlShift) {
-                    if (cursor == selectionStart && cursor != selectionEnd) {
-                        selectionStart = selectionEnd;
-                    }
+                    if (cursor == selectionStart && cursor != selectionEnd) selectionStart = selectionEnd;
                     cursor = text.length();
                     selectionEnd = cursor;
                 }
                 else if (shift) {
-                    if (cursor == selectionStart && cursor != selectionEnd) {
-                        selectionStart = cursor + 1;
-                    }
-                    else {
-                        selectionEnd = cursor + 1;
-                    }
+                    if (cursor == selectionStart && cursor != selectionEnd) selectionStart = cursor + 1;
+                    else selectionEnd = cursor + 1;
 
                     cursor++;
                 }
                 else {
-                    if (cursor == selectionStart && cursor != selectionEnd) {
-                        cursor = selectionEnd;
-                    }
-                    else {
-                        cursor++;
-                    }
+                    if (cursor == selectionStart && cursor != selectionEnd) cursor = selectionEnd;
+                    else cursor++;
 
                     resetSelection();
                 }
@@ -527,13 +498,11 @@ public abstract class WTextBox extends WWidget {
     public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
         if (isFocused()) GuiKeyEvents.canUseKeys = false;
 
-        if (completionsW != null && focused) {
-            renderer.absolutePost(() -> {
-                renderer.beginRender();
-                completionsW.render(renderer, mouseX, mouseY, delta);
-                renderer.endRender();
-            });
-        }
+        if (completionsW != null && focused) renderer.absolutePost(() -> {
+            renderer.beginRender();
+            completionsW.render(renderer, mouseX, mouseY, delta);
+            renderer.endRender();
+        });
 
         return super.render(renderer, mouseX, mouseY, delta);
     }
@@ -597,14 +566,10 @@ public abstract class WTextBox extends WWidget {
 
     private void cursorChanged() {
         double cursor = getCursorTextWidth(-2);
-        if (cursor < textStart) {
-            textStart -= textStart - cursor;
-        }
+        if (cursor < textStart) textStart -= textStart - cursor;
 
         cursor = getCursorTextWidth(2);
-        if (cursor > textStart + maxTextWidth()) {
-            textStart += cursor - (textStart + maxTextWidth());
-        }
+        if (cursor > textStart + maxTextWidth()) textStart += cursor - (textStart + maxTextWidth());
 
         textStart = Utils.clamp(textStart, 0, Math.max(textWidth() - maxTextWidth(), 0));
 

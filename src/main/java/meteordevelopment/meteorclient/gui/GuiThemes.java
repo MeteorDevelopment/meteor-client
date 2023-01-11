@@ -33,14 +33,12 @@ public class GuiThemes {
 
     @PostInit
     public static void postInit() {
-        if (FILE.exists()) {
-            try {
-                NbtCompound tag = NbtIo.read(FILE);
+        if (FILE.exists()) try {
+            NbtCompound tag = NbtIo.read(FILE);
 
-                if (tag != null) select(tag.getString("currentTheme"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            if (tag != null) select(tag.getString("currentTheme"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
         if (theme == null) select("Meteor");
@@ -111,15 +109,13 @@ public class GuiThemes {
     // Saving
 
     private static void saveTheme() {
-        if (get() != null) {
-            try {
-                NbtCompound tag = get().toTag();
+        if (get() != null) try {
+            NbtCompound tag = get().toTag();
 
-                THEMES_FOLDER.mkdirs();
-                NbtIo.write(tag, new File(THEMES_FOLDER, get().name + ".nbt"));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            THEMES_FOLDER.mkdirs();
+            NbtIo.write(tag, new File(THEMES_FOLDER, get().name + ".nbt"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

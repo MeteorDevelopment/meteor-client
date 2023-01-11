@@ -19,9 +19,7 @@ public class NotebotUtils {
     public static Note getNoteFromNoteBlock(BlockState noteBlock, NotebotMode mode) {
         Instrument instrument = null;
         int level = noteBlock.get(NoteBlock.NOTE);
-        if (mode == NotebotMode.ExactInstruments) {
-            instrument = noteBlock.get(NoteBlock.INSTRUMENT);
-        }
+        if (mode == NotebotMode.ExactInstruments) instrument = noteBlock.get(NoteBlock.INSTRUMENT);
 
         return new Note(instrument, level);
     }
@@ -68,11 +66,7 @@ public class NotebotUtils {
         }
 
         public static OptionalInstrument fromMinecraftInstrument(Instrument instrument) {
-            if (instrument != null) {
-                return BY_MINECRAFT_INSTRUMENT.get(instrument);
-            } else {
-                return null;
-            }
+            return instrument != null ? BY_MINECRAFT_INSTRUMENT.get(instrument) : null;
         }
     }
 }

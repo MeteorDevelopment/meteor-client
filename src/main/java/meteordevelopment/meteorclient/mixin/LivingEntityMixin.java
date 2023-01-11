@@ -74,9 +74,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
     private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo info) {
-        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
-            info.cancel();
-        }
+        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) info.cancel();
     }
 
     @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
@@ -97,8 +95,6 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)
     private void isFallFlyingHook(CallbackInfoReturnable<Boolean> info) {
-        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(true);
-        }
+        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) info.setReturnValue(true);
     }
 }

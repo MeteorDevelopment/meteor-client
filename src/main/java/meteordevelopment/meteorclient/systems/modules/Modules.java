@@ -206,9 +206,7 @@ public class Modules extends System<Modules> {
 
     void removeActive(Module module) {
         synchronized (active) {
-            if (active.remove(module)) {
-                MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
-            }
+            if (active.remove(module)) MeteorClient.EVENT_BUS.post(ActiveModulesChangedEvent.get());
         }
     }
 
@@ -367,9 +365,7 @@ public class Modules extends System<Modules> {
             }
 
             return false;
-        })) {
-            getGroup(removedModule.get().category).remove(removedModule.get());
-        }
+        })) getGroup(removedModule.get().category).remove(removedModule.get());
 
         // Add the module
         moduleInstances.put(module.getClass(), module);

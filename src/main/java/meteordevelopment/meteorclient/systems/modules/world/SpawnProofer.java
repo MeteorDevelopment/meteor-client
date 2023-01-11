@@ -81,9 +81,7 @@ public class SpawnProofer extends Module {
     @EventHandler
     private void onTickPre(TickEvent.Pre event) {
         // Delay
-        if (delay.get() != 0 && ticksWaited < delay.get() - 1) {
-            return;
-        }
+        if (delay.get() != 0 && ticksWaited < delay.get() - 1) return;
 
         // Find slot
         boolean foundBlock = InvUtils.testInHotbar(itemStack -> blocks.get().contains(Block.getBlockFromItem(itemStack.getItem())));
@@ -126,31 +124,25 @@ public class SpawnProofer extends Module {
         }
 
         // Place blocks
+        // Check if light source
         if (delay.get() == 0) {
             for (BlockPos blockPos : spawns) BlockUtils.place(blockPos, block, rotate.get(), -50, false);
-        }
-        else {
-            // Check if light source
-            if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
+        } else if (isLightSource(Block.getBlockFromItem(mc.player.getInventory().getStack(block.slot()).getItem()))) {
 
-                // Find lowest light level
-                int lowestLightLevel = 16;
-                BlockPos.Mutable selectedBlockPos = spawns.get(0);
+            // Find lowest light level
+            int lowestLightLevel = 16;
+            BlockPos.Mutable selectedBlockPos = spawns.get(0);
 
-                for (BlockPos blockPos : spawns) {
-                    int lightLevel = mc.world.getLightLevel(blockPos);
-                    if (lightLevel < lowestLightLevel) {
-                        lowestLightLevel = lightLevel;
-                        selectedBlockPos.set(blockPos);
-                    }
+            for (BlockPos blockPos : spawns) {
+                int lightLevel = mc.world.getLightLevel(blockPos);
+                if (lightLevel < lowestLightLevel) {
+                    lowestLightLevel = lightLevel;
+                    selectedBlockPos.set(blockPos);
                 }
+            }
 
-                BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
-            }
-            else {
-                BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
-            }
-        }
+            BlockUtils.place(selectedBlockPos, block, rotate.get(), -50, false);
+        } else BlockUtils.place(spawns.get(0), block, rotate.get(), -50, false);
 
         ticksWaited = 0;
     }

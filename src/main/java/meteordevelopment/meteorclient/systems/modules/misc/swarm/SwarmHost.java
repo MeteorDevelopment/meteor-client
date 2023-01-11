@@ -71,9 +71,7 @@ public class SwarmHost extends Thread {
     public void sendMessage(String s) {
         MeteorExecutor.execute(() -> {
             for (SwarmConnection connection : clientConnections) {
-                if (connection != null) {
-                    connection.messageToSend = s;
-                }
+                if (connection != null) connection.messageToSend = s;
             }
         });
     }

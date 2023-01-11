@@ -42,9 +42,11 @@ public class MessageAura extends Module {
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
+        if (!(event.entity instanceof PlayerEntity playerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) {
+            return;
+        }
 
-        if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity)event.entity))) {
+        if (!ignoreFriends.get() || ignoreFriends.get() && !Friends.get().isFriend(playerEntity)) {
             ChatUtils.sendPlayerMsg("/msg " + event.entity.getEntityName() + " " + message.get());
         }
     }

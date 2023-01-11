@@ -46,10 +46,7 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
             box.xAnchor = XAnchor.Left;
             box.yAnchor = YAnchor.Top;
             box.updateAnchors();
-        }
-        else {
-            box.setPos(box.x + (x - this.x), box.y + (y - this.y));
-        }
+        } else box.setPos(box.x + (x - this.x), box.y + (y - this.y));
 
         updatePos();
     }

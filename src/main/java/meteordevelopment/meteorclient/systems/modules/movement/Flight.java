@@ -22,7 +22,7 @@ import net.minecraft.util.math.Vec3d;
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
-    
+
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The mode for Flight.")
@@ -70,7 +70,7 @@ public class Flight extends Module {
         .sliderRange(1, 20)
         .build()
     );
-    
+
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
     private boolean flip;
@@ -92,9 +92,7 @@ public class Flight extends Module {
 
     @Override
     public void onDeactivate() {
-        if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) {
-            abilitiesOff();
-        }
+        if (mode.get() == Mode.Abilities && !mc.player.isSpectator()) abilitiesOff();
     }
 
     @EventHandler
@@ -172,9 +170,7 @@ public class Flight extends Module {
             // actual check is for >= -0.03125D, but we have to do a bit more than that
             // due to the fact that it's a bigger or *equal* to, and not just a bigger than
             ((PlayerMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
-        } else {
-            lastPacketY = currentY;
-        }
+        } else lastPacketY = currentY;
     }
 
     /**
@@ -185,29 +181,25 @@ public class Flight extends Module {
         if (!(event.packet instanceof PlayerMoveC2SPacket packet) || antiKickMode.get() != AntiKickMode.Packet) return;
 
         double currentY = packet.getY(Double.MAX_VALUE);
-        if (currentY != Double.MAX_VALUE) {
-            antiKickPacket(packet, currentY);
-        } else {
+        if (currentY != Double.MAX_VALUE) antiKickPacket(packet, currentY);
+        else {
             // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
             // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
-            PlayerMoveC2SPacket fullPacket;
-            if (packet.changesLook()) {
-                fullPacket = new PlayerMoveC2SPacket.Full(
-                    mc.player.getX(),
-                    mc.player.getY(),
-                    mc.player.getZ(),
-                    packet.getYaw(0),
-                    packet.getPitch(0),
-                    packet.isOnGround()
-                );
-            } else {
-                fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
-                    mc.player.getX(),
-                    mc.player.getY(),
-                    mc.player.getZ(),
-                    packet.isOnGround()
-                );
-            }
+            PlayerMoveC2SPacket fullPacket = packet.changesLook()
+                ? new PlayerMoveC2SPacket.Full(
+                mc.player.getX(),
+                mc.player.getY(),
+                mc.player.getZ(),
+                packet.getYaw(0),
+                packet.getPitch(0),
+                packet.isOnGround()
+            )
+                : new PlayerMoveC2SPacket.PositionAndOnGround(
+                mc.player.getX(),
+                mc.player.getY(),
+                mc.player.getZ(),
+                packet.isOnGround()
+            );
             event.cancel();
             antiKickPacket(fullPacket, mc.player.getY());
             mc.getNetworkHandler().sendPacket(fullPacket);
@@ -215,9 +207,8 @@ public class Flight extends Module {
     }
 
     private boolean shouldFlyDown(double currentY, double lastY) {
-        if (currentY >= lastY) {
-            return true;
-        } else return lastY - currentY < 0.03130D;
+        if (currentY >= lastY) return true;
+        return lastY - currentY < 0.03130D;
     }
 
     private void abilitiesOff() {

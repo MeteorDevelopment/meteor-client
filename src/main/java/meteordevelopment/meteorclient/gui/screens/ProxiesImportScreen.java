@@ -75,9 +75,7 @@ public class ProxiesImportScreen extends WindowScreen {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            add(theme.label("Invalid File!"));
-        }
+        } else add(theme.label("Invalid File!"));
         add(theme.horizontalSeparator()).expandX();
         WButton btnBack = add(theme.button("Back")).expandX().widget();
         btnBack.action = this::close;

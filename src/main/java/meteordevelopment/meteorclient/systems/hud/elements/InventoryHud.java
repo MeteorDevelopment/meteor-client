@@ -77,9 +77,7 @@ public class InventoryHud extends HudElement {
         if (hasContainer) Utils.getItemsInContainerItem(container, containerItems);
         Color drawColor = hasContainer ? Utils.getShulkerColor(container) : color.get();
 
-        if (background.get() != Background.None) {
-            drawBackground(renderer, (int) x, (int) y, drawColor);
-        }
+        if (background.get() != Background.None) drawBackground(renderer, (int) x, (int) y, drawColor);
 
         if (mc.player != null) {
             for (int row = 0; row < 3; row++) {

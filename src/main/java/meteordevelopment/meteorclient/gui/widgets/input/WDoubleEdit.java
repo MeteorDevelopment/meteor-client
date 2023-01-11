@@ -91,19 +91,15 @@ public class WDoubleEdit extends WHorizontalList {
         if (c == '-' && !text.contains("-") && textBox.cursor == 0) {
             good = true;
             validate = false;
-        }
-        else if (c == '.' && !text.contains(".")) {
+        } else if (c == '.' && !text.contains(".")) {
             good = true;
             if (text.isEmpty()) validate = false;
-        }
-        else good = Character.isDigit(c);
+        } else good = Character.isDigit(c);
 
-        if (good && validate) {
-            try {
-                Double.parseDouble(text + c);
-            } catch (NumberFormatException ignored) {
-                good = false;
-            }
+        if (good && validate) try {
+            Double.parseDouble(text + c);
+        } catch (NumberFormatException ignored) {
+            good = false;
         }
 
         return good;

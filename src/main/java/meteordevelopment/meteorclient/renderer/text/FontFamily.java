@@ -28,9 +28,7 @@ public class FontFamily {
         if (type == null) return null;
 
         for (FontFace font : fonts) {
-            if (font.info.type().equals(type)) {
-                return font;
-            }
+            if (font.info.type().equals(type)) return font;
         }
 
         return null;

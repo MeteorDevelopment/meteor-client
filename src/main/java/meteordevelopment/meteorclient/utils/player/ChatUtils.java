@@ -174,9 +174,7 @@ public class ChatUtils {
                         className = element.getClassName();
                         break;
                     }
-                } else {
-                    if (element.getClassName().equals(ChatUtils.class.getName())) foundChatUtils = true;
-                }
+                } else if (element.getClassName().equals(ChatUtils.class.getName())) foundChatUtils = true;
             }
         }
 

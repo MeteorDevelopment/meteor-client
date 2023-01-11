@@ -30,13 +30,15 @@ public abstract class KeyboardMixin {
     @Inject(method = "onKey", at = @At("HEAD"), cancellable = true)
     public void onKey(long window, int key, int scancode, int action, int modifiers, CallbackInfo info) {
         if (key != GLFW.GLFW_KEY_UNKNOWN) {
-            if (client.currentScreen instanceof WidgetScreen && action == GLFW.GLFW_REPEAT) {
-                ((WidgetScreen) client.currentScreen).keyRepeated(key, modifiers);
+            if (client.currentScreen instanceof WidgetScreen widgetScreen && action == GLFW.GLFW_REPEAT) {
+                widgetScreen.keyRepeated(key, modifiers);
             }
 
             if (GuiKeyEvents.canUseKeys) {
                 Input.setKeyState(key, action != GLFW.GLFW_RELEASE);
-                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(key, modifiers, KeyAction.get(action))).isCancelled()) info.cancel();
+                if (MeteorClient.EVENT_BUS.post(KeyEvent.get(key, modifiers, KeyAction.get(action))).isCancelled()) {
+                    info.cancel();
+                }
             }
         }
     }

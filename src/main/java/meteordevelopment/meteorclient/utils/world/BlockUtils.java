@@ -72,7 +72,8 @@ public class BlockUtils {
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (findItemResult.isOffhand()) {
             return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
-        } else if (findItemResult.isHotbar()) {
+        }
+        if (findItemResult.isHotbar()) {
             return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
         }
         return false;
@@ -225,9 +226,8 @@ public class BlockUtils {
     public static float calcBlockBreakingDelta2(BlockPos blockPos, float breakSpeed) {
         BlockState state = mc.world.getBlockState(blockPos);
         float f = state.getHardness(mc.world, blockPos);
-        if (f == -1.0F) {
-            return 0.0F;
-        } else {
+        if (f == -1.0F) return 0.0F;
+        else {
             int i = mc.player.canHarvest(state) ? 30 : 100;
             return breakSpeed / f / (float) i;
         }
@@ -289,9 +289,7 @@ public class BlockUtils {
     public static double getBreakDelta(int slot, BlockState state) {
         float hardness = state.getHardness(null, null);
         if (hardness == -1) return 0;
-        else {
-            return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
-        }
+        return getBlockBreakingSpeed(slot, state) / hardness / (!state.isToolRequired() || mc.player.getInventory().main.get(slot).isSuitableFor(state) ? 30 : 100);
     }
 
     private static double getBlockBreakingSpeed(int slot, BlockState block) {
@@ -320,13 +318,9 @@ public class BlockUtils {
             speed *= k;
         }
 
-        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) {
-            speed /= 5.0F;
-        }
+        if (mc.player.isSubmergedIn(FluidTags.WATER) && !EnchantmentHelper.hasAquaAffinity(mc.player)) speed /= 5.0F;
 
-        if (!mc.player.isOnGround()) {
-            speed /= 5.0F;
-        }
+        if (!mc.player.isOnGround()) speed /= 5.0F;
 
         return speed;
     }

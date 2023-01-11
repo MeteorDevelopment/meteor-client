@@ -280,9 +280,7 @@ public class HighwayBuilder extends Module {
         super.error(message, args);
         toggle();
 
-        if (disconnectOnToggle.get()) {
-            disconnect(message, args);
-        }
+        if (disconnectOnToggle.get()) disconnect(message, args);
     }
 
     private void errorEarly(String message, Object... args) {
@@ -841,9 +839,7 @@ public class HighwayBuilder extends Module {
 
             // Stop if no items were found and are required
             if (slot == -1) {
-                if (required) {
-                    b.error("Out of items.");
-                }
+                if (required) b.error("Out of items.");
 
                 return -1;
             }
@@ -899,9 +895,7 @@ public class HighwayBuilder extends Module {
             int slot = findAndMoveToHotbar(b, itemStack -> itemStack.getItem() instanceof BlockItem blockItem && b.blocksToPlace.get().contains(blockItem.getBlock()), false);
 
             if (slot == -1) {
-                if (!b.mineEnderChests.get()) {
-                    b.error("Out of blocks to place.");
-                }
+                if (!b.mineEnderChests.get()) b.error("Out of blocks to place.");
                 else {
                     if (hasItem(b, Items.ENDER_CHEST)) b.setState(MineEnderChests);
                     else b.error("Out of blocks to place.");

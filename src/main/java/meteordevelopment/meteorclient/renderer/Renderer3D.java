@@ -143,9 +143,7 @@ public class Renderer3D {
             lines.line(i4, i1);
         }
 
-        if (mode.sides()) {
-            quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, sideColor);
-        }
+        if (mode.sides()) quad(x1, y1, z1, x2, y2, z2, x3, y3, z3, x4, y4, z4, sideColor);
     }
 
     public void sideVertical(double x1, double y1, double z1, double x2, double y2, double z2, Color sideColor, Color lineColor, ShapeMode mode) {

@@ -86,9 +86,7 @@ public class NotebotCommand extends Command {
                 argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
                     Notebot notebot = Modules.get().get(Notebot.class);
                     Path songPath = ctx.getArgument("song", Path.class);
-                    if (songPath == null || !songPath.toFile().exists()) {
-                        throw INVALID_SONG.create();
-                    }
+                    if (songPath == null || !songPath.toFile().exists()) throw INVALID_SONG.create();
                     notebot.loadSong(songPath.toFile());
                     return SINGLE_SUCCESS;
                 })
@@ -100,9 +98,7 @@ public class NotebotCommand extends Command {
                 argument("song", NotebotSongArgumentType.create()).executes(ctx -> {
                     Notebot notebot = Modules.get().get(Notebot.class);
                     Path songPath = ctx.getArgument("song", Path.class);
-                    if (songPath == null || !songPath.toFile().exists()) {
-                        throw INVALID_SONG.create();
-                    }
+                    if (songPath == null || !songPath.toFile().exists()) throw INVALID_SONG.create();
                     notebot.previewSong(songPath.toFile());
                     return SINGLE_SUCCESS;
         })));
@@ -123,9 +119,7 @@ public class NotebotCommand extends Command {
 
         builder.then(literal("record").then(literal("save").then(argument("name", StringArgumentType.greedyString()).executes(ctx -> {
             String name = ctx.getArgument("name", String.class);
-            if (name == null || name.equals("")) {
-                throw INVALID_SONG.create();
-            }
+            if (name == null || name.equals("")) throw INVALID_SONG.create();
             Path path = MeteorClient.FOLDER.toPath().resolve(String.format("notebot/%s.txt", name));
             saveRecording(path);
             return SINGLE_SUCCESS;
@@ -144,9 +138,7 @@ public class NotebotCommand extends Command {
             if (ticks == -1) ticks = 0;
             List<Note> notes = song.computeIfAbsent(ticks, tick -> new ArrayList<>());
             var note = getNote(sound);
-            if (note != null) {
-                notes.add(note);
-            }
+            if (note != null) notes.add(note);
         }
     }
 

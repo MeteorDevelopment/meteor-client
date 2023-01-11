@@ -46,9 +46,7 @@ public class PlayerUtils {
     private static final Color color = new Color();
 
     public static Color getPlayerColor(PlayerEntity entity, Color defaultColor) {
-        if (Friends.get().isFriend(entity)) {
-            return color.set(Config.get().friendColor.get()).a(defaultColor.a);
-        }
+        if (Friends.get().isFriend(entity)) return color.set(Config.get().friendColor.get()).a(defaultColor.a);
 
         if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor.get()) {
             return color.set(color).a(defaultColor.a);
@@ -171,9 +169,7 @@ public class PlayerUtils {
 
                     BlockState blockState1 = mc.world.getBlockState(blockPos.offset(direction).offset(dir));
 
-                    if (blockState1.getBlock().getBlastResistance() < 600) {
-                        return false;
-                    }
+                    if (blockState1.getBlock().getBlastResistance() < 600) return false;
                 }
             }
         }
@@ -195,10 +191,10 @@ public class PlayerUtils {
                     damageTaken = DamageUtils.crystalDamage(mc.player, entity.getPos());
                 }
                 // Check for players holding swords
-                else if (entity instanceof PlayerEntity && damageTaken < DamageUtils.getSwordDamage((PlayerEntity) entity, true)) {
-                    if (!Friends.get().isFriend((PlayerEntity) entity) && isWithin(entity, 5)) {
-                        if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
-                            damageTaken = DamageUtils.getSwordDamage((PlayerEntity) entity, true);
+                else if (entity instanceof PlayerEntity playerEntity && damageTaken < DamageUtils.getSwordDamage(playerEntity, true)) {
+                    if (!Friends.get().isFriend(playerEntity) && isWithin(entity, 5)) {
+                        if ((playerEntity).getActiveItem().getItem() instanceof SwordItem) {
+                            damageTaken = DamageUtils.getSwordDamage(playerEntity, true);
                         }
                     }
                 }
@@ -222,9 +218,7 @@ public class PlayerUtils {
             if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
                 double damage = mc.player.fallDistance * 0.5;
 
-                if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
-                    damageTaken = damage;
-                }
+                if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) damageTaken = damage;
             }
         }
 

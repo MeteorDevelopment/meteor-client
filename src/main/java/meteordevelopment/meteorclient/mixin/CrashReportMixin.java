@@ -26,9 +26,7 @@ public class CrashReportMixin {
     private void onAddStackTrace(StringBuilder sb, CallbackInfo info) {
         sb.append("\n\n-- Meteor Client --\n\n");
         sb.append("Version: ").append(MeteorClient.VERSION).append("\n");
-        if (!MeteorClient.DEV_BUILD.isEmpty()) {
-            sb.append("Dev Build: ").append(MeteorClient.DEV_BUILD).append("\n");
-        }
+        if (!MeteorClient.DEV_BUILD.isEmpty()) sb.append("Dev Build: ").append(MeteorClient.DEV_BUILD).append("\n");
 
         if (Modules.get() != null) {
             boolean modulesActive = false;
@@ -71,14 +69,12 @@ public class CrashReportMixin {
                 if (!(element instanceof TextHud textHud)) sb.append(element.info.name).append("\n");
                 else {
                     sb.append("Text\n{")
-                      .append(textHud.text.get())
-                      .append("}\n");
-                    if (textHud.shown.get() != TextHud.Shown.Always) {
-                        sb.append("(")
-                          .append(textHud.shown.get())
-                          .append(textHud.condition.get())
-                          .append(")\n");
-                    }
+                        .append(textHud.text.get())
+                        .append("}\n");
+                    if (textHud.shown.get() != TextHud.Shown.Always) sb.append("(")
+                        .append(textHud.shown.get())
+                        .append(textHud.condition.get())
+                        .append(")\n");
                 }
             }
         }

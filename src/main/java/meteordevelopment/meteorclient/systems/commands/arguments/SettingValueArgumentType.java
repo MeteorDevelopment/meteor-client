@@ -44,9 +44,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
         }
 
         Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();
-        if (identifiers != null) {
-            return CommandSource.suggestIdentifiers(identifiers, builder);
-        }
+        if (identifiers != null) return CommandSource.suggestIdentifiers(identifiers, builder);
 
         return CommandSource.suggestMatching(setting.getSuggestions(), builder);
     }

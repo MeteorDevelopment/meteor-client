@@ -49,9 +49,7 @@ public class Strafe extends SpeedMode {
         speed = Math.max(speed, getDefaultSpeed());
 
         if (settings.ncpSpeedLimit.get()) {
-            if (System.currentTimeMillis() - timer > 2500L) {
-                timer = System.currentTimeMillis();
-            }
+            if (System.currentTimeMillis() - timer > 2500L) timer = System.currentTimeMillis();
 
             speed = Math.min(speed, System.currentTimeMillis() - timer > 1250L ? 0.44D : 0.43D);
         }

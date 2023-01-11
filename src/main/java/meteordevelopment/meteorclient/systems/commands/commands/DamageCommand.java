@@ -31,9 +31,7 @@ public class DamageCommand extends Command {
         builder.then(argument("damage", IntegerArgumentType.integer(1, 7)).executes(context -> {
             int amount = IntegerArgumentType.getInteger(context, "damage");
 
-            if (mc.player.getAbilities().invulnerable) {
-                throw INVULNERABLE.create();
-            }
+            if (mc.player.getAbilities().invulnerable) throw INVULNERABLE.create();
 
             damagePlayer(amount);
             return SINGLE_SUCCESS;

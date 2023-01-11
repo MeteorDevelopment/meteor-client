@@ -239,40 +239,40 @@ public class DiscordPresence extends Module {
 
                 line2Ticks = 0;
             } else line2Ticks++;
-        }
-        else {
-            if (!lastWasInMainMenu) {
-                rpc.setDetails("Meteor Client " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD));
+        } else if (!lastWasInMainMenu) {
+            rpc.setDetails("Meteor Client " + (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD));
 
-                if (mc.currentScreen instanceof TitleScreen) rpc.setState("Looking at title screen");
-                else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Selecting world");
-                else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen) rpc.setState("Creating world");
-                else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
-                else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
-                else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
-                else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
-                else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen) rpc.setState("Connecting to server");
-                else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
-                else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen) rpc.setState("Changing options");
-                else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Reading credits");
-                else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
-                else {
-                    boolean setState = false;
-                    if (mc.currentScreen != null) {
-                        String className = mc.currentScreen.getClass().getName();
-                        for (var pair : customStates) {
-                            if (className.startsWith(pair.getLeft())) {
-                                rpc.setState(pair.getRight());
-                                setState = true;
-                                break;
-                            }
+            if (mc.currentScreen instanceof TitleScreen) rpc.setState("Looking at title screen");
+            else if (mc.currentScreen instanceof SelectWorldScreen) rpc.setState("Selecting world");
+            else if (mc.currentScreen instanceof CreateWorldScreen || mc.currentScreen instanceof EditGameRulesScreen)
+                rpc.setState("Creating world");
+            else if (mc.currentScreen instanceof EditWorldScreen) rpc.setState("Editing world");
+            else if (mc.currentScreen instanceof LevelLoadingScreen) rpc.setState("Loading world");
+            else if (mc.currentScreen instanceof MultiplayerScreen) rpc.setState("Selecting server");
+            else if (mc.currentScreen instanceof AddServerScreen) rpc.setState("Adding server");
+            else if (mc.currentScreen instanceof ConnectScreen || mc.currentScreen instanceof DirectConnectScreen)
+                rpc.setState("Connecting to server");
+            else if (mc.currentScreen instanceof WidgetScreen) rpc.setState("Browsing Meteor's GUI");
+            else if (mc.currentScreen instanceof OptionsScreen || mc.currentScreen instanceof SkinOptionsScreen || mc.currentScreen instanceof SoundOptionsScreen || mc.currentScreen instanceof VideoOptionsScreen || mc.currentScreen instanceof ControlsOptionsScreen || mc.currentScreen instanceof LanguageOptionsScreen || mc.currentScreen instanceof ChatOptionsScreen || mc.currentScreen instanceof PackScreen || mc.currentScreen instanceof AccessibilityOptionsScreen)
+                rpc.setState("Changing options");
+            else if (mc.currentScreen instanceof CreditsScreen) rpc.setState("Reading credits");
+            else if (mc.currentScreen instanceof RealmsScreen) rpc.setState("Browsing Realms");
+            else {
+                boolean setState = false;
+                if (mc.currentScreen != null) {
+                    String className = mc.currentScreen.getClass().getName();
+                    for (var pair : customStates) {
+                        if (className.startsWith(pair.getLeft())) {
+                            rpc.setState(pair.getRight());
+                            setState = true;
+                            break;
                         }
                     }
-                    if (!setState) rpc.setState("In main menu");
                 }
-
-                update = true;
+                if (!setState) rpc.setState("In main menu");
             }
+
+            update = true;
         }
 
         // Update

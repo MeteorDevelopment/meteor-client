@@ -14,9 +14,7 @@ public enum ProxyType {
     @Nullable
     public static ProxyType parse(String group) {
         for (ProxyType type : values()) {
-            if (type.name().equalsIgnoreCase(group)) {
-                return type;
-            }
+            if (type.name().equalsIgnoreCase(group)) return type;
         }
         return null;
     }

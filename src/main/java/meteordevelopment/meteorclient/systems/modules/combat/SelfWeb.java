@@ -79,9 +79,7 @@ public class SelfWeb extends Module {
 
         BlockUtils.place(mc.player.getBlockPos(), web, rotate.get(), 0, false);
 
-        if (doubles.get()) {
-            BlockUtils.place(mc.player.getBlockPos().add(0, 1, 0), web, rotate.get(), 0, false);
-        }
+        if (doubles.get()) BlockUtils.place(mc.player.getBlockPos().add(0, 1, 0), web, rotate.get(), 0, false);
 
         if (turnOff.get()) toggle();
     }

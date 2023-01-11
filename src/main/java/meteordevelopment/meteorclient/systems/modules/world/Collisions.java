@@ -62,9 +62,8 @@ public class Collisions extends Module {
     private void onCollisionShape(CollisionShapeEvent event) {
         if (mc.world == null || mc.player == null) return;
         if (event.type != CollisionShapeEvent.CollisionType.BLOCK) return;
-        if (blocks.get().contains(event.state.getBlock())) {
-            event.shape = VoxelShapes.fullCube();
-        } else if (magma.get() && !mc.player.isSneaking()
+        if (blocks.get().contains(event.state.getBlock())) event.shape = VoxelShapes.fullCube();
+        else if (magma.get() && !mc.player.isSneaking()
             && event.state.isAir()
             && mc.world.getBlockState(event.pos.down()).getBlock() == Blocks.MAGMA_BLOCK) {
             event.shape = VoxelShapes.fullCube();

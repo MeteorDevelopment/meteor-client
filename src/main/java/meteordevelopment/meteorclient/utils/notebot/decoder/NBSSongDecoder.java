@@ -67,9 +67,7 @@ public class NBSSongDecoder extends SongDecoder {
             if (length == 0) {
                 nbsversion = dataInputStream.readByte();
                 dataInputStream.readByte(); // first custom instrument
-                if (nbsversion >= 3) {
-                    length = readShort(dataInputStream);
-                }
+                if (nbsversion >= 3) length = readShort(dataInputStream);
             }
             readShort(dataInputStream); // Song Height
             String title = readString(dataInputStream);
@@ -96,17 +94,13 @@ public class NBSSongDecoder extends SongDecoder {
             while (true) {
                 short jumpTicks = readShort(dataInputStream); // jumps till next tick
                 //System.out.println("Jumps to next tick: " + jumpTicks);
-                if (jumpTicks == 0) {
-                    break;
-                }
+                if (jumpTicks == 0) break;
                 tick += jumpTicks * (20f / speed);
                 //System.out.println("Tick: " + tick);
                 short layer = -1;
                 while (true) {
                     short jumpLayers = readShort(dataInputStream); // jumps till next layer
-                    if (jumpLayers == 0) {
-                        break;
-                    }
+                    if (jumpLayers == 0) break;
                     layer += jumpLayers;
                     //System.out.println("Layer: " + layer);
                     byte instrument = dataInputStream.readByte();
@@ -125,10 +119,7 @@ public class NBSSongDecoder extends SongDecoder {
 
             return new Song(notesMap, title, author);
         } catch (EOFException e) {
-            String file = "";
-            if (songFile != null) {
-                file = songFile.getName();
-            }
+            String file = songFile != null ? songFile.getName() : "";
             MeteorClient.LOG.error("Song is corrupted: " + file, e);
         } catch (IOException e) {
             e.printStackTrace();
@@ -165,9 +156,7 @@ public class NBSSongDecoder extends SongDecoder {
         StringBuilder builder = new StringBuilder(length);
         for (; length > 0; --length) {
             char c = (char) dataInputStream.readByte();
-            if (c == (char) 0x0D) {
-                c = ' ';
-            }
+            if (c == (char) 0x0D) c = ' ';
             builder.append(c);
         }
         return builder.toString();

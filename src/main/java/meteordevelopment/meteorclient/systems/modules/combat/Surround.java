@@ -281,9 +281,7 @@ public class Surround extends Module {
     public void onDeactivate() {
         if (toggleBack.get() && !toActivate.isEmpty() && mc.world != null && mc.player != null) {
             for (Module module : toActivate) {
-                if (!module.isActive()) {
-                    module.toggle();
-                }
+                if (!module.isActive()) module.toggle();
             }
         }
     }
@@ -295,9 +293,7 @@ public class Surround extends Module {
             ticks--;
             return;
         }
-        else {
-            ticks = delay.get();
-        }
+        ticks = delay.get();
 
         // Toggle if Y level changed
         if (toggleOnYChange.get() && mc.player.prevY != mc.player.getY()) {
@@ -378,11 +374,8 @@ public class Surround extends Module {
 
             for (Entity crystal : mc.world.getOtherEntities(null, box, entityPredicate)) {
                 if (rotate.get()) {
-                    Rotations.rotate(Rotations.getPitch(crystal), Rotations.getYaw(crystal), () -> {
-                        mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking()));
-                    });
-                }
-                else {
+                    Rotations.rotate(Rotations.getPitch(crystal), Rotations.getYaw(crystal), () -> mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking())));
+                } else {
                     mc.player.networkHandler.sendPacket(PlayerInteractEntityC2SPacket.attack(crystal, mc.player.isSneaking()));
                 }
 
@@ -409,19 +402,18 @@ public class Surround extends Module {
     }
 
     private BlockPos.Mutable offsetPos(BlockPos origin, CardinalDirection direction, int y) {
-        if (direction == null) {
-            return testPos.set(
-                origin.getX(),
-                origin.getY() + y,
-                origin.getZ()
-            );
-        }
-
-        return testPos.set(
+        return direction == null
+            ? testPos.set(
+            origin.getX(),
+            origin.getY() + y,
+            origin.getZ()
+        )
+            : testPos.set(
             origin.getX() + direction.toDirection().getOffsetX(),
             origin.getY() + y,
             origin.getZ() + direction.toDirection().getOffsetZ()
         );
+
     }
 
     private BlockType getBlockType(BlockPos pos) {

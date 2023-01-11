@@ -105,13 +105,11 @@ public abstract class WDropdown<T> extends WPressable {
         animProgress += (expanded ? 1 : -1) * delta * 14;
         animProgress = Utils.clamp(animProgress, 0, 1);
 
-        if (!render && animProgress > 0) {
-            renderer.absolutePost(() -> {
-                renderer.scissorStart(x, y + height, width, root.height * animProgress);
-                root.render(renderer, mouseX, mouseY, delta);
-                renderer.scissorEnd();
-            });
-        }
+        if (!render && animProgress > 0) renderer.absolutePost(() -> {
+            renderer.scissorStart(x, y + height, width, root.height * animProgress);
+            root.render(renderer, mouseX, mouseY, delta);
+            renderer.scissorEnd();
+        });
 
         if (expanded && root.mouseOver) theme.disableHoverColor = true;
 
@@ -148,9 +146,7 @@ public abstract class WDropdown<T> extends WPressable {
     public boolean onMouseScrolled(double amount) {
         if (super.onMouseScrolled(amount)) return true;
 
-        if (expanded) {
-            return root.mouseScrolled(amount);
-        }
+        if (expanded) return root.mouseScrolled(amount);
 
         return false;
     }

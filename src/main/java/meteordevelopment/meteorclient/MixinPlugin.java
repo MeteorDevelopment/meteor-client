@@ -82,18 +82,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
         if (!mixinClassName.startsWith(mixinPackage)) {
             throw new RuntimeException("Mixin " + mixinClassName + " is not in the mixin package");
         }
-        else if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
-            return !isOriginsPresent;
-        }
-        else if (mixinClassName.startsWith(mixinPackage + ".sodium")) {
-            return isSodiumPresent;
-        }
-        else if (mixinClassName.startsWith(mixinPackage + ".indigo")) {
-            return isIndigoPresent;
-        }
-        else if (mixinClassName.startsWith(mixinPackage + ".canvas")) {
-            return isCanvasPresent;
-        }
+        if (mixinClassName.endsWith("PlayerEntityRendererMixin")) return !isOriginsPresent;
+        if (mixinClassName.startsWith(mixinPackage + ".sodium")) return isSodiumPresent;
+        if (mixinClassName.startsWith(mixinPackage + ".indigo")) return isIndigoPresent;
+        if (mixinClassName.startsWith(mixinPackage + ".canvas")) return isCanvasPresent;
 
 
         return true;

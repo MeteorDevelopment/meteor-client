@@ -34,10 +34,7 @@ public class Sprint extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.forwardSpeed > 0 && !whenStationary.get()) {
-            mc.player.setSprinting(true);
-        } else if (whenStationary.get()) {
-            mc.player.setSprinting(true);
-        }
+        if (mc.player.forwardSpeed > 0 && !whenStationary.get()) mc.player.setSprinting(true);
+        else if (whenStationary.get()) mc.player.setSprinting(true);
     }
 }

@@ -157,47 +157,43 @@ public class Scaffold extends Module {
             Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
             bp.set(vec.getX(), vec.getY(), vec.getZ());
 
+        } else if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
+            bp.set(mc.player.getBlockPos().down());
+
         } else {
-            if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
-                bp.set(mc.player.getBlockPos().down());
+            Vec3d pos = mc.player.getPos();
+            pos = pos.add(0, -0.98f, 0);
+            pos.add(mc.player.getVelocity());
 
-            } else {
-                Vec3d pos = mc.player.getPos();
-                pos = pos.add(0, -0.98f, 0);
-                pos.add(mc.player.getVelocity());
+            if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
+                List<BlockPos> blockPosArray = new ArrayList<>();
 
-                if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
-                    List<BlockPos> blockPosArray = new ArrayList<>();
-
-                    for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
-                        for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                            for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
-                                bp.set(x, y, z);
-                                if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
-                            }
+                for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
+                    for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
+                        for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
+                            bp.set(x, y, z);
+                            if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
                         }
                     }
-                    if (blockPosArray.isEmpty()) return;
-
-                    blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
-
-                    prevBp.set(blockPosArray.get(0));
                 }
+                if (blockPosArray.isEmpty()) return;
 
-                Vec3d vecPrevBP = new Vec3d((double) prevBp.getX() + 0.5f,
-                    (double) prevBp.getY() + 0.5f,
-                    (double) prevBp.getZ() + 0.5f);
+                blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
 
-                Vec3d sub = pos.subtract(vecPrevBP);
-                Direction facing;
-                if (sub.getY() < -0.5f) {
-                    facing = Direction.DOWN;
-                } else if (sub.getY() > 0.5f) {
-                    facing = Direction.UP;
-                } else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
-
-                bp.set(prevBp.offset(facing));
+                prevBp.set(blockPosArray.get(0));
             }
+
+            Vec3d vecPrevBP = new Vec3d((double) prevBp.getX() + 0.5f,
+                (double) prevBp.getY() + 0.5f,
+                (double) prevBp.getZ() + 0.5f);
+
+            Vec3d sub = pos.subtract(vecPrevBP);
+            Direction facing;
+            if (sub.getY() < -0.5f) facing = Direction.DOWN;
+            else if (sub.getY() > 0.5f) facing = Direction.UP;
+            else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
+
+            bp.set(prevBp.offset(facing));
         }
 
         FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
@@ -212,9 +208,7 @@ public class Scaffold extends Module {
                 lastWasSneaking = false;
                 return;
             }
-        } else {
-            lastWasSneaking = false;
-        }
+        } else lastWasSneaking = false;
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
         if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
@@ -231,9 +225,7 @@ public class Scaffold extends Module {
             }
         }
 
-        if (!mc.world.getBlockState(bp).isAir()) {
-            prevBp.set(bp);
-        }
+        if (!mc.world.getBlockState(bp).isAir()) prevBp.set(bp);
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {

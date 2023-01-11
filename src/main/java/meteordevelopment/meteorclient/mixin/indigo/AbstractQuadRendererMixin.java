@@ -51,9 +51,8 @@ public abstract class AbstractQuadRendererMixin {
     private void whBufferQuad(VertexConsumer buff, MutableQuadViewImpl quad, Matrix4f matrix, int overlay, Matrix3f normalMatrix, Vector3f normalVec, int alpha) {
         final boolean useNormals = quad.hasVertexNormals();
 
-        if (useNormals) {
-            quad.populateMissingNormals();
-        } else {
+        if (useNormals) quad.populateMissingNormals();
+        else {
             final Vector3f faceNormal = quad.faceNormal();
             normalVec.set(faceNormal.x, faceNormal.y, faceNormal.z);
             normalVec.mul(normalMatrix);

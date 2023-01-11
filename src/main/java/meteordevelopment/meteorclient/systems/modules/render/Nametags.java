@@ -293,9 +293,7 @@ public class Nametags extends Module {
                 if (EntityUtils.getGameMode((PlayerEntity) entity) == null && ignoreBots.get()) continue;
             }
 
-            if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {
-                entityList.add(entity);
-            }
+            if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) entityList.add(entity);
         }
 
         entityList.sort(Comparator.comparing(e -> e.squaredDistanceTo(cameraPos)));
@@ -353,14 +351,12 @@ public class Nametags extends Module {
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);
         String gmText = "BOT";
-        if (gm != null) {
-            gmText = switch (gm) {
-                case SPECTATOR -> "Sp";
-                case SURVIVAL -> "S";
-                case CREATIVE -> "C";
-                case ADVENTURE -> "A";
-            };
-        }
+        if (gm != null) gmText = switch (gm) {
+            case SPECTATOR -> "Sp";
+            case SURVIVAL -> "S";
+            case CREATIVE -> "C";
+            case ADVENTURE -> "A";
+        };
 
         gmText = "[" + gmText + "] ";
 

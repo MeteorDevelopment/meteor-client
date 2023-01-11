@@ -74,10 +74,7 @@ public abstract class WWidget implements BaseWidget {
         if (isOver(mouseX, mouseY)) {
             mouseOverTimer += delta;
             if (mouseOverTimer >= 1 && tooltip != null) renderer.tooltip(tooltip);
-        }
-        else {
-            mouseOverTimer = 0;
-        }
+        } else mouseOverTimer = 0;
 
         onRender(renderer, mouseX, mouseY, delta);
         return false;

@@ -680,10 +680,7 @@ public class CrystalAura extends Module {
             if (ticks > 3) {
                 it.remove();
                 removed.remove(id);
-            }
-            else {
-                waitingToExplode.put(id, ticks + 1);
-            }
+            } else waitingToExplode.put(id, ticks + 1);
         }
 
         // Set player eye pos
@@ -831,10 +828,7 @@ public class CrystalAura extends Module {
                 Rotations.rotate(yaw, pitch, 50, () -> attackCrystal(crystal));
 
                 breakTimer = breakDelay.get();
-            }
-            else {
-                attacked = false;
-            }
+            } else attacked = false;
         }
         else {
             attackCrystal(crystal);
@@ -875,9 +869,7 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onPacketSend(PacketEvent.Send event) {
-        if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
-            switchTimer = switchDelay.get();
-        }
+        if (event.packet instanceof UpdateSelectedSlotC2SPacket) switchTimer = switchDelay.get();
     }
 
     // Place
@@ -1041,18 +1033,15 @@ public class CrystalAura extends Module {
             placeRenderPos.set(result.getBlockPos());
             renderDamage = damage;
 
-            if (renderMode.get() == RenderMode.Normal) {
-                placeRenderTimer = placeRenderTime.get();
-            } else {
+            if (renderMode.get() == RenderMode.Normal) placeRenderTimer = placeRenderTime.get();
+            else {
                 placeRenderTimer = renderTime.get();
-                if (renderMode.get() == RenderMode.Fading) {
-                    RenderUtils.renderTickingBlock(
-                        placeRenderPos, sideColor.get(),
-                        lineColor.get(), shapeMode.get(),
-                        0, renderTime.get(), true,
-                        false
-                    );
-                }
+                if (renderMode.get() == RenderMode.Fading) RenderUtils.renderTickingBlock(
+                    placeRenderPos, sideColor.get(),
+                    lineColor.get(), shapeMode.get(),
+                    0, renderTime.get(), true,
+                    false
+                );
             }
         }
         else {
@@ -1071,8 +1060,8 @@ public class CrystalAura extends Module {
 
     @EventHandler
     private void onPacketSent(PacketEvent.Sent event) {
-        if (event.packet instanceof PlayerMoveC2SPacket) {
-            serverYaw = ((PlayerMoveC2SPacket) event.packet).getYaw((float) serverYaw);
+        if (event.packet instanceof PlayerMoveC2SPacket playerMoveC2SPacket) {
+            serverYaw = playerMoveC2SPacket.getYaw((float) serverYaw);
         }
     }
 
@@ -1118,9 +1107,8 @@ public class CrystalAura extends Module {
             for (ItemStack itemStack : target.getArmorItems()) {
                 if (itemStack == null || itemStack.isEmpty()) {
                     if (facePlaceArmor.get()) return true;
-                }
-                else {
-                    if ((double) (itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage() * 100 <= facePlaceDurability.get()) return true;
+                } else if ((double) (itemStack.getMaxDamage() - itemStack.getDamage()) / itemStack.getMaxDamage() * 100 <= facePlaceDurability.get()) {
+                    return true;
                 }
             }
         }
@@ -1208,15 +1196,13 @@ public class CrystalAura extends Module {
             if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
             if (player.distanceTo(mc.player) > targetRange.get()) continue;
 
-            if (ignoreNakeds.get()) {
-                if (player.getOffHandStack().isEmpty()
-                    && player.getMainHandStack().isEmpty()
-                    && player.getInventory().armor.get(0).isEmpty()
-                    && player.getInventory().armor.get(1).isEmpty()
-                    && player.getInventory().armor.get(2).isEmpty()
-                    && player.getInventory().armor.get(3).isEmpty()
-                ) continue;
-            }
+            if (ignoreNakeds.get()
+                && player.getOffHandStack().isEmpty()
+                && player.getMainHandStack().isEmpty()
+                && player.getInventory().armor.get(0).isEmpty()
+                && player.getInventory().armor.get(1).isEmpty()
+                && player.getInventory().armor.get(2).isEmpty()
+                && player.getInventory().armor.get(3).isEmpty()) continue;
 
             targets.add(player);
         }

@@ -331,9 +331,7 @@ public class Nuker extends Module {
             maxv = 1 + Math.max(range_up.get(), range_down.get());
         }
 
-        if (mode.get() == Mode.Flatten){
-            pos1.setY((int) Math.floor(pY));
-        }
+        if (mode.get() == Mode.Flatten) pos1.setY((int) Math.floor(pY));
         box = new Box(pos1, pos2);
 
         // Find blocks to break
@@ -377,9 +375,7 @@ public class Nuker extends Module {
                 if (noBlockTimer++ >= delay.get()) firstBlock = true;
                 return;
             }
-            else {
-                noBlockTimer = 0;
-            }
+            noBlockTimer = 0;
 
             // Update timer
             if (!firstBlock && !lastBlockPos.equals(blocks.get(0))) {
@@ -403,9 +399,7 @@ public class Nuker extends Module {
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, block, Direction.UP));
                     mc.player.swingHand(Hand.MAIN_HAND);
                     mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, block, Direction.UP));
-                } else {
-                    BlockUtils.breakBlock(block, swingHand.get());
-                }
+                } else BlockUtils.breakBlock(block, swingHand.get());
 
                 if (enableRenderBreaking.get()) RenderUtils.renderTickingBlock(block.toImmutable(), sideColor.get(), lineColor.get(), shapeModeBreak.get(), 0, 8, true, false);
                 lastBlockPos.set(block);
@@ -421,7 +415,7 @@ public class Nuker extends Module {
             blocks.clear();
         });
     }
-    
+
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
         event.cooldown = 0;

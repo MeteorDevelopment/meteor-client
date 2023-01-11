@@ -116,9 +116,7 @@ public class Profile implements ISerializable<Profile> {
 
     @Override
     public Profile fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
-        }
+        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
 
         return this;
     }

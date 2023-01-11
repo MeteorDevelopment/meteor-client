@@ -144,18 +144,14 @@ public class AutoGap extends Module {
                         return;
                     }
                     // Otherwise change to the new slot
-                    else {
-                        changeSlot(slot);
-                    }
+                    else changeSlot(slot);
                 }
 
                 // Continue eating
                 eat();
             }
             // If we shouldn't be eating anymore then stop
-            else {
-                stopEating();
-            }
+            else stopEating();
         }
         else {
             // If we are not eating check if we should start eating
@@ -218,9 +214,7 @@ public class AutoGap extends Module {
             for (Class<? extends Module> klass : AURAS) {
                 Module module = Modules.get().get(klass);
 
-                if (wasAura.contains(klass) && !module.isActive()) {
-                    module.toggle();
-                }
+                if (wasAura.contains(klass) && !module.isActive()) module.toggle();
             }
         }
 

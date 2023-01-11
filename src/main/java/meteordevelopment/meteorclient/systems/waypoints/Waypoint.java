@@ -131,9 +131,7 @@ public class Waypoint implements ISerializable<Waypoint> {
         Map<String, AbstractTexture> icons = Waypoints.get().icons;
 
         AbstractTexture texture = icons.get(icon.get());
-        if (texture == null && !icons.isEmpty()) {
-            icon.set(icons.keySet().iterator().next());
-        }
+        if (texture == null && !icons.isEmpty()) icon.set(icons.keySet().iterator().next());
     }
 
     public static class Builder {
@@ -184,9 +182,7 @@ public class Waypoint implements ISerializable<Waypoint> {
 
     @Override
     public Waypoint fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
-        }
+        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
 
         return this;
     }

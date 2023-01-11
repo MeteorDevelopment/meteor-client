@@ -91,9 +91,7 @@ public class HandView extends Module {
             event.matrix.scale(scaleXOff.get().floatValue(), scaleYOff.get().floatValue(), scaleZOff.get().floatValue());
             event.matrix.translate(posXOff.get().floatValue(), posYOff.get().floatValue(), posZOff.get().floatValue());
         }
-        if (Rotations.rotating && followRotations.get()) {
-            applyServerRotations(event.matrix);
-        }
+        if (Rotations.rotating && followRotations.get()) applyServerRotations(event.matrix);
     }
 
     @EventHandler

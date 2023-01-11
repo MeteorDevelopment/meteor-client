@@ -161,17 +161,15 @@ public class BlockESP extends Module {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
-            if (schunk.size() > 0) {
-                synchronized (chunks) {
-                    chunks.put(chunk.getPos().toLong(), schunk);
-                    schunk.update();
+            if (schunk.size() > 0) synchronized (chunks) {
+                chunks.put(chunk.getPos().toLong(), schunk);
+                schunk.update();
 
-                    // Update neighbour chunks
-                    updateChunk(chunk.getPos().x - 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x + 1, chunk.getPos().z);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z - 1);
-                    updateChunk(chunk.getPos().x, chunk.getPos().z + 1);
-                }
+                // Update neighbour chunks
+                updateChunk(chunk.getPos().x - 1, chunk.getPos().z);
+                updateChunk(chunk.getPos().x + 1, chunk.getPos().z);
+                updateChunk(chunk.getPos().x, chunk.getPos().z - 1);
+                updateChunk(chunk.getPos().x, chunk.getPos().z + 1);
             }
 
             if (event != null) ChunkDataEvent.returnChunkDataEvent(event);
@@ -192,36 +190,34 @@ public class BlockESP extends Module {
         boolean added = blocks.get().contains(event.newState.getBlock()) && !blocks.get().contains(event.oldState.getBlock());
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
 
-        if (added || removed) {
-            MeteorExecutor.execute(() -> {
-                synchronized (chunks) {
-                    ESPChunk chunk = chunks.get(key);
+        if (added || removed) MeteorExecutor.execute(() -> {
+            synchronized (chunks) {
+                ESPChunk chunk = chunks.get(key);
 
-                    if (chunk == null) {
-                        chunk = new ESPChunk(chunkX, chunkZ);
-                        if (chunk.shouldBeDeleted()) return;
+                if (chunk == null) {
+                    chunk = new ESPChunk(chunkX, chunkZ);
+                    if (chunk.shouldBeDeleted()) return;
 
-                        chunks.put(key, chunk);
-                    }
+                    chunks.put(key, chunk);
+                }
 
-                    blockPos.set(bx, by, bz);
+                blockPos.set(bx, by, bz);
 
-                    if (added) chunk.add(blockPos);
-                    else chunk.remove(blockPos);
+                if (added) chunk.add(blockPos);
+                else chunk.remove(blockPos);
 
-                    // Update neighbour blocks
-                    for (int x = -1; x < 2; x++) {
-                        for (int z = -1; z < 2; z++) {
-                            for (int y = -1; y < 2; y++) {
-                                if (x == 0 && y == 0 && z == 0) continue;
+                // Update neighbour blocks
+                for (int x = -1; x < 2; x++) {
+                    for (int z = -1; z < 2; z++) {
+                        for (int y = -1; y < 2; y++) {
+                            if (x == 0 && y == 0 && z == 0) continue;
 
-                                updateBlock(bx + x, by + y, bz + z);
-                            }
+                            updateBlock(bx + x, by + y, bz + z);
                         }
                     }
                 }
-            });
-        }
+            }
+        });
     }
 
     @EventHandler

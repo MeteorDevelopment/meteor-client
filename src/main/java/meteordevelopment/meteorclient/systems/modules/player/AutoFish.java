@@ -118,9 +118,7 @@ public class AutoFish extends Module {
                 autoCastTimer = 0;
                 autoCastEnabled = true;
             }
-        } else {
-            autoCastCheckTimer--;
-        }
+        } else autoCastCheckTimer--;
 
         // Check for auto cast timer
         if (autoCastEnabled) {

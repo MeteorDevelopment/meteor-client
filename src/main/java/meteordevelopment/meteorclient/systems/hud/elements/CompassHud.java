@@ -145,9 +145,7 @@ public class CompassHud extends HudElement {
             );
         }
 
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
     }
 
     private double getX(Direction direction, double yaw) {

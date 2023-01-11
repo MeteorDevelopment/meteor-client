@@ -20,12 +20,8 @@ public class Texture {
     private boolean valid;
 
     public Texture(int width, int height, byte[] data, Format format, Filter filterMin, Filter filterMag) {
-        if (RenderSystem.isOnRenderThread()) {
-            upload(width, height, data, format, filterMin, filterMag);
-        }
-        else {
-            RenderSystem.recordRenderCall(() -> upload(width, height, data, format, filterMin, filterMag));
-        }
+        if (RenderSystem.isOnRenderThread()) upload(width, height, data, format, filterMin, filterMag);
+        else RenderSystem.recordRenderCall(() -> upload(width, height, data, format, filterMin, filterMag));
     }
 
     public Texture() {}

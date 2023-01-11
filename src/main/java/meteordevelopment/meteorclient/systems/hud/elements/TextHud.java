@@ -200,9 +200,7 @@ public class TextHud extends HudElement {
             }
             else script = Compiler.compile(result);
 
-            if (shown.get() != Shown.Always) {
-                conditionScript = Compiler.compile(Parser.parse(condition.get()));
-            }
+            if (shown.get() != Shown.Always) conditionScript = Compiler.compile(Parser.parse(condition.get()));
 
             needsCompile = false;
         }
@@ -248,9 +246,7 @@ public class TextHud extends HudElement {
             s = s.next;
         }
 
-        if (background.get()) {
-            renderer.quad(this.x, y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, y, getWidth(), getHeight(), backgroundColor.get());
     }
 
     @Override

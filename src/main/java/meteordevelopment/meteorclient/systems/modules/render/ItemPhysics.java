@@ -145,9 +145,7 @@ public class ItemPhysics extends Module {
 
             event.matrixStack.pop();
 
-            if (!hasDepthInGui) {
-                event.matrixStack.translate(0.0F * scaleX, 0.0F * scaleY, 0.0625F * scaleZ);
-            }
+            if (!hasDepthInGui) event.matrixStack.translate(0.0F * scaleX, 0.0F * scaleY, 0.0625F * scaleZ);
         }
 
         event.matrixStack.pop();

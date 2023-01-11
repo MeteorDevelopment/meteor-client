@@ -140,16 +140,12 @@ public class AutoAnvil extends Module {
                 BlockPos blockPos = target.getBlockPos().up().add(0, i, 0);
 
                 for (int j = 0; j < i; j++) {
-                    if (!mc.world.getBlockState(target.getBlockPos().up(j + 1)).getMaterial().isReplaceable()) {
-                        break;
-                    }
+                    if (!mc.world.getBlockState(target.getBlockPos().up(j + 1)).getMaterial().isReplaceable()) break;
                 }
 
                 if (BlockUtils.place(blockPos, anvil, rotate.get(), 0) && !multiPlace.get()) break;
             }
-        } else {
-            timer++;
-        }
+        } else timer++;
     }
 
     @Override

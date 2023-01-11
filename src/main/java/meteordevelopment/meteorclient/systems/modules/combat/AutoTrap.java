@@ -189,9 +189,7 @@ public class AutoTrap extends Module {
                 }
 
                 timer = 0;
-            } else {
-                timer++;
-            }
+            } else timer++;
             return;
         }
     }

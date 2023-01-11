@@ -114,9 +114,7 @@ public class Criticals extends Module {
 
                 attackPacket = null;
                 swingPacket = null;
-            } else {
-                sendTimer--;
-            }
+            } else sendTimer--;
         }
     }
 

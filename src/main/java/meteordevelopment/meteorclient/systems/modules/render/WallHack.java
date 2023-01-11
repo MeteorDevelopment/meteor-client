@@ -24,9 +24,7 @@ public class WallHack extends Module {
         .range(0, 255)
         .sliderMax(255)
         .onChanged(onChanged -> {
-            if (this.isActive()) {
-                mc.worldRenderer.reload();
-            }
+            if (this.isActive()) mc.worldRenderer.reload();
         })
         .build()
     );

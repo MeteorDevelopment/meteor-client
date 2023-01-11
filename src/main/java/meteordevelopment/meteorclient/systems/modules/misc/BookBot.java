@@ -104,9 +104,7 @@ public class BookBot extends Module {
     public BookBot() {
         super(Categories.Misc, "book-bot", "Automatically writes in books.");
 
-        if (!file.exists()) {
-            file = null;
-        }
+        if (!file.exists()) file = null;
 
         filters = BufferUtils.createPointerBuffer(1);
 
@@ -300,18 +298,14 @@ public class BookBot extends Module {
     public NbtCompound toTag() {
         NbtCompound tag = super.toTag();
 
-        if (file != null && file.exists()) {
-            tag.putString("file", file.getAbsolutePath());
-        }
+        if (file != null && file.exists()) tag.putString("file", file.getAbsolutePath());
 
         return tag;
     }
 
     @Override
     public Module fromTag(NbtCompound tag) {
-        if (tag.contains("file")) {
-            file = new File(tag.getString("file"));
-        }
+        if (tag.contains("file")) file = new File(tag.getString("file"));
 
         return super.fromTag(tag);
     }

@@ -25,13 +25,10 @@ public class FontFaceSetting extends Setting<FontFace> {
         if (split.length != 2) return null;
 
         for (FontFamily family : Fonts.FONT_FAMILIES) {
-            if (family.getName().replace(" ", "").equals(split[0])) {
-                try {
-                    return family.get(FontInfo.Type.valueOf(split[1]));
-                }
-                catch (IllegalArgumentException ignored) {
-                    return null;
-                }
+            if (family.getName().replace(" ", "").equals(split[0])) try {
+                return family.get(FontInfo.Type.valueOf(split[1]));
+            } catch (IllegalArgumentException ignored) {
+                return null;
             }
         }
 
@@ -48,9 +45,7 @@ public class FontFaceSetting extends Setting<FontFace> {
         if (value == null) return false;
 
         for (FontFamily fontFamily : Fonts.FONT_FAMILIES) {
-            if (fontFamily.hasType(value.info.type())) {
-                return true;
-            }
+            if (fontFamily.hasType(value.info.type())) return true;
         }
         return false;
     }

@@ -25,9 +25,7 @@ public class ReflectInit {
         for (MeteorAddon addon : AddonManager.ADDONS) {
             try {
                 String pkg = addon.getPackage();
-                if (pkg != null && !pkg.isBlank()) {
-                    packages.add(pkg);
-                }
+                if (pkg != null && !pkg.isBlank()) packages.add(pkg);
             } catch (AbstractMethodError e) {
                 throw new RuntimeException("Addon \"%s\" is too old and cannot be ran.".formatted(addon.name), e);
             }
@@ -53,9 +51,7 @@ public class ReflectInit {
 
         for (Class<?> clazz : getDependencies(task, annotation)) {
             for (Method m : byClass.getOrDefault(clazz, Collections.emptyList())) {
-                if (left.contains(m)) {
-                    reflectInit(m, annotation, left, byClass);
-                }
+                if (left.contains(m)) reflectInit(m, annotation, left, byClass);
             }
         }
 
@@ -71,12 +67,8 @@ public class ReflectInit {
     private static <T extends Annotation> Class<?>[] getDependencies(Method task, Class<T> annotation) {
         T init = task.getAnnotation(annotation);
 
-        if (init instanceof PreInit pre) {
-            return pre.dependencies();
-        }
-        else if (init instanceof PostInit post) {
-            return post.dependencies();
-        }
+        if (init instanceof PreInit pre) return pre.dependencies();
+        if (init instanceof PostInit post) return post.dependencies();
 
         return new Class<?>[]{};
     }

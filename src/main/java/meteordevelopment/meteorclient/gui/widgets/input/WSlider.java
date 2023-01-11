@@ -65,21 +65,17 @@ public abstract class WSlider extends WWidget {
         double s2 = s / 2;
 
         double x = this.x + s2 + valueWidth - height / 2;
-        handleMouseOver =  mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
+        handleMouseOver = mouseX >= x && mouseX <= x + height && mouseY >= y && mouseY <= y + height;
 
-		if(!scrollHandleMouseOver) {
-			scrollHandleX = x;
-			scrollHandleY = y;
-			scrollHandleH = height;
-			if(handleMouseOver) {
-				scrollHandleMouseOver = true;
-			}
-		} else {
-			scrollHandleMouseOver = mouseX >= scrollHandleX &&
-									mouseX <= scrollHandleX + scrollHandleH &&
-									mouseY >= scrollHandleY &&
-									mouseY <= scrollHandleY + scrollHandleH;
-		}
+        if (!scrollHandleMouseOver) {
+            scrollHandleX = x;
+            scrollHandleY = y;
+            scrollHandleH = height;
+            if (handleMouseOver) scrollHandleMouseOver = true;
+        } else scrollHandleMouseOver = mouseX >= scrollHandleX &&
+            mouseX <= scrollHandleX + scrollHandleH &&
+            mouseY >= scrollHandleY &&
+            mouseY <= scrollHandleY + scrollHandleH;
 
         boolean mouseOverX = mouseX >= this.x + s2 && mouseX <= this.x + s2 + width - s;
         mouseOver = mouseOverX && mouseY >= this.y && mouseY <= this.y + height;
@@ -91,14 +87,12 @@ public abstract class WSlider extends WWidget {
 
                 set((valueWidth / (width - s)) * (max - min) + min);
                 if (action != null) action.run();
-            } else {
-                if (value > min && mouseX < this.x + s2) {
-                    value = min;
-                    if (action != null) action.run();
-                } else if (value < max && mouseX > this.x + s2 + width - s) {
-                    value = max;
-                    if (action != null) action.run();
-                }
+            } else if (value > min && mouseX < this.x + s2) {
+                value = min;
+                if (action != null) action.run();
+            } else if (value < max && mouseX > this.x + s2 + width - s) {
+                value = max;
+                if (action != null) action.run();
             }
         }
     }
@@ -106,9 +100,7 @@ public abstract class WSlider extends WWidget {
     @Override
     public boolean onMouseReleased(double mouseX, double mouseY, int button) {
         if (dragging) {
-            if (value != valueAtDragStart && actionOnRelease != null) {
-                actionOnRelease.run();
-            }
+            if (value != valueAtDragStart && actionOnRelease != null) actionOnRelease.run();
 
             dragging = false;
             return true;
@@ -130,16 +122,12 @@ public abstract class WSlider extends WWidget {
 		}
 
 		if (scrollHandleMouseOver) {
-			if (parent instanceof WIntEdit) {
-				set(value + amount);
-			}
-			else {
-				set(value + 0.05 * amount);
-			}
+            if (parent instanceof WIntEdit) set(value + amount);
+            else set(value + 0.05 * amount);
 
-			if (action != null) action.run();
-			return true;
-		}
+            if (action != null) action.run();
+            return true;
+        }
 
 		return false;
 	}

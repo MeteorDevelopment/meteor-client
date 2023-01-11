@@ -49,16 +49,12 @@ public abstract class CameraMixin implements ICamera {
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0))
     private void modifyCameraDistance(Args args) {
         args.set(0, -clipToSpace(Modules.get().get(CameraTweaks.class).getDistance()));
-        if (Modules.get().isActive(Freecam.class)) {
-            args.set(0, -clipToSpace(0));
-        }
+        if (Modules.get().isActive(Freecam.class)) args.set(0, -clipToSpace(0));
     }
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
-        if (Modules.get().get(CameraTweaks.class).clip()) {
-            info.setReturnValue(desiredCameraDistance);
-        }
+        if (Modules.get().get(CameraTweaks.class).clip()) info.setReturnValue(desiredCameraDistance);
     }
 
     @Inject(method = "update", at = @At("HEAD"))
@@ -68,9 +64,7 @@ public abstract class CameraMixin implements ICamera {
 
     @Inject(method = "update", at = @At("TAIL"))
     private void onUpdateTail(BlockView area, Entity focusedEntity, boolean thirdPerson, boolean inverseView, float tickDelta, CallbackInfo info) {
-        if (Modules.get().isActive(Freecam.class)) {
-            this.thirdPerson = true;
-        }
+        if (Modules.get().isActive(Freecam.class)) this.thirdPerson = true;
     }
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))

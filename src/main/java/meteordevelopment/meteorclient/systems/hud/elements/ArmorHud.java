@@ -175,20 +175,16 @@ public class ArmorHud extends HudElement {
 
         matrices.pop();
 
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
     }
 
     private ItemStack getItem(int i) {
-        if (isInEditor()) {
-            return switch (i) {
-                default -> Items.NETHERITE_BOOTS.getDefaultStack();
-                case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
-                case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
-                case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
-            };
-        }
+        if (isInEditor()) return switch (i) {
+            case 1 -> Items.NETHERITE_LEGGINGS.getDefaultStack();
+            case 2 -> Items.NETHERITE_CHESTPLATE.getDefaultStack();
+            case 3 -> Items.NETHERITE_HELMET.getDefaultStack();
+            default -> Items.NETHERITE_BOOTS.getDefaultStack();
+        };
 
         return mc.player.getInventory().getArmorStack(i);
     }

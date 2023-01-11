@@ -90,14 +90,11 @@ public class ChestSwap extends Module {
                     if (item == Items.DIAMOND_CHESTPLATE) {
                         bestSlot = i;
                         breakLoop = true;
-                    } else if (item == Items.NETHERITE_CHESTPLATE) {
-                        bestSlot = i;
-                    }
+                    } else if (item == Items.NETHERITE_CHESTPLATE) bestSlot = i;
                     break;
                 case PreferNetherite:
-                    if (item == Items.DIAMOND_CHESTPLATE) {
-                        bestSlot = i;
-                    } else if (item == Items.NETHERITE_CHESTPLATE) {
+                    if (item == Items.DIAMOND_CHESTPLATE) bestSlot = i;
+                    else if (item == Items.NETHERITE_CHESTPLATE) {
                         bestSlot = i;
                         breakLoop = true;
                     }

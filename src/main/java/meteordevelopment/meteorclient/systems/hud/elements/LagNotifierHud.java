@@ -112,9 +112,7 @@ public class LagNotifierHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
 
         if (isInEditor()) {
             render(renderer, "4.3", color3.get());

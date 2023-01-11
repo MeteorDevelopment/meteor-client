@@ -31,7 +31,8 @@ public class Packet extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (mc.player.getInventory().getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed()) return;
+        if (mc.player.getInventory().getArmorStack(2).getItem() != Items.ELYTRA || mc.player.fallDistance <= 0.2 || mc.options.sneakKey.isPressed())
+            return;
 
         if (mc.options.forwardKey.isPressed()) {
             vec3d.add(0, 0, elytraFly.horizontalSpeed.get());
@@ -41,11 +42,8 @@ public class Packet extends ElytraFlightMode {
             vec3d.rotateY((float) Math.toRadians(mc.player.getYaw()));
         }
 
-        if (mc.options.jumpKey.isPressed()) {
-            vec3d.add(0, elytraFly.verticalSpeed.get(), 0);
-        } else if (!mc.options.jumpKey.isPressed()) {
-            vec3d.add(0, -elytraFly.verticalSpeed.get(), 0);
-        }
+        if (mc.options.jumpKey.isPressed()) vec3d.add(0, elytraFly.verticalSpeed.get(), 0);
+        else if (!mc.options.jumpKey.isPressed()) vec3d.add(0, -elytraFly.verticalSpeed.get(), 0);
 
         mc.player.setVelocity(vec3d);
         mc.player.networkHandler.sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));

@@ -34,19 +34,15 @@ public class Pitch40 extends ElytraFlightMode {
     public void onTick() {
         super.onTick();
 
-        if (pitchingDown && mc.player.getY() <= elytraFly.pitch40lowerBounds.get()) {
-            pitchingDown = false;
-        }
-        else if (!pitchingDown && mc.player.getY() >= elytraFly.pitch40upperBounds.get()) {
-            pitchingDown = true;
-        }
+        if (pitchingDown && mc.player.getY() <= elytraFly.pitch40lowerBounds.get()) pitchingDown = false;
+        else if (!pitchingDown && mc.player.getY() >= elytraFly.pitch40upperBounds.get()) pitchingDown = true;
 
         // Pitch upwards
         if (!pitchingDown && mc.player.getPitch() > -40) {
             pitch -= elytraFly.pitch40rotationSpeed.get();
 
             if (pitch < -40) pitch = -40;
-        // Pitch downwards
+            // Pitch downwards
         } else if (pitchingDown && mc.player.getPitch() < 40) {
             pitch += elytraFly.pitch40rotationSpeed.get();
 

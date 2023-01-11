@@ -130,12 +130,10 @@ public class Flamethrower extends Module {
             mc.interactionManager.attackBlock(entity.getBlockPos().east(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().north(), Direction.DOWN);
             mc.interactionManager.attackBlock(entity.getBlockPos().south(), Direction.DOWN);
-        } else {
-            if (ticks >= tickInterval.get() && !entity.isOnFire()) {
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(
-                    entity.getPos().subtract(new Vec3d(0, 1, 0)), Direction.UP, entity.getBlockPos().down(), false));
-                ticks = 0;
-            }
+        } else if (ticks >= tickInterval.get() && !entity.isOnFire()) {
+            mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(
+                entity.getPos().subtract(new Vec3d(0, 1, 0)), Direction.UP, entity.getBlockPos().down(), false));
+            ticks = 0;
         }
 
         InvUtils.swapBack();
@@ -149,9 +147,7 @@ public class Flamethrower extends Module {
         } else if (mc.player.getInventory().offHand.get(0).getItem() == Items.FLINT_AND_STEEL) {
             if (antiBreak.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1)
                 findNewFlintAndSteel = true;
-        } else {
-            findNewFlintAndSteel = true;
-        }
+        } else findNewFlintAndSteel = true;
 
         boolean foundFlintAndSteel = !findNewFlintAndSteel;
         if (findNewFlintAndSteel) {

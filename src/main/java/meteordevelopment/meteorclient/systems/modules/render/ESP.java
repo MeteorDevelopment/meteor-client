@@ -210,10 +210,7 @@ public class ESP extends Module {
 
             Box box = entity.getBoundingBox();
             event.renderer.box(x + box.minX, y + box.minY, z + box.minZ, x + box.maxX, y + box.maxY, z + box.maxZ, sideColor, lineColor, shapeMode.get(), 0);
-        }
-        else {
-            WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
-        }
+        } else WireframeEntityRenderer.render(event, entity, 1, sideColor, lineColor, shapeMode.get());
     }
 
     // 2D
@@ -326,10 +323,9 @@ public class ESP extends Module {
             return EntityUtils.getColorFromDistance(entity);
         }
 
-        if (entity instanceof PlayerEntity playerEntity) {
-            return PlayerUtils.getPlayerColor(playerEntity, playersColor.get());
-        }
-        return switch (entity.getType().getSpawnGroup()) {
+        return entity instanceof PlayerEntity playerEntity
+            ? PlayerUtils.getPlayerColor(playerEntity, playersColor.get())
+            : switch (entity.getType().getSpawnGroup()) {
             case CREATURE -> animalsColor.get();
             case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
             case MONSTER -> monstersColor.get();

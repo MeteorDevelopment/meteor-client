@@ -82,8 +82,6 @@ public class BoatFly extends Module {
 
     @EventHandler
     private void onReceivePacket(PacketEvent.Receive event) {
-        if (event.packet instanceof VehicleMoveS2CPacket && cancelServerPackets.get()) {
-            event.cancel();
-        }
+        if (event.packet instanceof VehicleMoveS2CPacket && cancelServerPackets.get()) event.cancel();
     }
 }

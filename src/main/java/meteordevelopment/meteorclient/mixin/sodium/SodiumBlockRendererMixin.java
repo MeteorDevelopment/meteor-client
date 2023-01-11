@@ -68,9 +68,7 @@ public class SodiumBlockRendererMixin {
 
         int[] colors = null;
 
-        if (bakedQuad.hasColor()) {
-            colors = this.colorBlender.getColors(world, pos, src, colorSampler, state);
-        }
+        if (bakedQuad.hasColor()) colors = this.colorBlender.getColors(world, pos, src, colorSampler, state);
 
         int vertexStart = vertices.getVertexCount();
 
@@ -101,8 +99,6 @@ public class SodiumBlockRendererMixin {
 
         Sprite sprite = src.getSprite();
 
-        if (sprite != null) {
-            model.addSprite(sprite);
-        }
+        if (sprite != null) model.addSprite(sprite);
     }
 }
