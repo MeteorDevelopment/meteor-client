@@ -511,6 +511,7 @@ public class Modules extends System<Modules> {
         add(new VoidESP());
         add(new WallHack());
         add(new WaypointsModule());
+        add(new WeatherChanger());
         add(new Xray());
         add(new Zoom());
         add(new Blur());
