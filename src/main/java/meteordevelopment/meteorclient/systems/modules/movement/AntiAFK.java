@@ -230,6 +230,7 @@ public class AntiAFK extends Module {
 
     private void fillTable(GuiTheme theme, WTable table) {
         table.add(theme.horizontalSeparator("Message List")).expandX();
+        table.row();
 
         // Messages
         for (int i = 0; i < messages.size(); i++) {
