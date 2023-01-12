@@ -150,11 +150,9 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
             r = v;
             g = v;
             b = v;
-            return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+            return new Color((int) (r * 255 + 0.5f), (int) (g * 255 + 0.5f), (int) (b * 255 + 0.5f), 255);
         }
-        hh = h;
-        if (hh >= 360.0) hh = 0.0;
-        hh /= 60.0;
+        hh = h < 360.0 ? ((h - (int)h) * 6.0f) : 0.0;
         i = (int) hh;
         ff = hh - i;
         p = v * (1.0 - s);
@@ -195,7 +193,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
                 b = q;
                 break;
         }
-        return new Color((int) (r * 255), (int) (g * 255), (int) (b * 255), 255);
+        return new Color((int) (r * 255 + 0.5f), (int) (g * 255 + 0.5f), (int) (b * 255 + 0.5f), 255);
     }
 
     public Color set(int r, int g, int b, int a) {
@@ -231,6 +229,16 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
         this.a = a;
         validate();
         return this;
+    }
+
+    public Color saturation(float saturation) {
+        float[] hsv = java.awt.Color.RGBtoHSB(r, g, b, null);
+        return set(fromHsv(hsv[0], saturation, hsv[2]));
+    }
+
+    public Color brightness(float brightness) {
+        float[] hsv = java.awt.Color.RGBtoHSB(r, g, b, null);
+        return set(fromHsv(hsv[0], hsv[1], brightness));
     }
 
     @Override
