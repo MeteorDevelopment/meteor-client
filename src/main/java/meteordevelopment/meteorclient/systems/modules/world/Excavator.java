@@ -6,15 +6,20 @@
 package meteordevelopment.meteorclient.systems.modules.world;
 
 import baritone.api.BaritoneAPI;
+import baritone.api.IBaritone;
 import baritone.api.selection.ISelection;
 import baritone.api.utils.BetterBlockPos;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
+import meteordevelopment.meteorclient.settings.ColorSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
-import meteordevelopment.meteorclient.utils.render.color.Color;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -22,14 +27,30 @@ import net.minecraft.util.math.BlockPos;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
 public class Excavator extends Module {
+    private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
+    private final SettingGroup sgGeneral = settings.getDefaultGroup();
+    private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
+    );
+    private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("side-color")
+        .description("The side color.")
+        .defaultValue(new SettingColor(255, 255, 255, 50))
+        .build()
+    );
+    private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
+        .name("line-color")
+        .description("The line color.")
+        .defaultValue(new SettingColor(255, 255, 255, 255))
+        .build()
+    );
     private Status status;
     private BlockPos start;
     private BlockPos end;
     private boolean excavating;
-
-    // TODO: add some feedback to notify the player about the start/end blocks being selected.
-    // This could be done either by sending a ChatUtils.sendMsg or by rendering the sel 1 & sel 2 (this option would be better)
-
 
     public Excavator() {
         super(Categories.World, "excavator", "Excavate a selection area.");
@@ -45,10 +66,10 @@ public class Excavator extends Module {
 
     @Override
     public void onDeactivate() {
-        clearSelection();
-        if (BaritoneAPI.getProvider().getPrimaryBaritone().getBuilderProcess().isActive()) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
-        }
+        ISelection selection = baritone.getSelectionManager().getLastSelection();
+        baritone.getSelectionManager().removeSelection(selection);
+
+        if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
     }
 
     @EventHandler
@@ -57,48 +78,33 @@ public class Excavator extends Module {
             return;
         }
 
-        if (mc.crosshairTarget instanceof BlockHitResult result) {
-            if (status == Status.SEL_START) {
-                start = result.getBlockPos();
-                status = Status.SEL_END;
-//                ChatUtils.sendMsg(Text.of(String.format("Start corner set: X=%d, Y=%d, Z=%d", start.getX(), start.getY(), start.getZ())));
+        if (!(mc.crosshairTarget instanceof BlockHitResult result)) return;
 
-            } else if (status == Status.SEL_END) {
-                end = result.getBlockPos();
-                status = Status.WORKING;
-//                ChatUtils.sendMsg(Text.of(String.format("End corner set: X=%d, Y=%d, Z=%d", end.getX(), end.getY(), end.getZ())));
-            }
+        if (status == Status.SEL_START) {
+            start = result.getBlockPos();
+            status = Status.SEL_END;
+            info("Start corner set: (%d, %d, %d)".formatted(start.getX(), start.getY(), start.getZ()));
+        } else if (status == Status.SEL_END) {
+            end = result.getBlockPos();
+            status = Status.WORKING;
+            info("End corner set: (%d, %d, %d)".formatted(end.getX(), end.getY(), end.getZ()));
         }
     }
 
     @EventHandler
-    private void onTick(Render3DEvent event) {
-        switch (status) {
-            case SEL_START, SEL_END -> {
-                if (mc.crosshairTarget instanceof BlockHitResult result) {
-                    event.renderer.box(result.getBlockPos(), new Color(255, 255, 0, 150), new Color(255, 255, 255, 150), ShapeMode.Lines, 0);
-                    // TODO: replace the colors in here with customizeable ones (recycle the BlockSelection settings?)
-                }
-            }
-            case WORKING -> {
-                if (!excavating) excavate();
-                if (!BaritoneAPI.getProvider().getPrimaryBaritone().getBuilderProcess().isActive()) {
-                    clearSelection();
-                    this.toggle();
-                }
-            }
-
+    private void onRender3D(Render3DEvent event) {
+        if (status == Status.SEL_START || status == Status.SEL_END) {
+            if (!(mc.crosshairTarget instanceof BlockHitResult result)) return;
+            event.renderer.box(result.getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
+        } else if (status == Status.WORKING) {
+            if (!excavating) excavate();
+            if (!baritone.getBuilderProcess().isActive()) toggle();
         }
     }
 
-    private static void clearSelection() {
-        ISelection selection = BaritoneAPI.getProvider().getPrimaryBaritone().getSelectionManager().getLastSelection();
-        BaritoneAPI.getProvider().getPrimaryBaritone().getSelectionManager().removeSelection(selection);
-    }
-
     private void excavate() {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getSelectionManager().addSelection(new BetterBlockPos(start), new BetterBlockPos(end));
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("sel cleararea");
+        baritone.getSelectionManager().addSelection(new BetterBlockPos(start), new BetterBlockPos(end));
+        baritone.getCommandManager().execute("sel cleararea");
         excavating = true;
     }
 
