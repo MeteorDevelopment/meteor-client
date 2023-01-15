@@ -56,21 +56,18 @@ public class Excavator extends Module {
         .defaultValue(ShapeMode.Both)
         .build()
     );
-
     private final Setting<SettingColor> sideColor = sgRendering.add(new ColorSetting.Builder()
         .name("side-color")
         .description("The side color.")
         .defaultValue(new SettingColor(255, 255, 255, 50))
         .build()
     );
-
     private final Setting<SettingColor> lineColor = sgRendering.add(new ColorSetting.Builder()
         .name("line-color")
         .description("The line color.")
         .defaultValue(new SettingColor(255, 255, 255, 255))
         .build()
     );
-
     private Status status;
     private BlockPos start;
     private BlockPos end;
