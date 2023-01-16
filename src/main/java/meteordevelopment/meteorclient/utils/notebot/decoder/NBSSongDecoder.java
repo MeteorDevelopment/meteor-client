@@ -162,6 +162,13 @@ public class NBSSongDecoder extends SongDecoder {
 
     private static String readString(DataInputStream dataInputStream) throws IOException {
         int length = readInt(dataInputStream);
+        if (length < 0) {
+            throw new EOFException("Length can't be negative! Length: " + length);
+        }
+        if (length > dataInputStream.available()) {
+            throw new EOFException("Can't read string that is larger than a buffer! Length: " + length + " Readable Bytes Length: " + dataInputStream.available());
+        }
+
         StringBuilder builder = new StringBuilder(length);
         for (; length > 0; --length) {
             char c = (char) dataInputStream.readByte();
