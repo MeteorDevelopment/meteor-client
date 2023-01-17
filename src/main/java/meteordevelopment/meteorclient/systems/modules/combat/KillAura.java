@@ -177,6 +177,15 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Double> fov = sgTargeting.add(new DoubleSetting.Builder()
+        .name("fov")
+        .description("Will only attack entities in the fov.")
+        .defaultValue(360)
+        .min(0)
+        .sliderMax(360)
+        .build()
+    );
+
     // Timing
 
     private final Setting<Boolean> pauseOnLag = sgTiming.add(new BoolSetting.Builder()
@@ -368,6 +377,7 @@ public class KillAura extends Module {
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(DamageSource.player(mc.player))) return false;
         }
+        if (!EntityUtils.inFov(entity, fov.get())) return false;
         return !(entity instanceof AnimalEntity animal) || !ignoreBabies.get() || !animal.isBaby();
     }
 
