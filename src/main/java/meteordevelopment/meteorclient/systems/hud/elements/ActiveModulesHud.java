@@ -172,7 +172,7 @@ public class ActiveModulesHud extends HudElement {
             case Smallest -> Double.compare(getModuleWidth(renderer, e1), getModuleWidth(renderer, e2));
         });
 
-        if (categoryGrouping.get()) modules.sort(Comparator.comparing(module -> module.category.hashCode()));
+        if (categoryGrouping.get()) modules.sort(Comparator.comparing(module -> module.category.name));
 
         double width = 0;
         double height = 0;
@@ -222,7 +222,10 @@ public class ActiveModulesHud extends HudElement {
         switch (colorMode.get()) {
             case Category -> color = module.category.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
             case Random -> color = module.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
-            case Rainbow -> color = Color.fromHsv(rainbowHue2 + rainbowSpread.get(), saturation.get().floatValue(), brightness.get().floatValue());
+            case Rainbow -> {
+                rainbowHue2 += rainbowSpread.get();
+                color = Color.fromHsv(rainbowHue2, saturation.get().floatValue(), brightness.get().floatValue());
+            }
         }
 
         renderer.text(module.title, x, y, color, shadow.get());
