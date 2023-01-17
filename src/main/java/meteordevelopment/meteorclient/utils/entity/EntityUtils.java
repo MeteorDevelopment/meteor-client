@@ -223,6 +223,6 @@ public class EntityUtils {
         double xDist = MathHelper.angleBetween(angle[0], mc.player.getYaw());
         double yDist = MathHelper.angleBetween(angle[1], mc.player.getPitch());
         double angleDistance = Math.hypot(xDist, yDist);
-        return !(angleDistance > fov);
+        return angleDistance <= fov;
     }
 }

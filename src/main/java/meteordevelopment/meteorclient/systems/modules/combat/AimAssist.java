@@ -69,7 +69,7 @@ public class AimAssist extends Module {
 
     private final Setting<Double> fov = sgGeneral.add(new DoubleSetting.Builder()
         .name("fov")
-        .description("Will only attack entities in the fov.")
+        .description("Will only aim entities in the fov.")
         .defaultValue(360)
         .min(0)
         .sliderMax(360)
@@ -107,14 +107,13 @@ public class AimAssist extends Module {
             if (!entity.isAlive()) return false;
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!ignoreWalls.get() && !PlayerUtils.canSeeEntity(entity)) return false;
-            if (!EntityUtils.inFov(entity, fov.get())) return false;
             if (entity == mc.player || !entities.get().getBoolean(entity.getType())) return false;
 
             if (entity instanceof PlayerEntity) {
                 return Friends.get().shouldAttack((PlayerEntity) entity);
             }
 
-            return true;
+            return EntityUtils.inFov(entity, fov.get());
         }, priority.get());
     }
 
