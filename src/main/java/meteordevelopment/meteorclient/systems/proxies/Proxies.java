@@ -20,7 +20,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     // https://regex101.com/r/gRHjnd/latest
     public static final Pattern PROXY_PATTERN = Pattern.compile("^(?:([\\w\\s]+)=)?((?:0*(?:\\d|[1-9]\\d|1\\d\\d|2[0-4]\\d|25[0-5])(?:\\.(?!:)|)){4}):(?!0)(\\d{1,4}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])(?i:@(socks[45]))?$", Pattern.MULTILINE);
 
-    private List<Proxy> proxies = new ArrayList<>();
+    private List<Proxy> proxyList = new ArrayList<>();
 
     public Proxies() {
         super("proxies");
@@ -31,26 +31,24 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     public boolean add(Proxy proxy) {
-        for (Proxy p : proxies) {
-            if (p.type.get().equals(proxy.type.get()) && p.address.get().equals(proxy.address.get()) && p.port.get() == proxy.port.get()) return false;
+        for (Proxy p : proxyList) {
+            if (p.equals(proxy)) return false;
         }
 
-        if (proxies.isEmpty()) proxy.enabled.set(true);
+        if (proxyList.isEmpty()) proxy.enabled.set(true);
 
-        proxies.add(proxy);
+        proxyList.add(proxy);
         save();
 
         return true;
     }
 
     public void remove(Proxy proxy) {
-        if (proxies.remove(proxy)) {
-            save();
-        }
+        if (proxyList.remove(proxy)) save();
     }
 
     public Proxy getEnabled() {
-        for (Proxy proxy : proxies) {
+        for (Proxy proxy : proxyList) {
             if (proxy.enabled.get()) return proxy;
         }
 
@@ -58,7 +56,7 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     public void setEnabled(Proxy proxy, boolean enabled) {
-        for (Proxy p : proxies) {
+        for (Proxy p : proxyList) {
             p.enabled.set(false);
         }
 
@@ -67,28 +65,25 @@ public class Proxies extends System<Proxies> implements Iterable<Proxy> {
     }
 
     public boolean isEmpty() {
-        return proxies.isEmpty();
+        return proxyList.isEmpty();
     }
 
     @NotNull
     @Override
     public Iterator<Proxy> iterator() {
-        return proxies.iterator();
+        return proxyList.iterator();
     }
 
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-
-        tag.put("proxies", NbtUtils.listToTag(proxies));
-
+        tag.put("proxies", NbtUtils.listToTag(proxyList));
         return tag;
     }
 
     @Override
     public Proxies fromTag(NbtCompound tag) {
-        proxies = NbtUtils.listFromTag(tag.getList("proxies", 10), Proxy::new);
-
+        proxyList = NbtUtils.listFromTag(tag.getList("proxies", 10), Proxy::new);
         return this;
     }
 }

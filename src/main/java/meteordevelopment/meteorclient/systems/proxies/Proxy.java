@@ -20,21 +20,21 @@ public class Proxy implements ISerializable<Proxy> {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgOptional = settings.createGroup("Optional");
 
-    public Setting<String> name = sgGeneral.add(new StringSetting.Builder()
+    public final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
         .name("name")
         .description("The name of the proxy.")
         .defaultValue("")
         .build()
     );
 
-    public Setting<ProxyType> type = sgGeneral.add(new EnumSetting.Builder<ProxyType>()
+    public final Setting<ProxyType> type = sgGeneral.add(new EnumSetting.Builder<ProxyType>()
         .name("type")
         .description("The type of proxy.")
-        .defaultValue(ProxyType.Socks5)
+        .defaultValue(ProxyType.SOCKS_5)
         .build()
     );
 
-    public Setting<String> address = sgGeneral.add(new StringSetting.Builder()
+    public final Setting<String> address = sgGeneral.add(new StringSetting.Builder()
         .name("address")
         .description("The ip address of the proxy.")
         .defaultValue("")
@@ -42,7 +42,7 @@ public class Proxy implements ISerializable<Proxy> {
         .build()
     );
 
-    public Setting<Integer> port = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Integer> port = sgGeneral.add(new IntSetting.Builder()
         .name("port")
         .description("The port of the proxy.")
         .defaultValue(0)
@@ -51,7 +51,7 @@ public class Proxy implements ISerializable<Proxy> {
         .build()
     );
 
-    public Setting<Boolean> enabled = sgGeneral.add(new BoolSetting.Builder()
+    public final Setting<Boolean> enabled = sgGeneral.add(new BoolSetting.Builder()
         .name("enabled")
         .description("Whether the proxy is enabled.")
         .defaultValue(true)
@@ -60,18 +60,18 @@ public class Proxy implements ISerializable<Proxy> {
 
     // Optional
 
-    public Setting<String> username = sgOptional.add(new StringSetting.Builder()
+    public final Setting<String> username = sgOptional.add(new StringSetting.Builder()
         .name("username")
         .description("The username of the proxy.")
         .defaultValue("")
         .build()
     );
 
-    public Setting<String> password = sgOptional.add(new StringSetting.Builder()
+    public final Setting<String> password = sgOptional.add(new StringSetting.Builder()
         .name("password")
         .description("The password of the proxy.")
         .defaultValue("")
-        .visible(() -> type.get().equals(ProxyType.Socks5))
+        .visible(() -> type.get() == ProxyType.SOCKS_5)
         .build()
     );
 
@@ -81,21 +81,21 @@ public class Proxy implements ISerializable<Proxy> {
     }
 
     public boolean resolveAddress() {
-        int port = this.port.get();
-        String address = this.address.get();
+        int p = port.get();
+        String addr = address.get();
 
-        if (port <= 0 || port > 65535 || address == null || address.isBlank()) return false;
-        InetSocketAddress socketAddress = new InetSocketAddress(address, port);
+        if (p <= 0 || p > 65535 || addr == null || addr.isBlank()) return false;
+        InetSocketAddress socketAddress = new InetSocketAddress(addr, p);
         return !socketAddress.isUnresolved();
     }
 
     public static class Builder {
-        protected ProxyType type = ProxyType.Socks5;
+        protected ProxyType type = ProxyType.SOCKS_5;
         protected String address = "";
-        protected int port = 0;
+        protected int port;
         protected String name = "";
         protected String username = "";
-        protected boolean enabled = false;
+        protected boolean enabled;
 
         public Builder type(ProxyType type) {
             this.type = type;
@@ -130,7 +130,7 @@ public class Proxy implements ISerializable<Proxy> {
         public Proxy build() {
             Proxy proxy = new Proxy();
 
-            if (!type.equals(proxy.type.getDefaultValue())) proxy.type.set(type);
+            if (type != proxy.type.getDefaultValue()) proxy.type.set(type);
             if (!address.equals(proxy.address.getDefaultValue())) proxy.address.set(address);
             if (port != proxy.port.getDefaultValue()) proxy.port.set(port);
             if (!name.equals(proxy.name.getDefaultValue())) proxy.name.set(name);
@@ -144,18 +144,13 @@ public class Proxy implements ISerializable<Proxy> {
     @Override
     public NbtCompound toTag() {
         NbtCompound tag = new NbtCompound();
-
         tag.put("settings", settings.toTag());
-
         return tag;
     }
 
     @Override
     public Proxy fromTag(NbtCompound tag) {
-        if (tag.contains("settings")) {
-            settings.fromTag(tag.getCompound("settings"));
-        }
-
+        if (tag.contains("settings")) settings.fromTag(tag.getCompound("settings"));
         return this;
     }
 
@@ -164,6 +159,8 @@ public class Proxy implements ISerializable<Proxy> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Proxy proxy = (Proxy) o;
-        return Objects.equals(proxy.address.get(), this.address.get()) && Objects.equals(proxy.port.get(), this.port.get());
+        return Objects.equals(proxy.address.get(), address.get())
+            && Objects.equals(proxy.port.get(), port.get())
+            && proxy.type.get() == type.get();
     }
 }

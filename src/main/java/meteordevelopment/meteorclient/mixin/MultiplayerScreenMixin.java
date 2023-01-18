@@ -42,19 +42,15 @@ public class MultiplayerScreenMixin extends Screen {
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
         addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Accounts"), button -> {
-                    client.setScreen(GuiThemes.get().accountsScreen());
-                })
-                .position(this.width - 75 - 3, 3)
+            new ButtonWidget.Builder(Text.literal("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen()))
+                .position(width - 75 - 3, 3)
                 .size(75, 20)
                 .build()
         );
 
         addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Proxies"), button -> {
-                    client.setScreen(GuiThemes.get().proxiesScreen());
-                })
-                .position(this.width - 75 - 3 - 75 - 2, 3)
+            new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
+                .position(width - 75 - 3 - 75 - 2, 3)
                 .size(75, 20)
                 .build()
         );
@@ -75,7 +71,11 @@ public class MultiplayerScreenMixin extends Screen {
         Proxy proxy = Proxies.get().getEnabled();
 
         String left = proxy != null ? "Using proxy " : "Not using a proxy";
-        String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
+        String right = null;
+        if (proxy != null) {
+            String name = proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(%s) ".formatted(proxy.name.get()) : "";
+            right = String.format("%s%s:%d", name, proxy.address.get(), proxy.port.get());
+        }
 
         textRenderer.drawWithShadow(matrices, left, x, y, textColor1);
         if (right != null) textRenderer.drawWithShadow(matrices, right, x + textRenderer.getWidth(left), y, textColor2);

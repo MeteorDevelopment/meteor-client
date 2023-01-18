@@ -26,21 +26,20 @@ public class ProxiesImportScreen extends WindowScreen {
     public ProxiesImportScreen(GuiTheme theme, File file) {
         super(theme, "Import Proxies");
         this.file = file;
-        this.onClosed(() -> {
-            if (parent instanceof ProxiesScreen screen) {
-                screen.reload();
-            }
+        onClosed(() -> {
+            if (parent instanceof ProxiesScreen screen) screen.reload();
         });
     }
 
     @Override
     public void initWidgets() {
         if (file.exists() && file.isFile()) {
-            add(theme.label("Importing proxies from " + file.getName() + "...").color(Color.GREEN));
+            add(theme.label("Importing proxies from %s...".formatted(file.getName())).color(Color.GREEN));
             WVerticalList list = add(theme.section("Log", false)).widget().add(theme.verticalList()).expandX().widget();
             Proxies proxies = Proxies.get();
             try {
-                int pog = 0, bruh = 0;
+                int success = 0;
+                int failure = 0;
                 for (String line : Files.readAllLines(file.toPath())) {
                     Matcher matcher = Proxies.PROXY_PATTERN.matcher(line);
 
@@ -51,34 +50,35 @@ public class ProxiesImportScreen extends WindowScreen {
                         Proxy proxy = new Proxy.Builder()
                             .address(address)
                             .port(port)
-                            .name(matcher.group(1) != null ? matcher.group(1) : address + ":" + port)
-                            .type(matcher.group(4) != null ? ProxyType.parse(matcher.group(4)) : ProxyType.Socks4)
+                            .name(matcher.group(1) != null ? matcher.group(1) : "%s:%d".formatted(address, port))
+                            .type(matcher.group(4) != null ? ProxyType.parse(matcher.group(4)) : ProxyType.SOCKS_4)
+                            //FIXME: this doesn't differentiate socks5 vs socks4 https://www.wikiwand.com/en/SOCKS
+                            //Can be tested with these: https://github.com/TheSpeedX/PROXY-List
                             .build();
 
                         if (proxies.add(proxy)) {
-                            list.add(theme.label("Imported proxy: " + proxy.name.get()).color(Color.GREEN));
-                            pog++;
+                            list.add(theme.label("Imported proxy: %s".formatted(proxy.name.get())).color(Color.GREEN));
+                            success++;
                         }
                         else {
-                            list.add(theme.label("Proxy already exists: " + proxy.name.get()).color(Color.ORANGE));
-                            bruh++;
+                            list.add(theme.label("Proxy already exists: %s".formatted(proxy.name.get())).color(Color.ORANGE));
+                            failure++;
                         }
                     }
                     else {
-                        list.add(theme.label("Invalid proxy: " + line).color(Color.RED));
-                        bruh++;
+                        list.add(theme.label("Invalid proxy: %s".formatted(line)).color(Color.RED));
+                        failure++;
                     }
                 }
                 add(theme
-                    .label("Successfully imported " + pog + "/" + (bruh + pog) + " proxies.")
-                    .color(Utils.lerp(Color.RED, Color.GREEN, (float) pog / (pog + bruh)))
+                    .label("Successfully imported %d/%d proxies.".formatted(success, failure + success))
+                    .color(Utils.lerp(Color.RED, Color.GREEN, (float) success / (success + failure)))
                 );
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            add(theme.label("Invalid File!"));
-        }
+        } else add(theme.label("Invalid File!"));
+
         add(theme.horizontalSeparator()).expandX();
         WButton btnBack = add(theme.button("Back")).expandX().widget();
         btnBack.action = this::close;

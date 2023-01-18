@@ -61,10 +61,10 @@ public class ProxiesScreen extends WindowScreen {
         WButton importBtn = l.add(theme.button("Import")).expandX().widget();
         importBtn.action = () -> {
             String selectedFile = TinyFileDialogs.tinyfd_openFileDialog("Import Proxies", null, filters, null, false);
-            if (selectedFile != null) {
-                File file = new File(selectedFile);
-                mc.setScreen(new ProxiesImportScreen(theme, file));
-            }
+            if (selectedFile == null) return;
+
+            File file = new File(selectedFile);
+            mc.setScreen(new ProxiesImportScreen(theme, file));
         };
     }
 
@@ -86,7 +86,7 @@ public class ProxiesScreen extends WindowScreen {
             WLabel name = table.add(theme.label(proxy.name.get())).widget();
             name.color = theme.textColor();
 
-            WLabel type = table.add(theme.label("(" + proxy.type.get() + ")")).widget();
+            WLabel type = table.add(theme.label("(%s)".formatted(proxy.type.get()))).widget();
             type.color = theme.textSecondaryColor();
 
             WHorizontalList ipList = table.add(theme.horizontalList()).expandCellX().widget();
@@ -119,7 +119,7 @@ public class ProxiesScreen extends WindowScreen {
         return NbtUtils.fromClipboard(Proxies.get());
     }
 
-    protected static class EditProxyScreen extends EditSystemScreen<Proxy> {
+    protected static final class EditProxyScreen extends EditSystemScreen<Proxy> {
         public EditProxyScreen(GuiTheme theme, Proxy value, Runnable reload) {
             super(theme, value, reload);
         }
