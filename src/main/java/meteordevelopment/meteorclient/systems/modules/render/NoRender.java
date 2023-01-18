@@ -148,6 +148,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noObfuscation = sgHUD.add(new BoolSetting.Builder()
+        .name("obfuscation")
+        .description("Disables obfuscation styling of characters.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> noPotionIcons = sgHUD.add(new BoolSetting.Builder()
         .name("potion-icons")
         .description("Disables rendering of status effect icons.")
@@ -413,6 +420,10 @@ public class NoRender extends Module {
 
     public boolean noHeldItemName() {
         return isActive() && noHeldItemName.get();
+    }
+
+    public boolean noObfuscation() {
+        return isActive() && noObfuscation.get();
     }
 
     public boolean noPotionIcons() {
