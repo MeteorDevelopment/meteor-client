@@ -164,13 +164,6 @@ public class NoRender extends Module {
 
     // World
 
-    private final Setting<Boolean> noWeather = sgWorld.add(new BoolSetting.Builder()
-        .name("weather")
-        .description("Disables rendering of weather.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> noBlindness = sgWorld.add(new BoolSetting.Builder()
         .name("blindness")
         .description("Disables rendering of blindness.")
@@ -425,10 +418,6 @@ public class NoRender extends Module {
 
     // World
 
-    public boolean noWeather() {
-        return isActive() && noWeather.get();
-    }
-
     public boolean noBlindness() {
         return isActive() && noBlindness.get();
     }
@@ -489,8 +478,7 @@ public class NoRender extends Module {
 
     @EventHandler
     private void onAddParticle(ParticleEvent event) {
-        if (noWeather.get() && event.particle.getType() == ParticleTypes.RAIN) event.cancel();
-        else if (noFireworkExplosions.get() && event.particle.getType() == ParticleTypes.FIREWORK) event.cancel();
+        if (noFireworkExplosions.get() && event.particle.getType() == ParticleTypes.FIREWORK) event.cancel();
         else if (particles.get().contains(event.particle.getType())) event.cancel();
     }
 
