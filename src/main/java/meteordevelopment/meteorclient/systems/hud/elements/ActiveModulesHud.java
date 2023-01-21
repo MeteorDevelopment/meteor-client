@@ -12,7 +12,9 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class ActiveModulesHud extends HudElement {
     public static final HudElementInfo<ActiveModulesHud> INFO = new HudElementInfo<>(Hud.GROUP, "active-modules", "Displays your active modules.", ActiveModulesHud::new);
@@ -217,16 +219,17 @@ public class ActiveModulesHud extends HudElement {
 
     private void renderModule(HudRenderer renderer, List<Module> modules, int index, double x, double y) {
         Module module = modules.get(index);
-        Color color = flatColor.get();
+        Color color;
 
-        switch (colorMode.get()) {
-            case Category -> color = module.category.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
-            case Random -> color = module.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
+        color = switch (colorMode.get()) {
+            case Category -> module.category.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
+            case Flat -> flatColor.get();
+            case Random -> module.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
             case Rainbow -> {
                 rainbowHue2 += rainbowSpread.get();
-                color = Color.fromHsv(rainbowHue2, saturation.get().floatValue(), brightness.get().floatValue());
+                yield Color.fromHsv(rainbowHue2, saturation.get().floatValue(), brightness.get().floatValue());
             }
-        }
+        };
 
         renderer.text(module.title, x, y, color, shadow.get());
 
