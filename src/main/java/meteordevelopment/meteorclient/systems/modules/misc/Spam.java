@@ -137,6 +137,10 @@ public class Spam extends Module {
 
         if (timer <= 0) {
             List<String> msgs = fileSpam.get() ? textInFile : messages.get();
+            if (textInFile == null) {
+                toggle();
+                return;
+            }
             int i;
             if (random.get()) {
                 i = Utils.random(0, msgs.size());
