@@ -29,7 +29,10 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Wearable;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
@@ -45,27 +48,21 @@ public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
+    private final SettingGroup sgStealDump = settings.createGroup("Steal and Dump");
     private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
 
     // General
 
     private final Setting<Boolean> mouseDragItemMove = sgGeneral.add(new BoolSetting.Builder()
-            .name("mouse-drag-item-move")
-            .description("Moving mouse over items while holding shift will transfer it to the other container.")
-            .defaultValue(true)
-            .build()
+        .name("mouse-drag-item-move")
+        .description("Moving mouse over items while holding shift will transfer it to the other container.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<List<Item>> antiDropItems = sgGeneral.add(new ItemListSetting.Builder()
-            .name("anti-drop-items")
-            .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
-            .build()
-    );
-
-    private final Setting<Boolean> buttons = sgGeneral.add(new BoolSetting.Builder()
-        .name("inventory-buttons")
-        .description("Shows steal and dump buttons in container guis.")
-        .defaultValue(true)
+        .name("anti-drop-items")
+        .description("Items to prevent dropping. Doesn't work in creative inventory screen.")
         .build()
     );
 
@@ -143,7 +140,57 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    // Auto steal
+    // Steal & Dump
+
+    private final Setting<Boolean> buttons = sgStealDump.add(new BoolSetting.Builder()
+        .name("inventory-buttons")
+        .description("Shows steal and dump buttons in container guis.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> stealDrop = sgStealDump.add(new BoolSetting.Builder()
+        .name("steal-drop")
+        .description("Drop items to the ground instead of stealing them.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> dropBackwards = sgStealDump.add(new BoolSetting.Builder()
+        .name("drop-backwards")
+        .description("Drop items behind you.")
+        .defaultValue(false)
+        .visible(stealDrop::get)
+        .build()
+    );
+
+    private final Setting<ListMode> dumpFilter = sgStealDump.add(new EnumSetting.Builder<ListMode>()
+        .name("dump-filter")
+        .description("Dump mode.")
+        .defaultValue(ListMode.None)
+        .build()
+    );
+
+    private final Setting<List<Item>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
+        .name("dump-items")
+        .description("Items to dump.")
+        .build()
+    );
+
+    private final Setting<ListMode> stealFilter = sgStealDump.add(new EnumSetting.Builder<ListMode>()
+        .name("steal-filter")
+        .description("Steal mode.")
+        .defaultValue(ListMode.None)
+        .build()
+    );
+
+    private final Setting<List<Item>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
+        .name("steal-items")
+        .description("Items to steal.")
+        .build()
+    );
+
+    // Auto Steal
 
     private final Setting<Boolean> autoSteal = sgAutoSteal.add(new BoolSetting.Builder()
         .name("auto-steal")
@@ -169,6 +216,14 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
+    private final Setting<Integer> autoStealInitDelay = sgAutoSteal.add(new IntSetting.Builder()
+        .name("initial-delay")
+        .description("The initial delay before stealing in milliseconds. 0 to use normal delay instead.")
+        .defaultValue(50)
+        .sliderMax(1000)
+        .build()
+    );
+
     private final Setting<Integer> autoStealRandomDelay = sgAutoSteal.add(new IntSetting.Builder()
         .name("random")
         .description("Randomly adds a delay of up to the specified time in milliseconds.")
@@ -177,7 +232,6 @@ public class InventoryTweaks extends Module {
         .defaultValue(50)
         .build()
     );
-
 
     private InventorySorter sorter;
     private boolean invOpened;
@@ -227,7 +281,8 @@ public class InventoryTweaks extends Module {
     }
 
     private boolean sort() {
-        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null) return false;
+        if (!sortingEnabled.get() || !(mc.currentScreen instanceof HandledScreen<?> screen) || sorter != null)
+            return false;
 
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             FindItemResult empty = InvUtils.findEmpty();
@@ -296,7 +351,8 @@ public class InventoryTweaks extends Module {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (autoDropItems.get().contains(itemStack.getItem())) {
-                if (!autoDropOnlyFullStacks.get() || itemStack.getCount() == itemStack.getMaxCount()) InvUtils.drop().slot(i);
+                if (!autoDropOnlyFullStacks.get() || itemStack.getCount() == itemStack.getMaxCount())
+                    InvUtils.drop().slot(i);
             }
         }
     }
@@ -335,11 +391,16 @@ public class InventoryTweaks extends Module {
         return (handler instanceof GenericContainerScreenHandler ? ((GenericContainerScreenHandler) handler).getRows() : 3);
     }
 
-    private void moveSlots(ScreenHandler handler, int start, int end) {
+    private void moveSlots(ScreenHandler handler, int start, int end, boolean steal) {
+        boolean initial = autoStealInitDelay.get() != 0;
         for (int i = start; i < end; i++) {
             if (!handler.getSlot(i).hasStack()) continue;
 
-            int sleep = getSleepTime();
+            int sleep;
+            if (initial) {
+                sleep = autoStealInitDelay.get();
+                initial = false;
+            } else sleep = getSleepTime();
             if (sleep > 0) {
                 try {
                     Thread.sleep(sleep);
@@ -348,20 +409,38 @@ public class InventoryTweaks extends Module {
                 }
             }
 
-            // Exit if user closes screen
-            if (mc.currentScreen == null) break;
+            // Exit if user closes screen or exit world
+            if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
-            InvUtils.quickMove().slotId(i);
+            Item item = handler.getSlot(i).getStack().getItem();
+            if (steal) {
+                if (stealFilter.get() == ListMode.Whitelist && !stealItems.get().contains(item))
+                    continue;
+                if (stealFilter.get() == ListMode.Blacklist && stealItems.get().contains(item))
+                    continue;
+            } else {
+                if (dumpFilter.get() == ListMode.Whitelist && !dumpItems.get().contains(item))
+                    continue;
+                if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
+                    continue;
+            }
+
+            if (steal && stealDrop.get()) {
+                if (dropBackwards.get()) {
+                    int iCopy = i;
+                    Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
+                }
+            } else InvUtils.quickMove().slotId(i);
         }
     }
 
     public void steal(ScreenHandler handler) {
-        MeteorExecutor.execute(() -> moveSlots(handler, 0, getRows(handler) * 9));
+        MeteorExecutor.execute(() -> moveSlots(handler, 0, getRows(handler) * 9, true));
     }
 
     public void dump(ScreenHandler handler) {
         int playerInvOffset = getRows(handler) * 9;
-        MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9));
+        MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9, false));
     }
 
     public boolean showButtons() {
@@ -392,5 +471,11 @@ public class InventoryTweaks extends Module {
                 }
             }
         }
+    }
+
+    public enum ListMode {
+        Whitelist,
+        Blacklist,
+        None
     }
 }
