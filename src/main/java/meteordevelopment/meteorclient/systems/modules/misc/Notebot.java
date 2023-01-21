@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoder;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoders;
+import meteordevelopment.meteorclient.utils.notebot.notedetect.NoteDetectMode;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -84,6 +85,13 @@ public class Notebot extends Module {
         .name("mode")
         .description("Select mode of notebot")
         .defaultValue(NotebotUtils.NotebotMode.ExactInstruments)
+        .build()
+    );
+
+    public final Setting<NoteDetectMode> noteDetectMode = sgGeneral.add(new EnumSetting.Builder<NoteDetectMode>()
+        .name("note-detect-mode")
+        .description("Select a note detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note")
+        .defaultValue(NoteDetectMode.BlockState)
         .build()
     );
 
@@ -750,7 +758,7 @@ public class Notebot extends Module {
 
                     if (!isValidScanSpot(pos)) continue;
 
-                    Note note = NotebotUtils.getNoteFromNoteBlock(blockState, mode.get());
+                    Note note = NotebotUtils.getNoteFromNoteBlock(blockState, pos, mode.get(), noteDetectMode.get().getNoteDetectFunction());
                     scannedNoteblocks.put(note, pos);
                 }
             }
