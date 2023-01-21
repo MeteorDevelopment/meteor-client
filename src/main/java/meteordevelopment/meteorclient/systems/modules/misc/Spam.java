@@ -17,15 +17,35 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 public class Spam extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
+    private final Setting<Boolean> fileSpam = sgGeneral.add(new BoolSetting.Builder()
+        .name("file-spam")
+        .description("Use files instead of message lists.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<String> textPath = sgGeneral.add(new StringSetting.Builder()
+        .name("text-path")
+        .description("File to use for spam. Re-activate to take effect.")
+        .defaultValue("text.txt")
+        .visible(fileSpam::get)
+        .build()
+    );
+
     private final Setting<List<String>> messages = sgGeneral.add(new StringListSetting.Builder()
         .name("messages")
         .description("Messages to use for spam.")
         .defaultValue(List.of("Meteor on Crack!"))
+        .visible(() -> !fileSpam.get())
         .build()
     );
 
@@ -76,6 +96,7 @@ public class Spam extends Module {
         .build()
     );
 
+    private List<String> textInFile;
     private int messageI, timer;
 
     public Spam() {
@@ -86,6 +107,16 @@ public class Spam extends Module {
     public void onActivate() {
         timer = delay.get();
         messageI = 0;
+
+        if (fileSpam.get()) {
+            File spamText = new File(textPath.get());
+            try (FileInputStream in = new FileInputStream(spamText)) {
+                textInFile = Arrays.stream(new String(in.readAllBytes()).split("\n")).map(s -> s.replace("\r", "")).toList();
+            } catch (IOException e) {
+                ChatUtils.error("Spam", "Failed to read %s.", spamText.getAbsolutePath());
+                toggle();
+            }
+        }
     }
 
     @EventHandler
@@ -105,24 +136,23 @@ public class Spam extends Module {
         if (messages.get().isEmpty()) return;
 
         if (timer <= 0) {
+            List<String> msgs = fileSpam.get() ? textInFile : messages.get();
             int i;
             if (random.get()) {
-                i = Utils.random(0, messages.get().size());
-            }
-            else {
-                if (messageI >= messages.get().size()) messageI = 0;
+                i = Utils.random(0, msgs.size());
+            } else {
+                if (messageI >= msgs.size()) messageI = 0;
                 i = messageI++;
             }
 
-            String text = messages.get().get(i);
+            String text = msgs.get(i);
             if (bypass.get()) {
                 text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
 
             ChatUtils.sendPlayerMsg(text);
             timer = delay.get();
-        }
-        else {
+        } else {
             timer--;
         }
     }
