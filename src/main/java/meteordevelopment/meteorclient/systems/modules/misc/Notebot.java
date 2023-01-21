@@ -758,7 +758,7 @@ public class Notebot extends Module {
 
                     if (!isValidScanSpot(pos)) continue;
 
-                    Note note = NotebotUtils.getNoteFromNoteBlock(blockState, pos, mode.get(), instrumentDetectMode.get().getNoteDetectFunction());
+                    Note note = NotebotUtils.getNoteFromNoteBlock(blockState, pos, mode.get(), instrumentDetectMode.get().getInstrumentDetectFunction());
                     scannedNoteblocks.put(note, pos);
                 }
             }

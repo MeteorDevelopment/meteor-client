@@ -20,7 +20,7 @@ public enum InstrumentDetectMode {
         this.instrumentDetectFunction = instrumentDetectFunction;
     }
 
-    public InstrumentDetectFunction getNoteDetectFunction() {
+    public InstrumentDetectFunction getInstrumentDetectFunction() {
         return instrumentDetectFunction;
     }
 }
