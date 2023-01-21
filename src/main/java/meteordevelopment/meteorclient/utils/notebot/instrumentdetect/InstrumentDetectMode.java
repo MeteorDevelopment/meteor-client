@@ -3,24 +3,24 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.notebot.notedetect;
+package meteordevelopment.meteorclient.utils.notebot.instrumentdetect;
 
 import net.minecraft.block.NoteBlock;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.client.MinecraftClient;
 
-public enum NoteDetectMode {
+public enum InstrumentDetectMode {
     BlockState(((noteBlock, blockPos) -> noteBlock.get(NoteBlock.INSTRUMENT))),
     BelowBlock(((noteBlock, blockPos) -> Instrument.fromBelowState(MinecraftClient.getInstance().world.getBlockState(blockPos.down()))))
     ;
 
-    private final NoteDetectFunction noteDetectFunction;
+    private final InstrumentDetectFunction instrumentDetectFunction;
 
-    NoteDetectMode(NoteDetectFunction noteDetectFunction) {
-        this.noteDetectFunction = noteDetectFunction;
+    InstrumentDetectMode(InstrumentDetectFunction instrumentDetectFunction) {
+        this.instrumentDetectFunction = instrumentDetectFunction;
     }
 
-    public NoteDetectFunction getNoteDetectFunction() {
-        return noteDetectFunction;
+    public InstrumentDetectFunction getNoteDetectFunction() {
+        return instrumentDetectFunction;
     }
 }
