@@ -3,13 +3,13 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.notebot.notedetect;
+package meteordevelopment.meteorclient.utils.notebot.instrumentdetect;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.enums.Instrument;
 import net.minecraft.util.math.BlockPos;
 
-public interface NoteDetectFunction {
+public interface InstrumentDetectFunction {
     /**
      * Detects an instrument for noteblock
      *

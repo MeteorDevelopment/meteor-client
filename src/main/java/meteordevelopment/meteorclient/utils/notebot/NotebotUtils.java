@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.notebot;
 
-import meteordevelopment.meteorclient.utils.notebot.notedetect.NoteDetectFunction;
+import meteordevelopment.meteorclient.utils.notebot.instrumentdetect.InstrumentDetectFunction;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.NoteBlock;
@@ -18,11 +18,11 @@ import java.util.Map;
 
 public class NotebotUtils {
 
-    public static Note getNoteFromNoteBlock(BlockState noteBlock, BlockPos blockPos, NotebotMode mode, NoteDetectFunction noteDetectFunction) {
+    public static Note getNoteFromNoteBlock(BlockState noteBlock, BlockPos blockPos, NotebotMode mode, InstrumentDetectFunction instrumentDetectFunction) {
         Instrument instrument = null;
         int level = noteBlock.get(NoteBlock.NOTE);
         if (mode == NotebotMode.ExactInstruments) {
-            instrument = noteDetectFunction.detectInstrument(noteBlock, blockPos);
+            instrument = instrumentDetectFunction.detectInstrument(noteBlock, blockPos);
         }
 
         return new Note(instrument, level);
