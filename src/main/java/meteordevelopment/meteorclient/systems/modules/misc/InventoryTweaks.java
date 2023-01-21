@@ -387,10 +387,6 @@ public class InventoryTweaks extends Module {
         return autoStealDelay.get() + (autoStealRandomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, autoStealRandomDelay.get()) : 0);
     }
 
-    private int getRows(ScreenHandler handler) {
-        return (handler instanceof GenericContainerScreenHandler ? ((GenericContainerScreenHandler) handler).getRows() : 3);
-    }
-
     private void moveSlots(ScreenHandler handler, int start, int end, boolean steal) {
         boolean initial = autoStealInitDelay.get() != 0;
         for (int i = start; i < end; i++) {
@@ -435,11 +431,11 @@ public class InventoryTweaks extends Module {
     }
 
     public void steal(ScreenHandler handler) {
-        MeteorExecutor.execute(() -> moveSlots(handler, 0, getRows(handler) * 9, true));
+        MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(handler.slots.size()), true));
     }
 
     public void dump(ScreenHandler handler) {
-        int playerInvOffset = getRows(handler) * 9;
+        int playerInvOffset = SlotUtils.indexToId(SlotUtils.HOTBAR_START);
         MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9, false));
     }
 
@@ -463,12 +459,10 @@ public class InventoryTweaks extends Module {
     private void onInventory(InventoryEvent event) {
         ScreenHandler handler = mc.player.currentScreenHandler;
         if (event.packet.getSyncId() == handler.syncId) {
-            if (handler instanceof GenericContainerScreenHandler || handler instanceof ShulkerBoxScreenHandler) {
-                if (autoSteal.get()) {
-                    steal(handler);
-                } else if (autoDump.get()) {
-                    dump(handler);
-                }
+            if (autoSteal.get()) {
+                steal(handler);
+            } else if (autoDump.get()) {
+                dump(handler);
             }
         }
     }
