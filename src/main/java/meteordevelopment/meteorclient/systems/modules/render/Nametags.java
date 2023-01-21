@@ -225,7 +225,7 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> pingColor = sgRender.add(new ColorSetting.Builder()
         .name("ping-color")
-        .description("The color of the nametag names.")
+        .description("The color of the nametag ping.")
         .defaultValue(new SettingColor(20, 170, 170))
         .visible(displayPing::get)
         .build()
@@ -233,17 +233,25 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> gamemodeColor = sgRender.add(new ColorSetting.Builder()
         .name("gamemode-color")
-        .description("The color of the nametag names.")
+        .description("The color of the nametag gamemode.")
         .defaultValue(new SettingColor(232, 185, 35))
         .visible(displayGameMode::get)
         .build()
     );
 
+    private final Setting<DistanceColorMode> distanceColorMode = sgRender.add(new EnumSetting.Builder<DistanceColorMode>()
+        .name("distance-color-mode")
+        .description("The mode to color the nametag distance with.")
+        .defaultValue(DistanceColorMode.Gradient)
+        .visible(displayDistance::get)
+        .build()
+    );
+
     private final Setting<SettingColor> distanceColor = sgRender.add(new ColorSetting.Builder()
         .name("distance-color")
-        .description("The color of the nametag names.")
+        .description("The color of the nametag distance.")
         .defaultValue(new SettingColor(150, 150, 150))
-        .visible(displayDistance::get)
+        .visible(() -> displayDistance.get() && distanceColorMode.get() == DistanceColorMode.Flat)
         .build()
     );
 
@@ -422,7 +430,13 @@ public class Nametags extends Module {
 
         hX = text.render(healthText, hX, hY, healthColor, shadow);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, pingColor.get(), shadow);
-        if (displayDistance.get() && renderPlayerDistance) text.render(distText, hX, hY, distanceColor.get(), shadow);
+        if (displayDistance.get() && renderPlayerDistance) {
+            switch (distanceColorMode.get()) {
+                case Flat ->  text.render(distText, hX, hY, distanceColor.get(), shadow);
+                case Gradient -> text.render(distText, hX, hY, EntityUtils.getColorFromDistance(mc.player), shadow);
+            }
+        }
+
         text.end();
 
         if (displayItems.get()) {
@@ -629,6 +643,11 @@ public class Nametags extends Module {
     public enum Position {
         Above,
         OnTop
+    }
+
+    public enum DistanceColorMode {
+        Gradient,
+        Flat;
     }
 
     public boolean excludeBots() {
