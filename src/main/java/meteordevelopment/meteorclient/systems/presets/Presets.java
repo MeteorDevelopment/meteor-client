@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.presets;
 
+import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -30,8 +31,9 @@ public class Presets extends System<Presets> implements Iterable<Preset<?>> {
         save();
     }
 
-    public List<Preset<?>> getAll() {
-        return presets;
+    @SuppressWarnings("unchecked")
+    public <T extends Setting<?>> List<Preset<T>> getPresetForSetting(T setting) {
+        return presets.stream().filter(preset -> preset.setting.getClass() == setting.getClass()).map(preset -> (Preset<T>) preset).toList();
     }
 
     public void remove(Preset<?> preset) {
