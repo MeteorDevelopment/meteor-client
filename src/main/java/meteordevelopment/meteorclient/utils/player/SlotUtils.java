@@ -33,10 +33,8 @@ public class SlotUtils {
 
     public static int indexToId(int i) {
         if (mc.player == null) return -1;
-        return indexToId(i, mc.player.currentScreenHandler);
-    }
+        ScreenHandler handler = mc.player.currentScreenHandler;
 
-    public static int indexToId(int i, ScreenHandler handler) {
         if (handler instanceof PlayerScreenHandler) return survivalInventory(i);
         else if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
         else if (handler instanceof GenericContainerScreenHandler) return genericContainer(i, ((GenericContainerScreenHandler) handler).getRows());
