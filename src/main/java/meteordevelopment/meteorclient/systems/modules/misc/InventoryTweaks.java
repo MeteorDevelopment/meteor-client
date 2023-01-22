@@ -34,9 +34,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Wearable;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
-import net.minecraft.screen.ShulkerBoxScreenHandler;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
@@ -431,11 +429,11 @@ public class InventoryTweaks extends Module {
     }
 
     public void steal(ScreenHandler handler) {
-        MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(handler.slots.size()), true));
+        MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(SlotUtils.MAIN_START, handler), true));
     }
 
     public void dump(ScreenHandler handler) {
-        int playerInvOffset = SlotUtils.indexToId(SlotUtils.HOTBAR_START);
+        int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START, handler);
         MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9, false));
     }
 
