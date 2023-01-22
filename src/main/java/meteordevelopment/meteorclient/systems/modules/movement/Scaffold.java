@@ -55,6 +55,13 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-on-click")
+        .description("Only places blocks when holding right click.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> renderSwing = sgGeneral.add(new BoolSetting.Builder()
         .name("swing")
         .description("Renders your client-side swing.")
@@ -153,6 +160,8 @@ public class Scaffold extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
+        if (onlyOnClick.get() && !mc.options.useKey.isPressed()) return;
+
         if (airPlace.get()) {
             Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
             bp.set(vec.getX(), vec.getY(), vec.getZ());
@@ -236,6 +245,10 @@ public class Scaffold extends Module {
         if (!mc.world.getBlockState(bp).isAir()) {
             prevBp.set(bp);
         }
+    }
+
+    public boolean scaffolding() {
+        return isActive() && (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.useKey.isPressed()));
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {
