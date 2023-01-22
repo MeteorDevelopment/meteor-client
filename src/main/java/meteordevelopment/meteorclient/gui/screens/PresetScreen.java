@@ -15,12 +15,10 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.presets.Preset;
 import meteordevelopment.meteorclient.systems.presets.Presets;
 
-import java.util.List;
+public class PresetScreen<T> extends WindowScreen {
+    Setting<T> setting;
 
-public class PresetScreen<T extends Setting<?>> extends WindowScreen {
-    T setting;
-
-    public PresetScreen(GuiTheme theme, T setting) {
+    public PresetScreen(GuiTheme theme, Setting<T> setting) {
         super(theme, "Presets");
         this.setting = setting;
     }
@@ -32,15 +30,14 @@ public class PresetScreen<T extends Setting<?>> extends WindowScreen {
     }
 
     private void initTable(WTable table) {
-        List<Preset<T>> presets = Presets.get().getPresetForSetting(setting);
         table.clear();
 
-        for (Preset<T> preset : presets) {
+        for (Preset<Setting<T>> preset : Presets.get().getPresetForSetting(setting)) {
             table.add(theme.label(preset.name)).expandCellX();
 
             WButton load = table.add(theme.button("Load")).widget();
             load.action = () -> {
-                setting = preset.setting;
+                setting.set(preset.setting.get());
                 close();
             };
 
