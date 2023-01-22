@@ -20,6 +20,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 
@@ -110,7 +111,7 @@ public class Spam extends Module {
 
         if (fileSpam.get()) {
             File spamText = new File(textPath.get());
-            try (FileInputStream in = new FileInputStream(spamText)) {
+            try (InputStream in = new FileInputStream(spamText)) {
                 textInFile = Arrays.stream(new String(in.readAllBytes()).split("\n")).map(s -> s.replace("\r", "")).toList();
             } catch (IOException e) {
                 ChatUtils.error("Spam", "Failed to read %s.", spamText.getAbsolutePath());
@@ -136,11 +137,7 @@ public class Spam extends Module {
         if (messages.get().isEmpty()) return;
 
         if (timer <= 0) {
-            List<String> msgs = fileSpam.get() ? textInFile : messages.get();
-            if (textInFile == null) {
-                toggle();
-                return;
-            }
+            List<String> msgs = fileSpam.get() && textInFile != null ? textInFile : messages.get();
             int i;
             if (random.get()) {
                 i = Utils.random(0, msgs.size());
