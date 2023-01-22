@@ -35,10 +35,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Wearable;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.ScreenHandler;
+import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -139,6 +141,13 @@ public class InventoryTweaks extends Module {
     );
 
     // Steal & Dump
+
+    public final Setting<List<ScreenHandlerType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
+        .name("steal-screens")
+        .description("Select the screens to display buttons and auto steal.")
+        .defaultValue(Arrays.asList(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
+        .build()
+    );
 
     private final Setting<Boolean> buttons = sgStealDump.add(new BoolSetting.Builder()
         .name("inventory-buttons")
@@ -429,11 +438,11 @@ public class InventoryTweaks extends Module {
     }
 
     public void steal(ScreenHandler handler) {
-        MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(SlotUtils.MAIN_START, handler), true));
+        MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(SlotUtils.MAIN_START), true));
     }
 
     public void dump(ScreenHandler handler) {
-        int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START, handler);
+        int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
         MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9, false));
     }
 
@@ -453,10 +462,18 @@ public class InventoryTweaks extends Module {
         return isActive() && armorSwap.get();
     }
 
+    public boolean canSteal(ScreenHandler handler) {
+        try {
+            return (stealScreens.get().contains(handler.getType()));
+        } catch (UnsupportedClassVersionError e) {
+            return false;
+        }
+    }
+
     @EventHandler
     private void onInventory(InventoryEvent event) {
         ScreenHandler handler = mc.player.currentScreenHandler;
-        if (event.packet.getSyncId() == handler.syncId) {
+        if (canSteal(handler) && event.packet.getSyncId() == handler.syncId) {
             if (autoSteal.get()) {
                 steal(handler);
             } else if (autoDump.get()) {
