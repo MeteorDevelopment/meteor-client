@@ -465,7 +465,7 @@ public class InventoryTweaks extends Module {
     public boolean canSteal(ScreenHandler handler) {
         try {
             return (stealScreens.get().contains(handler.getType()));
-        } catch (UnsupportedClassVersionError e) {
+        } catch (UnsupportedOperationException e) {
             return false;
         }
     }
