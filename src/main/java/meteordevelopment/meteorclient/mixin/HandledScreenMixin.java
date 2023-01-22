@@ -22,7 +22,6 @@ import net.minecraft.screen.slot.Slot;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -58,7 +57,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     private void onInit(CallbackInfo info) {
         InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
 
-        if (invTweaks.isActive() && invTweaks.showButtons()) {
+        if (invTweaks.canSteal(getScreenHandler())&& invTweaks.isActive() && invTweaks.showButtons()) {
             addDrawableChild(
                 new ButtonWidget.Builder(Text.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
                     .position(width / 2 - 40, 3)
