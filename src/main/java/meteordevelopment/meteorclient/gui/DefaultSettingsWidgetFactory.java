@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.screens.PresetScreen;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
 import meteordevelopment.meteorclient.gui.themes.meteor.widgets.WMeteorLabel;
 import meteordevelopment.meteorclient.gui.utils.Cell;
@@ -428,6 +429,9 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
         WButton button = c2.add(theme.button("Select")).expandCellX().widget();
         button.action = action;
+
+        WButton presets = c2.add(theme.button("Presets")).expandCellX().widget();
+        presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting));
 
         if (addCount) c2.add(new WSelectedCountLabel(setting).color(theme.textSecondaryColor()));
 
