@@ -124,7 +124,8 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     public static Setting<?> fromValueNBT(NbtCompound tag) {
         try {
             Class<?> settingClass = Class.forName(tag.getString("type"));
-            Method load = settingClass.getMethod("load", NbtCompound.class);
+            Method load = settingClass.getDeclaredMethod("load", NbtCompound.class);
+            load.setAccessible(true);
             Setting<?> instance = (Setting<?>) settingClass.newInstance();
             load.invoke(instance, tag);
             return instance;
