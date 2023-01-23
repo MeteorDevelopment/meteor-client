@@ -32,12 +32,12 @@ public class PresetScreen<T> extends WindowScreen {
     private void initTable(WTable table) {
         table.clear();
 
-        for (Preset<Setting<T>> preset : Presets.get().getPresetForSetting(setting)) {
+        for (Preset<T, Setting<T>> preset : Presets.get().getPresetForSetting(setting)) {
             table.add(theme.label(preset.name)).expandCellX();
 
             WButton load = table.add(theme.button("Load")).widget();
             load.action = () -> {
-                setting.set(preset.setting.get());
+                setting.set(preset.get());
                 close();
             };
 

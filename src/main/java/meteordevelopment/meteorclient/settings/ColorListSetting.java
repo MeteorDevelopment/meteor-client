@@ -15,6 +15,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ColorListSetting extends Setting<List<SettingColor>> {
+    public ColorListSetting() {
+        this("dummy", "", new ArrayList<>(), null, null, null);
+    }
+
     public ColorListSetting(String name, String description, List<SettingColor> defaultValue, Consumer<List<SettingColor>> onChanged, Consumer<Setting<List<SettingColor>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }

@@ -13,6 +13,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -112,6 +113,25 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
     }
 
     protected abstract NbtCompound save(NbtCompound tag);
+
+    public NbtCompound getValueNBT() {
+        NbtCompound tag = new NbtCompound();
+        tag.putString("type", getClass().getName());
+        save(tag);
+        return tag;
+    }
+
+    public static Setting<?> fromValueNBT(NbtCompound tag) {
+        try {
+            Class<?> settingClass = Class.forName(tag.getString("type"));
+            Method load = settingClass.getMethod("load", NbtCompound.class);
+            Setting<?> instance = (Setting<?>) settingClass.newInstance();
+            load.invoke(instance, tag);
+            return instance;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Override
     public NbtCompound toTag() {

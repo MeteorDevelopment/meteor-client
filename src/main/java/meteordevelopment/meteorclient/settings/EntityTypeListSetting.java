@@ -23,6 +23,10 @@ import java.util.function.Consumer;
 public class EntityTypeListSetting extends Setting<Object2BooleanMap<EntityType<?>>> {
     public final boolean onlyAttackable;
 
+    public EntityTypeListSetting() {
+        this("dummy", "", new Object2BooleanOpenHashMap<>(), null, null, null, false);
+    }
+
     public EntityTypeListSetting(String name, String description, Object2BooleanMap<EntityType<?>> defaultValue, Consumer<Object2BooleanMap<EntityType<?>>> onChanged, Consumer<Setting<Object2BooleanMap<EntityType<?>>>> onModuleActivated, IVisible visible, boolean onlyAttackable) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 

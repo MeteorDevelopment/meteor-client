@@ -22,6 +22,10 @@ import java.util.function.Predicate;
 public class BlockListSetting extends Setting<List<Block>> {
     public final Predicate<Block> filter;
 
+    public BlockListSetting() {
+        this("dummy","", new ArrayList<>(), null, null, null, null);
+    }
+
     public BlockListSetting(String name, String description, List<Block> defaultValue, Consumer<List<Block>> onChanged, Consumer<Setting<List<Block>>> onModuleActivated, Predicate<Block> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 

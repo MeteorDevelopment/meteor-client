@@ -15,8 +15,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-public class Presets extends System<Presets> implements Iterable<Preset<?>> {
-    List<Preset<?>> presets = new ArrayList<>();
+public class Presets extends System<Presets> implements Iterable<Preset<?, ?>> {
+    List<Preset<?, ?>> presets = new ArrayList<>();
 
     public Presets() {
         super("presets");
@@ -26,24 +26,29 @@ public class Presets extends System<Presets> implements Iterable<Preset<?>> {
         return Systems.get(Presets.class);
     }
 
-    public void add(Preset<?> preset) {
+    public void add(Preset<?, ?> preset) {
         presets.add(preset);
         save();
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends Setting<?>> List<Preset<T>> getPresetForSetting(T setting) {
-        return presets.stream().filter(preset -> preset.setting.getClass() == setting.getClass()).map(preset -> (Preset<T>) preset).toList();
+    public <V, S extends Setting<V>> List<Preset<V,S>> getPresetForSetting(S setting) {
+        return presets.stream().filter(preset -> preset.setting.getClass() == setting.getClass()).map(preset -> (Preset<V, S>) preset).toList();
     }
 
-    public void remove(Preset<?> preset) {
+    public void remove(Preset<?, ?> preset) {
         if (presets.remove(preset)) {
             save();
         }
     }
 
     @Override
-    public Iterator<Preset<?>> iterator() {
+    public void save() {
+        super.save();
+        load();
+    }
+
+    @Override
+    public Iterator<Preset<?, ?>> iterator() {
         return presets.iterator();
     }
 
