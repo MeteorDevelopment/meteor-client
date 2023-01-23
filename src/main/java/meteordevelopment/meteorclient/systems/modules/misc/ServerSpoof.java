@@ -12,9 +12,11 @@ import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket;
 import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -48,6 +50,14 @@ public class ServerSpoof extends Module {
         .name("resource-pack")
         .description("Spoof accepting server resource pack.")
         .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> bogusAccept = sgGeneral.add(new BoolSetting.Builder()
+        .name("bogus-accept")
+        .description("Send fake packets to server that you accepted the resource pack.")
+        .defaultValue(false)
+        .visible(resourcePack::get)
         .build()
     );
 
@@ -112,6 +122,18 @@ public class ServerSpoof extends Module {
                 msg.append(link);
                 msg.append(".");
                 info(msg);
+
+                if (bogusAccept.get()) {
+                    MeteorExecutor.execute(() -> {
+                        while (true) {
+                            if (mc.getNetworkHandler() == null) continue;
+
+                            mc.getNetworkHandler().sendPacket(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.ACCEPTED));
+                            mc.getNetworkHandler().sendPacket(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
+                            break;
+                        }
+                    });
+                }
             }
         }
     }
