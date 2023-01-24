@@ -227,8 +227,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         WButton edit = list.add(theme.button(GuiRenderer.EDIT)).widget();
         edit.action = () -> mc.setScreen(new ColorSettingScreen(theme, setting));
 
-        WButton presets = list.add(theme.button(GuiRenderer.FAVORITE_YES)).expandCellX().widget();
-        presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting));
+        WButton presets = list.add(theme.button(GuiRenderer.FAVORITE_YES)).widget();
+        presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting, () -> quad.color = setting.get()));
 
         reset(table, setting, () -> quad.color = setting.get());
     }
@@ -427,7 +427,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         button.action = action;
 
         WButton presets = c.add(theme.button(GuiRenderer.FAVORITE_YES)).expandCellX().widget();
-        presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting));
+        presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting, null));
 
         reset(c, setting, null);
     }
@@ -458,7 +458,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
             double ts = theme.textHeight();
             renderer.quad(x + width / 2 - ts / 2, y + pad, ts, ts, texture, theme.textColor.get());
-            renderer.text(String.valueOf(getSize()), x + ts, y - ts, theme.textSecondaryColor.get(), false);
+            renderer.text(String.valueOf(getSize()), x + ts, y - pad, theme.textSecondaryColor.get(), false);
         }
 
         private int getSize() {

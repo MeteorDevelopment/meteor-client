@@ -17,10 +17,12 @@ import meteordevelopment.meteorclient.systems.presets.Presets;
 
 public class PresetScreen<T> extends WindowScreen {
     Setting<T> setting;
+    Runnable onChanged;
 
-    public PresetScreen(GuiTheme theme, Setting<T> setting) {
+    public PresetScreen(GuiTheme theme, Setting<T> setting, Runnable onChanged) {
         super(theme, "Presets");
         this.setting = setting;
+        this.onChanged = onChanged;
     }
 
     @Override
@@ -38,6 +40,7 @@ public class PresetScreen<T> extends WindowScreen {
             WButton load = table.add(theme.button("Load")).widget();
             load.action = () -> {
                 setting.set(preset.get());
+                if (onChanged != null) onChanged.run();
                 close();
             };
 
