@@ -26,10 +26,6 @@ public class StringListSetting extends Setting<List<String>>{
     public final Class<? extends WTextBox.Renderer> renderer;
     public final CharFilter filter;
 
-    public StringListSetting() {
-        this("dummy", "", new ArrayList<>(), null, null, null, null, null);
-    }
-
     public StringListSetting(String name, String description, List<String> defaultValue, Consumer<List<String>> onChanged, Consumer<Setting<List<String>>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer, CharFilter filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 

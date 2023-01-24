@@ -25,7 +25,7 @@ public class PresetScreen<T> extends WindowScreen {
 
     @Override
     public void initWidgets() {
-        WTable table = add(theme.table()).expandX().minWidth(400).widget();
+        WTable table = add(theme.table()).expandX().minWidth(200).widget();
         initTable(table);
     }
 

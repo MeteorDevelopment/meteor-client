@@ -10,7 +10,8 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.PresetScreen;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
-import meteordevelopment.meteorclient.gui.themes.meteor.widgets.WMeteorLabel;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;
@@ -226,6 +227,9 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         WButton edit = list.add(theme.button(GuiRenderer.EDIT)).widget();
         edit.action = () -> mc.setScreen(new ColorSettingScreen(theme, setting));
 
+        WButton presets = list.add(theme.button(GuiRenderer.FAVORITE_YES)).expandCellX().widget();
+        presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting));
+
         reset(table, setting, () -> quad.color = setting.get());
     }
 
@@ -419,21 +423,11 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     // Other
 
     private void selectW(WContainer c, Setting<?> setting, Runnable action) {
-        boolean addCount = WSelectedCountLabel.getSize(setting) != -1;
-
-        WContainer c2 = c;
-        if (addCount) {
-            c2 = c.add(theme.horizontalList()).expandCellX().widget();
-            ((WHorizontalList) c2).spacing *= 2;
-        }
-
-        WButton button = c2.add(theme.button("Select")).expandCellX().widget();
+        WButton button = c.add(new WSelectCountButton(setting)).widget();
         button.action = action;
 
-        WButton presets = c2.add(theme.button("Presets")).expandCellX().widget();
+        WButton presets = c.add(theme.button(GuiRenderer.FAVORITE_YES)).expandCellX().widget();
         presets.action = () -> mc.setScreen(new PresetScreen<>(theme, setting));
-
-        if (addCount) c2.add(new WSelectedCountLabel(setting).color(theme.textSecondaryColor()));
 
         reset(c, setting, null);
     }
@@ -446,29 +440,28 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         };
     }
 
-    private static class WSelectedCountLabel extends WMeteorLabel {
+    private static class WSelectCountButton extends WButton implements MeteorWidget {
         private final Setting<?> setting;
-        private int lastSize = -1;
 
-        public WSelectedCountLabel(Setting<?> setting) {
-            super("", false);
+        public WSelectCountButton(Setting<?> setting) {
+            super(null, GuiRenderer.EDIT);
 
             this.setting = setting;
         }
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            int size = getSize(setting);
+            MeteorGuiTheme theme = theme();
+            double pad = pad();
 
-            if (size != lastSize) {
-                set("(" + size + " selected)");
-                lastSize = size;
-            }
+            renderBackground(renderer, this, pressed, mouseOver);
 
-            super.onRender(renderer, mouseX, mouseY, delta);
+            double ts = theme.textHeight();
+            renderer.quad(x + width / 2 - ts / 2, y + pad, ts, ts, texture, theme.textColor.get());
+            renderer.text(String.valueOf(getSize()), x + ts, y - ts, theme.textSecondaryColor.get(), false);
         }
 
-        public static int getSize(Setting<?> setting) {
+        private int getSize() {
             if (setting.get() instanceof Collection<?> collection) return collection.size();
             if (setting.get() instanceof Map<?, ?> map) return map.size();
 
