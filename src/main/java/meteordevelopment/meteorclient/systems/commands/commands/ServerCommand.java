@@ -13,6 +13,8 @@ import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.Address;
+import net.minecraft.client.network.AllowedAddressResolver;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandSource;
@@ -26,8 +28,6 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.StringUtils;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.*;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -56,11 +56,11 @@ public class ServerCommand extends Command {
 
         builder.then(literal("plugins")
             .then(literal("BukkitVer").executes(ctx -> {
-                getPlugins(true);
+                startPluginSearch(true);
                 return SINGLE_SUCCESS;
             }))
             .then(literal("MassScan").executes(ctx -> {
-                getPlugins(false);
+                startPluginSearch(false);
                 return SINGLE_SUCCESS;
             }))
         );
@@ -76,19 +76,12 @@ public class ServerCommand extends Command {
         }));
     }
 
-    private void getPlugins(boolean bukkit) {
+    private void startPluginSearch(boolean bukkit) {
         bukkitVer = bukkit;
         ticks = 0;
         MeteorClient.EVENT_BUS.subscribe(this);
-        int id = new Random().nextInt(200);
-        completionID = id;
-
-        if (mc.isIntegratedServerRunning()) { // don't bother if we're in singleplayer
-            error("Not available in singleplayer.");
-            return;
-        }
-
-        mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, bukkit ? "bukkit:ver " : "/"));
+        completionID = new Random().nextInt(200);
+        mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(completionID, bukkit ? "bukkit:ver " : "/"));
     }
 
     private void printPlugins(List<String> plugins) {
@@ -120,15 +113,9 @@ public class ServerCommand extends Command {
             return;
         }
 
-        String ipv4 = "";
-        try {
-            ipv4 = InetAddress.getByName(server.address).getHostAddress();
-        } catch (UnknownHostException ignored) {
-        }
+        MutableText addrText = Text.literal(Formatting.GRAY + server.address);
 
-        MutableText ipText = Text.literal(Formatting.GRAY + server.address);
-
-        ipText.setStyle(ipText.getStyle()
+        addrText.setStyle(addrText.getStyle()
             .withClickEvent(new ClickEvent(
                 ClickEvent.Action.COPY_TO_CLIPBOARD,
                 server.address
@@ -138,24 +125,22 @@ public class ServerCommand extends Command {
                 Text.literal("Copy to clipboard")
             ))
         );
-        if (!ipv4.isEmpty()) {
-            MutableText ipv4Text = Text.literal(String.format("%s (%s)", Formatting.GRAY, ipv4));
-            ipv4Text.setStyle(ipText.getStyle()
+        AllowedAddressResolver.DEFAULT.resolve(ServerAddress.parse(server.address)).map(Address::getInetSocketAddress).ifPresent(inetSocketAddress -> {
+            String ip = inetSocketAddress.toString();
+            MutableText ipText = Text.literal(String.format("%s (%s)", Formatting.GRAY, ip));
+            ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
                     ClickEvent.Action.COPY_TO_CLIPBOARD,
-                    ipv4
+                    ip
                 ))
                 .withHoverEvent(new HoverEvent(
                     HoverEvent.Action.SHOW_TEXT,
                     Text.literal("Copy to clipboard")
                 ))
             );
-            ipText.append(ipv4Text);
-        }
-        info(
-            Text.literal(String.format("%sIP: ", Formatting.GRAY))
-                .append(ipText)
-        );
+            addrText.append(ipText);
+        });
+        info(Text.literal(Formatting.GRAY + "%sIP: ").append(addrText));
 
         info("Port: %d", ServerAddress.parse(server.address).getPort());
 
