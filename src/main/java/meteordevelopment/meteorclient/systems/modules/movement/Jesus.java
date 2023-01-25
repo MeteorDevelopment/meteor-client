@@ -213,7 +213,8 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onFluidCollisionShape(CollisionShapeEvent event) {
-        if (event.type != CollisionShapeEvent.CollisionType.FLUID) return;
+        if (event.state.getFluidState().isEmpty()) return;
+
         if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
         }

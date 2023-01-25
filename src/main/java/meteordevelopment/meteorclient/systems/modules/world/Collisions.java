@@ -61,7 +61,7 @@ public class Collisions extends Module {
     @EventHandler
     private void onCollisionShape(CollisionShapeEvent event) {
         if (mc.world == null || mc.player == null) return;
-        if (event.type != CollisionShapeEvent.CollisionType.BLOCK) return;
+        if (!event.state.getFluidState().isEmpty()) return;
         if (blocks.get().contains(event.state.getBlock())) {
             event.shape = VoxelShapes.fullCube();
         } else if (magma.get() && !mc.player.isSneaking()
