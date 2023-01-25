@@ -78,7 +78,7 @@ public class ChatUtils {
         sendMsg(Formatting.GRAY, message, args);
     }
 
-    public static void info(String prefix, String message, Object... args) {
+    public static void infoP(String prefix, String message, Object... args) {
         sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.GRAY, message, args);
     }
 
@@ -88,7 +88,7 @@ public class ChatUtils {
         sendMsg(Formatting.YELLOW, message, args);
     }
 
-    public static void warning(String prefix, String message, Object... args) {
+    public static void warningP(String prefix, String message, Object... args) {
         sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.YELLOW, message, args);
     }
 
@@ -98,7 +98,7 @@ public class ChatUtils {
         sendMsg(Formatting.RED, message, args);
     }
 
-    public static void error(String prefix, String message, Object... args) {
+    public static void errorP(String prefix, String message, Object... args) {
         sendMsg(0, prefix, Formatting.LIGHT_PURPLE, Formatting.RED, message, args);
     }
 
