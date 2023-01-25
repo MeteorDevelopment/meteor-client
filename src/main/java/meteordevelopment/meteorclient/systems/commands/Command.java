@@ -89,16 +89,16 @@ public abstract class Command {
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.info(title, message, args);
+        ChatUtils.infoP(title, message, args);
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warning(title, message, args);
+        ChatUtils.warningP(title, message, args);
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.error(title, message, args);
+        ChatUtils.errorP(title, message, args);
     }
 }
