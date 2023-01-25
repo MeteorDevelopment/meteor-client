@@ -10,10 +10,10 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.Address;
 import net.minecraft.client.network.AllowedAddressResolver;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
@@ -28,6 +28,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import org.apache.commons.lang3.StringUtils;
 
+import java.net.Inet6Address;
 import java.util.*;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -114,7 +115,6 @@ public class ServerCommand extends Command {
         }
 
         MutableText addrText = Text.literal(Formatting.GRAY + server.address);
-
         addrText.setStyle(addrText.getStyle()
             .withClickEvent(new ClickEvent(
                 ClickEvent.Action.COPY_TO_CLIPBOARD,
@@ -125,8 +125,10 @@ public class ServerCommand extends Command {
                 Text.literal("Copy to clipboard")
             ))
         );
-        AllowedAddressResolver.DEFAULT.resolve(ServerAddress.parse(server.address)).map(Address::getInetSocketAddress).ifPresent(inetSocketAddress -> {
-            String ip = inetSocketAddress.toString();
+
+        AllowedAddressResolver.DEFAULT.resolve(ServerAddress.parse(server.address)).ifPresent(addr -> {
+            boolean ipv6 = addr.getInetSocketAddress().getAddress() instanceof Inet6Address;
+            String ip = String.format("%s%s%s:%d", ipv6 ? "[" : "", addr.getHostAddress(), ipv6 ? "]" : "", addr.getPort());
             MutableText ipText = Text.literal(String.format("%s (%s)", Formatting.GRAY, ip));
             ipText.setStyle(ipText.getStyle()
                 .withClickEvent(new ClickEvent(
@@ -140,7 +142,8 @@ public class ServerCommand extends Command {
             );
             addrText.append(ipText);
         });
-        info(Text.literal(Formatting.GRAY + "%sIP: ").append(addrText));
+
+        info(Text.literal(Formatting.GRAY + "IP: ").append(addrText));
 
         info("Port: %d", ServerAddress.parse(server.address).getPort());
 
@@ -218,9 +221,7 @@ public class ServerCommand extends Command {
     }
 
     public String formatPerms() {
-        int p = 5;
-        while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
-
+        int p = ((EntityAccessor) mc.player).getPermissionLevel();
         return switch (p) {
             case 0 -> "0 (No Perms)";
             case 1 -> "1 (No Perms)";
