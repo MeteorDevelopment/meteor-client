@@ -13,9 +13,15 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.projectile.FishingBobberEntity;
 import net.minecraft.item.FishingRodItem;
+import net.minecraft.entity.player.PlayerInventory;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.util.Formatting;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -165,11 +171,11 @@ public class AutoFish extends Module {
         if (dura.get()) {
             if (duraSwitch.get()) {
                 ItemStack currentRod = inventory.getStack(duraSwitchSlot.get());
-                if (!currentRod.isOf(Items.FISHING_ROD) || currentRod.getMaxDamage() - currentRod.getDamage() <= duraAmount.get()) {
+                if (!currentRod instanceof FishingRodItem || currentRod.getMaxDamage() - currentRod.getDamage() <= duraAmount.get()) {
                     boolean foundHigherDurabilityRod = false;
                     for (int count = 0; count < inventory.size(); count++) {
                         ItemStack stack = inventory.getStack(count);
-                        if (stack.isOf(Items.FISHING_ROD) && stack.getMaxDamage() - stack.getDamage() > currentRod.getMaxDamage() - currentRod.getDamage()) {
+                        if (stack instanceof FishingRodItem && stack.getMaxDamage() - stack.getDamage() > currentRod.getMaxDamage() - currentRod.getDamage()) {
                             foundHigherDurabilityRod = true;
                             ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Durability switch item found: switching slots");
                             InvUtils.move().from(count).to(duraSwitchSlot.get());
@@ -184,7 +190,7 @@ public class AutoFish extends Module {
                 }
             } else {
                 ItemStack currentRod = mc.player.getMainHandStack();
-                if (!currentRod.isOf(Items.FISHING_ROD)) {
+                if (!currentRod instanceof FishingRodItem) {
                     ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Not holding a fishing rod: stopping");
                     toggle();
                 }
@@ -223,7 +229,7 @@ public class AutoFish extends Module {
                 if (dura.get() && duraSwitch.get()) {
                     if (mc.player.getInventory().selectedSlot != duraSwitchSlot.get()) {
                         ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Switching selected slot to slot in settings");
-                        mc.player.getInventory().selectedSlot = duraSwitchSlot.get();
+                        InvUtils.swap(duraSwitchSlot.get(), false);
                     }
                 }
                 Utils.rightClick();
@@ -234,7 +240,7 @@ public class AutoFish extends Module {
                 if (dura.get() && duraSwitch.get()) {
                     if (mc.player.getInventory().selectedSlot != duraSwitchSlot.get()) {
                         ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Switching selected slot to slot in settings");
-                        mc.player.getInventory().selectedSlot = duraSwitchSlot.get();
+                        InvUtils.swap(duraSwitchSlot.get(), false);
                     }
                 }
                 Utils.rightClick();
