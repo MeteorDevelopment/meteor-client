@@ -20,6 +20,7 @@ import net.minecraft.item.FishingRodItem;
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSplashRangeDetection = settings.createGroup("Splash Detection");
+    private final SettingGroup sgDurability = settings.createGroup("Durability detection");
 
     // General
 
@@ -73,6 +74,55 @@ public class AutoFish extends Module {
             .min(0)
             .build()
     );
+    
+    // durability detection and rod switch
+    
+    private final dura = sgDurability.add(new BoolSetting.Builder()
+        .name("Durability")
+        .description("Automatically stops and changes rods on durability low")
+        .onChanged((Boolean n) -> {
+            if (n) {
+                    ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Durability on");
+            } else {
+                ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY,"Durability off");
+            }
+        })
+        .defaultValue(false)
+        .build()
+    );
+
+    private final duraAmount = sgDurability.add(new IntSetting.Builder()
+        .name("Durability Stop Amount")
+        .description("amount used to stop and switch rods")
+        .visible(dura::get)
+        .defaultValue(2)
+        .sliderRange(1, 64)
+        .build()
+    );
+
+    private final duraSwitch = sgDurability.add(new BoolSetting.Builder()
+        .name("Rod Switch")
+        .description("Automatically changes rod with one that has high enough durability")
+        .defaultValue(false)
+        .visible(dura::get)
+        .onChanged((Boolean n) -> {
+            if (n) {
+                ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Durability switch on");
+            } else {
+                ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Durability switch off");
+            }
+        })
+        .build()
+    );
+
+    private final duraSwitchSlot = sgDurability.add(new IntSetting.Builder()
+        .name("Rod Switch Slot")
+        .description("the slot the rod switches")
+        .visible(() -> dura.get() && duraSwitch.get())
+        .defaultValue(0)
+        .sliderRange(0, 9)
+        .build()
+    );
 
     private boolean ticksEnabled;
     private int ticksToRightClick;
@@ -110,6 +160,41 @@ public class AutoFish extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        // rod switch and durability stop < unoptimized code
+        PlayerInventory inventory = mc.player.getInventory();
+        if (dura.get()) {
+            if (duraSwitch.get()) {
+                ItemStack currentRod = inventory.getStack(duraSwitchSlot.get());
+                if (!currentRod.isOf(Items.FISHING_ROD) || currentRod.getMaxDamage() - currentRod.getDamage() <= duraAmount.get()) {
+                    boolean foundHigherDurabilityRod = false;
+                    for (int count = 0; count < inventory.size(); count++) {
+                        ItemStack stack = inventory.getStack(count);
+                        if (stack.isOf(Items.FISHING_ROD) && stack.getMaxDamage() - stack.getDamage() > currentRod.getMaxDamage() - currentRod.getDamage()) {
+                            foundHigherDurabilityRod = true;
+                            ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Durability switch item found: switching slots");
+                            InvUtils.move().from(count).to(duraSwitchSlot.get());
+                            InvUtils.swap(duraSwitchSlot.get(), false);
+                            break;
+                        }
+                    }
+                    if (!foundHigherDurabilityRod) {
+                        ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Cannot find another rod with higher durability: stopping");
+                        toggle();
+                    }
+                }
+            } else {
+                ItemStack currentRod = mc.player.getMainHandStack();
+                if (!currentRod.isOf(Items.FISHING_ROD)) {
+                    ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Not holding a fishing rod: stopping");
+                    toggle();
+                }
+                else if (currentRod.getMaxDamage() - currentRod.getDamage() <= duraAmount.get()) {
+                    ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Durability matches setting: stopping");
+                    toggle();
+                }
+            }
+        }
+        
         // Auto cast
         if (autoCastCheckTimer <= 0) {
             autoCastCheckTimer = 30;
@@ -135,11 +220,23 @@ public class AutoFish extends Module {
         // Handle logic
         if (ticksEnabled && ticksToRightClick <= 0) {
             if (ticksData == 0) {
+                if (dura.get() && duraSwitch.get()) {
+                    if (mc.player.getInventory().selectedSlot != duraSwitchSlot.get()) {
+                        ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Switching selected slot to slot in settings");
+                        mc.player.getInventory().selectedSlot = duraSwitchSlot.get();
+                    }
+                }
                 Utils.rightClick();
                 ticksToRightClick = ticksThrow.get();
                 ticksData = 1;
             }
             else if (ticksData == 1) {
+                if (dura.get() && duraSwitch.get()) {
+                    if (mc.player.getInventory().selectedSlot != duraSwitchSlot.get()) {
+                        ChatUtils.sendMsg(0, "AutoFish", Formatting.DARK_RED, Formatting.GRAY, "Switching selected slot to slot in settings");
+                        mc.player.getInventory().selectedSlot = duraSwitchSlot.get();
+                    }
+                }
                 Utils.rightClick();
                 ticksEnabled = false;
             }
