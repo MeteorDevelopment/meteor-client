@@ -83,6 +83,13 @@ public class NoSlow extends Module {
         .build()
     );
 
+    private final Setting<Boolean> hunger = sgGeneral.add(new BoolSetting.Builder()
+        .name("hunger")
+        .description("Whether or not hunger will not slow you down.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> slowness = sgGeneral.add(new BoolSetting.Builder()
         .name("slowness")
         .description("Whether or not slowness will not slow you down.")
@@ -131,6 +138,10 @@ public class NoSlow extends Module {
 
     public boolean sneaking() {
         return isActive() && sneaking.get();
+    }
+
+    public boolean hunger() {
+        return isActive() && hunger.get();
     }
 
     public boolean slowness() {
