@@ -229,9 +229,14 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void keybindW(WTable table, KeybindSetting setting) {
-        WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefaultValue())).expandX().widget();
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+
+        WKeybind keybind = list.add(theme.keybind(setting.get(), setting.getDefaultValue())).expandX().widget();
         keybind.action = setting::onChanged;
         setting.widget = keybind;
+
+        WButton reset = list.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+        reset.action = keybind::resetBind;
     }
 
     private void blockW(WTable table, BlockSetting setting) {
