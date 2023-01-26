@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens;
 
+import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
@@ -31,6 +32,7 @@ public class ModuleScreen extends WindowScreen {
 
     private WContainer settingsContainer;
     private WKeybind keybind;
+    private WCheckbox active;
 
     public ModuleScreen(GuiTheme theme, Module module) {
         super(theme, theme.favorite(module.favorite), module.title);
@@ -93,7 +95,7 @@ public class ModuleScreen extends WindowScreen {
 
         //   Active
         bottom.add(theme.label("Active: "));
-        WCheckbox active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
+        active = bottom.add(theme.checkbox(module.isActive())).expandCellX().widget();
         active.action = () -> {
             if (module.isActive() != active.checked) module.toggle();
         };
@@ -114,6 +116,11 @@ public class ModuleScreen extends WindowScreen {
     @EventHandler
     private void onModuleBindChanged(ModuleBindChangedEvent event) {
         keybind.reset();
+    }
+
+    @EventHandler
+    private void onActiveModulesChanged(ActiveModulesChangedEvent event) {
+        this.active.checked = Modules.get().getActive().contains(module);
     }
 
     @Override
