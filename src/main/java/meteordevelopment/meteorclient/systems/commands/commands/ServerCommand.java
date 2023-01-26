@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.systems.commands.Command;
+import meteordevelopment.meteorclient.systems.commands.arguments.EnumArgumentType;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.AllowedAddressResolver;
@@ -35,9 +36,11 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ServerCommand extends Command {
     private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith");
+    private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
+    private final List<String> massScanCache = new ArrayList<>();
     private int ticks = 0;
-    private boolean bukkitVer = false;
-    private int completionID = -1;
+    private Mode mode = Mode.Normal;
+    private final List<Integer> completionIDs = new ArrayList<>();
 
     public ServerCommand() {
         super("server", "Prints server information");
@@ -56,12 +59,8 @@ public class ServerCommand extends Command {
         }));
 
         builder.then(literal("plugins")
-            .then(literal("BukkitVer").executes(ctx -> {
-                startPluginSearch(true);
-                return SINGLE_SUCCESS;
-            }))
-            .then(literal("MassScan").executes(ctx -> {
-                startPluginSearch(false);
+            .then(argument("mode", EnumArgumentType.enumArgument(Mode.BukkitVer)).executes(ctx -> {
+                startPluginSearch(EnumArgumentType.getEnum(ctx, "mode", Mode.BukkitVer));
                 return SINGLE_SUCCESS;
             }))
         );
@@ -77,12 +76,35 @@ public class ServerCommand extends Command {
         }));
     }
 
-    private void startPluginSearch(boolean bukkit) {
-        bukkitVer = bukkit;
+    private void startPluginSearch(Mode mode) {
+        this.mode = mode;
         ticks = 0;
+        Random random = new Random();
         MeteorClient.EVENT_BUS.subscribe(this);
-        completionID = new Random().nextInt(200);
-        mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(completionID, bukkit ? "bukkit:ver " : "/"));
+        switch (mode) {
+            case Normal, BukkitVer -> {
+                int id = random.nextInt(200);
+                completionIDs.add(id);
+                mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, mode == Mode.BukkitVer ? "bukkit:ver " : "/"));
+            }
+            case MassScan -> {
+                info("Please wait around 5 seconds...");
+                new Thread(() -> {
+                    completionStarts.chars().forEach(i -> {
+                        int id = random.nextInt(200);
+                        completionIDs.add(id);
+                        mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, Character.toString(i)));
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                    });
+                    printPlugins(massScanCache);
+                    endPluginSearch();
+                }).start();
+            }
+        }
     }
 
     private void printPlugins(List<String> plugins) {
@@ -176,17 +198,18 @@ public class ServerCommand extends Command {
     private void onReadPacket(PacketEvent.Receive event) {
         try {
             if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
-                if (packet.getCompletionId() != completionID) return;
+                if (!completionIDs.remove(Integer.valueOf(packet.getCompletionId()))) return;
 
-                List<String> plugins = new ArrayList<>();
+                List<String> plugins = mode == Mode.MassScan ? massScanCache : new ArrayList<>();
                 for (Suggestion suggestion : packet.getSuggestions().getList()) {
-                    if (bukkitVer) {
+                    if (mode == Mode.BukkitVer) {
                         String pluginName = suggestion.getText();
                         plugins.add(pluginName);
                     } else {
                         String[] command = suggestion.getText().split(":");
                         if (command.length > 1) {
                             String pluginName = command[0].replace("/", "");
+
 
                             if (!plugins.contains(pluginName)) {
                                 plugins.add(pluginName);
@@ -195,19 +218,20 @@ public class ServerCommand extends Command {
                     }
                 }
 
-                printPlugins(plugins);
+                if (mode != Mode.MassScan) printPlugins(plugins);
             }
         } catch (Exception e) {
             error("An error occurred while trying to find plugins.");
         } finally {
-            endPluginSearch();
+            if (mode != Mode.MassScan) endPluginSearch();
         }
     }
 
     private void endPluginSearch() {
         ticks = 0;
         MeteorClient.EVENT_BUS.unsubscribe(this);
-        completionID = -1;
+        completionIDs.clear();
+        massScanCache.clear();
     }
 
     private String formatName(String name) {
@@ -230,5 +254,11 @@ public class ServerCommand extends Command {
             case 4 -> "4 (Operator)";
             default -> p + " (Unknown)";
         };
+    }
+
+    public enum Mode {
+        BukkitVer,
+        MassScan,
+        Normal
     }
 }
