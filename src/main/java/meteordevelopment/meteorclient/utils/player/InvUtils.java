@@ -142,6 +142,7 @@ public class InvUtils {
     // Interactions
 
     public static boolean swap(int slot, boolean swapBack) {
+        if (slot == SlotUtils.OFFHAND) return true;
         if (slot < 0 || slot > 8) return false;
         if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
         else if (!swapBack) previousSlot = -1;
