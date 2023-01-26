@@ -20,7 +20,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.passive.SheepEntity;
 import net.minecraft.item.Items;
-import net.minecraft.item.ShearsItem;
 import net.minecraft.util.Hand;
 
 public class AutoShearer extends Module {
@@ -49,7 +48,7 @@ public class AutoShearer extends Module {
     );
 
     private Entity entity;
-    private boolean offHand;
+    private Hand hand;
 
     public AutoShearer() {
         super(Categories.World, "auto-shearer", "Automatically shears sheep.");
@@ -67,38 +66,21 @@ public class AutoShearer extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (!(entity instanceof SheepEntity) || ((SheepEntity) entity).isSheared() || ((SheepEntity) entity).isBaby() || !PlayerUtils.isWithin(entity, distance.get())) continue;
 
-            boolean findNewShears = false;
-            if (mc.player.getInventory().getMainHandStack().getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1) findNewShears = true;
-            }
-            else if (mc.player.getInventory().offHand.get(0).getItem() instanceof ShearsItem) {
-                if (antiBreak.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1) findNewShears = true;
-                else offHand = true;
-            }
-            else {
-                findNewShears = true;
-            }
+            FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
+            if (!InvUtils.swap(findShear.slot(), true)) return;
 
-            boolean foundShears = !findNewShears;
-            if (findNewShears) {
-                FindItemResult shears = InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.SHEARS);
+            this.hand = findShear.isOffhand() ? Hand.OFF_HAND : Hand.MAIN_HAND;
+            this.entity = entity;
 
-                if (InvUtils.swap(shears.slot(), true)) foundShears = true;
-            }
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
+            else interact();
 
-            if (foundShears) {
-                this.entity = entity;
-
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
-                else interact();
-
-                return;
-            }
+            return;
         }
     }
 
     private void interact() {
-        mc.interactionManager.interactEntity(mc.player, entity, offHand ? Hand.OFF_HAND : Hand.MAIN_HAND);
+        mc.interactionManager.interactEntity(mc.player, entity, hand);
         InvUtils.swapBack();
     }
 }

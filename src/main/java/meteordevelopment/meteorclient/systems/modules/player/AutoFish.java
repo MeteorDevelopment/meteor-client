@@ -12,10 +12,11 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.FishingRodItem;
+import net.minecraft.item.Items;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -55,6 +56,13 @@ public class AutoFish extends Module {
             .min(0)
             .sliderMax(60)
             .build()
+    );
+
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-break")
+        .description("Prevents fishing rod from being broken.")
+        .defaultValue(false)
+        .build()
     );
 
     // Splash Detection
@@ -114,7 +122,7 @@ public class AutoFish extends Module {
         if (autoCastCheckTimer <= 0) {
             autoCastCheckTimer = 30;
 
-            if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) {
+            if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && hasFishingRod()) {
                 autoCastTimer = 0;
                 autoCastEnabled = true;
             }
@@ -151,5 +159,9 @@ public class AutoFish extends Module {
     @EventHandler
     private void onKey(KeyEvent event) {
         if (mc.options.useKey.isPressed()) ticksEnabled = false;
+    }
+
+    private boolean hasFishingRod() {
+        return InvUtils.swap(InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FISHING_ROD && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1)).slot(), false);
     }
 }
