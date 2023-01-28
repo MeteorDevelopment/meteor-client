@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems.commands.arguments;
 import net.minecraft.command.argument.EnumArgumentType;
 import net.minecraft.util.math.Direction;
 
-
 public class DirectionArgumentType extends EnumArgumentType<Direction> {
     private DirectionArgumentType() {
         super(Direction.CODEC, Direction::values);
