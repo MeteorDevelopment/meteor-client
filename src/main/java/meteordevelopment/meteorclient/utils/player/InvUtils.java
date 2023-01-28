@@ -126,7 +126,10 @@ public class InvUtils {
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
-            float score = mc.player.getInventory().getStack(i).getMiningSpeedMultiplier(state);
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (!stack.isSuitableFor(state)) continue;
+
+            float score = stack.getMiningSpeedMultiplier(state);
             if (score > bestScore) {
                 bestScore = score;
                 slot = i;
