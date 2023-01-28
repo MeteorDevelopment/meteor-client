@@ -22,7 +22,7 @@ jobs:
             Please close if duplicate.
           comment-body: '${index}. ${similarity} #${number}'
       - uses: actions/checkout@v2
-      - name: Automatically close issues that dont follow the issue template
+      - name: Automatically close issues that don't follow the issue template
         uses: lucasbento/auto-close-issues@v1.0.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
