@@ -183,7 +183,7 @@ public class AutoTool extends Module {
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
-        if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+        if (!itemStack.isSuitableFor(state) || !good.test(itemStack) || !isTool(itemStack)) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
