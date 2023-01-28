@@ -30,11 +30,4 @@ jobs:
             @${issue.user.login}: hello! :wave:
             This issue is being automatically closed because it does not follow the issue template." 
           closed-issues-label: "invalid"
-      - name: Add eyes reaction to all issues
-        uses: actions-cool/emoji-helper@v1.0.0
-        with:
-          type: 'issue'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          emoji: 'eyes'
-          
           
