@@ -110,7 +110,7 @@ public class Flamethrower extends Module {
             FindItemResult findFlintAndSteel = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FLINT_AND_STEEL && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
             if (!InvUtils.swap(findFlintAndSteel.slot(), true)) return;
 
-            this.hand = findFlintAndSteel.isOffhand() ? Hand.OFF_HAND : Hand.MAIN_HAND;
+            this.hand = findFlintAndSteel.getHand();
             this.entity = entity;
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
