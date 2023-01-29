@@ -433,7 +433,7 @@ public class Nametags extends Module {
         if (displayDistance.get() && renderPlayerDistance) {
             switch (distanceColorMode.get()) {
                 case Flat ->  text.render(distText, hX, hY, distanceColor.get(), shadow);
-                case Gradient -> text.render(distText, hX, hY, EntityUtils.getColorFromDistance(mc.player), shadow);
+                case Gradient -> text.render(distText, hX, hY, EntityUtils.getColorFromDistance(player), shadow);
             }
         }
 
