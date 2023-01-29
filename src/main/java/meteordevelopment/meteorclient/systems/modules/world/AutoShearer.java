@@ -69,7 +69,7 @@ public class AutoShearer extends Module {
             FindItemResult findShear = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.SHEARS && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
             if (!InvUtils.swap(findShear.slot(), true)) return;
 
-            this.hand = findShear.isOffhand() ? Hand.OFF_HAND : Hand.MAIN_HAND;
+            this.hand = findShear.getHand();
             this.entity = entity;
 
             if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity), Rotations.getPitch(entity), -100, this::interact);
