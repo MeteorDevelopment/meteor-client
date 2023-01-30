@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -18,6 +19,9 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
+import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +52,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .onChanged(aBoolean -> {
             for (HudElement element : elements) element.onFontChanged();
         })
+        .build()
+    );
+
+    private final Setting<Boolean> hideInMenu = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-in-menu")
+        .description("Whether or not to hide hud in inventories and game menu.")
+        .defaultValue(false)
         .build()
     );
 
@@ -94,6 +105,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     private boolean resetToDefaultElements;
+    private boolean wasMenuScreen, wasHudHidden;
 
     public Hud() {
         super("hud");
@@ -232,6 +244,17 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (customFont.get()) {
             for (HudElement element : elements) element.onFontChanged();
         }
+    }
+
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (hideInMenu.get()) {
+            if (!wasMenuScreen) wasHudHidden = !this.active;
+
+            if (event.screen instanceof GameMenuScreen || event.screen instanceof HandledScreen) this.active = false;
+            else if (!wasHudHidden) this.active = true;
+        }
+        wasMenuScreen = event.screen instanceof GameMenuScreen || event.screen instanceof HandledScreen;
     }
 
     public boolean hasCustomFont() {
