@@ -5,14 +5,12 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.EntityDestroyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PickItemsEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.events.packets.ContainerSlotUpdateEvent;
 import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
@@ -23,6 +21,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.utils.baritone.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -130,17 +129,18 @@ public abstract class ClientPlayNetworkHandlerMixin {
     private void onSendChatMessage(String message, CallbackInfo ci) {
         if (ignoreChatMessage) return;
 
-        if (!message.startsWith(Config.get().prefix.get()) && !message.startsWith(BaritoneAPI.getSettings().prefix.value)) {
-            SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
+        try {
+            Class.forName("baritone.api.BaritoneAPI");
+            String msg = BaritoneUtils.onSendChatMessage(message);
 
-            if (!event.isCancelled()) {
+            if (msg != null) {
                 ignoreChatMessage = true;
-                sendChatMessage(event.message);
+                sendChatMessage(msg);
                 ignoreChatMessage = false;
             }
             ci.cancel();
             return;
-        }
+        } catch (ClassNotFoundException ignored) {}
 
         if (message.startsWith(Config.get().prefix.get())) {
             try {

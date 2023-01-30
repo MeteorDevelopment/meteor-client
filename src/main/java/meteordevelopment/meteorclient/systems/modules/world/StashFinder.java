@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -23,6 +21,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.baritone.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.render.MeteorToast;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.*;
@@ -170,8 +169,12 @@ public class StashFinder extends Module {
             open.action = () -> mc.setScreen(new ChunkScreen(theme, chunk));
 
             WButton gotoBtn = table.add(theme.button("Goto")).widget();
-            gotoBtn.action = () -> BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(chunk.x, chunk.z));
-
+            gotoBtn.action = () -> {
+                try {
+                    Class.forName("baritone.api.BaritoneAPI");
+                    BaritoneUtils.GoalXZ(chunk.x, chunk.z);
+                } catch (ClassNotFoundException ignored) {}
+            };
             WMinus delete = table.add(theme.minus()).widget();
             delete.action = () -> {
                 if (chunks.remove(chunk)) {

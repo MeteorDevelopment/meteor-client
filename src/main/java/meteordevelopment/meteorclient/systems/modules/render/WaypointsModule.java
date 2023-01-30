@@ -5,9 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.IBaritone;
-import baritone.api.pathing.goals.GoalGetToBlock;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
@@ -24,6 +21,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.baritone.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
@@ -155,10 +153,10 @@ public class WaypointsModule extends Module {
             if (validDim) {
                 WButton gotoB = table.add(theme.button("Goto")).widget();
                 gotoB.action = () -> {
-                    IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
-                    if (baritone.getPathingBehavior().isPathing()) baritone.getPathingBehavior().cancelEverything();
-                    baritone.getCustomGoalProcess().setGoalAndPath(new GoalGetToBlock(waypoint.getPos()));
-                };
+                    try {
+                        Class.forName("baritone.api.BaritoneAPI");
+                        BaritoneUtils.GoalGetToBlock(waypoint.getPos());
+                    } catch (ClassNotFoundException ignored) {}                };
             }
 
             WMinus remove = table.add(theme.minus()).widget();
