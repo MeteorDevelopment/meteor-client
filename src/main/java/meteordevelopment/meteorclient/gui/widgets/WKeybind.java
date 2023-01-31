@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 
@@ -61,6 +62,9 @@ public class WKeybind extends WHorizontalList {
         refreshLabel();
         if (Modules.get().isBinding()) {
             Modules.get().setModuleToBind(null);
+        }
+        if (Hud.get().isBinding()) {
+            Hud.get().setElementToBind(null);
         }
     }
 

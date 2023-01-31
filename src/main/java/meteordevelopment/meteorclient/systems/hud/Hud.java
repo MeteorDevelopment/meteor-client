@@ -5,7 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
+import meteordevelopment.meteorclient.events.meteor.HudElementBindChangedEvent;
+import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -16,11 +21,15 @@ import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.meteorclient.utils.misc.input.Input;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
+import org.lwjgl.glfw.GLFW;
 
 import java.util.*;
 
@@ -35,9 +44,10 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     public final Map<String, HudElementInfo<?>> infos = new TreeMap<>();
     private final List<HudElement> elements = new ArrayList<>();
 
+    private HudElement elementToBind;
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEditor = settings.createGroup("Editor");
-    private final SettingGroup sgKeybind = settings.createGroup("Bind");
 
     // General
 
@@ -82,14 +92,6 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .description("Snapping range in editor.")
         .defaultValue(10)
         .sliderMax(20)
-        .build()
-    );
-
-    // Keybindings
-    private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
-        .name("bind")
-        .defaultValue(Keybind.none())
-        .action(() -> active = !active)
         .build()
     );
 
@@ -195,6 +197,70 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         add(MeteorTextHud.OPPOSITE_POSITION, -4, -4 - h, XAnchor.Right, YAnchor.Bottom);
         add(MeteorTextHud.ROTATION, -4, -4 - h * 2, XAnchor.Right, YAnchor.Bottom);
     }
+
+    // Binding
+
+    public void setElementToBind(HudElement elementToBind) { this.elementToBind = elementToBind; }
+    public boolean isBinding() { return elementToBind != null; }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onKeyBinding(KeyEvent event) {
+        if (event.action == KeyAction.Press && onBinding(true, event.key)) event.cancel();
+    }
+    @EventHandler(priority = EventPriority.HIGHEST)
+    private void onButtonBinding(MouseButtonEvent event) {
+        if (event.action == KeyAction.Press && onBinding(false, event.button)) event.cancel();
+    }
+    private boolean onBinding(boolean isKey, int value) {
+        if (!isBinding()) return false;
+
+        if (elementToBind.keybind.canBindTo(isKey, value)) {
+            elementToBind.keybind.set(isKey, value);
+            elementToBind.info("Bound to (highlight)%s(default).", elementToBind.keybind);
+        }
+        else if (value == GLFW.GLFW_KEY_ESCAPE) {
+            elementToBind.keybind.set(Keybind.none());
+            elementToBind.info("Removed bind.");
+        }
+        else return false;
+
+        MeteorClient.EVENT_BUS.post(HudElementBindChangedEvent.get(elementToBind));
+        elementToBind = null;
+
+        return true;
+    }
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onKey(KeyEvent event) {
+        if (event.action == KeyAction.Repeat) return;
+        onAction(true, event.key, event.action == KeyAction.Press);
+    }
+
+    @EventHandler(priority = EventPriority.HIGH)
+    private void onMouseButton(MouseButtonEvent event) {
+        if (event.action == KeyAction.Repeat) return;
+        onAction(false, event.button, event.action == KeyAction.Press);
+    }
+    private void onAction(boolean isKey, int value, boolean isPress) {
+        if (mc.currentScreen == null && !Input.isKeyPressed(GLFW.GLFW_KEY_F3)) {
+            for (HudElement element : elements) {
+                if (element.keybind.matches(isKey, value) && (isPress || element.toggleOnBindRelease)) {
+                    element.toggle();
+                    element.sendToggledMsg();
+                }
+            }
+        }
+    }
+    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    private void onOpenScreen(OpenScreenEvent event) {
+        if (!Utils.canUpdate()) return;
+
+        for (HudElement element : elements) {
+            if (element.toggleOnBindRelease && element.isActive()) {
+                element.toggle();
+                element.sendToggledMsg();
+            }
+        }
+    }
+    // End of binding
 
     @EventHandler
     private void onTick(TickEvent.Post event) {

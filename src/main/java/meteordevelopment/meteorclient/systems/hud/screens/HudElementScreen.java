@@ -5,20 +5,27 @@
 
 package meteordevelopment.meteorclient.systems.hud.screens;
 
+import meteordevelopment.meteorclient.events.meteor.HudElementBindChangedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import meteordevelopment.meteorclient.gui.widgets.WKeybind;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.settings.Settings;
+import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.XAnchor;
 import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
@@ -27,6 +34,7 @@ public class HudElementScreen extends WindowScreen {
     private final HudElement element;
 
     private WContainer settingsC1, settingsC2;
+    private WKeybind keybind;
     private final Settings settings;
 
     public HudElementScreen(GuiTheme theme, HudElement element) {
@@ -86,6 +94,33 @@ public class HudElementScreen extends WindowScreen {
         settingsC2 = add(theme.verticalList()).expandX().widget();
         settingsC2.add(theme.settings(settings)).expandX();
 
+        // Bind
+        WSection section = add(theme.section("Bind", true)).expandX().widget();
+
+        // Keybind
+        WHorizontalList bind = section.add(theme.horizontalList()).expandX().widget();
+
+        bind.add(theme.label("Bind: "));
+        keybind = bind.add(theme.keybind(element.keybind)).expandX().widget();
+        keybind.actionOnSet = () -> Hud.get().setElementToBind(element);
+
+        WButton reset = bind.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+        reset.action = keybind::resetBind;
+
+        // Toggle on bind release
+        WHorizontalList tobr = section.add(theme.horizontalList()).widget();
+
+        tobr.add(theme.label("Toggle on bind release: "));
+        WCheckbox tobrC = tobr.add(theme.checkbox(element.toggleOnBindRelease)).widget();
+        tobrC.action = () -> element.toggleOnBindRelease = tobrC.checked;
+
+        // Chat feedback
+        WHorizontalList cf = section.add(theme.horizontalList()).widget();
+
+        cf.add(theme.label("Chat Feedback: "));
+        WCheckbox cfC = cf.add(theme.checkbox(element.chatFeedback)).widget();
+        cfC.action = () -> element.chatFeedback = cfC.checked;
+
         add(theme.horizontalSeparator()).expandX();
 
         // Bottom
@@ -107,6 +142,11 @@ public class HudElementScreen extends WindowScreen {
     }
 
     @Override
+    public boolean shouldCloseOnEsc() {
+        return !Hud.get().isBinding();
+    }
+
+    @Override
     public void tick() {
         super.tick();
 
@@ -120,6 +160,10 @@ public class HudElementScreen extends WindowScreen {
     @Override
     protected void onRenderBefore(float delta) {
         HudEditorScreen.renderElements();
+    }
+    @EventHandler
+    private void onElementBindChanged(HudElementBindChangedEvent event) {
+        keybind.reset();
     }
 
     @Override

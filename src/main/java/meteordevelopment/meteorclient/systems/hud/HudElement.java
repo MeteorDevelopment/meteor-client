@@ -6,11 +6,16 @@
 package meteordevelopment.meteorclient.systems.hud;
 
 import meteordevelopment.meteorclient.settings.Settings;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.other.Snapper;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public abstract class HudElement implements Snapper.Element, ISerializable<HudElement> {
     public final HudElementInfo<?> info;
@@ -18,6 +23,10 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
 
     public final Settings settings = new Settings();
     public final HudBox box = new HudBox(this);
+
+    public final Keybind keybind = Keybind.none();
+    public boolean toggleOnBindRelease = false;
+    public boolean chatFeedback = true;
 
     public boolean autoAnchors = true;
     public int x, y;
@@ -103,6 +112,33 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
 
     public void onFontChanged() {}
 
+    public void sendToggledMsg() {
+        if (Config.get().chatFeedback.get() && chatFeedback) {
+            ChatUtils.forceNextPrefixClass(getClass());
+            ChatUtils.sendMsg(this.hashCode(), Formatting.GRAY, "Toggled (highlight)%s(default) %s(default).", info.title, isActive() ? Formatting.GREEN + "on" : Formatting.RED + "off");
+        }
+    }
+
+    public void info(Text message) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.sendMsg(info.title, message);
+    }
+
+    public void info(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.info(info.title, message, args);
+    }
+
+    public void warning(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.warning(info.title, message, args);
+    }
+
+    public void error(String message, Object... args) {
+        ChatUtils.forceNextPrefixClass(getClass());
+        ChatUtils.error(info.title, message, args);
+    }
+
     // Serialization
 
     @Override
@@ -111,6 +147,10 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
 
         tag.putString("name", info.name);
         tag.putBoolean("active", active);
+
+        tag.put("keybind", keybind.toTag());
+        tag.putBoolean("toggleOnKeyRelease", toggleOnBindRelease);
+        tag.putBoolean("chatFeedback", chatFeedback);
 
         tag.put("settings", settings.toTag());
         tag.put("box", box.toTag());
@@ -125,6 +165,10 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
         settings.reset();
 
         active = tag.getBoolean("active");
+
+        keybind.fromTag(tag);
+        toggleOnBindRelease = tag.getBoolean("toggleOnKeyRelease");
+        chatFeedback = tag.getBoolean("chatFeedback");
 
         settings.fromTag(tag.getCompound("settings"));
         box.fromTag(tag.getCompound("box"));
