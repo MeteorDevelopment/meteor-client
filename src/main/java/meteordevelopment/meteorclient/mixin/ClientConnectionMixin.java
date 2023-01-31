@@ -62,7 +62,7 @@ public class ClientConnectionMixin {
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
     private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
-        if (throwable instanceof IOException && Modules.get().get(AntiPacketKick.class).catchExceptions.get()) {
+        if (throwable instanceof IOException && Modules.get().get(AntiPacketKick.class).catchExceptions()) {
             if (Modules.get().get(AntiPacketKick.class).logExceptions.get()) ChatUtils.warning("Caught exception: %s", throwable);
             ci.cancel();
         }
