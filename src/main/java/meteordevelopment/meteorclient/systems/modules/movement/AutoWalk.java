@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.baritone.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.world.GoalDirection;
 import meteordevelopment.orbit.EventHandler;
@@ -34,37 +34,34 @@ public class AutoWalk extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-        .name("mode")
-        .description("Walking mode.")
-        .defaultValue(Mode.Smart)
-        .onChanged(mode1 -> {
-            if (isActive()) {
-                if (mode1 == Mode.Simple) {
-                    try {
-                        Class.forName("baritone.api.BaritoneAPI");
-                        BaritoneUtils.cancelEverything();
-                    } catch (ClassNotFoundException ignored) {}
-                    goal = null;
-                } else {
-                    timer = 0;
-                    createGoal();
-                }
+            .name("mode")
+            .description("Walking mode.")
+            .defaultValue(Mode.Smart)
+            .onChanged(mode1 -> {
+                if (isActive()) {
+                    if (mode1 == Mode.Simple) {
+                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                        goal = null;
+                    } else {
+                        timer = 0;
+                        createGoal();
+                    }
 
-                unpress();
-            }
-        })
-        .build()
+                    unpress();
+                }
+            })
+            .build()
     );
 
     private final Setting<Direction> direction = sgGeneral.add(new EnumSetting.Builder<Direction>()
-        .name("simple-direction")
-        .description("The direction to walk in simple mode.")
-        .defaultValue(Direction.Forwards)
-        .onChanged(direction1 -> {
-            if (isActive()) unpress();
-        })
-        .visible(() -> mode.get() == Mode.Simple)
-        .build()
+            .name("simple-direction")
+            .description("The direction to walk in simple mode.")
+            .defaultValue(Direction.Forwards)
+            .onChanged(direction1 -> {
+                if (isActive()) unpress();
+            })
+            .visible(() -> mode.get() == Mode.Simple)
+            .build()
     );
 
     private int timer = 0;
@@ -82,10 +79,8 @@ public class AutoWalk extends Module {
     @Override
     public void onDeactivate() {
         if (mode.get() == Mode.Simple) unpress();
-        try {
-            Class.forName("baritone.api.BaritoneAPI");
-            BaritoneUtils.cancelEverything();
-        } catch (ClassNotFoundException ignored) {}
+        else BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+
         goal = null;
     }
 
@@ -123,9 +118,6 @@ public class AutoWalk extends Module {
     private void createGoal() {
         timer = 0;
         goal = new GoalDirection(mc.player.getPos(), mc.player.getYaw());
-        try {
-            Class.forName("baritone.api.BaritoneAPI");
-            BaritoneUtils.setGoalAndPath(goal);
-        } catch (ClassNotFoundException ignored) {}
+        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
     }
 }
