@@ -5,11 +5,14 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import io.netty.channel.ChannelHandlerContext;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ConnectToServerEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.AntiPacketKick;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 import net.minecraft.network.listener.PacketListener;
@@ -22,6 +25,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 
 @Mixin(ClientConnection.class)
@@ -54,5 +58,13 @@ public class ClientConnectionMixin {
     @Inject(method = "send(Lnet/minecraft/network/Packet;)V", at = @At("TAIL"))
     private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
+    }
+
+    @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
+    private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
+        if (throwable instanceof IOException && Modules.get().get(AntiPacketKick.class).catchExceptions.get()) {
+            if (Modules.get().get(AntiPacketKick.class).logExceptions.get()) ChatUtils.warning("Caught exception: %s", throwable);
+            ci.cancel();
+        }
     }
 }
