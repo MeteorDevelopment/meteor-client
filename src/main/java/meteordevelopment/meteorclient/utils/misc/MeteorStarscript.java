@@ -86,6 +86,7 @@ public class MeteorStarscript {
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
             .set("get_module_info", MeteorStarscript::getModuleInfo)
+            .set("get_module_setting", MeteorStarscript::getModuleSetting)
             .set("prefix", MeteorStarscript::getMeteorPrefix)
         );
 
@@ -338,6 +339,19 @@ public class MeteorStarscript {
 
         Module module = Modules.get().get(ss.popString("First argument to meteor.is_module_active() needs to be a string."));
         return Value.bool(module != null && module.isActive());
+    }
+    private Value getModuleSetting(Starscript ss, int argCount) {
+        if (argCount != 2) ss.error("meteor.get_module_setting() requires 2 arguments, got %d.", argCount);
+
+        String settingName = ss.popString("Second argument to meteor.get_module_setting() needs to be a string.");
+        String moduleName = ss.popString("First argument to meteor.get_module_setting() needs to be a string.");
+        Module module = Modules.get().get(moduleName);
+        if (module == null) ss.error("%s is not a valid module.", moduleName);
+        assert module != null;
+        Setting<?> setting = module.settings.get(settingName);
+        if (setting == null) ss.error("%s is not a valid setting of module %s.", settingName, module.title);
+        assert  setting != null;
+        return Value.string(setting.get().toString());
     }
 
     private static Value getItem(Starscript ss, int argCount) {
