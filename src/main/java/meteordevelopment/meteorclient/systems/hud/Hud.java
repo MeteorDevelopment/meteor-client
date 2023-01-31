@@ -48,6 +48,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEditor = settings.createGroup("Editor");
+    private final SettingGroup sgKeybind = settings.createGroup("Bind");
 
     // General
 
@@ -92,6 +93,14 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .description("Snapping range in editor.")
         .defaultValue(10)
         .sliderMax(20)
+        .build()
+    );
+
+    // Keybindings
+    private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
+        .name("bind")
+        .defaultValue(Keybind.none())
+        .action(() -> active = !active)
         .build()
     );
 
