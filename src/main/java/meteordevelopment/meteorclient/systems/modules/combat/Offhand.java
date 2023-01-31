@@ -19,9 +19,12 @@ import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.AxeItem;
+import net.minecraft.item.CrossbowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SwordItem;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.nbt.NbtElement;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
 
@@ -70,6 +73,13 @@ public class Offhand extends Module {
         .build()
     );
 
+    private final Setting<Boolean> fireworkCrossbow = sgGeneral.add(new BoolSetting.Builder()
+        .name("firework-with-crossbow")
+        .description("Holds the Firework with highest damage when you are holding a Crossbow.")
+        .defaultValue(true)
+        .build()
+    );
+
     private boolean isClicking;
     private boolean sentMessage;
     private Item currentItem;
@@ -97,14 +107,17 @@ public class Offhand extends Module {
         else if ((Modules.get().isActive(CrystalAura.class) && crystalCa.get())
             || mc.interactionManager.isBreakingBlock() && crystalMine.get()) currentItem = Item.Crystal;
 
+        // Firework with Crossbow
+        else if (InvUtils.testInMainHand(Items.CROSSBOW) && fireworkCrossbow.get()) currentItem = Item.Firework;
+
         else currentItem = item.get();
 
         // Checking offhand item
         if (mc.player.getOffHandStack().getItem() != currentItem.item) {
-            FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, hotbar.get() ? 0 : 9, 35);
+            FindItemResult itemResult = findItem();
 
             // No offhand item
-            if (!item.found()) {
+            if (!itemResult.found()) {
                 if (!sentMessage) {
                     warning("Chosen item not found.");
                     sentMessage = true;
@@ -112,13 +125,13 @@ public class Offhand extends Module {
             }
 
             // Swap to offhand
-            else if ((isClicking || !rightClick.get()) && !autoTotem.isLocked() && !item.isOffhand()) {
-                InvUtils.move().from(item.slot()).toOffhand();
+            else if ((isClicking || !rightClick.get()) && !autoTotem.isLocked() && !itemResult.isOffhand()) {
+                InvUtils.move().from(itemResult.slot()).toOffhand();
                 sentMessage = false;
             }
         }
 
-        // If not clicking, set to totem if auto totem is on
+        // If not clicking, switch to totem if auto totem is active or swap offhand item
         else if (!isClicking && rightClick.get()) {
             if (autoTotem.isActive()) {
                 FindItemResult totem = InvUtils.find(itemStack -> itemStack.getItem() == Items.TOTEM_OF_UNDYING, hotbar.get() ? 0 : 9, 35);
@@ -126,7 +139,7 @@ public class Offhand extends Module {
                 if (totem.found() && !totem.isOffhand()) {
                     InvUtils.move().from(totem.slot()).toOffhand();
                 }
-            } else {
+            } else if (canSwapOffhand()) {
                 FindItemResult empty = InvUtils.find(ItemStack::isEmpty, hotbar.get() ? 0 : 9, 35);
                 if (empty.found()) InvUtils.move().fromOffhand().to(empty.slot());
             }
@@ -138,11 +151,44 @@ public class Offhand extends Module {
         isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
+    private FindItemResult findItem() {
+        if (currentItem == Item.Firework) {
+            int slot = -1, count = 0;
+            int bestDamage = -1;
+
+            for (int i = hotbar.get() ? 0 : 9; i <= 35; i++) {
+                ItemStack itemStack = mc.player.getInventory().getStack(i);
+                if (!itemStack.isOf(Item.Firework.item)) continue;
+
+                NbtCompound compound = itemStack.getSubNbt("Fireworks");
+                int damage = compound != null ? compound.getList("Explosions", NbtElement.COMPOUND_TYPE).size() : 0;
+
+                if (damage > bestDamage) {
+                    slot = i;
+                    count = itemStack.getCount();
+
+                    bestDamage = damage;
+                }
+            }
+
+            return new FindItemResult(slot, count);
+        }
+
+        return InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item , hotbar.get() ? 0 : 9, 35);
+    }
+
     private boolean usableItem() {
-        return mc.player.getMainHandStack().getItem() == Items.BOW
-            || mc.player.getMainHandStack().getItem() == Items.TRIDENT
-            || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
+        return mc.player.getMainHandStack().isOf(Items.BOW)
+            || mc.player.getMainHandStack().isOf(Items.TRIDENT)
+            || (mc.player.getMainHandStack().isOf(Items.CROSSBOW) && CrossbowItem.isCharged(mc.player.getMainHandStack()))
             || mc.player.getMainHandStack().getItem().isFood();
+    }
+
+    private boolean canSwapOffhand() {
+        ItemStack itemStack = mc.player.getMainHandStack();
+        return !itemStack.isOf(Items.CROSSBOW) ||
+               mc.player.getItemUseTime() < itemStack.getMaxUseTime() || // Project loading
+               CrossbowItem.isCharged(itemStack); // Project loaded and ready
     }
 
     @Override
@@ -154,6 +200,7 @@ public class Offhand extends Module {
         EGap(Items.ENCHANTED_GOLDEN_APPLE),
         Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
+        Firework(Items.FIREWORK_ROCKET),
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD);
 
