@@ -187,8 +187,8 @@ public class Offhand extends Module {
     private boolean canSwapOffhand() {
         ItemStack itemStack = mc.player.getMainHandStack();
         return !itemStack.isOf(Items.CROSSBOW) ||
-               mc.player.getItemUseTime() < itemStack.getMaxUseTime() || // Project loading
-               CrossbowItem.isCharged(itemStack); // Project loaded and ready
+               mc.player.getItemUseTime() < itemStack.getMaxUseTime() || // Projectile loading
+               CrossbowItem.isCharged(itemStack); // Projectile loaded and ready
     }
 
     @Override
