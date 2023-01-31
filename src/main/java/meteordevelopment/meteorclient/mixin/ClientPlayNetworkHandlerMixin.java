@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.mixin;
 
-import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.EntityDestroyEvent;
@@ -23,6 +22,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
+import meteordevelopment.meteorclient.utils.other.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
@@ -49,6 +49,9 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
     @Shadow
     public abstract void sendChatMessage(String content);
+
+    @Shadow
+    public abstract void sendChatCommand(String command);
 
     @Unique
     private boolean ignoreChatMessage;
@@ -130,7 +133,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
     private void onSendChatMessage(String message, CallbackInfo ci) {
         if (ignoreChatMessage) return;
 
-        if (!message.startsWith(Config.get().prefix.get()) && !message.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (BaritoneUtils.isLoaded() && !message.startsWith(Config.get().prefix.get()) && !message.startsWith(BaritoneUtils.getPrefix())) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
             if (!event.isCancelled()) {

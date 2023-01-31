@@ -38,6 +38,7 @@ import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.ValueComparableMap;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.other.BaritoneUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.nbt.NbtCompound;
@@ -89,6 +90,7 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
+        if (BaritoneUtils.isLoaded()) initBaritone();
     }
 
     @Override
@@ -448,7 +450,6 @@ public class Modules extends System<Modules> {
         add(new AntiLevitation());
         add(new AntiVoid());
         add(new AutoJump());
-        add(new AutoWalk());
         add(new Blink());
         add(new BoatFly());
         add(new ClickTP());
@@ -510,7 +511,6 @@ public class Modules extends System<Modules> {
         add(new UnfocusedCPU());
         add(new VoidESP());
         add(new WallHack());
-        add(new WaypointsModule());
         add(new Xray());
         add(new Zoom());
         add(new Blur());
@@ -533,12 +533,10 @@ public class Modules extends System<Modules> {
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
-        add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
         add(new NoGhostBlocks());
         add(new Nuker());
-        add(new StashFinder());
         add(new SpawnProofer());
         add(new Timer());
         add(new VeinMiner());
@@ -546,7 +544,6 @@ public class Modules extends System<Modules> {
     }
 
     private void initMisc() {
-        add(new Swarm());
         add(new AntiPacketKick());
         add(new AutoClicker());
         add(new AutoLog());
@@ -567,6 +564,14 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new ServerSpoof());
         add(new InventoryTweaks());
+    }
+
+    private void initBaritone() {
+        add(new AutoWalk());
+        add(new InfinityMiner());
+        add(new StashFinder());
+        add(new Swarm());
+        add(new WaypointsModule());
     }
 
     public static class ModuleRegistry extends SimpleRegistry<Module> {
