@@ -211,7 +211,7 @@ public class HoleESP extends Module {
     }
 
     private boolean validHole(BlockPos pos) {
-        if ((ignoreOwn.get() && (mc.player.getBlockPos().equals(pos)))) return false;
+        if (ignoreOwn.get() && mc.player.getBlockPos().equals(pos)) return false;
 
         WorldChunk chunk = mc.world.getChunk(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
         Block block = chunk.getBlockState(pos).getBlock();
