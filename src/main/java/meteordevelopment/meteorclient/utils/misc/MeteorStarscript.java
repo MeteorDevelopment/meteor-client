@@ -11,6 +11,7 @@ import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -340,7 +341,7 @@ public class MeteorStarscript {
         Module module = Modules.get().get(ss.popString("First argument to meteor.is_module_active() needs to be a string."));
         return Value.bool(module != null && module.isActive());
     }
-    private Value getModuleSetting(Starscript ss, int argCount) {
+    private static Value getModuleSetting(Starscript ss, int argCount) {
         if (argCount != 2) ss.error("meteor.get_module_setting() requires 2 arguments, got %d.", argCount);
 
         String settingName = ss.popString("Second argument to meteor.get_module_setting() needs to be a string.");
