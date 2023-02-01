@@ -160,8 +160,8 @@ public class Offhand extends Module {
                 ItemStack itemStack = mc.player.getInventory().getStack(i);
                 if (!itemStack.isOf(Item.Firework.item)) continue;
 
-                NbtCompound compound = itemStack.getSubNbt("Fireworks");
-                int damage = compound != null ? compound.getList("Explosions", NbtElement.COMPOUND_TYPE).size() : 0;
+                NbtCompound fireworksNbt = itemStack.getSubNbt("Fireworks");
+                int damage = fireworksNbt != null ? fireworksNbt.getList("Explosions", NbtElement.COMPOUND_TYPE).size() : 0;
 
                 if (damage > bestDamage) {
                     slot = i;
