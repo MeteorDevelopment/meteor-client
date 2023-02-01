@@ -74,7 +74,6 @@ public class MeteorStarscript {
         StandardLib.init(ss);
 
         // General
-        ss.set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "");
         ss.set("mc_version", SharedConstants.getGameVersion().getName());
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
         ss.set("ping", MeteorStarscript::ping);
@@ -82,6 +81,8 @@ public class MeteorStarscript {
 
         // Meteor
         ss.set("meteor", new ValueMap()
+            .set("name", MeteorClient.NAME)
+            .set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "")
             .set("modules", () -> Value.number(Modules.get().getAll().size()))
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
