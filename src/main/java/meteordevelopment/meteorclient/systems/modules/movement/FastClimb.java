@@ -42,7 +42,7 @@ public class FastClimb extends Module {
     private final Setting<Double> timer = sgGeneral.add(new DoubleSetting.Builder()
         .name("timer")
         .description("The timer value for Timer.")
-        .defaultValue(10)
+        .defaultValue(1.436)
         .min(1)
         .sliderMin(1)
         .visible(timerMode::get)
