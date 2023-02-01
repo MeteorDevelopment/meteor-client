@@ -31,7 +31,7 @@ public class NoSlow extends Module {
         .build()
     );
 
-    private final Setting<Integer> webTimer = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> webTimer = sgGeneral.add(new DoubleSetting.Builder()
         .name("web-timer")
         .description("The timer value for WebMode Timer.")
         .defaultValue(10)
