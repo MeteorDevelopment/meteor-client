@@ -75,7 +75,7 @@ public class FastClimb extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (climbing()) {
+        if (!timerMode.get() && climbing()) {
             Vec3d velocity = mc.player.getVelocity();
             mc.player.setVelocity(velocity.x, speed.get(), velocity.z);
         }
