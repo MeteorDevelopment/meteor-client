@@ -29,6 +29,8 @@ import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3d;
 
+import javax.annotation.Nullable;
+
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
@@ -296,9 +298,10 @@ public class ESP extends Module {
         if (!entities.get().getBoolean(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
         if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
-        return !EntityUtils.isInRenderDistance(entity) || getFadeAlpha(entity) == 0;
+        return !EntityUtils.isInRenderDistance(entity);
     }
 
+    @Nullable
     public Color getColor(Entity entity) {
         if (!entities.get().getBoolean(entity.getType())) return null;
 
