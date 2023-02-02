@@ -414,6 +414,7 @@ public class Modules extends System<Modules> {
 
     private void initPlayer() {
         add(new AntiHunger());
+        add(new AntiPotion());
         add(new AutoEat());
         add(new AutoFish());
         add(new AutoGap());
@@ -445,7 +446,6 @@ public class Modules extends System<Modules> {
         add(new AirJump());
         add(new Anchor());
         add(new AntiAFK());
-        add(new AntiLevitation());
         add(new AntiVoid());
         add(new AutoJump());
         add(new AutoWalk());
