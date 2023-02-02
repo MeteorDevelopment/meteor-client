@@ -33,6 +33,7 @@ public class Rotation extends Module {
         .defaultValue(0)
         .sliderMax(360)
         .max(360)
+        .visible(() -> yawLockMode.get() == LockMode.Simple)
         .build()
     );
 
@@ -51,6 +52,7 @@ public class Rotation extends Module {
         .defaultValue(0)
         .range(-90, 90)
         .sliderRange(-90, 90)
+        .visible(() -> pitchLockMode.get() == LockMode.Simple)
         .build()
     );
 
