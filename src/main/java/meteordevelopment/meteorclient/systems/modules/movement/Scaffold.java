@@ -53,6 +53,14 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Boolean> cancelVelocity = sgGeneral.add(new BoolSetting.Builder()
+        .name("cancel-velocity")
+        .description("Whether or not to cancel velocity when towering.")
+        .defaultValue(false)
+        .visible(fastTower::get)
+        .build()
+    );
+
     private final Setting<Boolean> onlyOnClick = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-click")
         .description("Only places blocks when holding right click.")
@@ -94,6 +102,25 @@ public class Scaffold extends Module {
         .defaultValue(4)
         .min(0)
         .sliderMax(8)
+        .visible(() -> !airPlace.get())
+        .build()
+    );
+
+    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
+        .name("range")
+        .description("Scaffold radius.")
+        .defaultValue(3)
+        .min(0)
+        .max(6)
+        .visible(() -> !airPlace.get())
+        .build()
+    );
+
+    private final Setting<Integer> blocksPerTick = sgGeneral.add(new IntSetting.Builder()
+        .name("blocks-per-tick")
+        .description("How many blocks to place in one tick.")
+        .defaultValue(3)
+        .min(1)
         .visible(() -> !airPlace.get())
         .build()
     );
@@ -196,12 +223,6 @@ public class Scaffold extends Module {
             bp.set(prevBp.offset(facing));
         }
 
-        FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
-        if (!item.found()) return;
-
-
-        if (item.getHand() == null && !autoSwitch.get()) return;
-
         // Move down if shifting
         if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed()) {
             if (lastSneakingY - mc.player.getY() < 0.1) {
@@ -214,18 +235,34 @@ public class Scaffold extends Module {
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
         if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
-            mc.player.setVelocity(0, 0.42f, 0);
+            Vec3d vel = mc.player.getVelocity();
+            mc.player.setVelocity(cancelVelocity.get() ? 0 : vel.x, 0.42, cancelVelocity.get() ? 0 : vel.z);
         }
 
-        if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
-            // Render block if was placed
-            if (render.get())
-                RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
-
-            // Move player down so they are on top of the placed block ready to jump again
-            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir() && fastTower.get()) {
-                mc.player.setVelocity(0, -0.28f, 0);
+        if (!airPlace.get()) {
+            List<BlockPos> blocks = new ArrayList<>();
+            for (double x = mc.player.getX() - range.get(); x <= mc.player.getX() + range.get(); x = x + 0.5) {
+                for (double z = mc.player.getZ() - range.get(); z <= mc.player.getZ() + range.get(); z = z + 0.5) {
+                    blocks.add(new BlockPos(x, mc.player.getY() - 0.5, z));
+                }
             }
+
+            if (!blocks.isEmpty()) {
+                blocks.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
+                int counter = 0;
+                for (BlockPos block : blocks) {
+                    if (place(block)) counter++;
+
+                    if (counter >= blocksPerTick.get()) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Move player down so they are on top of the placed block ready to jump again
+        if (place(bp) && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir()) {
+            mc.player.setVelocity(0, -0.28f, 0);
         }
 
         if (!mc.world.getBlockState(bp).isAir()) {
@@ -247,6 +284,21 @@ public class Scaffold extends Module {
 
         if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
         return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
+    }
+
+    private boolean place(BlockPos bp) {
+        FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
+        if (!item.found()) return false;
+
+        if (item.getHand() == null && !autoSwitch.get()) return false;
+
+        if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
+            // Render block if was placed
+            if (render.get())
+                RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
+            return true;
+        }
+        return false;
     }
 
     public enum ListMode {

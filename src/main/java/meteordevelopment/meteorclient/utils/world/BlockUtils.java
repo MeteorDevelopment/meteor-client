@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.utils.world;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -37,8 +36,6 @@ import net.minecraft.world.World;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockUtils {
-    private static final Vec3d hitPos = new Vec3d(0, 0, 0);
-
     public static boolean breaking;
     private static boolean breakingThisTick;
 
@@ -82,7 +79,7 @@ public class BlockUtils {
         if (slot < 0 || slot > 8) return false;
         if (!canPlace(blockPos, checkEntities)) return false;
 
-        ((IVec3d) hitPos).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+        Vec3d hitPos = Vec3d.ofCenter(blockPos);
 
         BlockPos neighbour;
         Direction side = getPlaceSide(blockPos);
@@ -97,18 +94,20 @@ public class BlockUtils {
 
         Direction s = side;
 
+        BlockHitResult bhr = new BlockHitResult(hitPos, s, neighbour, false);
+
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
                 InvUtils.swap(slot, swapBack);
 
-                place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
+                interact(bhr, hand, swingHand);
 
                 if (swapBack) InvUtils.swapBack();
             });
         } else {
             InvUtils.swap(slot, swapBack);
 
-            place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
+            interact(bhr, hand, swingHand);
 
             if (swapBack) InvUtils.swapBack();
         }
@@ -117,7 +116,7 @@ public class BlockUtils {
         return true;
     }
 
-    private static void place(BlockHitResult blockHitResult, Hand hand, boolean swing) {
+    public static void interact(BlockHitResult blockHitResult, Hand hand, boolean swing) {
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
 
