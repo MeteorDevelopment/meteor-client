@@ -81,7 +81,7 @@ public class ESP extends Module {
         .name("fill-opacity")
         .description("The opacity of the shape fill.")
         .visible(() -> shapeMode.get() != ShapeMode.Lines)
-        .defaultValue(0.8)
+        .defaultValue(0.3)
         .range(0, 1)
         .sliderMax(1)
         .build()
