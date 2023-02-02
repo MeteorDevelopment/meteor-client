@@ -98,7 +98,7 @@ public class Scaffold extends Module {
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("closest-block-range")
-        .description("How far can scaffold place blocks.")
+        .description("How far can scaffold place blocks when you are in air.")
         .defaultValue(4)
         .min(0)
         .sliderMax(8)
@@ -106,13 +106,13 @@ public class Scaffold extends Module {
         .build()
     );
 
-    private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-        .name("range")
-        .description("Scaffold radius.")
-        .defaultValue(3)
+    private final Setting<Double> radius = sgGeneral.add(new DoubleSetting.Builder()
+        .name("radius")
+        .description("Scaffold radius. 0 means one block.")
+        .defaultValue(0)
         .min(0)
         .max(6)
-        .visible(() -> !airPlace.get())
+        .visible(() -> airPlace.get())
         .build()
     );
 
@@ -121,7 +121,7 @@ public class Scaffold extends Module {
         .description("How many blocks to place in one tick.")
         .defaultValue(3)
         .min(1)
-        .visible(() -> !airPlace.get())
+        .visible(() -> airPlace.get())
         .build()
     );
 
@@ -234,15 +234,12 @@ public class Scaffold extends Module {
         }
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
-        if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
-            Vec3d vel = mc.player.getVelocity();
-            mc.player.setVelocity(cancelVelocity.get() ? 0 : vel.x, 0.42, cancelVelocity.get() ? 0 : vel.z);
-        }
+        fastTower(false, null);
 
-        if (!airPlace.get()) {
+        if (airPlace.get()) {
             List<BlockPos> blocks = new ArrayList<>();
-            for (double x = mc.player.getX() - range.get(); x <= mc.player.getX() + range.get(); x = x + 0.5) {
-                for (double z = mc.player.getZ() - range.get(); z <= mc.player.getZ() + range.get(); z = z + 0.5) {
+            for (double x = mc.player.getX() - radius.get(); x <= mc.player.getX() + radius.get(); x = x + 0.5) {
+                for (double z = mc.player.getZ() - radius.get(); z <= mc.player.getZ() + radius.get(); z = z + 0.5) {
                     blocks.add(new BlockPos(x, mc.player.getY() - 0.5, z));
                 }
             }
@@ -251,22 +248,21 @@ public class Scaffold extends Module {
                 blocks.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
                 int counter = 0;
                 for (BlockPos block : blocks) {
-                    if (place(block)) counter++;
+                    if (place(block)) {
+                        fastTower(true, block);
+                        counter++;
+                    }
 
                     if (counter >= blocksPerTick.get()) {
                         break;
                     }
                 }
             }
-        }
-
-        // Move player down so they are on top of the placed block ready to jump again
-        if (place(bp) && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround() && !mc.world.getBlockState(bp).isAir()) {
-            mc.player.setVelocity(0, -0.28f, 0);
-        }
-
-        if (!mc.world.getBlockState(bp).isAir()) {
-            prevBp.set(bp);
+        } else {
+            if (place(bp)) fastTower(true, bp);
+            if (!mc.world.getBlockState(bp).isAir()) {
+                prevBp.set(bp);
+            }
         }
     }
 
@@ -299,6 +295,22 @@ public class Scaffold extends Module {
             return true;
         }
         return false;
+    }
+
+    private void fastTower(boolean down, BlockPos checkBlock) {
+        if (down) {
+            // Move player down so they are on top of the placed block ready to jump again
+            if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround()) {
+                // The chunk hasn't updated yet so we check the block we were standing on
+                if (!mc.world.getBlockState(checkBlock.down()).isReplaceable())
+                    mc.player.setVelocity(0, -0.28f, 0);
+            }
+        } else {
+            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
+                Vec3d vel = mc.player.getVelocity();
+                mc.player.setVelocity(cancelVelocity.get() ? 0 : vel.x, 0.42, cancelVelocity.get() ? 0 : vel.z);
+            }
+        }
     }
 
     public enum ListMode {
