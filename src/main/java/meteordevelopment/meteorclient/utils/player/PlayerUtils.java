@@ -256,10 +256,14 @@ public class PlayerUtils {
     }
 
     public static double squaredDistanceTo(double x, double y, double z) {
-        float f = (float) (mc.player.getX() - x);
-        float g = (float) (mc.player.getY() - y);
-        float h = (float) (mc.player.getZ() - z);
-        return f * f + g * g + h * h;
+        return squaredDistance(mc.player.getX(), mc.player.getY(), mc.player.getZ(), x, y, z);
+    }
+
+    public static double squaredDistance(double x1, double y1, double z1, double x2, double y2, double z2) {
+        float f = (float) (x1 - x2);
+        float g = (float) (y1 - y2);
+        float h = (float) (z1 - z2);
+        return org.joml.Math.fma(f, f, org.joml.Math.fma(g, g, h * h));
     }
 
     public static boolean isWithin(Entity entity, double r) {
@@ -287,7 +291,8 @@ public class PlayerUtils {
     }
 
     public static double squaredDistanceToCamera(double x, double y, double z) {
-        return mc.gameRenderer.getCamera().getPos().squaredDistanceTo(x, y, z);
+        Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+        return squaredDistance(cameraPos.x, cameraPos.y, cameraPos.z, x, y, z);
     }
 
     public static double squaredDistanceToCamera(Entity entity) {
@@ -323,10 +328,7 @@ public class PlayerUtils {
     }
 
     public static boolean isWithinReach(double x, double y, double z) {
-        float f = (float) (mc.player.getX() - x);
-        float g = (float) (mc.player.getEyeY() - y);
-        float h = (float) (mc.player.getZ() - z);
-        return (f * f + g * g + h * h) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
+        return squaredDistanceTo(x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
     }
 
     public static Dimension getDimension() {
