@@ -91,7 +91,7 @@ public class Scaffold extends Module {
 
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
         .name("air-place")
-        .description("Allow air place.")
+        .description("Allow air place. This also allows you to modify scaffold radius.")
         .defaultValue(false)
         .build()
     );
@@ -108,7 +108,7 @@ public class Scaffold extends Module {
 
     private final Setting<Double> radius = sgGeneral.add(new DoubleSetting.Builder()
         .name("radius")
-        .description("Scaffold radius. 0 means one block.")
+        .description("Scaffold radius.")
         .defaultValue(0)
         .min(0)
         .max(6)
@@ -238,8 +238,8 @@ public class Scaffold extends Module {
 
         if (airPlace.get()) {
             List<BlockPos> blocks = new ArrayList<>();
-            for (double x = mc.player.getX() - radius.get(); x <= mc.player.getX() + radius.get(); x = x + 0.5) {
-                for (double z = mc.player.getZ() - radius.get(); z <= mc.player.getZ() + radius.get(); z = z + 0.5) {
+            for (int x = (int) (mc.player.getX() - radius.get()); x < mc.player.getX() + radius.get(); x++) {
+                for (int z = (int) (mc.player.getZ() - radius.get()); z < mc.player.getZ() + radius.get(); z++) {
                     blocks.add(new BlockPos(x, mc.player.getY() - 0.5, z));
                 }
             }
