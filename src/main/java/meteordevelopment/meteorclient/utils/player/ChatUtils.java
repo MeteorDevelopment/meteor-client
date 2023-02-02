@@ -58,10 +58,10 @@ public class ChatUtils {
         customPrefixes.removeIf(pair -> pair.getLeft().equals(packageName));
     }
     
-    public static Pair<String, Supplier<Text>> getCustomPrefix(String packageName) {
+    public static Supplier<Text> getCustomPrefix(String packageName) {
         for (Pair<String, Supplier<Text>> pair : customPrefixes) {
             if (pair.getLeft().equals(packageName)) {
-                return pair;
+                return pair.getRight();
             }
         }
     }
