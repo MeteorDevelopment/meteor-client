@@ -60,14 +60,14 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
             addDrawableChild(
                 new ButtonWidget.Builder(Text.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
-                    .position(width / 2 - 40, 3)
+                    .position(width / 2 - 41, 3)
                     .size(40, 20)
                     .build()
             );
 
             addDrawableChild(
                 new ButtonWidget.Builder(Text.literal("Dump"), button -> invTweaks.dump(getScreenHandler()))
-                    .position(width / 2 - 40, 26)
+                    .position(width / 2 + 2, 3)
                     .size(40, 20)
                     .build()
             );
