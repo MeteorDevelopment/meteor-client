@@ -64,7 +64,7 @@ public class ChatUtils {
                 return pair.getRight();
             }
         }
-        return Text::empty;
+        return null;
     }
 
     public static void forceNextPrefixClass(Class<?> klass) {
