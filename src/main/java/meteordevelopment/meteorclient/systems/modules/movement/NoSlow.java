@@ -83,6 +83,13 @@ public class NoSlow extends Module {
         .build()
     );
 
+    private final Setting<Boolean> slowFalling = sgGeneral.add(new BoolSetting.Builder()
+        .name("slow-falling")
+        .description("Whether or not slow falling effect will not slow your fall down.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> slowness = sgGeneral.add(new BoolSetting.Builder()
         .name("slowness")
         .description("Whether or not slowness will not slow you down.")
@@ -132,6 +139,11 @@ public class NoSlow extends Module {
     public boolean sneaking() {
         return isActive() && sneaking.get();
     }
+
+    public boolean slowFalling() {
+        return isActive() && slowFalling.get();
+    }
+
 
     public boolean slowness() {
         return isActive() && slowness.get();
