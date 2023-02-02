@@ -40,6 +40,10 @@ public class ChatUtils {
     public static Text getMeteorPrefix() {
         return PREFIX;
     }
+    
+    public static void setMeteorPrefix(Text newPrefix) {
+        PREFIX = newPrefix;
+    }
 
     /** Registers a custom prefix to be used when calling from a class in the specified package. When null is returned from the supplier the default Meteor prefix is used. */
     public static void registerCustomPrefix(String packageName, Supplier<Text> supplier) {
