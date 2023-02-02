@@ -57,6 +57,14 @@ public class ChatUtils {
     public static void unregisterCustomPrefix(String packageName) {
         customPrefixes.removeIf(pair -> pair.getLeft().equals(packageName));
     }
+    
+    public static Pair<String, Supplier<Text>> getCustomPrefix(String packageName) {
+        for (Pair<String, Supplier<Text>> pair : customPrefixes) {
+            if (pair.getLeft().equals(packageName)) {
+                return pair;
+            }
+        }
+    }
 
     public static void forceNextPrefixClass(Class<?> klass) {
         forcedPrefixClassName = klass.getName();
