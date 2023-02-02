@@ -92,9 +92,7 @@ public class BlockUtils {
             hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
         }
 
-        Direction s = side;
-
-        BlockHitResult bhr = new BlockHitResult(hitPos, s, neighbour, false);
+        BlockHitResult bhr = new BlockHitResult(hitPos, side, neighbour, false);
 
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
