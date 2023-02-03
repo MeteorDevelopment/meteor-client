@@ -163,6 +163,13 @@ public class KillAura extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreInvisible = sgTargeting.add(new BoolSetting.Builder()
+        .name("ignore-invisible")
+        .description("Whether or not to attack invisible entities.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> ignorePassive = sgTargeting.add(new BoolSetting.Builder()
         .name("ignore-passive")
         .description("Will only attack sometimes passive mobs if they are targeting you.")
@@ -368,6 +375,7 @@ public class KillAura extends Module {
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(DamageSource.player(mc.player))) return false;
         }
+        if (ignoreInvisible.get() && entity.isInvisible()) return false;
         return !(entity instanceof AnimalEntity animal) || !ignoreBabies.get() || !animal.isBaby();
     }
 
