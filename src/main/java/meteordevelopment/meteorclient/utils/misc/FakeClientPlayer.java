@@ -13,6 +13,7 @@ import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.scoreboard.Scoreboard;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
@@ -51,6 +52,7 @@ public class FakeClientPlayer {
             try {
                 if (world == null) {
                     world = (ClientWorld) unsafe.allocateInstance(ClientWorld.class);
+                    world.setScoreboard(new Scoreboard());
                 }
 
                 player = new OtherClientPlayerEntity(world, mc.getSession().getProfile());
