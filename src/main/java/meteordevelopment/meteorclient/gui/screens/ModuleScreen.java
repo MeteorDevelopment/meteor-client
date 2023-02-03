@@ -120,7 +120,7 @@ public class ModuleScreen extends WindowScreen {
 
     @EventHandler
     private void onActiveModulesChanged(ActiveModulesChangedEvent event) {
-        this.active.checked = Modules.get().getActive().contains(module);
+        this.active.checked = module.isActive();
     }
 
     @Override
