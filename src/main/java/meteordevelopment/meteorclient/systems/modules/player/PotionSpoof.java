@@ -20,7 +20,7 @@ import java.util.List;
 
 import static net.minecraft.entity.effect.StatusEffects.*;
 
-public class Potions extends Module {
+public class PotionSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Object2IntMap<StatusEffect>> spoofPotions = sgGeneral.add(new StatusEffectAmplifierMapSetting.Builder()
@@ -56,8 +56,8 @@ public class Potions extends Module {
         .build()
     );
 
-    public Potions() {
-        super(Categories.Player, "potions", "Spoofs potion statuses for you. SOME effects DO NOT work.");
+    public PotionSpoof() {
+        super(Categories.Player, "potion-spoof", "Spoofs potion statuses for you. SOME effects DO NOT work.");
     }
 
     @Override
