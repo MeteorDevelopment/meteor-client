@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
-import meteordevelopment.meteorclient.systems.modules.player.Potions;
+import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -64,8 +64,8 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
     private boolean travelHasNoGravityProxy(LivingEntity self) {
-        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(Potions.class).shouldBlock(StatusEffects.LEVITATION)) {
-            return !Modules.get().get(Potions.class).applyGravity.get();
+        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION)) {
+            return !Modules.get().get(PotionSpoof.class).applyGravity.get();
         }
         return self.hasNoGravity();
     }
@@ -108,6 +108,6 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
     private void hasStatusEffect(StatusEffect effect, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(Potions.class).shouldBlock(effect)) info.setReturnValue(false);
+        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) info.setReturnValue(false);
     }
 }
