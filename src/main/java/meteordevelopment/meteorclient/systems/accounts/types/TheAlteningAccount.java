@@ -50,7 +50,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
     @Override
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
+        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) AccountUtils.resetLoginEnvironment();
         AccountUtils.setBaseUrl(service, SESSION + "/session/minecraft/");
         AccountUtils.setJoinUrl(service, SESSION + "/session/minecraft/join");
         AccountUtils.setCheckUrl(service, SESSION + "/session/minecraft/hasJoined");

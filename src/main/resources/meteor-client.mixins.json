@@ -125,6 +125,7 @@
     "PlayerMoveC2SPacketAccessor",
     "PlayerMoveC2SPacketMixin",
     "PlayerPositionLookS2CPacketAccessor",
+    "PlayerSkinProviderAccessor",
     "PowderSnowBlockMixin",
     "ProjectileEntityAccessor",
     "ProjectileInGroundAccessor",
