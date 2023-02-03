@@ -121,6 +121,7 @@
     "PlayerEntityMixin",
     "PlayerEntityRendererMixin",
     "PlayerInteractEntityC2SPacketMixin",
+    "PlayerListEntryMixin",
     "PlayerListHudMixin",
     "PlayerMoveC2SPacketAccessor",
     "PlayerMoveC2SPacketMixin",
