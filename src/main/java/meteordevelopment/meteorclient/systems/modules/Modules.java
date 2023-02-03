@@ -414,7 +414,6 @@ public class Modules extends System<Modules> {
 
     private void initPlayer() {
         add(new AntiHunger());
-        add(new AntiPotion());
         add(new AutoEat());
         add(new AutoFish());
         add(new AutoGap());
@@ -436,7 +435,7 @@ public class Modules extends System<Modules> {
         add(new PacketMine());
         add(new Portals());
         add(new PotionSaver());
-        add(new PotionSpoof());
+        add(new Potions());
         add(new Reach());
         add(new Rotation());
         add(new SpeedMine());
