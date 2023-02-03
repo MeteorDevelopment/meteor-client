@@ -136,11 +136,6 @@ public abstract class EntityMixin {
         if (v != 0) info.setReturnValue((float) v);
     }
 
-    @Inject(method = "isInvisibleTo", at = @At("HEAD"), cancellable = true)
-    private void onIsInvisibleTo(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
-        if (player == null) info.setReturnValue(false);
-    }
-
     @Inject(method = "getPose", at = @At("HEAD"), cancellable = true)
     private void getPoseHook(CallbackInfoReturnable<EntityPose> info) {
         if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {

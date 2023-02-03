@@ -19,7 +19,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -199,7 +198,7 @@ public class CombatHud extends HudElement {
             if (isInEditor()) playerEntity = mc.player;
             else playerEntity = TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
 
-            if (playerEntity == null && !isInEditor()) return;
+            if (playerEntity == null) return;
 
             // Background
             Renderer2D.COLOR.begin();
