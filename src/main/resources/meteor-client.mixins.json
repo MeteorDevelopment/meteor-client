@@ -96,6 +96,7 @@
     "ItemEntityMixin",
     "ItemEntityRendererMixin",
     "ItemMixin",
+    "ItemRendererMixin",
     "ItemStackAccessor",
     "ItemStackMixin",
     "KeyBindingAccessor",

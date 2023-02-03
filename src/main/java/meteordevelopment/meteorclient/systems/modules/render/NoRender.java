@@ -118,6 +118,13 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noEnchantGlint = sgOverlay.add(new BoolSetting.Builder()
+        .name("enchantment-glint")
+        .description("Disables rending of the enchantment glint.")
+        .defaultValue(false)
+        .build()
+    );
+
     // HUD
 
     private final Setting<Boolean> noBossBar = sgHUD.add(new BoolSetting.Builder()
@@ -402,6 +409,10 @@ public class NoRender extends Module {
 
     public boolean noEatParticles() {
         return isActive() && noEatParticles.get();
+    }
+
+    public boolean noEnchantGlint() {
+        return isActive() && noEnchantGlint.get();
     }
 
     // HUD
