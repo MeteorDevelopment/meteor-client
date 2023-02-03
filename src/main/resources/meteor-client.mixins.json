@@ -16,6 +16,7 @@
     "BannerBlockEntityRendererMixin",
     "BeaconBlockEntityRendererMixin",
     "BeaconScreenMixin",
+    "BedBlockMixin",
     "BiomeColorsMixin",
     "BlockCollisionSpliteratorMixin",
     "BlockEntityRenderDispatcherMixin",
