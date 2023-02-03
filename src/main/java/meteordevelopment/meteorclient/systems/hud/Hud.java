@@ -105,7 +105,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     private boolean resetToDefaultElements;
-    private boolean wasMenuScreen, wasHudHidden;
+    private boolean wasHudHidden;
 
     public Hud() {
         super("hud");
@@ -249,12 +249,15 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler(priority = EventPriority.LOWEST)
     private void onOpenScreen(OpenScreenEvent event) {
         if (hideInMenu.get()) {
-            if (!wasMenuScreen) wasHudHidden = !this.active;
-
-            if (event.screen instanceof GameMenuScreen || event.screen instanceof HandledScreen) this.active = false;
-            else if (!wasHudHidden) this.active = true;
+            if (event.screen instanceof GameMenuScreen || event.screen instanceof HandledScreen<?>) {
+                wasHudHidden = active;
+                active = false;
+            }
+            else if (wasHudHidden) {
+                wasHudHidden = false;
+                active = true;
+            }
         }
-        wasMenuScreen = event.screen instanceof GameMenuScreen || event.screen instanceof HandledScreen;
     }
 
     public boolean hasCustomFont() {
