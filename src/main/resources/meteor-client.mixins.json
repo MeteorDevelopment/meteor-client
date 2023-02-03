@@ -159,6 +159,7 @@
     "Vec3dMixin",
     "VertexBufferMixin",
     "WorldAccessor",
+    "WorldMixin",
     "WorldBorderMixin",
     "WorldChunkMixin",
     "WorldRendererAccessor",

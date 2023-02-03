@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -17,6 +18,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.world.Difficulty;
+import sun.misc.Unsafe;
+
+import java.lang.reflect.Field;
+import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -41,11 +46,18 @@ public class FakeClientPlayer {
         String id = mc.getSession().getUuid();
 
         if (player == null || (!id.equals(lastId))) {
-            if (world == null) {
-                world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getCurrentServerEntry(), mc.getSession().getProfile(), null), new ClientWorld.Properties(Difficulty.NORMAL, false, false), world.getRegistryKey(), world.getDimensionEntry(), 1, 1, mc::getProfiler, null, false, 0);
-            }
+            try {
+                Field f = Unsafe.class.getDeclaredField("theUnsafe");
+                f.setAccessible(true);
+                Unsafe unsafe = (Unsafe) f.get(null);
 
-            player = new OtherClientPlayerEntity(world, mc.getSession().getProfile());
+                if (world == null) {
+                    world = (ClientWorld) unsafe.allocateInstance(ClientWorld.class);
+                }
+
+                player = new OtherClientPlayerEntity(world, mc.getSession().getProfile());
+            } catch (Exception ignored) {
+            }
 
             lastId = id;
             needsNewEntry = true;

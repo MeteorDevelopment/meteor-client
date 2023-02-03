@@ -50,13 +50,13 @@ public abstract class EntityRenderDispatcherMixin {
         if (v != 0) ((IBox) box).expand(v);
     }
 
-    // Player model rendering in main menu
-
     @Inject(method = "renderShadow", at = @At("HEAD"), cancellable = true)
     private static void onRenderShadow(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Entity entity, float opacity, float tickDelta, WorldView world, float radius, CallbackInfo info) {
         if (PostProcessShaders.rendering) info.cancel();
         if (Modules.get().get(NoRender.class).noDeadEntities() && entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) info.cancel();
     }
+
+    // Player model rendering in main menu
 
     @Inject(method = "getSquaredDistanceToCamera(Lnet/minecraft/entity/Entity;)D", at = @At("HEAD"), cancellable = true)
     private void onGetSquaredDistanceToCameraEntity(Entity entity, CallbackInfoReturnable<Double> info) {
