@@ -126,15 +126,22 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
+    private final Setting<Boolean> autoDropExcludeEquipped = sgAutoDrop.add(new BoolSetting.Builder()
+        .name("exclude-equipped")
+        .description("Whether or not to drop items equipped in armor slots.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> autoDropExcludeHotbar = sgAutoDrop.add(new BoolSetting.Builder()
-        .name("auto-drop-exclude-hotbar")
+        .name("exclude-hotbar")
         .description("Whether or not to drop items from your hotbar.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> autoDropOnlyFullStacks = sgAutoDrop.add(new BoolSetting.Builder()
-        .name("auto-drop-only-full-stacks")
+        .name("only-full-stacks")
         .description("Only drops the items if the stack is full.")
         .defaultValue(false)
         .build()
@@ -358,8 +365,8 @@ public class InventoryTweaks extends Module {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
             if (autoDropItems.get().contains(itemStack.getItem())) {
-                if (!autoDropOnlyFullStacks.get() || itemStack.getCount() == itemStack.getMaxCount())
-                    InvUtils.drop().slot(i);
+                if ((!autoDropOnlyFullStacks.get() || itemStack.getCount() == itemStack.getMaxCount()) &&
+                    !(autoDropExcludeEquipped.get() && SlotUtils.isArmor(i))) InvUtils.drop().slot(i);
             }
         }
     }
