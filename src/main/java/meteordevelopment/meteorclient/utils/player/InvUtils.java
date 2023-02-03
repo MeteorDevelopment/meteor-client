@@ -44,9 +44,16 @@ public class InvUtils {
         });
     }
 
+    public static boolean testInHands(Predicate<ItemStack> predicate) {
+        return testInMainHand(predicate) || testInOffHand(predicate);
+    }
+
+    public static boolean testInHands(Item... items) {
+        return testInMainHand(items) || testInOffHand(items);
+    }
+
     public static boolean testInHotbar(Predicate<ItemStack> predicate) {
-        if (testInMainHand(predicate)) return true;
-        if (testInOffHand(predicate)) return true;
+        if (testInHands(predicate)) return true;
 
         for (int i = SlotUtils.HOTBAR_START; i < SlotUtils.HOTBAR_END; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
@@ -79,11 +86,11 @@ public class InvUtils {
     }
 
     public static FindItemResult findInHotbar(Predicate<ItemStack> isGood) {
-        if (isGood.test(mc.player.getOffHandStack())) {
+        if (testInOffHand(isGood)) {
             return new FindItemResult(SlotUtils.OFFHAND, mc.player.getOffHandStack().getCount());
         }
 
-        if (isGood.test(mc.player.getMainHandStack())) {
+        if (testInMainHand(isGood)) {
             return new FindItemResult(mc.player.getInventory().selectedSlot, mc.player.getMainHandStack().getCount());
         }
 
