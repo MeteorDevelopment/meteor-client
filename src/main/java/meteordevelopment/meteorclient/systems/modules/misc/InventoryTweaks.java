@@ -392,7 +392,7 @@ public class InventoryTweaks extends Module {
 
     private void checkAutoStealSettings() {
         if (autoSteal.get() && autoDump.get()) {
-            ChatUtils.error("You can't enable Auto Steal and Auto Dump at the same time!");
+            error("You can't enable Auto Steal and Auto Dump at the same time!");
             autoDump.set(false);
         }
     }
