@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -65,6 +66,13 @@ public class Nametags extends Module {
         .name("ignore-self")
         .description("Ignore yourself when in third person or freecam.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Ignore rendering nametags for friends.")
+        .defaultValue(false)
         .build()
     );
 
@@ -299,6 +307,7 @@ public class Nametags extends Module {
             if (type == EntityType.PLAYER) {
                 if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
                 if (EntityUtils.getGameMode((PlayerEntity) entity) == null && ignoreBots.get()) continue;
+                if (Friends.get().isFriend((PlayerEntity) entity) && ignoreFriends.get()) continue;
             }
 
             if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {
