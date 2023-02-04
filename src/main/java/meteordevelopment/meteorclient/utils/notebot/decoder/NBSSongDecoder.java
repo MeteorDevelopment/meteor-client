@@ -119,6 +119,8 @@ public class NBSSongDecoder extends SongDecoder {
                     }
 
                     Instrument inst = fromNBSInstrument(instrument);
+
+                    // Probably a custom instrument. Ignore this note
                     if (inst == null) continue;
 
                     Note note = new Note(inst /* instrument */, key - NOTE_OFFSET /* note */);
