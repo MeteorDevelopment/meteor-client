@@ -328,7 +328,7 @@ public class PlayerUtils {
     }
 
     public static boolean isWithinReach(double x, double y, double z) {
-        return squaredDistanceTo(x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
+        return squaredDistance(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(), x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
     }
 
     public static Dimension getDimension() {
