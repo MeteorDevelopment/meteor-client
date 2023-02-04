@@ -8,7 +8,9 @@ package meteordevelopment.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
+import meteordevelopment.meteorclient.systems.commands.arguments.DirectionArgumentType;
 import net.minecraft.command.CommandSource;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
@@ -22,6 +24,13 @@ public class RotationCommand extends Command {
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder
             .then(literal("set")
+                .then(argument("direction", DirectionArgumentType.create())
+                    .executes(context -> {
+                        mc.player.setPitch(context.getArgument("direction", Direction.class).getVector().getY() * -90);
+                        mc.player.setYaw(context.getArgument("direction", Direction.class).asRotation());
+
+                        return SINGLE_SUCCESS;
+                    }))
                 .then(argument("pitch", FloatArgumentType.floatArg(-90, 90))
                     .executes(context -> {
                         mc.player.setPitch(context.getArgument("pitch", Float.class));
