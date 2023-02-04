@@ -403,10 +403,15 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
                 SettingColor defaultValue = WHITE;
                 if (_i < setting.getDefaultValue().size()) defaultValue = setting.getDefaultValue().get(_i);
 
-                ColorSetting set = new ColorSetting(setting.name, setting.description, defaultValue, settingColor -> {
-                    setting.get().get(_i).set(settingColor);
-                    setting.onChanged();
-                }, null, null);
+                ColorSetting set = new ColorSetting.Builder()
+                    .name(setting.name)
+                    .description(setting.description)
+                    .defaultValue(defaultValue)
+                    .onChanged(settingColor -> {
+                        setting.get().get(_i).set(settingColor);
+                        setting.onChanged();
+                    })
+                    .build();
                 set.set(setting.get().get(_i));
                 mc.setScreen(new ColorSettingScreen(theme, set));
             };
