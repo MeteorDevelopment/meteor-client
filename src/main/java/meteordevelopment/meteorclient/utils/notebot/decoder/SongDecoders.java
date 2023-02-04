@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import net.minecraft.block.enums.Instrument;
 import org.apache.commons.io.FilenameUtils;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -43,10 +44,19 @@ public class SongDecoders {
         return hasDecoder(path.toFile());
     }
 
+    /**
+     * Parse file to one of {@link SongDecoder}
+     *
+     * @param file A song file
+     * @return A {@link Song} object
+     */
+    @Nullable
     public static Song parse(File file) {
         if (!hasDecoder(file)) return null;
         SongDecoder decoder = getDecoder(file);
         Song song = decoder.parse(file);
+
+        if (song == null) return null;
 
         fixSong(song);
 
@@ -55,6 +65,11 @@ public class SongDecoders {
         return song;
     }
 
+    /**
+     * This method adapts {@link Song} to settings in Notebot module
+     *
+     * @param song A song
+     */
     private static void fixSong(Song song) {
         Notebot notebot = Modules.get().get(Notebot.class);
 

@@ -113,12 +113,15 @@ public class NBSSongDecoder extends SongDecoder {
 
                     byte key = dataInputStream.readByte();
                     if (nbsversion >= 4) {
-                        dataInputStream.readByte(); // note block velocity
+                        dataInputStream.readUnsignedByte(); // note block velocity
                         dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
                         readShort(dataInputStream); // note block pitch
                     }
 
-                    Note note = new Note(fromNBSInstrument(instrument) /* instrument */, key - NOTE_OFFSET /* note */);
+                    Instrument inst = fromNBSInstrument(instrument);
+                    if (inst == null) continue;
+
+                    Note note = new Note(inst /* instrument */, key - NOTE_OFFSET /* note */);
                     setNote((int) Math.round(tick), note, notesMap);
                 }
             }
