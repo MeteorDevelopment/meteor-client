@@ -28,10 +28,9 @@ public class ColorListSetting extends Setting<List<SettingColor>> {
                 String[] strs = colorStr.split(",");
                 colors.add(new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3])));
             }
-            return colors;
         } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
-            return null;
         }
+        return colors;
     }
 
     @Override
