@@ -114,7 +114,7 @@ public class Spam extends Module {
             try (InputStream in = new FileInputStream(spamText)) {
                 textInFile = Arrays.stream(new String(in.readAllBytes()).split("\n")).map(s -> s.replace("\r", "")).toList();
             } catch (IOException e) {
-                ChatUtils.error("Spam", "Failed to read %s.", spamText.getAbsolutePath());
+                error("Failed to read %s.", spamText.getAbsolutePath());
                 toggle();
             }
         }
