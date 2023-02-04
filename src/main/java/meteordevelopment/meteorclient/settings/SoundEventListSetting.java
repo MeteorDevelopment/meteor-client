@@ -19,10 +19,6 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class SoundEventListSetting extends Setting<List<SoundEvent>> {
-    public SoundEventListSetting() {
-        this("dummy", "", new ArrayList<>(), null, null, null);
-    }
-
     public SoundEventListSetting(String name, String description, List<SoundEvent> defaultValue, Consumer<List<SoundEvent>> onChanged, Consumer<Setting<List<SoundEvent>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }

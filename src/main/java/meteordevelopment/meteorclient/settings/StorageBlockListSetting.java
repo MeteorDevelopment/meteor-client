@@ -34,10 +34,6 @@ public class StorageBlockListSetting extends Setting<List<BlockEntityType<?>>> {
 
     public static final Registry<BlockEntityType<?>> REGISTRY = new SRegistry();
 
-    public StorageBlockListSetting() {
-        this("dummy", "", new ArrayList<>(), null, null, null);
-    }
-
     public StorageBlockListSetting(String name, String description, List<BlockEntityType<?>> defaultValue, Consumer<List<BlockEntityType<?>>> onChanged, Consumer<Setting<List<BlockEntityType<?>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }

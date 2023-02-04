@@ -5,18 +5,22 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
+import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
+import sun.misc.Unsafe;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.*;
 import java.util.function.Consumer;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
@@ -121,12 +125,38 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return tag;
     }
 
-    public static Setting<?> fromValueNBT(NbtCompound tag) {
+    @SuppressWarnings("unchecked")
+    public static <T> Setting<T> fromValueNBT(NbtCompound tag) {
         try {
             Class<?> settingClass = Class.forName(tag.getString("type"));
             Method load = settingClass.getDeclaredMethod("load", NbtCompound.class);
             load.setAccessible(true);
-            Setting<?> instance = (Setting<?>) settingClass.newInstance();
+
+            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+            unsafeField.setAccessible(true);
+            Unsafe unsafe = (Unsafe) unsafeField.get(null);
+            Setting<T> instance = (Setting<T>) unsafe.allocateInstance(settingClass);
+
+            Type genericSuperclass = settingClass.getGenericSuperclass();
+            ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
+            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+            Class<?> valueClass = (Class<?>) actualTypeArguments[0];
+
+            if (instance.value == null) {
+                if (valueClass == List.class) {
+                    instance.value = (T) new ArrayList<>();
+                } else if (valueClass == Object2IntMap.class) {
+                    instance.value = (T) new Object2IntArrayMap<>();
+                } else if (valueClass == Object2BooleanMap.class) {
+                    instance.value = (T) new Object2BooleanOpenHashMap<>();
+                } else if (valueClass == Map.class) {
+                    instance.value = (T) new HashMap<>();
+                } else if (valueClass == SettingColor.class) {
+                    instance.value = (T) new SettingColor();
+                } else if (valueClass == Set.class) {
+                    instance.value = (T) new ObjectOpenHashSet<>();
+                }
+            }
             load.invoke(instance, tag);
             return instance;
         } catch (Exception e) {

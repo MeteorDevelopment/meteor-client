@@ -23,10 +23,6 @@ public class PacketListSetting extends Setting<Set<Class<? extends Packet<?>>>> 
     public final Predicate<Class<? extends Packet<?>>> filter;
     private static List<String> suggestions;
 
-    public PacketListSetting() {
-        this("dummy", "", new ObjectOpenHashSet<>(), null, null, null, null);
-    }
-
     public PacketListSetting(String name, String description, Set<Class<? extends Packet<?>>> defaultValue, Consumer<Set<Class<? extends Packet<?>>>> onChanged, Consumer<Setting<Set<Class<? extends Packet<?>>>>> onModuleActivated, Predicate<Class<? extends Packet<?>>> filter, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 

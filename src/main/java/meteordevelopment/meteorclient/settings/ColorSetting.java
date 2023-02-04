@@ -16,10 +16,6 @@ import java.util.function.Consumer;
 public class ColorSetting extends Setting<SettingColor> {
     private static final List<String> SUGGESTIONS = ImmutableList.of("0 0 0 255", "225 25 25 255", "25 225 25 255", "25 25 225 255", "255 255 255 255");
 
-    public ColorSetting() {
-        this("dummy","", new SettingColor(), null, null, null);
-    }
-
     public ColorSetting(String name, String description, SettingColor defaultValue, Consumer<SettingColor> onChanged, Consumer<Setting<SettingColor>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
