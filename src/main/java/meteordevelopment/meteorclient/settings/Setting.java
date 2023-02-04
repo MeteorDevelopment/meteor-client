@@ -137,26 +137,27 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
             Unsafe unsafe = (Unsafe) unsafeField.get(null);
             Setting<T> instance = (Setting<T>) unsafe.allocateInstance(settingClass);
 
-            Type genericSuperclass = settingClass.getGenericSuperclass();
-            ParameterizedType parameterizedType = (ParameterizedType) genericSuperclass;
-            Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
-            Class<?> valueClass = (Class<?>) actualTypeArguments[0];
+            Type realValueType = ((ParameterizedType) settingClass.getGenericSuperclass()).getActualTypeArguments()[0];
+            if (realValueType instanceof ParameterizedType type) {
+                realValueType = type.getRawType();
+            }
 
             if (instance.value == null) {
-                if (valueClass == List.class) {
+                if (realValueType == List.class) {
                     instance.value = (T) new ArrayList<>();
-                } else if (valueClass == Object2IntMap.class) {
+                } else if (realValueType == Object2IntMap.class) {
                     instance.value = (T) new Object2IntArrayMap<>();
-                } else if (valueClass == Object2BooleanMap.class) {
+                } else if (realValueType == Object2BooleanMap.class) {
                     instance.value = (T) new Object2BooleanOpenHashMap<>();
-                } else if (valueClass == Map.class) {
+                } else if (realValueType == Map.class) {
                     instance.value = (T) new HashMap<>();
-                } else if (valueClass == SettingColor.class) {
+                } else if (realValueType == SettingColor.class) {
                     instance.value = (T) new SettingColor();
-                } else if (valueClass == Set.class) {
+                } else if (realValueType == Set.class) {
                     instance.value = (T) new ObjectOpenHashSet<>();
                 }
             }
+
             load.invoke(instance, tag);
             return instance;
         } catch (Exception e) {

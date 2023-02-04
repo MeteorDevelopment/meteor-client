@@ -11,11 +11,11 @@ import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 
-public class Preset<V, S extends Setting<V>> implements ISerializable<Preset<V, S>> {
+public class Preset<T> implements ISerializable<Preset<T>> {
     public String name;
-    public S setting;
+    public Setting<T> setting;
 
-    public Preset(String name, S setting) {
+    public Preset(String name, Setting<T> setting) {
         this.name = name;
         this.setting = setting;
     }
@@ -24,7 +24,7 @@ public class Preset<V, S extends Setting<V>> implements ISerializable<Preset<V, 
         fromTag((NbtCompound) tag);
     }
 
-    public V get() {
+    public T get() {
         return setting.get();
     }
 
@@ -37,9 +37,9 @@ public class Preset<V, S extends Setting<V>> implements ISerializable<Preset<V, 
     }
 
     @Override
-    public Preset<V, S> fromTag(NbtCompound tag) {
+    public Preset<T> fromTag(NbtCompound tag) {
         name = tag.getString("name");
-        setting = (S) Setting.fromValueNBT((NbtCompound) tag.get("setting"));
+        setting = Setting.fromValueNBT((NbtCompound) tag.get("setting"));
         return this;
     }
 }
