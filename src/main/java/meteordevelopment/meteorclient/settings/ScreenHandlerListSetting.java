@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ScreenHandlerListSetting extends Setting<List<ScreenHandlerType<?>>> {
-    public ScreenHandlerListSetting(String name, String description, List<ScreenHandlerType<?>> defaultValue, Consumer<List<ScreenHandlerType<?>>> onChanged, Consumer<Setting<List<ScreenHandlerType<?>>>> onModuleActivated, IVisible visible) {
+    protected ScreenHandlerListSetting(String name, String description, List<ScreenHandlerType<?>> defaultValue, Consumer<List<ScreenHandlerType<?>>> onChanged, Consumer<Setting<List<ScreenHandlerType<?>>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 

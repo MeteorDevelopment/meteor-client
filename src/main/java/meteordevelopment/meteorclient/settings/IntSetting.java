@@ -9,7 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
-public class IntSetting extends Setting<Integer> {
+public final class IntSetting extends Setting<Integer> {
     public final int min, max;
     public final int sliderMin, sliderMax;
     public final boolean noSlider;

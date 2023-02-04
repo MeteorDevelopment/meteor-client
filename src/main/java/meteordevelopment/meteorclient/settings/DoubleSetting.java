@@ -9,7 +9,7 @@ import net.minecraft.nbt.NbtCompound;
 
 import java.util.function.Consumer;
 
-public class DoubleSetting extends Setting<Double> {
+public final class DoubleSetting extends Setting<Double> {
     public final double min, max;
     public final double sliderMin, sliderMax;
     public final boolean onSliderRelease;

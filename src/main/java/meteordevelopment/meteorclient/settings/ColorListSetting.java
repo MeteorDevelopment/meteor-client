@@ -15,14 +15,23 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ColorListSetting extends Setting<List<SettingColor>> {
-    public ColorListSetting(String name, String description, List<SettingColor> defaultValue, Consumer<List<SettingColor>> onChanged, Consumer<Setting<List<SettingColor>>> onModuleActivated, IVisible visible) {
+    protected ColorListSetting(String name, String description, List<SettingColor> defaultValue, Consumer<List<SettingColor>> onChanged, Consumer<Setting<List<SettingColor>>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
     }
 
     @Override
     protected List<SettingColor> parseImpl(String str) {
-        // TODO: I cba to write a text parser for this
-        return new ArrayList<>();
+        List<SettingColor> colors = new ArrayList<>();
+        try {
+            String[] colorsStr = str.split(";");
+            for (String colorStr : colorsStr) {
+                String[] strs = colorStr.split(",");
+                colors.add(new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3])));
+            }
+            return colors;
+        } catch (IndexOutOfBoundsException | NumberFormatException ignored) {
+            return null;
+        }
     }
 
     @Override

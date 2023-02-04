@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 public class BlockSetting extends Setting<Block> {
     public final Predicate<Block> filter;
 
-    public BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated, IVisible visible, Predicate<Block> filter) {
+    protected BlockSetting(String name, String description, Block defaultValue, Consumer<Block> onChanged, Consumer<Setting<Block>> onModuleActivated, IVisible visible, Predicate<Block> filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;

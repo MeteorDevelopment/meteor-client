@@ -16,7 +16,7 @@ public class StringSetting extends Setting<String> {
     public final CharFilter filter;
     public final boolean wide;
 
-    public StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer, CharFilter filter, boolean wide) {
+    protected StringSetting(String name, String description, String defaultValue, Consumer<String> onChanged, Consumer<Setting<String>> onModuleActivated, IVisible visible, Class<? extends WTextBox.Renderer> renderer, CharFilter filter, boolean wide) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.renderer = renderer;

@@ -16,7 +16,7 @@ import java.util.function.Predicate;
 public class ItemSetting extends Setting<Item> {
     public final Predicate<Item> filter;
 
-    public ItemSetting(String name, String description, Item defaultValue, Consumer<Item> onChanged, Consumer<Setting<Item>> onModuleActivated, IVisible visible, Predicate<Item> filter) {
+    protected ItemSetting(String name, String description, Item defaultValue, Consumer<Item> onChanged, Consumer<Setting<Item>> onModuleActivated, IVisible visible, Predicate<Item> filter) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.filter = filter;
