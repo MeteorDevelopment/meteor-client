@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.item.Item;
@@ -25,12 +26,13 @@ import net.minecraft.item.Items;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgHunger = settings.createGroup("Hunger");
+    private final SettingGroup sgThreshold = settings.createGroup("Threshold");
 
     // General
 
@@ -66,14 +68,32 @@ public class AutoEat extends Module {
         .build()
     );
 
-    // Hunger
+    // Threshold
 
-    private final Setting<Integer> hungerThreshold = sgHunger.add(new IntSetting.Builder()
+    private final Setting<ThresholdMode> thresholdMode = sgThreshold.add(new EnumSetting.Builder<ThresholdMode>()
+        .name("threshold-mode")
+        .description("The threshold mode to trigger auto eat.")
+        .defaultValue(ThresholdMode.Any)
+        .build()
+    );
+
+    private final Setting<Double> healthThreshold = sgThreshold.add(new DoubleSetting.Builder()
+        .name("health-threshold")
+        .description("The level of health you eat at.")
+        .defaultValue(10)
+        .range(1, 19)
+        .sliderRange(1, 19)
+        .visible(() -> thresholdMode.get() != ThresholdMode.Hunger)
+        .build()
+    );
+
+    private final Setting<Integer> hungerThreshold = sgThreshold.add(new IntSetting.Builder()
         .name("hunger-threshold")
         .description("The level of hunger you eat at.")
         .defaultValue(16)
         .range(1, 19)
         .sliderRange(1, 19)
+        .visible(() -> thresholdMode.get() != ThresholdMode.Health)
         .build()
     );
 
@@ -206,8 +226,11 @@ public class AutoEat extends Module {
         this.slot = slot;
     }
 
-    private boolean shouldEat() {
-        return mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+    public boolean shouldEat() {
+        boolean health = mc.player.getHealth() <= healthThreshold.get();
+        boolean hunger = mc.player.getHungerManager().getFoodLevel() <= hungerThreshold.get();
+
+        return thresholdMode.get().test(health, hunger);
     }
 
     private int findSlot() {
@@ -231,6 +254,26 @@ public class AutoEat extends Module {
             }
         }
 
+        Item offHandItem = mc.player.getOffHandStack().getItem();
+        if (offHandItem.isFood() && !blacklist.get().contains(offHandItem) && offHandItem.getFoodComponent().getHunger() > bestHunger) slot = SlotUtils.OFFHAND;
+
         return slot;
+    }
+
+    public enum ThresholdMode {
+        Health((health, hunger) -> health),
+        Hunger((health, hunger) -> hunger),
+        Any((health, hunger) -> health || hunger),
+        Both((health, hunger) -> health && hunger);
+
+        private final BiPredicate<Boolean, Boolean> predicate;
+
+        ThresholdMode(BiPredicate<Boolean, Boolean> predicate) {
+            this.predicate = predicate;
+        }
+
+        public boolean test(boolean health, boolean hunger) {
+            return predicate.test(health, hunger);
+        }
     }
 }
