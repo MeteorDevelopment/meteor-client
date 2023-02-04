@@ -44,6 +44,7 @@ public class Presets extends System<Presets> implements Iterable<Preset<?>> {
     @Override
     public void save() {
         super.save();
+        // Prevent using the same instance
         load();
     }
 

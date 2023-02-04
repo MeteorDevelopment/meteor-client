@@ -5,22 +5,19 @@
 
 package meteordevelopment.meteorclient.settings;
 
-import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.IGetter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
-import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.registry.Registry;
 import net.minecraft.util.Identifier;
 import sun.misc.Unsafe;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
@@ -125,41 +122,15 @@ public abstract class Setting<T> implements IGetter<T>, ISerializable<T> {
         return tag;
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> Setting<T> fromValueNBT(NbtCompound tag) {
         try {
-            Class<?> settingClass = Class.forName(tag.getString("type"));
-            Method load = settingClass.getDeclaredMethod("load", NbtCompound.class);
-            load.setAccessible(true);
+            Class<?> builderClass = Class.forName(tag.getString("type") + "$Builder");
 
-            Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
-            unsafeField.setAccessible(true);
-            Unsafe unsafe = (Unsafe) unsafeField.get(null);
-            Setting<T> instance = (Setting<T>) unsafe.allocateInstance(settingClass);
+            SettingBuilder<?, ?, ?> builder = (SettingBuilder<?, ?, ?>) builderClass.newInstance();
+            Setting<?> instance = (Setting<?>) builder.build();
+            instance.load(tag);
 
-            Type realValueType = ((ParameterizedType) settingClass.getGenericSuperclass()).getActualTypeArguments()[0];
-            if (realValueType instanceof ParameterizedType type) {
-                realValueType = type.getRawType();
-            }
-
-            if (instance.value == null) {
-                if (realValueType == List.class) {
-                    instance.value = (T) new ArrayList<>();
-                } else if (realValueType == Object2IntMap.class) {
-                    instance.value = (T) new Object2IntArrayMap<>();
-                } else if (realValueType == Object2BooleanMap.class) {
-                    instance.value = (T) new Object2BooleanOpenHashMap<>();
-                } else if (realValueType == Map.class) {
-                    instance.value = (T) new HashMap<>();
-                } else if (realValueType == SettingColor.class) {
-                    instance.value = (T) new SettingColor();
-                } else if (realValueType == Set.class) {
-                    instance.value = (T) new ObjectOpenHashSet<>();
-                }
-            }
-
-            load.invoke(instance, tag);
-            return instance;
+            return (Setting<T>) instance;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
