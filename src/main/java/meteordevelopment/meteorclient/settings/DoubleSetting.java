@@ -16,7 +16,7 @@ public class DoubleSetting extends Setting<Double> {
     public final int decimalPlaces;
     public final boolean noSlider;
 
-    private DoubleSetting(String name, String description, double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, double min, double max, double sliderMin, double sliderMax, boolean onSliderRelease, int decimalPlaces, boolean noSlider) {
+    protected DoubleSetting(String name, String description, double defaultValue, Consumer<Double> onChanged, Consumer<Setting<Double>> onModuleActivated, IVisible visible, double min, double max, double sliderMin, double sliderMax, boolean onSliderRelease, int decimalPlaces, boolean noSlider) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
         this.min = min;
