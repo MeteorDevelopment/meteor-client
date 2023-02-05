@@ -11,7 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import java.util.List;
 import java.util.function.Consumer;
 
-public final class BoolSetting extends Setting<Boolean> {
+public class BoolSetting extends Setting<Boolean> {
     private static final List<String> SUGGESTIONS = ImmutableList.of("true", "false", "toggle");
 
     private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated, IVisible visible) {
