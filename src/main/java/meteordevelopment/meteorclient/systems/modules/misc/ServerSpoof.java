@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.misc;
 
 import io.netty.buffer.Unpooled;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -61,58 +60,52 @@ public class ServerSpoof extends Module {
     private final Setting<List<String>> channels = sgGeneral.add(new StringListSetting.Builder()
         .name("channels")
         .description("If the channel contains the keyword, this outgoing channel will be blocked.")
-        .defaultValue("minecraft:register")
+        .defaultValue("fabric", "minecraft:register")
         .visible(blockChannels::get)
         .build()
     );
 
     public ServerSpoof() {
         super(Categories.Misc, "server-spoof", "Spoof client brand, resource pack and channels.");
-
-        MeteorClient.EVENT_BUS.subscribe(new Listener());
+        runInMainMenu = true;
     }
 
-    private class Listener {
-        @EventHandler
-        private void onPacketSend(PacketEvent.Send event) {
-            if (!isActive()) return;
-            if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
-            Identifier id = packet.getChannel();
+    @EventHandler
+    private void onPacketSend(PacketEvent.Send event) {
+        if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
+        CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
+        Identifier id = packet.getChannel();
 
-            if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
-                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+        if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
+            packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
-            if (blockChannels.get()) {
-                for (String channel : channels.get()) {
-                    if (StringUtils.containsIgnoreCase(channel, id.toString())) {
-                        event.cancel();
-                        return;
-                    }
+        if (blockChannels.get()) {
+            for (String channel : channels.get()) {
+                if (StringUtils.containsIgnoreCase(id.toString(), channel)) {
+                    event.cancel();
+                    return;
                 }
             }
         }
+    }
 
-        @EventHandler
-        private void onPacketRecieve(PacketEvent.Receive event) {
-            if (!isActive()) return;
-
-            if (resourcePack.get()) {
-                if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
-                event.cancel();
-                MutableText msg = Text.literal("This server has ");
-                msg.append(packet.isRequired() ? "a required " : "an optional ");
-                MutableText link = Text.literal("resource pack");
-                link.setStyle(link.getStyle()
-                    .withColor(Formatting.BLUE)
-                    .withUnderline(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
-                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
-                );
-                msg.append(link);
-                msg.append(".");
-                info(msg);
-            }
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (resourcePack.get()) {
+            if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
+            event.cancel();
+            MutableText msg = Text.literal("This server has ");
+            msg.append(packet.isRequired() ? "a required " : "an optional ");
+            MutableText link = Text.literal("resource pack");
+            link.setStyle(link.getStyle()
+                .withColor(Formatting.BLUE)
+                .withUnderline(true)
+                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
+                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
+            );
+            msg.append(link);
+            msg.append(".");
+            info(msg);
         }
     }
 }
