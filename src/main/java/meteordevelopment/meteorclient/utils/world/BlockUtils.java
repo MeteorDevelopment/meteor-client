@@ -30,6 +30,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
@@ -179,18 +180,28 @@ public class BlockUtils {
         }
     }
 
+    public static BlockHitResult raycastBlock(BlockPos pos) {
+        Vec3d start = new Vec3d(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ());
+        Vec3d end = new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+
+        RaycastContext raycastContext = new RaycastContext(start, end, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
+        BlockHitResult hitResult = mc.world.raycast(raycastContext);
+
+        return hitResult;
+    }
+    
     /**
      * Needs to be used in {@link TickEvent.Pre}
      */
-    public static boolean breakBlock(BlockPos blockPos, boolean swing) {
+    public static boolean breakBlock(BlockPos blockPos, boolean swing, Direction dir) {
         if (!canBreak(blockPos, mc.world.getBlockState(blockPos))) return false;
 
         // Creating new instance of block pos because minecraft assigns the parameter to a field and we don't want it to change when it has been stored in a field somewhere
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
         if (mc.interactionManager.isBreakingBlock())
-            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
-        else mc.interactionManager.attackBlock(pos, Direction.UP);
+            mc.interactionManager.updateBlockBreakingProgress(pos, dir);
+        else mc.interactionManager.attackBlock(pos, dir);
 
         if (swing) mc.player.swingHand(Hand.MAIN_HAND);
         else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
@@ -199,6 +210,10 @@ public class BlockUtils {
         breakingThisTick = true;
 
         return true;
+    }
+
+    public static boolean breakBlock(BlockPos blockPos, boolean swing) {
+        return breakBlock(blockPos, swing, Direction.UP);
     }
 
     public static boolean canBreak(BlockPos blockPos, BlockState state) {
