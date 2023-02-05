@@ -245,6 +245,7 @@ public class KillAura extends Module {
 
     @Override
     public void onDeactivate() {
+        hitTimer = 0;
         targets.clear();
     }
 
@@ -338,7 +339,11 @@ public class KillAura extends Module {
 
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
-        if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+        if (!entity.isAlive()) return false;
+        if (entity instanceof LivingEntity livingEntity){
+            if (livingEntity.isDead() || livingEntity.hurtTime != 0)
+                return false;
+        }
 
         Box hitbox = entity.getBoundingBox();
         ((IVec3d)hitVec).set(
@@ -384,7 +389,10 @@ public class KillAura extends Module {
             if (hitTimer < delay) {
                 hitTimer++;
                 return false;
-            } else return true;
+            } else {
+                hitTimer = 0;
+                return true;
+            }
         } else return mc.player.getAttackCooldownProgress(delay) >= 1;
     }
 
@@ -393,8 +401,6 @@ public class KillAura extends Module {
 
         mc.interactionManager.attackEntity(mc.player, target);
         mc.player.swingHand(Hand.MAIN_HAND);
-
-        hitTimer = 0;
     }
 
     private boolean itemInHand() {
