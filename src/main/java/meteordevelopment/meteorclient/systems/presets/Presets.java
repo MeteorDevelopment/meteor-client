@@ -32,6 +32,8 @@ public class Presets extends System<Presets> implements Iterable<Preset<?>> {
     }
 
     public <T> List<Preset<T>> getPresetForSetting(Setting<T> setting) {
+        // Prevent using the same instance
+        load();
         return presets.stream().filter(preset -> preset.setting.getClass() == setting.getClass()).map(preset -> (Preset<T>) preset).toList();
     }
 
