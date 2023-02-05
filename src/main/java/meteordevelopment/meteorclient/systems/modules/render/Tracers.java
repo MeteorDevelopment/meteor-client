@@ -32,7 +32,7 @@ public class Tracers extends Module {
     // General
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-        .name("entites")
+        .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.PLAYER)
         .build()
