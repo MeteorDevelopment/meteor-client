@@ -10,22 +10,19 @@ import meteordevelopment.meteorclient.utils.render.ByteTexture;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.texture.AbstractTexture;
 import org.lwjgl.BufferUtils;
-import org.lwjgl.stb.STBTTFontinfo;
-import org.lwjgl.stb.STBTTPackContext;
-import org.lwjgl.stb.STBTTPackedchar;
-import org.lwjgl.stb.STBTruetype;
+import org.lwjgl.stb.*;
 import org.lwjgl.system.MemoryStack;
 
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class Font {
-    public AbstractTexture texture;
+        public AbstractTexture texture;
 
     private final int height;
     private final float scale;
     private final float ascent;
-    private final CharData[] charData;
+    private final CharData[][] charData;
 
     public Font(ByteBuffer buffer, int height) {
         this.height = height;
@@ -35,15 +32,20 @@ public class Font {
         STBTruetype.stbtt_InitFont(fontInfo, buffer);
 
         // Allocate STBTTPackedchar buffer
-        charData = new CharData[128];
-        STBTTPackedchar.Buffer cdata = STBTTPackedchar.create(charData.length);
+        charData = new CharData[][]{new CharData[128], new CharData[256]};
+        STBTTPackedchar.Buffer[] cdata = {STBTTPackedchar.create(128), STBTTPackedchar.create(256) };
         ByteBuffer bitmap = BufferUtils.createByteBuffer(2048 * 2048);
 
         // Create font texture
         STBTTPackContext packContext = STBTTPackContext.create();
         STBTruetype.stbtt_PackBegin(packContext, bitmap, 2048, 2048, 0, 1);
-        STBTruetype.stbtt_PackSetOversampling(packContext, 2, 2);
-        STBTruetype.stbtt_PackFontRange(packContext, buffer, 0, height, 32, cdata);
+        STBTTPackRange.Buffer packRanges = STBTTPackRange.malloc(2);
+
+        packRanges.put(STBTTPackRange.malloc().set(height, 32, null, 95, cdata[0], (byte)2, (byte)2));
+        packRanges.put(STBTTPackRange.malloc().set(height, 1024, null, 255, cdata[1], (byte)2, (byte)2));
+        packRanges.flip();
+
+        STBTruetype.stbtt_PackFontRanges(packContext, buffer, 0, packRanges);
         STBTruetype.stbtt_PackEnd(packContext);
 
         // Create texture object and get font scale
@@ -58,22 +60,31 @@ public class Font {
         }
 
         // Populate charData array
-        for (int i = 0; i < charData.length; i++) {
-            STBTTPackedchar packedChar = cdata.get(i);
+        for (int i = 0; i < charData[0].length; i++) {
+            STBTTPackedchar packedChar = cdata[0].get(i);
 
             float ipw = 1f / 2048;
             float iph = 1f / 2048;
 
-            charData[i] = new CharData(
-                    packedChar.xoff(),
-                    packedChar.yoff(),
-                    packedChar.xoff2(),
-                    packedChar.yoff2(),
-                    packedChar.x0() * ipw,
-                    packedChar.y0() * iph,
-                    packedChar.x1() * ipw,
-                    packedChar.y1() * iph,
-                    packedChar.xadvance()
+            charData[0][i] = new CharData(packedChar.xoff(), packedChar.yoff(), packedChar.xoff2(), packedChar.yoff2(), packedChar.x0() * ipw, packedChar.y0() * iph, packedChar.x1() * ipw, packedChar.y1() * iph, packedChar.xadvance());
+        }
+
+        for (int i = 0; i < charData[1].length; i++) {
+            STBTTPackedchar packedChar = cdata[1].get(i);
+
+            float ipw = 1f / 2048;
+            float iph = 1f / 2048;
+
+            charData[1][i] = new CharData(
+                packedChar.xoff(),
+                packedChar.yoff(),
+                packedChar.xoff2(),
+                packedChar.yoff2(),
+                packedChar.x0() * ipw,
+                packedChar.y0() * iph,
+                packedChar.x1() * ipw,
+                packedChar.y1() * iph,
+                packedChar.xadvance()
             );
         }
     }
@@ -83,8 +94,9 @@ public class Font {
 
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
-            if (cp < 32 || cp > 128) cp = 32;
-            CharData c = charData[cp - 32];
+            CharData c = charData[0][0];
+            if (cp >= 32 && cp <= 127) c = charData[0][cp - 32];
+            else if (cp >= 1024 && cp <= 1279) c = charData[1][cp - 1024]; // cp - 1024 (rus lang)
 
             width += c.xAdvance;
         }
@@ -92,7 +104,7 @@ public class Font {
         return width;
     }
 
-    public int getHeight() {
+    public double getHeight() {
         return height;
     }
 
@@ -101,15 +113,11 @@ public class Font {
 
         for (int i = 0; i < string.length(); i++) {
             int cp = string.charAt(i);
-            if (cp < 32 || cp > 128) cp = 32;
-            CharData c = charData[cp - 32];
+            CharData c = charData[0][0];
+            if (cp >= 32 && cp <= 127) c = charData[0][cp - 32];
+            else if (cp >= 1024 && cp <= 1279) c = charData[1][cp - 1024];
 
-            mesh.quad(
-                mesh.vec2(x + c.x0 * scale, y + c.y0 * scale).vec2(c.u0, c.v0).color(color).next(),
-                mesh.vec2(x + c.x0 * scale, y + c.y1 * scale).vec2(c.u0, c.v1).color(color).next(),
-                mesh.vec2(x + c.x1 * scale, y + c.y1 * scale).vec2(c.u1, c.v1).color(color).next(),
-                mesh.vec2(x + c.x1 * scale, y + c.y0 * scale).vec2(c.u1, c.v0).color(color).next()
-            );
+            mesh.quad(mesh.vec2(x + c.x0 * scale, y + c.y0 * scale).vec2(c.u0, c.v0).color(color).next(), mesh.vec2(x + c.x0 * scale, y + c.y1 * scale).vec2(c.u0, c.v1).color(color).next(), mesh.vec2(x + c.x1 * scale, y + c.y1 * scale).vec2(c.u1, c.v1).color(color).next(), mesh.vec2(x + c.x1 * scale, y + c.y0 * scale).vec2(c.u1, c.v0).color(color).next());
 
             x += c.xAdvance * scale;
         }
