@@ -17,7 +17,7 @@ import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
 public class Font {
-        public AbstractTexture texture;
+    public AbstractTexture texture;
 
     private final int height;
     private final float scale;
@@ -104,7 +104,7 @@ public class Font {
         return width;
     }
 
-    public double getHeight() {
+    public int getHeight() {
         return height;
     }
 
