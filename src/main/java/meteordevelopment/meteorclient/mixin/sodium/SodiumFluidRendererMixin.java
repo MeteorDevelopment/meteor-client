@@ -9,7 +9,8 @@ import me.jellysquid.mods.sodium.client.model.light.LightPipeline;
 import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
 import me.jellysquid.mods.sodium.client.model.quad.blender.ColorSampler;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
-import me.jellysquid.mods.sodium.client.render.pipeline.FluidRenderer;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.FluidRenderer;
+import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
 import me.jellysquid.mods.sodium.client.util.color.ColorARGB;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
@@ -47,8 +48,8 @@ public class SodiumFluidRendererMixin {
     /**
      * @author Walaryne
      */
-    @Inject(method = "calculateQuadColors", at = @At("TAIL"))
-    private void onCalculateQuadColors(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, ColorSampler<FluidState> colorSampler, FluidState fluidState, CallbackInfo info) {
+    @Inject(method = "updateQuad", at = @At("TAIL"))
+    private void onUpdateQuad(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, ColorSampler<FluidState> colorSampler, FluidState fluidState, CallbackInfo info) {
         // Ambience
         Ambience ambience = Modules.get().get(Ambience.class);
 
@@ -59,11 +60,8 @@ public class SodiumFluidRendererMixin {
             // XRay and Wallhack
             int alpha = alphas.get();
 
-            if (alpha != -1) {
-                quadColors[0] = (alpha << 24) | (quadColors[0] & 0x00FFFFFF);
-                quadColors[1] = (alpha << 24) | (quadColors[1] & 0x00FFFFFF);
-                quadColors[2] = (alpha << 24) | (quadColors[2] & 0x00FFFFFF);
-                quadColors[3] = (alpha << 24) | (quadColors[3] & 0x00FFFFFF);
+            for (int i = 0; i < quadColors.length; i++) {
+                quadColors[i] = ColorABGR.withAlpha(quadColors[i], alpha / 255f);
             }
         }
     }
