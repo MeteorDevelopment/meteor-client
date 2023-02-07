@@ -108,6 +108,7 @@ public class AutoGap extends Module {
             .defaultValue(20)
             .min(0)
             .sliderMax(40)
+            .visible(healthEnabled::get)
             .build()
     );
 

@@ -99,7 +99,7 @@ public class AutoEat extends Module {
         if (Modules.get().get(AutoGap.class).isEating()) return;
 
         if (eating) {
-            // If we are eating check if we should still be still eating
+            // If we are eating check if we should still be eating
             if (shouldEat()) {
                 // Check if the item in current slot is not food
                 if (!mc.player.getInventory().getStack(slot).isFood()) {

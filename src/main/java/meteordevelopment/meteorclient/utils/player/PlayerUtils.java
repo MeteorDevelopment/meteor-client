@@ -110,18 +110,22 @@ public class PlayerUtils {
         mc.player.networkHandler.sendPacket(new PlayerMoveC2SPacket.PositionAndOnGround(mc.player.getX(), mc.player.getY(), mc.player.getZ(), mc.player.isOnGround()));
     }
 
+    public static boolean canSeePos(Vec3d pos) {
+        Vec3d vec =  mc.player.getPos().add(0, mc.player.getStandingEyeHeight(), 0);
+
+        return mc.world.raycast(new RaycastContext(vec, pos, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+    }
+
+    public static boolean canSeeFeet(Entity entity) {
+        return canSeePos(entity.getPos());
+    }
+
+    public static boolean canSeeEyes(Entity entity) {
+        return canSeePos(entity.getPos().add(0, entity.getStandingEyeHeight(), 0));
+    }
+
     public static boolean canSeeEntity(Entity entity) {
-        Vec3d vec1 = new Vec3d(0, 0, 0);
-        Vec3d vec2 = new Vec3d(0, 0, 0);
-
-        ((IVec3d) vec1).set(mc.player.getX(), mc.player.getY() + mc.player.getStandingEyeHeight(), mc.player.getZ());
-        ((IVec3d) vec2).set(entity.getX(), entity.getY(), entity.getZ());
-        boolean canSeeFeet = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
-
-        ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
-        boolean canSeeEyes = mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
-
-        return canSeeFeet || canSeeEyes;
+        return canSeeFeet(entity) || canSeeEyes(entity);
     }
 
     public static float[] calculateAngle(Vec3d target) {
