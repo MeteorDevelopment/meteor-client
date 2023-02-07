@@ -17,6 +17,9 @@ public interface LivingEntityAccessor {
     @Invoker("swimUpward")
     void swimUpwards(TagKey<Fluid> fluid);
 
+    @Accessor("jumping")
+    boolean isJumping();
+
     @Accessor("jumpingCooldown")
     int getJumpCooldown();
 

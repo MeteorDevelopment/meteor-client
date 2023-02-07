@@ -52,7 +52,7 @@ public class NameHistoryCommand extends Command {
                 Color nameColor = PlayerUtils.getPlayerColor(mc.world.getPlayerByUuid(uuid), Utils.WHITE);
 
                 initial.setStyle(initial.getStyle()
-                    .withColor(new TextColor(nameColor.getPacked()))
+                    .withColor(TextColor.fromRgb(nameColor.getPacked()))
                     .withClickEvent(new ClickEvent(
                             ClickEvent.Action.OPEN_URL,
                             "https://laby.net/@" + name

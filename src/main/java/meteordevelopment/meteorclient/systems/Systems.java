@@ -40,9 +40,9 @@ public class Systems {
         config.load();
 
         add(new Modules());
+        add(new Macros());
         add(new Commands());
         add(new Friends());
-        add(new Macros());
         add(new Accounts());
         add(new Waypoints());
         add(new Profiles());

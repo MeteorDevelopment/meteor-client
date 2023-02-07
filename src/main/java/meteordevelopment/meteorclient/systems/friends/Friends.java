@@ -73,7 +73,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public boolean isFriend(PlayerEntity player) {
-        return get(player) != null;
+        return player != null && get(player) != null;
     }
 
     public boolean isFriend(PlayerListEntry player) {
