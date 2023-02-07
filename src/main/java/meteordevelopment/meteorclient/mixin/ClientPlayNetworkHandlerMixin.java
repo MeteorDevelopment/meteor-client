@@ -10,6 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.EntityDestroyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PickItemsEvent;
+import meteordevelopment.meteorclient.events.entity.player.PlayerRespawnEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
@@ -152,5 +153,10 @@ public abstract class ClientPlayNetworkHandlerMixin {
            client.inGameHud.getChatHud().addToMessageHistory(message);
             ci.cancel();
         }
+    }
+
+    @Inject(method = "onPlayerRespawn", at = @At("TAIL"))
+    public void onPlayerRespawn(PlayerRespawnS2CPacket packet, CallbackInfo ci) {
+        MeteorClient.EVENT_BUS.post(PlayerRespawnEvent.get());
     }
 }
