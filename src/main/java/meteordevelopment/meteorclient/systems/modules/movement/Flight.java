@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
+import meteordevelopment.meteorclient.mixin.PlayerPositionLookS2CPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -16,13 +18,16 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
 
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
-    
+
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The mode for Flight.")
@@ -33,6 +38,7 @@ public class Flight extends Module {
         })
         .build()
     );
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
         .description("Your speed when flying.")
@@ -40,28 +46,33 @@ public class Flight extends Module {
         .min(0.0)
         .build()
     );
+
     private final Setting<Boolean> verticalSpeedMatch = sgGeneral.add(new BoolSetting.Builder()
         .name("vertical-speed-match")
         .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
         .defaultValue(false)
         .build()
     );
+
+    // Anti Kick
+
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
         .description("The mode for anti kick.")
         .defaultValue(AntiKickMode.Packet)
         .build()
     );
+
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
         .name("delay")
         .description("The amount of delay, in ticks, between flying down a bit and return to original position")
         .defaultValue(20)
         .min(1)
         .sliderMax(200)
+        .visible(() -> antiKickMode.get() != AntiKickMode.Ground)
         .build()
     );
 
-    // Anti Kick
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
         .name("off-time")
         .description("The amount of delay, in milliseconds, to fly down a bit to reset floating ticks.")
@@ -70,7 +81,7 @@ public class Flight extends Module {
         .sliderRange(1, 20)
         .build()
     );
-    
+
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
     private boolean flip;
@@ -182,35 +193,67 @@ public class Flight extends Module {
      */
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || antiKickMode.get() != AntiKickMode.Packet) return;
+        if (!(event.packet instanceof PlayerMoveC2SPacket packet)) return;
 
-        double currentY = packet.getY(Double.MAX_VALUE);
-        if (currentY != Double.MAX_VALUE) {
-            antiKickPacket(packet, currentY);
-        } else {
-            // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
-            // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
-            PlayerMoveC2SPacket fullPacket;
-            if (packet.changesLook()) {
-                fullPacket = new PlayerMoveC2SPacket.Full(
-                    mc.player.getX(),
-                    mc.player.getY(),
-                    mc.player.getZ(),
-                    packet.getYaw(0),
-                    packet.getPitch(0),
-                    packet.isOnGround()
-                );
+        if (antiKickMode.get() == AntiKickMode.Packet) {
+            double currentY = packet.getY(Double.MAX_VALUE);
+            if (currentY != Double.MAX_VALUE) {
+                antiKickPacket(packet, currentY);
             } else {
-                fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
-                    mc.player.getX(),
-                    mc.player.getY(),
-                    mc.player.getZ(),
-                    packet.isOnGround()
-                );
+                // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
+                // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
+                PlayerMoveC2SPacket fullPacket;
+                if (packet.changesLook()) {
+                    fullPacket = new PlayerMoveC2SPacket.Full(
+                        mc.player.getX(),
+                        mc.player.getY(),
+                        mc.player.getZ(),
+                        packet.getYaw(0),
+                        packet.getPitch(0),
+                        packet.isOnGround()
+                    );
+                } else {
+                    fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX(),
+                        mc.player.getY(),
+                        mc.player.getZ(),
+                        packet.isOnGround()
+                    );
+                }
+                event.cancel();
+                antiKickPacket(fullPacket, mc.player.getY());
+                mc.getNetworkHandler().sendPacket(fullPacket);
             }
-            event.cancel();
-            antiKickPacket(fullPacket, mc.player.getY());
-            mc.getNetworkHandler().sendPacket(fullPacket);
+        } else if (antiKickMode.get() == AntiKickMode.Ground) {
+            if (!packet.changesPosition()) return;
+
+            Box adjustBox = mc.player.getBoundingBox().stretch(0, -mc.player.getY(), 0)
+                .contract(0, -mc.player.getHeight(), 0);
+
+            ((PlayerMoveC2SPacketAccessor) packet).setOnGround(true);
+            ((PlayerMoveC2SPacketAccessor) packet).setY(
+                Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
+                    .map(VoxelShape::getBoundingBox)
+                    .mapToDouble(box -> box.maxY)
+                    .max()
+                    .getAsDouble()
+            );
+        }
+    }
+
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (antiKickMode.get() == AntiKickMode.Ground && event.packet instanceof PlayerPositionLookS2CPacket packet) {
+            mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
+
+            Box adjustBox = mc.player.getBoundingBox().expand(0, 256 - mc.player.getHeight() - mc.player.getY(), 0).contract(0, mc.player.getHeight(), 0);
+
+            ((PlayerPositionLookS2CPacketAccessor) packet).setY(Math.min(mc.player.prevY,
+                Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
+                    .map(VoxelShape::getBoundingBox)
+                    .mapToDouble(box -> box.minY - mc.player.getHeight())
+                    .min()
+                    .getAsDouble()));
         }
     }
 
@@ -240,6 +283,7 @@ public class Flight extends Module {
     public enum AntiKickMode {
         Normal,
         Packet,
+        Ground,
         None
     }
 }
