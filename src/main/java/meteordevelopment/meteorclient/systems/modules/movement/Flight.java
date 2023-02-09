@@ -79,6 +79,7 @@ public class Flight extends Module {
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 20)
+        .visible(() -> antiKickMode.get() != AntiKickMode.Ground)
         .build()
     );
 
