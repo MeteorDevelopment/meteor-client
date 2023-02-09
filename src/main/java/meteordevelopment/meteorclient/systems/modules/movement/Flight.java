@@ -22,7 +22,6 @@ import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.shape.VoxelShape;
 
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -235,17 +234,12 @@ public class Flight extends Module {
         } else if (antiKickMode.get() == AntiKickMode.Ground) {
             if (!packet.changesPosition()) return;
 
-            Box adjustBox = mc.player.getBoundingBox().stretch(0, -mc.player.getY(), 0)
-                .contract(0, -mc.player.getHeight(), 0);
+            Box adjustBox = mc.player.getBoundingBox().stretch(0, mc.world.getBottomY(), 0).expand(0.0625);
 
             ((PlayerMoveC2SPacketAccessor) packet).setOnGround(true);
-            ((PlayerMoveC2SPacketAccessor) packet).setY(
-                Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
-                    .map(VoxelShape::getBoundingBox)
-                    .mapToDouble(box -> box.maxY)
-                    .max()
-                    .getAsDouble()
-            );
+            Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
+                .mapToDouble(voxelShape -> voxelShape.getBoundingBox().maxY)
+                .max().ifPresent(d -> ((PlayerMoveC2SPacketAccessor) packet).setY(d));
         }
     }
 
@@ -254,14 +248,12 @@ public class Flight extends Module {
         if (antiRubberbanding.get() && event.packet instanceof PlayerPositionLookS2CPacket packet) {
             mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
 
-            Box adjustBox = mc.player.getBoundingBox().expand(0, 256 - mc.player.getHeight() - mc.player.getY(), 0).contract(0, mc.player.getHeight(), 0);
+            Box adjustBox = mc.player.getBoundingBox().stretch(0, mc.world.getBottomY(), 0).expand(0.0625);
 
-            ((PlayerPositionLookS2CPacketAccessor) packet).setY(Math.min(mc.player.prevY,
-                Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
-                    .map(VoxelShape::getBoundingBox)
-                    .mapToDouble(box -> box.minY - mc.player.getHeight())
-                    .min()
-                    .getAsDouble()));
+            Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
+                .mapToDouble(voxelShape -> voxelShape.getBoundingBox().maxY)
+                .max()
+                .ifPresent(d -> ((PlayerPositionLookS2CPacketAccessor) packet).setY(Math.max(mc.player.prevY, d)));
         }
     }
 
