@@ -56,6 +56,13 @@ public class Flight extends Module {
 
     // Anti Kick
 
+    private final Setting<Boolean> antiRubberbanding = sgAntiKick.add(new BoolSetting.Builder()
+        .name("anti-rubberbanding")
+        .description("Attempts to prevent the server from teleporting us to the ground.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
         .description("The mode for anti kick.")
@@ -244,7 +251,7 @@ public class Flight extends Module {
 
     @EventHandler
     private void onPacketReceive(PacketEvent.Receive event) {
-        if (antiKickMode.get() == AntiKickMode.Ground && event.packet instanceof PlayerPositionLookS2CPacket packet) {
+        if (antiRubberbanding.get() && event.packet instanceof PlayerPositionLookS2CPacket packet) {
             mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
 
             Box adjustBox = mc.player.getBoundingBox().expand(0, 256 - mc.player.getHeight() - mc.player.getY(), 0).contract(0, mc.player.getHeight(), 0);
