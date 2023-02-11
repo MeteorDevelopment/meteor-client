@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.EntityAccessor;
 import meteordevelopment.meteorclient.systems.commands.Command;
-import meteordevelopment.meteorclient.systems.commands.arguments.EnumArgumentType;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.AllowedAddressResolver;
@@ -39,7 +38,7 @@ public class ServerCommand extends Command {
     private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
     private final List<String> massScanCache = new ArrayList<>();
     private int ticks = 0;
-    private Mode mode = Mode.Normal;
+    private boolean bukkitVerMode = false;
     private final List<Integer> completionIDs = new ArrayList<>();
 
     public ServerCommand() {
@@ -59,8 +58,12 @@ public class ServerCommand extends Command {
         }));
 
         builder.then(literal("plugins")
-            .then(argument("mode", EnumArgumentType.enumArgument(Mode.BukkitVer)).executes(ctx -> {
-                startPluginSearch(EnumArgumentType.getEnum(ctx, "mode", Mode.BukkitVer));
+            .then(literal("BukkitVer").executes(ctx -> {
+                startPluginSearch(true);
+                return SINGLE_SUCCESS;
+            }))
+            .then(literal("MassScan").executes(ctx -> {
+                startPluginSearch(false);
                 return SINGLE_SUCCESS;
             }))
         );
@@ -76,34 +79,31 @@ public class ServerCommand extends Command {
         }));
     }
 
-    private void startPluginSearch(Mode mode) {
-        this.mode = mode;
+    private void startPluginSearch(boolean bukkit) {
+        this.bukkitVerMode = bukkit;
         ticks = 0;
         Random random = new Random();
         MeteorClient.EVENT_BUS.subscribe(this);
-        switch (mode) {
-            case Normal, BukkitVer -> {
-                int id = random.nextInt(200);
-                completionIDs.add(id);
-                mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, mode == Mode.BukkitVer ? "bukkit:ver " : "/"));
-            }
-            case MassScan -> {
-                info("Please wait around 5 seconds...");
-                new Thread(() -> {
-                    completionStarts.chars().forEach(i -> {
-                        int id = random.nextInt(200);
-                        completionIDs.add(id);
-                        mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, Character.toString(i)));
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    });
-                    printPlugins(massScanCache);
-                    endPluginSearch();
-                }).start();
-            }
+        if (bukkit) {
+            int id = random.nextInt(200);
+            completionIDs.add(id);
+            mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, "bukkit:ver "));
+        } else {
+            info("Please wait around 5 seconds...");
+            new Thread(() -> {
+                completionStarts.chars().forEach(i -> {
+                    int id = random.nextInt(200);
+                    completionIDs.add(id);
+                    mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(id, Character.toString(i)));
+                    try {
+                        Thread.sleep(100);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                });
+                printPlugins(massScanCache);
+                endPluginSearch();
+            }).start();
         }
     }
 
@@ -200,9 +200,9 @@ public class ServerCommand extends Command {
             if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
                 if (!completionIDs.remove(Integer.valueOf(packet.getCompletionId()))) return;
 
-                List<String> plugins = mode == Mode.MassScan ? massScanCache : new ArrayList<>();
+                List<String> plugins = bukkitVerMode ? new ArrayList<>() : massScanCache;
                 for (Suggestion suggestion : packet.getSuggestions().getList()) {
-                    if (mode == Mode.BukkitVer) {
+                    if (bukkitVerMode) {
                         String pluginName = suggestion.getText();
                         plugins.add(pluginName);
                     } else {
@@ -218,12 +218,12 @@ public class ServerCommand extends Command {
                     }
                 }
 
-                if (mode != Mode.MassScan) printPlugins(plugins);
+                if (bukkitVerMode) printPlugins(plugins);
             }
         } catch (Exception e) {
             error("An error occurred while trying to find plugins.");
         } finally {
-            if (mode != Mode.MassScan) endPluginSearch();
+            if (bukkitVerMode) endPluginSearch();
         }
     }
 
