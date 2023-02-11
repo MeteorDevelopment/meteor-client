@@ -255,10 +255,4 @@ public class ServerCommand extends Command {
             default -> p + " (Unknown)";
         };
     }
-
-    public enum Mode {
-        BukkitVer,
-        MassScan,
-        Normal
-    }
 }
