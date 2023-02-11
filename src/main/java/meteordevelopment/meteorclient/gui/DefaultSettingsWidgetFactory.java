@@ -61,6 +61,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(StatusEffectAmplifierMapSetting.class, (table, setting) -> statusEffectAmplifierMapW(table, (StatusEffectAmplifierMapSetting) setting));
         factories.put(StatusEffectListSetting.class, (table, setting) -> statusEffectListW(table, (StatusEffectListSetting) setting));
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
+        factories.put(ScreenHandlerListSetting.class, (table, setting) -> screenHandlerListW(table, (ScreenHandlerListSetting) setting));
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
@@ -229,9 +230,14 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     }
 
     private void keybindW(WTable table, KeybindSetting setting) {
-        WKeybind keybind = table.add(theme.keybind(setting.get(), setting.getDefaultValue())).expandX().widget();
+        WHorizontalList list = table.add(theme.horizontalList()).expandX().widget();
+
+        WKeybind keybind = list.add(theme.keybind(setting.get(), setting.getDefaultValue())).expandX().widget();
         keybind.action = setting::onChanged;
         setting.widget = keybind;
+
+        WButton reset = list.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+        reset.action = keybind::resetBind;
     }
 
     private void blockW(WTable table, BlockSetting setting) {
@@ -318,6 +324,10 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
 
     private void storageBlockListW(WTable table, StorageBlockListSetting setting) {
         selectW(table, setting, () -> mc.setScreen(new StorageBlockListSettingScreen(theme, setting)));
+    }
+
+    private void screenHandlerListW(WTable table, ScreenHandlerListSetting setting) {
+        selectW(table, setting, () -> mc.setScreen(new ScreenHandlerSettingScreen(theme, setting)));
     }
 
     private void blockDataW(WTable table, BlockDataSetting<?> setting) {

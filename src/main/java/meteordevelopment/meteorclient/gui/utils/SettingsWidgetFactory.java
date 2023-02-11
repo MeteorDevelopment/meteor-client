@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.utils;
 
-import meteordevelopment.meteorclient.gui.DefaultSettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -17,7 +16,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public abstract class SettingsWidgetFactory {
-    private static final Map<Class<?>, Function<GuiTheme, DefaultSettingsWidgetFactory.Factory>> customFactories = new HashMap<>();
+    private static final Map<Class<?>, Function<GuiTheme, SettingsWidgetFactory.Factory>> customFactories = new HashMap<>();
 
     protected final GuiTheme theme;
     protected final Map<Class<?>, Factory> factories = new HashMap<>();

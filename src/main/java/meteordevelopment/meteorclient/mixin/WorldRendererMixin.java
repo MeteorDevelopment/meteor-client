@@ -78,7 +78,7 @@ public abstract class WorldRendererMixin {
 
     @Unique
     private void draw(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, VertexConsumerProvider vertexConsumers, MatrixStack matrices, EntityShader shader, Color color) {
-        if (shader.shouldDraw(entity) && !PostProcessShaders.isCustom(vertexConsumers)) {
+        if (shader.shouldDraw(entity) && !PostProcessShaders.isCustom(vertexConsumers) && color != null) {
             Framebuffer prevBuffer = this.entityOutlinesFramebuffer;
             this.entityOutlinesFramebuffer = shader.framebuffer;
             PostProcessShaders.rendering = true;

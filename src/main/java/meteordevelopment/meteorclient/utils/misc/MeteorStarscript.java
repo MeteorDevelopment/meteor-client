@@ -74,7 +74,6 @@ public class MeteorStarscript {
         StandardLib.init(ss);
 
         // General
-        ss.set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "");
         ss.set("mc_version", SharedConstants.getGameVersion().getName());
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
         ss.set("ping", MeteorStarscript::ping);
@@ -82,6 +81,8 @@ public class MeteorStarscript {
 
         // Meteor
         ss.set("meteor", new ValueMap()
+            .set("name", MeteorClient.NAME)
+            .set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "")
             .set("modules", () -> Value.number(Modules.get().getAll().size()))
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
@@ -221,12 +222,12 @@ public class MeteorStarscript {
         String caller = getCallerName();
 
         if (caller != null) {
-            if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
-            else ChatUtils.error("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
+            if (i != -1) ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
+            else ChatUtils.errorPrefix("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
         }
         else {
-            if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
-            else ChatUtils.error("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
+            if (i != -1) ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
+            else ChatUtils.errorPrefix("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
         }
     }
 
@@ -237,8 +238,8 @@ public class MeteorStarscript {
     public static void printChatError(StarscriptError e) {
         String caller = getCallerName();
 
-        if (caller != null) ChatUtils.error("Starscript", "%s (from %s)", e.getMessage(), caller);
-        else ChatUtils.error("Starscript", "%s", e.getMessage());
+        if (caller != null) ChatUtils.errorPrefix("Starscript", "%s (from %s)", e.getMessage(), caller);
+        else ChatUtils.errorPrefix("Starscript", "%s", e.getMessage());
     }
 
     private static String getCallerName() {

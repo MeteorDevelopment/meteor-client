@@ -82,6 +82,13 @@ public class NoFall extends Module {
         .build()
     );
 
+    private final Setting<Boolean> antiBounce = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-bounce")
+        .description("Disables bouncing on slime-block and bed upon landing.")
+        .defaultValue(true)
+        .build()
+    );
+
     private boolean placedWater;
     private BlockPos targetPos;
     private int timer;
@@ -182,6 +189,10 @@ public class NoFall extends Module {
                 }
             }
         }
+    }
+
+    public boolean cancelBounce() {
+        return isActive() && antiBounce.get();
     }
 
     private void useItem(FindItemResult item, boolean placedWater, BlockPos blockPos, boolean interactItem) {
