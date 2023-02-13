@@ -23,7 +23,7 @@ public class MacroCommand extends Command {
         builder.then(
             argument("macro", MacroArgumentType.create())
                 .executes(context -> {
-                    Macro macro = context.getArgument("macro", Macro.class);
+                    Macro macro = MacroArgumentType.get(context);
                     macro.onAction();
                     return SINGLE_SUCCESS;
                 }));
