@@ -29,6 +29,9 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
 
@@ -38,6 +41,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Shadow protected int x;
     @Shadow protected int y;
+
+    @Shadow protected int backgroundWidth;
 
     @Shadow @org.jetbrains.annotations.Nullable protected abstract Slot getSlotAt(double xPosition, double yPosition);
 
@@ -53,26 +58,34 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         super(title);
     }
 
+    // Inventory Tweaks
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
 
-        if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
-            addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
-                    .position(width / 2 - 41, 3)
-                    .size(40, 20)
-                    .build()
-            );
+        if (invTweaks.isActive()) {
+            List<InventoryTweaks.Button> buttons = Arrays.stream(invTweaks.buttons)
+                .filter(button -> button.showButton(getScreenHandler()))
+                .toList();
 
-            addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Dump"), button -> invTweaks.dump(getScreenHandler()))
-                    .position(width / 2 + 2, 3)
-                    .size(40, 20)
-                    .build()
-            );
+            int buttonCount = buttons.size();
+            int buttonWidth = 40;
+            int margin = (backgroundWidth - (buttonCount * buttonWidth)) / (buttonCount + 1);
+            int netButtonWidth = buttonWidth + margin;
+            int xPos = x + margin;
+
+            for (InventoryTweaks.Button button : buttons) {
+                addDrawableChild(
+                    new ButtonWidget.Builder(Text.literal(button.buttonName), btn -> button.execute(getScreenHandler()))
+                        .position(xPos, y - 12)
+                        .size(buttonWidth, 12)
+                        .build()
+                );
+                xPos += netButtonWidth;
+            }
         }
     }
+
 
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
