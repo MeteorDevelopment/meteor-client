@@ -270,7 +270,11 @@ public class Notebot extends Module {
 
     @Override
     public String getInfoString() {
-        return stage.toString();
+        if (stage == Stage.None) {
+            return "None";
+        } else {
+            return playingMode.toString() + " | " + stage.toString();
+        }
     }
 
     @Override
