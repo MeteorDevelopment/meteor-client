@@ -65,6 +65,22 @@ public abstract class EntityMixin {
         return vec;
     }
 
+    @Inject(method = "isTouchingWater", at = @At(value = "HEAD"), cancellable = true)
+    private void isTouchingWater(CallbackInfoReturnable<Boolean> info) {
+        if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
+    }
+
+    @Inject(method = "isInLava", at = @At(value = "HEAD"), cancellable = true)
+    private void isInLava(CallbackInfoReturnable<Boolean> info) {
+        if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
+    }
+
+    @Redirect(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSubmergedInWater()Z"))
+    private boolean isSubmergedInWater(Entity entity) {
+        if (entity == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) return false;
+        return entity.isSubmergedInWater();
+    }
+
     @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     private void onPushAwayFrom(Args args, Entity entity) {
         Velocity velocity = Modules.get().get(Velocity.class);
