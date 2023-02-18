@@ -11,10 +11,7 @@ import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
-import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
-import meteordevelopment.meteorclient.systems.modules.movement.Sneak;
-import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
+import meteordevelopment.meteorclient.systems.modules.movement.*;
 import meteordevelopment.meteorclient.systems.modules.player.Portals;
 import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
@@ -22,6 +19,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.entity.JumpingMount;
 import net.minecraft.entity.damage.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
@@ -49,6 +47,16 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     private boolean redirectUsingItem(ClientPlayerEntity player) {
         if (Modules.get().get(NoSlow.class).items()) return false;
         return player.isUsingItem();
+    }
+
+    @Inject(method = "getMountJumpStrength", at = @At("HEAD"), cancellable = true)
+    private void getMountJumpStrength(CallbackInfoReturnable<Float> info) {
+        if (Modules.get().get(EntityControl.class).maxJump()) info.setReturnValue(1f);
+    }
+
+    @Inject(method = "getJumpingMount", at = @At("RETURN"), cancellable = true)
+    private void changeJumpingMount(CallbackInfoReturnable<JumpingMount> info) {
+        if (Modules.get().get(EntityControl.class).cancelJump()) info.setReturnValue(null);
     }
 
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)

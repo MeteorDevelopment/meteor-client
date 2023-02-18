@@ -5,16 +5,16 @@
 
 package meteordevelopment.meteorclient.events.entity;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 
-public class LivingEntityMoveEvent {
-    private static final LivingEntityMoveEvent INSTANCE = new LivingEntityMoveEvent();
+public class EntityMoveEvent {
+    private static final EntityMoveEvent INSTANCE = new EntityMoveEvent();
 
-    public LivingEntity entity;
+    public Entity entity;
     public Vec3d movement;
 
-    public static LivingEntityMoveEvent get(LivingEntity entity, Vec3d movement) {
+    public static EntityMoveEvent get(Entity entity, Vec3d movement) {
         INSTANCE.entity = entity;
         INSTANCE.movement = movement;
         return INSTANCE;
