@@ -357,7 +357,7 @@ public class InventoryTweaks extends Module {
             itemsFilter = sg.add(new EnumSetting.Builder<ListMode>()
                 .name("items-filter")
                 .description("The method for filtering selected items.")
-                .defaultValue(ListMode.None)
+                .defaultValue(ListMode.Whitelist)
                 .visible(() -> triggerMode.get() != TriggerMode.Disabled)
                 .build()
             );
@@ -432,12 +432,12 @@ public class InventoryTweaks extends Module {
 
         public enum ListMode {
             Whitelist,
-            Blacklist,
-            None;
+            Blacklist;
 
             public <T> boolean test(List<T> list, T element) {
                 if (this.equals(ListMode.Whitelist) && list.contains(element)) return true;
                 else if (this.equals(ListMode.Blacklist) && !list.contains(element)) return true;
+
                 return false;
             }
         }
