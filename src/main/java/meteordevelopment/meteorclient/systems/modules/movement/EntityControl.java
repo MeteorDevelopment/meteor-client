@@ -17,7 +17,6 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AbstractHorseEntity;
-import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
 import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
 import net.minecraft.util.math.Vec3d;
@@ -30,7 +29,7 @@ public class EntityControl extends Module {
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Target entities.")
-        .defaultValue(EntityType.BOAT, EntityType.CHEST_BOAT, EntityType.DONKEY, EntityType.HORSE, EntityType.LLAMA, EntityType.MULE, EntityType.PIG, EntityType.SKELETON_HORSE, EntityType.STRIDER, EntityType.TRADER_LLAMA, EntityType.ZOMBIE_HORSE)
+        .defaultValue(EntityType.BOAT, EntityType.CHEST_BOAT, EntityType.DONKEY, EntityType.HORSE, EntityType.MULE, EntityType.PIG, EntityType.SKELETON_HORSE, EntityType.STRIDER, EntityType.ZOMBIE_HORSE)
         .build()
     );
 
@@ -155,7 +154,6 @@ public class EntityControl extends Module {
 
         // Apply movement
         if (lockYaw.get()) entity.setYaw(mc.player.getYaw());
-        if (entity instanceof LlamaEntity llama) llama.headYaw = mc.player.headYaw;
         ((IVec3d)event.entity.getVelocity()).set(velX, velY, velZ);
     }
 
