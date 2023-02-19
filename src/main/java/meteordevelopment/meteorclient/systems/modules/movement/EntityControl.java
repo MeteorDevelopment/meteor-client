@@ -61,6 +61,13 @@ public class EntityControl extends Module {
         .build()
     );
 
+    private final Setting<Boolean> cancelBoatPaddle = sgGeneral.add(new BoolSetting.Builder()
+        .name("cancel-boat-paddle")
+        .description("Cancels Boat paddle.")
+        .defaultValue(false)
+        .build()
+    );
+
     // Speed
 
     private final Setting<Boolean> entitySpeed = sgSpeed.add(new BoolSetting.Builder()
@@ -147,6 +154,7 @@ public class EntityControl extends Module {
 
         // Vertical movement
         if (flight.get()) {
+            velY = 0;
             if (mc.options.jumpKey.isPressed()) velY += verticalSpeed.get() / 20;
             if (mc.options.sprintKey.isPressed()) velY -= verticalSpeed.get() / 20;
             else velY -= fallSpeed.get() / 20;
@@ -175,7 +183,7 @@ public class EntityControl extends Module {
 
     public boolean cancelBoatPaddle() {
         if (!(mc.player.getVehicle() instanceof BoatEntity boat)) return false;
-        return isActive() && entities.get().getBoolean(boat.getType()) && flight.get();
+        return isActive() && entities.get().getBoolean(boat.getType()) && cancelBoatPaddle.get();
     }
 
     public boolean cancelJump() {
