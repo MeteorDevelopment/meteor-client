@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -33,16 +34,17 @@ public class Scaffold extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgRender = settings.createGroup("Render");
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-        .name("blocks")
-        .description("Selected blocks.")
+    private final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
+        .name("blocks-filter")
+        .description("How to use the block list setting")
+        .defaultValue(FilterMode.Blacklist)
         .build()
     );
 
-    private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
-        .name("blocks-filter")
-        .description("How to use the block list setting")
-        .defaultValue(ListMode.Blacklist)
+    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+        .name("blocks")
+        .description("Selected blocks.")
+        .visible(() -> !blocksFilter.get().isWildCard())
         .build()
     );
 
@@ -275,8 +277,7 @@ public class Scaffold extends Module {
 
         Block block = ((BlockItem) itemStack.getItem()).getBlock();
 
-        if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
-        else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
+        if (!blocksFilter.get().test(blocks.get(), block)) return false;
 
         if (!Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, pos))) return false;
         return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
@@ -311,10 +312,5 @@ public class Scaffold extends Module {
                 mc.player.setVelocity(cancelVelocity.get() ? 0 : vel.x, 0.42, cancelVelocity.get() ? 0 : vel.z);
             }
         }
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 }

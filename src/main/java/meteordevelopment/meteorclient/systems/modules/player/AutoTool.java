@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -30,9 +31,23 @@ import java.util.function.Predicate;
 
 public class AutoTool extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
 
     // General
+
+    private final Setting<FilterMode> itemsFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
+        .name("items-filter")
+        .description("Filter mode for Items.")
+        .defaultValue(FilterMode.Blacklist)
+        .build()
+    );
+
+    private final Setting<List<Item>> items = sgGeneral.add(new ItemListSetting.Builder()
+        .name("items")
+        .description("The tools you want to use.")
+        .visible(() -> !itemsFilter.get().isWildCard())
+        .filter(AutoTool::isTool)
+        .build()
+    );
 
     private final Setting<EnchantPreference> prefer = sgGeneral.add(new EnumSetting.Builder<EnchantPreference>()
         .name("prefer")
@@ -79,30 +94,6 @@ public class AutoTool extends Module {
         .build()
     ));
 
-    // Whitelist and blacklist
-
-    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
-        .name("list-mode")
-        .description("Selection mode.")
-        .defaultValue(ListMode.Blacklist)
-        .build()
-    );
-
-    private final Setting<List<Item>> whitelist = sgWhitelist.add(new ItemListSetting.Builder()
-        .name("whitelist")
-        .description("The tools you want to use.")
-        .visible(() -> listMode.get() == ListMode.Whitelist)
-        .filter(AutoTool::isTool)
-        .build()
-    );
-
-    private final Setting<List<Item>> blacklist = sgWhitelist.add(new ItemListSetting.Builder()
-        .name("blacklist")
-        .description("The tools you don't want to use.")
-        .visible(() -> listMode.get() == ListMode.Blacklist)
-        .filter(AutoTool::isTool)
-        .build()
-    );
 
     private boolean wasPressed;
     private boolean shouldSwitch;
@@ -150,8 +141,7 @@ public class AutoTool extends Module {
         for (int i = 0; i < 9; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
 
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
+            if (!itemsFilter.get().test(items.get(), itemStack.getItem())) continue;
 
             double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
             if (score < 0) continue;
@@ -219,10 +209,5 @@ public class AutoTool extends Module {
         None,
         Fortune,
         SilkTouch
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 }

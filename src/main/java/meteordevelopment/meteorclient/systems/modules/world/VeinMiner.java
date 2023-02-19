@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -53,17 +54,18 @@ public class VeinMiner extends Module {
 
     // General
 
+    private final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
+        .name("blocks-filter")
+        .description("Selection mode.")
+        .defaultValue(FilterMode.Whitelist)
+        .build()
+    );
+
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
         .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS)
-        .build()
-    );
-
-    private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
-        .name("mode")
-        .description("Selection mode.")
-        .defaultValue(ListMode.Whitelist)
+        .visible(() -> !blocksFilter.get().isWildCard())
         .build()
     );
 
@@ -158,11 +160,7 @@ public class VeinMiner extends Module {
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         BlockState state = mc.world.getBlockState(event.blockPos);
 
-        if (state.getHardness(mc.world, event.blockPos) < 0)
-            return;
-        if (mode.get() == ListMode.Whitelist && !selectedBlocks.get().contains(state.getBlock()))
-            return;
-        if (mode.get() == ListMode.Blacklist && selectedBlocks.get().contains(state.getBlock()))
+        if (state.getHardness(mc.world, event.blockPos) < 0 || !blocksFilter.get().test(selectedBlocks.get(), state.getBlock()))
             return;
 
         foundBlockPositions.clear();
@@ -274,11 +272,6 @@ public class VeinMiner extends Module {
 
     @Override
     public String getInfoString() {
-        return mode.get().toString() + " (" + selectedBlocks.get().size() + ")";
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
+        return blocksFilter.get().toString() + " (" + selectedBlocks.get().size() + ")";
     }
 }

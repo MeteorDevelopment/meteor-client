@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -25,17 +26,17 @@ import static net.minecraft.entity.effect.StatusEffects.HASTE;
 public class SpeedMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
+    public final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
             .name("blocks")
             .description("Selected blocks.")
             .filter(block -> block.getHardness() > 0)
             .build()
     );
 
-    private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
+    public final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
         .name("blocks-filter")
         .description("How to use the blocks setting.")
-        .defaultValue(ListMode.Blacklist)
+        .defaultValue(FilterMode.Blacklist)
         .build()
     );
 
@@ -72,20 +73,12 @@ public class SpeedMine extends Module {
     }
 
     public boolean filter(Block block) {
-        if (blocksFilter.get() == ListMode.Blacklist && !blocks.get().contains(block)) return true;
-        else if (blocksFilter.get() == ListMode.Whitelist && blocks.get().contains(block)) return true;
-
-        return false;
+        return blocksFilter.get().test(blocks.get(), block);
     }
 
     public enum Mode {
         Normal,
         Haste1,
         Haste2
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 }

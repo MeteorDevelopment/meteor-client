@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
@@ -320,8 +321,8 @@ public class InventoryTweaks extends Module {
 
         final Setting<TriggerMode> triggerMode;
         final Setting<List<ScreenHandlerType<?>>> containersList;
+        final Setting<FilterMode> itemsFilter;
         final Setting<List<Item>> items;
-        final Setting<ListMode> itemsFilter;
         final Setting<Integer> delay;
         final Setting<Integer> initDelay;
         final Setting<Integer> randomDelay;
@@ -347,18 +348,18 @@ public class InventoryTweaks extends Module {
                 .build()
             );
 
-            items = sg.add(new ItemListSetting.Builder()
-                .name("items")
-                .description("Items list.")
+            itemsFilter = sg.add(new EnumSetting.Builder<FilterMode>()
+                .name("items-filter")
+                .description("The method for filtering items.")
+                .defaultValue(FilterMode.Whitelist)
                 .visible(() -> triggerMode.get() != TriggerMode.Disabled)
                 .build()
             );
 
-            itemsFilter = sg.add(new EnumSetting.Builder<ListMode>()
-                .name("items-filter")
-                .description("The method for filtering selected items.")
-                .defaultValue(ListMode.Whitelist)
-                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            items = sg.add(new ItemListSetting.Builder()
+                .name("items")
+                .description("Items list.")
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled && !itemsFilter.get().isWildCard())
                 .build()
             );
 
@@ -429,18 +430,6 @@ public class InventoryTweaks extends Module {
             Button,
             Disabled
         }
-
-        public enum ListMode {
-            Whitelist,
-            Blacklist;
-
-            public <T> boolean test(List<T> list, T element) {
-                if (this.equals(ListMode.Whitelist) && list.contains(element)) return true;
-                else if (this.equals(ListMode.Blacklist) && !list.contains(element)) return true;
-
-                return false;
-            }
-        }
     }
 
     private class Delete extends Button {
@@ -484,7 +473,7 @@ public class InventoryTweaks extends Module {
                     if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
                     Item item = handler.getSlot(i).getStack().getItem();
-                    if (!itemsFilter.get().test(items.get(), item)) continue;
+                    if (!itemsFilter.get().test(items.get() , item)) continue;
 
                     mc.interactionManager.clickSlot(handler.syncId, i, 100, SlotActionType.SWAP, mc.player);
                 }
