@@ -270,6 +270,11 @@ public class StashFinder extends Module {
         return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getFileWorldName()), "stashes.csv");
     }
 
+    @Override
+    public String getInfoString() {
+        return String.valueOf(chunks.size());
+    }
+
     public enum Mode {
         Chat,
         Toast,
