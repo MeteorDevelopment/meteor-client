@@ -82,7 +82,7 @@ public class Config extends System<Config> {
         .name("window-title-text")
         .description("The text it displays in the window title.")
         .visible(customWindowTitle::get)
-        .defaultValue("Minecraft {mc_version} - Meteor Client {version}")
+        .defaultValue("Minecraft {mc_version} - {meteor.name} {meteor.version}")
         .onChanged(value -> mc.updateWindowTitle())
         .build()
     );

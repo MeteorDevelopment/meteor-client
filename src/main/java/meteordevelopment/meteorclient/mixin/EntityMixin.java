@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplie
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
+import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
@@ -18,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.render.ESP;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -105,7 +107,8 @@ public abstract class EntityMixin {
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
     private void onGetTeamColorValue(CallbackInfoReturnable<Integer> info) {
         if (PostProcessShaders.rendering) {
-            info.setReturnValue(Modules.get().get(ESP.class).getColor((Entity) (Object) this).getPacked());
+            Color color = Modules.get().get(ESP.class).getColor((Entity) (Object) this);
+            if (color != null) info.setReturnValue(color.getPacked());
         }
     }
 
@@ -144,5 +147,10 @@ public abstract class EntityMixin {
         if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
             info.setReturnValue(EntityPose.FALL_FLYING);
         }
+    }
+
+    @Inject(method = "bypassesLandingEffects", at = @At("RETURN"), cancellable = true)
+    private void cancelBounce(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(Modules.get().get(NoFall.class).cancelBounce() || cir.getReturnValue());
     }
 }

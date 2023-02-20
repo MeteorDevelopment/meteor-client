@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -50,6 +51,27 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     public HandledScreenMixin(Text title) {
         super(title);
+    }
+
+    @Inject(method = "init", at = @At("TAIL"))
+    private void onInit(CallbackInfo info) {
+        InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
+
+        if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
+                    .position(width / 2 - 41, 3)
+                    .size(40, 20)
+                    .build()
+            );
+
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Dump"), button -> invTweaks.dump(getScreenHandler()))
+                    .position(width / 2 + 2, 3)
+                    .size(40, 20)
+                    .build()
+            );
+        }
     }
 
     // Inventory Tweaks

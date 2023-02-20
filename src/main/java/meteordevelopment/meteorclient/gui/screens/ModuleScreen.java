@@ -8,12 +8,14 @@ package meteordevelopment.meteorclient.gui.screens;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WKeybind;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.containers.WSection;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WFavorite;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -59,8 +61,16 @@ public class ModuleScreen extends WindowScreen {
 
         // Bind
         WSection section = add(theme.section("Bind", true)).expandX().widget();
-        keybind = section.add(theme.keybind(module.keybind)).expandX().widget();
+
+        // Keybind
+        WHorizontalList bind = section.add(theme.horizontalList()).expandX().widget();
+
+        bind.add(theme.label("Bind: "));
+        keybind = bind.add(theme.keybind(module.keybind)).expandX().widget();
         keybind.actionOnSet = () -> Modules.get().setModuleToBind(module);
+
+        WButton reset = bind.add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
+        reset.action = keybind::resetBind;
 
         // Toggle on bind release
         WHorizontalList tobr = section.add(theme.horizontalList()).widget();

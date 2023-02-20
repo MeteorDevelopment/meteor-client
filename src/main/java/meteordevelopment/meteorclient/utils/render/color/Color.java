@@ -277,7 +277,7 @@ public class Color implements ICopyable<Color>, ISerializable<Color> {
     }
 
     public TextColor toTextColor() {
-        return new TextColor(getPacked());
+        return TextColor.fromRgb(getPacked());
     }
 
     public Style toStyle() {
