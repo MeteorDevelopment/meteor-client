@@ -188,7 +188,7 @@ public class AutoTool extends Module {
     }
 
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!itemStack.isSuitableFor(state) || !good.test(itemStack) || !isTool(itemStack)) return -1;
 
         if (silkTouchEnderChest
