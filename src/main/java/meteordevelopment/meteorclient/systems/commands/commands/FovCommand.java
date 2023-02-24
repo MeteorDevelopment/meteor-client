@@ -13,9 +13,9 @@ import net.minecraft.command.CommandSource;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
-public class FOVCommand extends Command {
-    public FOVCommand() {
-        super("fov", "Changes your FOV.");
+public class FovCommand extends Command {
+    public FovCommand() {
+        super("fov", "Changes your fov.");
     }
 
     @Override
