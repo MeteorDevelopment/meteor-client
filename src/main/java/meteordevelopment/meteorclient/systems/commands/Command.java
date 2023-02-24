@@ -76,9 +76,7 @@ public abstract class Command {
 
     public String toString(String... args) {
         StringBuilder base = new StringBuilder(toString());
-        for (String arg : args)
-            base.append(' ').append(arg);
-
+        for (String arg : args) base.append(' ').append(arg);
         return base.toString();
     }
 
