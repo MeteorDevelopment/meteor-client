@@ -39,7 +39,6 @@ public class Commands extends System<Commands> {
 
     @Override
     public void init() {
-        add(new BaritoneCommand());
         add(new VClipCommand());
         add(new HClipCommand());
         add(new DismountCommand());
@@ -71,7 +70,7 @@ public class Commands extends System<Commands> {
         add(new GiveCommand());
         add(new NameHistoryCommand());
         add(new BindCommand());
-        add(new FOVCommand());
+        add(new FovCommand());
         add(new RotationCommand());
         add(new WaypointCommand());
         add(new InputCommand());
