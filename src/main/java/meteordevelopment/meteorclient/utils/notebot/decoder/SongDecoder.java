@@ -20,5 +20,5 @@ public abstract class SongDecoder {
      * @param file Song file
      * @return A {@link Song} object
      */
-    public abstract Song parse(File file);
+    public abstract Song parse(File file) throws Exception;
 }

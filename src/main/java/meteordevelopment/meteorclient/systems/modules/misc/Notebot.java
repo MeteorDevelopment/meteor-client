@@ -719,33 +719,42 @@ public class Notebot extends Module {
 
         info("Loading song \"%s\".", FilenameUtils.getBaseName(file.getName()));
 
-        loadingSongFuture = CompletableFuture.supplyAsync(() -> SongDecoders.parse(file));
+        // Start loading song
+        loadingSongFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return SongDecoders.parse(file);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         loadingSongFuture.completeOnTimeout(null, 60, TimeUnit.SECONDS);
 
         stage = Stage.LoadingSong;
         long time1 = System.currentTimeMillis();
-        loadingSongFuture.thenAccept(song -> {
-            if (song != null) {
+        loadingSongFuture.whenComplete((song ,ex) -> {
+            if (ex == null) {
+                // Song is null only when it times out
+                if (song == null) {
+                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' timed out.");
+                    onSongEnd();
+                    return;
+                }
+
                 this.song = song;
                 long time2 = System.currentTimeMillis();
                 long diff = time2 - time1;
 
-                info("Song '"+FilenameUtils.getBaseName(file.getName())+"' has been loaded to the memory! Took "+diff+"ms");
+                info("Song '" + FilenameUtils.getBaseName(file.getName()) + "' has been loaded to the memory! Took "+diff+"ms");
                 callback.run();
             } else {
-                error("Could not load song '"+FilenameUtils.getBaseName(file.getName())+"'");
-                onSongEnd();
+                if (ex instanceof CancellationException) {
+                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' was cancelled.");
+                } else {
+                    error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'. See the logs for more details");
+                    MeteorClient.LOG.error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'", ex);
+                    onSongEnd();
+                }
             }
-        });
-        loadingSongFuture.exceptionally(throwable -> {
-            if (throwable instanceof CancellationException) {
-                error("Loading song '"+FilenameUtils.getBaseName(file.getName())+"' was cancelled.");
-            } else {
-                error("Could not load song '" + FilenameUtils.getBaseName(file.getName()) + "'. See logs for more details");
-                MeteorClient.LOG.error("Could not load song'" + FilenameUtils.getBaseName(file.getName()) + "'", throwable);
-                onSongEnd();
-            }
-            return null;
         });
         return true;
     }

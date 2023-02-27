@@ -12,8 +12,8 @@ import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import net.minecraft.block.enums.Instrument;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -50,13 +50,11 @@ public class SongDecoders {
      * @param file A song file
      * @return A {@link Song} object
      */
-    @Nullable
-    public static Song parse(File file) {
-        if (!hasDecoder(file)) return null;
+    @NotNull
+    public static Song parse(File file) throws Exception {
+        if (!hasDecoder(file)) throw new IllegalStateException("Decoder for this file does not exists!");
         SongDecoder decoder = getDecoder(file);
         Song song = decoder.parse(file);
-
-        if (song == null) return null;
 
         fixSong(song);
 
