@@ -5,13 +5,17 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.timeout.TimeoutException;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.ConnectToServerEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.AntiPacketKick;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketEncoderException;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -54,5 +58,14 @@ public class ClientConnectionMixin {
     @Inject(method = "send(Lnet/minecraft/network/Packet;)V", at = @At("TAIL"))
     private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
+    }
+
+    @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
+    private void exceptionCaught(ChannelHandlerContext context, Throwable throwable, CallbackInfo ci) {
+        AntiPacketKick apk = Modules.get().get(AntiPacketKick.class);
+        if (!(throwable instanceof TimeoutException) && !(throwable instanceof PacketEncoderException) && apk.catchExceptions()) {
+            if (apk.logExceptions.get()) apk.warning("Caught exception: %s", throwable);
+            ci.cancel();
+        }
     }
 }

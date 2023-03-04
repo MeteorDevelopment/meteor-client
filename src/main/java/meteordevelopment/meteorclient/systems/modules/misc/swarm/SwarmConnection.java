@@ -22,7 +22,7 @@ public class SwarmConnection extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.info("Swarm", "New worker connected on %s.", getIp(socket.getInetAddress().getHostAddress()));
+        ChatUtils.infoPrefix("Swarm", "New worker connected on %s.", getIp(socket.getInetAddress().getHostAddress()));
 
         try {
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
@@ -33,7 +33,7 @@ public class SwarmConnection extends Thread {
                         out.writeUTF(messageToSend);
                         out.flush();
                     } catch (Exception e) {
-                        ChatUtils.error("Swarm", "Encountered error when sending command.");
+                        ChatUtils.errorPrefix("Swarm", "Encountered error when sending command.");
                         e.printStackTrace();
                     }
 
@@ -43,7 +43,7 @@ public class SwarmConnection extends Thread {
 
             out.close();
         } catch (IOException e) {
-            ChatUtils.info("Swarm", "Error creating a connection with %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
+            ChatUtils.infoPrefix("Swarm", "Error creating a connection with %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
             e.printStackTrace();
         }
     }
@@ -55,7 +55,7 @@ public class SwarmConnection extends Thread {
             e.printStackTrace();
         }
 
-        ChatUtils.info("Swarm", "Worker disconnected on ip: %s.", socket.getInetAddress().getHostAddress());
+        ChatUtils.infoPrefix("Swarm", "Worker disconnected on ip: %s.", socket.getInetAddress().getHostAddress());
 
         interrupt();
     }

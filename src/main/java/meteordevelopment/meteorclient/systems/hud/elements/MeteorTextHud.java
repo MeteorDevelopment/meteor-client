@@ -50,7 +50,7 @@ public class MeteorTextHud {
         ROTATION = addPreset("Rotation", "{camera.direction} #1({round(camera.yaw, 1)}, {round(camera.pitch, 1)})", 0);
         MODULE_ENABLED = addPreset("Module enabled", "Kill Aura: {meteor.is_module_active(\"kill-aura\") ? #2 \"ON\" : #3 \"OFF\"}", 0);
         MODULE_ENABLED_WITH_INFO = addPreset("Module enabled with info", "Kill Aura: {meteor.is_module_active(\"kill-aura\") ? #2 \"ON\" : #3 \"OFF\"} #1{meteor.get_module_info(\"kill-aura\")}", 0);
-        WATERMARK = addPreset("Watermark", "Meteor Client #1{version}", Integer.MAX_VALUE);
+        WATERMARK = addPreset("Watermark", "{meteor.name} #1{meteor.version}");
         BARITONE = addPreset("Baritone", "Baritone: #1{baritone.process_name}");
     }
 

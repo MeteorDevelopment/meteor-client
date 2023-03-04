@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplie
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
+import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
@@ -146,5 +147,10 @@ public abstract class EntityMixin {
         if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
             info.setReturnValue(EntityPose.FALL_FLYING);
         }
+    }
+
+    @Inject(method = "bypassesLandingEffects", at = @At("RETURN"), cancellable = true)
+    private void cancelBounce(CallbackInfoReturnable<Boolean> cir) {
+        cir.setReturnValue(Modules.get().get(NoFall.class).cancelBounce() || cir.getReturnValue());
     }
 }

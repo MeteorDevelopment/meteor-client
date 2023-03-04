@@ -23,11 +23,15 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.thrown.EnderPearlEntity;
 import net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.Vec3d;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
 
@@ -36,6 +40,7 @@ import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords
 public class Notifier extends Module {
     private final SettingGroup sgTotemPops = settings.createGroup("Totem Pops");
     private final SettingGroup sgVisualRange = settings.createGroup("Visual Range");
+    private final SettingGroup sgPearl = settings.createGroup("Pearl");
 
     // Totem Pops
 
@@ -104,8 +109,32 @@ public class Notifier extends Module {
         .build()
     );
 
+    // Pearl
+
+    private final Setting<Boolean> pearl = sgPearl.add(new BoolSetting.Builder()
+        .name("pearl")
+        .description("Notifies you when a player is teleported using an ender pearl.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> pearlIgnoreOwn = sgPearl.add(new BoolSetting.Builder()
+        .name("ignore-own")
+        .description("Ignores your own pearls.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> pearlIgnoreFriends = sgPearl.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Ignores friends pearls.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Object2IntMap<UUID> totemPopMap = new Object2IntOpenHashMap<>();
     private final Object2IntMap<UUID> chatIdMap = new Object2IntOpenHashMap<>();
+    private final Map<Integer, Vec3d> pearlStartPosMap = new HashMap<>();
 
     private final Random random = new Random();
 
@@ -117,36 +146,56 @@ public class Notifier extends Module {
 
     @EventHandler
     private void onEntityAdded(EntityAddedEvent event) {
-        if (event.entity.getUuid().equals(mc.player.getUuid()) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Despawn) return;
-
-        if (event.entity instanceof PlayerEntity) {
-            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
+        if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().getBoolean(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Despawn) {
+            if (event.entity instanceof PlayerEntity) {
+                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
+                }
+            } else {
+                MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
+                text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
+                text.append(formatCoords(event.entity.getPos()));
+                text.append(Text.literal(".").formatted(Formatting.GRAY));
+                info(text);
             }
         }
-        else {
-            MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-            text.append(Text.literal(" has spawned at ").formatted(Formatting.GRAY));
-            text.append(formatCoords(event.entity.getPos()));
-            text.append(Text.literal(".").formatted(Formatting.GRAY));
-            info(text);
+
+        if (pearl.get()) {
+            if (event.entity instanceof EnderPearlEntity pearl) {
+                pearlStartPosMap.put(pearl.getId(), new Vec3d(pearl.getX(), pearl.getY(), pearl.getZ()));
+            }
         }
     }
 
     @EventHandler
     private void onEntityRemoved(EntityRemovedEvent event) {
-        if (event.entity.getUuid().equals(mc.player.getUuid()) || !entities.get().getBoolean(event.entity.getType()) || !visualRange.get() || this.event.get() == Event.Spawn) return;
-
-        if (event.entity instanceof PlayerEntity) {
-            if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
-                ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
+        if (!event.entity.getUuid().equals(mc.player.getUuid()) && entities.get().getBoolean(event.entity.getType()) && visualRange.get() && this.event.get() != Event.Spawn) {
+            if (event.entity instanceof PlayerEntity) {
+                if ((!visualRangeIgnoreFriends.get() || !Friends.get().isFriend(((PlayerEntity) event.entity))) && (!visualRangeIgnoreFakes.get() || !(event.entity instanceof FakePlayerEntity))) {
+                    ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
+                }
+            } else {
+                MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
+                text.append(Text.literal(" has despawned at ").formatted(Formatting.GRAY));
+                text.append(formatCoords(event.entity.getPos()));
+                text.append(Text.literal(".").formatted(Formatting.GRAY));
+                info(text);
             }
-        } else {
-            MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
-            text.append(Text.literal(" has despawned at ").formatted(Formatting.GRAY));
-            text.append(formatCoords(event.entity.getPos()));
-            text.append(Text.literal(".").formatted(Formatting.GRAY));
-            info(text);
+        }
+
+        if (pearl.get()) {
+            Entity e = event.entity;
+            int i = e.getId();
+            if (pearlStartPosMap.containsKey(i)) {
+                EnderPearlEntity pearl = (EnderPearlEntity) e;
+                if (pearl.getOwner() != null && pearl.getOwner() instanceof PlayerEntity p) {
+                    double d = pearlStartPosMap.get(i).distanceTo(e.getPos());
+                    if ((!Friends.get().isFriend(p) || !pearlIgnoreFriends.get()) && (!p.equals(mc.player) || !pearlIgnoreOwn.get())) {
+                        info("(highlight)%s's(default) pearl landed at %d, %d, %d (highlight)(%.1fm away, travelled %.1fm)(default).", pearl.getOwner().getEntityName(), pearl.getBlockPos().getX(), pearl.getBlockPos().getY(), pearl.getBlockPos().getZ(), pearl.distanceTo(mc.player), d);
+                    }
+                }
+                pearlStartPosMap.remove(i);
+            }
         }
     }
 
@@ -156,12 +205,14 @@ public class Notifier extends Module {
     public void onActivate() {
         totemPopMap.clear();
         chatIdMap.clear();
+        pearlStartPosMap.clear();
     }
 
     @EventHandler
     private void onGameJoin(GameJoinedEvent event) {
         totemPopMap.clear();
         chatIdMap.clear();
+        pearlStartPosMap.clear();
     }
 
     @EventHandler

@@ -23,7 +23,7 @@ public class SwarmWorker extends Thread {
             socket = new Socket(ip, port);
         } catch (Exception e) {
             socket = null;
-            ChatUtils.warning("Swarm", "Server not found at %s on port %s.", ip, port);
+            ChatUtils.warningPrefix("Swarm", "Server not found at %s on port %s.", ip, port);
             e.printStackTrace();
         }
 
@@ -32,7 +32,7 @@ public class SwarmWorker extends Thread {
 
     @Override
     public void run() {
-        ChatUtils.info("Swarm", "Connected to Swarm host on at %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
+        ChatUtils.infoPrefix("Swarm", "Connected to Swarm host on at %s on port %s.", getIp(socket.getInetAddress().getHostAddress()), socket.getPort());
 
         try {
             DataInputStream in = new DataInputStream(socket.getInputStream());
@@ -42,7 +42,7 @@ public class SwarmWorker extends Thread {
                 String read = in.readUTF();
 
                 if (!read.equals("")) {
-                    ChatUtils.info("Swarm", "Received command: (highlight)%s", read);
+                    ChatUtils.infoPrefix("Swarm", "Received command: (highlight)%s", read);
 
                     try {
                         Commands.get().dispatch(read);
@@ -55,7 +55,7 @@ public class SwarmWorker extends Thread {
 
             in.close();
         } catch (IOException e) {
-            ChatUtils.error("Swarm", "Error in connection to host.");
+            ChatUtils.errorPrefix("Swarm", "Error in connection to host.");
             e.printStackTrace();
             disconnect();
         }
@@ -70,7 +70,7 @@ public class SwarmWorker extends Thread {
 
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
 
-        ChatUtils.info("Swarm", "Disconnected from host.");
+        ChatUtils.infoPrefix("Swarm", "Disconnected from host.");
 
         interrupt();
     }
