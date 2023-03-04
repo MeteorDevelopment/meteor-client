@@ -8,11 +8,12 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.Environment;
 import com.mojang.authlib.exceptions.AuthenticationException;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
 import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.AccountUtils;
@@ -23,10 +24,8 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> {
-    private static final String AUTH = "http://authserver.thealtening.com";
-    private static final String ACCOUNT = "https://api.mojang.com";
-    private static final String SESSION = "http://sessionserver.thealtening.com";
-    private static final String SERVICES = "https://api.minecraftservices.com";
+    private static final Environment ENVIRONMENT = Environment.create("http://authserver.thealtening.com", "https://api.mojang.com", "http://sessionserver.thealtening.com", "https://api.minecraftservices.com", "The Altening");
+    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "", ENVIRONMENT);
 
     public TheAlteningAccount(String token) {
         super(AccountType.TheAltening, token);
@@ -50,10 +49,8 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
     @Override
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) AccountUtils.resetLoginEnvironment();
-        AccountUtils.setBaseUrl(service, SESSION + "/session/minecraft/");
-        AccountUtils.setJoinUrl(service, SESSION + "/session/minecraft/join");
-        AccountUtils.setCheckUrl(service, SESSION + "/session/minecraft/hasJoined");
+        MinecraftSessionService sessService = YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE, ENVIRONMENT);
+        AccountUtils.applyLoginEnvironment(SERVICE, sessService, mc.getSession());
 
         YggdrasilUserAuthentication auth = getAuth();
 
@@ -72,7 +69,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     }
 
     private YggdrasilUserAuthentication getAuth() {
-        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "", Environment.create(AUTH, ACCOUNT, SESSION, SERVICES, "The Altening")).createUserAuthentication(Agent.MINECRAFT);
+        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) SERVICE.createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
         auth.setPassword("Meteor on Crack!");

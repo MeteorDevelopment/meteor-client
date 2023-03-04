@@ -5,8 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
-import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
@@ -30,11 +30,9 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) AccountUtils.resetLoginEnvironment();
-        AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/");
-        AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/join");
-        AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/hasJoined");
-
+        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy());
+        MinecraftSessionService sessService = authenticationService.createMinecraftSessionService();
+        AccountUtils.applyLoginEnvironment(authenticationService, sessService, mc.getSession());
         return true;
     }
 

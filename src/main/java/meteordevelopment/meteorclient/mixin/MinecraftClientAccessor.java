@@ -80,7 +80,4 @@ public interface MinecraftClientAccessor {
     @Mutable
     @Accessor("profileKeys")
     void setProfileKeys(ProfileKeys profileKeys);
-
-    @Accessor("authenticationService")
-    YggdrasilAuthenticationService getAuthenticationService();
 }
