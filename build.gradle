@@ -1,7 +1,7 @@
 plugins {
-    id 'fabric-loom' version '1.0-SNAPSHOT'
-    id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id "fabric-loom" version "1.1-SNAPSHOT"
+    id "maven-publish"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
@@ -46,9 +46,9 @@ configurations {
 
 dependencies {
 	// Fabric
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
 
 	// Compat fixes
@@ -113,7 +113,7 @@ remapJar {
 }
 
 javadoc {
-    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption("Xdoclint:none", "-quiet")
     options.encoding = "UTF-8"
 }
 
