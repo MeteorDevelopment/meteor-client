@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.entity.Entity;
@@ -22,7 +23,7 @@ import net.minecraft.util.math.Vec3d;
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
-    
+
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The mode for Flight.")
@@ -40,6 +41,31 @@ public class Flight extends Module {
         .min(0.0)
         .build()
     );
+
+    private final Setting<Keybind> speedUpKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("speed-up-key")
+        .description("Pressing this will increase your speed.")
+        .defaultValue(Keybind.none())
+        .action(() -> {
+            if (!isActive()) return;
+            // Increase the speed by 25%
+            speed.set(speed.get() * 1.25);
+        })
+        .build()
+    );
+
+    private final Setting<Keybind> speedDownKey = sgGeneral.add(new KeybindSetting.Builder()
+        .name("speed-down-key")
+        .description("Pressing this will decrease your speed.")
+        .defaultValue(Keybind.none())
+        .action(() -> {
+            if (!isActive()) return;
+            // Decrease the speed by 25%
+            speed.set(speed.get() * 0.75);
+        })
+        .build()
+    );
+
     private final Setting<Boolean> verticalSpeedMatch = sgGeneral.add(new BoolSetting.Builder()
         .name("vertical-speed-match")
         .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
@@ -70,7 +96,7 @@ public class Flight extends Module {
         .sliderRange(1, 20)
         .build()
     );
-    
+
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
     private boolean flip;
