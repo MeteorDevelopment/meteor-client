@@ -25,8 +25,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
-
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
+import org.lwjgl.glfw.GLFW;
 
 public class Excavator extends Module {
     private final IBaritone baritone = BaritoneAPI.getProvider().getPrimaryBaritone();
@@ -37,7 +36,7 @@ public class Excavator extends Module {
     private final Setting<Keybind> selectionKey = sgGeneral.add(new KeybindSetting.Builder()
         .name("selection-key")
         .description("Key to draw the selection.")
-        .defaultValue(Keybind.fromButton(GLFW_MOUSE_BUTTON_RIGHT))
+        .defaultValue(Keybind.fromButton(GLFW.GLFW_MOUSE_BUTTON_RIGHT))
         .build()
     );
 
