@@ -124,6 +124,12 @@ public class MeteorStarscript {
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
             .set("speed", () -> Value.number(Utils.getPlayerSpeed()))
+            .set("velocity", new ValueMap()
+                .set("_toString", () -> Value.string(mc.player != null ? Utils.getPlayerVelocity().toString() : ""))
+                .set("x", () -> Value.number(mc.player != null ? Utils.getPlayerVelocity().x : 0))
+                .set("y", () -> Value.number(mc.player != null ? Utils.getPlayerVelocity().y : 0))
+                .set("z", () -> Value.number(mc.player != null ? Utils.getPlayerVelocity().z : 0))
+            )
 
             .set("breaking_progress", () -> Value.number(mc.interactionManager != null ? ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress() : 0))
             .set("biome", MeteorStarscript::biome)
