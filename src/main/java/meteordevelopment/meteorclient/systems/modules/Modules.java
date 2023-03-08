@@ -398,6 +398,7 @@ public class Modules extends System<Modules> {
         add(new BedAura());
         add(new BowAimbot());
         add(new BowSpam());
+        add(new BucketAura());
         add(new Burrow());
         add(new Criticals());
         add(new CrystalAura());
