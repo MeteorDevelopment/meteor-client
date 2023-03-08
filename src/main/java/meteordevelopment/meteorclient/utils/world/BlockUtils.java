@@ -67,8 +67,12 @@ public class BlockUtils {
     }
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
-        if (!findItemResult.isHotbar() && !findItemResult.isOffhand()) return false;
-        return place(blockPos, findItemResult.getHand(), findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
+        if (findItemResult.isOffhand()) {
+            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
+        } else if (findItemResult.isHotbar()) {
+            return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
+        }
+        return false;
     }
 
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {

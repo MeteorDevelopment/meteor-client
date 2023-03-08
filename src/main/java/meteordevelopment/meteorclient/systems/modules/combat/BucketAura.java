@@ -19,14 +19,14 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
-import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.*;
+import net.minecraft.item.EntityBucketItem;
+import net.minecraft.item.Items;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
@@ -37,7 +37,7 @@ public class BucketAura extends Module {
     private final SettingGroup sgWater = settings.createGroup("Water");
     private final SettingGroup sgLava = settings.createGroup("Lava");
 
-    private final Setting<AuraPriority> priority = sgGeneral.add(new EnumSetting.Builder<AuraPriority>()
+    private final Setting<AuraPriority> auraPriority = sgGeneral.add(new EnumSetting.Builder<AuraPriority>()
         .name("priority")
         .description("Which aura to be prioritised for targeting.")
         .defaultValue(AuraPriority.Water)
@@ -56,7 +56,7 @@ public class BucketAura extends Module {
     private final Setting<Integer> placeDelay = sgGeneral.add(new IntSetting.Builder()
         .name("place-delay")
         .description("Minimum delay in ticks for targeting entities for each aura.")
-        .defaultValue(10)
+        .defaultValue(5)
         .min(0)
         .sliderRange(1, 20)
         .build()
@@ -72,7 +72,7 @@ public class BucketAura extends Module {
     private final Setting<Integer> collectDelay = sgGeneral.add(new IntSetting.Builder()
         .name("collect-delay")
         .description("The tick delay between collecting fluids.")
-        .defaultValue(3)
+        .defaultValue(2)
         .min(0)
         .sliderRange(1, 20)
         .visible(collect::get)
@@ -93,10 +93,11 @@ public class BucketAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> antiExplode = sgWater.add(new BoolSetting.Builder()
+    private final Setting<Boolean> antiExplode = sgGeneral.add(new BoolSetting.Builder() // add me to lava
         .name("anti-explode")
         .description("Automatically places water/lava to prevent block damage from explosions.")
         .defaultValue(true)
+        .visible(() -> !collect.get())
         .build()
     );
 
@@ -120,7 +121,7 @@ public class BucketAura extends Module {
     private final Setting<PlayerTargets> waterPlayerTargets = sgWater.add(new EnumSetting.Builder<PlayerTargets>()
         .name("player-targets")
         .description("Other players to be targeted.")
-        .defaultValue(PlayerTargets._Friends)
+        .defaultValue(PlayerTargets.OnlyFriends)
         .visible(() -> waterEnabled.get() && waterEntities.get().getBoolean(EntityType.PLAYER))
         .build()
     );
@@ -202,7 +203,7 @@ public class BucketAura extends Module {
     );
 
     private int placeDelayLeft;
-    private BlockPos placePos;
+    private Vec3d placePos;
     private FindItemResult placeItem;
 
     private int collectDelayLeft;
@@ -222,7 +223,7 @@ public class BucketAura extends Module {
         if (placeDelayLeft <= 0) {
             Entity target = findTarget();
             if (target != null) {
-                interact(placePos, placeItem);
+                interact(placePos, placeItem, smashAdjacent.get());
                 placeDelayLeft = placeDelay.get();
             }
         }
@@ -231,9 +232,9 @@ public class BucketAura extends Module {
             BlockIterator.register(range.get(), range.get(), (bp, blockState) -> {
                 if (collectDelayLeft > 0) return;
                 if (!blockState.getFluidState().isStill()) return;
-                if (!canInteractPos(bp.down(), true)) return;
+                if (!canInteractPos(bp.toCenterPos(), false)) return;
 
-                interact(bp, InvUtils.findInHotbar(Items.BUCKET));
+                interact(bp.toCenterPos(), InvUtils.findInHotbar(Items.BUCKET), false);
                 collectDelayLeft = collectDelay.get();
             });
         }
@@ -245,7 +246,7 @@ public class BucketAura extends Module {
     private Entity findTarget() {
         for (Entity entity : mc.world.getEntities()) {
             if (!entity.isAlive()) continue;
-            if (!entity.getBlockStateAtPos().getFluidState().isEmpty() || entity.inPowderSnow) continue;
+            if (entity.isTouchingWater() || entity.isInLava() || entity.inPowderSnow) continue;
             if (ignoreBabies.get() && entity instanceof LivingEntity living && living.isBaby()) continue;
 
             if (findPlace(entity) && findItem(checkWater(entity), checkLava(entity)))
@@ -259,26 +260,29 @@ public class BucketAura extends Module {
         placePos = null;
         Streams.stream(mc.world.getBlockCollisions(entity, entity.getBoundingBox().offset(0, -0.5, 0)))
             .map(VoxelShape::getBoundingBox)
-            .filter(bb -> canInteractPos(new BlockPos(bb.getCenter()), false))
+            .filter(bb -> canInteractPos(bb.getCenter().add(0, 0.5, 0), true))
             .findAny()
-            .ifPresent(bb -> placePos = new BlockPos(bb.getCenter()));
+            .ifPresent(bb -> placePos = bb.getCenter().add(0, 0.5, 0));
 
         return placePos != null;
     }
 
-    private boolean canInteractPos(BlockPos bp, boolean replaceable) {
-        Vec3d interactPos = bp.toCenterPos().add(0, 0.5, 0);
-        if (!PlayerUtils.isWithin(interactPos, range.get()) || !PlayerUtils.canSeePos(interactPos)) return false;
+    private boolean canInteractPos(Vec3d pos, boolean place) {
+        if (!PlayerUtils.isWithin(pos, range.get()) || !PlayerUtils.canSeePos(pos)) return false;
 
-        BlockState state = mc.world.getBlockState(bp);
-        return !state.hasBlockEntity() && (replaceable == state.isReplaceable());
+        if (place) {
+            BlockState belowState = mc.world.getBlockState(new BlockPos(pos).down());
+            return !belowState.hasBlockEntity() && !belowState.isReplaceable();
+        }
+
+        return true;
     }
 
     private boolean checkWater(Entity entity) {
         if (!waterEnabled.get()) return false;
         if (entity instanceof OtherClientPlayerEntity player && !waterPlayerTargets.get().test(player)) return false;
 
-        if ((antiExplode.get() && EntityUtils.canExplode(entity)) ||
+        if ((antiExplode.get() && !collect.get() && EntityUtils.canExplode(entity)) ||
             (waterExtinguish.get() && entity.isOnFire()) ||
             (waterEntities.get().getBoolean(entity.getType()) && entity != mc.player && entity != mc.cameraEntity)) return true;
 
@@ -288,11 +292,14 @@ public class BucketAura extends Module {
     private boolean checkLava(Entity entity) {
         if (!lavaEnabled.get()) return false;
         if (lavaIgnoreOnFire.get() && entity.isOnFire()) return false;
-        if (entity == mc.player || entity == mc.cameraEntity) return  false;
+        if (entity == mc.player || entity == mc.cameraEntity) return false;
         if (lavaAntiSuicide.get() && mc.player.getBlockPos().equals(placePos)) return false;
         if (entity instanceof OtherClientPlayerEntity player && !lavaPlayerTargets.get().test(player)) return false;
 
-        return lavaEntities.get().getBoolean(entity.getType());
+        if ((antiExplode.get() && !collect.get() && EntityUtils.canExplode(entity)) ||
+            (lavaEntities.get().getBoolean(entity.getType()))) return true;
+
+        return false;
     }
 
     private boolean findItem(boolean checkWater, boolean checkLava) {
@@ -309,37 +316,32 @@ public class BucketAura extends Module {
             lava = InvUtils.findInHotbar(Items.LAVA_BUCKET);
         }
 
-        placeItem = priority.get().chooseItem(water, lava);
+        placeItem = auraPriority.get().chooseItem(water, lava);
 
         return placeItem != null && placeItem.found();
     }
 
-    private void interact(BlockPos pos, FindItemResult item) {
+    private void interact(Vec3d pos, FindItemResult item, boolean smash) {
         if (!item.found()) return;
 
-        if (smashAdjacent.get()) {
-            if (mc.world.getBlockState(pos.up()).getBlock().getHardness() == 0.0)
-                mc.interactionManager.attackBlock(pos.up(), Direction.DOWN);
+        BlockPos blockPos = new BlockPos(pos);
+
+        if (smash) {
+            if (mc.world.getBlockState(blockPos).getBlock().getHardness() == 0.0)
+                mc.interactionManager.attackBlock(blockPos, Direction.DOWN);
 
             for (HorizontalDirection direction : HorizontalDirection.values()) {
-                BlockPos offsetPos = direction.offset(pos).up();
+                BlockPos offsetPos = direction.offset(blockPos);
                 if (mc.world.getBlockState(offsetPos).getBlock().getHardness() == 0.0)
                     mc.interactionManager.attackBlock(offsetPos, Direction.DOWN);
             }
         }
 
-        Item interactItem = mc.player.getInventory().getStack(item.slot()).getItem();
-
-        if (interactItem instanceof BucketItem) {
-            Vec3d interactPos = pos.toCenterPos().add(0, 0.5, 0);
-            Rotations.rotate(Rotations.getYaw(interactPos), Rotations.getPitch(interactPos), 10, () -> {
-                InvUtils.swap(item.slot(), true);
-                mc.interactionManager.interactItem(mc.player, item.getHand());
-                InvUtils.swapBack();
-            });
-        } else if (interactItem instanceof PowderSnowBucketItem) {
-            BlockUtils.place(pos.up(), item, 10, false);
-        }
+        Rotations.rotate(Rotations.getYaw(pos), Rotations.getPitch(pos), 10, () -> {
+            InvUtils.swap(item.slot(), true);
+            mc.interactionManager.interactItem(mc.player, item.getHand());
+            InvUtils.swapBack();
+        });
     }
 
     public enum AuraPriority {
@@ -347,30 +349,24 @@ public class BucketAura extends Module {
         Lava;
 
         public FindItemResult chooseItem(FindItemResult water, FindItemResult lava) {
-            FindItemResult notFound = new FindItemResult(-1, -1);
             return switch (this) {
-                case Water -> water.found() ? water : lava.found() ? lava : notFound;
-                case Lava -> lava.found() ? lava : water.found() ? water: notFound;
+                case Water -> water.found() ? water : lava;
+                case Lava -> lava.found() ? lava : water;
             };
         }
     }
 
     public enum PlayerTargets {
         All,
-        _Friends,
+        OnlyFriends,
         NotFriends;
 
         public boolean test(OtherClientPlayerEntity player) {
             return switch (this) {
                 case All -> true;
-                case _Friends -> Friends.get().isFriend(player);
+                case OnlyFriends -> Friends.get().isFriend(player);
                 case NotFriends -> !Friends.get().isFriend(player);
             };
-        }
-
-        @Override
-        public String toString() {
-            return this == _Friends ? "Friends" : super.toString();
         }
     }
 }
