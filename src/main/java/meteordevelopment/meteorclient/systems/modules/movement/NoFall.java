@@ -32,7 +32,6 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
-import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -201,7 +200,7 @@ public class NoFall extends Module {
         if (interactItem) {
             Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), 10, true, () -> {
                 InvUtils.swap(item.slot(), true);
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+                mc.interactionManager.interactItem(mc.player, item.getHand());
                 InvUtils.swapBack();
             });
         } else {
