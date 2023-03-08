@@ -127,7 +127,7 @@ public class EChestFarmer extends Module {
             BlockPos pos = ((BlockHitResult) mc.crosshairTarget).getBlockPos().up();
             BlockState state = mc.world.getBlockState(pos);
 
-            if (state.getMaterial().isReplaceable() || state.getBlock() == Blocks.ENDER_CHEST) {
+            if (state.isReplaceable() || state.getBlock() == Blocks.ENDER_CHEST) {
                 target = ((BlockHitResult) mc.crosshairTarget).getBlockPos().up();
             }
             else return;
@@ -171,7 +171,7 @@ public class EChestFarmer extends Module {
         }
 
         // Place echest if the target pos is empty
-        if (mc.world.getBlockState(target).getMaterial().isReplaceable()) {
+        if (mc.world.getBlockState(target).isReplaceable()) {
             FindItemResult echest = InvUtils.findInHotbar(Items.ENDER_CHEST);
 
             if (!echest.found()) {

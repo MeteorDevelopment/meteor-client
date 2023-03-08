@@ -205,6 +205,6 @@ public class SelfTrap extends Module {
 
 
     private void add(BlockPos blockPos, Block block) {
-        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
+        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).isReplaceable() && mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
     }
 }

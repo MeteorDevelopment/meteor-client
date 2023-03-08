@@ -914,7 +914,7 @@ public class CrystalAura extends Module {
         BlockIterator.register((int) Math.ceil(placeRange.get()), (int) Math.ceil(placeRange.get()), (bp, blockState) -> {
             // Check if its bedrock or obsidian and return if isSupport is false
             boolean hasBlock = blockState.isOf(Blocks.BEDROCK) || blockState.isOf(Blocks.OBSIDIAN);
-            if (!hasBlock && (!isSupport.get() || !blockState.getMaterial().isReplaceable())) return;
+            if (!hasBlock && (!isSupport.get() || !blockState.isReplaceable())) return;
 
             // Check if there is air on top
             blockPos.set(bp.getX(), bp.getY() + 1, bp.getZ());

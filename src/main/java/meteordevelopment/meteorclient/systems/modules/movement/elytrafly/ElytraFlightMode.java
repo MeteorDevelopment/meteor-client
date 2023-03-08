@@ -15,7 +15,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
-import net.minecraft.util.Hand;
 import net.minecraft.util.math.Vec3d;
 
 public class ElytraFlightMode {
@@ -115,17 +114,13 @@ public class ElytraFlightMode {
                 FindItemResult itemResult = InvUtils.findInHotbar(Items.FIREWORK_ROCKET);
                 if (!itemResult.found()) return;
 
-                if (itemResult.isOffhand()) {
-                    mc.interactionManager.interactItem(mc.player, Hand.OFF_HAND);
-                    mc.player.swingHand(Hand.OFF_HAND);
-                } else {
-                    InvUtils.swap(itemResult.slot(), true);
+                InvUtils.swap(itemResult.slot(), true);
 
-                    mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                    mc.player.swingHand(Hand.MAIN_HAND);
+                mc.interactionManager.interactItem(mc.player, itemResult.getHand());
+                mc.player.swingHand(itemResult.getHand());
 
-                    InvUtils.swapBack();
-                }
+                InvUtils.swapBack();
+
             }
             ticksLeft--;
         }

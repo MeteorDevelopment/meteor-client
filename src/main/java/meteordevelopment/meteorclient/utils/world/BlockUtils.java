@@ -67,12 +67,8 @@ public class BlockUtils {
     }
 
     public static boolean place(BlockPos blockPos, FindItemResult findItemResult, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
-        if (findItemResult.isOffhand()) {
-            return place(blockPos, Hand.OFF_HAND, mc.player.getInventory().selectedSlot, rotate, rotationPriority, swingHand, checkEntities, swapBack);
-        } else if (findItemResult.isHotbar()) {
-            return place(blockPos, Hand.MAIN_HAND, findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
-        }
-        return false;
+        if (!findItemResult.isHotbar() && !findItemResult.isOffhand()) return false;
+        return place(blockPos, findItemResult.getHand(), findItemResult.slot(), rotate, rotationPriority, swingHand, checkEntities, swapBack);
     }
 
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
@@ -135,7 +131,7 @@ public class BlockUtils {
         if (!World.isValid(blockPos)) return false;
 
         // Check if current block is replaceable
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
+        if (!mc.world.getBlockState(blockPos).isReplaceable()) return false;
 
         // Check if intersects entities
         return !checkEntities || mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent());
