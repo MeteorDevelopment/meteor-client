@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.commands.Commands;
-import meteordevelopment.meteorclient.systems.commands.commands.SayCommand;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -415,7 +414,7 @@ public class BetterChat extends Module {
             .withFormatting(Formatting.DARK_RED)
             .withClickEvent(new ClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
-                Commands.get().get(SayCommand.class).toString(message)
+                Commands.get().get("say").toString(message)
             ))
             .withHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT,
