@@ -405,6 +405,7 @@ public class MeteorStarscript {
 
     // Returns the ETA in seconds
     private static Value baritoneETA() {
+        if (mc.player == null) return Value.number(0);
         Optional<Double> ticksTillGoal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().estimatedTicksToGoal();
         return ticksTillGoal.map(aDouble -> Value.number(aDouble / 20)).orElseGet(() -> Value.number(0));
     }
