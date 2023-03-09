@@ -13,7 +13,9 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -73,8 +75,11 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
                     clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
                     ci.cancel();
                 } else if (actionType == SlotActionType.SWAP) {
-                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                    ci.cancel();
+                    // clickSlot would call this method again, so we would end up in an infinite loop
+                    if (!SlotUtils.isArmor(button)) {
+                        clickSlot(syncId, SlotUtils.indexToId(button), armorSlot, SlotActionType.SWAP, player); //invert swap
+                        ci.cancel();
+                    }
                 }
             }
         }

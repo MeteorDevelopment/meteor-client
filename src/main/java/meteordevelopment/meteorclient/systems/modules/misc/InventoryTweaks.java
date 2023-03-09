@@ -312,27 +312,29 @@ public class InventoryTweaks extends Module {
     }
 
     private boolean swapArmor() {  // would mixin to use method in ArmorItem, but it's buggy and unreliable on servers
-        if (mc.currentScreen != null) {
-            if (!(mc.currentScreen instanceof InventoryScreen screen)) return false;
-            Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
-            if (focusedSlot == null || !isWearable(focusedSlot.getStack())) return false;
+        int index = -1;
+        ItemStack handStack = null;
 
-            ItemStack itemStack = focusedSlot.getStack();
-            EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
-
-            //the way mojang handles the inventory is awful, and it took me too long to figure this out
-            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(focusedSlot.getIndex()),
-                SlotUtils.ARMOR_START + equipmentSlot.getEntitySlotId(), SlotActionType.SWAP, mc.player);
-
-        } else {
-            ItemStack itemStack = mc.player.getMainHandStack();
-            if (!isWearable(itemStack)) return false;
-            EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(itemStack);
-
-            mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId())),
-                mc.player.getInventory().selectedSlot, SlotActionType.SWAP, mc.player);
-
+        // get slot index and stack
+        if (mc.currentScreen instanceof InventoryScreen screen) {
+            Slot handSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
+            if (handSlot != null) {
+                handStack = handSlot.getStack();
+                index = handSlot.getIndex();
+            }
+        } else if (mc.currentScreen == null) {
+            handStack = mc.player.getMainHandStack();
+            index = mc.player.getInventory().selectedSlot;
         }
+
+        if (handStack == null || !isWearable(handStack)) return false;
+
+        EquipmentSlot equipmentSlot = LivingEntity.getPreferredEquipmentSlot(handStack);
+        int equipmentSlotId = SlotUtils.indexToId(SlotUtils.ARMOR_START + (3 - equipmentSlot.getEntitySlotId()));
+
+        mc.interactionManager.clickSlot(mc.player.currentScreenHandler.syncId, equipmentSlotId, index,
+            SlotActionType.SWAP, mc.player);
+
         return true;
     }
 
