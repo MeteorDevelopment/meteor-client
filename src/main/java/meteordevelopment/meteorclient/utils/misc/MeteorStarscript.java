@@ -123,7 +123,7 @@ public class MeteorStarscript {
             .set("_toString", () -> Value.string(mc.getSession().getUsername()))
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
-            .set("speed", () -> Value.number(Utils.getPlayerSpeed()))
+            .set("speed", () -> Value.number(Utils.getPlayerVelocity().horizontalLength()))
             .set("velocity", new ValueMap()
                 .set("_toString", () -> Value.string(mc.player != null ? Utils.getPlayerVelocity().toString() : ""))
                 .set("x", () -> Value.number(mc.player != null ? Utils.getPlayerVelocity().x : 0))

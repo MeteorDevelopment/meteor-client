@@ -87,19 +87,6 @@ public class Utils {
         }
     }
 
-    public static double getPlayerSpeed() {
-        if (mc.player == null) return 0;
-
-        double tX = Math.abs(mc.player.getX() - mc.player.prevX);
-        double tZ = Math.abs(mc.player.getZ() - mc.player.prevZ);
-        double length = Math.sqrt(tX * tX + tZ * tZ);
-
-        Timer timer = Modules.get().get(Timer.class);
-        if (timer.isActive()) length *= timer.getMultiplier();
-
-        return length * 20;
-    }
-
     // Note: Minecraft "velocity" does not mean the same as velocity in physics
     // Not to be confused with player.getVelocity()
     // This is to calculate the player's speed in each direction
