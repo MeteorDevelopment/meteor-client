@@ -71,8 +71,6 @@ public class Excavator extends Module {
     );
 
     private Status status;
-    private BlockPos start;
-    private BlockPos end;
 
     public Excavator() {
         super(Categories.World, "excavator", "Excavate a selection area.");
@@ -81,8 +79,6 @@ public class Excavator extends Module {
     @Override
     public void onActivate() {
         status = Status.SEL_START;
-        start = null;
-        end = null;
     }
 
     @Override
@@ -116,14 +112,14 @@ public class Excavator extends Module {
         if (!(mc.crosshairTarget instanceof BlockHitResult result)) return;
 
         if (status == Status.SEL_START) {
-            start = result.getBlockPos();
+            BlockPos start = result.getBlockPos();
             status = Status.SEL_END;
             baritone.getCommandManager().execute("sel 1 %d %d %d".formatted(start.getX(), start.getY(), start.getZ()));
             if (logSelection.get()) {
                 info("Start corner set: (%d, %d, %d)".formatted(start.getX(), start.getY(), start.getZ()));
             }
         } else if (status == Status.SEL_END) {
-            end = result.getBlockPos();
+            BlockPos end = result.getBlockPos();
             status = Status.WORKING;
             baritone.getCommandManager().execute("sel 2 %d %d %d".formatted(end.getX(), end.getY(), end.getZ()));
             if (logSelection.get()) {
@@ -144,6 +140,6 @@ public class Excavator extends Module {
     private enum Status {
         SEL_START,
         SEL_END,
-        WORKING,
+        WORKING
     }
 }
