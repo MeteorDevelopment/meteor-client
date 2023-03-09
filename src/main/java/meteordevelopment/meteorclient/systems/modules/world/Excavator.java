@@ -48,6 +48,13 @@ public class Excavator extends Module {
         .build()
     );
 
+    private final Setting<Boolean> keepActive = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-active")
+        .description("Keep the module active after finishing the excavation.")
+        .defaultValue(false)
+        .build()
+    );
+
     // Rendering
     private final Setting<ShapeMode> shapeMode = sgRendering.add(new EnumSetting.Builder<ShapeMode>()
         .name("shape-mode")
@@ -70,15 +77,10 @@ public class Excavator extends Module {
         .build()
     );
 
-    private Status status;
+    private Status status = Status.SEL_START;
 
     public Excavator() {
         super(Categories.World, "excavator", "Excavate a selection area.");
-    }
-
-    @Override
-    public void onActivate() {
-        status = Status.SEL_START;
     }
 
     @Override
@@ -87,6 +89,7 @@ public class Excavator extends Module {
         else baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
 
         if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
+        status = Status.SEL_START;
     }
 
     @EventHandler
@@ -134,7 +137,12 @@ public class Excavator extends Module {
         if (status == Status.SEL_START || status == Status.SEL_END) {
             if (!(mc.crosshairTarget instanceof BlockHitResult result)) return;
             event.renderer.box(result.getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
-        } else if (status == Status.WORKING && !baritone.getBuilderProcess().isActive()) toggle();
+        } else if (status == Status.WORKING && !baritone.getBuilderProcess().isActive()) {
+            if (keepActive.get()) {
+                baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
+                status = Status.SEL_START;
+            } else toggle();
+        }
     }
 
     private enum Status {
