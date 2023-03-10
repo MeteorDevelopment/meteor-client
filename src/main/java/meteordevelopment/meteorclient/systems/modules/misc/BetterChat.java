@@ -74,7 +74,7 @@ public class BetterChat extends Module {
     );
 
     public final Setting<Boolean> antiHistClear = sgGeneral.add(new BoolSetting.Builder()
-        .name("anti-clear")
+        .name("keep-history")
         .description("Prevents the chat history from being cleared when disconnecting.")
         .defaultValue(true)
         .build()
