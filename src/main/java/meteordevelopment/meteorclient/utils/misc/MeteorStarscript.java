@@ -180,6 +180,32 @@ public class MeteorStarscript {
             .set("player_count", () -> Value.number(mc.getNetworkHandler() != null ? mc.getNetworkHandler().getPlayerList().size() : 0))
             .set("difficulty", () -> Value.string(mc.world != null ? mc.world.getDifficulty().getName() : ""))
         );
+
+        // Special characters
+        ss.set("char", new ValueMap()
+            .set("newline", Value.string("\n"))
+            .set("tab", Value.string("\t"))
+            .set("paragraph", Value.string("§"))
+            .set("backspace", Value.string("\b"))
+            .set("zwj", Value.string("\u200d"))
+            .set("zwnj", Value.string("\u200c"))
+            .set("from_code", (ss, argCount) -> {
+                    if (argCount != 1) {
+                        ss.error("from_code() requires 1 argument, got %d.", argCount);
+
+                    }
+                    String character = ss.popString("Argument to from_code() must be a string.");
+                    character = character.toUpperCase();
+                    if (!character.matches("[0-9A-F]+")) {
+                        ss.error("Argument to from_code() must be hex.");
+                    }
+                    if (character.length() % 2 == 1) {
+                        ss.error("Argument to from_code() must be of even length.");
+                    }
+                    int code = Integer.parseInt(character, 16);
+                    return Value.string(Character.toString((char) code));
+            })
+        );
     }
 
     // Helpers
