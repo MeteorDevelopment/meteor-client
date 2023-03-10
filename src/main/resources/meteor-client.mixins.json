@@ -136,7 +136,6 @@
     "RenderLayersMixin",
     "RenderTickCounterMixin",
     "ResourceReloadLoggerAccessor",
-    "RideableMixin",
     "ScreenMixin",
     "SectionedEntityCacheAccessor",
     "ShapeIndexBufferAccessor",

@@ -40,13 +40,6 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> saddleSpoof = sgGeneral.add(new BoolSetting.Builder()
-        .name("saddle-spoof")
-        .description("Allows you to control rideable entities without saddle.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> lockYaw = sgGeneral.add(new BoolSetting.Builder()
         .name("lock-yaw")
         .description("Locks the Entity's yaw.")
@@ -125,7 +118,7 @@ public class EntityControl extends Module {
     private final Setting<Double> fallSpeed = sgFlight.add(new DoubleSetting.Builder()
         .name("fall-speed")
         .description("How fast you will fall in blocks per second.")
-        .defaultValue(0.1)
+        .defaultValue(0.625)
         .min(0)
         .visible(flight::get)
         .build()
@@ -175,10 +168,6 @@ public class EntityControl extends Module {
     public boolean maxJump() {
         if (mc.player.getVehicle() == null) return false;
         return isActive() && entities.get().getBoolean(mc.player.getVehicle().getType()) && maxJump.get();
-    }
-
-    public boolean saddleSpoof(Entity entity) {
-        return isActive() && entities.get().getBoolean(entity.getType()) && saddleSpoof.get();
     }
 
     public boolean cancelBoatPaddle() {
