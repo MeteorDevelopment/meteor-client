@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.mojang.authlib.minecraft.UserApiService;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.resource.ResourceReloadLogger;
+import net.minecraft.client.util.ProfileKeys;
 import net.minecraft.client.util.Session;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -40,4 +42,18 @@ public interface MinecraftClientAccessor {
 
     @Invoker("doAttack")
     boolean leftClick();
+
+    @Mutable
+    @Accessor("profileKeys")
+    void setProfileKeys(ProfileKeys keys);
+
+    @Accessor("userApiService")
+    UserApiService getUserApiService();
+
+    @Mutable
+    @Accessor
+    void setUserApiService(UserApiService apiService);
+
+    @Accessor("session")
+    Session getSession();
 }
