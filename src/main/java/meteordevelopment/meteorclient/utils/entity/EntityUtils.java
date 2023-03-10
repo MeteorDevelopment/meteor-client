@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
 import meteordevelopment.meteorclient.mixin.WorldAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.block.AirBlock;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -27,7 +27,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -38,8 +37,6 @@ import net.minecraft.world.entity.EntityTrackingSection;
 import net.minecraft.world.entity.SectionedEntityCache;
 import net.minecraft.world.entity.SimpleEntityLookup;
 
-import javax.annotation.Nullable;
-import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
@@ -88,6 +85,10 @@ public class EntityUtils {
         }
 
         return false;
+    }
+
+    public static boolean isOnAir(Entity entity) {
+        return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
 
     public static boolean isInRenderDistance(Entity entity) {

@@ -8,16 +8,20 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.VehicleMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.vehicle.BoatEntity;
+import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
 import net.minecraft.util.math.Vec3d;
 
@@ -54,29 +58,30 @@ public class EntityControl extends Module {
         .build()
     );
 
-    private final Setting<Boolean> cancelBoatPaddle = sgGeneral.add(new BoolSetting.Builder()
-        .name("cancel-boat-paddle")
-        .description("Cancels Boat paddle.")
-        .defaultValue(false)
-        .build()
-    );
-
     // Speed
 
-    private final Setting<Boolean> entitySpeed = sgSpeed.add(new BoolSetting.Builder()
-        .name("entity-speed")
+    private final Setting<Boolean> speed = sgSpeed.add(new BoolSetting.Builder()
+        .name("speed")
         .description("Makes you go faster horizontally when riding entities.")
         .defaultValue(false)
         .build()
     );
 
-    private final Setting<Double> speed = sgSpeed.add(new DoubleSetting.Builder()
+    private final Setting<Double> horizontalSpeed = sgSpeed.add(new DoubleSetting.Builder()
         .name("speed")
         .description("Horizontal speed in blocks per second.")
         .defaultValue(10)
         .min(0)
         .sliderMax(50)
-        .visible(entitySpeed::get)
+        .visible(speed::get)
+        .build()
+    );
+
+    private final Setting<Boolean> cancelBoatPaddle = sgSpeed.add(new BoolSetting.Builder()
+        .name("cancel-boat-paddle")
+        .description("Cancels Boat paddle.")
+        .defaultValue(true)
+        .visible(speed::get)
         .build()
     );
 
@@ -84,7 +89,7 @@ public class EntityControl extends Module {
         .name("only-on-ground")
         .description("Use speed only when standing on a block.")
         .defaultValue(false)
-        .visible(entitySpeed::get)
+        .visible(speed::get)
         .build()
     );
 
@@ -92,7 +97,7 @@ public class EntityControl extends Module {
         .name("in-water")
         .description("Use speed only in water.")
         .defaultValue(false)
-        .visible(entitySpeed::get)
+        .visible(speed::get)
         .build()
     );
 
@@ -118,11 +123,32 @@ public class EntityControl extends Module {
     private final Setting<Double> fallSpeed = sgFlight.add(new DoubleSetting.Builder()
         .name("fall-speed")
         .description("How fast you will fall in blocks per second.")
-        .defaultValue(0.625)
+        .defaultValue(0)
         .min(0)
         .visible(flight::get)
         .build()
     );
+
+    private final Setting<Boolean> antiKick = sgFlight.add(new BoolSetting.Builder()
+        .name("anti-kick")
+        .description("Moves down occasionally to prevent floating kicks.")
+        .defaultValue(true)
+        .visible(flight::get)
+        .build()
+    );
+
+    private final Setting<Integer> downDelay = sgFlight.add(new IntSetting.Builder()
+        .name("delay")
+        .description("How often do you move down while flying.")
+        .defaultValue(15)
+        .min(1)
+        .sliderMax(200)
+        .visible(() -> flight.get() && antiKick.get())
+        .build()
+    );
+
+    private double lastPacketY;
+    private int delayLeft;
 
     public EntityControl() {
         super(Categories.Movement, "entity-control", "Gives you more control over rideable entities.");
@@ -138,9 +164,9 @@ public class EntityControl extends Module {
         double velZ = entity.getVelocity().z;
 
         // Horizontal movement
-        if (entitySpeed.get() &&
+        if (speed.get() &&
             (!onlyOnGround.get() || entity.isOnGround()) && (inWater.get() || !entity.isTouchingWater())) {
-                Vec3d vel = PlayerUtils.getHorizontalVelocity(speed.get());
+                Vec3d vel = PlayerUtils.getHorizontalVelocity(horizontalSpeed.get());
                 velX = vel.x;
                 velZ = vel.z;
         }
@@ -165,6 +191,32 @@ public class EntityControl extends Module {
         }
     }
 
+    @EventHandler
+    private void onTick(TickEvent.Post event) {
+        if (delayLeft > 0) delayLeft--;
+    }
+
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (!(event.packet instanceof VehicleMoveC2SPacket packet) || !antiKick.get()) return;
+
+        double currentY = packet.getY();
+        if (delayLeft <= 0 && shouldFlyDown(currentY) && EntityUtils.isOnAir(mc.player.getVehicle())) {
+            // actual check is for >= -0.03125D, but we have to do a bit more than that
+            // due to the fact that it's a bigger or *equal* to, and not just a bigger than
+            ((VehicleMoveC2SPacketAccessor) packet).setY(lastPacketY - 0.03130D);
+            delayLeft = downDelay.get();
+        } else {
+            lastPacketY = currentY;
+        }
+    }
+
+    private boolean shouldFlyDown(double currentY) {
+        if (currentY >= lastPacketY) {
+            return true;
+        } else return lastPacketY - currentY < 0.03130D;
+    }
+
     public boolean maxJump() {
         if (mc.player.getVehicle() == null) return false;
         return isActive() && entities.get().getBoolean(mc.player.getVehicle().getType()) && maxJump.get();
@@ -172,7 +224,7 @@ public class EntityControl extends Module {
 
     public boolean cancelBoatPaddle() {
         if (!(mc.player.getVehicle() instanceof BoatEntity boat)) return false;
-        return isActive() && entities.get().getBoolean(boat.getType()) && cancelBoatPaddle.get();
+        return isActive() && entities.get().getBoolean(boat.getType()) && cancelBoatPaddle.get() && speed.get();
     }
 
     public boolean cancelJump() {
@@ -181,6 +233,6 @@ public class EntityControl extends Module {
     }
 
     public float getSaddledSpeed(float defaultSpeed) {
-        return isActive() && entities.get().getBoolean(mc.player.getVehicle().getType()) && entitySpeed.get() ? speed.get().floatValue() : defaultSpeed;
+        return isActive() && entities.get().getBoolean(mc.player.getVehicle().getType()) && speed.get() ? horizontalSpeed.get().floatValue() : defaultSpeed;
     }
 }
