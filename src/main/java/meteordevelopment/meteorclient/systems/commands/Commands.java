@@ -75,7 +75,7 @@ public class Commands extends System<Commands> {
         add(new RotationCommand());
         add(new WaypointCommand());
         add(new InputCommand());
-
+        add(new RunCommand());
         commands.sort(Comparator.comparing(Command::getName));
     }
 
