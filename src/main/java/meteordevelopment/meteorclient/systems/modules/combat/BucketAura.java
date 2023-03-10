@@ -223,7 +223,7 @@ public class BucketAura extends Module {
         if (placeDelayLeft <= 0) {
             Entity target = findTarget();
             if (target != null) {
-                interact(placePos, placeItem, smashAdjacent.get());
+                interact(placePos, placeItem);
                 placeDelayLeft = placeDelay.get();
             }
         }
@@ -234,7 +234,7 @@ public class BucketAura extends Module {
                 if (!blockState.getFluidState().isStill()) return;
                 if (!canInteractPos(bp.toCenterPos(), false)) return;
 
-                interact(bp.toCenterPos(), InvUtils.findInHotbar(Items.BUCKET), false);
+                interact(bp.toCenterPos(), InvUtils.findInHotbar(Items.BUCKET));
                 collectDelayLeft = collectDelay.get();
             });
         }
@@ -321,12 +321,12 @@ public class BucketAura extends Module {
         return placeItem != null && placeItem.found();
     }
 
-    private void interact(Vec3d pos, FindItemResult item, boolean smash) {
+    private void interact(Vec3d pos, FindItemResult item) {
         if (!item.found()) return;
 
         BlockPos blockPos = new BlockPos(pos);
 
-        if (smash) {
+        if (smashAdjacent.get()) {
             if (mc.world.getBlockState(blockPos).getBlock().getHardness() == 0.0)
                 mc.interactionManager.attackBlock(blockPos, Direction.DOWN);
 
