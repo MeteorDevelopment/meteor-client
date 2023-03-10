@@ -62,27 +62,28 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
+        if (!invTweaks.isActive()) return;
 
-        if (invTweaks.isActive()) {
-            List<InventoryTweaks.Button> buttons = Arrays.stream(invTweaks.buttons)
-                .filter(button -> button.showButton(getScreenHandler()))
-                .toList();
+        List<InventoryTweaks.Button> buttons = Arrays.stream(invTweaks.buttons)
+            .filter(button -> button.showButton(getScreenHandler()))
+            .toList();
 
-            int buttonCount = buttons.size();
-            int buttonWidth = 40;
-            int margin = (backgroundWidth - (buttonCount * buttonWidth)) / (buttonCount + 1);
-            int netButtonWidth = buttonWidth + margin;
-            int xPos = x + margin;
+        int buttonWidth = 40;
+        int buttonHeight = 12;
+        int buttonCount = buttons.size();
 
-            for (InventoryTweaks.Button button : buttons) {
-                addDrawableChild(
-                    new ButtonWidget.Builder(Text.literal(button.buttonName), btn -> button.execute(getScreenHandler()))
-                        .position(xPos, y - 12)
-                        .size(buttonWidth, 12)
-                        .build()
-                );
-                xPos += netButtonWidth;
-            }
+        int margin = (backgroundWidth - (buttonCount * buttonWidth)) / (buttonCount + 1);
+        int xPos = x + margin;
+        int netButtonWidth = buttonWidth + margin;
+
+        for (InventoryTweaks.Button button : buttons) {
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal(button.buttonName), btn -> button.execute(getScreenHandler()))
+                    .position(xPos, y - buttonHeight)
+                    .size(buttonWidth, buttonHeight)
+                    .build()
+            );
+            xPos += netButtonWidth;
         }
     }
 
