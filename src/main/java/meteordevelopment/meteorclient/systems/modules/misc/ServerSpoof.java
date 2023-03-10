@@ -12,7 +12,6 @@ import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
@@ -123,16 +122,9 @@ public class ServerSpoof extends Module {
                 msg.append(".");
                 info(msg);
 
-                if (bogusAccept.get()) {
-                    MeteorExecutor.execute(() -> {
-                        while (true) {
-                            if (mc.getNetworkHandler() == null) continue;
-
-                            mc.getNetworkHandler().sendPacket(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.ACCEPTED));
-                            mc.getNetworkHandler().sendPacket(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
-                            break;
-                        }
-                    });
+                if (bogusAccept.get() && mc.player != null) {
+                     mc.getNetworkHandler().sendPacket(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.ACCEPTED));
+                     mc.getNetworkHandler().sendPacket(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
                 }
             }
         }
