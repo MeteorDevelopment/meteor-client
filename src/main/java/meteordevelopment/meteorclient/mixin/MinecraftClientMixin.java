@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.events.game.WindowResizedEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
+import meteordevelopment.meteorclient.mixininterface.IDisconnectedScreen;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -161,6 +162,14 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
         Utils.frameTime = (time - lastTime) / 1000.0;
         lastTime = time;
+    }
+
+    // Some other mod trying to override tick method
+    @Inject(method = "method_1572", at = @At("HEAD"), remap = false)
+    private void onScreenTick(CallbackInfo ci) {
+        if (currentScreen instanceof IDisconnectedScreen screen) {
+            screen.tickScreen();
+        }
     }
 
     // Interface
