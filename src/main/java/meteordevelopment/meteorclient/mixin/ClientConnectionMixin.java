@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketEncoderException;
-import net.minecraft.network.listener.PacketListener;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -30,9 +29,9 @@ import java.net.InetSocketAddress;
 
 @Mixin(ClientConnection.class)
 public class ClientConnectionMixin {
-    @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
-    private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet)).isCancelled()) info.cancel();
+    @Inject(method = "channelRead0", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/ClientConnection;handlePacket(Lnet/minecraft/network/Packet;Lnet/minecraft/network/listener/PacketListener;)V"), cancellable = true)
+    private void onHandlePacket(ChannelHandlerContext channelHandlerContext, Packet<?> packet, CallbackInfo info) {
+        if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet, (ClientConnection) (Object) this)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "disconnect", at = @At("HEAD"))
@@ -52,12 +51,13 @@ public class ClientConnectionMixin {
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/Packet;)V", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet)).isCancelled()) info.cancel();
+        if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet, (ClientConnection) (Object) this).isCancelled()))
+            info.cancel();
     }
 
     @Inject(method = "send(Lnet/minecraft/network/Packet;)V", at = @At("TAIL"))
     private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
-        MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
+        MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet, (ClientConnection) (Object) this));
     }
 
     @Inject(method = "exceptionCaught", at = @At("HEAD"), cancellable = true)
