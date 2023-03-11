@@ -276,11 +276,8 @@ public class AutoGap extends Module {
     }
 
     private int findSlot() {
-        boolean preferEGap = this.preferEGap.get();
-        if (requiresEGap) preferEGap = true;
-
+        boolean preferEGap = this.preferEGap.get() || requiresEGap;
         int slot = -1;
-        Item currentItem = null;
 
         for (int i = 0; i < 9; i++) {
             // Skip if item stack is empty
@@ -291,34 +288,17 @@ public class AutoGap extends Module {
             if (isNotGapOrEGap(stack)) continue;
             Item item = stack.getItem();
 
-            // If this is the first apple found then set it without looking at preferEGap setting
-            if (currentItem == null) {
+            // If egap was found and preferEGap is true we can return the current slot
+            if (item == Items.ENCHANTED_GOLDEN_APPLE && preferEGap) {
                 slot = i;
-                currentItem = item;
+                break;
             }
-            else {
-                // Skip if current item and item are the same
-                if (currentItem == item) continue;
-
-                // If egap was found and preferEGap is true we can return the current slot
-                if (item == Items.ENCHANTED_GOLDEN_APPLE && preferEGap) {
-                    slot = i;
-                    currentItem = item;
-
-                    break;
-                }
-                // If gap was found and preferEGap is false we can return the current slot
-                else if (item == Items.GOLDEN_APPLE && !preferEGap) {
-                    slot = i;
-                    currentItem = item;
-
-                    break;
-                }
+            // If gap was found and egap is not required we can return the current slot
+            else if (item == Items.GOLDEN_APPLE && !requiresEGap) {
+                slot = i;
+                if (!preferEGap) break;
             }
         }
-
-        // If requiresEGap is true but no egap was found return -1
-        if (requiresEGap && currentItem != Items.ENCHANTED_GOLDEN_APPLE) return -1;
 
         return slot;
     }
