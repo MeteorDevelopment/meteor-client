@@ -25,10 +25,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(DisconnectedScreen.class)
 public abstract class DisconnectedScreenMixin extends Screen implements IDisconnectedScreen {
-    @Shadow private int reasonHeight;
+    @Shadow
+    private int reasonHeight;
 
-    @Unique private ButtonWidget reconnectBtn;
-    @Unique private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
+    @Unique
+    private ButtonWidget reconnectBtn;
+    @Unique
+    private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
     private final AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
 
@@ -66,7 +69,7 @@ public abstract class DisconnectedScreenMixin extends Screen implements IDisconn
     public void tickScreen() {
         if (!autoReconnect.isActive()) return;
         if (time <= 0) {
-            reconnect();
+            if (autoReconnect.autoReconnect.get()) reconnect();
         } else {
             time--;
             if (reconnectBtn != null) ((AbstractButtonWidgetAccessor) reconnectBtn).setText(Text.literal(getText()));
