@@ -40,6 +40,6 @@ public class ContainerButtonWidget extends ButtonWidget {
         drawTexture(matrices, getX() + halfWidth, getY(), 200 - halfWidth, 46 + texY, halfWidth, halfHeight);
         drawTexture(matrices, getX() + halfWidth, getY() + halfHeight, 200 - halfWidth, 46 + texY + 14, halfWidth, halfHeight);
 
-        drawCenteredText(matrices, textRenderer, getMessage(), getX() + width / 2, (getY() + height / 2) - 4, active ? 16777215 : 10526880 | MathHelper.ceil(alpha * 255.0F) << 24);
+        drawCenteredTextWithShadow(matrices, textRenderer, getMessage(), getX() + width / 2, (getY() + height / 2) - 4, active ? 16777215 : 10526880 | MathHelper.ceil(alpha * 255.0F) << 24);
     }
 }

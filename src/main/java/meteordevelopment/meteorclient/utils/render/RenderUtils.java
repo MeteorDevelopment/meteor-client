@@ -51,8 +51,8 @@ public class RenderUtils {
         matrices.push();
         matrices.scale((float) scale, (float) scale, 1);
 
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / scale), (int) (y / scale));
-        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
+        mc.getItemRenderer().renderGuiItemIcon(matrices, itemStack, (int) (x / scale), (int) (y / scale));
+        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(matrices, mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
 
         matrices.pop();
         //RenderSystem.enableDepthTest();

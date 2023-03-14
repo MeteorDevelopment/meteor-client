@@ -39,8 +39,8 @@ public class WItem extends WWidget {
                 matrices.scale((float) s, (float) s, 1);
                 matrices.translate(x / s, y / s, 0);
 
-                mc.getItemRenderer().renderGuiItemIcon(itemStack, 0, 0);
-                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, 0, 0);
+                mc.getItemRenderer().renderGuiItemIcon(matrices, itemStack, 0, 0);
+                mc.getItemRenderer().renderGuiItemOverlay(matrices, mc.textRenderer, itemStack, 0, 0);
 
                 matrices.pop();
             });

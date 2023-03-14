@@ -182,7 +182,7 @@ public class DamageUtils {
     }
 
     private static double normalProtReduction(Entity player, double damage) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.GENERIC);
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().generic());
         if (protLevel > 20) protLevel = 20;
 
         damage *= 1 - (protLevel / 25.0);
@@ -190,7 +190,7 @@ public class DamageUtils {
     }
 
     private static double blastProtReduction(Entity player, double damage, Explosion explosion) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.explosion(explosion));
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().explosion(explosion));
         if (protLevel > 20) protLevel = 20;
 
         damage *= (1 - (protLevel / 25.0));

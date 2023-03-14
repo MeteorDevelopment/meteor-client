@@ -16,7 +16,7 @@ import net.minecraft.block.ShapeContext;
 import net.minecraft.block.SkullBlock;
 import net.minecraft.client.render.OverlayTexture;
 import net.minecraft.client.render.model.BakedModel;
-import net.minecraft.client.render.model.json.ModelTransformation;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.item.AliasedBlockItem;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -141,7 +141,7 @@ public class ItemPhysics extends Module {
                 }
             }
 
-            event.itemRenderer.renderItem(itemStack, ModelTransformation.Mode.GROUND, false, event.matrixStack, event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV, bakedModel);
+            event.itemRenderer.renderItem(itemStack, ModelTransformationMode.GROUND, false, event.matrixStack, event.vertexConsumerProvider, event.light, OverlayTexture.DEFAULT_UV, bakedModel);
 
             event.matrixStack.pop();
 
