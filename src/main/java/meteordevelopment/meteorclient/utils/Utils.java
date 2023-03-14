@@ -95,7 +95,7 @@ public class Utils {
         double length = Math.sqrt(tX * tX + tZ * tZ);
 
         Timer timer = Modules.get().get(Timer.class);
-        if (timer.isActive()) length *= Modules.get().get(Timer.class).getMultiplier();
+        if (timer.isActive()) length *= timer.getMultiplier();
 
         return length * 20;
     }
