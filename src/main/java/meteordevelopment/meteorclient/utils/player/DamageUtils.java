@@ -164,9 +164,9 @@ public class DamageUtils {
     // Anchor damage
 
     public static double anchorDamage(LivingEntity player, Vec3d anchor) {
-        mc.world.removeBlock(new BlockPos(anchor), false);
+        mc.world.removeBlock(BlockPos.ofFloored(anchor), false);
         double damage = bedDamage(player, anchor);
-        mc.world.setBlockState(new BlockPos(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
+        mc.world.setBlockState(BlockPos.ofFloored(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
         return damage;
     }
 
@@ -269,7 +269,7 @@ public class DamageUtils {
             return d <= e ? blockHitResult : blockHitResult2;
         }, (raycastContext) -> {
             Vec3d vec3d = raycastContext.getStart().subtract(raycastContext.getEnd());
-            return BlockHitResult.createMissed(raycastContext.getEnd(), Direction.getFacing(vec3d.x, vec3d.y, vec3d.z), new BlockPos(raycastContext.getEnd()));
+            return BlockHitResult.createMissed(raycastContext.getEnd(), Direction.getFacing(vec3d.x, vec3d.y, vec3d.z), BlockPos.ofFloored(raycastContext.getEnd()));
         });
     }
 }

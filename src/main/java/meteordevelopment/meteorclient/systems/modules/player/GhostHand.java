@@ -32,7 +32,7 @@ public class GhostHand extends Module {
         if (!mc.options.useKey.isPressed() || mc.player.isSneaking()) return;
 
         for (BlockEntity blockEntity : Utils.blockEntities()) {
-            if (new BlockPos(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos()).equals(blockEntity.getPos())) return;
+            if (BlockPos.ofFloored(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos()).equals(blockEntity.getPos())) return;
         }
 
         Vec3d direction = new Vec3d(0, 0, 0.1)
@@ -42,7 +42,7 @@ public class GhostHand extends Module {
         posList.clear();
 
         for (int i = 1; i < mc.interactionManager.getReachDistance() * 10; i++) {
-            BlockPos pos = new BlockPos(mc.player.getCameraPosVec(mc.getTickDelta()).add(direction.multiply(i)));
+            BlockPos pos = BlockPos.ofFloored(mc.player.getCameraPosVec(mc.getTickDelta()).add(direction.multiply(i)));
 
             if (posList.contains(pos)) continue;
             posList.add(pos);
