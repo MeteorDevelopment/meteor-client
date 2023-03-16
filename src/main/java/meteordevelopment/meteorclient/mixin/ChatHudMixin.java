@@ -102,6 +102,14 @@ public abstract class ChatHudMixin implements IChatHud {
         return list.size();
     }
 
+    @Inject(method = "clear(Z)V", at = @At("HEAD"), cancellable = true)
+    private void onClear(CallbackInfo info) {
+        BetterChat betterChat = Modules.get().get(BetterChat.class);
+        if (betterChat.antiHistClear.get()) {
+            info.cancel();
+        }
+    }
+
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int currentTick, int mouseX, int mouseY, CallbackInfo info) {
         if (!Modules.get().get(BetterChat.class).displayPlayerHeads()) return;
