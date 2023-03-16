@@ -87,10 +87,7 @@ public class Utils {
         }
     }
 
-    // Note: Minecraft "velocity" does not mean the same as velocity in physics
-    // Not to be confused with player.getVelocity()
-    // This is to calculate the player's speed in each direction
-    public static Vec3d getPlayerVelocity() {
+    public static Vec3d getPlayerSpeed() {
         if (mc.player == null) return Vec3d.ZERO;
 
         double tX = mc.player.getX() - mc.player.prevX;
@@ -103,6 +100,7 @@ public class Utils {
             tY *= timer.getMultiplier();
             tZ *= timer.getMultiplier();
         }
+        
         tX *= 20;
         tY *= 20;
         tZ *= 20;
