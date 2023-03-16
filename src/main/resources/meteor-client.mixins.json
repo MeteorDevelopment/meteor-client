@@ -149,6 +149,7 @@
     "SplashTextResourceSupplierMixin",
     "StatusEffectInstanceAccessor",
     "StatusEffectInstanceMixin",
+    "StringHelperMixin",
     "SweetBerryBushBlockMixin",
     "TextHandlerAccessor",
     "TextRendererMixin",
