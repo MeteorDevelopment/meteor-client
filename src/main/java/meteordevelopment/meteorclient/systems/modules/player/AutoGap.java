@@ -278,7 +278,7 @@ public class AutoGap extends Module {
     }
 
     private int findSlot() {
-        boolean preferEGap = this.preferEGap.get() || requiresEGap;
+        boolean preferEGap = this.allowEgap.get() || requiresEGap;
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
