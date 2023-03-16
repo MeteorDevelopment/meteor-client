@@ -149,7 +149,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
                 ChatUtils.error(e.getMessage());
             }
 
-           client.inGameHud.getChatHud().addToMessageHistory(message);
+            client.inGameHud.getChatHud().addToMessageHistory(message);
             ci.cancel();
         }
     }

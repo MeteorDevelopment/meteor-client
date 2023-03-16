@@ -59,7 +59,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     @Inject(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"), cancellable = true)
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
         SpeedMine module = Modules.get().get(SpeedMine.class);
-        if (!module.isActive() || module.mode.get() != SpeedMine.Mode.Normal) return;
+        if (!module.isActive() || !module.filter(block.getBlock()) || module.mode.get() != SpeedMine.Mode.Normal) return;
         float breakSpeed = cir.getReturnValue();
         float breakSpeedMod = (float) (breakSpeed * module.modifier.get());
 

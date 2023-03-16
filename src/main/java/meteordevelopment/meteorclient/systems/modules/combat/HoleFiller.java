@@ -227,7 +227,6 @@ public class HoleFiller extends Module {
 
     private final BlockPos.Mutable testPos = new BlockPos.Mutable();
     private final Box box = new Box(0, 0, 0, 0, 0, 0);
-    private Vec3d testVec;
     private int timer;
 
     public HoleFiller() {
@@ -283,18 +282,15 @@ public class HoleFiller extends Module {
         });
 
         BlockIterator.after(() -> {
-            if (timer <= 0 && !holes.isEmpty()) {
-                int bpt = 0;
+            if (timer > 0 || holes.isEmpty()) return;
 
-                for (Hole hole : holes) {
-                    if (bpt >= blocksPerTick.get()) continue;
-                    if (BlockUtils.place(hole.blockPos, block, rotate.get(), 10, swing.get(), true)) {
-                        bpt++;
-                    }
-                }
-
-                timer = placeDelay.get();
+            int bpt = 0;
+            for (Hole hole : holes) {
+                if (bpt >= blocksPerTick.get()) continue;
+                if (BlockUtils.place(hole.blockPos, block, rotate.get(), 10, swing.get(), true)) bpt++;
             }
+
+            timer = placeDelay.get();
         });
 
         timer--;
@@ -331,42 +327,30 @@ public class HoleFiller extends Module {
         testPos.add(0, -1, 0);
 
         ((IBox) box).set(pos);
-        if (!mc.world.getOtherEntities(null, box, entity -> entity instanceof PlayerEntity
-            || entity instanceof TntEntity || entity instanceof EndCrystalEntity).isEmpty()) return false;
+        if (!mc.world.getOtherEntities(null, box, entity
+            -> entity instanceof PlayerEntity
+            || entity instanceof TntEntity
+            || entity instanceof EndCrystalEntity).isEmpty()) return false;
 
         if (!smart.get() || forceFill.get().isPressed()) return true;
 
-        boolean validHole = false;
-        for (PlayerEntity target : targets) {
-            if (target.getY() > testPos.getY() && (distance(target, testPos, true) < feetRange.get())) {
-                validHole = true;
-                break;
-            }
-        }
-
-        return validHole;
+        return targets.stream().anyMatch(target
+            -> target.getY() > testPos.getY()
+            && (distance(target, testPos, true) < feetRange.get()));
     }
 
     private void setTargets() {
         targets.clear();
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.distanceTo(mc.player) > targetRange.get()) continue;
-
-            if (player.isCreative() || player == mc.player
-                || player.isDead() || !Friends.get().shouldAttack(player)
-                || (isSurrounded(player) && ignoreSafe.get())
+            if (player.distanceTo(mc.player) > targetRange.get() ||
+                player.isCreative() ||
+                player == mc.player ||
+                player.isDead() ||
+                !Friends.get().shouldAttack(player) ||
+                (ignoreSafe.get() && isSurrounded(player)) ||
+                (onlyMoving.get() && (player.getX() - player.prevX != 0 || player.getY() - player.prevY != 0 || player.getZ() - player.prevZ != 0))
             ) continue;
-
-            if (onlyMoving.get()) {
-                if (player.getX() - player.prevX != 0) continue;
-                if (player.getY() - player.prevY != 0) continue;
-                if (player.getZ() - player.prevZ != 0) continue;
-            }
-
-            if (ignoreSafe.get()) {
-                if (isSurrounded(player)) continue;
-            }
 
             targets.add(player);
         }
@@ -378,17 +362,18 @@ public class HoleFiller extends Module {
 
             testPos.set(target.getBlockPos().offset(dir));
             Block block = mc.world.getBlockState(testPos).getBlock();
-            if (block != Blocks.OBSIDIAN && block != Blocks.BEDROCK && block != Blocks.RESPAWN_ANCHOR
-                && block != Blocks.CRYING_OBSIDIAN && block != Blocks.NETHERITE_BLOCK) {
-                return false;
-            }
+            if (block != Blocks.OBSIDIAN &&
+                block != Blocks.BEDROCK &&
+                block != Blocks.RESPAWN_ANCHOR &&
+                block != Blocks.CRYING_OBSIDIAN &&
+                block != Blocks.NETHERITE_BLOCK) return false;
         }
 
         return true;
     }
 
     private double distance(PlayerEntity player, BlockPos pos, boolean feet) {
-        testVec = player.getPos();
+        Vec3d testVec = player.getPos();
         if (!feet) testVec.add(0, player.getEyeHeight(mc.player.getPose()), 0);
 
         else if (predict.get()) {
@@ -403,12 +388,12 @@ public class HoleFiller extends Module {
         double j = testVec.y - (pos.getY() + ((feet) ? 1 : 0.5));
         double k = testVec.z - (pos.getZ() + 0.5);
 
-        return (Math.sqrt(i * i + j * j + k * k));
+        return Math.sqrt(i * i + j * j + k * k);
     }
 
     private static class Hole {
-        public BlockPos.Mutable blockPos = new BlockPos.Mutable();
-        public byte exclude;
+        private final BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        private final byte exclude;
 
         public Hole(BlockPos blockPos, byte exclude) {
             this.blockPos.set(blockPos);

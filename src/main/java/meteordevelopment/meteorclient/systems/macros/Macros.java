@@ -37,6 +37,14 @@ public class Macros extends System<Macros> implements Iterable<Macro> {
         save();
     }
 
+    public Macro get(String name) {
+        for (Macro macro : macros) {
+            if (macro.name.get().equalsIgnoreCase(name)) return macro;
+        }
+
+        return null;
+    }
+
     public List<Macro> getAll() {
         return macros;
     }

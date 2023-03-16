@@ -31,7 +31,6 @@ public class NotebotSongArgumentType implements ArgumentType<Path> {
     public Path parse(StringReader reader) throws CommandSyntaxException {
         final String text = reader.getRemaining();
         reader.setCursor(reader.getTotalLength());
-        System.out.println("READER: " + text);
         return MeteorClient.FOLDER.toPath().resolve("notebot/" + text);
     }
 

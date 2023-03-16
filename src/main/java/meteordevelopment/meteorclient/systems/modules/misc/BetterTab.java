@@ -96,7 +96,7 @@ public class BetterTab extends Module {
                 if (format.isColor()) nameString = nameString.replace(format.toString(), "");
             }
 
-            name = Text.literal(nameString).setStyle(name.getStyle().withColor(new TextColor(color.getPacked())));
+            name = Text.literal(nameString).setStyle(name.getStyle().withColor(TextColor.fromRgb(color.getPacked())));
         }
 
         if (gamemode.get()) {
