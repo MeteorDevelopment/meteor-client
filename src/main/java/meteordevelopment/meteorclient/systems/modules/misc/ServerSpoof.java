@@ -51,8 +51,8 @@ public class ServerSpoof extends Module {
         .build()
     );
 
-    private final Setting<Boolean> bogusAccept = sgGeneral.add(new BoolSetting.Builder()
-        .name("bogus-accept")
+    private final Setting<Boolean> fakeAccept = sgGeneral.add(new BoolSetting.Builder()
+        .name("fake-accept")
         .description("Send fake packets to server that you accepted the resource pack.")
         .defaultValue(false)
         .visible(resourcePack::get)
@@ -120,7 +120,7 @@ public class ServerSpoof extends Module {
             msg.append(".");
             info(msg);
 
-            if (bogusAccept.get()) {
+            if (fakeAccept.get()) {
                 event.connection.send(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.ACCEPTED));
                 event.connection.send(new ResourcePackStatusC2SPacket(ResourcePackStatusC2SPacket.Status.SUCCESSFULLY_LOADED));
             }
