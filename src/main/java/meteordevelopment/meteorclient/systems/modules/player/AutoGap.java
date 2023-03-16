@@ -42,9 +42,9 @@ public class AutoGap extends Module {
 
     // General
 
-    private final Setting<Boolean> preferEGap = sgGeneral.add(new BoolSetting.Builder()
-            .name("prefer-egap")
-            .description("Prefers to eat E-Gap over Gaps if found.")
+    private final Setting<Boolean> allowEgap = sgGeneral.add(new BoolSetting.Builder()
+            .name("allow-egap")
+            .description("Allow eating E-Gaps over Gaps if found.")
             .defaultValue(true)
             .build()
     );
@@ -83,6 +83,7 @@ public class AutoGap extends Module {
             .name("potions-fire-resistance")
             .description("If it should eat when Fire Resistance runs out. Requires E-Gaps.")
             .defaultValue(true)
+            .visible(allowEgap::get)
             .build()
     );
 
@@ -90,6 +91,7 @@ public class AutoGap extends Module {
             .name("potions-absorption")
             .description("If it should eat when Resistance runs out. Requires E-Gaps.")
             .defaultValue(false)
+            .visible(allowEgap::get)
             .build()
     );
 
