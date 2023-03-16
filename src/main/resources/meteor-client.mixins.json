@@ -127,6 +127,7 @@
     "PlayerMoveC2SPacketAccessor",
     "PlayerMoveC2SPacketMixin",
     "PlayerPositionLookS2CPacketAccessor",
+    "PlayerSkinProviderAccessor",
     "PowderSnowBlockMixin",
     "ProjectileEntityAccessor",
     "ProjectileInGroundAccessor",
@@ -162,7 +163,8 @@
     "WorldBorderMixin",
     "WorldChunkMixin",
     "WorldRendererAccessor",
-    "WorldRendererMixin"
+    "WorldRendererMixin",
+    "YggdrasilMinecraftSessionServiceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1

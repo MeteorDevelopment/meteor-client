@@ -6,16 +6,21 @@
 package meteordevelopment.meteorclient.systems.accounts;
 
 import com.mojang.authlib.exceptions.AuthenticationException;
-import com.mojang.authlib.yggdrasil.YggdrasilEnvironment;
-import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilUserApiService;
-import meteordevelopment.meteorclient.MeteorClient;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
+import net.minecraft.client.network.SocialInteractionsManager;
+import net.minecraft.client.report.AbuseReportContext;
+import net.minecraft.client.report.ReporterEnvironment;
+import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.ProfileKeys;
 import net.minecraft.client.util.Session;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.network.encryption.SignatureVerifier;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -34,10 +39,8 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public abstract boolean fetchInfo();
 
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
-        AccountUtils.setBaseUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/");
-        AccountUtils.setJoinUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/join");
-        AccountUtils.setCheckUrl(service, YggdrasilEnvironment.PROD.getEnvironment().getSessionHost() + "/session/minecraft/hasJoined");
+        YggdrasilAuthenticationService authenticationService = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy());
+        applyLoginEnvironment(authenticationService, authenticationService.createMinecraftSessionService());
 
         return true;
     }
@@ -55,19 +58,28 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         return cache;
     }
 
-    protected void setSession(Session session) {
+    public static void setSession(Session session) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
-
         mca.setSession(session);
         mc.getSessionProperties().clear();
-
+        UserApiService apiService;
         try {
-            mca.setUserApiService(new YggdrasilUserApiService(mca.getSession().getAccessToken(), mc.getNetworkProxy(), YggdrasilEnvironment.PROD.getEnvironment()));
-            mca.setProfileKeys(ProfileKeys.create(mca.getUserApiService(), mca.getSession(), mc.runDirectory.toPath()));
+            apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
         } catch (AuthenticationException e) {
-            e.printStackTrace();
-            MeteorClient.LOG.error("Failed to log into the new account. Try again, or restart your game.");
+            apiService = UserApiService.OFFLINE;
         }
+        mca.setUserApiService(apiService);
+        mca.setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
+        mca.setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
+        mca.setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
+    }
+
+    public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
+        MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
+        mca.setAuthenticationService(authService);
+        mca.setServicesSignatureVerifier(SignatureVerifier.create(authService.getServicesKey()));
+        mca.setSessionService(sessService);
+        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir(), sessService));
     }
 
     @Override
