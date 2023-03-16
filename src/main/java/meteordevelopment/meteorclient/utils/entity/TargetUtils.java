@@ -101,6 +101,6 @@ public class TargetUtils {
         double e1pitch = Math.abs(Rotations.getPitch(e1) - mc.player.getPitch());
         double e2pitch = Math.abs(Rotations.getPitch(e2) - mc.player.getPitch());
 
-        return Double.compare(Math.sqrt(e1yaw * e1yaw + e1pitch * e1pitch), Math.sqrt(e2yaw * e2yaw + e2pitch * e2pitch));
+        return Double.compare(e1yaw * e1yaw + e1pitch * e1pitch, e2yaw * e2yaw + e2pitch * e2pitch);
     }
 }
