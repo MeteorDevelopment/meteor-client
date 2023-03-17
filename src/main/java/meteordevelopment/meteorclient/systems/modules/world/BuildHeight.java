@@ -21,8 +21,9 @@ public class BuildHeight extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerInteractBlockC2SPacket p)) return;
-
-        if (p.getBlockHitResult().getPos().y >= 255 && p.getBlockHitResult().getSide() == Direction.UP) {
+        
+        int maxheight = (mc.world.getDimension().height() > 256) ? 319 : 255;
+        if (p.getBlockHitResult().getPos().y >= maxheight && p.getBlockHitResult().getSide() == Direction.UP) {
             ((BlockHitResultAccessor) p.getBlockHitResult()).setSide(Direction.DOWN);
         }
     }
