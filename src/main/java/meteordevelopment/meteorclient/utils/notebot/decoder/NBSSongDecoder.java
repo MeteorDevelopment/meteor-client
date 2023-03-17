@@ -7,10 +7,10 @@ package meteordevelopment.meteorclient.utils.notebot.decoder;
 
 import com.google.common.collect.Multimap;
 import com.google.common.collect.MultimapBuilder;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import net.minecraft.block.enums.Instrument;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
@@ -31,109 +31,89 @@ public class NBSSongDecoder extends SongDecoder {
      * @return Song object representing a Note Block Studio project
      */
     @Override
-    public Song parse(File songFile) {
-        try {
-            return parse(new FileInputStream(songFile), songFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
-
-    /**
-     * Parses a Song from an InputStream
-     * @see Song
-     * @param inputStream of a Note Block Studio project file (.nbs)
-     * @return Song object from the InputStream
-     */
-    public Song parse(InputStream inputStream) {
-        return parse(inputStream, null); // Source is unknown -> no file
+    @NotNull
+    public Song parse(File songFile) throws Exception {
+        return parse(new FileInputStream(songFile));
     }
 
     /**
      * Parses a Song from an InputStream and a Note Block Studio project file (.nbs)
      * @see Song
      * @param inputStream of a .nbs file
-     * @param songFile representing a .nbs file
      * @return Song object representing the given .nbs file
      */
-    private Song parse(InputStream inputStream, File songFile) {
+    @NotNull
+    private Song parse(InputStream inputStream) throws Exception {
         Multimap<Integer, Note> notesMap = MultimapBuilder.linkedHashKeys().arrayListValues().build();
 
-        try {
-            DataInputStream dataInputStream = new DataInputStream(inputStream);
-            short length = readShort(dataInputStream);
-            int nbsversion = 0;
-            if (length == 0) {
-                nbsversion = dataInputStream.readByte();
-                dataInputStream.readByte(); // first custom instrument
-                if (nbsversion >= 3) {
-                    length = readShort(dataInputStream);
-                }
+        DataInputStream dataInputStream = new DataInputStream(inputStream);
+        short length = readShort(dataInputStream);
+        int nbsversion = 0;
+        if (length == 0) {
+            nbsversion = dataInputStream.readByte();
+            dataInputStream.readByte(); // first custom instrument
+            if (nbsversion >= 3) {
+                length = readShort(dataInputStream);
             }
-            readShort(dataInputStream); // Song Height
-            String title = readString(dataInputStream);
-            String author = readString(dataInputStream);
-            readString(dataInputStream); // original author
-            readString(dataInputStream); // description
-            float speed = readShort(dataInputStream) / 100f;
-            dataInputStream.readBoolean(); // auto-save
-            dataInputStream.readByte(); // auto-save duration
-            dataInputStream.readByte(); // x/4ths, time signature
-            readInt(dataInputStream); // minutes spent on project
-            readInt(dataInputStream); // left clicks (why?)
-            readInt(dataInputStream); // right clicks (why?)
-            readInt(dataInputStream); // blocks added
-            readInt(dataInputStream); // blocks removed
-            readString(dataInputStream); // .mid/.schematic file name
-            if (nbsversion >= 4) {
-                dataInputStream.readByte(); // loop on/off
-                dataInputStream.readByte(); // max loop count
-                readShort(dataInputStream); // loop start tick
-            }
+        }
+        readShort(dataInputStream); // Song Height
+        String title = readString(dataInputStream);
+        String author = readString(dataInputStream);
+        readString(dataInputStream); // original author
+        readString(dataInputStream); // description
+        float speed = readShort(dataInputStream) / 100f;
+        dataInputStream.readBoolean(); // auto-save
+        dataInputStream.readByte(); // auto-save duration
+        dataInputStream.readByte(); // x/4ths, time signature
+        readInt(dataInputStream); // minutes spent on project
+        readInt(dataInputStream); // left clicks (why?)
+        readInt(dataInputStream); // right clicks (why?)
+        readInt(dataInputStream); // blocks added
+        readInt(dataInputStream); // blocks removed
+        readString(dataInputStream); // .mid/.schematic file name
+        if (nbsversion >= 4) {
+            dataInputStream.readByte(); // loop on/off
+            dataInputStream.readByte(); // max loop count
+            readShort(dataInputStream); // loop start tick
+        }
 
-            double tick = -1;
+        double tick = -1;
+        while (true) {
+            short jumpTicks = readShort(dataInputStream); // jumps till next tick
+            //System.out.println("Jumps to next tick: " + jumpTicks);
+            if (jumpTicks == 0) {
+                break;
+            }
+            tick += jumpTicks * (20f / speed);
+            //System.out.println("Tick: " + tick);
+            short layer = -1;
             while (true) {
-                short jumpTicks = readShort(dataInputStream); // jumps till next tick
-                //System.out.println("Jumps to next tick: " + jumpTicks);
-                if (jumpTicks == 0) {
+                short jumpLayers = readShort(dataInputStream); // jumps till next layer
+                if (jumpLayers == 0) {
                     break;
                 }
-                tick += jumpTicks * (20f / speed);
-                //System.out.println("Tick: " + tick);
-                short layer = -1;
-                while (true) {
-                    short jumpLayers = readShort(dataInputStream); // jumps till next layer
-                    if (jumpLayers == 0) {
-                        break;
-                    }
-                    layer += jumpLayers;
-                    //System.out.println("Layer: " + layer);
-                    byte instrument = dataInputStream.readByte();
+                layer += jumpLayers;
+                //System.out.println("Layer: " + layer);
+                byte instrument = dataInputStream.readByte();
 
-                    byte key = dataInputStream.readByte();
-                    if (nbsversion >= 4) {
-                        dataInputStream.readByte(); // note block velocity
-                        dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
-                        readShort(dataInputStream); // note block pitch
-                    }
-
-                    Note note = new Note(fromNBSInstrument(instrument) /* instrument */, key - NOTE_OFFSET /* note */);
-                    setNote((int) Math.round(tick), note, notesMap);
+                byte key = dataInputStream.readByte();
+                if (nbsversion >= 4) {
+                    dataInputStream.readUnsignedByte(); // note block velocity
+                    dataInputStream.readUnsignedByte(); // note panning, 0 is right in nbs format
+                    readShort(dataInputStream); // note block pitch
                 }
-            }
 
-            return new Song(notesMap, title, author);
-        } catch (EOFException e) {
-            String file = "";
-            if (songFile != null) {
-                file = songFile.getName();
+                Instrument inst = fromNBSInstrument(instrument);
+
+                // Probably a custom instrument. Ignore this note
+                if (inst == null) continue;
+
+                Note note = new Note(inst /* instrument */, key - NOTE_OFFSET /* note */);
+                setNote((int) Math.round(tick), note, notesMap);
             }
-            MeteorClient.LOG.error("Song is corrupted: " + file, e);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
-        return null;
+
+        return new Song(notesMap, title, author);
     }
 
     /**
