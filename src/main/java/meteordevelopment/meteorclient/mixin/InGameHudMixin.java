@@ -64,12 +64,12 @@ public abstract class InGameHudMixin {
 
     @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/Identifier;F)V", ordinal = 0))
     private void onRenderPumpkinOverlay(Args args) {
-        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(1, 0f);
+        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(2, 0f);
     }
 
     @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/Identifier;F)V", ordinal = 1))
     private void onRenderPowderedSnowOverlay(Args args) {
-        if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(1, 0f);
+        if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(2, 0f);
     }
 
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)

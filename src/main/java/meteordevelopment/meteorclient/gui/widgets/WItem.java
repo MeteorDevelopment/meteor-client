@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.widgets;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
