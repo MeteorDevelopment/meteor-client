@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.events.packets;
 
 import meteordevelopment.meteorclient.events.Cancellable;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 
 public class PacketEvent extends Cancellable {
     public Packet<?> packet;

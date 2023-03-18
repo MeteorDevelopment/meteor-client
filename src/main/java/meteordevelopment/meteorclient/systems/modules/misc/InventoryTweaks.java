@@ -32,7 +32,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Wearable;
+import net.minecraft.item.Equipment;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -339,7 +339,7 @@ public class InventoryTweaks extends Module {
     private boolean isWearable(ItemStack itemStack) {
         Item item = itemStack.getItem();
 
-        if (item instanceof Wearable) return true;
+        if (item instanceof Equipment) return true;
         return item instanceof BlockItem blockItem &&
             (blockItem.getBlock() instanceof AbstractSkullBlock || blockItem.getBlock() instanceof CarvedPumpkinBlock);
     }

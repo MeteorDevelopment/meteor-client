@@ -240,7 +240,7 @@ public class Scaffold extends Module {
             List<BlockPos> blocks = new ArrayList<>();
             for (int x = (int) (mc.player.getX() - radius.get()); x < mc.player.getX() + radius.get(); x++) {
                 for (int z = (int) (mc.player.getZ() - radius.get()); z < mc.player.getZ() + radius.get(); z++) {
-                    blocks.add(new BlockPos(x, mc.player.getY() - 0.5, z));
+                    blocks.add(BlockPos.ofFloored(x, mc.player.getY() - 0.5, z));
                 }
             }
 

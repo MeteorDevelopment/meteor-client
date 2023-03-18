@@ -47,10 +47,10 @@ public class BannerTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
         DiffuseLighting.disableGuiDepthLighting();
         matrices.push();
-        matrices.translate(x + 8, y + 8, z);
+        matrices.translate(x + 8, y + 8, 0);
 
         matrices.push();
         matrices.translate(0.5, 16, 0);
