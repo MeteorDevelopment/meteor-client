@@ -117,7 +117,7 @@ public class MicrosoftLogin {
         }
     }
 
-    private static void stopServer() {
+    public static void stopServer() {
         if (server == null) return;
 
         server.stop(0);
