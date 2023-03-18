@@ -96,11 +96,6 @@ public abstract class GameRendererMixin {
         return entity.raycast(maxDistance, tickDelta, includeFluids);
     }
 
-    @Inject(method = "tiltViewWhenHurt", at = @At("HEAD"), cancellable = true)
-    private void onTiltViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noHurtCam()) info.cancel();
-    }
-
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
     private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
         if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
