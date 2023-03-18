@@ -81,7 +81,7 @@ public class InventoryHud extends HudElement {
             drawBackground(renderer, (int) x, (int) y, drawColor);
         }
 
-        if (mc.player != null) {
+        renderer.post(() -> {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
                     int index = row * 9 + i;
@@ -94,7 +94,7 @@ public class InventoryHud extends HudElement {
                     RenderUtils.drawItem(stack, itemX, itemY, scale.get(), true);
                 }
             }
-        }
+        });
     }
 
     private void drawBackground(HudRenderer renderer, int x, int y, Color color) {

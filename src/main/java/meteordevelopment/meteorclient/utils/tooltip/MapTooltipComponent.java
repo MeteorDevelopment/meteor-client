@@ -47,12 +47,12 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
         double scale = Modules.get().get(BetterTooltips.class).mapsScale.get();
 
         // Background
         matrices.push();
-        matrices.translate(x, y, z);
+        matrices.translate(x, y, 0);
         matrices.scale((float) (scale) * 2, (float) (scale) * 2, 0);
         matrices.scale((64 + 8) / 64f, (64 + 8) / 64f, 0);
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
@@ -65,7 +65,7 @@ public class MapTooltipComponent implements TooltipComponent, MeteorTooltipData 
         MapState mapState = FilledMapItem.getMapState(this.mapId, mc.world);
         if (mapState == null) return;
         matrices.push();
-        matrices.translate(x, y, z);
+        matrices.translate(x, y, 0);
         matrices.scale((float) scale, (float) scale, 0);
         matrices.translate(8, 8, 0);
         mc.gameRenderer.getMapRenderer().draw(matrices, consumer, this.mapId, mapState, false, 0xF000F0);

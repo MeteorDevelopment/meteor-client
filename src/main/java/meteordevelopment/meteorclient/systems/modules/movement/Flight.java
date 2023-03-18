@@ -22,7 +22,7 @@ import net.minecraft.util.math.Vec3d;
 public class Flight extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgAntiKick = settings.createGroup("Anti Kick"); //Pog
-    
+
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("The mode for Flight.")
@@ -33,6 +33,7 @@ public class Flight extends Module {
         })
         .build()
     );
+
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
         .name("speed")
         .description("Your speed when flying.")
@@ -40,18 +41,21 @@ public class Flight extends Module {
         .min(0.0)
         .build()
     );
+
     private final Setting<Boolean> verticalSpeedMatch = sgGeneral.add(new BoolSetting.Builder()
         .name("vertical-speed-match")
         .description("Matches your vertical speed to your horizontal speed, otherwise uses vanilla ratio.")
         .defaultValue(false)
         .build()
     );
+
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
         .description("The mode for anti kick.")
         .defaultValue(AntiKickMode.Packet)
         .build()
     );
+
     private final Setting<Integer> delay = sgAntiKick.add(new IntSetting.Builder()
         .name("delay")
         .description("The amount of delay, in ticks, between flying down a bit and return to original position")
@@ -70,7 +74,7 @@ public class Flight extends Module {
         .sliderRange(1, 20)
         .build()
     );
-    
+
     private int delayLeft = delay.get();
     private int offLeft = offTime.get();
     private boolean flip;
@@ -141,13 +145,9 @@ public class Flight extends Module {
 
         switch (mode.get()) {
             case Velocity -> {
-
-                 /*TODO: deal with underwater movement, find a way to "spoof" not being in water
-                also, all of the multiplication below is to get the speed to roughly match the speed
-                you get when using vanilla fly*/
+                // TODO: deal with underwater movement, find a way to "spoof" not being in water
 
                 mc.player.getAbilities().flying = false;
-                mc.player.airStrafingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();
                 if (mc.options.jumpKey.isPressed())
@@ -230,6 +230,13 @@ public class Flight extends Module {
     // Copied from ServerPlayNetworkHandler#isEntityOnAir
     private boolean isEntityOnAir(Entity entity) {
         return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
+    }
+
+    public float getOffGroundSpeed() {
+        // All the multiplication below is to get the speed to roughly match the speed you get when using vanilla fly
+
+        if (!isActive() || mode.get() != Mode.Velocity) return -1;
+        return speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
     }
 
     public enum Mode {

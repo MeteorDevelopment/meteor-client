@@ -98,7 +98,7 @@ public class WaypointsModule extends Module {
             Waypoint waypoint = new Waypoint.Builder()
                 .name("Death " + time)
                 .icon("skull")
-                .pos(new BlockPos(deathPos).up(2))
+                .pos(BlockPos.ofFloored(deathPos).up(2))
                 .dimension(PlayerUtils.getDimension())
                 .build();
 

@@ -253,7 +253,7 @@ public class BlockUtils {
         if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
             if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube())
                 return MobSpawn.Never;
-            if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).isTransparent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
         if (mc.world.getLightLevel(blockPos, 0) <= spawnLightLimit) return MobSpawn.Potential;
