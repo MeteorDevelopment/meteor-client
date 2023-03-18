@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -90,4 +91,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
+    @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
+    private void onGetOffGroundSpeed(CallbackInfoReturnable<Float> info) {
+        float speed = Modules.get().get(Flight.class).getOffGroundSpeed();
+        if (speed != -1) info.setReturnValue(speed);
+    }
 }

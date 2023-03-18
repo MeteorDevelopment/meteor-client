@@ -96,8 +96,8 @@ public abstract class GameRendererMixin {
         return entity.raycast(maxDistance, tickDelta, includeFluids);
     }
 
-    @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
-    private void onBobViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
+    @Inject(method = "tiltViewWhenHurt", at = @At("HEAD"), cancellable = true)
+    private void onTiltViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noHurtCam()) info.cancel();
     }
 
