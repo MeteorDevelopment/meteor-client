@@ -333,7 +333,7 @@ public class Utils {
     }
 
     public static String formatEnumName(String enumName) {
-        return Arrays.stream(enumName.split("_")).map(String::toLowerCase).map(StringUtils::capitalize).collect(Collectors.joining());
+        return Arrays.stream(enumName.split("_")).map(String::toLowerCase).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
 
     public static String nameToTitle(String name) {
