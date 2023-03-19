@@ -104,8 +104,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @Inject(method = "clear(Z)V", at = @At("HEAD"), cancellable = true)
     private void onClear(CallbackInfo info) {
-        BetterChat betterChat = Modules.get().get(BetterChat.class);
-        if (betterChat.antiHistClear.get()) {
+        if (Modules.get().get(BetterChat.class).keepHistory()) {
             info.cancel();
         }
     }
