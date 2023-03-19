@@ -39,18 +39,7 @@ public class AccountsScreen extends WindowScreen {
 
         addButton(l, "Cracked", () -> mc.setScreen(new AddCrackedAccountScreen(theme, this)));
         addButton(l, "Altening", () -> mc.setScreen(new AddAlteningAccountScreen(theme, this)));
-        addButton(l, "Microsoft", () -> {
-            locked = true;
-
-            MicrosoftLogin.getRefreshToken(refreshToken -> {
-                locked = false;
-
-                if (refreshToken != null) {
-                    MicrosoftAccount account = new MicrosoftAccount(refreshToken);
-                    addAccount(null, this, account);
-                }
-            });
-        });
+        addButton(l, "Microsoft", () -> mc.setScreen(new AddMicrosoftAccountScreen(theme, this)));
     }
 
     private void addButton(WContainer c, String text, Runnable action) {
