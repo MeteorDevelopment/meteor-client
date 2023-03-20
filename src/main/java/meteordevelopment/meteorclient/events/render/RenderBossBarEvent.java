@@ -5,13 +5,12 @@
 
 package meteordevelopment.meteorclient.events.render;
 
-import meteordevelopment.meteorclient.events.Cancellable;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.text.Text;
 
 import java.util.Iterator;
 
-public class RenderBossBarEvent extends Cancellable {
+public class RenderBossBarEvent {
     public static class BossText {
         private static final BossText INSTANCE = new BossText();
 

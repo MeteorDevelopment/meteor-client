@@ -89,7 +89,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", ordinal = 0))
     private void onTickHasVehicleBeforeSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Pre.get());
     }
@@ -99,7 +99,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 1, shift = At.Shift.AFTER))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V", ordinal = 1, shift = At.Shift.AFTER))
     private void onTickHasVehicleAfterSendPackets(CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(SendMovementPacketsEvent.Post.get());
     }

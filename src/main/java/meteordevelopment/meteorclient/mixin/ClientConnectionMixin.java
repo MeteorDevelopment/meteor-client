@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.AntiPacketKick;
 import meteordevelopment.meteorclient.systems.modules.world.HighwayBuilder;
 import net.minecraft.network.ClientConnection;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.PacketEncoderException;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.text.MutableText;
@@ -50,12 +50,12 @@ public class ClientConnectionMixin {
         MeteorClient.EVENT_BUS.post(ConnectToServerEvent.get());
     }
 
-    @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/Packet;)V", cancellable = true)
+    @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
     private void onSendPacketHead(Packet<?> packet, CallbackInfo info) {
         if (MeteorClient.EVENT_BUS.post(PacketEvent.Send.get(packet)).isCancelled()) info.cancel();
     }
 
-    @Inject(method = "send(Lnet/minecraft/network/Packet;)V", at = @At("TAIL"))
+    @Inject(method = "send(Lnet/minecraft/network/packet/Packet;)V", at = @At("TAIL"))
     private void onSendPacketTail(Packet<?> packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(PacketEvent.Sent.get(packet));
     }

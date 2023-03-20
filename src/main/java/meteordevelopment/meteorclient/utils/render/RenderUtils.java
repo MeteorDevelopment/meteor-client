@@ -32,6 +32,8 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
+    private static final MatrixStack MATRICES = new MatrixStack();
+
     public static Vec3d center;
 
     private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
@@ -46,15 +48,13 @@ public class RenderUtils {
     public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
         //RenderSystem.disableDepthTest();
 
-        MatrixStack matrices = RenderSystem.getModelViewStack();
+        MATRICES.push();
+        MATRICES.scale((float) scale, (float) scale, 1);
 
-        matrices.push();
-        matrices.scale((float) scale, (float) scale, 1);
+        mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, (int) (x / scale), (int) (y / scale));
+        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
 
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / scale), (int) (y / scale));
-        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
-
-        matrices.pop();
+        MATRICES.pop();
         //RenderSystem.enableDepthTest();
     }
 
