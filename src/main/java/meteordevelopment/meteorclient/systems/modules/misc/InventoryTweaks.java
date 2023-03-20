@@ -198,14 +198,6 @@ public class InventoryTweaks extends Module {
         return true;
     }
 
-    private boolean isWearable(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-
-        if (item instanceof Equipment) return true;
-        return item instanceof BlockItem blockItem &&
-            (blockItem.getBlock() instanceof AbstractSkullBlock || blockItem.getBlock() instanceof CarvedPumpkinBlock);
-    }
-
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         sorter = null;
@@ -266,10 +258,6 @@ public class InventoryTweaks extends Module {
 
     public boolean armorStorage() {
         return isActive() && armorStorage.get();
-    }
-
-    public boolean armorSwap() {
-        return isActive() && armorSwap.get();
     }
 
     public abstract class Button {
