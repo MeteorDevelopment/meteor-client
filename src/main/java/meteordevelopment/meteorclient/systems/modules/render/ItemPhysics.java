@@ -151,7 +151,7 @@ public class ItemPhysics extends Module {
         }
 
         event.matrixStack.pop();
-        event.setCancelled(true);
+        event.cancel();
     }
 
     private int getRenderedAmount(ItemStack stack) {

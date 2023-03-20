@@ -12,22 +12,17 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 
 public class NoGhostBlocks extends Module {
-
     public NoGhostBlocks() {
         super(Categories.World, "no-ghost-blocks", "Attempts to prevent ghost blocks arising from breaking blocks quickly. Especially useful with multiconnect.");
     }
 
-    private BlockState lastState;
-
     @EventHandler
     public void onBreakBlock(BreakBlockEvent event) {
-        if (mc.isInSingleplayer())
-            return;
+        if (mc.isInSingleplayer()) return;
 
-        event.setCancelled(true);
+        event.cancel();
 
-        // play the related sounds and particles for the user.
         BlockState blockState = mc.world.getBlockState(event.blockPos);
-        blockState.getBlock().onBreak(mc.world, event.blockPos, blockState, mc.player); // this doesn't alter the state of the block in the world
+        blockState.getBlock().onBreak(mc.world, event.blockPos, blockState, mc.player);
     }
 }
