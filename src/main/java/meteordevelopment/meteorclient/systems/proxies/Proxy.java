@@ -48,6 +48,7 @@ public class Proxy implements ISerializable<Proxy> {
         .defaultValue(0)
         .range(0, 65535)
         .sliderMax(65535)
+        .noSlider()
         .build()
     );
 
