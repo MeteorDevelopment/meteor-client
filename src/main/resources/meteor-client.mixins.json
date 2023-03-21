@@ -47,6 +47,7 @@
     "ClientChunkManagerAccessor",
     "ClientChunkMapAccessor",
     "ClientConnectionAccessor",
+    "ClientConnectionInitChannelMixin",
     "ClientConnectionMixin",
     "ClientPlayerEntityAccessor",
     "ClientPlayerEntityMixin",
