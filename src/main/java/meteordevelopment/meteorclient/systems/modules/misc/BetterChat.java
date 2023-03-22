@@ -73,6 +73,13 @@ public class BetterChat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> keepHistory = sgGeneral.add(new BoolSetting.Builder()
+        .name("keep-history")
+        .description("Prevents the chat history from being cleared when disconnecting.")
+        .defaultValue(true)
+        .build()
+    );
+
     // Filter
 
     private final Setting<Boolean> antiSpam = sgFilter.add(new BoolSetting.Builder()
@@ -434,6 +441,8 @@ public class BetterChat extends Module {
     }
 
     public boolean displayPlayerHeads() { return isActive() && playerHeads.get(); }
+
+    public boolean keepHistory() { return isActive() && keepHistory.get(); }
 
     public int getChatLength() {
         return longerChatLines.get();

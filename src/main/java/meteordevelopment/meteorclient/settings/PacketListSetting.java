@@ -11,7 +11,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 
 import java.util.ArrayList;
 import java.util.List;

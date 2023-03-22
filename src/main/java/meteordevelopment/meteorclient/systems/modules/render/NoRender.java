@@ -27,13 +27,6 @@ public class NoRender extends Module {
 
     // Overlay
 
-    private final Setting<Boolean> noHurtCam = sgOverlay.add(new BoolSetting.Builder()
-        .name("hurt-cam")
-        .description("Disables rendering of the hurt camera effect.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Boolean> noPortalOverlay = sgOverlay.add(new BoolSetting.Builder()
         .name("portal-overlay")
         .description("Disables rendering of the nether portal overlay.")
@@ -358,10 +351,6 @@ public class NoRender extends Module {
     }
 
     // Overlay
-
-    public boolean noHurtCam() {
-        return isActive() && noHurtCam.get();
-    }
 
     public boolean noPortalOverlay() {
         return isActive() && noPortalOverlay.get();
