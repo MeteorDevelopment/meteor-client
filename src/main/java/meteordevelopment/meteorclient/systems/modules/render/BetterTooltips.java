@@ -345,7 +345,9 @@ public class BetterTooltips extends Module {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
         }
         else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
-            RegistryEntry<BannerPattern> bannerPattern = (Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() ? Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
+            boolean present = Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() && Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().size() != 0;
+
+            RegistryEntry<BannerPattern> bannerPattern = (present ? Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
             if (bannerPattern != null) event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(bannerPattern));
         }
         else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
