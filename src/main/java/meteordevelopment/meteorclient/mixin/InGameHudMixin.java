@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -101,5 +102,12 @@ public abstract class InGameHudMixin {
     @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"), cancellable = true)
     private void onRenderHeldItemTooltip(MatrixStack matrices, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noHeldItemName()) info.cancel();
+    }
+
+    @Inject(method = "clear", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;clear(Z)V"), cancellable = true)
+    private void onClear(CallbackInfo info) {
+        if (Modules.get().get(BetterChat.class).keepHistory()) {
+            info.cancel();
+        }
     }
 }
