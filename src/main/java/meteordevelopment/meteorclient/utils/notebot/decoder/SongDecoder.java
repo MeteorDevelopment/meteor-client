@@ -14,5 +14,11 @@ import java.io.File;
 public abstract class SongDecoder {
     protected Notebot notebot = Modules.get().get(Notebot.class);
 
-    public abstract Song parse(File file);
+    /**
+     * Parse file to a {@link Song} object
+     *
+     * @param file Song file
+     * @return A {@link Song} object
+     */
+    public abstract Song parse(File file) throws Exception;
 }

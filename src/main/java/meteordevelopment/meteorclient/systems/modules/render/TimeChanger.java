@@ -47,7 +47,7 @@ public class TimeChanger extends Module {
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
             oldTime = ((WorldTimeUpdateS2CPacket) event.packet).getTime();
-            event.setCancelled(true);
+            event.cancel();
         }
     }
 

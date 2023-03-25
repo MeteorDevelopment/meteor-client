@@ -123,7 +123,8 @@ public abstract class EntityMixin {
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (!Utils.canUpdate()) return;
-        if (Modules.get().get(NoRender.class).noInvisibility() || !Modules.get().get(ESP.class).shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
+        ESP esp = Modules.get().get(ESP.class);
+        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
     }
 
     @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)

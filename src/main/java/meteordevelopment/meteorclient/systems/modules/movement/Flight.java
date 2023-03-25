@@ -53,6 +53,7 @@ public class Flight extends Module {
         .build()
     );
 
+
     // Anti Kick
 
     private final Setting<Boolean> antiRubberbanding = sgAntiKick.add(new BoolSetting.Builder()
@@ -159,13 +160,9 @@ public class Flight extends Module {
 
         switch (mode.get()) {
             case Velocity -> {
-
-                 /*TODO: deal with underwater movement, find a way to "spoof" not being in water
-                also, all of the multiplication below is to get the speed to roughly match the speed
-                you get when using vanilla fly*/
+                // TODO: deal with underwater movement, find a way to "spoof" not being in water
 
                 mc.player.getAbilities().flying = false;
-                mc.player.airStrafingSpeed = speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();
                 if (mc.options.jumpKey.isPressed())
@@ -273,6 +270,13 @@ public class Flight extends Module {
     // Copied from ServerPlayNetworkHandler#isEntityOnAir
     private boolean isEntityOnAir(Entity entity) {
         return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
+    }
+
+    public float getOffGroundSpeed() {
+        // All the multiplication below is to get the speed to roughly match the speed you get when using vanilla fly
+
+        if (!isActive() || mode.get() != Mode.Velocity) return -1;
+        return speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
     }
 
     public enum Mode {
