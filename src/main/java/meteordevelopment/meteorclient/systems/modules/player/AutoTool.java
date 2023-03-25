@@ -174,7 +174,7 @@ public class AutoTool extends Module {
 
         if (shouldStopUsing(currentStack) && isTool(currentStack)) {
             mc.options.attackKey.setPressed(false);
-            event.setCancelled(true);
+            event.cancel();
         }
     }
 

@@ -41,15 +41,15 @@ public class BookTooltipComponent implements TooltipComponent, MeteorTooltipData
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
         // Background
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderTexture(0, TEXTURE_BOOK_BACKGROUND);
-        DrawableHelper.drawTexture(matrices, x, y, z, 12, 0, 112, 134, 179, 179);
+        DrawableHelper.drawTexture(matrices, x, y, 0, 12, 0, 112, 134, 179, 179);
 
         // Content
         matrices.push();
-        matrices.translate(x + 16, y + 12, z + 1);
+        matrices.translate(x + 16, y + 12, 1);
         matrices.scale(0.7f, 0.7f, 1f);
         int offset = 0;
         for (OrderedText line : textRenderer.wrapLines(page, 112)) {

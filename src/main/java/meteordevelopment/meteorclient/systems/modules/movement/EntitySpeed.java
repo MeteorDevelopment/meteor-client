@@ -50,7 +50,7 @@ public class EntitySpeed extends Module {
 
     @EventHandler
     private void onLivingEntityMove(LivingEntityMoveEvent event) {
-        if (event.entity.getPrimaryPassenger() != mc.player) return;
+        if (event.entity.getControllingPassenger() != mc.player) return;
 
         // Check for onlyOnGround and inWater
         LivingEntity entity = event.entity;
