@@ -8,9 +8,9 @@ package meteordevelopment.meteorclient.mixin;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
+import meteordevelopment.meteorclient.events.entity.player.OffGroundSpeedEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
-import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
@@ -102,11 +102,9 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
-    @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
-    private void onGetOffGroundSpeed(CallbackInfoReturnable<Float> info) {
+    @Inject(method = "getOffGroundSpeed", at = @At("RETURN"), cancellable = true)
+    private void onGetOffGroundSpeed(CallbackInfoReturnable<Float> cir) {
         if (!world.isClient) return;
-
-        float speed = Modules.get().get(Flight.class).getOffGroundSpeed();
-        if (speed != -1) info.setReturnValue(speed);
+        cir.setReturnValue(MeteorClient.EVENT_BUS.post(OffGroundSpeedEvent.get(cir.getReturnValueF())).speed);
     }
 }
