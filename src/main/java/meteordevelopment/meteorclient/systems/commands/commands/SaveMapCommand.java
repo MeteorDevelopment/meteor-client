@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.mixin.MapRendererAccessor;
 import meteordevelopment.meteorclient.systems.commands.Command;
+import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.render.MapRenderer;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.FilledMapItem;
@@ -17,9 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.map.MapState;
 import net.minecraft.text.Text;
-import org.lwjgl.BufferUtils;
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.system.MemoryUtil;
 import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import javax.imageio.ImageIO;
@@ -27,7 +26,6 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
@@ -35,17 +33,10 @@ public class SaveMapCommand extends Command {
     private static final SimpleCommandExceptionType MAP_NOT_FOUND = new SimpleCommandExceptionType(Text.literal("You must be holding a filled map."));
     private static final SimpleCommandExceptionType OOPS = new SimpleCommandExceptionType(Text.literal("Something went wrong."));
 
-    private final PointerBuffer filters;
+    private final PointerBuffer filters = Utils.fileFilter("*.png");
 
     public SaveMapCommand() {
         super("save-map", "Saves a map to an image.", "sm");
-
-        filters = BufferUtils.createPointerBuffer(1);
-
-        ByteBuffer pngFilter = MemoryUtil.memASCII("*.png");
-
-        filters.put(pngFilter);
-        filters.rewind();
     }
 
     @Override
@@ -107,10 +98,7 @@ public class SaveMapCommand extends Command {
         ItemStack map = getMap();
         if (map == null) return null;
 
-        MapState state = FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
-        if (state == null) return null;
-
-        return state;
+        return FilledMapItem.getMapState(FilledMapItem.getMapId(map), mc.world);
     }
 
     private String getPath() {

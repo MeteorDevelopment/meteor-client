@@ -11,9 +11,15 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
+import meteordevelopment.meteorclient.gui.widgets.WLabel;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
+import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
+import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
+import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -51,6 +57,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.Range;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
+import org.lwjgl.BufferUtils;
+import org.lwjgl.PointerBuffer;
+import org.lwjgl.system.MemoryUtil;
+import org.lwjgl.util.tinyfd.TinyFileDialogs;
 
 import java.io.File;
 import java.io.IOException;
@@ -65,9 +75,10 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
     private static final Random random = new Random();
+    public static final Color WHITE = new Color(255, 255, 255);
+    public static PointerBuffer TEXT_FILTER = fileFilter("*.txt");
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
-    public static final Color WHITE = new Color(255, 255, 255);
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
@@ -100,7 +111,7 @@ public class Utils {
             tY *= timer.getMultiplier();
             tZ *= timer.getMultiplier();
         }
-        
+
         tX *= 20;
         tY *= 20;
         tZ *= 20;
@@ -636,5 +647,30 @@ public class Utils {
     public static boolean ipFilter(String text, char character) {
         if (text.contains(":") && character == ':') return false;
         return (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z') || (character >= '0' && character <= '9') || character == '.';
+    }
+
+    public static PointerBuffer fileFilter(String filter) {
+        return BufferUtils.createPointerBuffer(1).put(MemoryUtil.memASCII(filter)).rewind();
+    }
+
+    public static WWidget fileSelectWidget(Setting<String> pathSetting, GuiTheme theme) {
+        WHorizontalList list = theme.horizontalList();
+
+        WButton selectFile = list.add(theme.button("Select File")).widget();
+
+        File file = new File(pathSetting.get());
+
+        WLabel fileName = list.add(theme.label(file.exists() ? file.getName() : "No file selected.")).widget();
+
+        selectFile.action = () -> {
+            String path = TinyFileDialogs.tinyfd_openFileDialog("Select File", pathSetting.get(), TEXT_FILTER, null, false);
+
+            if (path != null) {
+                pathSetting.set(path);
+                fileName.set(file.getName());
+            }
+        };
+
+        return list;
     }
 }

@@ -5,9 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -18,10 +21,9 @@ import net.minecraft.client.gui.screen.DisconnectedScreen;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
 public class Spam extends Module {
@@ -36,9 +38,9 @@ public class Spam extends Module {
 
     private final Setting<String> textPath = sgGeneral.add(new StringSetting.Builder()
         .name("text-path")
-        .description("File to use for spam. Re-activate to take effect.")
-        .defaultValue("text.txt")
-        .visible(fileSpam::get)
+        .description("File to be used for spamming. Re-activate to take effect.")
+        .defaultValue(new File(MeteorClient.FOLDER, "spam.txt").getAbsolutePath())
+        .visible(() -> false)
         .build()
     );
 
@@ -65,7 +67,6 @@ public class Spam extends Module {
         .defaultValue(true)
         .build()
     );
-
 
     private final Setting<Boolean> disableOnDisconnect = sgGeneral.add(new BoolSetting.Builder()
         .name("disable-on-disconnect")
@@ -97,7 +98,7 @@ public class Spam extends Module {
         .build()
     );
 
-    private List<String> textInFile;
+    private List<String> lines;
     private int messageI, timer;
 
     public Spam() {
@@ -106,18 +107,22 @@ public class Spam extends Module {
 
     @Override
     public void onActivate() {
-        timer = delay.get();
-        messageI = 0;
-
         if (fileSpam.get()) {
-            File spamText = new File(textPath.get());
-            try (InputStream in = new FileInputStream(spamText)) {
-                textInFile = Arrays.stream(new String(in.readAllBytes()).split("\n")).map(s -> s.replace("\r", "")).toList();
+            try {
+                lines = Files.readAllLines(Path.of(textPath.get()));
             } catch (IOException e) {
-                error("Failed to read %s.", spamText.getAbsolutePath());
+                error("No file selected, please select a file in the GUI.");
                 toggle();
             }
         }
+
+        timer = delay.get();
+        messageI = 0;
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return Utils.fileSelectWidget(textPath, theme);
     }
 
     @EventHandler
@@ -134,10 +139,10 @@ public class Spam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (messages.get().isEmpty()) return;
+        if (messages.get().isEmpty() || lines == null || lines.isEmpty()) return;
 
         if (timer <= 0) {
-            List<String> msgs = fileSpam.get() && textInFile != null ? textInFile : messages.get();
+            List<String> msgs = fileSpam.get() ? lines : messages.get();
             int i;
             if (random.get()) {
                 i = Utils.random(0, msgs.size());
