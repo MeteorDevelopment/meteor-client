@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.notebot.song;
 
 import com.google.common.collect.Multimap;
+import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoder;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -16,6 +17,7 @@ public class Song {
     private int lastTick;
     private final String title;
     private final String author;
+    public Class<? extends SongDecoder> decodedFrom;
 
     private final Set<Note> requirements = new HashSet<>();
 

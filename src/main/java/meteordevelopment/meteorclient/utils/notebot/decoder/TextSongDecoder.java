@@ -17,7 +17,6 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class TextSongDecoder extends SongDecoder {
-
     @Override
     public Song parse(File file) throws Exception {
         List<String> data = Files.readAllLines(file.toPath());
@@ -43,22 +42,19 @@ public class TextSongDecoder extends SongDecoder {
                 notebot.warning("Malformed line %d", lineNumber);
                 continue;
             }
-            int key;
-            int val;
-            int type = 0;
+
             try {
-                key = Integer.parseInt(parts[0]);
-                val = Integer.parseInt(parts[1]);
+                int type = 0;
+                int key = Integer.parseInt(parts[0]);
+                int val = Integer.parseInt(parts[1]);
                 if (parts.length > 2) {
                     type = Integer.parseInt(parts[2]);
                 }
+                Note note = new Note(Instrument.values()[type], val);
+                notesMap.put(key, note);
             } catch (NumberFormatException e) {
                 notebot.warning("Invalid character at line %d", lineNumber);
-                continue;
             }
-
-            Note note = new Note(Instrument.values()[type], val);
-            notesMap.put(key, note);
         }
         return new Song(notesMap, title, author);
     }

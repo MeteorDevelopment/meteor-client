@@ -25,7 +25,7 @@ public class SongDecoders {
     static {
         registerDecoder("nbs", new NBSSongDecoder());
         registerDecoder("txt", new TextSongDecoder());
-        // TODO Maybe a midi decoder in the future
+        registerDecoder("mid", new MidiSongDecoder());
     }
 
     public static void registerDecoder(String extension, SongDecoder songDecoder) {
@@ -45,16 +45,16 @@ public class SongDecoders {
     }
 
     /**
-     * Parse file to one of {@link SongDecoder}
+     * Parse file to one of {@link SongDecoder}, unsupported formats will fallback to {@link TextSongDecoder}.
      *
      * @param file A song file
      * @return A {@link Song} object
      */
     @NotNull
     public static Song parse(File file) throws Exception {
-        if (!hasDecoder(file)) throw new IllegalStateException("Decoder for this file does not exists!");
-        SongDecoder decoder = getDecoder(file);
+        SongDecoder decoder = hasDecoder(file) ? getDecoder(file) : decoders.get("txt");
         Song song = decoder.parse(file);
+        song.decodedFrom = decoder.getClass();
 
         fixSong(song);
 

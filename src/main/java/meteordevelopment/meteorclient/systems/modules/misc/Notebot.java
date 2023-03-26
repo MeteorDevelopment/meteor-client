@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
+import meteordevelopment.meteorclient.utils.notebot.decoder.MidiSongDecoder;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoder;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoders;
 import meteordevelopment.meteorclient.utils.notebot.instrumentdetect.InstrumentDetectMode;
@@ -745,6 +746,7 @@ public class Notebot extends Module {
                 long diff = time2 - time1;
 
                 info("Song '" + FilenameUtils.getBaseName(file.getName()) + "' has been loaded to the memory! Took "+diff+"ms");
+                if (song.decodedFrom == MidiSongDecoder.class) warning("Midi decoding is not fully supported, you can use external tools to convert midi to nbs first.");
                 callback.run();
             } else {
                 if (ex instanceof CancellationException) {
