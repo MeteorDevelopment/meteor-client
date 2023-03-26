@@ -38,7 +38,6 @@ public class Spam extends Module {
 
     private final Setting<String> textPath = sgGeneral.add(new StringSetting.Builder()
         .name("text-path")
-        .description("File to be used for spamming. Re-activate to take effect.")
         .defaultValue(new File(MeteorClient.FOLDER, "spam.txt").getAbsolutePath())
         .visible(() -> false)
         .build()
@@ -76,7 +75,7 @@ public class Spam extends Module {
     );
 
     private final Setting<Boolean> random = sgGeneral.add(new BoolSetting.Builder()
-        .name("randomise")
+        .name("randomize")
         .description("Selects a random message from your spam message list.")
         .defaultValue(false)
         .build()

@@ -45,7 +45,6 @@ public class BookBot extends Module {
 
     private final Setting<String> textPath = sgGeneral.add(new StringSetting.Builder()
         .name("text-path")
-        .description("File to be used for book bot. Re-activate to take effect.")
         .defaultValue(new File(MeteorClient.FOLDER, "bookbot.txt").getAbsolutePath())
         .visible(() -> false)
         .build()
@@ -127,6 +126,7 @@ public class BookBot extends Module {
 
         // Check if there is a book to write
         if (!writableBook.found()) {
+            error("You need a writable book to use this module.");
             toggle();
             return;
         }
@@ -147,20 +147,17 @@ public class BookBot extends Module {
         delayTimer = delay.get();
 
         // Write book
-
         if (mode.get() == Mode.Random) {
             int origin = onlyAscii.get() ? 0x21 : 0x0800;
             int bound = onlyAscii.get() ? 0x7E : 0x10FFFF;
 
+            // Generate a random load of ints to use as random characters
             writeBook(
-                // Generate a random load of ints to use as random characters
                 random.ints(origin, bound)
                     .filter(i -> !Character.isWhitespace(i) && i != '\r' && i != '\n')
                     .iterator()
             );
         } else if (mode.get() == Mode.File) {
-            File file = new File(textPath.get());
-
             // Handle the file being empty
             if (lines.isEmpty()) {
                 MutableText message = Text.literal("");
@@ -168,19 +165,12 @@ public class BookBot extends Module {
                 message.append(Text.literal("Click here to edit it.")
                     .setStyle(Style.EMPTY
                         .withFormatting(Formatting.UNDERLINE, Formatting.RED)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, file.getAbsolutePath()))
+                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, textPath.get()))
                     )
                 );
                 info(message);
                 toggle();
-                return;
-            }
-
-            try {
-                writeBook(String.join("\n", Files.readAllLines(file.toPath())).chars().iterator());
-            } catch (IOException e) {
-                error("Failed to read the file.");
-            }
+            } else writeBook(String.join("\n", lines).chars().iterator());
         }
     }
 
