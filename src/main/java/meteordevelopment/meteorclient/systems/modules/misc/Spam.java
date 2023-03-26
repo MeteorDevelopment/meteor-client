@@ -138,7 +138,11 @@ public class Spam extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (messages.get().isEmpty() || lines == null || lines.isEmpty()) return;
+        if (lines == null || lines.isEmpty()) {
+            error("The bookbot file is empty or not found. (%s)", textPath.get());
+            toggle();
+            return;
+        }
 
         if (timer <= 0) {
             List<String> msgs = fileSpam.get() ? lines : messages.get();

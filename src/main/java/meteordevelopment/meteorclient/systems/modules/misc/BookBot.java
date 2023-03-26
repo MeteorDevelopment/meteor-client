@@ -21,11 +21,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.network.packet.c2s.play.BookUpdateC2SPacket;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
 
 import java.io.File;
 import java.io.IOException;
@@ -158,17 +154,8 @@ public class BookBot extends Module {
                     .iterator()
             );
         } else if (mode.get() == Mode.File) {
-            // Handle the file being empty
-            if (lines.isEmpty()) {
-                MutableText message = Text.literal("");
-                message.append(Text.literal("The bookbot file is empty! ").formatted(Formatting.RED));
-                message.append(Text.literal("Click here to edit it.")
-                    .setStyle(Style.EMPTY
-                        .withFormatting(Formatting.UNDERLINE, Formatting.RED)
-                        .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, textPath.get()))
-                    )
-                );
-                info(message);
+            if (lines == null || lines.isEmpty()) {
+                error("The bookbot file is empty or not found. (%s)", textPath.get());
                 toggle();
             } else writeBook(String.join("\n", lines).chars().iterator());
         }
