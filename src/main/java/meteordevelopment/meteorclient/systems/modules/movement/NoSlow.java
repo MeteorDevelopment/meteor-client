@@ -31,7 +31,7 @@ public class NoSlow extends Module {
         .build()
     );
 
-    private final Setting<Integer> webTimer = sgGeneral.add(new IntSetting.Builder()
+    private final Setting<Double> webTimer = sgGeneral.add(new DoubleSetting.Builder()
         .name("web-timer")
         .description("The timer value for WebMode Timer.")
         .defaultValue(10)
@@ -79,6 +79,13 @@ public class NoSlow extends Module {
     private final Setting<Boolean> sneaking = sgGeneral.add(new BoolSetting.Builder()
         .name("sneaking")
         .description("Whether or not sneaking will not slow you down.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> hunger = sgGeneral.add(new BoolSetting.Builder()
+        .name("hunger")
+        .description("Whether or not hunger will not slow you down.")
         .defaultValue(false)
         .build()
     );
@@ -131,6 +138,10 @@ public class NoSlow extends Module {
 
     public boolean sneaking() {
         return isActive() && sneaking.get();
+    }
+
+    public boolean hunger() {
+        return isActive() && hunger.get();
     }
 
     public boolean slowness() {

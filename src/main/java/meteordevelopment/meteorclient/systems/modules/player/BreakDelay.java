@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.entity.player.BlockBreakingCooldownEvent;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -22,6 +23,13 @@ public class BreakDelay extends Module {
         .defaultValue(0)
         .min(0)
         .sliderMax(5)
+        .build()
+    );
+
+    public final Setting<Boolean> noInstaBreak = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-insta-break")
+        .description("Prevent you from breaking blocks instantly.")
+        .defaultValue(false)
         .build()
     );
 

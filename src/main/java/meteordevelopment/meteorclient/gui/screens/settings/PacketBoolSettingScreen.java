@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.PacketListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.network.PacketUtils;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 
 import java.util.Set;
 import java.util.function.Predicate;

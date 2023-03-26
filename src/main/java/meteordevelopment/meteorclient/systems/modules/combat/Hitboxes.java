@@ -6,14 +6,18 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.item.AxeItem;
+import net.minecraft.item.SwordItem;
 
 public class Hitboxes extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -32,13 +36,25 @@ public class Hitboxes extends Module {
         .build()
     );
 
+    private final Setting<Boolean> onlyOnWeapon = sgGeneral.add(new BoolSetting.Builder()
+        .name("only-on-weapon")
+        .description("Only modifies hitbox when holding a weapon in hand.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Hitboxes() {
         super(Categories.Combat, "hitboxes", "Expands an entity's hitboxes.");
     }
 
     public double getEntityValue(Entity entity) {
-        if (!isActive()) return 0;
+        if (!(isActive() && testWeapon())) return 0;
         if (entities.get().getBoolean(entity.getType())) return value.get();
         return 0;
+    }
+
+    private boolean testWeapon() {
+        if (!onlyOnWeapon.get()) return true;
+        return InvUtils.testInHands(itemStack -> itemStack.getItem() instanceof SwordItem || itemStack.getItem() instanceof AxeItem);
     }
 }

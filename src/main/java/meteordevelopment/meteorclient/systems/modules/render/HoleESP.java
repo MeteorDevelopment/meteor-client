@@ -20,10 +20,13 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.Dir;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -177,17 +180,17 @@ public class HoleESP extends Module {
 
             for (Direction direction : Direction.values()) {
                 if (direction == Direction.UP) continue;
-
-                BlockState state = mc.world.getBlockState(blockPos.offset(direction));
+                BlockPos offsetPos = blockPos.offset(direction);
+                BlockState state = mc.world.getBlockState(offsetPos);
 
                 if (state.getBlock() == Blocks.BEDROCK) bedrock++;
                 else if (state.getBlock() == Blocks.OBSIDIAN) obsidian++;
                 else if (direction == Direction.DOWN) return;
-                else if (validHole(blockPos.offset(direction)) && air == null) {
+                else if (doubles.get() && air == null && validHole(offsetPos)) {
                     for (Direction dir : Direction.values()) {
                         if (dir == direction.getOpposite() || dir == Direction.UP) continue;
 
-                        BlockState blockState1 = mc.world.getBlockState(blockPos.offset(direction).offset(dir));
+                        BlockState blockState1 = mc.world.getBlockState(offsetPos.offset(dir));
 
                         if (blockState1.getBlock() == Blocks.BEDROCK) bedrock++;
                         else if (blockState1.getBlock() == Blocks.OBSIDIAN) obsidian++;
@@ -208,14 +211,16 @@ public class HoleESP extends Module {
     }
 
     private boolean validHole(BlockPos pos) {
-        if ((ignoreOwn.get() && (mc.player.getBlockPos().equals(pos)))) return false;
+        if (ignoreOwn.get() && mc.player.getBlockPos().equals(pos)) return false;
 
-        if (!webs.get() && mc.world.getBlockState(pos).getBlock() == Blocks.COBWEB) return false;
+        WorldChunk chunk = mc.world.getChunk(ChunkSectionPos.getSectionCoord(pos.getX()), ChunkSectionPos.getSectionCoord(pos.getZ()));
+        Block block = chunk.getBlockState(pos).getBlock();
+        if (!webs.get() && block == Blocks.COBWEB) return false;
 
-        if (((AbstractBlockAccessor) mc.world.getBlockState(pos).getBlock()).isCollidable()) return false;
+        if (((AbstractBlockAccessor) block).isCollidable()) return false;
 
         for (int i = 0; i < holeHeight.get(); i++) {
-            if (((AbstractBlockAccessor) mc.world.getBlockState(pos.up(i)).getBlock()).isCollidable()) return false;
+            if (((AbstractBlockAccessor) chunk.getBlockState(pos.up(i)).getBlock()).isCollidable()) return false;
         }
 
         return true;

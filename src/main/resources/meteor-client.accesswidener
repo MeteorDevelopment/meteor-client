@@ -7,8 +7,6 @@ accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC
 accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
 accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMap
 
-accessible   method  net/minecraft/text/TextColor <init> (I)V
-
 accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity playerListEntry Lnet/minecraft/client/network/PlayerListEntry;
 
 accessible   field   net/minecraft/client/model/ModelPart cuboids Ljava/util/List;

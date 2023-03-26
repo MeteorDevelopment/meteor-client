@@ -15,7 +15,6 @@ public class MouseScrollEvent extends Cancellable {
     public static MouseScrollEvent get(double value) {
         INSTANCE.setCancelled(false);
         INSTANCE.value = value;
-
         return INSTANCE;
     }
 }
