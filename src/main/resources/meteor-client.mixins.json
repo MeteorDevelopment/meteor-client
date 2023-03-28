@@ -151,6 +151,7 @@
     "StatusEffectInstanceMixin",
     "StringHelperMixin",
     "SweetBerryBushBlockMixin",
+    "SwordItemMixin",
     "TextHandlerAccessor",
     "TextRendererMixin",
     "TextVisitFactoryMixin",
