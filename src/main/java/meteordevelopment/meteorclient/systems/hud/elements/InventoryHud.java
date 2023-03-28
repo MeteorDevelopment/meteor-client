@@ -81,6 +81,8 @@ public class InventoryHud extends HudElement {
             drawBackground(renderer, (int) x, (int) y, drawColor);
         }
 
+        if (mc.player == null) return;
+
         renderer.post(() -> {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
@@ -108,7 +110,7 @@ public class InventoryHud extends HudElement {
     }
 
     private ItemStack getContainer() {
-        if (isInEditor()) return null;
+        if (isInEditor() || mc.player == null) return null;
 
         ItemStack stack = mc.player.getOffHandStack();
         if (Utils.hasItems(stack) || stack.getItem() == Items.ENDER_CHEST) return stack;
