@@ -299,7 +299,7 @@ public class BetterTooltips extends Module {
         }
 
         // Hold to preview tooltip
-        if ((Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers())
+        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack))
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
             || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
@@ -316,7 +316,7 @@ public class BetterTooltips extends Module {
     @EventHandler
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
-        if (Utils.hasItems(event.itemStack) && previewShulkers()) {
+        if (previewShulkers() && Utils.hasItems(event.itemStack)) {
             NbtCompound compoundTag = event.itemStack.getSubNbt("BlockEntityTag");
             DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
             Inventories.readNbt(compoundTag, itemStacks);
