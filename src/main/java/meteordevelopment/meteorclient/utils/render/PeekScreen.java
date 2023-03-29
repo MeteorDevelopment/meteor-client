@@ -74,6 +74,7 @@ public class PeekScreen extends ShulkerBoxScreen {
         RenderSystem.setShaderTexture(0, TEXTURE);
         int i = (this.width - this.backgroundWidth) / 2;
         int j = (this.height - this.backgroundHeight) / 2;
-        this.drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        drawTexture(matrices, i, j, 0, 0, this.backgroundWidth, this.backgroundHeight);
+        RenderSystem.setShaderColor(1, 1, 1, 1);
     }
 }
