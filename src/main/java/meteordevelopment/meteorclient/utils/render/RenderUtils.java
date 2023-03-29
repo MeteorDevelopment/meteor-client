@@ -15,6 +15,8 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -45,17 +47,18 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
-        //RenderSystem.disableDepthTest();
-
+    public static void drawItem(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
         MATRICES.push();
-        MATRICES.scale((float) scale, (float) scale, 1);
+        MATRICES.scale(scale, scale, 1f);
+        MATRICES.translate(0, 0, 401); // Thanks Mojang
 
-        mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, (int) (x / scale), (int) (y / scale));
-        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
+        int scaledX = (int) (x / scale);
+        int scaledY = (int) (y / scale);
+
+        mc.getItemRenderer().renderInGuiWithOverrides(MATRICES, itemStack, scaledX, scaledY);
+        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, scaledX, scaledY, null);
 
         MATRICES.pop();
-        //RenderSystem.enableDepthTest();
     }
 
     public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
