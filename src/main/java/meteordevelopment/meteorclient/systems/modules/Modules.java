@@ -439,6 +439,7 @@ public class Modules extends System<Modules> {
         add(new Reach());
         add(new Rotation());
         add(new SpeedMine());
+        add(new VehicleOneHit());
     }
 
     private void initMovement() {
@@ -566,7 +567,6 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new ServerSpoof());
         add(new InventoryTweaks());
-        add(new VehicleOneHit());
     }
 
     public static class ModuleRegistry extends SimpleRegistry<Module> {
