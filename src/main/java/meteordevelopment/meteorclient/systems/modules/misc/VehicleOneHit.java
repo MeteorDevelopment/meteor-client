@@ -36,9 +36,7 @@ public class VehicleOneHit extends Module {
             ignorePIEPacket = true;
             assert mc.crosshairTarget != null && !event.isCancelled();
             Entity entity = ((EntityHitResult) mc.crosshairTarget).getEntity();
-            if(entity instanceof BoatEntity || entity instanceof MinecartEntity){
-                for (int i = 0; i < amount.get(); i++) mc.player.networkHandler.sendPacket(event.packet);
-            };
+            if(entity instanceof BoatEntity || entity instanceof MinecartEntity) for (int i = 0; i < amount.get(); i++) mc.player.networkHandler.sendPacket(event.packet);
             ignorePIEPacket = false;
         }
     }
