@@ -30,7 +30,7 @@ public class VehicleOneHit extends Module {
         .build()
     );
     public VehicleOneHit() {
-        super(Categories.Misc, "VehicleOneHit", "Destroy boats and minecarts with one hit");
+        super(Categories.Misc, "vehicle-one-hit", "Destroy boats and minecarts with one hit");
     }
 
 
