@@ -28,7 +28,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.EndCrystalEntity;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket;
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
@@ -130,13 +129,6 @@ public class Surround extends Module {
         .name("toggle-on-complete")
         .description("Toggles off when all blocks are placed.")
         .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnDeath = sgToggles.add(new BoolSetting.Builder()
-        .name("toggle-on-death")
-        .description("Toggles off when you die.")
-        .defaultValue(true)
         .build()
     );
 
@@ -391,17 +383,6 @@ public class Surround extends Module {
         }
 
         return placed;
-    }
-
-    @EventHandler
-    private void onPacketReceive(PacketEvent.Receive event)  {
-        if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.getEntityId());
-            if (entity == mc.player && toggleOnDeath.get()) {
-                toggle();
-                info("Toggled off because you died.");
-            }
-        }
     }
 
     private BlockPos.Mutable offsetPosFromPlayer(CardinalDirection direction, int y) {

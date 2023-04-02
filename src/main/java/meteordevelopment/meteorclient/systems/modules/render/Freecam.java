@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import meteordevelopment.meteorclient.events.entity.DamageEvent;
-import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
@@ -30,7 +28,6 @@ import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.entity.Entity;
-import net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.EntityHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -57,27 +54,6 @@ public class Freecam extends Module {
         .defaultValue(0)
         .min(0)
         .sliderMax(2)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnDamage = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-on-damage")
-        .description("Disables freecam when you take damage.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnDeath = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-on-death")
-        .description("Disables freecam when you die.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> toggleOnLog = sgGeneral.add(new BoolSetting.Builder()
-        .name("toggle-on-log")
-        .description("Disables freecam when you disconnect from a server.")
-        .defaultValue(true)
         .build()
     );
 
@@ -346,35 +322,6 @@ public class Freecam extends Module {
     @EventHandler
     private void onChunkOcclusion(ChunkOcclusionEvent event) {
         event.cancel();
-    }
-
-    @EventHandler
-    private void onDamage(DamageEvent event) {
-        if (event.entity.getUuid() == null) return;
-        if (!event.entity.getUuid().equals(mc.player.getUuid())) return;
-
-        if (toggleOnDamage.get()) {
-            toggle();
-            info("Toggled off because you took damage.");
-        }
-    }
-
-    @EventHandler
-    private void onGameLeft(GameLeftEvent event) {
-        if (!toggleOnLog.get()) return;
-
-        toggle();
-    }
-
-    @EventHandler
-    private void onPacketReceive(PacketEvent.Receive event)  {
-        if (event.packet instanceof DeathMessageS2CPacket packet) {
-            Entity entity = mc.world.getEntityById(packet.getEntityId());
-            if (entity == mc.player && toggleOnDeath.get()) {
-                toggle();
-                info("Toggled off because you died.");
-            }
-        }
     }
 
     private boolean checkGuiMove() {
