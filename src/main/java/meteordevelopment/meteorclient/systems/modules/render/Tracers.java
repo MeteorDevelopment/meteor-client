@@ -291,9 +291,9 @@ public class Tracers extends Module {
             final Vec2f SCREEN_CENTER = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
 
             Vector3d projection = new Vector3d(entity.prevX, entity.prevY, entity.prevZ);
-            NametagUtils.to2D(projection, 1, false, false);
+            boolean projSucceeded = NametagUtils.to2D(projection, 1, false, false);
 
-            if (!(projection.x < 0.f || projection.x > mc.getWindow().getFramebufferWidth() || projection.y < 0.f || projection.y > mc.getWindow().getFramebufferHeight()))
+            if (projSucceeded && projection.x > 0.f && projection.x < mc.getWindow().getFramebufferWidth() && projection.y > 0.f && projection.y < mc.getWindow().getFramebufferHeight())
                 continue;
 
             projection = new Vector3d(entity.prevX, entity.prevY, entity.prevZ);
