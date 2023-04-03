@@ -37,9 +37,10 @@ public class Http {
         private HttpRequest.Builder builder;
         private Method method;
 
-        public Request(Method method, String url) {
+        public Request(Method method, String url, boolean meteorUserAgent) {
             try {
-                this.builder = HttpRequest.newBuilder().uri(new URI(url)).header("User-Agent", "Meteor Client");
+                this.builder = HttpRequest.newBuilder().uri(new URI(url));
+                if (meteorUserAgent) this.builder = this.builder.header("User-Agent", "Meteor Client");
                 this.method = method;
             } catch (URISyntaxException e) {
                 e.printStackTrace();
@@ -120,10 +121,18 @@ public class Http {
     }
 
     public static Request get(String url) {
-        return new Request(Method.GET, url);
+        return get(url, false);
+    }
+
+    public static Request get(String url, boolean meteorUserAgent) {
+        return new Request(Method.GET, url, meteorUserAgent);
     }
 
     public static Request post(String url) {
-        return new Request(Method.POST, url);
+        return post(url, false);
+    }
+
+    public static Request post(String url, boolean meteorUserAgent) {
+        return new Request(Method.POST, url, meteorUserAgent);
     }
 }
