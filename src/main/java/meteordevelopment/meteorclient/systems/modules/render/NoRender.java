@@ -252,7 +252,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
-        .onChanged(reload -> chunkOcclusion())
+        .onChanged(b -> mc.worldRenderer.reload())
         .build()
     );
 
@@ -349,6 +349,16 @@ public class NoRender extends Module {
 
     public NoRender() {
         super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
+    }
+
+    @Override
+    public void onActivate() {
+        mc.worldRenderer.reload();
+    }
+
+    @Override
+    public void onDeactivate() {
+        mc.worldRenderer.reload();
     }
 
     // Overlay
@@ -484,10 +494,6 @@ public class NoRender extends Module {
     @EventHandler
     private void onChunkOcclusion(ChunkOcclusionEvent event) {
         if (noCaveCulling.get()) event.cancel();
-    }
-
-    public void chunkOcclusion() {
-        mc.worldRenderer.reload();
     }
 
     public boolean noMapMarkers() {
