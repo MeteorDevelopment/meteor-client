@@ -157,7 +157,7 @@ public class Modules extends System<Modules> {
         return modules;
     }
 
-    public int getCount() {
+    public Object getCount() {
         return moduleInstances.values().size();
     }
 

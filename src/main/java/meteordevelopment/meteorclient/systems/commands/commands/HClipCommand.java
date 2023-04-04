@@ -11,13 +11,14 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Vec3d;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class HClipCommand extends Command {
     public HClipCommand() {
-        super("hclip", "Lets you clip through blocks horizontally.");
+        super("hclip", String.valueOf(Text.translatable("text.system.commands.commands.HClipCommand")));
     }
 
     @Override

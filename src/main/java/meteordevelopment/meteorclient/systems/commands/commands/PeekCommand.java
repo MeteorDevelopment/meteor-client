@@ -18,7 +18,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 public class PeekCommand extends Command {
     private static final ItemStack[] ITEMS = new ItemStack[27];
     private static final SimpleCommandExceptionType NOT_HOLDING_SHULKER_BOX =
-            new SimpleCommandExceptionType(Text.literal("You must be holding a storage block with items in it."));
+            new SimpleCommandExceptionType(Text.literal(String.valueOf(Text.translatable("text.system.commands.commands.PeekCommand"))));
 
     public PeekCommand() {
         super("peek", "Lets you see what's inside storage block items.");

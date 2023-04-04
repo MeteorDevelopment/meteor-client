@@ -24,7 +24,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class BindsCommand extends Command {
     public BindsCommand() {
-        super("binds", "List of all bound modules.");
+        super("binds", String.valueOf(Text.translatable("text.system.commands.commands.bindsCommand")));
     }
 
     @Override
@@ -32,10 +32,9 @@ public class BindsCommand extends Command {
         builder.executes(context -> {
             // Modules
             List<Module> modules = Modules.get().getAll().stream()
-                    .filter(module -> module.keybind.isSet())
-                    .collect(Collectors.toList());
+                .filter(module -> module.keybind.isSet()).toList();
 
-            ChatUtils.info("--- Bound Modules ((highlight)%d(default)) ---", modules.size());
+            ChatUtils.info(String.valueOf(Text.translatable("text.system.commands.commands.bindsCommand.title")), modules.size());
 
             for (Module module : modules) {
                 HoverEvent hoverEvent = new HoverEvent(HoverEvent.Action.SHOW_TEXT, getTooltip(module));

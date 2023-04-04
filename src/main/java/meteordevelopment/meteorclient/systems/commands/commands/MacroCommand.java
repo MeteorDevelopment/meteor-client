@@ -10,12 +10,13 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.meteorclient.systems.commands.arguments.MacroArgumentType;
 import meteordevelopment.meteorclient.systems.macros.Macro;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class MacroCommand extends Command {
     public MacroCommand() {
-        super("macro", "Allows you to execute macros.");
+        super("macro", String.valueOf(Text.translatable("text.system.commands.commands.MacroCommand")));
     }
 
     @Override

@@ -84,7 +84,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
         return !isFriend(player);
     }
 
-    public int count() {
+    public Object count() {
         return friends.size();
     }
 

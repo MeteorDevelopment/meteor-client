@@ -41,7 +41,7 @@ public class NotebotCommand extends Command {
     private final Map<Integer, List<Note>> song = new HashMap<>(); // tick -> notes
 
     public NotebotCommand() {
-        super("notebot", "Allows you load notebot files");
+        super("notebot", String.valueOf(Text.translatable("text.system.commands.commands.NotebotCommand")));
     }
 
     @Override

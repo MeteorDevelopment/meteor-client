@@ -11,12 +11,13 @@ import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class EnderChestCommand extends Command {
     public EnderChestCommand() {
-        super("ender-chest", "Allows you to preview memory of your ender chest.", "ec", "echest");
+        super("ender-chest", String.valueOf(Text.translatable("text.system.commands.commands.EnderChestCommand")), "ec", "echest");
     }
 
     @Override

@@ -11,13 +11,14 @@ import meteordevelopment.meteorclient.systems.commands.arguments.ProfileArgument
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ProfilesCommand extends Command {
 
     public ProfilesCommand() {
-        super("profiles", "Loads and saves profiles.");
+        super("profiles", String.valueOf(Text.translatable("text.system.commands.commands.ProfilesCommand")));
     }
 
     @Override

@@ -15,12 +15,13 @@ import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class FakePlayerCommand extends Command {
     public FakePlayerCommand() {
-        super("fake-player", "Manages fake players that you can use for testing.");
+        super("fake-player", String.valueOf(Text.translatable("text.system.commands.commands.FakePlayerCommand")));
     }
 
     @Override
@@ -45,7 +46,7 @@ public class FakePlayerCommand extends Command {
                 .executes(context -> {
                     FakePlayerEntity fp = FakePlayerArgumentType.get(context);
                     if (fp == null || !FakePlayerManager.contains(fp)) {
-                        error("Couldn't find a Fake Player with that name.");
+                        error(String.valueOf(Text.translatable("text.system.commands.commands.FakePlayerCommand.notFound")));
                         return SINGLE_SUCCESS;
                     }
 

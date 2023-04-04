@@ -14,13 +14,14 @@ import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class FriendsCommand extends Command {
     public FriendsCommand() {
-        super("friends", "Manages friends.");
+        super("friends", String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand")));
     }
 
     @Override
@@ -32,9 +33,9 @@ public class FriendsCommand extends Command {
                     Friend friend = new Friend(profile.getName(), profile.getId());
 
                     if (Friends.get().add(friend)) {
-                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Added (highlight)%s (default)to friends.".formatted(friend.getName()));
+                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand.added")).formatted(friend.getName()));
                     }
-                    else error("Already friends with that player.");
+                    else error(String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand.already")));
 
                     return SINGLE_SUCCESS;
                 })
@@ -46,14 +47,14 @@ public class FriendsCommand extends Command {
                 .executes(context -> {
                     Friend friend = FriendArgumentType.get(context);
                     if (friend == null) {
-                        error("Not friends with that player.");
+                        error(String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand.not")));
                         return SINGLE_SUCCESS;
                     }
 
                     if (Friends.get().remove(friend)) {
-                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, "Removed (highlight)%s (default)from friends.".formatted(friend.getName()));
+                        ChatUtils.sendMsg(friend.hashCode(), Formatting.GRAY, String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand.removeSuccess")).formatted(friend.getName()));
                     }
-                    else error("Failed to remove that friend.");
+                    else error(String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand.removeFailed")));
 
                     return SINGLE_SUCCESS;
                 })
@@ -61,7 +62,7 @@ public class FriendsCommand extends Command {
         );
 
         builder.then(literal("list").executes(context -> {
-                info("--- Friends ((highlight)%s(default)) ---", Friends.get().count());
+                info(String.valueOf(Text.translatable("text.system.commands.commands.FriendsCommand.listTitle")), Friends.get().count());
                 Friends.get().forEach(friend -> ChatUtils.info("(highlight)%s".formatted(friend.getName())));
                 return SINGLE_SUCCESS;
             })

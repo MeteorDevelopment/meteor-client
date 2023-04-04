@@ -20,13 +20,13 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class ModulesCommand extends Command {
     public ModulesCommand() {
-        super("modules", "Displays a list of all modules.", "features");
+        super("modules", String.valueOf(Text.translatable("text.system.commands.commands.ModulesCommand")), "features");
     }
 
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- Modules ((highlight)%d(default)) ---", Modules.get().getCount());
+            ChatUtils.info(String.valueOf(Text.translatable("text.system.commands.commands.ModulesCommand.title")), Modules.get().getCount());
 
             Modules.loopCategories().forEach(category -> {
                 MutableText categoryMessage = Text.literal("");

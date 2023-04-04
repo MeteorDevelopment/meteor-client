@@ -27,7 +27,7 @@ import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class NbtCommand extends Command {
     public NbtCommand() {
-        super("nbt", "Modifies NBT data for an item, example: .nbt add {display:{Name:'{\"text\":\"$cRed Name\"}'}}");
+        super("nbt", String.valueOf(Text.translatable("text.system.commands.commands.NbtCommand")));
     }
 
     @Override

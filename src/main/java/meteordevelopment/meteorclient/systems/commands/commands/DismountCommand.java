@@ -9,12 +9,13 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import net.minecraft.command.CommandSource;
 import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
+import net.minecraft.text.Text;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class DismountCommand extends Command {
     public DismountCommand() {
-        super("dismount", "Dismounts you from entity you are riding.");
+        super("dismount", String.valueOf(Text.translatable("text.system.commands.commands.DismountCommand")));
     }
 
     @Override

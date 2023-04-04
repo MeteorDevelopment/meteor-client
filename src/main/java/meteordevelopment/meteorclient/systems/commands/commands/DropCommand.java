@@ -25,7 +25,7 @@ public class DropCommand extends Command {
     private static final SimpleCommandExceptionType NO_SUCH_ITEM = new SimpleCommandExceptionType(Text.literal("Could not find an item with that name!"));
 
     public DropCommand() {
-        super("drop", "Automatically drops specified items.");
+        super("drop", String.valueOf(Text.translatable("text.system.commands.commands.DropCommand")));
     }
 
     @Override

@@ -58,7 +58,7 @@ public class LocateCommand extends Command {
     );
 
     public LocateCommand() {
-        super("locate", "Locates structures", "loc");
+        super("locate", String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand")), "loc");
     }
 
     @Override
@@ -66,24 +66,24 @@ public class LocateCommand extends Command {
         builder.then(literal("buried_treasure").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {
-                error("You need to hold a treasure map first");
+                error(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.needMap")));
                 return SINGLE_SUCCESS;
             }
             NbtCompound tag = stack.getNbt();
             NbtList nbt1 = (NbtList) tag.get("Decorations");
             if (nbt1 == null) {
-                error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
+                error(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.wrongMap")));
                 return SINGLE_SUCCESS;
             }
 
             NbtCompound iconNBT = nbt1.getCompound(0);
             if (iconNBT == null) {
-                error("Couldn't locate the cross. Are you holding a (highlight)treasure map(default)?");
+                error(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.wrongMap")));
                 return SINGLE_SUCCESS;
             }
 
             Vec3d coords = new Vec3d(iconNBT.getDouble("x"),iconNBT.getDouble("y"),iconNBT.getDouble("z"));
-            MutableText text = Text.literal("Buried Treasure located at ");
+            MutableText text = Text.literal(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.buried")));
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);
@@ -93,22 +93,22 @@ public class LocateCommand extends Command {
         builder.then(literal("lodestone").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.COMPASS) {
-                error("You need to hold a lodestone compass");
+                error(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.needCompass")));
                 return SINGLE_SUCCESS;
             }
             NbtCompound tag = stack.getNbt();
             if (tag == null) {
-                error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+                error(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.wrongCompass")));
                 return SINGLE_SUCCESS;
             }
             NbtCompound nbt1 = tag.getCompound("LodestonePos");
             if (nbt1 == null) {
-                error("Couldn't get the NBT data. Are you holding a (highlight)lodestone(default) compass?");
+                error(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.wrongCompass")));
                 return SINGLE_SUCCESS;
             }
 
             Vec3d coords = new Vec3d(nbt1.getDouble("X"),nbt1.getDouble("Y"),nbt1.getDouble("Z"));
-            MutableText text = Text.literal("Lodestone located at ");
+            MutableText text = Text.literal(String.valueOf(Text.translatable("text.system.commands.commands.LocateCommand.compass")));
             text.append(ChatUtils.formatCoords(coords));
             text.append(".");
             info(text);

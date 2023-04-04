@@ -32,7 +32,7 @@ public class EnchantCommand extends Command {
     private final static SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(Text.literal("You need to hold some item to enchant."));
 
     public EnchantCommand() {
-        super("enchant", "Enchants the item in your hand. REQUIRES Creative mode.");
+        super("enchant", String.valueOf(Text.translatable("text.system.commands.commands.EnchantCommand")));
     }
 
     @Override

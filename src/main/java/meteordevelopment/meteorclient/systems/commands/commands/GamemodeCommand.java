@@ -8,13 +8,14 @@ package meteordevelopment.meteorclient.systems.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.systems.commands.Command;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 import net.minecraft.world.GameMode;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class GamemodeCommand extends Command {
     public GamemodeCommand() {
-        super("gamemode", "Changes your gamemode client-side.", "gm");
+        super("gamemode", String.valueOf(Text.translatable("text.system.commands.commands.GamemodeCommand")), "gm");
     }
 
     @Override

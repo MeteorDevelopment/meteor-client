@@ -8,6 +8,7 @@ import meteordevelopment.meteorclient.systems.commands.Command;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.command.CommandSource;
+import net.minecraft.text.Text;
 
 import java.util.Map;
 
@@ -26,7 +27,7 @@ public class InputCommand extends Command {
     );
 
     public InputCommand() {
-        super("input", "Keyboard input simulation.");
+        super("input", String.valueOf(Text.translatable("text.system.commands.commands.InputCommand")));
     }
 
     @Override
