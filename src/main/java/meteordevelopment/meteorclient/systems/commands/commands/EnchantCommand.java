@@ -20,6 +20,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.Text;
 
 import java.util.function.Function;
@@ -79,7 +80,8 @@ public class EnchantCommand extends Command {
 
         builder.then(literal("remove").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(Commands.REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT)).executes(context -> {
             ItemStack itemStack = tryGetItemStack();
-            Utils.removeEnchantment(itemStack, context.getArgument("enchantment", Enchantment.class));
+            RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
+            Utils.removeEnchantment(itemStack, enchantment.value());
 
             syncItem();
             return SINGLE_SUCCESS;
@@ -89,8 +91,8 @@ public class EnchantCommand extends Command {
     private void one(CommandContext<CommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
-        Enchantment enchantment = context.getArgument("enchantment", Enchantment.class);
-        Utils.addEnchantment(itemStack, enchantment, level.apply(enchantment));
+        RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
+        Utils.addEnchantment(itemStack, enchantment.value(), level.apply(enchantment.value()));
 
         syncItem();
     }

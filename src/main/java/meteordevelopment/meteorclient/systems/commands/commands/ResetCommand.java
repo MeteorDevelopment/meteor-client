@@ -36,7 +36,7 @@ public class ResetCommand extends Command {
                 }))
                 .then(literal("all").executes(context -> {
                     Modules.get().getAll().forEach(module -> module.settings.forEach(group -> group.forEach(Setting::reset)));
-                    ChatUtils.info("Modules", "Reset all module settings");
+                    ChatUtils.infoPrefix("Modules", "Reset all module settings");
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("gui").executes(context -> {
@@ -54,12 +54,12 @@ public class ResetCommand extends Command {
                 }))
                 .then(literal("all").executes(context -> {
                     Modules.get().getAll().forEach(module -> module.keybind.set(true, -1));
-                    ChatUtils.info("Modules", "Reset all binds.");
+                    ChatUtils.infoPrefix("Modules", "Reset all binds.");
                     return SINGLE_SUCCESS;
                 }))
         ).then(literal("hud").executes(context -> {
             Systems.get(Hud.class).resetToDefaultElements();
-            ChatUtils.info("HUD", "Reset all elements.");
+            ChatUtils.infoPrefix("HUD", "Reset all elements.");
             return SINGLE_SUCCESS;
         }));
     }

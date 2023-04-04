@@ -19,7 +19,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
@@ -50,6 +49,8 @@ public class CombatHud extends HudElement {
     private static final Color BLACK = new Color(0, 0, 0, 255);
 
     public static final HudElementInfo<CombatHud> INFO = new HudElementInfo<>(Hud.GROUP, "combat", "Displays information about your combat target.", CombatHud::new);
+
+    private static final MatrixStack MATRICES = new MatrixStack();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -210,6 +211,7 @@ public class CombatHud extends HudElement {
 
             // Player Model
             InventoryScreen.drawEntity(
+                MATRICES,
                 (int) (x + (25 * scale.get())),
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),

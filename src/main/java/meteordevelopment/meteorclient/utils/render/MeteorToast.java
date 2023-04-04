@@ -35,15 +35,15 @@ public class MeteorToast implements Toast {
 
     public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text, long duration) {
         this.icon = item != null ? item.getDefaultStack() : null;
-        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
-        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
+        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
+        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) : null;
         this.duration = duration;
     }
 
     public MeteorToast(@Nullable Item item, @NotNull String title, @Nullable String text) {
         this.icon = item != null ? item.getDefaultStack() : null;
-        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
-        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
+        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
+        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) : null;
         this.duration = 6000;
     }
 
@@ -69,7 +69,7 @@ public class MeteorToast implements Toast {
 
         mc.textRenderer.draw(matrices, title, x, titleY, TITLE_COLOR);
 
-        if (icon != null) mc.getItemRenderer().renderInGui(icon, 8, 8);
+        if (icon != null) mc.getItemRenderer().renderInGui(matrices, icon, 8, 8);
 
         if (!playedSound) {
             mc.getSoundManager().play(getSound());
@@ -85,12 +85,12 @@ public class MeteorToast implements Toast {
     }
 
     public void setTitle(@NotNull String title) {
-        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(new TextColor(TITLE_COLOR)));
+        this.title = Text.literal(title).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TITLE_COLOR)));
         justUpdated = true;
     }
 
     public void setText(@Nullable String text) {
-        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(new TextColor(TEXT_COLOR))) : null;
+        this.text = text != null ? Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(TEXT_COLOR))) : null;
         justUpdated = true;
     }
 

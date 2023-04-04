@@ -81,7 +81,7 @@ public class InventoryHud extends HudElement {
             drawBackground(renderer, (int) x, (int) y, drawColor);
         }
 
-        if (mc.player != null) {
+        renderer.post(() -> {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
                     int index = row * 9 + i;
@@ -91,10 +91,10 @@ public class InventoryHud extends HudElement {
                     int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * scale.get()) : (int) (x + (1 + i * 18) * scale.get());
                     int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * scale.get()) : (int) (y + (1 + row * 18) * scale.get());
 
-                    RenderUtils.drawItem(stack, itemX, itemY, scale.get(), true);
+                    RenderUtils.drawItem(stack, itemX, itemY, scale.get().floatValue(), true);
                 }
             }
-        }
+        });
     }
 
     private void drawBackground(HudRenderer renderer, int x, int y, Color color) {

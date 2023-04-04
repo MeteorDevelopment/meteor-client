@@ -31,7 +31,7 @@ public class MeshVertexConsumerProvider implements IVertexConsumerProvider {
         vertexConsumer.setOffset(offsetX, offsetY, offsetZ);
     }
 
-    private static class MeshVertexConsumer implements VertexConsumer {
+    public static class MeshVertexConsumer implements VertexConsumer {
         private final Mesh mesh;
 
         private double offsetX, offsetY, offsetZ;

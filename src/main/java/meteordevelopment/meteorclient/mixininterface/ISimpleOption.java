@@ -3,5 +3,8 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.mixin;public interface StarscriptAccessor {
+package meteordevelopment.meteorclient.mixininterface;
+
+public interface ISimpleOption {
+    void set(Object value);
 }

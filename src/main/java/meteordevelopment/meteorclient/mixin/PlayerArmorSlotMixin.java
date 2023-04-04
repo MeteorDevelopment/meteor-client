@@ -16,7 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(targets = "net/minecraft/screen/PlayerScreenHandler$1")
 public class PlayerArmorSlotMixin {
-
     @Inject(method = "getMaxItemCount", at = @At("HEAD"), cancellable = true)
     private void onGetMaxItemCount(CallbackInfoReturnable<Integer> cir) {
         if (Modules.get().get(InventoryTweaks.class).armorStorage()) cir.setReturnValue(64);

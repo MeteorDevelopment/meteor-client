@@ -32,6 +32,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static net.minecraft.client.MinecraftClient.IS_SYSTEM_MAC;
 
 public class MeteorGuiTheme extends GuiTheme {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -357,7 +358,13 @@ public class MeteorGuiTheme extends GuiTheme {
 
     @Override
     public double scale(double value) {
-        return value * scale.get();
+        double scaled = value * scale.get();
+
+        if (IS_SYSTEM_MAC) {
+            scaled /= (double) mc.getWindow().getWidth() / mc.getWindow().getFramebufferWidth();
+        }
+
+        return scaled;
     }
 
     @Override

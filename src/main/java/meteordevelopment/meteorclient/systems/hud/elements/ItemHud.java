@@ -24,6 +24,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class ItemHud extends HudElement {
     public static HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
 
+    private static final MatrixStack MATRICES = new MatrixStack();
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
@@ -127,22 +129,22 @@ public class ItemHud extends HudElement {
     private void render(ItemStack itemStack, int x, int y) {
         switch (noneMode.get()) {
             case HideItem -> {
-                mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
+                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
+                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
             }
             case HideCount -> {
                 if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-                mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
+                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
                 if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
 
                 if (!itemStack.isEmpty()) {
-                    mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
+                    mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
                 }
             }
             case ShowCount -> {
                 if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-                mc.getItemRenderer().renderGuiItemIcon(itemStack, x, y);
-                mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount() == Integer.MAX_VALUE ? 0 : itemStack.getCount()));
+                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
+                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount() == Integer.MAX_VALUE ? 0 : itemStack.getCount()));
                 if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
             }
         }
