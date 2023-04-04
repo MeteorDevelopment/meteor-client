@@ -252,6 +252,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
+        .onChanged(reload -> chunkOcclusion())
         .build()
     );
 
@@ -483,6 +484,10 @@ public class NoRender extends Module {
     @EventHandler
     private void onChunkOcclusion(ChunkOcclusionEvent event) {
         if (noCaveCulling.get()) event.cancel();
+    }
+
+    public void chunkOcclusion() {
+        mc.worldRenderer.reload();
     }
 
     public boolean noMapMarkers() {
