@@ -353,12 +353,12 @@ public class NoRender extends Module {
 
     @Override
     public void onActivate() {
-        mc.worldRenderer.reload();
+        if (noCaveCulling.get()) mc.worldRenderer.reload();
     }
 
     @Override
     public void onDeactivate() {
-        mc.worldRenderer.reload();
+        if (noCaveCulling.get()) mc.worldRenderer.reload();
     }
 
     // Overlay
