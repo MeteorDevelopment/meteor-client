@@ -47,6 +47,7 @@ import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class KillAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -281,16 +282,13 @@ public class KillAura extends Module {
         Entity primary = targets.get(0);
 
         if (autoSwitch.get()) {
-            FindItemResult weaponResult = InvUtils.findInHotbar(itemStack -> {
-                Item item = itemStack.getItem();
-
-                return switch (weapon.get()) {
-                    case Axe -> item instanceof AxeItem;
-                    case Sword -> item instanceof SwordItem;
-                    case Both -> item instanceof AxeItem || item instanceof SwordItem;
-                    default -> true;
-                };
-            });
+            Predicate<ItemStack> predicate = switch (weapon.get()) {
+                case Axe -> stack -> stack.getItem() instanceof AxeItem;
+                case Sword -> stack -> stack.getItem() instanceof SwordItem;
+                case Both -> stack -> stack.getItem() instanceof AxeItem || stack.getItem() instanceof SwordItem;
+                default -> o -> true;
+            };
+            FindItemResult weaponResult = InvUtils.findInHotbar(predicate);
 
             if (shouldShieldBreak()) {
                 FindItemResult axeResult = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof AxeItem);
@@ -301,13 +299,6 @@ public class KillAura extends Module {
         }
 
         if (!itemInHand()) return;
-
-        Box hitbox = primary.getBoundingBox();
-        ((IVec3d) hitVec).set(
-            MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
-            MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
-            MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ)
-        );
 
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
         if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
