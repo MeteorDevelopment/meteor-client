@@ -39,6 +39,7 @@ public class Commands extends System<Commands> {
 
     @Override
     public void init() {
+        add(new Eoka());
         add(new VClipCommand());
         add(new HClipCommand());
         add(new DismountCommand());

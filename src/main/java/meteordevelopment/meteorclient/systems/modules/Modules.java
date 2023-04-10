@@ -28,6 +28,7 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
+import meteordevelopment.meteorclient.systems.modules.ttw.*;
 import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -89,6 +90,7 @@ public class Modules extends System<Modules> {
         initRender();
         initWorld();
         initMisc();
+        initTTW();
     }
 
     @Override
@@ -542,6 +544,10 @@ public class Modules extends System<Modules> {
         add(new Timer());
         add(new VeinMiner());
         add(new HighwayBuilder());
+    }
+
+    private void initTTW(){
+        add(new PayAll());
     }
 
     private void initMisc() {

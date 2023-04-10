@@ -45,6 +45,10 @@ configurations {
 }
 
 dependencies {
+    //json
+    implementation 'org.json:json:20210307'
+    //okhhtp
+    implementation 'com.squareup.okhttp3:okhttp:4.9.1'
 	// Fabric
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"

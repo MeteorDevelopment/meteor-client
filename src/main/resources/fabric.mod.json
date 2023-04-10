@@ -1,13 +1,15 @@
 {
   "schemaVersion": 1,
-  "name": "Meteor Client",
+  "name": "Meteor Client TTW",
   "id": "meteor-client",
   "version": "${version}",
   "description": "Based utility mod.",
   "authors": [
     "MineGame159",
     "squidoodly",
-    "seasnail"
+    "seasnail",
+    "Dwarslooper",
+    "MagpieMan"
   ],
   "contact": {
     "homepage": "https://meteorclient.com",
