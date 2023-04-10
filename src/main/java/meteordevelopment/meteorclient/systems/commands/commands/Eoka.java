@@ -90,7 +90,7 @@ public class Eoka extends Command {
             String playerList = Strings.join(players.toArray(new String[0]), ", ");
             info("Players (%d): %s ", players.size(), playerList);
             try {
-                URL url = new URL("http://localhost:5000/api/players/receive");
+                URL url = new URL("https://eoka-site.glitch.me/api/players/receive");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setDoOutput(true);
@@ -139,9 +139,32 @@ public class Eoka extends Command {
         Collections.sort(plugins);
 
         if (!plugins.isEmpty()) {
+            MinecraftClient client = MinecraftClient.getInstance();
+            Object ip = client.getNetworkHandler().getConnection().getAddress().toString();
+            String pluginlist = Strings.join(plugins.toArray(new String[0]), ", ");
             info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+            try {
+                URL url = new URL("https://eoka-site.glitch.me/api/plugins/receive");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setDoOutput(true);
+                conn.setRequestProperty("Content-Type", "application/json");
+                OutputStream os = conn.getOutputStream();
+                String jsonInputString = "{ \"ip\": \"" + ip + "\", \"plugins\": \"" + pluginlist + "\" }";
+                byte[] input = jsonInputString.getBytes("utf-8");
+                os.write(input, 0, input.length);
+                BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream(), "utf-8"));
+                String responseLine = null;
+                while ((responseLine = br.readLine()) != null) {
+                    System.out.println(responseLine);
+                }
+                os.close();
+                br.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         } else {
-            error("No plugins found.");
+            error("No Plugins found.");
         }
 
         ticks = 0;
