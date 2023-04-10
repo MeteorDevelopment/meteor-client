@@ -4,7 +4,7 @@
 </p>
 
 <h1 align="center">Meteor Client TTW Edition</h1>
-<p align="center">A Minecraft Fabric Utility Mod for anarchy servers. Now with added features to help the antip2w community</p>
+<p align="center">A Minecraft Fabric Utility Mod for anarchy servers. Now with added features to help the AntiP2W community</p>
 
 <div align="center">
     <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
