@@ -3,8 +3,8 @@
 <img src="https://meteorclient.com/icon.png" alt="meteor-client-logo" width="15%"/>
 </p>
 
-<h1 align="center">Meteor Client</h1>
-<p align="center">A Minecraft Fabric Utility Mod for anarchy servers.</p>
+<h1 align="center">Meteor Client TTW Edition</h1>
+<p align="center">A Minecraft Fabric Utility Mod for anarchy servers. Now with added features to help the antip2w community</p>
 
 <div align="center">
     <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
@@ -50,6 +50,7 @@ You will be rewarded with a role on our Discord server, an in-game cape, and an 
 ## Credits
 [Cabaletta](https://github.com/cabaletta) and [WagYourTail](https://github.com/wagyourtail) for [Baritone](https://github.com/cabaletta/baritone)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
+Developer of the [Payall Mod](https://github.com/Dwarslooper/NoMoreP2W)
 
 ## Licensing
 This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). 
