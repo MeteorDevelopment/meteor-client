@@ -19,6 +19,11 @@
 
 ## Usage
 
+### Added Features
+- .kick command ported from meteor rejects
+- .eoka commands for interfacing with https://eoka-site.glitch.me (cloned and modified from the original meteor server command)
+- .payall mod ported from https://github.com/Dwarslooper/NoMoreP2W
+
 ### Building
 - Clone this repository
 - Run `./gradlew build`
