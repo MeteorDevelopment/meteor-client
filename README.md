@@ -7,7 +7,7 @@
 <p align="center">A Minecraft Fabric Utility Mod for anarchy servers. Now with added features to help the AntiP2W community</p>
 
 <div align="center">
-    <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/689197705683140636?logo=discord" alt="Discord"/></a>
+    <a href="https://discord.gg/bBGQZvd"><img src="https://img.shields.io/discord/1095007520885583943?logo=discord" alt="Discord"/></a>
     <br>
     <img src="https://img.shields.io/github/last-commit/TheUnsocialEngineer/meteor-client-ttw" alt="GitHub last commit"/>
     <img src="https://img.shields.io/github/commit-activity/w/TheUnsocialEngineer/meteor-client-ttw" alt="GitHub commit activity"/>
