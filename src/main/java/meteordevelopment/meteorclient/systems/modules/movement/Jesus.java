@@ -22,7 +22,7 @@ import net.minecraft.block.Material;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
@@ -213,7 +213,8 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onFluidCollisionShape(CollisionShapeEvent event) {
-        if (event.type != CollisionShapeEvent.CollisionType.FLUID) return;
+        if (event.state.getFluidState().isEmpty()) return;
+
         if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
         }

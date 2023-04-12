@@ -13,10 +13,12 @@ public class DamageEvent {
 
     public LivingEntity entity;
     public DamageSource source;
+    public float amount;
 
-    public static DamageEvent get(LivingEntity entity, DamageSource source) {
+    public static DamageEvent get(LivingEntity entity, DamageSource source, float amount) {
         INSTANCE.entity = entity;
         INSTANCE.source = source;
+        INSTANCE.amount = amount;
         return INSTANCE;
     }
 }
