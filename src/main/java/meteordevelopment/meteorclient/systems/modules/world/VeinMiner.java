@@ -171,8 +171,7 @@ public class VeinMiner extends Module {
     private MyBlock getNextVisibleBlock() {
         if (checkVisibility.get()){
             for (MyBlock block : blocks) {
-                BlockPos offsetPos = block.blockPos.add(0.5, 0.5, 0.5);
-                BlockHitResult hitResult = BlockUtils.raycastBlock(offsetPos);
+                BlockHitResult hitResult = BlockUtils.raycastBlock(block.blockPos);
 
                 if (hitResult.getBlockPos().equals(block.blockPos)) {
                     block.direction = hitResult.getSide();
@@ -299,15 +298,16 @@ public class VeinMiner extends Module {
 
     private double getClosestDistance(BlockPos pos) {
         double closestDistance = 100000f;
-
+    
         for (Direction direction : Direction.values()){
             BlockPos offsetPos = pos.offset(direction);
-            Vec3d eyePos = mc.player.getEyePos();
-            double distance = Utils.distance(eyePos.getX() - 0.7, eyePos.getY() - 0.7, eyePos.getZ() - 0.7, offsetPos.getX(), offsetPos.getY(), offsetPos.getZ());
-
+            Vec3d eyePos = mc.player.getCameraPosVec(1.0F);
+            double eyeHeightOffset = mc.player.getEyeHeight(mc.player.getPose()) + 0.5;
+            double distance = Utils.distance(eyePos.getX(), eyePos.getY() + eyeHeightOffset, eyePos.getZ(), offsetPos.getX(), offsetPos.getY(), offsetPos.getZ());
+    
             closestDistance = Math.min(closestDistance, distance);
         }
-
+    
         return closestDistance;
     }
     
