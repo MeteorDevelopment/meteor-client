@@ -112,7 +112,17 @@ public class Scaffold extends Module {
         .defaultValue(0)
         .min(0)
         .max(6)
-        .visible(() -> airPlace.get())
+        .visible(airPlace::get)
+        .build()
+    );
+
+    private final Setting<Double> down = sgGeneral.add(new DoubleSetting.Builder()
+        .name("down")
+        .description("How many blocks to build down.")
+        .defaultValue(0)
+        .min(0)
+        .max(6)
+        .visible(airPlace::get)
         .build()
     );
 
@@ -121,7 +131,7 @@ public class Scaffold extends Module {
         .description("How many blocks to place in one tick.")
         .defaultValue(3)
         .min(1)
-        .visible(() -> airPlace.get())
+        .visible(airPlace::get)
         .build()
     );
 
@@ -199,9 +209,7 @@ public class Scaffold extends Module {
                         }
                     }
                 }
-                if (blockPosArray.size() == 0) {
-                    return;
-                }
+                if (blockPosArray.isEmpty()) return;
 
                 blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
 
@@ -234,28 +242,27 @@ public class Scaffold extends Module {
         }
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
-        fastTower(false, null);
+        if (getItem() != null) fastTower(false, null);
 
         if (airPlace.get()) {
             List<BlockPos> blocks = new ArrayList<>();
-            for (int x = (int) (mc.player.getX() - radius.get()); x < mc.player.getX() + radius.get(); x++) {
-                for (int z = (int) (mc.player.getZ() - radius.get()); z < mc.player.getZ() + radius.get(); z++) {
-                    blocks.add(BlockPos.ofFloored(x, mc.player.getY() - 0.5, z));
+
+            for (int x = (int) (mc.player.getX() - radius.get()); x <= (int) (mc.player.getX() + radius.get()); x++)
+                for (int z = (int) (mc.player.getZ() - radius.get()); z <= (int) (mc.player.getZ() + radius.get()); z++)
+                    for (int y = (int) (mc.player.getY() - 0.98 - down.get()); y <= (int) mc.player.getY() - 0.98; y++)
+                        blocks.add(new BlockPos(x, y, z));
+
+            blocks.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
+
+            int counter = 0;
+            for (BlockPos block : blocks) {
+                if (place(block)) {
+                    fastTower(true, block);
+                    counter++;
                 }
-            }
 
-            if (!blocks.isEmpty()) {
-                blocks.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
-                int counter = 0;
-                for (BlockPos block : blocks) {
-                    if (place(block)) {
-                        fastTower(true, block);
-                        counter++;
-                    }
-
-                    if (counter >= blocksPerTick.get()) {
-                        break;
-                    }
+                if (counter >= blocksPerTick.get()) {
+                    break;
                 }
             }
         } else {
@@ -282,14 +289,15 @@ public class Scaffold extends Module {
         return !(block instanceof FallingBlock) || !FallingBlock.canFallThrough(mc.world.getBlockState(pos));
     }
 
-    private boolean place(BlockPos bp) {
+    private FindItemResult getItem() {
         FindItemResult item = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
-        if (!item.found()) return false;
+        if (!item.found()) return null;
+        if (item.getHand() == null && !autoSwitch.get()) return null;
+        return item;
+    }
 
-        if (item.getHand() == null && !autoSwitch.get()) return false;
-
-        if (BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
-            // Render block if was placed
+    private boolean place(BlockPos bp) {
+        if (BlockUtils.place(bp, getItem(), rotate.get(), 50, renderSwing.get(), true)) {
             if (render.get())
                 RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
             return true;
