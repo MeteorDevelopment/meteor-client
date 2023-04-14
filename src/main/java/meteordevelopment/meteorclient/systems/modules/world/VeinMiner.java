@@ -95,14 +95,14 @@ public class VeinMiner extends Module {
     );
 
 	private final Setting<Boolean> mineUnderPlayer = sgGeneral.add(new BoolSetting.Builder()
-        .name("Under mining")
-        .description("Allow this feature to mine under you.")
+        .name("mine-under-player")
+        .description("Enable the possibility to mine under you.")
         .defaultValue(true)
         .build());
 
 	private final Setting<Boolean> checkVisibility = sgGeneral.add(new BoolSetting.Builder()
-        .name("Visibility check")
-        .description("Check only block in line of sight.")
+        .name("check-visibility")
+        .description("Mine only block in line of sight.")
         .defaultValue(false)
         .build());
 
