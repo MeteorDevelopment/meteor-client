@@ -70,7 +70,7 @@ public class Xray extends Module {
     );
 
     private final Setting<Boolean> exposedOnly = sgGeneral.add(new BoolSetting.Builder()
-        .name("exposed only")
+        .name("exposed-only")
         .description("Show only exposed ores.")
         .defaultValue(false)
         .onChanged(onChanged -> {
