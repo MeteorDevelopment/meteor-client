@@ -92,7 +92,7 @@ public class Scaffold extends Module {
 
     private final Setting<Boolean> airPlace = sgGeneral.add(new BoolSetting.Builder()
         .name("air-place")
-        .description("Allow air place. This also allows you to modify scaffold radius.")
+        .description("Allow air place. This also allows you to modify scaffolding radius.")
         .defaultValue(false)
         .build()
     );
@@ -195,9 +195,9 @@ public class Scaffold extends Module {
         } else if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
             bp.set(mc.player.getBlockPos().down());
         } else {
-            Vec3d pos = mc.player.getPos();
-            pos = pos.add(0, -0.98f, 0);
-            pos.add(mc.player.getVelocity());
+            Vec3d pos = mc.player.getPos()
+                .add(0, -0.98f, 0)
+                .add(mc.player.getVelocity());
 
             if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
                 PriorityQueue<BlockPos> blockPosQueue = new PriorityQueue<>(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
@@ -212,18 +212,13 @@ public class Scaffold extends Module {
                 if (!blockPosQueue.isEmpty()) prevBp.set(blockPosQueue.poll());
             }
 
-            Vec3d vecPrevBP = new Vec3d(prevBp.getX() + 0.5, prevBp.getY() + 0.5, prevBp.getZ() + 0.5);
-            Vec3d sub = pos.subtract(vecPrevBP);
+            Vec3d sub = pos.subtract(Vec3d.ofCenter(prevBp));
             Direction facing;
-            if (sub.getY() < -0.5f) {
-                facing = Direction.DOWN;
-            } else if (sub.getY() > 0.5f) {
-                facing = Direction.UP;
-            } else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
+            if (sub.getY() < -0.5f) facing = Direction.DOWN;
+            else if (sub.getY() > 0.5f) facing = Direction.UP;
+            else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
 
             bp.set(prevBp.offset(facing));
-
-
         }
 
         // Move down if shifting
@@ -252,17 +247,11 @@ public class Scaffold extends Module {
 
             int counter = 0;
             while (counter < blocksPerTick.get() && !blocks.isEmpty()) {
-                BlockPos block = blocks.poll();
-                if (place(block)) {
-                    fastTower(true, block);
-                    counter++;
-                }
+                if (place(blocks.poll())) counter++;
             }
         } else {
-            if (place(bp)) fastTower(true, bp);
-            if (!mc.world.getBlockState(bp).isAir()) {
-                prevBp.set(bp);
-            }
+            place(bp);
+            if (!mc.world.getBlockState(bp).isAir()) prevBp.set(bp);
         }
     }
 
@@ -294,6 +283,7 @@ public class Scaffold extends Module {
         if (item != null && BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
             if (render.get())
                 RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
+            fastTower(true, bp);
             return true;
         }
         return false;
