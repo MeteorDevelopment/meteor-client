@@ -25,9 +25,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 public class Scaffold extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -98,7 +99,7 @@ public class Scaffold extends Module {
 
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("closest-block-range")
-        .description("How far can scaffold place blocks when you are in air.")
+        .description(" when you are in air.")
         .defaultValue(4)
         .min(0)
         .sliderMax(8)
@@ -121,7 +122,7 @@ public class Scaffold extends Module {
         .description("How many blocks to build down.")
         .defaultValue(0)
         .min(0)
-        .max(6)
+        .max(8)
         .visible(airPlace::get)
         .build()
     );
@@ -199,27 +200,19 @@ public class Scaffold extends Module {
             pos.add(mc.player.getVelocity());
 
             if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
-                List<BlockPos> blockPosArray = new ArrayList<>();
-
-                for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
-                    for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                        for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
+                PriorityQueue<BlockPos> blockPosQueue = new PriorityQueue<>(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
+                for (double x = Math.floor(mc.player.getX() - placeRange.get()); x < Math.floor(mc.player.getX() + placeRange.get()); x++) {
+                    for (double z = Math.floor(mc.player.getZ() - placeRange.get()); z < Math.floor(mc.player.getZ() + placeRange.get()); z++) {
+                        for (double y = Math.max(mc.world.getBottomY(), Math.floor(mc.player.getY() - placeRange.get())); y <= Math.min(mc.world.getTopY(), Math.floor(mc.player.getY() + placeRange.get())); y++) {
                             bp.set(x, y, z);
-                            if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
+                            if (!mc.world.getBlockState(bp).isAir()) blockPosQueue.add(new BlockPos(bp));
                         }
                     }
                 }
-                if (blockPosArray.isEmpty()) return;
-
-                blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
-
-                prevBp.set(blockPosArray.get(0));
+                if (!blockPosQueue.isEmpty()) prevBp.set(blockPosQueue.poll());
             }
 
-            Vec3d vecPrevBP = new Vec3d((double) prevBp.getX() + 0.5f,
-                (double) prevBp.getY() + 0.5f,
-                (double) prevBp.getZ() + 0.5f);
-
+            Vec3d vecPrevBP = new Vec3d(prevBp.getX() + 0.5, prevBp.getY() + 0.5, prevBp.getZ() + 0.5);
             Vec3d sub = pos.subtract(vecPrevBP);
             Direction facing;
             if (sub.getY() < -0.5f) {
@@ -229,6 +222,8 @@ public class Scaffold extends Module {
             } else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
 
             bp.set(prevBp.offset(facing));
+
+
         }
 
         // Move down if shifting
@@ -243,26 +238,24 @@ public class Scaffold extends Module {
         if (!lastWasSneaking) lastSneakingY = mc.player.getY();
 
         if (getItem() != null) fastTower(false, null);
+        else return;
 
         if (airPlace.get()) {
-            List<BlockPos> blocks = new ArrayList<>();
-
-            for (int x = (int) (mc.player.getX() - radius.get()); x <= (int) (mc.player.getX() + radius.get()); x++)
-                for (int z = (int) (mc.player.getZ() - radius.get()); z <= (int) (mc.player.getZ() + radius.get()); z++)
-                    for (int y = (int) (mc.player.getY() - 0.98 - down.get()); y <= (int) mc.player.getY() - 0.98; y++)
-                        blocks.add(new BlockPos(x, y, z));
-
-            blocks.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
+            Queue<BlockPos> blocks = new PriorityQueue<>(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
+            for (double x = Math.floor(mc.player.getX() - radius.get()); x <= Math.floor(mc.player.getX() + radius.get()); x++) {
+                for (double z = Math.floor(mc.player.getZ() - radius.get()); z <= Math.floor(mc.player.getZ() + radius.get()); z++) {
+                    for (double y = Math.floor(Math.max(mc.world.getBottomY(), mc.player.getY() - down.get() - 0.98)); y <= Math.floor(Math.min(mc.world.getTopY(), mc.player.getY() - 0.98)); y++) {
+                        blocks.offer(BlockPos.ofFloored(x, y, z));
+                    }
+                }
+            }
 
             int counter = 0;
-            for (BlockPos block : blocks) {
+            while (counter < blocksPerTick.get() && !blocks.isEmpty()) {
+                BlockPos block = blocks.poll();
                 if (place(block)) {
                     fastTower(true, block);
                     counter++;
-                }
-
-                if (counter >= blocksPerTick.get()) {
-                    break;
                 }
             }
         } else {
@@ -297,7 +290,8 @@ public class Scaffold extends Module {
     }
 
     private boolean place(BlockPos bp) {
-        if (BlockUtils.place(bp, getItem(), rotate.get(), 50, renderSwing.get(), true)) {
+        FindItemResult item = getItem();
+        if (item != null && BlockUtils.place(bp, item, rotate.get(), 50, renderSwing.get(), true)) {
             if (render.get())
                 RenderUtils.renderTickingBlock(bp.toImmutable(), sideColor.get(), lineColor.get(), shapeMode.get(), 0, 8, true, false);
             return true;
