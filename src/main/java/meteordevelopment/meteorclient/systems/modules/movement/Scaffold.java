@@ -189,16 +189,14 @@ public class Scaffold extends Module {
     private void onTick(TickEvent.Pre event) {
         if (onlyOnClick.get() && !mc.options.useKey.isPressed()) return;
 
+        Vec3d pos = mc.player.getPos().add(mc.player.getVelocity());
         if (airPlace.get()) {
-            Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
-            bp.set(vec.getX(), vec.getY(), vec.getZ());
+            pos = pos.add(0, -0.5f, 0);
+            bp.set(pos.getX(), pos.getY(), pos.getZ());
         } else if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
             bp.set(mc.player.getBlockPos().down());
         } else {
-            Vec3d pos = mc.player.getPos()
-                .add(0, -0.98f, 0)
-                .add(mc.player.getVelocity());
-
+            pos = pos.add(0, -0.98f, 0);
             if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
                 PriorityQueue<BlockPos> blockPosQueue = new PriorityQueue<>(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
                 for (double x = Math.floor(mc.player.getX() - placeRange.get()); x < Math.floor(mc.player.getX() + placeRange.get()); x++) {
@@ -237,18 +235,15 @@ public class Scaffold extends Module {
 
         if (airPlace.get()) {
             Queue<BlockPos> blocks = new PriorityQueue<>(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
-            for (double x = Math.floor(mc.player.getX() - radius.get()); x <= Math.floor(mc.player.getX() + radius.get()); x++) {
-                for (double z = Math.floor(mc.player.getZ() - radius.get()); z <= Math.floor(mc.player.getZ() + radius.get()); z++) {
-                    for (double y = Math.floor(Math.max(mc.world.getBottomY(), mc.player.getY() - down.get() - 0.98)); y <= Math.floor(Math.min(mc.world.getTopY(), mc.player.getY() - 0.98)); y++) {
+            for (double x = Math.floor(pos.getX() - radius.get()); x <= Math.floor(pos.getX() + radius.get()); x++) {
+                for (double z = Math.floor(pos.getZ() - radius.get()); z <= Math.floor(pos.getZ() + radius.get()); z++) {
+                    for (double y = Math.floor(Math.max(mc.world.getBottomY(), pos.getY() - down.get())); y <= Math.min(mc.world.getTopY(), pos.getY()); y++) {
                         blocks.offer(BlockPos.ofFloored(x, y, z));
                     }
                 }
             }
 
-            int counter = 0;
-            while (counter < blocksPerTick.get() && !blocks.isEmpty()) {
-                if (place(blocks.poll())) counter++;
-            }
+            for (int counter = 0; counter < blocksPerTick.get() && !blocks.isEmpty(); counter++) place(blocks.poll());
         } else {
             place(bp);
             if (!mc.world.getBlockState(bp).isAir()) prevBp.set(bp);
@@ -260,9 +255,9 @@ public class Scaffold extends Module {
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {
-        if (!(itemStack.getItem() instanceof BlockItem)) return false;
+        if (!(itemStack.getItem() instanceof BlockItem blockItem)) return false;
 
-        Block block = ((BlockItem) itemStack.getItem()).getBlock();
+        Block block = blockItem.getBlock();
 
         if (blocksFilter.get() == ListMode.Blacklist && blocks.get().contains(block)) return false;
         else if (blocksFilter.get() == ListMode.Whitelist && !blocks.get().contains(block)) return false;
