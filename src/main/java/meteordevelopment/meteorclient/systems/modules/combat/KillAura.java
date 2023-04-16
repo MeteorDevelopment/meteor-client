@@ -29,7 +29,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Tameable;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.mob.EndermanEntity;
 import net.minecraft.entity.mob.ZombifiedPiglinEntity;
 import net.minecraft.entity.passive.AnimalEntity;
@@ -327,7 +326,7 @@ public class KillAura extends Module {
     private boolean shouldShieldBreak() {
         for (Entity target : targets) {
             if (target instanceof PlayerEntity player) {
-                if (player.blockedByShield(DamageSource.player(mc.player)) && shieldMode.get() == ShieldMode.Break) {
+                if (player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player)) && shieldMode.get() == ShieldMode.Break) {
                     return true;
                 }
             }
@@ -366,7 +365,7 @@ public class KillAura extends Module {
         if (entity instanceof PlayerEntity player) {
             if (player.isCreative()) return false;
             if (!Friends.get().shouldAttack(player)) return false;
-            if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(DamageSource.player(mc.player))) return false;
+            if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player))) return false;
         }
         return !(entity instanceof AnimalEntity animal) || !ignoreBabies.get() || !animal.isBaby();
     }

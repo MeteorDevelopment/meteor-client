@@ -53,6 +53,7 @@ public class Commands extends System<Commands> {
         add(new NbtCommand());
         add(new NotebotCommand());
         add(new PeekCommand());
+        add(new EnderChestCommand());
         add(new ProfilesCommand());
         add(new ReloadCommand());
         add(new ResetCommand());

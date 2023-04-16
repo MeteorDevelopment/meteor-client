@@ -34,15 +34,20 @@ public class WItemWithLabel extends WHorizontalList {
 
     private String getStringToAppend() {
         String str = "";
+
         if (itemStack.getItem() == Items.POTION) {
             List<StatusEffectInstance> effects = PotionUtil.getPotion(itemStack).getEffects();
+
             if (effects.size() > 0) {
                 str += " ";
+
                 StatusEffectInstance effect = effects.get(0);
                 if (effect.getAmplifier() > 0) str += effect.getAmplifier() + 1 + " ";
-                str += "(" + StatusEffectUtil.durationToString(effect, 1) + ")";
+
+                str += "(" + StatusEffectUtil.durationToString(effect, 1).getString() + ")";
             }
         }
+
         return str;
     }
 
