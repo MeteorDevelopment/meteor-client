@@ -64,7 +64,6 @@
     "CrossbowItemAccessor",
     "CustomPayloadC2SPacketAccessor",
     "CustomPayloadS2CPacketMixin",
-    "DefaultSkinHelperMixin",
     "DisconnectedScreenMixin",
     "EnchantingTableBlockEntityRendererMixin",
     "EndCrystalEntityRendererMixin",
