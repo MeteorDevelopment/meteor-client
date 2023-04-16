@@ -117,7 +117,7 @@ public class MicrosoftLogin {
         }
     }
 
-    private static void stopServer() {
+    public static void stopServer() {
         if (server == null) return;
 
         server.stop(0);
@@ -131,7 +131,7 @@ public class MicrosoftLogin {
         public void handle(HttpExchange req) throws IOException {
             if (req.getRequestMethod().equals("GET")) {
                 // Login
-                List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8.name());
+                List<NameValuePair> query = URLEncodedUtils.parse(req.getRequestURI(), StandardCharsets.UTF_8);
 
                 boolean ok = false;
 
@@ -144,7 +144,10 @@ public class MicrosoftLogin {
                     }
                 }
 
-                if (!ok) writeText(req, "Cannot authenticate.");
+                if (!ok) {
+                    writeText(req, "Cannot authenticate.");
+                    callback.accept(null);
+                }
                 else writeText(req, "You may now close this page.");
             }
 

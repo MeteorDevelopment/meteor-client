@@ -18,6 +18,7 @@ public class CollisionShapeEvent extends Cancellable {
     public VoxelShape shape;
 
     public static CollisionShapeEvent get(BlockState state, BlockPos pos, VoxelShape shape) {
+        INSTANCE.setCancelled(false);
         INSTANCE.state = state;
         INSTANCE.pos = pos;
         INSTANCE.shape = shape;
