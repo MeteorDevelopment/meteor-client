@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.settings.*;
-import meteordevelopment.meteorclient.gui.themes.meteor.widgets.WMeteorLabel;
+import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;
@@ -428,18 +428,8 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     // Other
 
     private void selectW(WContainer c, Setting<?> setting, Runnable action) {
-        boolean addCount = WSelectedCountLabel.getSize(setting) != -1;
-
-        WContainer c2 = c;
-        if (addCount) {
-            c2 = c.add(theme.horizontalList()).expandCellX().widget();
-            ((WHorizontalList) c2).spacing *= 2;
-        }
-
-        WButton button = c2.add(theme.button("Select")).expandCellX().widget();
+        WButton button = c.add(new WSelectCountButton(setting)).widget();
         button.action = action;
-
-        if (addCount) c2.add(new WSelectedCountLabel(setting).color(theme.textSecondaryColor()));
 
         reset(c, setting, null);
     }
@@ -452,33 +442,31 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         };
     }
 
-    private static class WSelectedCountLabel extends WMeteorLabel {
+    private static class WSelectCountButton extends WButton implements MeteorWidget {
         private final Setting<?> setting;
-        private int lastSize = -1;
 
-        public WSelectedCountLabel(Setting<?> setting) {
-            super("", false);
+        public WSelectCountButton(Setting<?> setting) {
+            super(null, GuiRenderer.EDIT);
 
             this.setting = setting;
         }
 
         @Override
         protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
-            int size = getSize(setting);
+            double pad = pad();
 
-            if (size != lastSize) {
-                set("(" + size + " selected)");
-                lastSize = size;
-            }
+            renderBackground(renderer, this, pressed, mouseOver);
 
-            super.onRender(renderer, mouseX, mouseY, delta);
-        }
+            int size = 0;
+            if (setting.get() instanceof Collection<?> collection) size = collection.size();
+            else if (setting.get() instanceof Map<?, ?> map) size = map.size();
 
-        public static int getSize(Setting<?> setting) {
-            if (setting.get() instanceof Collection<?> collection) return collection.size();
-            if (setting.get() instanceof Map<?, ?> map) return map.size();
-
-            return -1;
+            String sizeText = String.valueOf(size);
+            double ts = theme.textHeight();
+            double tw = theme.textWidth(sizeText);
+            renderer.quad(x + width / 2 - ts / 2, y + pad, ts, ts, texture, theme().textColor.get());
+            renderer.circle(x + ts + tw / 2, y + pad, tw - 2, theme().textSecondaryColor.get());
+            renderer.text(sizeText, x + ts, y - pad, theme().textColor.get(), false);
         }
     }
 }

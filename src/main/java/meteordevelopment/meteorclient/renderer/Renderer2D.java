@@ -138,4 +138,20 @@ public class Renderer2D {
     public void texQuad(double x, double y, double width, double height, double rotation, TextureRegion region, Color color) {
         texQuad(x, y, width, height, rotation, region.x1, region.y1, region.x2, region.y2, color);
     }
+
+    public void circlePart(double x, double y, double r, double startAngle, double angle, Color color) {
+        int step = 30;
+        double cirPart = angle / step;
+        int center = triangles.vec2(x, y).color(color).next();
+        int prev = vecOnCircle(x, y, r, startAngle, color);
+        for (int i = 1; i < step + 1; i++) {
+            int next = vecOnCircle(x, y, r, startAngle + cirPart * i, color);
+            triangles.quad(prev, center, next, next);
+            prev = next;
+        }
+    }
+
+    private int vecOnCircle(double x, double y, double r, double angle, Color color) {
+        return triangles.vec2(x + Math.sin(angle) * r, y - Math.cos(angle) * r).color(color).next();
+    }
 }
