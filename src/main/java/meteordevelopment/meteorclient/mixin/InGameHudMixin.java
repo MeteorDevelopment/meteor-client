@@ -9,6 +9,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.BetterChat;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -58,22 +59,22 @@ public abstract class InGameHudMixin {
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderPortalOverlay(float f, CallbackInfo info) {
+    private void onRenderPortalOverlay(MatrixStack matrices, float f, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noPortalOverlay()) info.cancel();
     }
 
-    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/util/Identifier;F)V", ordinal = 0))
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/Identifier;F)V", ordinal = 0))
     private void onRenderPumpkinOverlay(Args args) {
-        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(1, 0f);
+        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(2, 0f);
     }
 
-    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/util/Identifier;F)V", ordinal = 1))
+    @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/Identifier;F)V", ordinal = 1))
     private void onRenderPowderedSnowOverlay(Args args) {
-        if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(1, 0f);
+        if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(2, 0f);
     }
 
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderVignetteOverlay(Entity entity, CallbackInfo info) {
+    private void onRenderVignetteOverlay(MatrixStack matrices, Entity entity, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noVignette()) info.cancel();
     }
 
@@ -83,7 +84,7 @@ public abstract class InGameHudMixin {
     }
 
     @Inject(method = "renderSpyglassOverlay", at = @At("HEAD"), cancellable = true)
-    private void onRenderSpyglassOverlay(float scale, CallbackInfo info) {
+    private void onRenderSpyglassOverlay(MatrixStack matrices, float scale, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noSpyglassOverlay()) info.cancel();
     }
 
@@ -101,5 +102,12 @@ public abstract class InGameHudMixin {
     @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"), cancellable = true)
     private void onRenderHeldItemTooltip(MatrixStack matrices, CallbackInfo info) {
         if (Modules.get().get(NoRender.class).noHeldItemName()) info.cancel();
+    }
+
+    @Inject(method = "clear", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;clear(Z)V"), cancellable = true)
+    private void onClear(CallbackInfo info) {
+        if (Modules.get().get(BetterChat.class).keepHistory()) {
+            info.cancel();
+        }
     }
 }

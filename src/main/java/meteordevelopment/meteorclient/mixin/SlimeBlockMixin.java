@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SlimeBlock;
@@ -25,10 +24,5 @@ public class SlimeBlockMixin {
     @Inject(method = "onSteppedOn", at = @At("HEAD"), cancellable = true)
     private void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity, CallbackInfo info) {
         if (Modules.get().get(NoSlow.class).slimeBlock() && entity == mc.player) info.cancel();
-    }
-
-    @Inject(method = "bounce", at = @At("HEAD"), cancellable = true)
-    private void onBounce(Entity entity, CallbackInfo info) {
-        if (Modules.get().get(NoFall.class).cancelBounce() && entity == mc.player) info.cancel();
     }
 }

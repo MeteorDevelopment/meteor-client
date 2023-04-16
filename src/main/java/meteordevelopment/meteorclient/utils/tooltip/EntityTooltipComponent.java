@@ -46,9 +46,9 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer, int z) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
         matrices.push();
-        matrices.translate(15, 2, z);
+        matrices.translate(15, 2, 0);
         this.entity.setVelocity(1.f, 1.f, 1.f);
         this.renderEntity(matrices, x, y);
         matrices.pop();

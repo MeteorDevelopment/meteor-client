@@ -69,7 +69,7 @@ public class MeteorToast implements Toast {
 
         mc.textRenderer.draw(matrices, title, x, titleY, TITLE_COLOR);
 
-        if (icon != null) mc.getItemRenderer().renderInGui(icon, 8, 8);
+        if (icon != null) mc.getItemRenderer().renderInGui(matrices, icon, 8, 8);
 
         if (!playedSound) {
             mc.getSoundManager().play(getSound());

@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
@@ -187,7 +187,7 @@ public class PacketUtilsUtil {
         writer.write("import com.mojang.datafixers.util.Pair;\n");
         writer.write("import com.mojang.serialization.Lifecycle;\n");
         writer.write("import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;\n");
-        writer.write("import net.minecraft.network.Packet;\n");
+        writer.write("import net.minecraft.network.packet.Packet;\n");
         writer.write("import net.minecraft.registry.Registry;\n");
         writer.write("import net.minecraft.registry.RegistryKey;\n");
         writer.write("import net.minecraft.registry.SimpleRegistry;\n");
