@@ -9,7 +9,6 @@ import baritone.api.BaritoneAPI;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -42,7 +41,6 @@ import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
@@ -237,7 +235,6 @@ public class KillAura extends Module {
 
     CrystalAura ca = Modules.get().get(CrystalAura.class);
     private final List<Entity> targets = new ArrayList<>();
-    private final Vec3d hitVec = new Vec3d(0, 0, 0);
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
 
@@ -333,12 +330,12 @@ public class KillAura extends Module {
         if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
 
         Box hitbox = entity.getBoundingBox();
-        ((IVec3d)hitVec).set(
+        if (!PlayerUtils.isWithin(
             MathHelper.clamp(mc.player.getX(), hitbox.minX, hitbox.maxX),
             MathHelper.clamp(mc.player.getY(), hitbox.minY, hitbox.maxY),
-            MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ)
-        );
-        if (!PlayerUtils.isWithin(hitVec, range.get())) return false;
+            MathHelper.clamp(mc.player.getZ(), hitbox.minZ, hitbox.maxZ),
+            range.get()
+        )) return false;
 
         if (!entities.get().getBoolean(entity.getType())) return false;
         if (ignoreNamed.get() && entity.hasCustomName()) return false;
