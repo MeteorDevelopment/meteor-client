@@ -80,7 +80,6 @@ public class Panic extends Module {
         .build()
     );
 
-    // Leave on disconnect
     @EventHandler
     private void onDisconnect(GameLeftEvent event) {
         if (disable_disconnect.get()) {
