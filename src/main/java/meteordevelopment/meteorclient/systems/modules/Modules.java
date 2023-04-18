@@ -566,6 +566,7 @@ public class Modules extends System<Modules> {
         add(new Spam());
         add(new ServerSpoof());
         add(new InventoryTweaks());
+        add(new Panic());
     }
 
     public static class ModuleRegistry extends SimpleRegistry<Module> {
