@@ -28,6 +28,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.PotionItem;
 import net.minecraft.item.SwordItem;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -35,6 +36,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
+import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.world.dimension.DimensionTypes;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.WHITE;
@@ -205,7 +208,7 @@ public class PlayerUtils {
             }
 
             // Check for beds if in nether
-            if (PlayerUtils.getDimension() != Dimension.Overworld) {
+            if (!mc.world.getDimension().bedWorks()) {
                 for (BlockEntity blockEntity : Utils.blockEntities()) {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
@@ -329,6 +332,13 @@ public class PlayerUtils {
 
     public static boolean isWithinReach(double x, double y, double z) {
         return squaredDistance(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(), x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
+    }
+
+    public static RegistryKey<DimensionType> oppositeDimension() {
+        RegistryKey<DimensionType> dimensionType =  mc.world.getDimensionKey();
+        if (dimensionType == DimensionTypes.OVERWORLD)return DimensionTypes.THE_NETHER;
+        if (dimensionType == DimensionTypes.THE_NETHER) return DimensionTypes.OVERWORLD;
+        return DimensionTypes.OVERWORLD;
     }
 
     public static Dimension getDimension() {
