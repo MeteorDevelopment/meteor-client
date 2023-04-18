@@ -14,15 +14,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.Arrays;
 
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
     @Unique private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
-    @Unique private final ThreadLocal<int[]> colors = ThreadLocal.withInitial(() -> new int[4]);
 
     @Inject(method = "renderModel", at = @At("HEAD"), cancellable = true)
     private void onRenderModel(BlockRenderContext ctx, ChunkModelBuilder buffers, CallbackInfoReturnable<Boolean> info) {
@@ -32,23 +29,17 @@ public class SodiumBlockRendererMixin {
         else alphas.set(alpha);
     }
 
-    // TODO: Looks like Sodium disables transparency on blocks that aren't supposed to be transparent
-    @ModifyVariable(method = "writeGeometry", at = @At("HEAD"), argsOnly = true, index = 6)
-    private int[] onWriteGeometryModifyColors(int[] colors) {
+    @Redirect(method = "writeGeometry", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/util/color/ColorABGR;mul(IF)I"))
+    private int setColor(int color, float w) {
         int alpha = alphas.get();
+        return alpha == -1 ? ColorABGR.mul(color, w) : mul(color, w, alpha);
+    }
 
-        if (alpha != -1) {
-            if (colors == null) {
-                colors = this.colors.get();
-                Arrays.fill(colors, ColorABGR.pack(255, 255, 255, alpha));
-            }
-            else {
-                for (int i = 0; i < colors.length; i++) {
-                    colors[i] = ColorABGR.withAlpha(colors[i], alpha / 255f);
-                }
-            }
-        }
-
-        return colors;
+    // In sodium "mul" removes alpha property, so we make alpha available here
+    private static int mul(int color, float w, int a) {
+        float r = (float)ColorABGR.unpackRed(color) * w;
+        float g = (float)ColorABGR.unpackGreen(color) * w;
+        float b = (float)ColorABGR.unpackBlue(color) * w;
+        return ColorABGR.pack((int)r, (int)g, (int)b, a);
     }
 }

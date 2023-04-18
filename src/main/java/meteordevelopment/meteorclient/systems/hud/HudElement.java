@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Settings;
 import meteordevelopment.meteorclient.systems.hud.screens.HudEditorScreen;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -102,6 +104,10 @@ public abstract class HudElement implements Snapper.Element, ISerializable<HudEl
     public void render(HudRenderer renderer) {}
 
     public void onFontChanged() {}
+
+    public WWidget getWidget(GuiTheme theme) {
+        return null;
+    }
 
     // Serialization
 
