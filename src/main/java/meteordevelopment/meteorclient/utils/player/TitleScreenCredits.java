@@ -43,7 +43,7 @@ public class TitleScreenCredits {
                 if (credit.addon.getRepo() == null || credit.addon.getCommit() == null) continue;
 
                 GithubRepo repo = credit.addon.getRepo();
-                Response res = Http.get(String.format("https://api.github.com/repos/%s/branches/%s", repo.getOwnerName(), repo.branch()), true).sendJson(Response.class);
+                Response res = Http.get(String.format("https://api.github.com/repos/%s/branches/%s", repo.getOwnerName(), repo.branch())).sendJson(Response.class);
 
                 if (res != null && !credit.addon.getCommit().equals(res.commit.sha)) {
                     synchronized (credit.sections) {

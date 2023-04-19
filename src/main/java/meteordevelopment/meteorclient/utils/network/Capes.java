@@ -45,7 +45,7 @@ public class Capes {
 
         MeteorExecutor.execute(() -> {
             // Cape owners
-            Stream<String> lines = Http.get(CAPE_OWNERS_URL, true).sendLines();
+            Stream<String> lines = Http.get(CAPE_OWNERS_URL).sendLines();
             if (lines != null) lines.forEach(s -> {
                 String[] split = s.split(" ");
 
@@ -56,7 +56,7 @@ public class Capes {
             });
 
             // Capes
-            lines = Http.get(CAPES_URL, true).sendLines();
+            lines = Http.get(CAPES_URL).sendLines();
             if (lines != null) lines.forEach(s -> {
                 String[] split = s.split(" ");
 
@@ -140,7 +140,7 @@ public class Capes {
                         }
                     }
 
-                    InputStream in = Http.get(url, true).sendInputStream();
+                    InputStream in = Http.get(url).sendInputStream();
                     if (in == null) {
                         synchronized (TO_RETRY) {
                             TO_RETRY.add(this);

@@ -32,7 +32,7 @@ public class CommitsScreen extends WindowScreen {
 
         MeteorExecutor.execute(() -> {
             GithubRepo repo = addon.getRepo();
-            Response res = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch()), true).sendJson(Response.class);
+            Response res = Http.get(String.format("https://api.github.com/repos/%s/compare/%s...%s", repo.getOwnerName(), addon.getCommit(), repo.branch())).sendJson(Response.class);
 
             if (res != null) {
                 commits = res.commits;
