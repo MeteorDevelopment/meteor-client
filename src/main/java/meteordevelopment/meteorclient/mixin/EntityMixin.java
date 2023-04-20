@@ -90,7 +90,12 @@ public abstract class EntityMixin {
             float a = f == 1.0D ? g : f;
 
             JumpVelocityMultiplierEvent event = MeteorClient.EVENT_BUS.post(JumpVelocityMultiplierEvent.get());
-            info.setReturnValue(a * event.multiplier);
+
+            if (!event.ignorant) {
+                info.setReturnValue(a * event.multiplier);
+            } else {
+                info.setReturnValue(event.multiplier);
+            }
         }
     }
 

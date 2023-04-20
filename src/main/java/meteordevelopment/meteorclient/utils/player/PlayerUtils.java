@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.combat.Burrow;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -18,6 +19,7 @@ import meteordevelopment.meteorclient.utils.misc.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.misc.text.TextUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dimension;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BedBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
@@ -229,6 +231,10 @@ public class PlayerUtils {
         }
 
         return damageTaken;
+    }
+
+    public static Block getStandingOn() {
+        return mc.world.getBlockState(mc.player.getBlockPos().offset(Direction.DOWN)).getBlock();
     }
 
     public static double distanceTo(Entity entity) {

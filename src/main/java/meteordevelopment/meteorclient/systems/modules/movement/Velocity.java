@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplierEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.EntityVelocityUpdateS2CPacketAccessor;
@@ -15,7 +16,9 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
 
 public class Velocity extends Module {
@@ -126,8 +129,23 @@ public class Velocity extends Module {
         .build()
     );
 
+    public final Setting<Boolean> no_honey = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-honey")
+        .description("Lets you jump full height on honey blocks")
+        .defaultValue(false)
+        .build()
+    );
+
     public Velocity() {
         super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
+    }
+
+    @EventHandler
+    private void onJumpVelocity(JumpVelocityMultiplierEvent event) {
+        if (no_honey.get() && PlayerUtils.getStandingOn() == Blocks.HONEY_BLOCK) {
+            event.ignorant = true;
+            event.multiplier = Blocks.STONE.getJumpVelocityMultiplier();
+        }
     }
 
     @EventHandler

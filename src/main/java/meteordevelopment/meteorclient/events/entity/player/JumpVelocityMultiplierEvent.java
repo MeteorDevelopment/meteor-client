@@ -9,6 +9,7 @@ public class JumpVelocityMultiplierEvent {
     private static final JumpVelocityMultiplierEvent INSTANCE = new JumpVelocityMultiplierEvent();
 
     public float multiplier = 1;
+    public boolean ignorant = false;
 
     public static JumpVelocityMultiplierEvent get() {
         INSTANCE.multiplier = 1;
