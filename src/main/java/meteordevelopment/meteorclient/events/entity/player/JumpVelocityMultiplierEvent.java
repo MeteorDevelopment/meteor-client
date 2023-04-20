@@ -13,6 +13,7 @@ public class JumpVelocityMultiplierEvent {
 
     public static JumpVelocityMultiplierEvent get() {
         INSTANCE.multiplier = 1;
+        INSTANCE.ignorant = false;
         return INSTANCE;
     }
 }

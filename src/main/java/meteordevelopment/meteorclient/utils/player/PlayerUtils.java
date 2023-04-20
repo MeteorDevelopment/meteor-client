@@ -233,10 +233,6 @@ public class PlayerUtils {
         return damageTaken;
     }
 
-    public static Block getStandingOn() {
-        return mc.world.getBlockState(mc.player.getBlockPos().offset(Direction.DOWN)).getBlock();
-    }
-
     public static double distanceTo(Entity entity) {
         return distanceTo(entity.getX(), entity.getY(), entity.getZ());
     }

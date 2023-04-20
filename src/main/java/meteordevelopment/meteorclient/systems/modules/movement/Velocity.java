@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.packet.s2c.play.EntityVelocityUpdateS2CPacket;
@@ -130,8 +129,8 @@ public class Velocity extends Module {
     );
 
     public final Setting<Boolean> no_honey = sgGeneral.add(new BoolSetting.Builder()
-        .name("no-honey")
-        .description("Lets you jump full height on honey blocks")
+        .name("ignore-jump-modifier")
+        .description("Lets you jump full height on blocks e.e honey")
         .defaultValue(false)
         .build()
     );
@@ -142,7 +141,7 @@ public class Velocity extends Module {
 
     @EventHandler
     private void onJumpVelocity(JumpVelocityMultiplierEvent event) {
-        if (no_honey.get() && PlayerUtils.getStandingOn() == Blocks.HONEY_BLOCK) {
+        if (no_honey.get() && this.isActive()) {
             event.ignorant = true;
             event.multiplier = Blocks.STONE.getJumpVelocityMultiplier();
         }
