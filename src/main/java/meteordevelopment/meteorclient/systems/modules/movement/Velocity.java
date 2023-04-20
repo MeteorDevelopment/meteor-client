@@ -141,7 +141,7 @@ public class Velocity extends Module {
 
     @EventHandler
     private void onJumpVelocity(JumpVelocityMultiplierEvent event) {
-        if (no_honey.get() && this.isActive()) {
+        if (no_honey.get()) {
             event.ignorant = true;
             event.multiplier = Blocks.STONE.getJumpVelocityMultiplier();
         }
