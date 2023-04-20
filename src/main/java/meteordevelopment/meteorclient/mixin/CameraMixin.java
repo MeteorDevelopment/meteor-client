@@ -22,6 +22,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -46,11 +47,12 @@ public abstract class CameraMixin implements ICamera {
         if (Modules.get().get(NoRender.class).noLiquidOverlay()) ci.setReturnValue(CameraSubmersionType.NONE);
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0))
-    private void modifyCameraDistance(Args args) {
-        args.set(0, -clipToSpace(Modules.get().get(CameraTweaks.class).getDistance()));
+    @ModifyArg(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0), index = 0)
+    private double modifyCameraDistance(double x) {
         if (Modules.get().isActive(Freecam.class)) {
-            args.set(0, -clipToSpace(0));
+            return -clipToSpace(0);
+        } else {
+            return -clipToSpace(Modules.get().get(CameraTweaks.class).getDistance());
         }
     }
 
