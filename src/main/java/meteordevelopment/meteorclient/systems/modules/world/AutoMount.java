@@ -31,75 +31,75 @@ public class AutoMount extends Module {
     // General
 
     private final Setting<Boolean> checkSaddle = sgGeneral.add(new BoolSetting.Builder()
-            .name("check-saddle")
-            .description("Checks if the entity contains a saddle before mounting.")
-            .defaultValue(false)
-            .build()
+        .name("check-saddle")
+        .description("Checks if the entity contains a saddle before mounting.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Faces the entity you mount.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Faces the entity you mount.")
+        .defaultValue(true)
+        .build()
     );
 
     // Mount
 
     private final Setting<Boolean> horses = sgMount.add(new BoolSetting.Builder()
-            .name("horse")
-            .description("Horse")
-            .defaultValue(false)
-            .build()
+        .name("horse")
+        .description("Horse")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> donkeys = sgMount.add(new BoolSetting.Builder()
-            .name("donkey")
-            .description("Donkey")
-            .defaultValue(false)
-            .build()
+        .name("donkey")
+        .description("Donkey")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> mules = sgMount.add(new BoolSetting.Builder()
-            .name("mule")
-            .description("Mule")
-            .defaultValue(false)
-            .build()
+        .name("mule")
+        .description("Mule")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> skeletonHorse = sgMount.add(new BoolSetting.Builder()
-            .name("skeleton-horse")
-            .description("Skeleton Horse")
-            .defaultValue(false)
-            .build()
+        .name("skeleton-horse")
+        .description("Skeleton Horse")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> llamas = sgMount.add(new BoolSetting.Builder()
-            .name("llama")
-            .description("Llama")
-            .defaultValue(false)
-            .build()
+        .name("llama")
+        .description("Llama")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> pigs = sgMount.add(new BoolSetting.Builder()
-            .name("pig")
-            .description("Pig")
-            .defaultValue(false)
-            .build()
+        .name("pig")
+        .description("Pig")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> boats = sgMount.add(new BoolSetting.Builder()
-            .name("boat")
-            .description("Boat")
-            .defaultValue(false)
-            .build()
+        .name("boat")
+        .description("Boat")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> minecarts = sgMount.add(new BoolSetting.Builder()
-            .name("minecart")
-            .description("Minecart")
-            .defaultValue(false)
-            .build()
+        .name("minecart")
+        .description("Minecart")
+        .defaultValue(false)
+        .build()
     );
 
     public AutoMount() {

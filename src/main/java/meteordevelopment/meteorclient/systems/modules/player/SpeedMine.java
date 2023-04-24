@@ -26,10 +26,10 @@ public class SpeedMine extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
-            .name("blocks")
-            .description("Selected blocks.")
-            .filter(block -> block.getHardness() > 0)
-            .build()
+        .name("blocks")
+        .description("Selected blocks.")
+        .filter(block -> block.getHardness() > 0)
+        .build()
     );
 
     private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
@@ -40,16 +40,16 @@ public class SpeedMine extends Module {
     );
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .defaultValue(Mode.Normal)
-            .build()
+        .name("mode")
+        .defaultValue(Mode.Normal)
+        .build()
     );
     public final Setting<Double> modifier = sgGeneral.add(new DoubleSetting.Builder()
-            .name("modifier")
-            .description("Mining speed modifier. An additional value of 0.2 is equivalent to one haste level (1.2 = haste 1).")
-            .defaultValue(1.4)
-            .min(0)
-            .build()
+        .name("modifier")
+        .description("Mining speed modifier. An additional value of 0.2 is equivalent to one haste level (1.2 = haste 1).")
+        .defaultValue(1.4)
+        .min(0)
+        .build()
     );
 
     public SpeedMine() {

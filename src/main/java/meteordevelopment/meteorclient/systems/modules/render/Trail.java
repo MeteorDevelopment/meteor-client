@@ -36,7 +36,6 @@ public class Trail extends Module {
         .build()
     );
 
-
     public Trail() {
         super(Categories.Render, "trail", "Renders a customizable trail behind your player.");
     }
