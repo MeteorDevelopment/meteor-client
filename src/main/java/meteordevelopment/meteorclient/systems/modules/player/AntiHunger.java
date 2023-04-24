@@ -21,24 +21,25 @@ public class AntiHunger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
-            .name("sprint")
-            .description("Spoofs sprinting packets.")
-            .defaultValue(true)
-            .build()
+        .name("sprint")
+        .description("Spoofs sprinting packets.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> onGround = sgGeneral.add(new BoolSetting.Builder()
-            .name("on-ground")
-            .description("Spoofs the onGround flag.")
-            .defaultValue(true)
-            .build()
+        .name("on-ground")
+        .description("Spoofs the onGround flag.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> waterCheck = sgGeneral.add(new BoolSetting.Builder()
-            .name("water-check")
-            .description("Pauses the module if you are in water")
-            .defaultValue(true)
-            .build());
+        .name("water-check")
+        .description("Pauses the module if you are in water")
+        .defaultValue(true)
+        .build()
+    );
 
     private boolean lastOnGround;
     private boolean sendOnGroundTruePacket;

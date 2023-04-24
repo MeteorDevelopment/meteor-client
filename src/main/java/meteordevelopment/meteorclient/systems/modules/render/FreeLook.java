@@ -22,43 +22,43 @@ public class FreeLook extends Module {
     // General
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Which entity to rotate.")
-            .defaultValue(Mode.Player)
-            .build()
+        .name("mode")
+        .description("Which entity to rotate.")
+        .defaultValue(Mode.Player)
+        .build()
     );
 
-    public final Setting<Boolean> togglePerpective = sgGeneral.add(new BoolSetting.Builder()
-            .name("toggle-perspective")
-            .description("Changes your perspective on toggle.")
-            .defaultValue(true)
-            .build()
+    public final Setting<Boolean> togglePerspective = sgGeneral.add(new BoolSetting.Builder()
+        .name("toggle-perspective")
+        .description("Changes your perspective on toggle.")
+        .defaultValue(true)
+        .build()
     );
 
     public final Setting<Double> sensitivity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("camera-sensitivity")
-            .description("How fast the camera moves in camera mode.")
-            .defaultValue(8)
-            .min(0)
-            .sliderMax(10)
-            .build()
+        .name("camera-sensitivity")
+        .description("How fast the camera moves in camera mode.")
+        .defaultValue(8)
+        .min(0)
+        .sliderMax(10)
+        .build()
     );
 
     // Arrows
 
     public final Setting<Boolean> arrows = sgArrows.add(new BoolSetting.Builder()
-            .name("arrows-control-opposite")
-            .description("Allows you to control the other entities rotation with the arrow keys.")
-            .defaultValue(true)
-            .build()
+        .name("arrows-control-opposite")
+        .description("Allows you to control the other entities rotation with the arrow keys.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Double> arrowSpeed = sgArrows.add(new DoubleSetting.Builder()
-            .name("arrow-speed")
-            .description("Rotation speed with arrow keys.")
-            .defaultValue(4)
-            .min(0)
-            .build()
+        .name("arrow-speed")
+        .description("Rotation speed with arrow keys.")
+        .defaultValue(4)
+        .min(0)
+        .build()
     );
 
     public float cameraYaw;
@@ -76,12 +76,12 @@ public class FreeLook extends Module {
         cameraPitch = mc.player.getPitch();
         prePers = mc.options.getPerspective();
 
-        if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerpective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
+        if (prePers != Perspective.THIRD_PERSON_BACK &&  togglePerspective.get()) mc.options.setPerspective(Perspective.THIRD_PERSON_BACK);
     }
 
     @Override
     public void onDeactivate() {
-        if (mc.options.getPerspective() != prePers && togglePerpective.get()) mc.options.setPerspective(prePers);
+        if (mc.options.getPerspective() != prePers && togglePerspective.get()) mc.options.setPerspective(prePers);
     }
 
     public boolean playerMode() {

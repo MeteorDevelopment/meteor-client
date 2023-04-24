@@ -28,64 +28,64 @@ public class AutoLog extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Integer> health = sgGeneral.add(new IntSetting.Builder()
-            .name("health")
-            .description("Automatically disconnects when health is lower or equal to this value.")
-            .defaultValue(6)
-            .range(0, 20)
-            .sliderMax(20)
-            .build()
+        .name("health")
+        .description("Automatically disconnects when health is lower or equal to this value.")
+        .defaultValue(6)
+        .range(0, 20)
+        .sliderMax(20)
+        .build()
     );
 
     private final Setting<Boolean> smart = sgGeneral.add(new BoolSetting.Builder()
-            .name("smart")
-            .description("Disconnects when you're about to take enough damage to kill you.")
-            .defaultValue(true)
-            .build()
+        .name("smart")
+        .description("Disconnects when you're about to take enough damage to kill you.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> onlyTrusted = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-trusted")
-            .description("Disconnects when a player not on your friends list appears in render distance.")
-            .defaultValue(false)
-            .build()
+        .name("only-trusted")
+        .description("Disconnects when a player not on your friends list appears in render distance.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> instantDeath = sgGeneral.add(new BoolSetting.Builder()
-            .name("32K")
-            .description("Disconnects when a player near you can instantly kill you.")
-            .defaultValue(false)
-            .build()
+        .name("32K")
+        .description("Disconnects when a player near you can instantly kill you.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> crystalLog = sgGeneral.add(new BoolSetting.Builder()
-            .name("crystal-nearby")
-            .description("Disconnects when a crystal appears near you.")
-            .defaultValue(false)
-            .build()
+        .name("crystal-nearby")
+        .description("Disconnects when a crystal appears near you.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Integer> range = sgGeneral.add(new IntSetting.Builder()
-            .name("range")
-            .description("How close a crystal has to be to you before you disconnect.")
-            .defaultValue(4)
-            .range(1, 10)
-            .sliderMax(5)
-            .visible(crystalLog::get)
-            .build()
+        .name("range")
+        .description("How close a crystal has to be to you before you disconnect.")
+        .defaultValue(4)
+        .range(1, 10)
+        .sliderMax(5)
+        .visible(crystalLog::get)
+        .build()
     );
 
     private final Setting<Boolean> smartToggle = sgGeneral.add(new BoolSetting.Builder()
-            .name("smart-toggle")
-            .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
-            .defaultValue(false)
-            .build()
+        .name("smart-toggle")
+        .description("Disables Auto Log after a low-health logout. WILL re-enable once you heal.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> toggleOff = sgGeneral.add(new BoolSetting.Builder()
-            .name("toggle-off")
-            .description("Disables Auto Log after usage.")
-            .defaultValue(true)
-            .build()
+        .name("toggle-off")
+        .description("Disables Auto Log after usage.")
+        .defaultValue(true)
+        .build()
     );
 
     public AutoLog() {

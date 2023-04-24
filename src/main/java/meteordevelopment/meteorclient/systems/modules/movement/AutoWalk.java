@@ -19,49 +19,37 @@ import meteordevelopment.orbit.EventPriority;
 import net.minecraft.client.option.KeyBinding;
 
 public class AutoWalk extends Module {
-    public enum Mode {
-        Simple,
-        Smart
-    }
-
-    public enum Direction {
-        Forwards,
-        Backwards,
-        Left,
-        Right
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Walking mode.")
-            .defaultValue(Mode.Smart)
-            .onChanged(mode1 -> {
-                if (isActive()) {
-                    if (mode1 == Mode.Simple) {
-                        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-                        goal = null;
-                    } else {
-                        timer = 0;
-                        createGoal();
-                    }
-
-                    unpress();
+        .name("mode")
+        .description("Walking mode.")
+        .defaultValue(Mode.Smart)
+        .onChanged(mode1 -> {
+            if (isActive()) {
+                if (mode1 == Mode.Simple) {
+                    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                    goal = null;
+                } else {
+                    timer = 0;
+                    createGoal();
                 }
-            })
-            .build()
+
+                unpress();
+            }
+        })
+        .build()
     );
 
     private final Setting<Direction> direction = sgGeneral.add(new EnumSetting.Builder<Direction>()
-            .name("simple-direction")
-            .description("The direction to walk in simple mode.")
-            .defaultValue(Direction.Forwards)
-            .onChanged(direction1 -> {
-                if (isActive()) unpress();
-            })
-            .visible(() -> mode.get() == Mode.Simple)
-            .build()
+        .name("simple-direction")
+        .description("The direction to walk in simple mode.")
+        .defaultValue(Direction.Forwards)
+        .onChanged(direction1 -> {
+            if (isActive()) unpress();
+        })
+        .visible(() -> mode.get() == Mode.Simple)
+        .build()
     );
 
     private int timer = 0;
@@ -119,5 +107,17 @@ public class AutoWalk extends Module {
         timer = 0;
         goal = new GoalDirection(mc.player.getPos(), mc.player.getYaw());
         BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(goal);
+    }
+
+    public enum Mode {
+        Simple,
+        Smart
+    }
+
+    public enum Direction {
+        Forwards,
+        Backwards,
+        Left,
+        Right
     }
 }

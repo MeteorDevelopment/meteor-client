@@ -16,10 +16,10 @@ public class Fullbright extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("The mode to use for Fullbright.")
-            .defaultValue(Mode.Gamma)
-            .build()
+        .name("mode")
+        .description("The mode to use for Fullbright.")
+        .defaultValue(Mode.Gamma)
+        .build()
     );
 
     private final Setting<Integer> minimumLightLevel = sgGeneral.add(new IntSetting.Builder()

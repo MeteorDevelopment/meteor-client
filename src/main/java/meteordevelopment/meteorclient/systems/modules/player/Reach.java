@@ -15,12 +15,12 @@ public class Reach extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> blockReach = sgGeneral.add(new DoubleSetting.Builder()
-            .name("block-reach")
-            .description("The reach modifier for blocks.")
-            .defaultValue(4.5)
-            .min(0)
-            .sliderMax(6)
-            .build()
+        .name("block-reach")
+        .description("The reach modifier for blocks.")
+        .defaultValue(4.5)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     private final Setting<Double> entityReach = sgGeneral.add(new DoubleSetting.Builder()

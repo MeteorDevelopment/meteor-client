@@ -47,7 +47,7 @@ public class Tracers extends Module {
 
     public final Setting<Boolean> showInvis = sgGeneral.add(new BoolSetting.Builder()
         .name("show-invisible")
-        .description("Shows invisibile entities.")
+        .description("Shows invisible entities.")
         .defaultValue(true)
         .build()
     );
