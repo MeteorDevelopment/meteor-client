@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import meteordevelopment.meteorclient.systems.commands.Commands;
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
@@ -45,7 +45,7 @@ public abstract class ScreenMixin {
     private void onRunCommand(Style style, CallbackInfoReturnable<Boolean> cir) {
         if (style.getClickEvent().getValue().startsWith(Config.get().prefix.get())) {
             try {
-                Commands.get().dispatch(style.getClickEvent().getValue().substring(Config.get().prefix.get().length()));
+                Commands.dispatch(style.getClickEvent().getValue().substring(Config.get().prefix.get().length()));
 
                 cir.setReturnValue(true);
                 cir.cancel();
