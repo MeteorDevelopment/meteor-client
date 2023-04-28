@@ -6,7 +6,6 @@
   "client": [
     "AbstractBlockAccessor",
     "AbstractBlockMixin",
-    "AbstractButtonWidgetAccessor",
     "AbstractClientPlayerEntityMixin",
     "AbstractFurnaceScreenHandlerMixin",
     "AbstractFurnaceScreenMixin",
