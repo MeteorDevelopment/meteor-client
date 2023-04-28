@@ -53,7 +53,7 @@ public class ClientConnectionMixin {
 
     @Inject(method = "connect", at = @At("HEAD"))
     private static void onConnect(InetSocketAddress address, boolean useEpoll, CallbackInfoReturnable<ClientConnection> info) {
-        MeteorClient.EVENT_BUS.post(ConnectToServerEvent.get());
+        MeteorClient.EVENT_BUS.post(ConnectToServerEvent.get(address));
     }
 
     @Inject(at = @At("HEAD"), method = "send(Lnet/minecraft/network/packet/Packet;)V", cancellable = true)
