@@ -161,7 +161,7 @@ public class Notifier extends Module {
                     ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has entered your visual range!", event.entity.getEntityName());
 
                     if (visualMakeSound.get())
-                        mc.world.playSoundFromEntity(mc.player, event.entity, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
+                        mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
                 MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
@@ -187,7 +187,7 @@ public class Notifier extends Module {
                     ChatUtils.sendMsg(event.entity.getId() + 100, Formatting.GRAY, "(highlight)%s(default) has left your visual range!", event.entity.getEntityName());
 
                     if (visualMakeSound.get())
-                        mc.world.playSoundFromEntity(mc.player, event.entity, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
+                        mc.world.playSoundFromEntity(mc.player, mc.player, SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.AMBIENT, 3.0F, 1.0F);
                 }
             } else {
                 MutableText text = Text.literal(event.entity.getType().getName().getString()).formatted(Formatting.WHITE);
