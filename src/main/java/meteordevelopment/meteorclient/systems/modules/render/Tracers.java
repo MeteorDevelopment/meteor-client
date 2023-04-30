@@ -277,9 +277,6 @@ public class Tracers extends Module {
         if (mc.options.hudHidden || style.get() != TracerStyle.Offscreen) return;
         count = 0;
 
-        MatrixStack matrices = RenderSystem.getModelViewStack();
-        matrices.push();
-
         Renderer2D.COLOR.begin();
 
         for (Entity entity : mc.world.getEntities()) {
@@ -324,7 +321,6 @@ public class Tracers extends Module {
         }
 
         Renderer2D.COLOR.render(null);
-        RenderSystem.getModelViewStack().pop();
     }
 
     private void rotateTriangle(Vector2f[] points, float ang) {
