@@ -6,7 +6,11 @@
 package meteordevelopment.meteorclient.gui;
 
 import meteordevelopment.meteorclient.gui.renderer.packer.GuiTexture;
-import meteordevelopment.meteorclient.gui.screens.*;
+import meteordevelopment.meteorclient.gui.screens.ModuleScreen;
+import meteordevelopment.meteorclient.gui.screens.ModulesScreen;
+import meteordevelopment.meteorclient.gui.screens.NotebotSongsScreen;
+import meteordevelopment.meteorclient.gui.screens.ProxiesScreen;
+import meteordevelopment.meteorclient.gui.screens.accounts.AccountsScreen;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.gui.utils.CharFilter;
 import meteordevelopment.meteorclient.gui.utils.SettingsWidgetFactory;

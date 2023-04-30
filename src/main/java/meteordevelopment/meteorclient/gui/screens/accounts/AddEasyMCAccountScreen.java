@@ -3,16 +3,16 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.gui.screens;
+package meteordevelopment.meteorclient.gui.screens.accounts;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
 import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
-import meteordevelopment.meteorclient.systems.accounts.types.TheAlteningAccount;
+import meteordevelopment.meteorclient.systems.accounts.types.EasyMCAccount;
 
-public class AddAlteningAccountScreen extends AddAccountScreen {
-    public AddAlteningAccountScreen(GuiTheme theme, AccountsScreen parent) {
-        super(theme, "Add The Altening Account", parent);
+public class AddEasyMCAccountScreen extends AddAccountScreen {
+    public AddEasyMCAccountScreen(GuiTheme theme, AccountsScreen parent) {
+        super(theme, "Add an EasyMC Account", parent);
     }
 
     @Override
@@ -29,7 +29,7 @@ public class AddAlteningAccountScreen extends AddAccountScreen {
         add = t.add(theme.button("Add")).expandX().widget();
         add.action = () -> {
             if (!token.get().isEmpty()) {
-                AccountsScreen.addAccount(this, parent, new TheAlteningAccount(token.get()));
+                AccountsScreen.addAccount(this, parent, new EasyMCAccount(token.get()));
             }
         };
 

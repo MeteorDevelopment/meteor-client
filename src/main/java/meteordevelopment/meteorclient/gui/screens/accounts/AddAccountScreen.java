@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.gui.screens;
+package meteordevelopment.meteorclient.gui.screens.accounts;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
