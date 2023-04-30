@@ -136,7 +136,7 @@ public class Tracers extends Module {
         .build()
     );
 
-    private final Setting<Integer> blinkOffscreenSpeed = sgAppearance.add(new IntSetting.Builder()
+    private final Setting<Double> blinkOffscreenSpeed = sgAppearance.add(new Double.Builder()
         .name("blink-offscreen-speed")
         .description("Offscreen's blink speed.")
         .defaultValue(4)
@@ -363,7 +363,7 @@ public class Tracers extends Module {
     }
 
     private float getAlpha() {
-        float speed = blinkOffscreenSpeed.get() / 4.f;
+        double speed = blinkOffscreenSpeed.get() / 4.0;
         double duration = Math.abs(Duration.between(Instant.now(), initTimer).toMillis()) * speed;
 
         return (float)Math.abs((duration % 1000) - 500) / 500.f;
