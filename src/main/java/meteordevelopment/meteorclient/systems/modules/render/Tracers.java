@@ -218,34 +218,44 @@ public class Tracers extends Module {
         super(Categories.Render, "tracers", "Displays tracer lines to specified entities.");
     }
 
+    private boolean shouldBeIgnored(Entity entity) {
+        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+    }
+
+    private Color getEntityColor(Entity entity) {
+        Color color;
+
+        if (distance.get()) {
+            if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
+                color = Config.get().friendColor.get();
+            }
+            else color = EntityUtils.getColorFromDistance(entity);
+        }
+        else if (entity instanceof PlayerEntity) {
+            color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
+        }
+        else {
+            color = switch (entity.getType().getSpawnGroup()) {
+                case CREATURE -> animalsColor.get();
+                case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
+                case MONSTER -> monstersColor.get();
+                case AMBIENT -> ambientColor.get();
+                default -> miscColor.get();
+            };
+        }
+
+        return new Color(color);
+    }
+
     @EventHandler
     private void onRender(Render3DEvent event) {
         if (mc.options.hudHidden || style.get() == TracerStyle.Offscreen) return;
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
-            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
+            if (shouldBeIgnored(entity)) continue;
 
-            Color color;
-
-            if (distance.get()) {
-                if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
-                    color = Config.get().friendColor.get();
-                }
-                else color = EntityUtils.getColorFromDistance(entity);
-            }
-            else if (entity instanceof PlayerEntity) {
-                color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-            }
-            else {
-                color = switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE -> animalsColor.get();
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                    case MONSTER -> monstersColor.get();
-                    case AMBIENT -> ambientColor.get();
-                    default -> miscColor.get();
-                };
-            }
+            Color color = getEntityColor(entity);
 
             double x = entity.prevX + (entity.getX() - entity.prevX) * event.tickDelta;
             double y = entity.prevY + (entity.getY() - entity.prevY) * event.tickDelta;
@@ -267,35 +277,20 @@ public class Tracers extends Module {
         if (mc.options.hudHidden || style.get() != TracerStyle.Offscreen) return;
         count = 0;
 
+        MatrixStack matrices = RenderSystem.getModelViewStack();
+        matrices.push();
+
+        Renderer2D.COLOR.begin();
+
         for (Entity entity : mc.world.getEntities()) {
-            if (!PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().getBoolean(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity)) continue;
+            if (shouldBeIgnored(entity)) continue;
 
-            Color color;
+            Color color = getEntityColor(entity);
 
-            if (distance.get()) {
-                if (friendOverride.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) {
-                    color = Config.get().friendColor.get();
-                }
-                else color = EntityUtils.getColorFromDistance(entity);
-            }
-            else if (entity instanceof PlayerEntity) {
-                color = PlayerUtils.getPlayerColor(((PlayerEntity) entity), playersColor.get());
-            }
-            else {
-                color = switch (entity.getType().getSpawnGroup()) {
-                    case CREATURE -> animalsColor.get();
-                    case WATER_AMBIENT, WATER_CREATURE, UNDERGROUND_WATER_CREATURE, AXOLOTLS -> waterAnimalsColor.get();
-                    case MONSTER -> monstersColor.get();
-                    case AMBIENT -> ambientColor.get();
-                    default -> miscColor.get();
-                };
-            }
-
-            Color finalColor = new Color(color.r, color.g, color.b, color.a);
             if (blinkOffscreen.get())
-                finalColor.a *= getAlpha();
+                color.a *= getAlpha();
 
-            final Vec2f SCREEN_CENTER = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
+            Vec2f screenCenter = new Vec2f(mc.getWindow().getFramebufferWidth() / 2.f, mc.getWindow().getFramebufferHeight() / 2.f);
 
             Vector3d projection = new Vector3d(entity.prevX, entity.prevY, entity.prevZ);
             boolean projSucceeded = NametagUtils.to2D(projection, 1, false, false);
@@ -306,67 +301,49 @@ public class Tracers extends Module {
             projection = new Vector3d(entity.prevX, entity.prevY, entity.prevZ);
             NametagUtils.to2D(projection, 1, false, true);
 
-            Vector2f angle = VectorAngles(new Vector3d(SCREEN_CENTER.x - projection.x, SCREEN_CENTER.y - projection.y, 0));
+            Vector2f angle = vectorAngles(new Vector3d(screenCenter.x - projection.x, screenCenter.y - projection.y, 0));
             angle.y += 180;
 
-            MatrixStack matrices = RenderSystem.getModelViewStack();
-            matrices.push();
-            matrices.translate(0, 0, 0);
-            matrices.scale(1.f, 1.f, 1);
+            float angleYawRad = (float) Math.toRadians(angle.y);
 
-            final float ANGLE_YAW_RAD = (float) Math.toRadians(angle.y);
+            Vector2f newPoint = new Vector2f(screenCenter.x + distanceOffscreen.get() * (float) Math.cos(angleYawRad),
+                screenCenter.y + distanceOffscreen.get() * (float) Math.sin(angleYawRad));
 
-            final Vector2f NEW_POINT = new Vector2f(SCREEN_CENTER.x + distanceOffscreen.get() * (float) Math.cos(ANGLE_YAW_RAD),
-                SCREEN_CENTER.y + distanceOffscreen.get() * (float) Math.sin(ANGLE_YAW_RAD));
-
-            Vector2f TRIANGLE_POINTS[] = {
-                new Vector2f(NEW_POINT.x - sizeOffscreen.get(), NEW_POINT.y - sizeOffscreen.get()),
-                new Vector2f(NEW_POINT.x + sizeOffscreen.get() * 0.73205f, NEW_POINT.y),
-                new Vector2f(NEW_POINT.x - sizeOffscreen.get(), NEW_POINT.y + sizeOffscreen.get())
+            Vector2f trianglePoints[] = {
+                new Vector2f(newPoint.x - sizeOffscreen.get(), newPoint.y - sizeOffscreen.get()),
+                new Vector2f(newPoint.x + sizeOffscreen.get() * 0.73205f, newPoint.y),
+                new Vector2f(newPoint.x - sizeOffscreen.get(), newPoint.y + sizeOffscreen.get())
             };
 
-            // rotate
-            rotateTriangle(TRIANGLE_POINTS, angle.y);
+            rotateTriangle(trianglePoints, angle.y);
 
-            Renderer2D.COLOR.begin();
-            Renderer2D.COLOR.triangle(TRIANGLE_POINTS[0].x, TRIANGLE_POINTS[0].y, TRIANGLE_POINTS[1].x, TRIANGLE_POINTS[1].y, TRIANGLE_POINTS[2].x,
-                TRIANGLE_POINTS[2].y, finalColor);
-            Renderer2D.COLOR.render(null);
+            Renderer2D.COLOR.triangle(trianglePoints[0].x, trianglePoints[0].y, trianglePoints[1].x, trianglePoints[1].y, trianglePoints[2].x,
+                trianglePoints[2].y, color);
 
             count++;
-
-            RenderSystem.getModelViewStack().pop();
         }
-    }
 
-    private Vector2f addVec2f(Vector2f a, Vector2f b) {
-        return new Vector2f(a.x + b.x, a.y + b.y);
-    }
-
-    private Vector2f subVec2f(Vector2f a, Vector2f b) {
-        return new Vector2f(a.x - b.x, a.y - b.y);
-    }
-
-    private Vector2f divVec2f(Vector2f src, float fac) {
-        return new Vector2f(src.x / fac, src.y / fac);
+        Renderer2D.COLOR.render(null);
+        RenderSystem.getModelViewStack().pop();
     }
 
     private void rotateTriangle(Vector2f[] points, float ang) {
-        final Vector2f TRIANGLE_CENTER = divVec2f(addVec2f(addVec2f(points[0], points[1]), points[2]), 3);
-        final float THETA = (float)Math.toRadians(ang);
-        final float COS = (float)Math.cos(THETA);
-        final float SIN = (float)Math.sin(THETA);
+        Vector2f triangleCenter = new Vector2f(0, 0);
+        triangleCenter.add(points[0]).add(points[1]).add(points[2]).div(3.f);
+        float theta = (float)Math.toRadians(ang);
+        float cos = (float)Math.cos(theta);
+        float sin = (float)Math.sin(theta);
         for (int i = 0; i < 3; i++) {
-            Vector2f point = new Vector2f(points[i].x, points[i].y);
-            point = subVec2f(point, TRIANGLE_CENTER);
+            Vector2f point = new Vector2f(points[i].x, points[i].y).sub(triangleCenter);
 
-            Vector2f newPoint = new Vector2f(point.x * COS - point.y * SIN, point.x * SIN + point.y * COS);
+            Vector2f newPoint = new Vector2f(point.x * cos - point.y * sin, point.x * sin + point.y * cos);
+            newPoint.add(triangleCenter);
 
-            points[i] = addVec2f(newPoint, TRIANGLE_CENTER);
+            points[i] = newPoint;
         }
     }
 
-    private Vector2f VectorAngles(final Vector3d forward) {
+    private Vector2f vectorAngles(final Vector3d forward) {
         float tmp, yaw, pitch;
 
         if(forward.x == 0 && forward.y == 0) {
@@ -390,11 +367,10 @@ public class Tracers extends Module {
     }
 
     private float getAlpha() {
-        final float speed = blinkOffscreenSpeed.get() / 4.f;
-        final double duration = Math.abs(Duration.between(Instant.now(), initTimer).toMillis()) * speed;
-        final float seconds = (float)Math.abs((duration % 1000) - 500) / 500.f;
+        float speed = blinkOffscreenSpeed.get() / 4.f;
+        double duration = Math.abs(Duration.between(Instant.now(), initTimer).toMillis()) * speed;
 
-        return seconds;
+        return (float)Math.abs((duration % 1000) - 500) / 500.f;
     }
 
     @Override
