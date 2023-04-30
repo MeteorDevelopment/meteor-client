@@ -252,6 +252,7 @@ public class NoRender extends Module {
         .name("cave-culling")
         .description("Disables Minecraft's cave culling algorithm.")
         .defaultValue(false)
+        .onChanged(b -> mc.worldRenderer.reload())
         .build()
     );
 
@@ -348,6 +349,16 @@ public class NoRender extends Module {
 
     public NoRender() {
         super(Categories.Render, "no-render", "Disables certain animations or overlays from rendering.");
+    }
+
+    @Override
+    public void onActivate() {
+        if (noCaveCulling.get()) mc.worldRenderer.reload();
+    }
+
+    @Override
+    public void onDeactivate() {
+        if (noCaveCulling.get()) mc.worldRenderer.reload();
     }
 
     // Overlay
