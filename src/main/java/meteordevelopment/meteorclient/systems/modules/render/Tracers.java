@@ -46,6 +46,11 @@ public class Tracers extends Module {
     private final SettingGroup sgAppearance = settings.createGroup("Appearance");
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
+    public enum TracerStyle {
+        Lines,
+        Offscreen
+    };
+
     // General
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
@@ -71,10 +76,18 @@ public class Tracers extends Module {
 
     // Appearance
 
+    private final Setting<TracerStyle> style = sgAppearance.add(new EnumSetting.Builder<TracerStyle>()
+        .name("style")
+        .description("What display mode should be used")
+        .defaultValue(TracerStyle.Lines)
+        .build()
+    );
+
     private final Setting<Target> target = sgAppearance.add(new EnumSetting.Builder<Target>()
         .name("target")
         .description("What part of the entity to target.")
         .defaultValue(Target.Body)
+        .visible(() ->  style.get() == TracerStyle.Lines)
         .build()
     );
 
@@ -82,6 +95,7 @@ public class Tracers extends Module {
         .name("stem")
         .description("Draw a line through the center of the tracer target.")
         .defaultValue(true)
+        .visible(() ->  style.get() == TracerStyle.Lines)
         .build()
     );
 
@@ -94,20 +108,13 @@ public class Tracers extends Module {
         .build()
     );
 
-    private final Setting<Boolean> offscreen = sgAppearance.add(new BoolSetting.Builder()
-        .name("offscreen")
-        .description("Uses a triangle-styled offscreen tracer style.")
-        .defaultValue(false)
-        .build()
-    );
-
     private final Setting<Integer> distanceOffscreen = sgAppearance.add(new IntSetting.Builder()
         .name("distance-offscreen")
         .description("Offscreen's distance from center.")
         .defaultValue(200)
         .min(0)
         .sliderMax(500)
-        .visible(() ->  offscreen.get())
+        .visible(() ->  style.get() == TracerStyle.Offscreen)
         .build()
     );
 
@@ -117,7 +124,7 @@ public class Tracers extends Module {
         .defaultValue(10)
         .min(2)
         .sliderMax(50)
-        .visible(() ->  offscreen.get())
+        .visible(() ->  style.get() == TracerStyle.Offscreen)
         .build()
     );
 
@@ -125,7 +132,7 @@ public class Tracers extends Module {
         .name("blink-offscreen")
         .description("Make offscreen Blink.")
         .defaultValue(true)
-        .visible(() ->  offscreen.get())
+        .visible(() ->  style.get() == TracerStyle.Offscreen)
         .build()
     );
 
@@ -135,7 +142,7 @@ public class Tracers extends Module {
         .defaultValue(4)
         .min(1)
         .sliderMax(15)
-        .visible(() ->  offscreen.get() && blinkOffscreen.get())
+        .visible(() ->  style.get() == TracerStyle.Offscreen && blinkOffscreen.get())
         .build()
     );
 
@@ -213,7 +220,7 @@ public class Tracers extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (mc.options.hudHidden || offscreen.get()) return;
+        if (mc.options.hudHidden || style.get() == TracerStyle.Offscreen) return;
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
@@ -257,7 +264,7 @@ public class Tracers extends Module {
 
     @EventHandler
     public void onRender2D(Render2DEvent event) {
-        if (mc.options.hudHidden || !offscreen.get()) return;
+        if (mc.options.hudHidden || style.get() != TracerStyle.Offscreen) return;
         count = 0;
 
         for (Entity entity : mc.world.getEntities()) {
