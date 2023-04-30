@@ -136,7 +136,7 @@ public class Tracers extends Module {
         .build()
     );
 
-    private final Setting<Double> blinkOffscreenSpeed = sgAppearance.add(new Double.Builder()
+    private final Setting<Double> blinkOffscreenSpeed = sgAppearance.add(new DoubleSetting.Builder()
         .name("blink-offscreen-speed")
         .description("Offscreen's blink speed.")
         .defaultValue(4)
