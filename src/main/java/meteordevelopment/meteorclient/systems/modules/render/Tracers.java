@@ -353,12 +353,12 @@ public class Tracers extends Module {
             else
                 pitch = 90;
         } else {
-            yaw = (float)(Math.atan2(forward.y, forward.x) * 180 / 3.1415f);
+            yaw = (float)(Math.atan2(forward.y, forward.x) * 180 / Math.PI);
             if(yaw < 0)
                 yaw += 360;
 
             tmp = (float)Math.sqrt(forward.x * forward.x + forward.y * forward.y);
-            pitch = (float)(Math.atan2(-forward.z, tmp) * 180 / 3.1415f);
+            pitch = (float)(Math.atan2(-forward.z, tmp) * 180 / Math.PI);
             if(pitch < 0)
                 pitch += 360;
         }
