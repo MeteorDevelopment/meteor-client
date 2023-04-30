@@ -9,7 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
-import meteordevelopment.meteorclient.renderer.text.TextRenderer;
+import meteordevelopment.meteorclient.renderer.text.*;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -263,6 +263,15 @@ public class Nametags extends Module {
         .build()
     );
 
+    private final Setting<FontFace> font = sgRender.add(new FontFaceSetting.Builder()
+        .name("font")
+        .description("Nametag font.")
+        .defaultValue(Config.get().font.get())
+        .onChanged(e -> updateTextRenderer())
+        .build()
+    );
+
+    private TextRenderer text = new CustomTextRenderer(font.get());
     private final Color WHITE = new Color(255, 255, 255);
     private final Color RED = new Color(255, 25, 25);
     private final Color AMBER = new Color(255, 105, 25);
@@ -364,7 +373,6 @@ public class Nametags extends Module {
     }
 
     private void renderNametagPlayer(PlayerEntity player, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
         // Gamemode
@@ -541,7 +549,6 @@ public class Nametags extends Module {
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
         String name = stack.getName().getString();
@@ -569,7 +576,6 @@ public class Nametags extends Module {
     }
 
     private void renderGenericNametag(LivingEntity entity, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
         //Name
@@ -609,7 +615,6 @@ public class Nametags extends Module {
     }
 
     private void renderTntNametag(TntEntity entity, boolean shadow) {
-        TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
         String fuseText = ticksToTime(entity.getFuse());
@@ -657,6 +662,10 @@ public class Nametags extends Module {
     public enum DistanceColorMode {
         Gradient,
         Flat;
+    }
+
+    private void updateTextRenderer() {
+        text = new CustomTextRenderer(font.get());
     }
 
     public boolean excludeBots() {
