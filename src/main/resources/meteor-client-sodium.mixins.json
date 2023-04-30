@@ -5,10 +5,10 @@
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
     "LightDataAccessMixin",
+    "MeshVertexConsumerMixin",
     "SodiumBlockOcculsionCacheMixin",
     "SodiumBlockRendererMixin",
-    "SodiumFluidRendererMixin",
-    "MeshVertexConsumerMixin"
+    "SodiumFluidRendererMixin"
   ],
   "injectors": {
     "defaultRequire": 1

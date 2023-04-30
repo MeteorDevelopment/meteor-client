@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-//Created by squidoodly 06/07/2020
-
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
@@ -29,40 +27,13 @@ import net.minecraft.util.Hand;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 public class MiddleClickExtra extends Module {
-    private enum Type {
-        Immediate,
-        LongerSingleClick,
-        Longer
-    }
-
-    public enum Mode {
-        Pearl(Items.ENDER_PEARL, Type.Immediate),
-        Rocket(Items.FIREWORK_ROCKET, Type.Immediate),
-
-        Rod(Items.FISHING_ROD, Type.LongerSingleClick),
-
-        Bow(Items.BOW, Type.Longer),
-        Gap(Items.GOLDEN_APPLE, Type.Longer),
-        EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
-        Chorus(Items.CHORUS_FRUIT, Type.Longer),
-        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate);
-
-        private final Item item;
-        private final Type type;
-
-        Mode(Item item, Type type) {
-            this.item = item;
-            this.type = type;
-        }
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
-            .name("mode")
-            .description("Which item to use when you middle click.")
-            .defaultValue(Mode.Pearl)
-            .build()
+        .name("mode")
+        .description("Which item to use when you middle click.")
+        .defaultValue(Mode.Pearl)
+        .build()
     );
 
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
@@ -138,5 +109,32 @@ public class MiddleClickExtra extends Module {
             InvUtils.swapBack();
             isUsing = false;
         }
+    }
+
+    public enum Mode {
+        Pearl(Items.ENDER_PEARL, Type.Immediate),
+        Rocket(Items.FIREWORK_ROCKET, Type.Immediate),
+
+        Rod(Items.FISHING_ROD, Type.LongerSingleClick),
+
+        Bow(Items.BOW, Type.Longer),
+        Gap(Items.GOLDEN_APPLE, Type.Longer),
+        EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
+        Chorus(Items.CHORUS_FRUIT, Type.Longer),
+        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate);
+
+        private final Item item;
+        private final Type type;
+
+        Mode(Item item, Type type) {
+            this.item = item;
+            this.type = type;
+        }
+    }
+
+    private enum Type {
+        Immediate,
+        LongerSingleClick,
+        Longer
     }
 }

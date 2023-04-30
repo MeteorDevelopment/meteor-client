@@ -111,7 +111,7 @@ public class Xray extends Module {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
             BlockPos adjPos = pos.offset(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(view , adjPos,  facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
+            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
         }
 
         return returns;
