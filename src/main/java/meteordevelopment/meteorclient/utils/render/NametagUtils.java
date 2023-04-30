@@ -56,15 +56,15 @@ public class NametagUtils {
         vec4.mul(model, mmMat4);
         mmMat4.mul(projection, pmMat4);
 
-        final boolean BEHIND = pmMat4.w <= 0.f;
+        boolean behind = pmMat4.w <= 0.f;
 
-        if (BEHIND && !allowBehind) return false;
+        if (behind && !allowBehind) return false;
 
         toScreen(pmMat4);
         double x = pmMat4.x * mc.getWindow().getFramebufferWidth();
         double y = pmMat4.y * mc.getWindow().getFramebufferHeight();
 
-        if (BEHIND) {
+        if (behind) {
             x = mc.getWindow().getFramebufferWidth() - x;
             y = mc.getWindow().getFramebufferHeight() - y;
         }
