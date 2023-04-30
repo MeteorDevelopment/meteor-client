@@ -346,20 +346,20 @@ public class Tracers extends Module {
     private Vector2f vectorAngles(final Vector3d forward) {
         float tmp, yaw, pitch;
 
-        if(forward.x == 0 && forward.y == 0) {
+        if (forward.x == 0 && forward.y == 0) {
             yaw = 0;
-            if(forward.z > 0)
+            if (forward.z > 0)
                 pitch = 270;
             else
                 pitch = 90;
         } else {
             yaw = (float)(Math.atan2(forward.y, forward.x) * 180 / Math.PI);
-            if(yaw < 0)
+            if (yaw < 0)
                 yaw += 360;
 
             tmp = (float)Math.sqrt(forward.x * forward.x + forward.y * forward.y);
             pitch = (float)(Math.atan2(-forward.z, tmp) * 180 / Math.PI);
-            if(pitch < 0)
+            if (pitch < 0)
                 pitch += 360;
         }
 
