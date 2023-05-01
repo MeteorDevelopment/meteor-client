@@ -6,7 +6,7 @@
   "client": [
     "LightDataAccessMixin",
     "MeshVertexConsumerMixin",
-    "SodiumBlockOcculsionCacheMixin",
+    "SodiumBlockOcclusionCacheMixin",
     "SodiumBlockRendererMixin",
     "SodiumFluidRendererMixin"
   ],
