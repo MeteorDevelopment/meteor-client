@@ -25,6 +25,13 @@ public class Commands {
 
     private static final List<Command> COMMANDS = new ArrayList<>();
 
+    private static final Commands INSTANCE = new Commands();
+
+    @Deprecated
+    public static Commands get() {
+        return INSTANCE;
+    }
+
     @PostInit
     public static void init() {
         add(new VClipCommand());
