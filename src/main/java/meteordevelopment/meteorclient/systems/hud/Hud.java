@@ -53,7 +53,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     private final Setting<Double> textScale = sgGeneral.add(new DoubleSetting.Builder()
         .name("text-scale")
-        .description("Scale of text if not overriden by the element.")
+        .description("Scale of text if not overridden by the element.")
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
