@@ -28,10 +28,10 @@ public class CommandsCommand extends Command {
     @Override
     public void build(LiteralArgumentBuilder<CommandSource> builder) {
         builder.executes(context -> {
-            ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.getAll().size());
+            ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.COMMANDS.size());
 
             MutableText commands = Text.literal("");
-            Commands.getAll().forEach(command -> commands.append(getCommandText(command)));
+            Commands.COMMANDS.forEach(command -> commands.append(getCommandText(command)));
             ChatUtils.sendMsg(commands);
 
             return SINGLE_SUCCESS;
@@ -59,7 +59,7 @@ public class CommandsCommand extends Command {
 
         // Text
         MutableText text = Text.literal(Utils.nameToTitle(command.getName()));
-        if (command != Commands.getAll().get(Commands.getAll().size() - 1))
+        if (command != Commands.COMMANDS.get(Commands.COMMANDS.size() - 1))
             text.append(Text.literal(", ").formatted(Formatting.GRAY));
         text.setStyle(text
             .getStyle()
