@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.commands.commands.*;
 import meteordevelopment.meteorclient.utils.PostInit;
@@ -22,15 +21,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class Commands {
     public static final CommandDispatcher<CommandSource> DISPATCHER = new CommandDispatcher<>();
     public static final CommandSource COMMAND_SOURCE = new ClientCommandSource(null, mc);
-
-    private static final List<Command> COMMANDS = new ArrayList<>();
-
-    private static final Commands INSTANCE = new Commands();
-
-    @Deprecated
-    public static Commands get() {
-        return INSTANCE;
-    }
+    public static final List<Command> COMMANDS = new ArrayList<>();
 
     @PostInit
     public static void init() {
@@ -81,12 +72,7 @@ public class Commands {
     }
 
     public static void dispatch(String message) throws CommandSyntaxException {
-        ParseResults<CommandSource> results = DISPATCHER.parse(message, COMMAND_SOURCE);
-        DISPATCHER.execute(results);
-    }
-
-    public static List<Command> getAll() {
-        return COMMANDS;
+        DISPATCHER.execute(message, COMMAND_SOURCE);
     }
 
     public static Command get(String name) {
