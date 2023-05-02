@@ -362,10 +362,10 @@ public class Modules extends System<Modules> {
             if (module1.name.equals(module.name)) {
                 removedModule.set(module1);
                 module1.settings.unregisterColorSettings();
+                MeteorClient.LOG.warn("{} has overridden {}.", module.getClass().getName(), module1.getClass().getName());
 
                 return true;
             }
-
             return false;
         })) {
             getGroup(removedModule.get().category).remove(removedModule.get());

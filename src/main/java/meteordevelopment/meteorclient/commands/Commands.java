@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.commands;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.commands.*;
 import meteordevelopment.meteorclient.utils.PostInit;
 import net.minecraft.client.network.ClientCommandSource;
@@ -66,7 +67,14 @@ public class Commands {
     }
 
     public static void add(Command command) {
-        COMMANDS.removeIf(existing -> existing.getName().equals(command.getName()));
+        COMMANDS.removeIf(existing -> {
+            if (existing.getName().equals(command.getName())) {
+                MeteorClient.LOG.warn("{} has overridden {}.", command.getClass().getName(), existing.getClass().getName());
+                return true;
+            }
+            return false;
+        });
+
         command.registerTo(DISPATCHER);
         COMMANDS.add(command);
     }
