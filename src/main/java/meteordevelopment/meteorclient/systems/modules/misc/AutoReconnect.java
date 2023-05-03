@@ -13,21 +13,22 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.network.ServerInfo;
+
+import java.net.InetSocketAddress;
 
 public class AutoReconnect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
-            .name("delay")
-            .description("The amount of seconds to wait before reconnecting to the server.")
-            .defaultValue(3.5)
-            .min(0)
-            .decimalPlaces(1)
-            .build()
+        .name("delay")
+        .description("The amount of seconds to wait before reconnecting to the server.")
+        .defaultValue(3.5)
+        .min(0)
+        .decimalPlaces(1)
+        .build()
     );
 
-    public ServerInfo lastServerInfo;
+    public InetSocketAddress lastServerConnection;
 
     public AutoReconnect() {
         super(Categories.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
@@ -36,8 +37,8 @@ public class AutoReconnect extends Module {
 
     private class StaticListener {
         @EventHandler
-        private void onConnectToServer(ConnectToServerEvent event) {
-            lastServerInfo = mc.isInSingleplayer() ? null : mc.getCurrentServerEntry();
+        private void onGameJoined(ConnectToServerEvent event) {
+            lastServerConnection = event.address;
         }
     }
 }

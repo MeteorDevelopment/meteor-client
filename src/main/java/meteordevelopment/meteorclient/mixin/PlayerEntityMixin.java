@@ -22,7 +22,6 @@ import net.minecraft.entity.player.PlayerAbilities;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,20 +61,17 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
         if (!world.isClient) return;
 
-        SpeedMine module = Modules.get().get(SpeedMine.class);
-        if (!module.isActive() || !module.filter(block.getBlock()) || module.mode.get() != SpeedMine.Mode.Normal) return;
+        SpeedMine speedMine = Modules.get().get(SpeedMine.class);
+        if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock())) return;
 
         float breakSpeed = cir.getReturnValue();
-        float breakSpeedMod = (float) (breakSpeed * module.modifier.get());
+        float breakSpeedMod = (float) (breakSpeed * speedMine.modifier.get());
 
-        HitResult result = mc.crosshairTarget;
-
-        if (result != null && result.getType() == HitResult.Type.BLOCK) {
-            BlockPos pos = ((BlockHitResult) result).getBlockPos();
-            if (module.modifier.get() < 1 || (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod))) {
+        if (mc.crosshairTarget instanceof BlockHitResult bhr) {
+            BlockPos pos = bhr.getBlockPos();
+            if (speedMine.modifier.get() < 1 || (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod))) {
                 cir.setReturnValue(breakSpeedMod);
-            }
-            else {
+            } else {
                 cir.setReturnValue(0.9f / BlockUtils.calcBlockBreakingDelta2(pos, 1));
             }
         }

@@ -65,23 +65,23 @@ public class Flamethrower extends Module {
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically faces towards the animal roasted.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically faces towards the animal roasted.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to cook.")
-            .defaultValue(
-                EntityType.PIG,
-                EntityType.COW,
-                EntityType.SHEEP,
-                EntityType.CHICKEN,
-                EntityType.RABBIT
-            )
-            .build()
+        .name("entities")
+        .description("Entities to cook.")
+        .defaultValue(
+            EntityType.PIG,
+            EntityType.COW,
+            EntityType.SHEEP,
+            EntityType.CHICKEN,
+            EntityType.RABBIT
+        )
+        .build()
     );
 
     private Entity entity;

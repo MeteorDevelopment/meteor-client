@@ -30,10 +30,10 @@ public class BreakIndicators extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     public final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
