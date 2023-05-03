@@ -31,11 +31,11 @@ public class WaypointArgumentType implements ArgumentType<String> {
     }
 
     public static WaypointArgumentType create() {
-        return new WaypointArgumentType(false);
+        return new WaypointArgumentType(true);
     }
 
-    public static WaypointArgumentType greedy() {
-        return new WaypointArgumentType(true);
+    public static WaypointArgumentType create(boolean greedy) {
+        return new WaypointArgumentType(greedy);
     }
 
     public static Waypoint get(CommandContext<?> context) {
