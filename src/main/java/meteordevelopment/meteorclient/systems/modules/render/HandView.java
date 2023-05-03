@@ -56,12 +56,27 @@ public class HandView extends Module {
         .sliderMax(1)
         .build()
     );
+
     public final Setting<Double> offSwing = sgGeneral.add(new DoubleSetting.Builder()
         .name("off-hand-progress")
         .description("The swing progress of your off hand.")
         .defaultValue(0)
         .range(0, 1)
         .sliderMax(1)
+        .build()
+    );
+
+    public final Setting<Boolean> oldAnimations = sgGeneral.add(new BoolSetting.Builder()
+        .name("old-animations")
+        .description("Changes hit animations to those like 1.8")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> showSwapping = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-swapping")
+        .description("Whether or not to show the item swapping animation")
+        .defaultValue(true)
         .build()
     );
 
@@ -195,6 +210,14 @@ public class HandView extends Module {
     private void applyServerRotations(MatrixStack matrix) {
         matrix.multiply(RotationAxis.POSITIVE_X.rotationDegrees(mc.player.getPitch() - Rotations.serverPitch));
         matrix.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(mc.player.getYaw() - Rotations.serverYaw));
+    }
+
+    public boolean oldAnimations() {
+        return isActive() && oldAnimations.get();
+    }
+
+    public boolean showSwapping() {
+        return isActive() && showSwapping.get();
     }
 
     public enum SwingMode {
