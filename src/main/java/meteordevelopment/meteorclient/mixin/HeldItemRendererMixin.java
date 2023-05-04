@@ -40,7 +40,7 @@ public abstract class HeldItemRendererMixin {
 
     @ModifyVariable(method = "renderItem(FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider$Immediate;Lnet/minecraft/client/network/ClientPlayerEntity;I)V", at = @At(value = "STORE", ordinal = 0), index = 6)
     private float modifySwing(float swingProgress) {
-        HandView module = Modules.get().get(HandView.class);
+        HandView module = Modules.getModule(HandView.class);
         Hand hand = MoreObjects.firstNonNull(mc.player.preferredHand, Hand.MAIN_HAND);
 
         if (module.isActive()) {
@@ -63,7 +63,7 @@ public abstract class HeldItemRendererMixin {
     @ModifyArg(method = "updateHeldItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;clamp(FFF)F", ordinal = 2), index = 0)
     private float modifyEquipProgressMainhand(float value) {
         float f = mc.player.getAttackCooldownProgress(1f);
-        float modified = Modules.get().get(HandView.class).oldAnimations() ? 1 : f * f * f;
+        float modified = Modules.getModule(HandView.class).oldAnimations() ? 1 : f * f * f;
 
         return (showSwapping(mainHand, mc.player.getMainHandStack()) ? modified : 0) - equipProgressMainHand;
     }
@@ -84,6 +84,6 @@ public abstract class HeldItemRendererMixin {
     }
 
     private boolean showSwapping(ItemStack stack1, ItemStack stack2) {
-        return !Modules.get().get(HandView.class).showSwapping() || ItemStack.areEqual(stack1, stack2);
+        return !Modules.getModule(HandView.class).showSwapping() || ItemStack.areEqual(stack1, stack2);
     }
 }

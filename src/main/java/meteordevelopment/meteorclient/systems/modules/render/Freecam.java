@@ -379,7 +379,7 @@ public class Freecam extends Module {
 
     private boolean checkGuiMove() {
         // TODO: This is very bad but you all can cope :cope:
-        GUIMove guiMove = Modules.get().get(GUIMove.class);
+        GUIMove guiMove = Modules.getModule(GUIMove.class);
         if (mc.currentScreen != null && !guiMove.isActive()) return true;
         return (mc.currentScreen != null && guiMove.isActive() && guiMove.skip());
     }

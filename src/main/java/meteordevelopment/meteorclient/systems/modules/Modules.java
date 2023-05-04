@@ -132,6 +132,11 @@ public class Modules extends System<Modules> {
         return (T) moduleInstances.get(klass);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T extends Module> T getModule(Class<T> klass) {
+        return (T) get().moduleInstances.get(klass);
+    }
+
     public Module get(String name) {
         for (Module module : moduleInstances.values()) {
             if (module.name.equalsIgnoreCase(name)) return module;

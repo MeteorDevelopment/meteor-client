@@ -79,7 +79,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "updateTargetedEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/ProjectileUtil;raycast(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Vec3d;Lnet/minecraft/util/math/Box;Ljava/util/function/Predicate;D)Lnet/minecraft/util/hit/EntityHitResult;"), cancellable = true)
     private void onUpdateTargetedEntity(float tickDelta, CallbackInfo info) {
-        if (Modules.get().get(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
+        if (Modules.getModule(NoMiningTrace.class).canWork() && client.crosshairTarget.getType() == HitResult.Type.BLOCK) {
             client.getProfiler().pop();
             info.cancel();
         }
@@ -98,14 +98,14 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
     private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
-        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
+        if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.getModule(NoRender.class).noTotemAnimation()) {
             info.cancel();
         }
     }
 
     @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
     private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
-        if (Modules.get().get(NoRender.class).noNausea()) return 0;
+        if (Modules.getModule(NoRender.class).noNausea()) return 0;
         return MathHelper.lerp(delta, first, second);
     }
 
@@ -115,7 +115,7 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "updateTargetedEntity", at = @At("HEAD"), cancellable = true)
     private void updateTargetedEntityInvoke(float tickDelta, CallbackInfo info) {
-        Freecam freecam = Modules.get().get(Freecam.class);
+        Freecam freecam = Modules.getModule(Freecam.class);
         boolean highwayBuilder = Modules.get().isActive(HighwayBuilder.class);
 
         if ((freecam.isActive() || highwayBuilder) && client.getCameraEntity() != null && !freecamSet) {
@@ -165,19 +165,19 @@ public abstract class GameRendererMixin {
 
     @Inject(method = "renderHand", at = @At("HEAD"), cancellable = true)
     private void renderHand(MatrixStack matrices, Camera camera, float tickDelta, CallbackInfo info) {
-        if (!Modules.get().get(Freecam.class).renderHands() ||
-            !Modules.get().get(Zoom.class).renderHands())
+        if (!Modules.getModule(Freecam.class).renderHands() ||
+            !Modules.getModule(Zoom.class).renderHands())
             info.cancel();
     }
 
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3))
     private double updateTargetedEntityModifySurvivalReach(double d) {
-        return Modules.get().get(Reach.class).entityReach();
+        return Modules.getModule(Reach.class).entityReach();
     }
 
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
     private double updateTargetedEntityModifySquaredMaxReach(double d) {
-        Reach reach = Modules.get().get(Reach.class);
+        Reach reach = Modules.getModule(Reach.class);
         return reach.entityReach() * reach.entityReach();
     }
 }

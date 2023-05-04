@@ -97,14 +97,14 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @Redirect(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;visibleMessages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
     private int addMessageListSizeProxy(List<ChatHudLine> list) {
-        BetterChat betterChat = Modules.get().get(BetterChat.class);
+        BetterChat betterChat = Modules.getModule(BetterChat.class);
         if (betterChat.isLongerChat() && betterChat.getChatLength() >= 100) return list.size() - betterChat.getChatLength();
         return list.size();
     }
 
     @Inject(method = "render", at = @At("TAIL"))
     private void onRender(MatrixStack matrices, int currentTick, int mouseX, int mouseY, CallbackInfo info) {
-        if (!Modules.get().get(BetterChat.class).displayPlayerHeads()) return;
+        if (!Modules.getModule(BetterChat.class).displayPlayerHeads()) return;
         if (mc.options.getChatVisibility().getValue() == ChatVisibility.HIDDEN) return;
         int maxLineCount = mc.inGameHud.getChatHud().getVisibleLineCount();
 
@@ -210,6 +210,6 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
     private MessageIndicator onMessageIndicator(ChatHudLine.Visible message) {
-        return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : message.indicator();
+        return Modules.getModule(NoRender.class).noMessageSignatureIndicator() ? null : message.indicator();
     }
 }

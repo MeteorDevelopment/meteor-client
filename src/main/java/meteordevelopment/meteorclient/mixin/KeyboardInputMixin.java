@@ -18,6 +18,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class KeyboardInputMixin extends Input {
     @Inject(method = "tick", at = @At("TAIL"))
     private void isPressed(boolean slowDown, float f, CallbackInfo ci) {
-        if (Modules.get().get(Sneak.class).doVanilla()) sneaking = true;
+        if (Modules.getModule(Sneak.class).doVanilla()) sneaking = true;
     }
 }

@@ -87,7 +87,7 @@ public class Offhand extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
+        AutoTotem autoTotem = Modules.getModule(AutoTotem.class);
 
         // Sword Gap
         if ((mc.player.getMainHandStack().getItem() instanceof SwordItem
@@ -135,7 +135,7 @@ public class Offhand extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
-        isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
+        isClicking = mc.currentScreen == null && !Modules.getModule(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     private boolean usableItem() {

@@ -19,7 +19,7 @@ public class StorageOutlineShader extends PostProcessShader {
 
     @Override
     protected boolean shouldDraw() {
-        if (storageESP == null) storageESP = Modules.get().get(StorageESP.class);
+        if (storageESP == null) storageESP = Modules.getModule(StorageESP.class);
         return storageESP.isShader();
     }
 

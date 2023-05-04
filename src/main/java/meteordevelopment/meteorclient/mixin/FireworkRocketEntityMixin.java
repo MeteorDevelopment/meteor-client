@@ -26,14 +26,14 @@ public abstract class FireworkRocketEntityMixin {
 
     @Inject(method = "tick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        if (Modules.get().get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this) && this.life > this.lifeTime) {
+        if (Modules.getModule(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this) && this.life > this.lifeTime) {
             this.explodeAndRemove();
         }
     }
 
     @Inject(method = "onEntityHit", at = @At("HEAD"), cancellable = true)
     private void onEntityHit(EntityHitResult entityHitResult, CallbackInfo info) {
-        if (Modules.get().get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
+        if (Modules.getModule(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
             this.explodeAndRemove();
             info.cancel();
         }
@@ -41,7 +41,7 @@ public abstract class FireworkRocketEntityMixin {
 
     @Inject(method = "onBlockHit", at = @At("HEAD"), cancellable = true)
     private void onBlockHit(BlockHitResult blockHitResult, CallbackInfo info) {
-        if (Modules.get().get(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
+        if (Modules.getModule(ElytraBoost.class).isFirework((FireworkRocketEntity) (Object) this)) {
             this.explodeAndRemove();
             info.cancel();
         }

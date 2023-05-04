@@ -31,7 +31,7 @@ public class LightDataAccessMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        xray = Modules.get().get(Xray.class);
+        xray = Modules.getModule(Xray.class);
     }
 
     @ModifyVariable(method = "compute", at = @At(value = "STORE"), name = "lm")

@@ -61,7 +61,7 @@ public class Strafe extends SpeedMode {
         double velX = change.x;
         double velZ = change.y;
 
-        Anchor anchor = Modules.get().get(Anchor.class);
+        Anchor anchor = Modules.getModule(Anchor.class);
         if (anchor.isActive() && anchor.controlMovement) {
             velX = anchor.deltaX;
             velZ = anchor.deltaZ;

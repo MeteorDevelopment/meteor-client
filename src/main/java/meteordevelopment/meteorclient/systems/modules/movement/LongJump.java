@@ -131,7 +131,7 @@ public class LongJump extends Module {
 
     @Override
     public void onDeactivate() {
-        Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        Modules.getModule(Timer.class).setOverride(Timer.OFF);
     }
 
     @EventHandler
@@ -144,7 +144,7 @@ public class LongJump extends Module {
 
     @EventHandler
     private void onPlayerMove(PlayerMoveEvent event) {
-        Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
+        Modules.getModule(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
         switch (jumpMode.get()) {
             case Vanilla -> {
                 if (PlayerUtils.isMoving() && mc.options.jumpKey.isPressed()) {

@@ -28,7 +28,7 @@ public class FluidRendererMixin {
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRender(BlockRenderView world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState, CallbackInfo info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {
             alphas.set(-2);
@@ -47,7 +47,7 @@ public class FluidRendererMixin {
         int alpha = alphas.get();
 
         if (alpha == -2) {
-            Color color = Modules.get().get(Ambience.class).lavaColor.get();
+            Color color = Modules.getModule(Ambience.class).lavaColor.get();
             vertex(vertexConsumer, x, y, z, color.r, color.g, color.b, color.a, u, v, light);
             info.cancel();
         }

@@ -49,7 +49,7 @@ public abstract class ClientWorldMixin {
      */
     @Inject(method = "getDimensionEffects", at = @At("HEAD"), cancellable = true)
     private void onGetSkyProperties(CallbackInfoReturnable<DimensionEffects> info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.endSky.get()) {
             info.setReturnValue(ambience.customSkyColor.get() ? customSky : endSky);
@@ -61,7 +61,7 @@ public abstract class ClientWorldMixin {
      */
     @Inject(method = "getSkyColor", at = @At("HEAD"), cancellable = true)
     private void onGetSkyColor(Vec3d cameraPos, float tickDelta, CallbackInfoReturnable<Vec3d> info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.customSkyColor.get()) {
             info.setReturnValue(ambience.skyColor().getVec3d());
@@ -73,7 +73,7 @@ public abstract class ClientWorldMixin {
      */
     @Inject(method = "getCloudsColor", at = @At("HEAD"), cancellable = true)
     private void onGetCloudsColor(float tickDelta, CallbackInfoReturnable<Vec3d> info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.customCloudColor.get()) {
             info.setReturnValue(ambience.cloudColor.get().getVec3d());
@@ -82,7 +82,7 @@ public abstract class ClientWorldMixin {
 
     @ModifyArgs(method = "doRandomBlockDisplayTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/world/ClientWorld;randomBlockDisplayTick(IIIILnet/minecraft/util/math/random/Random;Lnet/minecraft/block/Block;Lnet/minecraft/util/math/BlockPos$Mutable;)V"))
     private void doRandomBlockDisplayTicks(Args args) {
-        if (Modules.get().get(NoRender.class).noBarrierInvis()) {
+        if (Modules.getModule(NoRender.class).noBarrierInvis()) {
             args.set(5, Blocks.BARRIER);
         }
     }

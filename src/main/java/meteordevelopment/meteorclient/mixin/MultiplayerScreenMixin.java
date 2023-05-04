@@ -67,7 +67,7 @@ public class MultiplayerScreenMixin extends Screen {
 
         // Logged in as
         textRenderer.drawWithShadow(matrices, loggedInAs, x, y, textColor1);
-        textRenderer.drawWithShadow(matrices, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+        textRenderer.drawWithShadow(matrices, Modules.getModule(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
 
         y += textRenderer.fontHeight + 2;
 

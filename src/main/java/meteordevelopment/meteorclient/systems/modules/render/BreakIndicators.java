@@ -69,8 +69,8 @@ public class BreakIndicators extends Module {
     private void onRender(Render3DEvent event) {
         renderNormal(event);
 
-        if (packetMine.get() && !Modules.get().get(PacketMine.class).blocks.isEmpty()) {
-            renderPacket(event, Modules.get().get(PacketMine.class).blocks);
+        if (packetMine.get() && !Modules.getModule(PacketMine.class).blocks.isEmpty()) {
+            renderPacket(event, Modules.getModule(PacketMine.class).blocks);
         }
     }
 

@@ -55,7 +55,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
-        InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
+        InventoryTweaks invTweaks = Modules.getModule(InventoryTweaks.class);
 
         if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
             addDrawableChild(
@@ -77,7 +77,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
     private void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> info) {
-        if (button != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.get().get(InventoryTweaks.class).mouseDragItemMove()) return;
+        if (button != GLFW_MOUSE_BUTTON_LEFT || doubleClicking || !Modules.getModule(InventoryTweaks.class).mouseDragItemMove()) return;
 
         Slot slot = getSlotAt(mouseX, mouseY);
         if (slot != null && slot.hasStack() && hasShiftDown()) onMouseClick(slot, slot.id, button, SlotActionType.QUICK_MOVE);
@@ -86,7 +86,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     // Middle click open
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)
     private void mouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
-        BetterTooltips toolips = Modules.get().get(BetterTooltips.class);
+        BetterTooltips toolips = Modules.getModule(BetterTooltips.class);
 
         if (button == GLFW.GLFW_MOUSE_BUTTON_MIDDLE && focusedSlot != null && !focusedSlot.getStack().isEmpty() && mc.player.currentScreenHandler.getCursorStack().isEmpty() && toolips.middleClickOpen()) {
             ItemStack itemStack = focusedSlot.getStack();
@@ -99,7 +99,7 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
     // Item Highlight
     @Inject(method = "drawSlot", at = @At("HEAD"))
     private void onDrawSlot(MatrixStack matrices, Slot slot, CallbackInfo info) {
-        int color = Modules.get().get(ItemHighlight.class).getColor(slot.getStack());
+        int color = Modules.getModule(ItemHighlight.class).getColor(slot.getStack());
         if (color != -1) fill(matrices, slot.x, slot.y, slot.x + 16, slot.y + 16, color);
     }
 }

@@ -17,7 +17,7 @@ import java.util.Queue;
 import java.util.Set;
 
 public class ESPGroup {
-    private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
+    private static final BlockESP blockEsp = Modules.getModule(BlockESP.class);
 
     private final Block block;
 

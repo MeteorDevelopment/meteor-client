@@ -23,7 +23,7 @@ import java.util.Iterator;
 public class BossBarHudMixin {
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void onRender(CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noBossBar()) info.cancel();
+        if (Modules.getModule(NoRender.class).noBossBar()) info.cancel();
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Ljava/util/Collection;iterator()Ljava/util/Iterator;"))

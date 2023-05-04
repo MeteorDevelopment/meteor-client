@@ -47,8 +47,8 @@ public class MouseMixin {
 
     @Redirect(method = "updateMouse", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;changeLookDirection(DD)V"))
     private void updateMouseChangeLookDirection(ClientPlayerEntity player, double cursorDeltaX, double cursorDeltaY) {
-        Freecam freecam = Modules.get().get(Freecam.class);
-        FreeLook freeLook = Modules.get().get(FreeLook.class);
+        Freecam freecam = Modules.getModule(Freecam.class);
+        FreeLook freeLook = Modules.getModule(FreeLook.class);
 
         if (freecam.isActive()) freecam.changeLookDirection(cursorDeltaX * 0.15, cursorDeltaY * 0.15);
         else if (Modules.get().isActive(HighwayBuilder.class)) {

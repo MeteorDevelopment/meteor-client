@@ -29,7 +29,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public abstract class DisconnectedScreenMixin extends Screen {
     @Shadow private int reasonHeight;
     @Unique private ButtonWidget reconnectBtn;
-    @Unique private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
+    @Unique private double time = Modules.getModule(AutoReconnect.class).time.get() * 20;
 
     protected DisconnectedScreenMixin(Text title) {
         super(title);
@@ -37,7 +37,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onRenderBackground(CallbackInfo info) {
-        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+        AutoReconnect autoReconnect = Modules.getModule(AutoReconnect.class);
         if (autoReconnect.lastServerConnection != null) {
             int x = width / 2 - 100;
             int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
@@ -64,7 +64,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     @Override
     public void tick() {
-        AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
+        AutoReconnect autoReconnect = Modules.getModule(AutoReconnect.class);
         if (!autoReconnect.isActive() || autoReconnect.lastServerConnection == null) return;
 
         if (time <= 0) {
@@ -82,7 +82,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
     }
 
     private void tryConnecting() {
-        var conn = Modules.get().get(AutoReconnect.class).lastServerConnection;
+        var conn = Modules.getModule(AutoReconnect.class).lastServerConnection;
         var host = conn.getAddress().getHostName();
         if (host.contains(":")) host = host.substring(0, host.indexOf(":"));
         ConnectScreen.connect(new TitleScreen(), mc, new ServerAddress(host, conn.getPort()), new ServerInfo(I18n.translate("selectServer.defaultName"), host, false));

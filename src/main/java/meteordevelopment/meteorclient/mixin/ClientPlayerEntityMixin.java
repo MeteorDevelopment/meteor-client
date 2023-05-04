@@ -47,25 +47,25 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @Redirect(method = "tickMovement", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isUsingItem()Z"))
     private boolean redirectUsingItem(ClientPlayerEntity player) {
-        if (Modules.get().get(NoSlow.class).items()) return false;
+        if (Modules.getModule(NoSlow.class).items()) return false;
         return player.isUsingItem();
     }
 
     @Inject(method = "isSneaking", at = @At("HEAD"), cancellable = true)
     private void onIsSneaking(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(Scaffold.class).scaffolding()) info.setReturnValue(false);
+        if (Modules.getModule(Scaffold.class).scaffolding()) info.setReturnValue(false);
     }
 
     @Inject(method = "shouldSlowDown", at = @At("HEAD"), cancellable = true)
     private void onShouldSlowDown(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(NoSlow.class).sneaking()) {
+        if (Modules.getModule(NoSlow.class).sneaking()) {
             info.setReturnValue(isCrawling());
         }
     }
 
     @Inject(method = "pushOutOfBlocks", at = @At("HEAD"), cancellable = true)
     private void onPushOutOfBlocks(double x, double d, CallbackInfo info) {
-        Velocity velocity = Modules.get().get(Velocity.class);
+        Velocity velocity = Modules.getModule(Velocity.class);
         if (velocity.isActive() && velocity.blocks.get()) {
             info.cancel();
         }
@@ -78,7 +78,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))
     private float onHunger(float constant) {
-        if (Modules.get().get(NoSlow.class).hunger()) return -1;
+        if (Modules.getModule(NoSlow.class).hunger()) return -1;
         return constant;
     }
 
@@ -107,6 +107,6 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
     // Sneak
     @Redirect(method = "sendMovementPackets", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/network/ClientPlayerEntity;isSneaking()Z"))
     private boolean isSneaking(ClientPlayerEntity clientPlayerEntity) {
-        return Modules.get().get(Sneak.class).doPacket() || Modules.get().get(NoSlow.class).airStrict() || clientPlayerEntity.isSneaking();
+        return Modules.getModule(Sneak.class).doPacket() || Modules.getModule(NoSlow.class).airStrict() || clientPlayerEntity.isSneaking();
     }
 }

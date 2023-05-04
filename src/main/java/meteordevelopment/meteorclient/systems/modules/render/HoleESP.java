@@ -246,17 +246,17 @@ public class HoleESP extends Module {
 
         public Color getTopColor() {
             return switch (this.type) {
-                case Obsidian -> Modules.get().get(HoleESP.class).obsidianColorTop.get();
-                case Bedrock  -> Modules.get().get(HoleESP.class).bedrockColorTop.get();
-                default       -> Modules.get().get(HoleESP.class).mixedColorTop.get();
+                case Obsidian -> Modules.getModule(HoleESP.class).obsidianColorTop.get();
+                case Bedrock  -> Modules.getModule(HoleESP.class).bedrockColorTop.get();
+                default       -> Modules.getModule(HoleESP.class).mixedColorTop.get();
             };
         }
 
         public Color getBottomColor() {
             return switch (this.type) {
-                case Obsidian -> Modules.get().get(HoleESP.class).obsidianColorBottom.get();
-                case Bedrock  -> Modules.get().get(HoleESP.class).bedrockColorBottom.get();
-                default       -> Modules.get().get(HoleESP.class).mixedColorBottom.get();
+                case Obsidian -> Modules.getModule(HoleESP.class).obsidianColorBottom.get();
+                case Bedrock  -> Modules.getModule(HoleESP.class).bedrockColorBottom.get();
+                default       -> Modules.getModule(HoleESP.class).mixedColorBottom.get();
             };
         }
 

@@ -61,7 +61,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
         if (!world.isClient) return;
 
-        SpeedMine speedMine = Modules.get().get(SpeedMine.class);
+        SpeedMine speedMine = Modules.getModule(SpeedMine.class);
         if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock())) return;
 
         float breakSpeed = cir.getReturnValue();
@@ -81,14 +81,14 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     public void dontJump(CallbackInfo info) {
         if (!world.isClient) return;
 
-        Anchor module = Modules.get().get(Anchor.class);
+        Anchor module = Modules.getModule(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
     }
 
     @Inject(method = "getMovementSpeed", at = @At("RETURN"), cancellable = true)
     private void onGetMovementSpeed(CallbackInfoReturnable<Float> info) {
         if (!world.isClient) return;
-        if (!Modules.get().get(NoSlow.class).slowness()) return;
+        if (!Modules.getModule(NoSlow.class).slowness()) return;
 
         float walkSpeed = getAbilities().getWalkSpeed();
 
@@ -102,7 +102,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
     private void onGetOffGroundSpeed(CallbackInfoReturnable<Float> info) {
         if (!world.isClient) return;
 
-        float speed = Modules.get().get(Flight.class).getOffGroundSpeed();
+        float speed = Modules.getModule(Flight.class).getOffGroundSpeed();
         if (speed != -1) info.setReturnValue(speed);
     }
 }

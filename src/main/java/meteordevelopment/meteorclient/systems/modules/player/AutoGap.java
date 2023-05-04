@@ -184,7 +184,7 @@ public class AutoGap extends Module {
         wasAura.clear();
         if (pauseAuras.get()) {
             for (Class<? extends Module> klass : AURAS) {
-                Module module = Modules.get().get(klass);
+                Module module = Modules.getModule(klass);
 
                 if (module.isActive()) {
                     wasAura.add(klass);
@@ -218,7 +218,7 @@ public class AutoGap extends Module {
         // Resume auras
         if (pauseAuras.get()) {
             for (Class<? extends Module> klass : AURAS) {
-                Module module = Modules.get().get(klass);
+                Module module = Modules.getModule(klass);
 
                 if (wasAura.contains(klass) && !module.isActive()) {
                     module.toggle();

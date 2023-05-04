@@ -130,8 +130,8 @@ public class Xray extends Module {
     }
 
     public static int getAlpha(BlockState state, BlockPos pos) {
-        WallHack wallHack = Modules.get().get(WallHack.class);
-        Xray xray = Modules.get().get(Xray.class);
+        WallHack wallHack = Modules.getModule(WallHack.class);
+        Xray xray = Modules.getModule(Xray.class);
 
         if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
             int alpha;

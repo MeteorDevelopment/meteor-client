@@ -90,7 +90,7 @@ public class ModuleListSetting extends Setting<List<Module>> {
             List<Module> modules = new ArrayList<>();
 
             for (Class<? extends Module> klass : defaults) {
-                if (Modules.get().get(klass) != null) modules.add(Modules.get().get(klass));
+                if (Modules.getModule(klass) != null) modules.add(Modules.getModule(klass));
             }
 
             return defaultValue(modules);

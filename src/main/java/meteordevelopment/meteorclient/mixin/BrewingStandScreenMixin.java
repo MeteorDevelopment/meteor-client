@@ -24,12 +24,12 @@ public abstract class BrewingStandScreenMixin extends HandledScreen<BrewingStand
     public void handledScreenTick() {
         super.handledScreenTick();
 
-        if (Modules.get().isActive(AutoBrewer.class)) Modules.get().get(AutoBrewer.class).tick(handler);
+        if (Modules.get().isActive(AutoBrewer.class)) Modules.getModule(AutoBrewer.class).tick(handler);
     }
 
     @Override
     public void close() {
-        if (Modules.get().isActive(AutoBrewer.class)) Modules.get().get(AutoBrewer.class).onBrewingStandClose();
+        if (Modules.get().isActive(AutoBrewer.class)) Modules.getModule(AutoBrewer.class).onBrewingStandClose();
 
         super.close();
     }

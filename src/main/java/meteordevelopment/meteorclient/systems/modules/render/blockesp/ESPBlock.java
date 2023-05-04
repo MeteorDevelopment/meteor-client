@@ -20,7 +20,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class ESPBlock {
     private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
-    private static final BlockESP blockEsp = Modules.get().get(BlockESP.class);
+    private static final BlockESP blockEsp = Modules.getModule(BlockESP.class);
 
     public static final int FO = 1 << 1;
     public static final int FO_RI = 1 << 2;

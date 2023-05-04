@@ -23,6 +23,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class SlimeBlockMixin {
     @Inject(method = "onSteppedOn", at = @At("HEAD"), cancellable = true)
     private void onSteppedOn(World world, BlockPos pos, BlockState state, Entity entity, CallbackInfo info) {
-        if (Modules.get().get(NoSlow.class).slimeBlock() && entity == mc.player) info.cancel();
+        if (Modules.getModule(NoSlow.class).slimeBlock() && entity == mc.player) info.cancel();
     }
 }

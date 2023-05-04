@@ -145,7 +145,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
 
     @Inject(method = "getFramerateLimit", at = @At("HEAD"), cancellable = true)
     private void onGetFramerateLimit(CallbackInfoReturnable<Integer> info) {
-        if (Modules.get().isActive(UnfocusedCPU.class) && !isWindowFocused()) info.setReturnValue(Math.min(Modules.get().get(UnfocusedCPU.class).fps.get(), this.options.getMaxFps().getValue()));
+        if (Modules.get().isActive(UnfocusedCPU.class) && !isWindowFocused()) info.setReturnValue(Math.min(Modules.getModule(UnfocusedCPU.class).fps.get(), this.options.getMaxFps().getValue()));
     }
 
     // Time delta

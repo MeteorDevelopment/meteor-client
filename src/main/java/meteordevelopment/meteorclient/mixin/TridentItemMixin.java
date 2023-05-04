@@ -37,7 +37,7 @@ public class TridentItemMixin {
 
     @ModifyArgs(method = "onStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addVelocity(DDD)V"))
     private void modifyVelocity(Args args) {
-        TridentBoost tridentBoost = Modules.get().get(TridentBoost.class);
+        TridentBoost tridentBoost = Modules.getModule(TridentBoost.class);
 
         args.set(0, (double) args.get(0) * tridentBoost.getMultiplier());
         args.set(1, (double) args.get(1) * tridentBoost.getMultiplier());
@@ -46,14 +46,14 @@ public class TridentItemMixin {
 
     @Redirect(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isTouchingWaterOrRain()Z"))
     private boolean isInWaterUse(PlayerEntity playerEntity) {
-        TridentBoost tridentBoost = Modules.get().get(TridentBoost.class);
+        TridentBoost tridentBoost = Modules.getModule(TridentBoost.class);
 
         return tridentBoost.allowOutOfWater() || mc.player.isTouchingWaterOrRain();
     }
 
     @Redirect(method = "onStoppedUsing", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;isTouchingWaterOrRain()Z"))
     private boolean isInWaterPostUse(PlayerEntity playerEntity) {
-        TridentBoost tridentBoost = Modules.get().get(TridentBoost.class);
+        TridentBoost tridentBoost = Modules.getModule(TridentBoost.class);
 
         return tridentBoost.allowOutOfWater() || mc.player.isTouchingWaterOrRain();
     }

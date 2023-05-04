@@ -29,7 +29,7 @@ import java.util.List;
 public abstract class ScreenMixin {
     @Inject(method = "renderBackground(Lnet/minecraft/client/util/math/MatrixStack;)V", at = @At("HEAD"), cancellable = true)
     private void onRenderBackground(CallbackInfo info) {
-        if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
+        if (Utils.canUpdate() && Modules.getModule(NoRender.class).noGuiBackground())
             info.cancel();
     }
 

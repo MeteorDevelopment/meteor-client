@@ -55,37 +55,37 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "renderStatusEffectOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderStatusEffectOverlay(CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noPotionIcons()) info.cancel();
+        if (Modules.getModule(NoRender.class).noPotionIcons()) info.cancel();
     }
 
     @Inject(method = "renderPortalOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderPortalOverlay(MatrixStack matrices, float f, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noPortalOverlay()) info.cancel();
+        if (Modules.getModule(NoRender.class).noPortalOverlay()) info.cancel();
     }
 
     @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/Identifier;F)V", ordinal = 0))
     private void onRenderPumpkinOverlay(Args args) {
-        if (Modules.get().get(NoRender.class).noPumpkinOverlay()) args.set(2, 0f);
+        if (Modules.getModule(NoRender.class).noPumpkinOverlay()) args.set(2, 0f);
     }
 
     @ModifyArgs(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/InGameHud;renderOverlay(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/util/Identifier;F)V", ordinal = 1))
     private void onRenderPowderedSnowOverlay(Args args) {
-        if (Modules.get().get(NoRender.class).noPowderedSnowOverlay()) args.set(2, 0f);
+        if (Modules.getModule(NoRender.class).noPowderedSnowOverlay()) args.set(2, 0f);
     }
 
     @Inject(method = "renderVignetteOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderVignetteOverlay(MatrixStack matrices, Entity entity, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noVignette()) info.cancel();
+        if (Modules.getModule(NoRender.class).noVignette()) info.cancel();
     }
 
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void onRenderScoreboardSidebar(MatrixStack matrixStack, ScoreboardObjective scoreboardObjective, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noScoreboard()) info.cancel();
+        if (Modules.getModule(NoRender.class).noScoreboard()) info.cancel();
     }
 
     @Inject(method = "renderSpyglassOverlay", at = @At("HEAD"), cancellable = true)
     private void onRenderSpyglassOverlay(MatrixStack matrices, float scale, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noSpyglassOverlay()) info.cancel();
+        if (Modules.getModule(NoRender.class).noSpyglassOverlay()) info.cancel();
     }
 
     @Redirect(method = "renderCrosshair", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/Perspective;isFirstPerson()Z"))
@@ -96,17 +96,17 @@ public abstract class InGameHudMixin {
 
     @Inject(method = "renderCrosshair", at = @At("HEAD"), cancellable = true)
     private void onRenderCrosshair(MatrixStack matrices, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noCrosshair()) info.cancel();
+        if (Modules.getModule(NoRender.class).noCrosshair()) info.cancel();
     }
 
     @Inject(method = "renderHeldItemTooltip", at = @At("HEAD"), cancellable = true)
     private void onRenderHeldItemTooltip(MatrixStack matrices, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noHeldItemName()) info.cancel();
+        if (Modules.getModule(NoRender.class).noHeldItemName()) info.cancel();
     }
 
     @Inject(method = "clear", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHud;clear(Z)V"), cancellable = true)
     private void onClear(CallbackInfo info) {
-        if (Modules.get().get(BetterChat.class).keepHistory()) {
+        if (Modules.getModule(BetterChat.class).keepHistory()) {
             info.cancel();
         }
     }

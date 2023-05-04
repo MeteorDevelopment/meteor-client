@@ -21,7 +21,7 @@ public abstract class TextVisitFactoryMixin {
                     "visitFormatted(Ljava/lang/String;ILnet/minecraft/text/Style;Lnet/minecraft/text/CharacterVisitor;)Z"},
             index = 0)
     private static String adjustText(String text) {
-        if (Modules.get() != null) return Modules.get().get(NameProtect.class).replaceName(text);
+        if (Modules.get() != null) return Modules.getModule(NameProtect.class).replaceName(text);
         else return text;
     }
 }

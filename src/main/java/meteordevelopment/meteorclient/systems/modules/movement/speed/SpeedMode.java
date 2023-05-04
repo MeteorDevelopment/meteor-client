@@ -20,7 +20,7 @@ public class SpeedMode {
     protected double distance, speed;
 
     public SpeedMode(SpeedModes type) {
-        this.settings = Modules.get().get(Speed.class);
+        this.settings = Modules.getModule(Speed.class);
         this.mc = MinecraftClient.getInstance();
         this.type = type;
         reset();

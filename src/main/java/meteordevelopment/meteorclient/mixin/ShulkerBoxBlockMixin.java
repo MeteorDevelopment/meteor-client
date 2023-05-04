@@ -25,7 +25,7 @@ public class ShulkerBoxBlockMixin {
     private void onAppendTooltip(ItemStack stack, BlockView view, List<Text> tooltip, TooltipContext options, CallbackInfo info) {
         if (Modules.get() == null) return;
 
-        BetterTooltips tooltips = Modules.get().get(BetterTooltips.class);
+        BetterTooltips tooltips = Modules.getModule(BetterTooltips.class);
         if (tooltips.isActive()) {
             if (tooltips.previewShulkers()) info.cancel();
             else if (tooltips.shulkerCompactTooltip()) {

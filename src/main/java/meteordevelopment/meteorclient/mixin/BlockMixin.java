@@ -30,7 +30,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
 
     @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
     private static void onShouldDrawSide(BlockState state, BlockView world, BlockPos pos, Direction side, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
-        Xray xray = Modules.get().get(Xray.class);
+        Xray xray = Modules.getModule(Xray.class);
 
         if (xray.isActive()) {
             info.setReturnValue(xray.modifyDrawSide(state, world, pos, side, info.getReturnValueZ()));
@@ -42,13 +42,13 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         // For some retarded reason Tweakeroo calls this method before meteor is initialized
         if (Modules.get() == null) return;
 
-        Slippy slippy = Modules.get().get(Slippy.class);
+        Slippy slippy = Modules.getModule(Slippy.class);
         Block block = (Block) (Object) this;
 
         if (slippy.isActive() && !slippy.ignoredBlocks.get().contains(block)) {
             info.setReturnValue(slippy.friction.get().floatValue());
         }
 
-        if (block == Blocks.SLIME_BLOCK && Modules.get().get(NoSlow.class).slimeBlock()) info.setReturnValue(0.6F);
+        if (block == Blocks.SLIME_BLOCK && Modules.getModule(NoSlow.class).slimeBlock()) info.setReturnValue(0.6F);
     }
 }

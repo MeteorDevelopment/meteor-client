@@ -66,7 +66,7 @@ public class Criticals extends Module {
 
             Entity entity =  packet.getEntity();
 
-            if (!(entity instanceof LivingEntity) || (entity != Modules.get().get(KillAura.class).getTarget() && ka.get())) return;
+            if (!(entity instanceof LivingEntity) || (entity != Modules.getModule(KillAura.class).getTarget() && ka.get())) return;
 
             switch (mode.get()) {
                 case Packet -> {

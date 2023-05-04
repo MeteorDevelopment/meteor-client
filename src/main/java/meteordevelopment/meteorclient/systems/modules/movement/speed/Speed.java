@@ -107,7 +107,7 @@ public class Speed extends Module {
 
     @Override
     public void onDeactivate() {
-        Modules.get().get(Timer.class).setOverride(Timer.OFF);
+        Modules.getModule(Timer.class).setOverride(Timer.OFF);
         currentMode.onDeactivate();
     }
 
@@ -118,7 +118,7 @@ public class Speed extends Module {
         if (vanillaOnGround.get() && !mc.player.isOnGround() && speedMode.get() == SpeedModes.Vanilla) return;
         if (!inLiquids.get() && (mc.player.isTouchingWater() || mc.player.isInLava())) return;
 
-        Modules.get().get(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
+        Modules.getModule(Timer.class).setOverride(PlayerUtils.isMoving() ? timer.get() : Timer.OFF);
 
         currentMode.onMove(event);
     }

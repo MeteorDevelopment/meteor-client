@@ -94,13 +94,13 @@ public class Utils {
         double tY = mc.player.getY() - mc.player.prevY;
         double tZ = mc.player.getZ() - mc.player.prevZ;
 
-        Timer timer = Modules.get().get(Timer.class);
+        Timer timer = Modules.getModule(Timer.class);
         if (timer.isActive()) {
             tX *= timer.getMultiplier();
             tY *= timer.getMultiplier();
             tZ *= timer.getMultiplier();
         }
-        
+
         tX *= 20;
         tY *= 20;
         tZ *= 20;

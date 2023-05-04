@@ -44,10 +44,10 @@ public class DamageCommand extends Command {
 
     private void damagePlayer(int amount) {
         boolean noFall = Modules.get().isActive(NoFall.class);
-        if (noFall) Modules.get().get(NoFall.class).toggle();
+        if (noFall) Modules.getModule(NoFall.class).toggle();
 
         boolean antiHunger = Modules.get().isActive(AntiHunger.class);
-        if (antiHunger) Modules.get().get(AntiHunger.class).toggle();
+        if (antiHunger) Modules.getModule(AntiHunger.class).toggle();
 
         Vec3d pos = mc.player.getPos();
 
@@ -58,8 +58,8 @@ public class DamageCommand extends Command {
 
         sendPositionPacket(pos.x, pos.y, pos.z, true);
 
-        if (noFall) Modules.get().get(NoFall.class).toggle();
-        if (antiHunger) Modules.get().get(AntiHunger.class).toggle();
+        if (noFall) Modules.getModule(NoFall.class).toggle();
+        if (antiHunger) Modules.getModule(AntiHunger.class).toggle();
     }
 
     private void sendPositionPacket(double x, double y, double z, boolean onGround) {

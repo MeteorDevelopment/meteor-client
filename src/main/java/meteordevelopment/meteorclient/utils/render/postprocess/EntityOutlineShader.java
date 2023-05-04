@@ -13,7 +13,7 @@ public class EntityOutlineShader extends EntityShader {
 
     @Override
     protected boolean shouldDraw() {
-        if (esp == null) esp = Modules.get().get(ESP.class);
+        if (esp == null) esp = Modules.getModule(ESP.class);
         return esp.isShader();
     }
 

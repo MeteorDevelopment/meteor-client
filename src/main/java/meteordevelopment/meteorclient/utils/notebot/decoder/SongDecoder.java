@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import java.io.File;
 
 public abstract class SongDecoder {
-    protected Notebot notebot = Modules.get().get(Notebot.class);
+    protected Notebot notebot = Modules.getModule(Notebot.class);
 
     /**
      * Parse file to a {@link Song} object

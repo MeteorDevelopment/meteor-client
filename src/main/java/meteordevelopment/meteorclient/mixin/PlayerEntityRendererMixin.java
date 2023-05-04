@@ -27,7 +27,7 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 public class PlayerEntityRendererMixin {
     @ModifyArgs(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 0))
     private void modifyRenderLayer(Args args, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light, AbstractClientPlayerEntity player, ModelPart arm, ModelPart sleeve) {
-        Chams chams = Modules.get().get(Chams.class);
+        Chams chams = Modules.getModule(Chams.class);
 
         if (chams.isActive() && chams.hand.get()) {
             Identifier texture = chams.handTexture.get() ? player.getSkinTexture() : Chams.BLANK;
@@ -37,7 +37,7 @@ public class PlayerEntityRendererMixin {
 
     @Redirect(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 0))
     private void redirectRenderMain(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-        Chams chams = Modules.get().get(Chams.class);
+        Chams chams = Modules.getModule(Chams.class);
 
         if (chams.isActive() && chams.hand.get()) {
             Color color = chams.handColor.get();
@@ -49,7 +49,7 @@ public class PlayerEntityRendererMixin {
 
     @Redirect(method = "renderArm", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/model/ModelPart;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;II)V", ordinal = 1))
     private void redirectRenderSleeve(ModelPart modelPart, MatrixStack matrices, VertexConsumer vertices, int light, int overlay) {
-        Chams chams = Modules.get().get(Chams.class);
+        Chams chams = Modules.getModule(Chams.class);
 
         if (Modules.get().isActive(HandView.class)) return;
 

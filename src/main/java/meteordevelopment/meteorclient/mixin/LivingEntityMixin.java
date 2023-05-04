@@ -64,28 +64,28 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
     private boolean travelHasNoGravityProxy(LivingEntity self) {
-        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.get().get(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION)) {
-            return !Modules.get().get(PotionSpoof.class).applyGravity.get();
+        if (activeStatusEffects.containsKey(StatusEffects.LEVITATION) && Modules.getModule(PotionSpoof.class).shouldBlock(StatusEffects.LEVITATION)) {
+            return !Modules.getModule(PotionSpoof.class).applyGravity.get();
         }
         return self.hasNoGravity();
     }
 
     @Inject(method = "spawnItemParticles", at = @At("HEAD"), cancellable = true)
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
-        NoRender noRender = Modules.get().get(NoRender.class);
+        NoRender noRender = Modules.getModule(NoRender.class);
         if (noRender.noEatParticles() && stack.isFood()) info.cancel();
     }
 
     @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
     private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo info) {
-        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
+        if ((Object) this == mc.player && Modules.getModule(OffhandCrash.class).isAntiCrash()) {
             info.cancel();
         }
     }
 
     @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
     private Hand setHand(Hand hand) {
-        HandView handView = Modules.get().get(HandView.class);
+        HandView handView = Modules.getModule(HandView.class);
         if ((Object) this == mc.player && handView.isActive()) {
             if (handView.swingMode.get() == HandView.SwingMode.None) return hand;
             return handView.swingMode.get() == HandView.SwingMode.Offhand ? Hand.OFF_HAND : Hand.MAIN_HAND;
@@ -96,18 +96,18 @@ public abstract class LivingEntityMixin extends Entity {
     @ModifyConstant(method = "getHandSwingDuration", constant = @Constant(intValue = 6))
     private int getHandSwingDuration(int constant) {
         if ((Object) this != mc.player) return constant;
-        return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
+        return Modules.getModule(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.getModule(HandView.class).swingSpeed.get() : constant;
     }
 
     @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)
     private void isFallFlyingHook(CallbackInfoReturnable<Boolean> info) {
-        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
+        if ((Object) this == mc.player && Modules.getModule(ElytraFly.class).canPacketEfly()) {
             info.setReturnValue(true);
         }
     }
 
     @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
     private void hasStatusEffect(StatusEffect effect, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) info.setReturnValue(false);
+        if (Modules.getModule(PotionSpoof.class).shouldBlock(effect)) info.setReturnValue(false);
     }
 }

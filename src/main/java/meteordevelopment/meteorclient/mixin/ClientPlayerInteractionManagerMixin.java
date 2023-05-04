@@ -63,7 +63,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     public void onClickArmorSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
-        if (!Modules.get().get(InventoryTweaks.class).armorStorage()) return;
+        if (!Modules.getModule(InventoryTweaks.class).armorStorage()) return;
 
         ScreenHandler screenHandler = player.currentScreenHandler;
 
@@ -110,7 +110,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        info.setReturnValue(Modules.get().get(Reach.class).blockReach());
+        info.setReturnValue(Modules.getModule(Reach.class).blockReach());
     }
 
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
@@ -134,7 +134,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Redirect(method = "method_41930",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
     private float deltaChange(BlockState blockState, PlayerEntity player, BlockView world, BlockPos pos) {
         float delta = blockState.calcBlockBreakingDelta(player, world, pos);
-        if (Modules.get().get(BreakDelay.class).noInstaBreak.get() && delta >= 1) {
+        if (Modules.getModule(BreakDelay.class).noInstaBreak.get() && delta >= 1) {
             BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(blockBreakingCooldown));
             blockBreakingCooldown = event.cooldown;
             return 0;

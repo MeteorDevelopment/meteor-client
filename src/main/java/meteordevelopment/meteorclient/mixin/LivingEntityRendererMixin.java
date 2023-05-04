@@ -78,9 +78,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("HEAD"), cancellable = true)
     private void renderHead(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        if (Modules.get().get(NoRender.class).noDeadEntities() && livingEntity.isDead()) ci.cancel();
+        if (Modules.getModule(NoRender.class).noDeadEntities() && livingEntity.isDead()) ci.cancel();
 
-        Chams chams = Modules.get().get(Chams.class);
+        Chams chams = Modules.getModule(Chams.class);
 
         if (chams.isActive() && chams.shouldRender(livingEntity)) {
             glEnable(GL_POLYGON_OFFSET_FILL);
@@ -90,7 +90,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Inject(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At("TAIL"))
     private void renderTail(T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, CallbackInfo ci) {
-        Chams chams = Modules.get().get(Chams.class);
+        Chams chams = Modules.getModule(Chams.class);
 
         if (chams.isActive() && chams.shouldRender(livingEntity)) {
             glPolygonOffset(1.0f, 1100000.0f);
@@ -102,7 +102,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @ModifyArgs(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/math/MatrixStack;scale(FFF)V"))
     private void modifyScale(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
-        Chams module = Modules.get().get(Chams.class);
+        Chams module = Modules.getModule(Chams.class);
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
         if (module.ignoreSelf.get() && livingEntity == mc.player) return;
 
@@ -113,7 +113,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @ModifyArgs(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/model/EntityModel;render(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;IIFFFF)V"))
     private void modifyColor(Args args, T livingEntity, float f, float g, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i) {
-        Chams module = Modules.get().get(Chams.class);
+        Chams module = Modules.getModule(Chams.class);
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity)) return;
         if (module.ignoreSelf.get() && livingEntity == mc.player) return;
 
@@ -126,7 +126,7 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @Redirect(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/entity/LivingEntityRenderer;getRenderLayer(Lnet/minecraft/entity/LivingEntity;ZZZ)Lnet/minecraft/client/render/RenderLayer;"))
     private RenderLayer getRenderLayer(LivingEntityRenderer<T, M> livingEntityRenderer, T livingEntity, boolean showBody, boolean translucent, boolean showOutline) {
-        Chams module = Modules.get().get(Chams.class);
+        Chams module = Modules.getModule(Chams.class);
         if (!module.isActive() || !module.players.get() || !(livingEntity instanceof PlayerEntity) || module.playersTexture.get())
             return getRenderLayer(livingEntity, showBody, translucent, showOutline);
         if (module.ignoreSelf.get() && livingEntity == mc.player)

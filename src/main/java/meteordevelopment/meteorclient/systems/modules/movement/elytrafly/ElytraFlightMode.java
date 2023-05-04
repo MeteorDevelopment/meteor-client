@@ -33,7 +33,7 @@ public class ElytraFlightMode {
     protected double acceleration;
 
     public ElytraFlightMode(ElytraFlightModes type) {
-        this.elytraFly = Modules.get().get(ElytraFly.class);
+        this.elytraFly = Modules.getModule(ElytraFly.class);
         this.mc = MinecraftClient.getInstance();
         this.type = type;
     }

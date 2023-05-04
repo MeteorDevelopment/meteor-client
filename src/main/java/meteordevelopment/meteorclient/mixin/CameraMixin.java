@@ -43,12 +43,12 @@ public abstract class CameraMixin implements ICamera {
 
     @Inject(method = "getSubmersionType", at = @At("HEAD"), cancellable = true)
     private void getSubmergedFluidState(CallbackInfoReturnable<CameraSubmersionType> ci) {
-        if (Modules.get().get(NoRender.class).noLiquidOverlay()) ci.setReturnValue(CameraSubmersionType.NONE);
+        if (Modules.getModule(NoRender.class).noLiquidOverlay()) ci.setReturnValue(CameraSubmersionType.NONE);
     }
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0))
     private void modifyCameraDistance(Args args) {
-        args.set(0, -clipToSpace(Modules.get().get(CameraTweaks.class).getDistance()));
+        args.set(0, -clipToSpace(Modules.getModule(CameraTweaks.class).getDistance()));
         if (Modules.get().isActive(Freecam.class)) {
             args.set(0, -clipToSpace(0));
         }
@@ -56,7 +56,7 @@ public abstract class CameraMixin implements ICamera {
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)
     private void onClipToSpace(double desiredCameraDistance, CallbackInfoReturnable<Double> info) {
-        if (Modules.get().get(CameraTweaks.class).clip()) {
+        if (Modules.getModule(CameraTweaks.class).clip()) {
             info.setReturnValue(desiredCameraDistance);
         }
     }
@@ -75,7 +75,7 @@ public abstract class CameraMixin implements ICamera {
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setPos(DDD)V"))
     private void onUpdateSetPosArgs(Args args) {
-        Freecam freecam = Modules.get().get(Freecam.class);
+        Freecam freecam = Modules.getModule(Freecam.class);
 
         if (freecam.isActive()) {
             args.set(0, freecam.getX(tickDelta));
@@ -86,8 +86,8 @@ public abstract class CameraMixin implements ICamera {
 
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;setRotation(FF)V"))
     private void onUpdateSetRotationArgs(Args args) {
-        Freecam freecam = Modules.get().get(Freecam.class);
-        FreeLook freeLook = Modules.get().get(FreeLook.class);
+        Freecam freecam = Modules.getModule(Freecam.class);
+        FreeLook freeLook = Modules.getModule(FreeLook.class);
 
         if (freecam.isActive()) {
             args.set(0, (float) freecam.getYaw(tickDelta));

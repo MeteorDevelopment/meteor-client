@@ -57,7 +57,7 @@ public abstract class EntityMixin {
     private Vec3d updateMovementInFluidFluidStateGetVelocity(FluidState state, BlockView world, BlockPos pos) {
         Vec3d vec = state.getVelocity(world, pos);
 
-        Velocity velocity = Modules.get().get(Velocity.class);
+        Velocity velocity = Modules.getModule(Velocity.class);
         if ((Object) this == mc.player && velocity.isActive() && velocity.liquids.get()) {
             vec = vec.multiply(velocity.getHorizontal(velocity.liquidsHorizontal), velocity.getVertical(velocity.liquidsVertical), velocity.getHorizontal(velocity.liquidsHorizontal));
         }
@@ -67,7 +67,7 @@ public abstract class EntityMixin {
 
     @ModifyArgs(method = "pushAwayFrom(Lnet/minecraft/entity/Entity;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;addVelocity(DDD)V"))
     private void onPushAwayFrom(Args args, Entity entity) {
-        Velocity velocity = Modules.get().get(Velocity.class);
+        Velocity velocity = Modules.getModule(Velocity.class);
 
         // Velocity
         if ((Object) this == mc.player && velocity.isActive() && velocity.entityPush.get()) {
@@ -107,7 +107,7 @@ public abstract class EntityMixin {
     @Inject(method = "getTeamColorValue", at = @At("HEAD"), cancellable = true)
     private void onGetTeamColorValue(CallbackInfoReturnable<Integer> info) {
         if (PostProcessShaders.rendering) {
-            Color color = Modules.get().get(ESP.class).getColor((Entity) (Object) this);
+            Color color = Modules.getModule(ESP.class).getColor((Entity) (Object) this);
             if (color != null) info.setReturnValue(color.getPacked());
         }
     }
@@ -115,26 +115,26 @@ public abstract class EntityMixin {
     @Redirect(method = "getVelocityMultiplier", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;getBlock()Lnet/minecraft/block/Block;"))
     private Block getVelocityMultiplierGetBlockProxy(BlockState blockState) {
         if ((Object) this != mc.player) return blockState.getBlock();
-        if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.get().get(NoSlow.class).soulSand()) return Blocks.STONE;
-        if (blockState.getBlock() == Blocks.HONEY_BLOCK && Modules.get().get(NoSlow.class).honeyBlock()) return Blocks.STONE;
+        if (blockState.getBlock() == Blocks.SOUL_SAND && Modules.getModule(NoSlow.class).soulSand()) return Blocks.STONE;
+        if (blockState.getBlock() == Blocks.HONEY_BLOCK && Modules.getModule(NoSlow.class).honeyBlock()) return Blocks.STONE;
         return blockState.getBlock();
     }
 
     @Inject(method = "isInvisibleTo(Lnet/minecraft/entity/player/PlayerEntity;)Z", at = @At("HEAD"), cancellable = true)
     private void isInvisibleToCanceller(PlayerEntity player, CallbackInfoReturnable<Boolean> info) {
         if (!Utils.canUpdate()) return;
-        ESP esp = Modules.get().get(ESP.class);
-        if (Modules.get().get(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
+        ESP esp = Modules.getModule(ESP.class);
+        if (Modules.getModule(NoRender.class).noInvisibility() || esp.isActive() && !esp.shouldSkip((Entity) (Object) this)) info.setReturnValue(false);
     }
 
     @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
     private void isGlowing(CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(NoRender.class).noGlowing()) info.setReturnValue(false);
+        if (Modules.getModule(NoRender.class).noGlowing()) info.setReturnValue(false);
     }
 
     @Inject(method = "getTargetingMargin", at = @At("HEAD"), cancellable = true)
     private void onGetTargetingMargin(CallbackInfoReturnable<Float> info) {
-        double v = Modules.get().get(Hitboxes.class).getEntityValue((Entity) (Object) this);
+        double v = Modules.getModule(Hitboxes.class).getEntityValue((Entity) (Object) this);
         if (v != 0) info.setReturnValue((float) v);
     }
 
@@ -145,13 +145,13 @@ public abstract class EntityMixin {
 
     @Inject(method = "getPose", at = @At("HEAD"), cancellable = true)
     private void getPoseHook(CallbackInfoReturnable<EntityPose> info) {
-        if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
+        if ((Object) this == mc.player && Modules.getModule(ElytraFly.class).canPacketEfly()) {
             info.setReturnValue(EntityPose.FALL_FLYING);
         }
     }
 
     @Inject(method = "bypassesLandingEffects", at = @At("RETURN"), cancellable = true)
     private void cancelBounce(CallbackInfoReturnable<Boolean> cir) {
-        cir.setReturnValue(Modules.get().get(NoFall.class).cancelBounce() || cir.getReturnValue());
+        cir.setReturnValue(Modules.getModule(NoFall.class).cancelBounce() || cir.getReturnValue());
     }
 }

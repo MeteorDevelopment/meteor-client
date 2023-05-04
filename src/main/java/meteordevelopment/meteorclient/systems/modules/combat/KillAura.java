@@ -233,7 +233,7 @@ public class KillAura extends Module {
         .build()
     );
 
-    CrystalAura ca = Modules.get().get(CrystalAura.class);
+    CrystalAura ca = Modules.getModule(CrystalAura.class);
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;

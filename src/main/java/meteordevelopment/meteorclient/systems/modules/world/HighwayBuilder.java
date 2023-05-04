@@ -299,8 +299,8 @@ public class HighwayBuilder extends Module {
             return;
         }
 
-        if (Modules.get().get(AutoEat.class).eating) return;
-        if (Modules.get().get(AutoGap.class).isEating()) return;
+        if (Modules.getModule(AutoEat.class).eating) return;
+        if (Modules.getModule(AutoGap.class).isEating()) return;
 
         state.tick(this);
     }

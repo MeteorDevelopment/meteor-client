@@ -21,13 +21,13 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 public class LightmapTextureManagerMixin {
     @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/texture/NativeImage;setColor(III)V"))
     private void update(Args args) {
-        if (Modules.get().get(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
+        if (Modules.getModule(Fullbright.class).getGamma() || Modules.get().isActive(Xray.class)) {
             args.set(2, 0xFFFFFFFF);
         }
     }
 
     @Inject(method = "getDarknessFactor(F)F", at = @At("HEAD"), cancellable = true)
 	private void getDarknessFactor(float tickDelta, CallbackInfoReturnable<Float> info) {
-		if (Modules.get().get(NoRender.class).noDarkness()) info.setReturnValue(0.0f);
+		if (Modules.getModule(NoRender.class).noDarkness()) info.setReturnValue(0.0f);
 	}
 }

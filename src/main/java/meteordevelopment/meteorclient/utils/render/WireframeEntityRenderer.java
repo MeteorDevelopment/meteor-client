@@ -256,7 +256,7 @@ public class WireframeEntityRenderer {
 
         if (entityRenderer instanceof EndCrystalEntityRenderer renderer) {
             EndCrystalEntity crystalEntity = (EndCrystalEntity) entity;
-            Chams chams = Modules.get().get(Chams.class);
+            Chams chams = Modules.getModule(Chams.class);
             boolean chamsEnabled = chams.isActive() && chams.crystals.get();
 
             matrices.push();

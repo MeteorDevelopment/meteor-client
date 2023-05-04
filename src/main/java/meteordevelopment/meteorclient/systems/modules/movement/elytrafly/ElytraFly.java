@@ -275,7 +275,7 @@ public class ElytraFly extends Module {
         currentMode.onActivate();
         if ((chestSwap.get() == ChestSwapMode.Always || chestSwap.get() == ChestSwapMode.WaitForGround)
                 && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
-            Modules.get().get(ChestSwap.class).swap();
+            Modules.getModule(ChestSwap.class).swap();
         }
     }
 
@@ -284,7 +284,7 @@ public class ElytraFly extends Module {
         if (autoPilot.get()) mc.options.forwardKey.setPressed(false);
 
         if (chestSwap.get() == ChestSwapMode.Always && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-            Modules.get().get(ChestSwap.class).swap();
+            Modules.getModule(ChestSwap.class).swap();
         } else if (chestSwap.get() == ChestSwapMode.WaitForGround) {
             enableGroundListener();
         }
@@ -349,7 +349,7 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying()) {
+        if (autoHover.get() && mc.player.input.sneaking && !Modules.getModule(Freecam.class).isActive() && mc.player.isFallFlying()) {
             BlockState underState = mc.world.getBlockState(mc.player.getBlockPos().down());
             Block under = underState.getBlock();
             BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
@@ -409,7 +409,7 @@ public class ElytraFly extends Module {
         private void chestSwapGroundListener(PlayerMoveEvent event) {
             if (mc.player != null && mc.player.isOnGround()) {
                 if (mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA) {
-                    Modules.get().get(ChestSwap.class).swap();
+                    Modules.getModule(ChestSwap.class).swap();
                     disableGroundListener();
                 }
             }

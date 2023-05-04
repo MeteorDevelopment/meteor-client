@@ -23,13 +23,13 @@ import java.util.function.Function;
 public class SignBlockEntityRendererMixin {
     @Redirect(method = "renderText", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/entity/SignBlockEntity;updateSign(ZLjava/util/function/Function;)[Lnet/minecraft/text/OrderedText;"))
     private OrderedText[] updateSignProxy(SignBlockEntity sign, boolean filterText, Function<Text, OrderedText> textOrderingFunction) {
-        if (Modules.get().get(NoRender.class).noSignText()) return null;
+        if (Modules.getModule(NoRender.class).noSignText()) return null;
         return sign.updateSign(filterText, textOrderingFunction);
     }
 
     @ModifyConstant(method = "renderText", constant = @Constant(intValue = 4))
     private int loopTextLengthProxy(int i) {
-        if (Modules.get().get(NoRender.class).noSignText()) return 0;
+        if (Modules.getModule(NoRender.class).noSignText()) return 0;
         return i;
     }
 }

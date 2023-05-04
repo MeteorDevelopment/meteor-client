@@ -46,7 +46,7 @@ public abstract class EntityRenderDispatcherMixin {
 
     @Inject(method = "renderHitbox", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/WorldRenderer;drawBox(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumer;Lnet/minecraft/util/math/Box;FFFF)V", ordinal = 0), locals = LocalCapture.CAPTURE_FAILSOFT)
     private static void onRenderHitbox(MatrixStack matrices, VertexConsumer vertices, Entity entity, float tickDelta, CallbackInfo info, Box box) {
-        double v = Modules.get().get(Hitboxes.class).getEntityValue(entity);
+        double v = Modules.getModule(Hitboxes.class).getEntityValue(entity);
         if (v != 0) ((IBox) box).expand(v);
     }
 
@@ -55,7 +55,7 @@ public abstract class EntityRenderDispatcherMixin {
     @Inject(method = "renderShadow", at = @At("HEAD"), cancellable = true)
     private static void onRenderShadow(MatrixStack matrices, VertexConsumerProvider vertexConsumers, Entity entity, float opacity, float tickDelta, WorldView world, float radius, CallbackInfo info) {
         if (PostProcessShaders.rendering) info.cancel();
-        if (Modules.get().get(NoRender.class).noDeadEntities() && entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) info.cancel();
+        if (Modules.getModule(NoRender.class).noDeadEntities() && entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) info.cancel();
     }
 
     @Inject(method = "getSquaredDistanceToCamera(Lnet/minecraft/entity/Entity;)D", at = @At("HEAD"), cancellable = true)

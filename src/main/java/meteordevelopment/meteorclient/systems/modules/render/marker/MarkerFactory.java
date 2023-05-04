@@ -35,7 +35,7 @@ public class MarkerFactory {
     public BaseMarker createMarker(String name) {
         if (factories.containsKey(name)) {
             BaseMarker marker = factories.get(name).create();
-            marker.settings.registerColorSettings(Modules.get().get(Marker.class));
+            marker.settings.registerColorSettings(Modules.getModule(Marker.class));
 
             return marker;
         }

@@ -23,6 +23,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class SweetBerryBushBlockMixin {
     @Inject(method = "onEntityCollision", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;slowMovement(Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/Vec3d;)V"), cancellable = true)
     private void onEntityCollision(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo info) {
-        if (entity == mc.player && Modules.get().get(NoSlow.class).berryBush()) info.cancel();
+        if (entity == mc.player && Modules.getModule(NoSlow.class).berryBush()) info.cancel();
     }
 }

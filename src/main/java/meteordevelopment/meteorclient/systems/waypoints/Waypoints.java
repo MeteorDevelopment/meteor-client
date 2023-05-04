@@ -129,7 +129,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        WaypointsModule module = Modules.get().get(WaypointsModule.class);
+        WaypointsModule module = Modules.getModule(WaypointsModule.class);
         if (!module.isActive()) return;
 
         TextRenderer text = TextRenderer.get();

@@ -22,7 +22,7 @@ public class BiomeColorsMixin {
      */
     @Inject(method = "getWaterColor", at = @At("HEAD"), cancellable = true)
     private static void onGetWaterColor(BlockRenderView world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.customWaterColor.get()) {
             info.setReturnValue(ambience.waterColor.get().getPacked());
@@ -34,7 +34,7 @@ public class BiomeColorsMixin {
      */
     @Inject(method = "getFoliageColor", at = @At("HEAD"), cancellable = true)
     private static void onGetFoliageColor(BlockRenderView world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.customFoliageColor.get()) {
             info.setReturnValue(ambience.foliageColor.get().getPacked());
@@ -46,7 +46,7 @@ public class BiomeColorsMixin {
      */
     @Inject(method = "getGrassColor", at = @At("HEAD"), cancellable = true)
     private static void onGetGrassColor(BlockRenderView world, BlockPos pos, CallbackInfoReturnable<Integer> info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.customGrassColor.get()) {
             info.setReturnValue(ambience.grassColor.get().getPacked());

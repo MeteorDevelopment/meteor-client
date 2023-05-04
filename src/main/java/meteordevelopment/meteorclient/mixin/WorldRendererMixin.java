@@ -55,12 +55,12 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "renderWeather", at = @At("HEAD"), cancellable = true)
     private void onRenderWeather(LightmapTextureManager manager, float f, double d, double e, double g, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noWeather()) info.cancel();
+        if (Modules.getModule(NoRender.class).noWeather()) info.cancel();
     }
 
 	@Inject(method = "hasBlindnessOrDarkness(Lnet/minecraft/client/render/Camera;)Z", at = @At("HEAD"), cancellable = true)
 	private void hasBlindnessOrDarkness(Camera camera, CallbackInfoReturnable<Boolean> info) {
-		if (Modules.get().get(NoRender.class).noBlindness() || Modules.get().get(NoRender.class).noDarkness()) info.setReturnValue(null);
+		if (Modules.getModule(NoRender.class).noBlindness() || Modules.getModule(NoRender.class).noDarkness()) info.setReturnValue(null);
 	}
 
     // Entity Shaders
@@ -73,7 +73,7 @@ public abstract class WorldRendererMixin {
     @Inject(method = "renderEntity", at = @At("HEAD"))
     private void renderEntity(Entity entity, double cameraX, double cameraY, double cameraZ, float tickDelta, MatrixStack matrices, VertexConsumerProvider vertexConsumers, CallbackInfo info) {
         draw(entity, cameraX, cameraY, cameraZ, tickDelta, vertexConsumers, matrices, PostProcessShaders.CHAMS, Color.WHITE);
-        draw(entity, cameraX, cameraY, cameraZ, tickDelta, vertexConsumers, matrices, PostProcessShaders.ENTITY_OUTLINE, Modules.get().get(ESP.class).getColor(entity));
+        draw(entity, cameraX, cameraY, cameraZ, tickDelta, vertexConsumers, matrices, PostProcessShaders.ENTITY_OUTLINE, Modules.getModule(ESP.class).getColor(entity));
     }
 
     @Unique
@@ -105,7 +105,7 @@ public abstract class WorldRendererMixin {
 
     @Inject(method = "renderEndSky", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Tessellator;draw()V"))
     private void onRenderEndSkyDraw(MatrixStack matrices, CallbackInfo info) {
-        Ambience ambience = Modules.get().get(Ambience.class);
+        Ambience ambience = Modules.getModule(Ambience.class);
 
         if (ambience.isActive() && ambience.endSky.get() && ambience.customSkyColor.get()) {
             Color customEndSkyColor = ambience.skyColor();
@@ -127,6 +127,6 @@ public abstract class WorldRendererMixin {
 
     @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 0)
     private static int getLightmapCoordinatesModifySkyLight(int sky) {
-        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), sky);
+        return Math.max(Modules.getModule(Fullbright.class).getLuminance(), sky);
     }
 }

@@ -26,6 +26,6 @@ public abstract class AbstractFurnaceScreenMixin<T extends AbstractFurnaceScreen
 
     @Inject(method = "handledScreenTick", at = @At("TAIL"))
     private void onTick(CallbackInfo info) {
-        if (Modules.get().isActive(AutoSmelter.class)) Modules.get().get(AutoSmelter.class).tick(handler);
+        if (Modules.get().isActive(AutoSmelter.class)) Modules.getModule(AutoSmelter.class).tick(handler);
     }
 }

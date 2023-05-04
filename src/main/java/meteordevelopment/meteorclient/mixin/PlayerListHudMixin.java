@@ -23,28 +23,28 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class PlayerListHudMixin {
     @ModifyConstant(constant = @Constant(longValue = 80L), method = "collectPlayerEntries")
     private long modifyCount(long count) {
-        BetterTab module = Modules.get().get(BetterTab.class);
+        BetterTab module = Modules.getModule(BetterTab.class);
 
         return module.isActive() ? module.tabSize.get() : count;
     }
 
     @Inject(method = "getPlayerName", at = @At("HEAD"), cancellable = true)
     public void getPlayerName(PlayerListEntry playerListEntry, CallbackInfoReturnable<Text> info) {
-        BetterTab betterTab = Modules.get().get(BetterTab.class);
+        BetterTab betterTab = Modules.getModule(BetterTab.class);
 
         if (betterTab.isActive()) info.setReturnValue(betterTab.getPlayerName(playerListEntry));
     }
 
     @ModifyArg(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I"), index = 0)
     private int modifyWidth(int width) {
-        BetterTab module = Modules.get().get(BetterTab.class);
+        BetterTab module = Modules.getModule(BetterTab.class);
 
         return module.isActive() && module.accurateLatency.get() ? width + 30 : width;
     }
 
     @Inject(method = "renderLatencyIcon", at = @At("HEAD"), cancellable = true)
     private void onRenderLatencyIcon(MatrixStack matrices, int width, int x, int y, PlayerListEntry entry, CallbackInfo info) {
-        BetterTab betterTab = Modules.get().get(BetterTab.class);
+        BetterTab betterTab = Modules.getModule(BetterTab.class);
 
         if (betterTab.isActive() && betterTab.accurateLatency.get()) {
             MinecraftClient mc = MinecraftClient.getInstance();

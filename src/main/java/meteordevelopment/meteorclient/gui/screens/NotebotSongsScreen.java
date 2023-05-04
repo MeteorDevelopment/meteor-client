@@ -23,7 +23,7 @@ import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NotebotSongsScreen extends WindowScreen {
-    private static final Notebot notebot = Modules.get().get(Notebot.class);
+    private static final Notebot notebot = Modules.getModule(Notebot.class);
 
     private WTextBox filter;
     private String filterText = "";

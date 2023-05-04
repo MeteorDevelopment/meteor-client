@@ -153,9 +153,9 @@ public class NoSlow extends Module {
         if (web.get() == WebMode.Timer) {
             if (mc.world.getBlockState(mc.player.getBlockPos()).getBlock() == Blocks.COBWEB && !mc.player.isOnGround()) {
                 resetTimer = false;
-                Modules.get().get(Timer.class).setOverride(webTimer.get());
+                Modules.getModule(Timer.class).setOverride(webTimer.get());
             } else if (!resetTimer) {
-                Modules.get().get(Timer.class).setOverride(Timer.OFF);
+                Modules.getModule(Timer.class).setOverride(Timer.OFF);
                 resetTimer = true;
             }
         }

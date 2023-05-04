@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class TextRendererMixin {
     @Redirect(method = "accept", at = @At(value = "INVOKE", target = "Lnet/minecraft/text/Style;isObfuscated()Z"))
     private boolean onRenderObfuscatedStyle(Style instance) {
-        return !Modules.get().get(NoRender.class).noObfuscation() && instance.isObfuscated();
+        return !Modules.getModule(NoRender.class).noObfuscation() && instance.isObfuscated();
     }
 }

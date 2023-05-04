@@ -38,7 +38,7 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/ingame/BeaconScreen;addButton(Lnet/minecraft/client/gui/widget/ClickableWidget;)V", ordinal = 1, shift = At.Shift.AFTER), cancellable = true)
     private void changeButtons(CallbackInfo ci) {
-        if (!Modules.get().get(BetterBeacons.class).isActive()) return;
+        if (!Modules.getModule(BetterBeacons.class).isActive()) return;
         List<StatusEffect> effects = Arrays.stream(BeaconBlockEntity.EFFECTS_BY_LEVEL).flatMap(Arrays::stream).toList();
 
         if (MinecraftClient.getInstance().currentScreen instanceof BeaconScreen beaconScreen) {
@@ -59,7 +59,7 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
 
     @Inject(method = "drawBackground", at = @At("TAIL"))
     private void onDrawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo ci) {
-        if (!Modules.get().get(BetterBeacons.class).isActive()) return;
+        if (!Modules.getModule(BetterBeacons.class).isActive()) return;
         //this will clear the background from useless pyramid graphics
         DrawableHelper.fill(matrices,this.x+10,this.y+7,this.x+220,this.y+98, 0xFF212121);
     }

@@ -20,6 +20,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class PowderSnowBlockMixin {
     @Inject(method = "canWalkOnPowderSnow", at = @At("HEAD"), cancellable = true)
     private static void onCanWalkOnPowderSnow(Entity entity, CallbackInfoReturnable<Boolean> info) {
-        if (entity == mc.player && Modules.get().get(Jesus.class).canWalkOnPowderSnow()) info.setReturnValue(true);
+        if (entity == mc.player && Modules.getModule(Jesus.class).canWalkOnPowderSnow()) info.setReturnValue(true);
     }
 }
