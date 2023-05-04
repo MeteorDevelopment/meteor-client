@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
-import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.hud.Hud;
@@ -41,7 +40,6 @@ public class Systems {
 
         add(new Modules());
         add(new Macros());
-        add(new Commands());
         add(new Friends());
         add(new Accounts());
         add(new Waypoints());
