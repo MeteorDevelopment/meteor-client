@@ -5,9 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -70,7 +73,7 @@ public class Xray extends Module {
     );
 
     private final Setting<Boolean> exposedOnly = sgGeneral.add(new BoolSetting.Builder()
-        .name("exposed only")
+        .name("exposed-only")
         .description("Show only exposed ores.")
         .defaultValue(false)
         .onChanged(onChanged -> {
@@ -92,6 +95,11 @@ public class Xray extends Module {
         mc.worldRenderer.reload();
     }
 
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return MixinPlugin.isSodiumPresent ? theme.label("Warning: Due to sodium's presence, opacity is overridden to 0.") : null;
+    }
+
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
         if (isBlocked(event.blockEntity.getCachedState().getBlock(), event.blockEntity.getPos())) event.cancel();
@@ -111,7 +119,7 @@ public class Xray extends Module {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
             BlockPos adjPos = pos.offset(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(view , adjPos,  facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
+            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
         }
 
         return returns;

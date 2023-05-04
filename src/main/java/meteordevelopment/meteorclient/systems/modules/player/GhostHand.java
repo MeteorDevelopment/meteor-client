@@ -9,9 +9,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
@@ -31,9 +29,7 @@ public class GhostHand extends Module {
     private void onTick(TickEvent.Pre event) {
         if (!mc.options.useKey.isPressed() || mc.player.isSneaking()) return;
 
-        for (BlockEntity blockEntity : Utils.blockEntities()) {
-            if (BlockPos.ofFloored(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos()).equals(blockEntity.getPos())) return;
-        }
+        if (mc.world.getBlockState(BlockPos.ofFloored(mc.player.raycast(mc.interactionManager.getReachDistance(), mc.getTickDelta(), false).getPos())).hasBlockEntity()) return;
 
         Vec3d direction = new Vec3d(0, 0, 0.1)
                 .rotateX(-(float) Math.toRadians(mc.player.getPitch()))
@@ -47,11 +43,9 @@ public class GhostHand extends Module {
             if (posList.contains(pos)) continue;
             posList.add(pos);
 
-            for (BlockEntity blockEntity : Utils.blockEntities()) {
-                if (blockEntity.getPos().equals(pos)) {
-                    mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
-                    return;
-                }
+            if (mc.world.getBlockState(pos).hasBlockEntity()) {
+                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(new Vec3d(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5), Direction.UP, pos, true));
+                return;
             }
         }
     }

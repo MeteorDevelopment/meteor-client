@@ -235,7 +235,7 @@ public class AutoTrap extends Module {
             case Platform -> {
                 add(targetPos.add(0, -1, 0));
                 add(targetPos.add(1, -1, 0));
-                add(targetPos.add(0, -1, 0));
+                add(targetPos.add(-1, -1, 0));
                 add(targetPos.add(0, -1, 1));
                 add(targetPos.add(0, -1, -1));
             }

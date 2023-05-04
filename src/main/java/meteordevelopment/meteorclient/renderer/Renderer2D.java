@@ -52,6 +52,15 @@ public class Renderer2D {
         lines.render(matrices);
     }
 
+    // Tris
+    public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
+        triangles.triangle(
+            triangles.vec2(x1, y1).color(color).next(),
+            triangles.vec2(x2, y2).color(color).next(),
+            triangles.vec2(x3, y3).color(color).next()
+        );
+    }
+
     // Lines
 
     public void line(double x1, double y1, double x2, double y2, Color color) {

@@ -25,36 +25,36 @@ public class AutoBreed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to breed.")
-            .defaultValue(EntityType.HORSE, EntityType.DONKEY, EntityType.COW,
-                    EntityType.MOOSHROOM, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN, EntityType.WOLF,
-                    EntityType.CAT, EntityType.OCELOT, EntityType.RABBIT, EntityType.LLAMA, EntityType.TURTLE,
-                    EntityType.PANDA, EntityType.FOX, EntityType.BEE, EntityType.STRIDER, EntityType.HOGLIN)
-            .onlyAttackable()
-            .build()
+        .name("entities")
+        .description("Entities to breed.")
+        .defaultValue(EntityType.HORSE, EntityType.DONKEY, EntityType.COW,
+            EntityType.MOOSHROOM, EntityType.SHEEP, EntityType.PIG, EntityType.CHICKEN, EntityType.WOLF,
+            EntityType.CAT, EntityType.OCELOT, EntityType.RABBIT, EntityType.LLAMA, EntityType.TURTLE,
+            EntityType.PANDA, EntityType.FOX, EntityType.BEE, EntityType.STRIDER, EntityType.HOGLIN)
+        .onlyAttackable()
+        .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("How far away the animals can be to be bred.")
-            .min(0)
-            .defaultValue(4.5)
-            .build()
+        .name("range")
+        .description("How far away the animals can be to be bred.")
+        .min(0)
+        .defaultValue(4.5)
+        .build()
     );
 
     private final Setting<Hand> hand = sgGeneral.add(new EnumSetting.Builder<Hand>()
-            .name("hand-for-breeding")
-            .description("The hand to use for breeding.")
-            .defaultValue(Hand.MAIN_HAND)
-            .build()
+        .name("hand-for-breeding")
+        .description("The hand to use for breeding.")
+        .defaultValue(Hand.MAIN_HAND)
+        .build()
     );
 
     private final Setting<Boolean> ignoreBabies = sgGeneral.add(new BoolSetting.Builder()
-            .name("ignore-babies")
-            .description("Whether or not to ignore the baby variants of the specified entity.")
-            .defaultValue(true)
-            .build()
+        .name("ignore-babies")
+        .description("Whether or not to ignore the baby variants of the specified entity.")
+        .defaultValue(true)
+        .build()
     );
 
     private final List<Entity> animalsFed = new ArrayList<>();

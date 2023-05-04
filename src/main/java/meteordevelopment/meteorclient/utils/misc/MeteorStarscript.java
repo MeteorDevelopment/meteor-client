@@ -122,6 +122,7 @@ public class MeteorStarscript {
         ss.set("player", new ValueMap()
             .set("_toString", () -> Value.string(mc.getSession().getUsername()))
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
+            .set("absorption", () -> Value.number(mc.player != null ? mc.player.getAbsorptionAmount() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
             
             .set("speed", () -> Value.number(Utils.getPlayerSpeed().horizontalLength()))
@@ -585,7 +586,8 @@ public class MeteorStarscript {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(entity.getName().getString()))
             .set("id", Value.string(Registries.ENTITY_TYPE.getId(entity.getType()).toString()))
-            .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth() : 0))
+            .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth(): 0))
+            .set("absorption", Value.number(entity instanceof LivingEntity e ? e.getAbsorptionAmount() : 0))
             .set("pos", Value.map(new ValueMap()
                 .set("_toString", posString(entity.getX(), entity.getY(), entity.getZ()))
                 .set("x", Value.number(entity.getX()))

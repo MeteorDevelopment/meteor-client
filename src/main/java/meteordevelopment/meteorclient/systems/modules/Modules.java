@@ -28,8 +28,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
+import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -381,9 +381,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initCombat() {
-        add(new AimAssist());
         add(new AnchorAura());
-//        add(new AntiAnchor());
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
