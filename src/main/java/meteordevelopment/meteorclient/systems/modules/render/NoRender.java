@@ -169,6 +169,45 @@ public class NoRender extends Module {
         .build()
     );
 
+    public final Setting<Boolean> noToasts = sgHUD.add(new BoolSetting.Builder()
+        .name("toasts")
+        .description("Hide specific toasts")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Boolean> noAdvancementToasts = sgHUD.add(new BoolSetting.Builder()
+        .name("advancements")
+        .description("Hide advancements")
+        .defaultValue(false)
+        .visible(noToasts::get)
+        .build()
+    );
+
+    private final Setting<Boolean> noRecipeToasts = sgHUD.add(new BoolSetting.Builder()
+        .name("recipes")
+        .description("Hide new recipes")
+        .defaultValue(false)
+        .visible(noToasts::get)
+        .build()
+    );
+
+    private final Setting<Boolean> noSystemToasts = sgHUD.add(new BoolSetting.Builder()
+        .name("system")
+        .description("Hide system toasts (narrator, unsafe server, etc.)")
+        .defaultValue(false)
+        .visible(noToasts::get)
+        .build()
+    );
+
+    private final Setting<Boolean> noTutorialToasts = sgHUD.add(new BoolSetting.Builder()
+        .name("advancements")
+        .description("Hide the tutorial")
+        .defaultValue(false)
+        .visible(noToasts::get)
+        .build()
+    );
+
     // World
 
     private final Setting<Boolean> noWeather = sgWorld.add(new BoolSetting.Builder()
@@ -443,6 +482,26 @@ public class NoRender extends Module {
 
     public boolean noMessageSignatureIndicator() {
         return isActive() && noMessageSignatureIndicator.get();
+    }
+
+    public boolean noToasts() {
+        return isActive() && noToasts.get();
+    }
+
+    public boolean noAdvancementToasts() {
+        return isActive() && noAdvancementToasts.get();
+    }
+
+    public boolean noRecipeToasts() {
+        return isActive() && noRecipeToasts.get();
+    }
+
+    public boolean noSystemToasts() {
+        return isActive() && noSystemToasts.get();
+    }
+
+    public boolean noTutorialToasts() {
+        return isActive() && noTutorialToasts.get();
     }
 
     // World
