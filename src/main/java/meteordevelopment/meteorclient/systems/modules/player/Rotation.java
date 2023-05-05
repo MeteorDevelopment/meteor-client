@@ -67,14 +67,15 @@ public class Rotation extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        switch (yawLockMode.get()) {
-            case Simple -> setYawAngle(yawAngle.get().floatValue());
-            case Smart  -> setYawAngle(getSmartYawDirection());
-        }
-
-        switch (pitchLockMode.get()) {
-            case Simple -> mc.player.setPitch(pitchAngle.get().floatValue());
-            case Smart  -> mc.player.setPitch(getSmartPitchDirection());
+        if (mc.player != null) {
+            switch (yawLockMode.get()) {
+                case Simple -> setYawAngle(yawAngle.get().floatValue());
+                case Smart -> setYawAngle(getSmartYawDirection());
+            }
+            switch (pitchLockMode.get()) {
+                case Simple -> mc.player.setPitch(pitchAngle.get().floatValue());
+                case Smart -> mc.player.setPitch(getSmartPitchDirection());
+            }
         }
     }
 
