@@ -26,7 +26,7 @@ public class ToastManagerMixin {
 
     @Inject(method = "draw", at = @At("HEAD"))
     private void draw(MatrixStack matrices, CallbackInfo ci) {
-        if(this.toastQueue.isEmpty()) return;
+        if(toastQueue.isEmpty()) return;
         if(!Modules.get().get(NoRender.class).isActive() || !Modules.get().get(NoRender.class).noToasts()) return;
 
         Toast currentToast = toastQueue.getFirst();

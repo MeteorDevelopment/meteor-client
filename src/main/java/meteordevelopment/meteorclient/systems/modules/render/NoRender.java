@@ -201,7 +201,7 @@ public class NoRender extends Module {
     );
 
     private final Setting<Boolean> noTutorialToasts = sgHUD.add(new BoolSetting.Builder()
-        .name("advancements")
+        .name("tutorial")
         .description("Hide the tutorial")
         .defaultValue(false)
         .visible(noToasts::get)
