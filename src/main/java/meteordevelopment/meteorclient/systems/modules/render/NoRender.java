@@ -171,14 +171,14 @@ public class NoRender extends Module {
 
     private final Setting<Boolean> noToasts = sgHUD.add(new BoolSetting.Builder()
         .name("toasts")
-        .description("Hide specific toasts")
+        .description("Disables specific toasts.")
         .defaultValue(false)
         .build()
     );
 
     private final Setting<Boolean> noAdvancementToasts = sgHUD.add(new BoolSetting.Builder()
         .name("advancements")
-        .description("Hide advancements")
+        .description("Disables advancement toasts.")
         .defaultValue(false)
         .visible(noToasts::get)
         .build()
@@ -186,7 +186,7 @@ public class NoRender extends Module {
 
     private final Setting<Boolean> noRecipeToasts = sgHUD.add(new BoolSetting.Builder()
         .name("recipes")
-        .description("Hide new recipes")
+        .description("Disables new recipe toasts.")
         .defaultValue(false)
         .visible(noToasts::get)
         .build()
@@ -194,7 +194,7 @@ public class NoRender extends Module {
 
     private final Setting<Boolean> noSystemToasts = sgHUD.add(new BoolSetting.Builder()
         .name("system")
-        .description("Hide system toasts (narrator, unsafe server, etc.)")
+        .description("Disables system toasts (narrator, unsafe server, etc.).")
         .defaultValue(false)
         .visible(noToasts::get)
         .build()
@@ -202,7 +202,7 @@ public class NoRender extends Module {
 
     private final Setting<Boolean> noTutorialToasts = sgHUD.add(new BoolSetting.Builder()
         .name("tutorial")
-        .description("Hide the tutorial")
+        .description("Disable tutorial toasts.")
         .defaultValue(false)
         .visible(noToasts::get)
         .build()
