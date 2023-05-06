@@ -169,7 +169,7 @@ public class NoRender extends Module {
         .build()
     );
 
-    public final Setting<Boolean> noToasts = sgHUD.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noToasts = sgHUD.add(new BoolSetting.Builder()
         .name("toasts")
         .description("Hide specific toasts")
         .defaultValue(false)
