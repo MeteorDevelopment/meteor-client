@@ -8,12 +8,15 @@ package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.entity.player.StartBreakingBlockEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -24,6 +27,11 @@ import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
+import net.minecraft.util.Hand;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameMode;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -65,10 +73,18 @@ public class AutoTool extends Module {
         .build()
     );
 
+    private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
+        .name("switch-mode")
+        .description("Mode to switch to the tool.")
+        .defaultValue(SwitchMode.Vanilla)
+        .build()
+    );
+
     private final Setting<Boolean> switchBack = sgGeneral.add(new BoolSetting.Builder()
         .name("switch-back")
         .description("Switches your hand to whatever was selected when releasing your attack key.")
         .defaultValue(false)
+        .visible(() -> switchMode.get() == SwitchMode.Vanilla)
         .build()
     );
 
@@ -76,6 +92,7 @@ public class AutoTool extends Module {
         .name("switch-delay")
         .description("Delay in ticks before switching tools.")
         .defaultValue(0)
+        .visible(() -> switchMode.get() == SwitchMode.Vanilla)
         .build()
     ));
 
@@ -117,20 +134,45 @@ public class AutoTool extends Module {
     private void onTick(TickEvent.Post event) {
         if (Modules.get().isActive(InfinityMiner.class)) return;
 
-        if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
-            InvUtils.swapBack();
-            wasPressed = false;
-            return;
-        }
+        switch (switchMode.get()) {
+            case Vanilla -> {
+                if (switchBack.get() && !mc.options.attackKey.isPressed() && wasPressed && InvUtils.previousSlot != -1) {
+                    InvUtils.swapBack();
+                    wasPressed = false;
+                    return;
+                }
 
-        if (ticks <= 0 && shouldSwitch && bestSlot != -1) {
-            InvUtils.swap(bestSlot, switchBack.get());
-            shouldSwitch = false;
-        } else {
-            ticks--;
-        }
+                if (ticks <= 0 && shouldSwitch && bestSlot != -1) {
+                    InvUtils.swap(bestSlot, switchBack.get());
+                    shouldSwitch = false;
+                } else {
+                    ticks--;
+                }
 
-        wasPressed = mc.options.attackKey.isPressed();
+                wasPressed = mc.options.attackKey.isPressed();
+            }
+            case Silent -> {
+                if (!Utils.canUpdate() || !mc.options.attackKey.isPressed() || mc.crosshairTarget.getPos() == null
+                    || mc.crosshairTarget.getType() != HitResult.Type.BLOCK || PlayerUtils.getGameMode() == GameMode.CREATIVE) {
+                    return;
+                }
+
+                BlockPos target = ((BlockHitResult) mc.crosshairTarget).getBlockPos();
+
+                if (!BlockUtils.canBreak(target, mc.world.getBlockState(target)) || bestSlot == -1 || mc.player.getInventory().selectedSlot == bestSlot) {
+                    return;
+                }
+
+                int oldSlot = mc.player.getInventory().selectedSlot;
+
+                swapTo(bestSlot);
+
+                mc.player.swingHand(Hand.MAIN_HAND);
+                mc.interactionManager.updateBlockBreakingProgress(target, ((BlockHitResult) mc.crosshairTarget).getSide());
+
+                swapTo(oldSlot);
+            }
+        }
     }
 
     @EventHandler(priority = EventPriority.HIGH)
@@ -162,24 +204,38 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
-            ticks = switchDelay.get();
+        switch (switchMode.get()) {
+            case Vanilla -> {
+                if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+                    ticks = switchDelay.get();
 
-            if (ticks == 0) InvUtils.swap(bestSlot, true);
-            else shouldSwitch = true;
-        }
+                    if (ticks == 0) InvUtils.swap(bestSlot, true);
+                    else shouldSwitch = true;
+                }
 
-        // Anti break
-        currentStack = mc.player.getMainHandStack();
+                // Anti break
+                currentStack = mc.player.getMainHandStack();
 
-        if (shouldStopUsing(currentStack) && isTool(currentStack)) {
-            mc.options.attackKey.setPressed(false);
-            event.cancel();
+                if (shouldStopUsing(currentStack) && isTool(currentStack)) {
+                    mc.options.attackKey.setPressed(false);
+                    event.cancel();
+                }
+            }
+            case Silent -> {
+                if (PlayerUtils.getGameMode() != GameMode.CREATIVE && bestSlot != -1 && mc.player.getInventory().selectedSlot != bestSlot) {
+                    event.cancel();
+                }
+            }
         }
     }
 
     private boolean shouldStopUsing(ItemStack itemStack) {
         return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
+    }
+
+    private void swapTo(int slot) {
+        mc.player.getInventory().selectedSlot = slot;
+        ((IClientPlayerInteractionManager) mc.interactionManager).syncSelected();
     }
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
@@ -212,6 +268,7 @@ public class AutoTool extends Module {
     public static boolean isTool(Item item) {
         return item instanceof ToolItem || item instanceof ShearsItem;
     }
+
     public static boolean isTool(ItemStack itemStack) {
         return isTool(itemStack.getItem());
     }
@@ -225,5 +282,10 @@ public class AutoTool extends Module {
     public enum ListMode {
         Whitelist,
         Blacklist
+    }
+
+    public enum SwitchMode {
+        Vanilla,
+        Silent
     }
 }
