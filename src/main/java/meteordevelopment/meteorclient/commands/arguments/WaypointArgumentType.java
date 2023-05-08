@@ -24,19 +24,35 @@ import java.util.concurrent.CompletableFuture;
 
 public class WaypointArgumentType implements ArgumentType<String> {
     private static final DynamicCommandExceptionType NO_SUCH_WAYPOINT = new DynamicCommandExceptionType(name -> Text.literal("Waypoint with name '" + name + "' doesn't exist."));
+    private final boolean greedyString;
+
+    private WaypointArgumentType(boolean greedyString) {
+        this.greedyString = greedyString;
+    }
 
     public static WaypointArgumentType create() {
-        return new WaypointArgumentType();
+        return new WaypointArgumentType(true);
+    }
+
+    public static WaypointArgumentType create(boolean greedy) {
+        return new WaypointArgumentType(greedy);
     }
 
     public static Waypoint get(CommandContext<?> context) {
         return Waypoints.get().get(context.getArgument("waypoint", String.class));
     }
 
+    public static Waypoint get(CommandContext<?> context, String name) {
+        return Waypoints.get().get(context.getArgument(name, String.class));
+    }
+
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
-        String argument = reader.getRemaining();
-        reader.setCursor(reader.getTotalLength());          //ty sb :pray:
+        String argument;
+        if (greedyString) {
+            argument = reader.getRemaining();
+            reader.setCursor(reader.getTotalLength());
+        } else argument = reader.readString();
 
         if (Waypoints.get().get(argument) == null) throw NO_SUCH_WAYPOINT.create(argument);
         return argument;
