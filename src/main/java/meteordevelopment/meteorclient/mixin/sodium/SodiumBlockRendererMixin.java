@@ -15,6 +15,7 @@ import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexBufferBuil
 import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexEncoder;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.util.math.Vec3d;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ public class SodiumBlockRendererMixin {
     }
 
 
-    @Inject(method = "writeGeometry", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/util/color/ColorABGR;mul(IF)I", shift = At.Shift.BY, by = 2), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+    @Inject(method = "writeGeometry", at = @At(value = "FIELD", target = "Lme/jellysquid/mods/sodium/client/render/vertex/type/ChunkVertexEncoder$Vertex;color:I", opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
     private void setColor(BlockRenderContext ctx, ChunkVertexBufferBuilder vertexBuffer, IndexBufferBuilder indexBuffer, Vec3d offset, ModelQuadView quad, int[] colors, float[] brightness, int[] lightmap, CallbackInfo info, ModelQuadOrientation orientation, ChunkVertexEncoder.Vertex[] vertices, int dstIndex, int srcIndex, ChunkVertexEncoder.Vertex out) {
         int alpha = alphas.get();
 
