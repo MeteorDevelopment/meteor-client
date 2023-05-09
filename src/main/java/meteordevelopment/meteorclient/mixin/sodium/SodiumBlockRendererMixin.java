@@ -5,17 +5,23 @@
 
 package meteordevelopment.meteorclient.mixin.sodium;
 
+import me.jellysquid.mods.sodium.client.model.IndexBufferBuilder;
+import me.jellysquid.mods.sodium.client.model.quad.ModelQuadView;
+import me.jellysquid.mods.sodium.client.model.quad.properties.ModelQuadOrientation;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.buffers.ChunkModelBuilder;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderContext;
 import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockRenderer;
-import me.jellysquid.mods.sodium.client.util.color.ColorABGR;
+import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexBufferBuilder;
+import me.jellysquid.mods.sodium.client.render.vertex.type.ChunkVertexEncoder;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(value = BlockRenderer.class, remap = false)
 public class SodiumBlockRendererMixin {
@@ -30,17 +36,14 @@ public class SodiumBlockRendererMixin {
     }
 
 
-    @Redirect(method = "writeGeometry", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/util/color/ColorABGR;mul(IF)I"))
-    private int setColor(int color, float w) {
+    @Inject(method = "writeGeometry", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/util/color/ColorABGR;mul(IF)I", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true)
+    private void setColor(BlockRenderContext ctx, ChunkVertexBufferBuilder vertexBuffer, IndexBufferBuilder indexBuffer, Vec3d offset, ModelQuadView quad, int[] colors, float[] brightness, int[] lightmap, CallbackInfo info, ModelQuadOrientation orientation, ChunkVertexEncoder.Vertex[] vertices, int dstIndex, int srcIndex, ChunkVertexEncoder.Vertex out) {
         int alpha = alphas.get();
-        return alpha == -1 ? ColorABGR.mul(color, w) : mul(color, w, alpha);
-    }
 
-    @Unique
-    private static int mul(int color, float w, int a) {
-        float r = (float) ColorABGR.unpackRed(color) * w;
-        float g = (float) ColorABGR.unpackGreen(color) * w;
-        float b = (float) ColorABGR.unpackBlue(color) * w;
-        return ColorABGR.pack((int) r, (int) g, (int) b, a);
+        if (alpha == 0) info.cancel();
+        else if (alpha != -1) {
+            out.color &= 0xFFFFFF;
+            out.color |= alpha << 24;
+        }
     }
 }
