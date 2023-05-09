@@ -5,15 +5,19 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -25,6 +29,8 @@ import net.minecraft.world.BlockView;
 import java.util.List;
 
 public class Xray extends Module {
+    public static final boolean isIrisPresent = FabricLoader.getInstance().isModLoaded("iris");
+
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<Block>> blocks = sgGeneral.add(new BlockListSetting.Builder()
@@ -92,6 +98,11 @@ public class Xray extends Module {
         mc.worldRenderer.reload();
     }
 
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return isIrisPresent ? theme.label("Warning: Due to iris' presence, opacity is overridden to 0.") : null;
+    }
+
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
         if (isBlocked(event.blockEntity.getCachedState().getBlock(), event.blockEntity.getPos())) event.cancel();
@@ -126,6 +137,8 @@ public class Xray extends Module {
         Xray xray = Modules.get().get(Xray.class);
 
         if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
+            if (isIrisPresent) return 0;
+
             int alpha;
 
             if (xray.isActive()) alpha = xray.opacity.get();
@@ -134,7 +147,7 @@ public class Xray extends Module {
             return alpha;
         }
         else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            return xray.opacity.get();
+            return isIrisPresent ? 0 : xray.opacity.get();
         }
 
         return -1;

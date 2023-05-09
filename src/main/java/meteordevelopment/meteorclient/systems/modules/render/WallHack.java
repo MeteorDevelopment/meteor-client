@@ -6,6 +6,8 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -60,6 +62,11 @@ public class WallHack extends Module {
     @Override
     public void onDeactivate() {
         mc.worldRenderer.reload();
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return Xray.isIrisPresent ? theme.label("Warning: Due to iris' presence, opacity is overridden to 0.") : null;
     }
 
     @EventHandler
