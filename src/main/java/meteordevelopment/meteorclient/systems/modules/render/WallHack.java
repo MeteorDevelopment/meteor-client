@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.block.Block;
 
 import java.util.List;
@@ -67,7 +68,7 @@ public class WallHack extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        return MixinPlugin.isSodiumPresent ? theme.label("Warning: Due to sodium's presence, opacity is overridden to 0.") : null;
+        return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? theme.label("Warning: Due to shaders in use, opacity is overridden to 0.") : null;
     }
 
     @EventHandler
