@@ -50,7 +50,7 @@ public class AutoNametag extends Module {
     private final Setting<Boolean> renametag = sgGeneral.add(new BoolSetting.Builder()
         .name("renametag")
         .description("Allows already nametagged entities to be renamed.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
@@ -70,11 +70,11 @@ public class AutoNametag extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        // Nametag in hobar
+        // Nametag in hotbar
         FindItemResult findNametag = InvUtils.findInHotbar(Items.NAME_TAG);
 
         if (!findNametag.found()) {
-            error("No Nametag in Hotbar");
+            error("No Nametags in hotbar, disabling");
             toggle();
             return;
         }
@@ -84,8 +84,11 @@ public class AutoNametag extends Module {
         target = TargetUtils.get(entity -> {
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
-            if (entity.hasCustomName()) {
-                return renametag.get() && entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
+            if (!entity.hasCustomName()) {
+                return entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
+            }
+            if (entity.hasCustomName() && renametag.get()) {
+                return entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
             }
             return false;
         }, priority.get());
