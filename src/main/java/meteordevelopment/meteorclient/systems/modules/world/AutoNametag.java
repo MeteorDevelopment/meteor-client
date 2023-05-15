@@ -84,8 +84,11 @@ public class AutoNametag extends Module {
         target = TargetUtils.get(entity -> {
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
             if (!entities.get().getBoolean(entity.getType())) return false;
-            if (entity.hasCustomName()) {
-                return renametag.get() && entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
+            if (!entity.hasCustomName()) {
+                return entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
+            }
+            if (entity.hasCustomName() && renametag.get()) {
+                return entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
             }
             return false;
         }, priority.get());
