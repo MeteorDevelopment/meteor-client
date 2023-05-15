@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.command.CommandSource;
@@ -31,6 +32,8 @@ public class InputCommand extends Command {
         mc.options.attackKey, "attack"
     );
 
+    private static final Pool<KeypressHandler> keypressHandlerPool = new Pool<>(KeypressHandler::new);
+
     public InputCommand() {
         super("input", "Keyboard input simulation.");
     }
@@ -41,7 +44,10 @@ public class InputCommand extends Command {
             builder.then(literal(keyBinding.getValue())
                 .then(argument("ticks", IntegerArgumentType.integer(1))
                     .executes(context -> {
-                        new KeypressHandler(keyBinding.getKey(), context.getArgument("ticks", Integer.class));
+                        KeypressHandler handler = keypressHandlerPool.get();
+                        handler.key = keyBinding.getKey();
+                        handler.ticks = IntegerArgumentType.getInteger(context, "ticks");
+                        MeteorClient.EVENT_BUS.subscribe(handler);
                         return SINGLE_SUCCESS;
                     })
                 )
@@ -50,15 +56,8 @@ public class InputCommand extends Command {
     }
 
     private static class KeypressHandler {
-        private final KeyBinding key;
+        private KeyBinding key;
         private int ticks;
-
-        public KeypressHandler(KeyBinding key, int ticks) {
-            this.key = key;
-            this.ticks = ticks;
-
-            MeteorClient.EVENT_BUS.subscribe(this);
-        }
 
         @EventHandler
         private void onTick(TickEvent.Post event) {
@@ -66,6 +65,7 @@ public class InputCommand extends Command {
             else {
                 key.setPressed(false);
                 MeteorClient.EVENT_BUS.unsubscribe(this);
+                keypressHandlerPool.free(this);
             }
         }
     }
