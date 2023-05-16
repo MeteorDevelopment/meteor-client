@@ -11,10 +11,13 @@ import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import meteordevelopment.meteorclient.systems.proxies.Proxies;
 import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -61,13 +64,15 @@ public class MultiplayerScreenMixin extends Screen {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+    private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) { // TODO: ensure this is ok
         float x = 3;
         float y = 3;
 
         // Logged in as
-        textRenderer.drawWithShadow(matrices, loggedInAs, x, y, textColor1);
-        textRenderer.drawWithShadow(matrices, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+//        textRenderer.drawWithShadow(matrices, loggedInAs, x, y, textColor1);
+//        textRenderer.drawWithShadow(matrices, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
+        textRenderer.draw(loggedInAs, x, y, textColor1, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
+        textRenderer.draw(Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
 
         y += textRenderer.fontHeight + 2;
 
@@ -77,7 +82,10 @@ public class MultiplayerScreenMixin extends Screen {
         String left = proxy != null ? "Using proxy " : "Not using a proxy";
         String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
 
-        textRenderer.drawWithShadow(matrices, left, x, y, textColor1);
-        if (right != null) textRenderer.drawWithShadow(matrices, right, x + textRenderer.getWidth(left), y, textColor2);
+//        textRenderer.drawWithShadow(matrices, left, x, y, textColor1);
+        textRenderer.draw(left, x, y, textColor1, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
+//        if (right != null) textRenderer.drawWithShadow(matrices, right, x + textRenderer.getWidth(left), y, textColor2);
+        if (right != null)
+            textRenderer.draw(right, x + textRenderer.getWidth(left), y, textColor2, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
     }
 }

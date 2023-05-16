@@ -416,10 +416,10 @@ public class BetterTooltips extends Module {
     private MutableText getStatusText(StatusEffectInstance effect) {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.durationToString(effect, 1).getString()));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1).getString()));
         }
         else {
-            text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1).getString()));
+            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1).getString()));
         }
 
         if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);

@@ -14,7 +14,10 @@ import meteordevelopment.meteorclient.gui.screens.CommitsScreen;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.VertexConsumerProvider;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -73,7 +76,7 @@ public class TitleScreenCredits {
         credits.add(credit);
     }
 
-    public static void render(MatrixStack matrices) {
+    public static void render(DrawContext context) {
         if (credits.isEmpty()) init();
 
         int y = 3;
@@ -81,8 +84,9 @@ public class TitleScreenCredits {
             int x = mc.currentScreen.width - 3 - credit.width;
 
             synchronized (credit.sections) {
-                for (Section section : credit.sections) {
-                    mc.textRenderer.drawWithShadow(matrices, section.text, x, y, section.color);
+                for (Section section : credit.sections) { // TODO: check renderer
+//                    mc.textRenderer.drawWithShadow(matrices, section.text, x, y, section.color);
+                    mc.textRenderer.draw(section.text, x, y, section.color, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
                     x += section.width;
                 }
             }

@@ -6,6 +6,9 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
@@ -29,7 +32,7 @@ public class WItem extends WWidget {
     }
 
     @Override
-    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
+    protected void onRender(GuiRenderer renderer, double mouseX, double mouseY, double delta) { // TODO: check renderer
         if (!itemStack.isEmpty()) {
             renderer.post(() -> {
                 double s = theme.scale(2);
@@ -38,8 +41,9 @@ public class WItem extends WWidget {
                 MATRICES.scale((float) s, (float) s, 1);
                 MATRICES.translate(x / s, y / s, 0);
 
-                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, 0, 0);
-                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, 0, 0);
+//                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, 0, 0);
+//                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, 0, 0);
+                mc.getItemRenderer().renderItem(itemStack, ModelTransformationMode.GUI, 0, 0, MATRICES, VertexConsumerProvider.immediate(new BufferBuilder(256)), null, 0);
 
                 MATRICES.pop();
             });

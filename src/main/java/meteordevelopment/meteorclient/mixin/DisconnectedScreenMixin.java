@@ -16,6 +16,7 @@ import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -27,9 +28,13 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(DisconnectedScreen.class)
 public abstract class DisconnectedScreenMixin extends Screen {
-    @Shadow private int reasonHeight;
-    @Unique private ButtonWidget reconnectBtn;
-    @Unique private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
+    @Shadow
+    @Final
+    private Text reason;
+    @Unique
+    private ButtonWidget reconnectBtn;
+    @Unique
+    private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
     protected DisconnectedScreenMixin(Text title) {
         super(title);
@@ -40,7 +45,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
         if (autoReconnect.lastServerConnection != null) {
             int x = width / 2 - 100;
-            int y = Math.min((height / 2 + reasonHeight / 2) + 32, height - 30);
+            int y = Math.min((height / 2 + reason.withoutStyle().size() / 2) + 32, height - 30);
 
             reconnectBtn = addDrawableChild(
                 new ButtonWidget.Builder(Text.literal(getText()), button -> tryConnecting())
@@ -85,6 +90,6 @@ public abstract class DisconnectedScreenMixin extends Screen {
         var conn = Modules.get().get(AutoReconnect.class).lastServerConnection;
         var host = conn.getAddress().getHostName();
         if (host.contains(":")) host = host.substring(0, host.indexOf(":"));
-        ConnectScreen.connect(new TitleScreen(), mc, new ServerAddress(host, conn.getPort()), new ServerInfo(I18n.translate("selectServer.defaultName"), host, false));
+        ConnectScreen.connect(new TitleScreen(), mc, new ServerAddress(host, conn.getPort()), new ServerInfo(I18n.translate("selectServer.defaultName"), host, false), false);
     }
 }

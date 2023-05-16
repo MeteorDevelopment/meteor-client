@@ -15,6 +15,7 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.glfw.GLFW;
@@ -258,8 +259,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(matrices);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (!Utils.canUpdate()) renderBackground(context);
 
         double s = mc.getWindow().getScaleFactor();
 

@@ -44,7 +44,7 @@ public class WItemWithLabel extends WHorizontalList {
                 StatusEffectInstance effect = effects.get(0);
                 if (effect.getAmplifier() > 0) str += effect.getAmplifier() + 1 + " ";
 
-                str += "(" + StatusEffectUtil.durationToString(effect, 1).getString() + ")";
+                str += "(" + StatusEffectUtil.getDurationText(effect, 1).getString() + ")";
             }
         }
 

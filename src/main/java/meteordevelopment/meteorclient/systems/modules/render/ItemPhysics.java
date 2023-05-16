@@ -40,7 +40,7 @@ public class ItemPhysics extends Module {
 
         event.matrixStack.push();
 
-        BakedModel bakedModel = event.itemRenderer.getModel(itemStack, event.itemEntity.world, null, 0);
+        BakedModel bakedModel = event.itemRenderer.getModel(itemStack, event.itemEntity.getWorld(), null, 0);
         boolean hasDepthInGui = bakedModel.hasDepth();
         int renderCount = getRenderedAmount(itemStack);
         IItemEntity rotator = (IItemEntity) event.itemEntity;
@@ -48,7 +48,7 @@ public class ItemPhysics extends Module {
 
         if (event.itemEntity.getStack().getItem() instanceof BlockItem && !(event.itemEntity.getStack().getItem() instanceof AliasedBlockItem)) {
             Block b = ((BlockItem) event.itemEntity.getStack().getItem()).getBlock();
-            VoxelShape shape = b.getOutlineShape(b.getDefaultState(), event.itemEntity.world, event.itemEntity.getBlockPos(), ShapeContext.absent());
+            VoxelShape shape = b.getOutlineShape(b.getDefaultState(), event.itemEntity.getWorld(), event.itemEntity.getBlockPos(), ShapeContext.absent());
 
             if (shape.getMax(Direction.Axis.Y) <= .5) renderBlockFlat = true;
         }
@@ -64,7 +64,7 @@ public class ItemPhysics extends Module {
             event.matrixStack.translate(0, -.185, -.0);
         }
 
-        boolean isAboveWater = event.itemEntity.world.getBlockState(event.itemEntity.getBlockPos()).getFluidState().getFluid().isIn(FluidTags.WATER);
+        boolean isAboveWater = event.itemEntity.getWorld().getBlockState(event.itemEntity.getBlockPos()).getFluidState().getFluid().isIn(FluidTags.WATER);
         if (!event.itemEntity.isOnGround() && (!event.itemEntity.isSubmergedInWater() && !isAboveWater)) {
             float rotation = ((float) event.itemEntity.getItemAge() + event.tickDelta) / 20.0F + event.itemEntity.uniqueOffset; // calculate rotation based on age and ticks
 
@@ -102,7 +102,7 @@ public class ItemPhysics extends Module {
             event.matrixStack.translate(0, -.185, .0);
         }
 
-        if (event.itemEntity.world.getBlockState(event.itemEntity.getBlockPos()).getBlock().equals(Blocks.SOUL_SAND)) {
+        if (event.itemEntity.getWorld().getBlockState(event.itemEntity.getBlockPos()).getBlock().equals(Blocks.SOUL_SAND)) {
             event.matrixStack.translate(0, 0, -.1);
         }
 

@@ -23,7 +23,10 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.render.BufferBuilder;
+import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -50,7 +53,7 @@ public class CombatHud extends HudElement {
 
     public static final HudElementInfo<CombatHud> INFO = new HudElementInfo<>(Hud.GROUP, "combat", "Displays information about your combat target.", CombatHud::new);
 
-    private static final MatrixStack MATRICES = new MatrixStack();
+    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -211,7 +214,7 @@ public class CombatHud extends HudElement {
 
             // Player Model
             InventoryScreen.drawEntity(
-                MATRICES,
+                DRAW_CONTEXT,
                 (int) (x + (25 * scale.get())),
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
