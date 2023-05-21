@@ -5,12 +5,19 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import it.unimi.dsi.fastutil.ints.IntDoubleImmutablePair;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.WindowResizedEvent;
 import meteordevelopment.meteorclient.events.render.RenderAfterWorldEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
-import meteordevelopment.meteorclient.renderer.*;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.renderer.Framebuffer;
+import meteordevelopment.meteorclient.renderer.GL;
+import meteordevelopment.meteorclient.renderer.PostProcessRenderer;
+import meteordevelopment.meteorclient.renderer.Shader;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.IntSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.listeners.ConsumerListener;
@@ -18,34 +25,33 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.util.Pair;
 
 public class Blur extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgScreens = settings.createGroup("Screens");
 
     // Strength-Levels from https://github.com/jonaburg/picom/blob/a8445684fe18946604848efb73ace9457b29bf80/src/backend/backend_common.c#L372
-    private final Pair<Integer, Double>[] strengths = new Pair[]{
-        new Pair<>(1, 1.25),   // LVL 1
-        new Pair<>(1, 2.25),   // LVL 2
-        new Pair<>(2, 2.0),      // LVL 3
-        new Pair<>(2, 3.0),      // LVL 4
-        new Pair<>(2, 4.25),   // LVL 5
-        new Pair<>(3, 2.5),    // LVL 6
-        new Pair<>(3, 3.25),   // LVL 7
-        new Pair<>(3, 4.25),   // LVL 8
-        new Pair<>(3, 5.5),    // LVL 9
-        new Pair<>(4, 3.25),   // LVL 10
-        new Pair<>(4, 4.0),      // LVL 11
-        new Pair<>(4, 5.0),      // LVL 12
-        new Pair<>(4, 6.0),      // LVL 13
-        new Pair<>(4, 7.25),   // LVL 14
-        new Pair<>(4, 8.25),   // LVL 15
-        new Pair<>(5, 4.5),    // LVL 16
-        new Pair<>(5, 5.25),   // LVL 17
-        new Pair<>(5, 6.25),   // LVL 18
-        new Pair<>(5, 7.25),   // LVL 19
-        new Pair<>(5, 8.5)     // LVL 20
+    private final IntDoubleImmutablePair[] strengths = new IntDoubleImmutablePair[]{
+        IntDoubleImmutablePair.of(1, 1.25), // LVL 1
+        IntDoubleImmutablePair.of(1, 2.25), // LVL 2
+        IntDoubleImmutablePair.of(2, 2.0),  // LVL 3
+        IntDoubleImmutablePair.of(2, 3.0),  // LVL 4
+        IntDoubleImmutablePair.of(2, 4.25), // LVL 5
+        IntDoubleImmutablePair.of(3, 2.5),  // LVL 6
+        IntDoubleImmutablePair.of(3, 3.25), // LVL 7
+        IntDoubleImmutablePair.of(3, 4.25), // LVL 8
+        IntDoubleImmutablePair.of(3, 5.5),  // LVL 9
+        IntDoubleImmutablePair.of(4, 3.25), // LVL 10
+        IntDoubleImmutablePair.of(4, 4.0),  // LVL 11
+        IntDoubleImmutablePair.of(4, 5.0),  // LVL 12
+        IntDoubleImmutablePair.of(4, 6.0),  // LVL 13
+        IntDoubleImmutablePair.of(4, 7.25), // LVL 14
+        IntDoubleImmutablePair.of(4, 8.25), // LVL 15
+        IntDoubleImmutablePair.of(5, 4.5),  // LVL 16
+        IntDoubleImmutablePair.of(5, 5.25), // LVL 17
+        IntDoubleImmutablePair.of(5, 6.25), // LVL 18
+        IntDoubleImmutablePair.of(5, 7.25), // LVL 19
+        IntDoubleImmutablePair.of(5, 8.5)   // LVL 20
     };
 
     // General
@@ -109,9 +115,11 @@ public class Blur extends Module {
         // The listeners need to run even when the module is not enabled
         MeteorClient.EVENT_BUS.subscribe(new ConsumerListener<>(WindowResizedEvent.class, event -> {
             // Resize all fbos
-            for (Framebuffer fbo : fbos) {
-                if (fbo != null) {
-                    fbo.resize();
+            for (int i = 0; i < fbos.length; i++) {
+                if (fbos[i] != null) {
+                    fbos[i].resize();
+                } else {
+                    fbos[i] = new Framebuffer(1 / Math.pow(2, i));
                 }
             }
         }));
@@ -148,7 +156,9 @@ public class Blur extends Module {
             shaderUp = new Shader("blur.vert", "blur_up.frag");
             shaderPassthrough = new Shader("passthrough.vert", "passthrough.frag");
             for (int i = 0; i < fbos.length; i++) {
-                fbos[i] = new Framebuffer(1 / Math.pow(2, i));
+                if (fbos[i] == null) {
+                    fbos[i] = new Framebuffer(1 / Math.pow(2, i));
+                }
             }
         }
 
@@ -163,22 +173,24 @@ public class Blur extends Module {
         }
 
         // Update strength
-        Pair<Integer, Double> strength = strengths[(int) ((this.strength.get() - 1) * progress)];
+        IntDoubleImmutablePair strength = strengths[(int) ((this.strength.get() - 1) * progress)];
+        int iterations = strength.leftInt();
+        double offset = strength.rightDouble();
 
         // Render the blur
         PostProcessRenderer.beginRender();
 
         // Initial downsample
-        renderToFbo(fbos[0], MinecraftClient.getInstance().getFramebuffer().getColorAttachment(), shaderDown, strength.getRight());
+        renderToFbo(fbos[0], MinecraftClient.getInstance().getFramebuffer().getColorAttachment(), shaderDown, offset);
 
         // Downsample
-        for (int i = 0; i < strength.getLeft(); i++) {
-            renderToFbo(fbos[i + 1], fbos[i].texture, shaderDown, strength.getRight());
+        for (int i = 0; i < iterations; i++) {
+            renderToFbo(fbos[i + 1], fbos[i].texture, shaderDown, offset);
         }
 
         // Upsample
-        for (int i = strength.getLeft(); i >= 1; i--) {
-            renderToFbo(fbos[i - 1], fbos[i].texture, shaderUp, strength.getRight());
+        for (int i = iterations; i >= 1; i--) {
+            renderToFbo(fbos[i - 1], fbos[i].texture, shaderUp, offset);
         }
 
         // Render output
