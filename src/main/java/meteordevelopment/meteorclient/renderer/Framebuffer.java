@@ -20,8 +20,8 @@ public class Framebuffer {
      * @param sizeMulti The multiplier for the size of the framebuffer
      */
     public Framebuffer(double sizeMulti) {
-        this();
         this.sizeMulti = sizeMulti;
+        init();
     }
 
     public Framebuffer() {
