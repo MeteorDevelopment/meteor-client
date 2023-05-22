@@ -46,9 +46,7 @@ public abstract class ScreenMixin {
         if (style.getClickEvent().getValue().startsWith(Config.get().prefix.get())) {
             try {
                 Commands.dispatch(style.getClickEvent().getValue().substring(Config.get().prefix.get().length()));
-
                 cir.setReturnValue(true);
-                cir.cancel();
             } catch (CommandSyntaxException e) {
                 e.printStackTrace();
             }
