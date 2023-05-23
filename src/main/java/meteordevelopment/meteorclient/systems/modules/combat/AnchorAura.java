@@ -25,6 +25,7 @@ import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
@@ -322,6 +323,12 @@ public class AnchorAura extends Module {
                 if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
                 else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
                 break;
+            case Around:
+                if (isValidPlace(targetPlacePos.north())) return targetPlacePos.north();
+                else if (isValidPlace(targetPlacePos.east())) return targetPlacePos.east();
+                else if (isValidPlace(targetPlacePos.west())) return targetPlacePos.west();
+                else if (isValidPlace(targetPlacePos.south())) return targetPlacePos.south();
+                break;
         }
         return null;
     }
@@ -349,7 +356,7 @@ public class AnchorAura extends Module {
     }
 
     private boolean isValidPlace(BlockPos pos) {
-        return (mc.world.getBlockState(pos).isAir() || mc.world.getBlockState(pos).getFluidState().getFluid() instanceof FlowableFluid) && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pos)) <= placeRange.get() && getDamagePlace(pos);
+        return (mc.world.getBlockState(pos).isAir() || mc.world.getBlockState(pos).getFluidState().getFluid() instanceof FlowableFluid) && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pos)) <= placeRange.get() && getDamagePlace(pos) && !target.getBoundingBox().intersects(new Box(pos));
     }
 
     private boolean isValidBreak(BlockPos pos) {
@@ -385,6 +392,7 @@ public class AnchorAura extends Module {
 
     public enum PlaceMode {
         Above,
+        Around,
         AboveAndBelow,
         All
     }
