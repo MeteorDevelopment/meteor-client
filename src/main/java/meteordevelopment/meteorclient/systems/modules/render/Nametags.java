@@ -271,7 +271,7 @@ public class Nametags extends Module {
         .build()
     );
 
-    private TextRenderer text = new CustomTextRenderer(font.get());
+    private CustomTextRenderer text = new CustomTextRenderer(font.get());
     private final Color WHITE = new Color(255, 255, 255);
     private final Color RED = new Color(255, 25, 25);
     private final Color AMBER = new Color(255, 105, 25);
@@ -665,8 +665,10 @@ public class Nametags extends Module {
     }
 
     private void updateTextRenderer() {
-        Font t = ((CustomTextRenderer) text).getFont();
-        if (t != null) t.texture.clearGlId();
+        if (text != null) {
+            Font t = text.getFont();
+            if (t != null) t.texture.clearGlId();
+        }
         text = new CustomTextRenderer(font.get());
     }
 
