@@ -665,6 +665,8 @@ public class Nametags extends Module {
     }
 
     private void updateTextRenderer() {
+        Font t = ((CustomTextRenderer) text).getFont();
+        if (t != null) t.texture.clearGlId();
         text = new CustomTextRenderer(font.get());
     }
 

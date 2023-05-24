@@ -131,4 +131,8 @@ public class CustomTextRenderer implements TextRenderer {
         building = false;
         scale = 1;
     }
+
+    public Font getFont() {
+        return font;
+    }
 }
