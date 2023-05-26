@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -15,10 +14,12 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
 
+import java.util.Set;
+
 public class Hitboxes extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Which entities to target.")
         .defaultValue(EntityType.PLAYER)
@@ -45,7 +46,7 @@ public class Hitboxes extends Module {
 
     public double getEntityValue(Entity entity) {
         if (!(isActive() && testWeapon())) return 0;
-        if (entities.get().getBoolean(entity.getType())) return value.get();
+        if (entities.get().contains(entity.getType())) return value.get();
         return 0;
     }
 

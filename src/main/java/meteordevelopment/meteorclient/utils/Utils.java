@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -100,7 +99,7 @@ public class Utils {
             tY *= timer.getMultiplier();
             tZ *= timer.getMultiplier();
         }
-        
+
         tX *= 20;
         tY *= 20;
         tZ *= 20;
@@ -552,14 +551,6 @@ public class Utils {
                 break;
             }
         }
-    }
-
-    @SafeVarargs
-    public static <T> Object2BooleanOpenHashMap<T> asO2BMap(T... checked) {
-        Map<T, Boolean> map = new HashMap<>();
-        for (T item : checked)
-            map.put(item, true);
-        return new Object2BooleanOpenHashMap<>(map);
     }
 
     public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {

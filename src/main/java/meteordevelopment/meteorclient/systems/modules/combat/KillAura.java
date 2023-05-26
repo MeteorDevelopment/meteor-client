@@ -6,7 +6,6 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import baritone.api.BaritoneAPI;
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -45,6 +44,7 @@ import net.minecraft.world.GameMode;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Predicate;
 
 public class KillAura extends Module {
@@ -106,7 +106,7 @@ public class KillAura extends Module {
 
     // Targeting
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgTargeting.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to attack.")
         .onlyAttackable()
@@ -337,7 +337,7 @@ public class KillAura extends Module {
             range.get()
         )) return false;
 
-        if (!entities.get().getBoolean(entity.getType())) return false;
+        if (!entities.get().contains(entity.getType())) return false;
         if (ignoreNamed.get() && entity.hasCustomName()) return false;
         if (!PlayerUtils.canSeeEntity(entity) && !PlayerUtils.isWithin(entity, wallsRange.get())) return false;
         if (ignoreTamed.get()) {
