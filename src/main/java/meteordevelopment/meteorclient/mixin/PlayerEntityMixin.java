@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DropItemsEvent;
 import meteordevelopment.meteorclient.events.entity.player.ClipAtLedgeEvent;
@@ -57,24 +58,25 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         }
     }
 
-    @Inject(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"), cancellable = true)
-    public void onGetBlockBreakingSpeed(BlockState block, CallbackInfoReturnable<Float> cir) {
-        if (!world.isClient) return;
+    @ModifyReturnValue(method = "getBlockBreakingSpeed", at = @At(value = "RETURN"))
+    public float onGetBlockBreakingSpeed(float breakSpeed, BlockState block) {
+        if (!world.isClient) return breakSpeed;
 
         SpeedMine speedMine = Modules.get().get(SpeedMine.class);
-        if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock())) return;
+        if (!speedMine.isActive() || speedMine.mode.get() != SpeedMine.Mode.Normal || !speedMine.filter(block.getBlock())) return breakSpeed;
 
-        float breakSpeed = cir.getReturnValue();
         float breakSpeedMod = (float) (breakSpeed * speedMine.modifier.get());
 
         if (mc.crosshairTarget instanceof BlockHitResult bhr) {
             BlockPos pos = bhr.getBlockPos();
             if (speedMine.modifier.get() < 1 || (BlockUtils.canInstaBreak(pos, breakSpeed) == BlockUtils.canInstaBreak(pos, breakSpeedMod))) {
-                cir.setReturnValue(breakSpeedMod);
+                return breakSpeedMod;
             } else {
-                cir.setReturnValue(0.9f / BlockUtils.calcBlockBreakingDelta2(pos, 1));
+                return 0.9f / BlockUtils.calcBlockBreakingDelta2(pos, 1);
             }
         }
+
+        return breakSpeed;
     }
 
     @Inject(method = "jump", at = @At("HEAD"), cancellable = true)
@@ -85,17 +87,19 @@ public abstract class PlayerEntityMixin extends LivingEntity {
         if (module.isActive() && module.cancelJump) info.cancel();
     }
 
-    @Inject(method = "getMovementSpeed", at = @At("RETURN"), cancellable = true)
-    private void onGetMovementSpeed(CallbackInfoReturnable<Float> info) {
-        if (!world.isClient) return;
-        if (!Modules.get().get(NoSlow.class).slowness()) return;
+    @ModifyReturnValue(method = "getMovementSpeed", at = @At("RETURN"))
+    private float onGetMovementSpeed(float original) {
+        if (!world.isClient) return original;
+        if (!Modules.get().get(NoSlow.class).slowness()) return original;
 
         float walkSpeed = getAbilities().getWalkSpeed();
 
-        if (info.getReturnValueF() < walkSpeed) {
-            if (isSprinting()) info.setReturnValue((float) (walkSpeed * 1.30000001192092896));
-            else info.setReturnValue(walkSpeed);
+        if (original < walkSpeed) {
+            if (isSprinting()) return (float) (walkSpeed * 1.30000001192092896);
+            else return walkSpeed;
         }
+
+        return original;
     }
 
     @Inject(method = "getOffGroundSpeed", at = @At("HEAD"), cancellable = true)
