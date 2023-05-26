@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -20,11 +19,12 @@ import net.minecraft.util.Hand;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 public class AutoBreed extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Entities to breed.")
         .defaultValue(EntityType.HORSE, EntityType.DONKEY, EntityType.COW,
@@ -76,7 +76,7 @@ public class AutoBreed extends Module {
             if (!(entity instanceof AnimalEntity)) continue;
             else animal = (AnimalEntity) entity;
 
-            if (!entities.get().getBoolean(animal.getType())
+            if (!entities.get().contains(animal.getType())
                     || (animal.isBaby() && !ignoreBabies.get())
                     || animalsFed.contains(animal)
                     || !PlayerUtils.isWithin(animal, range.get())
