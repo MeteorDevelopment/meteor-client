@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
@@ -95,11 +96,11 @@ public abstract class ChatHudMixin implements IChatHud {
         }
     }
 
-    @Redirect(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;visibleMessages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    private int addMessageListSizeProxy(List<ChatHudLine> list) {
+    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;visibleMessages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    private int addMessageListSizeProxy(int size) {
         BetterChat betterChat = Modules.get().get(BetterChat.class);
-        if (betterChat.isLongerChat() && betterChat.getChatLength() >= 100) return list.size() - betterChat.getChatLength();
-        return list.size();
+        if (betterChat.isLongerChat() && betterChat.getChatLength() >= 100) return size - betterChat.getChatLength();
+        return size;
     }
 
     @Inject(method = "render", at = @At("TAIL"))

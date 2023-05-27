@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Slippy;
@@ -19,8 +20,6 @@ import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Block.class)
 public abstract class BlockMixin extends AbstractBlock implements ItemConvertible {
@@ -28,27 +27,30 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         super(settings);
     }
 
-    @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
-    private static void onShouldDrawSide(BlockState state, BlockView world, BlockPos pos, Direction side, BlockPos blockPos, CallbackInfoReturnable<Boolean> info) {
+    @ModifyReturnValue(method = "shouldDrawSide", at = @At("RETURN"))
+    private static boolean onShouldDrawSide(boolean original, BlockState state, BlockView world, BlockPos pos, Direction side, BlockPos blockPos) {
         Xray xray = Modules.get().get(Xray.class);
 
         if (xray.isActive()) {
-            info.setReturnValue(xray.modifyDrawSide(state, world, pos, side, info.getReturnValueZ()));
+            return xray.modifyDrawSide(state, world, pos, side, original);
         }
+
+        return original;
     }
 
-    @Inject(method = "getSlipperiness", at = @At("RETURN"), cancellable = true)
-    public void getSlipperiness(CallbackInfoReturnable<Float> info) {
+    @ModifyReturnValue(method = "getSlipperiness", at = @At("RETURN"))
+    public float getSlipperiness(float original) {
         // For some retarded reason Tweakeroo calls this method before meteor is initialized
-        if (Modules.get() == null) return;
+        if (Modules.get() == null) return original;
 
         Slippy slippy = Modules.get().get(Slippy.class);
         Block block = (Block) (Object) this;
 
         if (slippy.isActive() && !slippy.ignoredBlocks.get().contains(block)) {
-            info.setReturnValue(slippy.friction.get().floatValue());
+            return slippy.friction.get().floatValue();
         }
 
-        if (block == Blocks.SLIME_BLOCK && Modules.get().get(NoSlow.class).slimeBlock()) info.setReturnValue(0.6F);
+        if (block == Blocks.SLIME_BLOCK && Modules.get().get(NoSlow.class).slimeBlock()) return 0.6F;
+        else return original;
     }
 }
