@@ -556,6 +556,7 @@ public class Modules extends System<Modules> {
         add(new AutoMountain());
         add(new AutoLavaCaster());
         add(new AutoWither());
+        add(new ReverseStep());
     }
 
     private void initMisc() {
