@@ -23,6 +23,7 @@
 - .kick command ported from meteor rejects
 - .eoka commands for interfacing with https://eoka-site.glitch.me (cloned and modified from the original meteor server command)
 - .payall mod ported from https://github.com/Dwarslooper/NoMoreP2W
+- auto mountain and caster are from the trousersteak addon
 
 ### Building
 - Clone this repository
@@ -56,6 +57,7 @@ You will be rewarded with a role on our Discord server, an in-game cape, and an 
 [Cabaletta](https://github.com/cabaletta) and [WagYourTail](https://github.com/wagyourtail) for [Baritone](https://github.com/cabaletta/baritone)  
 The [Fabric Team](https://github.com/FabricMC) for [Fabric](https://github.com/FabricMC/fabric-loader) and [Yarn](https://github.com/FabricMC/yarn)
 Developer of the [Payall Mod](https://github.com/Dwarslooper/NoMoreP2W)
+Developer of [Trousersteak](https://github.com/etianl/Trouser-Streak)
 
 ## Licensing
 This project is licensed under the [GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0.en.html). 
