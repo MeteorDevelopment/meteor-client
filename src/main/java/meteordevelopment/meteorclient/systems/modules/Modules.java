@@ -25,6 +25,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.*;
 import meteordevelopment.meteorclient.systems.modules.dupes.Essentials;
 import meteordevelopment.meteorclient.systems.modules.griefing.AutoLavaCaster;
 import meteordevelopment.meteorclient.systems.modules.griefing.AutoMountain;
+import meteordevelopment.meteorclient.systems.modules.griefing.AutoWither;
 import meteordevelopment.meteorclient.systems.modules.misc.*;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
 import meteordevelopment.meteorclient.systems.modules.movement.*;
@@ -554,6 +555,7 @@ public class Modules extends System<Modules> {
         add(new Essentials());
         add(new AutoMountain());
         add(new AutoLavaCaster());
+        add(new AutoWither());
     }
 
     private void initMisc() {
