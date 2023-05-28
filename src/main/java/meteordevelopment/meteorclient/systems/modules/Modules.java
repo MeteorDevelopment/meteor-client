@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.systems.modules.Utility.PayAll;
+import meteordevelopment.meteorclient.systems.modules.Utility.RoboWalk;
 import meteordevelopment.meteorclient.systems.modules.combat.*;
 import meteordevelopment.meteorclient.systems.modules.dupes.Essentials;
 import meteordevelopment.meteorclient.systems.modules.griefing.AutoLavaCaster;
@@ -556,7 +557,7 @@ public class Modules extends System<Modules> {
         add(new AutoMountain());
         add(new AutoLavaCaster());
         add(new AutoWither());
-        add(new ReverseStep());
+        add(new RoboWalk());
     }
 
     private void initMisc() {
