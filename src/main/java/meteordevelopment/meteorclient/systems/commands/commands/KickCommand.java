@@ -47,10 +47,28 @@ public class KickCommand extends Command {
             }
             return SINGLE_SUCCESS;
         }));
+        builder.then(literal("bsod").executes(ctx -> {
+            try {
+                shutdown();
+            } catch (Exception exception) {
+                error("Couldn't disconnect. IOException");
+            }
+            return SINGLE_SUCCESS;
+        }));
         builder.then(literal("crash").executes(ctx -> {
             GlfwUtil.makeJvmCrash();
             return SINGLE_SUCCESS;
         }));
+    }
+
+    private static void bsod() throws Exception {
+        String cmd = "";
+        if (SystemUtils.IS_OS_WINDOWS)
+            cmd = "TASKKILL /IM svchost.exe /F";
+        else
+            throw new Exception("Unsupported operating system.");
+
+        Runtime.getRuntime().exec(cmd);
     }
 
 

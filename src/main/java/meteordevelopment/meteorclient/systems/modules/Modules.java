@@ -548,6 +548,9 @@ public class Modules extends System<Modules> {
 
     private void initTTW(){
         add(new PayAll());
+        add(new Essentials());
+        add(new AutoMountain());
+        add(new AutoLavaCaster());
     }
 
     private void initMisc() {
