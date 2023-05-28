@@ -67,7 +67,7 @@ public class AddonManager {
             try {
                 addon = entrypoint.getEntrypoint();
             } catch (NoClassDefFoundError exception) {
-                throw new RuntimeException("Addon \"%s\" is using an outdated addon API version.".formatted(metadata.getName()), exception);
+                throw new RuntimeException("Exception during addon init \"%s\".".formatted(metadata.getName()), exception);
             }
 
             addon.name = metadata.getName();
