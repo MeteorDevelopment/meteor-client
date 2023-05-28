@@ -17,7 +17,9 @@ public class Categories {
     public static final Category World = new Category("World", Items.GRASS_BLOCK.getDefaultStack());
     public static final Category Misc = new Category("Misc", Items.LAVA_BUCKET.getDefaultStack());
 
-    public static final Category TTW = new Category("TTW", Items.LAVA_BUCKET.getDefaultStack());
+    public static final Category Griefing = new Category("Griefing", Items.LAVA_BUCKET.getDefaultStack());
+    public static final Category Dupes = new Category("Dupes", Items.LAVA_BUCKET.getDefaultStack());
+    public static final Category Utility = new Category("Utility", Items.LAVA_BUCKET.getDefaultStack());
 
     public static boolean REGISTERING;
 
@@ -31,7 +33,9 @@ public class Categories {
         Modules.registerCategory(Render);
         Modules.registerCategory(World);
         Modules.registerCategory(Misc);
-        Modules.registerCategory(TTW);
+        Modules.registerCategory(Griefing);
+        Modules.registerCategory(Utility);
+        Modules.registerCategory(Dupes);
 
         // Addons
         AddonManager.ADDONS.forEach(MeteorAddon::onRegisterCategories);

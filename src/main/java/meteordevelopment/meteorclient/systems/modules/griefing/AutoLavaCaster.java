@@ -1,7 +1,11 @@
-//Written By etianll with a little bit of skidded codes and some new ideas. Credits to Meteor Rejects for  a bit of skids
-package meteordevelopment.meteorclient.systems.modules.ttw;
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
 
-import meteordevelopment.meteorclient.MeteorClient;
+//Written By etianll with a little bit of skidded codes and some new ideas. Credits to Meteor Rejects for  a bit of skids
+package meteordevelopment.meteorclient.systems.modules.griefing;
+
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -197,7 +201,7 @@ public class AutoLavaCaster extends Module {
     );
 
     public AutoLavaCaster() {
-        super(Categories.TTW, "AutoLavaCaster", "Make Layers of Cobble on your Stairs! Aim at the top of the block you want to lava on.");
+        super(Categories.Griefing, "AutoLavaCaster", "Make Layers of Cobble on your Stairs! Aim at the top of the block you want to lava on.");
     }
     private BlockPos lava;
     private boolean tryanotherpos=false;

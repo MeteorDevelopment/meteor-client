@@ -1,4 +1,9 @@
-package meteordevelopment.meteorclient.systems.modules.ttw;
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.systems.modules.Utility;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -15,7 +20,7 @@ import java.util.ArrayList;
 
 public class PayAll extends Module {
     public PayAll() {
-        super(Categories.TTW, "Pay-All", "Pays All Players In Server");
+        super(Categories.Utility, "Pay-All", "Pays All Players In Server");
     }
 
     int currentDelay = 0;

@@ -1,4 +1,9 @@
-package meteordevelopment.meteorclient.systems.modules.ttw;
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.systems.modules.dupes;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
@@ -19,7 +24,7 @@ import java.awt.event.KeyEvent;
 
 public class Essentials extends Module {
     public Essentials() {
-        super(Categories.TTW, "Essentials Recipe", "Automates the essentials recipe dupe");
+        super(Categories.Dupes, "Essentials Recipe", "Automates the essentials recipe dupe");
     }
 
     private final SettingGroup sgGeneral = settings.createGroup("Items");

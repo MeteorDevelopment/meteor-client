@@ -1,4 +1,9 @@
-package meteordevelopment.meteorclient.systems.modules.ttw;
+/*
+ * This file is part of the Meteor Client distribution (https://github.com/MeteorDevelopment/meteor-client).
+ * Copyright (c) Meteor Development.
+ */
+
+package meteordevelopment.meteorclient.systems.modules.griefing;
 
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -17,6 +22,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.griefing.AutoLavaCaster;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
@@ -233,7 +239,7 @@ public class AutoMountain extends Module {
 
     public AutoMountain()
     {
-        super(Categories.TTW, "AutoMountain", "Make Mountains!");
+        super(Categories.Griefing, "AutoMountain", "Make Mountains!");
     }
     private boolean pause = false;
     public static boolean autocasttimenow = false;
