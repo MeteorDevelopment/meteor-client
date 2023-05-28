@@ -232,10 +232,10 @@ public class InfinityMiner extends Module {
     private boolean isFull() {
         for (int i = 0; i <= 35; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
-
+            if (itemStack.isEmpty()) return false;
+            
             for (Item item : targetItems.get()) {
-                if ((itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxCount())
-                    || itemStack.isEmpty()) {
+                if (itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxCount()) {
                     return false;
                 }
             }
