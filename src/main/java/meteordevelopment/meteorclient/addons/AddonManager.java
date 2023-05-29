@@ -66,7 +66,7 @@ public class AddonManager {
             MeteorAddon addon;
             try {
                 addon = entrypoint.getEntrypoint();
-            } catch (NoClassDefFoundError exception) {
+            } catch (Exception exception) {
                 throw new RuntimeException("Exception during addon init \"%s\".".formatted(metadata.getName()), exception);
             }
 
