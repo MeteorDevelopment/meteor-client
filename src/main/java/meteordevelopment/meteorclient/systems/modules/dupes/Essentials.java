@@ -199,8 +199,8 @@ public class Essentials extends Module {
             item = ("skull_banner_pattern");
             command = (start + item);
             slot=(2);
-            x=(869);
-            y=(370);
+            x=(894);
+            y=(423);
         } else if (netherite.get()) {
             item = ("netherite_ingot");
             slot=(1);
@@ -252,7 +252,8 @@ public class Essentials extends Module {
                 Robot robot = new Robot();
                 robot.mouseMove(x, y);
                 robot.delay(100);
-                InvUtils.drop().slotId(slot);
+                robot.keyPress(75);
+                //InvUtils.drop().slotId(slot);
                 //info("dropped slot " + i);
                 //info("mouse moved to " +"x "+x+",y "+y);
                 timer = delay.get();
