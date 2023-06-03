@@ -63,11 +63,16 @@ public class AddonManager {
         // Addons
         for (EntrypointContainer<MeteorAddon> entrypoint : FabricLoader.getInstance().getEntrypointContainers("meteor", MeteorAddon.class)) {
             ModMetadata metadata = entrypoint.getProvider().getMetadata();
-            MeteorAddon addon = entrypoint.getEntrypoint();
+            MeteorAddon addon;
+            try {
+                addon = entrypoint.getEntrypoint();
+            } catch (Exception exception) {
+                throw new RuntimeException("Exception during addon init \"%s\".".formatted(metadata.getName()), exception);
+            }
 
             addon.name = metadata.getName();
 
-            if (metadata.getAuthors().isEmpty()) throw new RuntimeException("Addon %s requires at least 1 author to be defined in it's fabric.mod.json. See https://fabricmc.net/wiki/documentation:fabric_mod_json_spec".formatted(addon.name));
+            if (metadata.getAuthors().isEmpty()) throw new RuntimeException("Addon \"%s\" requires at least 1 author to be defined in it's fabric.mod.json. See https://fabricmc.net/wiki/documentation:fabric_mod_json_spec".formatted(addon.name));
             addon.authors = new String[metadata.getAuthors().size()];
 
             if (metadata.containsCustomValue(MeteorClient.MOD_ID + ":color")) {
