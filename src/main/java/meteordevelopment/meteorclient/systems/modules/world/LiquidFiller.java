@@ -143,10 +143,4 @@ public class LiquidFiller extends Module {
         Water,
         Both
     }
-
-    public enum PlaceIn {
-        Lava,
-        Water,
-        Both
-    }
 }
