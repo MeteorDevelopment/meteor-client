@@ -27,36 +27,36 @@ public class LiquidFiller extends Module {
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
-            .name("place-in")
-            .description("What type of liquids to place in.")
-            .defaultValue(PlaceIn.Lava)
-            .build()
+        .name("place-in")
+        .description("What type of liquids to place in.")
+        .defaultValue(PlaceIn.Lava)
+        .build()
     );
 
     private final Setting<Integer> horizontalRadius = sgGeneral.add(new IntSetting.Builder()
-            .name("horizontal-radius")
-            .description("Horizontal radius in which to search for liquids.")
-            .defaultValue(4)
-            .min(0)
-            .sliderMax(6)
-            .build()
+        .name("horizontal-radius")
+        .description("Horizontal radius in which to search for liquids.")
+        .defaultValue(4)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     private final Setting<Integer> verticalRadius = sgGeneral.add(new IntSetting.Builder()
-            .name("vertical-radius")
-            .description("Vertical radius in which to search for liquids.")
-            .defaultValue(4)
-            .min(0)
-            .sliderMax(6)
-            .build()
+        .name("vertical-radius")
+        .description("Vertical radius in which to search for liquids.")
+        .defaultValue(4)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
-            .name("delay")
-            .description("Delay between actions in ticks.")
-            .defaultValue(0)
-            .min(0)
-            .build()
+        .name("delay")
+        .description("Delay between actions in ticks.")
+        .defaultValue(0)
+        .min(0)
+        .build()
     );
 
     private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
@@ -69,25 +69,25 @@ public class LiquidFiller extends Module {
     );
 
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
-            .name("block-whitelist")
-            .description("The allowed blocks that it will use to fill up the liquid.")
-            .defaultValue(
-                Blocks.DIRT,
-                Blocks.COBBLESTONE,
-                Blocks.STONE,
-                Blocks.NETHERRACK,
-                Blocks.DIORITE,
-                Blocks.GRANITE,
-                Blocks.ANDESITE
-            )
-            .build()
+        .name("block-whitelist")
+        .description("The allowed blocks that it will use to fill up the liquid.")
+        .defaultValue(
+            Blocks.DIRT,
+            Blocks.COBBLESTONE,
+            Blocks.STONE,
+            Blocks.NETHERRACK,
+            Blocks.DIORITE,
+            Blocks.GRANITE,
+            Blocks.ANDESITE
+        )
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically rotates towards the space targeted for filling.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically rotates towards the space targeted for filling.")
+        .defaultValue(true)
+        .build()
     );
 
     private final List<BlockPos.Mutable> blocks = new ArrayList<>();
