@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
 import meteordevelopment.meteorclient.settings.*;
-import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -421,7 +421,7 @@ public class BetterChat extends Module {
             .withFormatting(Formatting.DARK_RED)
             .withClickEvent(new ClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
-                Commands.get().get("say").toString(message)
+                Commands.get("say").toString(message)
             ))
             .withHoverEvent(new HoverEvent(
                 HoverEvent.Action.SHOW_TEXT,

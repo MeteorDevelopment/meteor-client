@@ -24,10 +24,10 @@ public class EntityControl extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> maxJump = sgGeneral.add(new BoolSetting.Builder()
-            .name("max-jump")
-            .description("Sets jump power to maximum.")
-            .defaultValue(true)
-            .build()
+        .name("max-jump")
+        .description("Sets jump power to maximum.")
+        .defaultValue(true)
+        .build()
     );
 
     public EntityControl() {

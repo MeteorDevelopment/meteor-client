@@ -48,40 +48,40 @@ public class MeteorGuiTheme extends GuiTheme {
     // General
 
     public final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("Scale of the GUI.")
-            .defaultValue(1)
-            .min(0.75)
-            .sliderRange(0.75, 4)
-            .onSliderRelease()
-            .onChanged(aDouble -> {
-                if (mc.currentScreen instanceof WidgetScreen) ((WidgetScreen) mc.currentScreen).invalidate();
-            })
-            .build()
+        .name("scale")
+        .description("Scale of the GUI.")
+        .defaultValue(1)
+        .min(0.75)
+        .sliderRange(0.75, 4)
+        .onSliderRelease()
+        .onChanged(aDouble -> {
+            if (mc.currentScreen instanceof WidgetScreen) ((WidgetScreen) mc.currentScreen).invalidate();
+        })
+        .build()
     );
 
     public final Setting<AlignmentX> moduleAlignment = sgGeneral.add(new EnumSetting.Builder<AlignmentX>()
-            .name("module-alignment")
-            .description("How module titles are aligned.")
-            .defaultValue(AlignmentX.Center)
-            .build()
+        .name("module-alignment")
+        .description("How module titles are aligned.")
+        .defaultValue(AlignmentX.Center)
+        .build()
     );
 
     public final Setting<Boolean> categoryIcons = sgGeneral.add(new BoolSetting.Builder()
-            .name("category-icons")
-            .description("Adds item icons to module categories.")
-            .defaultValue(false)
-            .build()
+        .name("category-icons")
+        .description("Adds item icons to module categories.")
+        .defaultValue(false)
+        .build()
     );
 
     public final Setting<Boolean> hideHUD = sgGeneral.add(new BoolSetting.Builder()
-            .name("hide-HUD")
-            .description("Hide HUD when in GUI.")
-            .defaultValue(false)
-            .onChanged(v -> {
-                if (mc.currentScreen instanceof WidgetScreen) mc.options.hudHidden = v;
-            })
-            .build()
+        .name("hide-HUD")
+        .description("Hide HUD when in GUI.")
+        .defaultValue(false)
+        .onChanged(v -> {
+            if (mc.currentScreen instanceof WidgetScreen) mc.options.hudHidden = v;
+        })
+        .build()
     );
 
     // Colors

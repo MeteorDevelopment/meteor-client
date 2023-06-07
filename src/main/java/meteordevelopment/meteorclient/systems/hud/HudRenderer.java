@@ -105,6 +105,10 @@ public class HudRenderer {
         Renderer2D.COLOR.quad(x, y, width, height, cTopLeft, cTopRight, cBottomRight, cBottomLeft);
     }
 
+    public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
+        Renderer2D.COLOR.triangle(x1, y1, x2, y2, x3, y3, color);
+    }
+
     public void texture(Identifier id, double x, double y, double width, double height, Color color) {
         GL.bindTexture(id);
 

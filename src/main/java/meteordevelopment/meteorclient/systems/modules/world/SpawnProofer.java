@@ -63,10 +63,10 @@ public class SpawnProofer extends Module {
     );
 
     private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
-            .name("new-mob-spawn-light-level")
-            .description("Use the new (1.18+) mob spawn behavior")
-            .defaultValue(true)
-            .build()
+        .name("new-mob-spawn-light-level")
+        .description("Use the new (1.18+) mob spawn behavior")
+        .defaultValue(true)
+        .build()
     );
 
 
