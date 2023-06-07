@@ -15,19 +15,15 @@ import meteordevelopment.meteorclient.utils.world.BlockIterator;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.ShapeContext;
 import net.minecraft.item.BlockItem;
+import net.minecraft.util.math.BlockPos;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class LiquidFiller extends Module {
-    public enum PlaceIn {
-        Lava,
-        Water,
-        Both
-    }
-
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
@@ -58,9 +54,18 @@ public class LiquidFiller extends Module {
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
             .name("delay")
             .description("Delay between actions in ticks.")
-            .defaultValue(1)
+            .defaultValue(0)
             .min(0)
             .build()
+    );
+
+    private final Setting<Integer> maxBlocksPerTick = sgGeneral.add(new IntSetting.Builder()
+        .name("max-blocks-per-tick")
+        .description("Maximum blocks to try to place per tick.")
+        .defaultValue(1)
+        .min(1)
+        .sliderRange(1, 10)
+        .build()
     );
 
     private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
@@ -84,6 +89,8 @@ public class LiquidFiller extends Module {
             .defaultValue(true)
             .build()
     );
+
+    private final List<BlockPos.Mutable> blocks = new ArrayList<>();
 
     private int timer;
 
@@ -112,21 +119,28 @@ public class LiquidFiller extends Module {
 
         // Loop blocks around the player
         BlockIterator.register(horizontalRadius.get(), verticalRadius.get(), (blockPos, blockState) -> {
-            // Check if the block a source liquid block
-            if (isSource(blockState)) {
+            // Check if the block is a source block
+            if (blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill()) {
                 Block liquid = blockState.getBlock();
 
                 PlaceIn placeIn = placeInLiquids.get();
-                if (placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) {
-                    if (BlockUtils.place(blockPos, item, rotate.get(), 0, true)) {
-                        BlockIterator.disableCurrent();
-                    }
+
+                if ((placeIn == PlaceIn.Both || (placeIn == PlaceIn.Lava && liquid == Blocks.LAVA) || (placeIn == PlaceIn.Water && liquid == Blocks.WATER)) && mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) {
+                    blocks.add(blockPos.mutableCopy());
+                    if (blocks.size() >= maxBlocksPerTick.get()) BlockIterator.disableCurrent();
                 }
             }
         });
+
+        BlockIterator.after(() -> {
+            for (BlockPos pos : blocks) BlockUtils.place(pos, item, rotate.get(), 0, true);
+            blocks.clear();
+        });
     }
 
-    private boolean isSource(BlockState blockState) {
-        return blockState.getFluidState().getLevel() == 8 && blockState.getFluidState().isStill();
+    public enum PlaceIn {
+        Lava,
+        Water,
+        Both
     }
 }
