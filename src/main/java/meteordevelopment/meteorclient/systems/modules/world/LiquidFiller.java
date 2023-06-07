@@ -54,7 +54,7 @@ public class LiquidFiller extends Module {
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("Delay between actions in ticks.")
-        .defaultValue(1)
+        .defaultValue(0)
         .min(0)
         .build()
     );
