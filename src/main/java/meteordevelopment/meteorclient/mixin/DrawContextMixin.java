@@ -23,11 +23,9 @@ import java.util.Optional;
 public class DrawContextMixin {
     @Inject(method = "drawTooltip(Lnet/minecraft/client/font/TextRenderer;Ljava/util/List;Ljava/util/Optional;II)V", at = @At(value = "HEAD"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, remap = false)
     private void onComponentConstruct(TextRenderer textRenderer, List<Text> text, Optional<TooltipData> data, int x, int y, CallbackInfo ci) {
-        data.ifPresent(tooltipData -> {
-            if (tooltipData instanceof MeteorTooltipData) {
-                text.add((Text) ((MeteorTooltipData) tooltipData).getComponent());
+        if (data.isPresent() && data.get() instanceof MeteorTooltipData meteorTooltipData) {
+                text.add((Text) meteorTooltipData.getComponent());
                 ci.cancel();
-            }
-        });
+        }
     }
 }
