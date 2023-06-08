@@ -20,6 +20,7 @@ import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -264,17 +265,18 @@ public abstract class WidgetScreen extends Screen {
         RENDERER.theme = theme;
         theme.beforeRender();
 
-        RENDERER.begin(context.getMatrices());
+        MatrixStack matrices = context.getMatrices();
+        RENDERER.begin(matrices);
         RENDERER.setAlpha(animProgress);
         root.render(RENDERER, mouseX, mouseY, delta / 20);
         RENDERER.setAlpha(1);
-        RENDERER.end(context.getMatrices());
+        RENDERER.end(matrices);
 
-        boolean tooltip = RENDERER.renderTooltip(mouseX, mouseY, delta / 20, context.getMatrices());
+        boolean tooltip = RENDERER.renderTooltip(mouseX, mouseY, delta / 20, matrices);
 
         if (debug) {
-            DEBUG_RENDERER.render(root, context.getMatrices());
-            if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget, context.getMatrices());
+            DEBUG_RENDERER.render(root, matrices);
+            if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget, matrices);
         }
 
         Utils.scaledProjection();

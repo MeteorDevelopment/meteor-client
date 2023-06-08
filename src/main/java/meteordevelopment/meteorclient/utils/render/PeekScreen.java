@@ -71,7 +71,6 @@ public class PeekScreen extends ShulkerBoxScreen {
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
         RenderSystem.setShaderColor(color.r / 255f, color.g / 255f, color.b / 255f, color.a / 255f);
-        RenderSystem.setShaderTexture(0, TEXTURE);
         int i = (width - backgroundWidth) / 2;
         int j = (height - backgroundHeight) / 2;
         context.drawTexture(TEXTURE, i, j, 0, 0, backgroundWidth, backgroundHeight);

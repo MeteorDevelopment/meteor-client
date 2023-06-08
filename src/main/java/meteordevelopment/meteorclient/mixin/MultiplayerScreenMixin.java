@@ -24,6 +24,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 @Mixin(MultiplayerScreen.class)
 public class MultiplayerScreenMixin extends Screen {
     private int textColor1;
@@ -45,18 +47,14 @@ public class MultiplayerScreenMixin extends Screen {
         loggedInAsLength = textRenderer.getWidth(loggedInAs);
 
         addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Accounts"), button -> {
-                    client.setScreen(GuiThemes.get().accountsScreen());
-                })
+            new ButtonWidget.Builder(Text.literal("Accounts"), button -> client.setScreen(GuiThemes.get().accountsScreen()))
                 .position(this.width - 75 - 3, 3)
                 .size(75, 20)
                 .build()
         );
 
         addDrawableChild(
-                new ButtonWidget.Builder(Text.literal("Proxies"), button -> {
-                    client.setScreen(GuiThemes.get().proxiesScreen());
-                })
+            new ButtonWidget.Builder(Text.literal("Proxies"), button -> client.setScreen(GuiThemes.get().proxiesScreen()))
                 .position(this.width - 75 - 3 - 75 - 2, 3)
                 .size(75, 20)
                 .build()
@@ -64,15 +62,13 @@ public class MultiplayerScreenMixin extends Screen {
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) { // TODO: ensure this is ok
-        float x = 3;
-        float y = 3;
+    private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        int x = 3;
+        int y = 3;
 
         // Logged in as
-//        textRenderer.drawWithShadow(matrices, loggedInAs, x, y, textColor1);
-//        textRenderer.drawWithShadow(matrices, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
-        textRenderer.draw(loggedInAs, x, y, textColor1, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
-        textRenderer.draw(Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
+        context.drawTextWithShadow(mc.textRenderer, loggedInAs, x, y, textColor1);
+        context.drawTextWithShadow(mc.textRenderer, Modules.get().get(NameProtect.class).getName(client.getSession().getUsername()), x + loggedInAsLength, y, textColor2);
 
         y += textRenderer.fontHeight + 2;
 
@@ -82,10 +78,8 @@ public class MultiplayerScreenMixin extends Screen {
         String left = proxy != null ? "Using proxy " : "Not using a proxy";
         String right = proxy != null ? (proxy.name.get() != null && !proxy.name.get().isEmpty() ? "(" + proxy.name.get() + ") " : "") + proxy.address.get() + ":" + proxy.port.get() : null;
 
-//        textRenderer.drawWithShadow(matrices, left, x, y, textColor1);
-        textRenderer.draw(left, x, y, textColor1, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
-//        if (right != null) textRenderer.drawWithShadow(matrices, right, x + textRenderer.getWidth(left), y, textColor2);
+        context.drawTextWithShadow(mc.textRenderer, left, x, y, textColor1);
         if (right != null)
-            textRenderer.draw(right, x + textRenderer.getWidth(left), y, textColor2, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
+            context.drawTextWithShadow(mc.textRenderer, right, x + textRenderer.getWidth(left), y, textColor2);
     }
 }

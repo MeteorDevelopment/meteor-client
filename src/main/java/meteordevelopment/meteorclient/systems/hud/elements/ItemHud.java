@@ -14,9 +14,9 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.render.model.json.ModelTransformationMode;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -27,7 +27,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class ItemHud extends HudElement {
     public static HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
 
-    private static final MatrixStack MATRICES = new MatrixStack();
+    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
@@ -123,31 +123,28 @@ public class ItemHud extends HudElement {
             });
         }
 
-        if (background.get()) {
-            renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
     }
 
-    private void render(ItemStack itemStack, int x, int y) { // FIXME: find out how to port these
+    private void render(ItemStack itemStack, int x, int y) {
         switch (noneMode.get()) {
             case HideItem -> {
-//                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
-//                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
-                mc.getItemRenderer().renderItem(itemStack, ModelTransformationMode.GUI, 0, 0, MATRICES, VertexConsumerProvider.immediate(new BufferBuilder(256)), mc.world, 0);
+                DRAW_CONTEXT.drawItem(itemStack, x, y);
+                DRAW_CONTEXT.drawItemTooltip(mc.textRenderer, itemStack, x, y);
             }
             case HideCount -> {
                 if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-//                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
+                DRAW_CONTEXT.drawItem(itemStack, x, y);
                 if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
 
                 if (!itemStack.isEmpty()) {
-//                    mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
+                    DRAW_CONTEXT.drawItemInSlot(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
                 }
             }
             case ShowCount -> {
                 if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-//                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
-//                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount() == Integer.MAX_VALUE ? 0 : itemStack.getCount()));
+                DRAW_CONTEXT.drawItem(itemStack, x, y);
+                DRAW_CONTEXT.drawItemInSlot(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount() == Integer.MAX_VALUE ? 0 : itemStack.getCount()));
                 if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
             }
         }

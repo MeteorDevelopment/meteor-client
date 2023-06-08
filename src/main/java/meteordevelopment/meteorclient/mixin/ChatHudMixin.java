@@ -189,7 +189,6 @@ public abstract class ChatHudMixin implements IChatHud {
         Identifier skin = getMessageTexture(line);
         if (skin != null) {
             RenderSystem.setShaderColor(1, 1, 1, opacity);
-            RenderSystem.setShaderTexture(0, skin);
             DRAW_CONTEXT.drawTexture(skin, 0, y, 8, 8, 8.0F, 8.0F, 8, 8, 64, 64);
             DRAW_CONTEXT.drawTexture(skin, 0, y, 8, 8, 40.0F, 8.0F, 8, 8, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
@@ -210,7 +209,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // No Message Signature Indicator
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine/Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
     private MessageIndicator onMessageIndicator(ChatHudLine.Visible message) {
         return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : message.indicator();
     }

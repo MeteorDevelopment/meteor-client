@@ -84,9 +84,8 @@ public class TitleScreenCredits {
             int x = mc.currentScreen.width - 3 - credit.width;
 
             synchronized (credit.sections) {
-                for (Section section : credit.sections) { // TODO: check renderer
-//                    mc.textRenderer.drawWithShadow(matrices, section.text, x, y, section.color);
-                    mc.textRenderer.draw(section.text, x, y, section.color, true, context.getMatrices().peek().getPositionMatrix(), VertexConsumerProvider.immediate(new BufferBuilder(256)), TextRenderer.TextLayerType.NORMAL, 0, 0);
+                for (Section section : credit.sections) {
+                    context.drawTextWithShadow(mc.textRenderer, section.text, x, y, section.color);
                     x += section.width;
                 }
             }
