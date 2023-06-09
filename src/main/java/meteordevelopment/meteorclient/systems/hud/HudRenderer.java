@@ -199,6 +199,10 @@ public class HudRenderer {
         postTasks.add(task);
     }
 
+    public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverlay) {
+        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay, countOverlay);
+    }
+
     public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
         RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
     }

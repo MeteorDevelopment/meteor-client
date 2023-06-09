@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -14,20 +13,12 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class ItemHud extends HudElement {
     public static HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
-
-    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
@@ -109,42 +100,37 @@ public class ItemHud extends HudElement {
             }
         } else {
             renderer.post(() -> {
-                MatrixStack matrices = RenderSystem.getModelViewStack();
-
-                matrices.push();
-                matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
-
                 double x = this.x + border.get();
                 double y = this.y + border.get();
 
-                render(itemStack, (int) (x / scale.get()), (int) (y / scale.get()));
-
-                matrices.pop();
+                render(renderer, itemStack, (int) x, (int) y);
             });
         }
 
         if (background.get()) renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
     }
 
-    private void render(ItemStack itemStack, int x, int y) {
-        switch (noneMode.get()) {
-            case HideItem -> DRAW_CONTEXT.drawItem(itemStack, x, y);
-            case HideCount -> {
-                if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-                DRAW_CONTEXT.drawItem(itemStack, x, y);
-                if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
-
-                if (!itemStack.isEmpty()) {
-                    DRAW_CONTEXT.drawItemInSlot(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
-                }
-            }
-            case ShowCount -> {
-                if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-                DRAW_CONTEXT.drawItem(itemStack, x, y);
-                DRAW_CONTEXT.drawItemInSlot(mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount() == Integer.MAX_VALUE ? 0 : itemStack.getCount()));
-                if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
-            }
+    private void render(HudRenderer renderer, ItemStack itemStack, int x, int y) {
+        if (noneMode.get() == NoneMode.HideItem) {
+            renderer.item(itemStack, x, y, scale.get().floatValue(), true);
+            return;
         }
+
+        String countOverride = null;
+        boolean resetToZero = false;
+
+        if (itemStack.isEmpty()) {
+            if (noneMode.get() == NoneMode.ShowCount)
+                countOverride = "0";
+
+            itemStack.setCount(1);
+            resetToZero = true;
+        }
+
+        renderer.item(itemStack, x, y, scale.get().floatValue(), true, countOverride);
+
+        if (resetToZero)
+            itemStack.setCount(0);
     }
 
     public enum NoneMode {

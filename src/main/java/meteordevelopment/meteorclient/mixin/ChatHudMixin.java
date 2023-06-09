@@ -24,8 +24,6 @@ import net.minecraft.client.gui.hud.MessageIndicator;
 import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.option.ChatVisibility;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.network.message.MessageSignatureData;
 import net.minecraft.text.Text;
@@ -38,7 +36,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -53,7 +50,6 @@ public abstract class ChatHudMixin implements IChatHud {
     private static final Pattern BARITONE_PREFIX_REGEX = Pattern.compile("^\\s{0,2}(<[0-9]{1,2}:[0-9]{1,2}>\\s)?\\[Baritone]");
     private static final Identifier METEOR_CHAT_ICON = new MeteorIdentifier("textures/icons/chat/meteor.png");
     private static final Identifier BARITONE_CHAT_ICON = new MeteorIdentifier("textures/icons/chat/baritone.png");
-    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
 
     @Shadow @Final private List<ChatHudLine.Visible> visibleMessages;
     @Shadow private int scrolledLines;
@@ -134,7 +130,7 @@ public abstract class ChatHudMixin implements IChatHud {
                         double s = -m * g;
                         StringCharacterVisitor visitor = new StringCharacterVisitor();
                         chatHudLine.content().accept(visitor);
-                        drawIcon(matrices, visitor.result.toString(), (int) (s + h), (float) (o * d));
+                        drawIcon(context, matrices, visitor.result.toString(), (int) (s + h), (float) (o * d));
                     }
                 }
             }
@@ -166,13 +162,13 @@ public abstract class ChatHudMixin implements IChatHud {
     @Shadow
     public abstract double getChatScale();
 
-    private void drawIcon(MatrixStack matrices, String line, int y, float opacity) {
+    private void drawIcon(DrawContext drawContext, MatrixStack matrices, String line, int y, float opacity) {
         if (METEOR_PREFIX_REGEX.matcher(line).find()) {
             matrices.push();
             RenderSystem.setShaderColor(1, 1, 1, opacity);
             matrices.translate(0, y, 0);
             matrices.scale(0.125f, 0.125f, 1);
-            DRAW_CONTEXT.drawTexture(METEOR_CHAT_ICON, 0, 0, 0f, 0f, 64, 64, 64, 64);
+            drawContext.drawTexture(METEOR_CHAT_ICON, 0, 0, 0f, 0f, 64, 64, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
             matrices.pop();
             return;
@@ -181,7 +177,7 @@ public abstract class ChatHudMixin implements IChatHud {
             RenderSystem.setShaderColor(1, 1, 1, opacity);
             matrices.translate(0, y, 10);
             matrices.scale(0.125f, 0.125f, 1);
-            DRAW_CONTEXT.drawTexture(BARITONE_CHAT_ICON, 0, 0, 0f, 0f, 64, 64, 64, 64);
+            drawContext.drawTexture(BARITONE_CHAT_ICON, 0, 0, 0f, 0f, 64, 64, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
             matrices.pop();
             return;
@@ -190,8 +186,8 @@ public abstract class ChatHudMixin implements IChatHud {
         Identifier skin = getMessageTexture(line);
         if (skin != null) {
             RenderSystem.setShaderColor(1, 1, 1, opacity);
-            DRAW_CONTEXT.drawTexture(skin, 0, y, 8, 8, 8.0F, 8.0F, 8, 8, 64, 64);
-            DRAW_CONTEXT.drawTexture(skin, 0, y, 8, 8, 40.0F, 8.0F, 8, 8, 64, 64);
+            drawContext.drawTexture(skin, 0, y, 8, 8, 8.0F, 8.0F, 8, 8, 64, 64);
+            drawContext.drawTexture(skin, 0, y, 8, 8, 40.0F, 8.0F, 8, 8, 64, 64);
             RenderSystem.setShaderColor(1, 1, 1, 1);
         }
     }
@@ -210,8 +206,8 @@ public abstract class ChatHudMixin implements IChatHud {
 
     // No Message Signature Indicator
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
-    private MessageIndicator onMessageIndicator(ChatHudLine.Visible message) {
-        return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : message.indicator();
+    @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;indicator()Lnet/minecraft/client/gui/hud/MessageIndicator;"))
+    private MessageIndicator onRender_modifyIndicator(MessageIndicator indicator) {
+        return Modules.get().get(NoRender.class).noMessageSignatureIndicator() ? null : indicator;
     }
 }

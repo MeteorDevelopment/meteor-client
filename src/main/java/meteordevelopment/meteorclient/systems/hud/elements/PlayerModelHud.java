@@ -11,10 +11,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.MathHelper;
 
@@ -22,7 +19,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PlayerModelHud extends HudElement {
     public static final HudElementInfo<PlayerModelHud> INFO = new HudElementInfo<>(Hud.GROUP, "player-model", "Displays a model of your player.", PlayerModelHud::new);
-    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
@@ -103,7 +99,7 @@ public class PlayerModelHud extends HudElement {
             float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
-            InventoryScreen.drawEntity(DRAW_CONTEXT, (int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
+            InventoryScreen.drawEntity(renderer.drawContext, (int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
         });
 
         if (background.get()) {

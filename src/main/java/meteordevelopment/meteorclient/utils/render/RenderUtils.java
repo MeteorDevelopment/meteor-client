@@ -43,7 +43,7 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride) {
         MatrixStack matrices = drawContext.getMatrices();
         matrices.push();
         matrices.scale(scale, scale, 1f);
@@ -53,9 +53,13 @@ public class RenderUtils {
         int scaledY = (int) (y / scale);
 
         drawContext.drawItem(itemStack, scaledX, scaledY);
-        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY);
+        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
 
         matrices.pop();
+    }
+
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        drawItem(drawContext, itemStack, x, y, scale, overlay, null);
     }
 
     public static void updateScreenCenter() {
