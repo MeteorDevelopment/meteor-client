@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -28,6 +27,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
 import org.joml.Vector3d;
+
+import java.util.Set;
 
 public class ESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -96,7 +97,7 @@ public class ESP extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select specific entities.")
         .defaultValue(EntityType.PLAYER)
@@ -296,14 +297,14 @@ public class ESP extends Module {
     // Utils
 
     public boolean shouldSkip(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return true;
+        if (!entities.get().contains(entity.getType())) return true;
         if (entity == mc.player && ignoreSelf.get()) return true;
         if (entity == mc.cameraEntity && mc.options.getPerspective().isFirstPerson()) return true;
         return !EntityUtils.isInRenderDistance(entity);
     }
 
     public Color getColor(Entity entity) {
-        if (!entities.get().getBoolean(entity.getType())) return null;
+        if (!entities.get().contains(entity.getType())) return null;
 
         double alpha = getFadeAlpha(entity);
         if (alpha == 0) return null;

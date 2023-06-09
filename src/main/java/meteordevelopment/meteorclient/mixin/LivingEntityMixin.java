@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
@@ -54,12 +55,12 @@ public abstract class LivingEntityMixin extends Entity {
             MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source, amount));
     }
 
-    @Inject(method = "canWalkOnFluid", at = @At("HEAD"), cancellable = true)
-    private void onCanWalkOnFluid(FluidState fluidState, CallbackInfoReturnable<Boolean> info) {
-        if ((Object) this != mc.player) return;
+    @ModifyReturnValue(method = "canWalkOnFluid", at = @At("RETURN"))
+    private boolean onCanWalkOnFluid(boolean original, FluidState fluidState) {
+        if ((Object) this != mc.player) return original;
         CanWalkOnFluidEvent event = MeteorClient.EVENT_BUS.post(CanWalkOnFluidEvent.get(fluidState));
 
-        info.setReturnValue(event.walkOnFluid);
+        return event.walkOnFluid;
     }
 
     @Redirect(method = "travel", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hasNoGravity()Z"))
@@ -99,15 +100,19 @@ public abstract class LivingEntityMixin extends Entity {
         return Modules.get().get(HandView.class).isActive() && mc.options.getPerspective().isFirstPerson() ? Modules.get().get(HandView.class).swingSpeed.get() : constant;
     }
 
-    @Inject(method = "isFallFlying", at = @At("HEAD"), cancellable = true)
-    private void isFallFlyingHook(CallbackInfoReturnable<Boolean> info) {
+    @ModifyReturnValue(method = "isFallFlying", at = @At("RETURN"))
+    private boolean isFallFlyingHook(boolean original) {
         if ((Object) this == mc.player && Modules.get().get(ElytraFly.class).canPacketEfly()) {
-            info.setReturnValue(true);
+            return true;
         }
+
+        return original;
     }
 
-    @Inject(method = "hasStatusEffect", at = @At("HEAD"), cancellable = true)
-    private void hasStatusEffect(StatusEffect effect, CallbackInfoReturnable<Boolean> info) {
-        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) info.setReturnValue(false);
+    @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
+    private boolean hasStatusEffect(boolean original, StatusEffect effect) {
+        if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) return false;
+
+        return original;
     }
 }

@@ -557,14 +557,6 @@ public class Utils {
         }
     }
 
-    @SafeVarargs
-    public static <T> Object2BooleanOpenHashMap<T> asO2BMap(T... checked) {
-        Map<T, Boolean> map = new HashMap<>();
-        for (T item : checked)
-            map.put(item, true);
-        return new Object2BooleanOpenHashMap<>(map);
-    }
-
     public static Color lerp(Color first, Color second, @Range(from = 0, to = 1) float v) {
         return new Color(
             (int) (first.r * (1 - v) + second.r * v),
