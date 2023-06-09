@@ -260,7 +260,7 @@ public abstract class WidgetScreen extends Screen {
         // Apply projection without scaling
         Utils.unscaledProjection();
 
-        onRenderBefore(delta);
+        onRenderBefore(context, delta);
 
         RENDERER.theme = theme;
         theme.beforeRender();
@@ -291,7 +291,7 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onRenderBefore(float delta) {}
+    protected void onRenderBefore(DrawContext drawContext, float delta) {}
 
     @Override
     public void resize(MinecraftClient client, int width, int height) {

@@ -344,7 +344,7 @@ public class CombatHud extends HudElement {
 
                 ItemStack itemStack = getItem(slot);
 
-                RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, true);
+                renderer.item(itemStack, (int) armorX, (int) armorY, 1, true);
 
                 armorY += 18;
 

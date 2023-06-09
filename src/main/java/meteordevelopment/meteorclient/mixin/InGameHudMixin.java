@@ -46,7 +46,7 @@ public abstract class InGameHudMixin {
 
         Utils.unscaledProjection();
 
-        MeteorClient.EVENT_BUS.post(Render2DEvent.get(scaledWidth, scaledHeight, tickDelta));
+        MeteorClient.EVENT_BUS.post(Render2DEvent.get(context, scaledWidth, scaledHeight, tickDelta));
 
         Utils.scaledProjection();
         RenderSystem.applyModelViewMatrix();

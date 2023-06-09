@@ -56,7 +56,7 @@ public class ContainerTooltipComponent implements TooltipComponent, MeteorToolti
         int row = 0;
         int i = 0;
         for (ItemStack itemStack : items) {
-            RenderUtils.drawItem(itemStack, x + 8 + i * 18, y + 7 + row * 18, true);
+            RenderUtils.drawItem(context, itemStack, x + 8 + i * 18, y + 7 + row * 18, 1, true);
 
             i++;
             if (i >= 9) {

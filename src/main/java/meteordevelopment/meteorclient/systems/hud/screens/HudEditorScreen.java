@@ -271,7 +271,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         boolean renderSplitLines = pressed && !selection.isEmpty() && moved;
         if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta / 20);
-        renderElements();
+        renderElements(context);
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
@@ -281,11 +281,11 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         runAfterRenderTasks();
     }
 
-    public static void renderElements() {
+    public static void renderElements(DrawContext drawContext) {
         Hud hud = Hud.get();
         boolean inactiveOnly = Utils.canUpdate() && hud.active;
 
-        HudRenderer.INSTANCE.begin();
+        HudRenderer.INSTANCE.begin(drawContext);
 
         for (HudElement element : hud) {
             element.updatePos();

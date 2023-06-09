@@ -15,8 +15,6 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -34,8 +32,6 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
-    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
-
     public static Vec3d center;
 
     private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
@@ -47,8 +43,8 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        MatrixStack matrices = DRAW_CONTEXT.getMatrices();
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        MatrixStack matrices = drawContext.getMatrices();
         matrices.push();
         matrices.scale(scale, scale, 1f);
         matrices.translate(0, 0, 401); // Thanks Mojang
@@ -56,15 +52,10 @@ public class RenderUtils {
         int scaledX = (int) (x / scale);
         int scaledY = (int) (y / scale);
 
-        DRAW_CONTEXT.drawItem(itemStack, scaledX, scaledY);
-        // if (overlay) DRAW_CONTEXT.drawItemTooltip(mc.textRenderer, itemStack, scaledX, scaledY); TODO: still needed?
-        // also wrong method call...
+        drawContext.drawItem(itemStack, scaledX, scaledY);
+        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY);
 
         matrices.pop();
-    }
-
-    public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
-        drawItem(itemStack, x, y, 1, overlay);
     }
 
     public static void updateScreenCenter() {
