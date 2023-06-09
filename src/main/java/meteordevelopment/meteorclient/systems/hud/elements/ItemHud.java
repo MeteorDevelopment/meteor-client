@@ -128,10 +128,7 @@ public class ItemHud extends HudElement {
 
     private void render(ItemStack itemStack, int x, int y) {
         switch (noneMode.get()) {
-            case HideItem -> {
-                DRAW_CONTEXT.drawItem(itemStack, x, y);
-                DRAW_CONTEXT.drawItemTooltip(mc.textRenderer, itemStack, x, y);
-            }
+            case HideItem -> DRAW_CONTEXT.drawItem(itemStack, x, y);
             case HideCount -> {
                 if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
                 DRAW_CONTEXT.drawItem(itemStack, x, y);

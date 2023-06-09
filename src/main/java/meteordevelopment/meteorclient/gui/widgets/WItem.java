@@ -43,7 +43,6 @@ public class WItem extends WWidget {
                 matrices.translate(x / s, y / s, 0);
 
                 DRAW_CONTEXT.drawItem(itemStack, 0, 0);
-                DRAW_CONTEXT.drawItemTooltip(mc.textRenderer, itemStack, 0, 0);
 
                 matrices.pop();
             });

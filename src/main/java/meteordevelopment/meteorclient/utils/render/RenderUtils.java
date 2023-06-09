@@ -57,7 +57,8 @@ public class RenderUtils {
         int scaledY = (int) (y / scale);
 
         DRAW_CONTEXT.drawItem(itemStack, scaledX, scaledY);
-        if (overlay) DRAW_CONTEXT.drawItemTooltip(mc.textRenderer, itemStack, scaledX, scaledY);
+        // if (overlay) DRAW_CONTEXT.drawItemTooltip(mc.textRenderer, itemStack, scaledX, scaledY); TODO: still needed?
+        // also wrong method call...
 
         matrices.pop();
     }
