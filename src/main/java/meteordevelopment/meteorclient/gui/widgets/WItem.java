@@ -6,17 +6,9 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class WItem extends WWidget {
-    private static final DrawContext DRAW_CONTEXT = new DrawContext(mc, VertexConsumerProvider.immediate(new BufferBuilder(256)));
-
     protected ItemStack itemStack;
 
     public WItem(ItemStack itemStack) {
@@ -36,15 +28,7 @@ public class WItem extends WWidget {
         if (!itemStack.isEmpty()) {
             renderer.post(() -> {
                 double s = theme.scale(2);
-
-                MatrixStack matrices = DRAW_CONTEXT.getMatrices();
-                matrices.push();
-                matrices.scale((float) s, (float) s, 1);
-                matrices.translate(x / s, y / s, 0);
-
-                DRAW_CONTEXT.drawItem(itemStack, 0, 0);
-
-                matrices.pop();
+                renderer.item(itemStack, (int) x, (int) y, (float) s, true);
             });
         }
     }

@@ -265,16 +265,17 @@ public abstract class WidgetScreen extends Screen {
         RENDERER.theme = theme;
         theme.beforeRender();
 
-        MatrixStack matrices = context.getMatrices();
-        RENDERER.begin(matrices);
+        RENDERER.begin(context);
         RENDERER.setAlpha(animProgress);
         root.render(RENDERER, mouseX, mouseY, delta / 20);
         RENDERER.setAlpha(1);
-        RENDERER.end(matrices);
+        RENDERER.end();
 
-        boolean tooltip = RENDERER.renderTooltip(mouseX, mouseY, delta / 20, matrices);
+        boolean tooltip = RENDERER.renderTooltip(context, mouseX, mouseY, delta / 20);
 
         if (debug) {
+            MatrixStack matrices = context.getMatrices();
+
             DEBUG_RENDERER.render(root, matrices);
             if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget, matrices);
         }
