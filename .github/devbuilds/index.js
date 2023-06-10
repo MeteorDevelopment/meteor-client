@@ -57,8 +57,7 @@ if (success) {
     });
 
     let form = new FormData();
-    form.set("file", new Blob([fs.readFileSync(jar)]))
-    form.append("file", fs.createReadStream(jar));
+    form.set("file", new Blob([fs.readFileSync(jar)]));
 
     fetch("https://meteorclient.com/api/uploadDevBuild", {
         method: "POST",
