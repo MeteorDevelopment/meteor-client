@@ -61,7 +61,7 @@ public class SettingCommand extends Command {
                                     String value = SettingValueArgumentType.get(context);
 
                                     if (setting.parse(value)) {
-                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, value);
+                                        ModuleArgumentType.get(context).info("Setting (highlight)%s(default) changed to (highlight)%s(default).", setting.title, setting.get().toString());
                                     }
 
                                     return SINGLE_SUCCESS;
