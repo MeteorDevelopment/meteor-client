@@ -66,8 +66,16 @@ if (success) {
         },
         body: form
     })
-        .then(res => res.json())
-        .then(res => send(res.version, res.number));
+        .then(async res => {
+            let data = await res.json();
+
+            if (res.ok) {
+                send(data.version, data.number);
+            }
+            else {
+                console.log("Failed to upload dev build: " + data.error);
+            }
+        });
 }
 else {
     fetch("https://meteorclient.com/api/stats")
