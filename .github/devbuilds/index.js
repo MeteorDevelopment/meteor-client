@@ -60,7 +60,7 @@ if (success) {
     let form = new FormData();
     form.set(
         "file",
-        new Blob([readFileSync(jar)], { type: "application/java-archive" }),
+        new Blob([fs.readFileSync(jar)], { type: "application/java-archive" }),
         path.basename(jar)
     );
 
