@@ -70,4 +70,4 @@ accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadSt
 accessible   field   net/minecraft/block/AbstractBlock collidable Z
 accessible field net/minecraft/util/math/Direction HORIZONTAL [Lnet/minecraft/util/math/Direction;
 
-accessible   field   net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/item/ItemGroup;
+accessible field net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/registry/RegistryKey;

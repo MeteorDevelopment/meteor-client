@@ -74,7 +74,7 @@ public abstract class ClientPlayerEntityMixin extends AbstractClientPlayerEntity
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamage(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate() && world.isClient && canTakeDamage()) MeteorClient.EVENT_BUS.post(DamageEvent.get(this, source, amount));
+        if (Utils.canUpdate() && getWorld().isClient && canTakeDamage()) MeteorClient.EVENT_BUS.post(DamageEvent.get(this, source, amount));
     }
 
     @ModifyConstant(method = "canSprint", constant = @Constant(floatValue = 6.0f))

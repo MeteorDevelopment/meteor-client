@@ -365,7 +365,7 @@ public class Surround extends Module {
             }
         }
 
-        boolean isThreat = mc.world.getBlockState(placePos).getMaterial().isReplaceable() || beingMined;
+        boolean isThreat = mc.world.getBlockState(placePos).isReplaceable() || beingMined;
 
         // If the block is air or is being mined, destroy nearby crystals to be safe
         if (protect.get() && !placed && isThreat) {

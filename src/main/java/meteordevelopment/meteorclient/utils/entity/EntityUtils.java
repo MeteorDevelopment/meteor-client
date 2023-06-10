@@ -73,7 +73,7 @@ public class EntityUtils {
         for (int i = 0; i < 64; i++) {
             BlockState state = mc.world.getBlockState(blockPos);
 
-            if (state.getMaterial().blocksMovement()) break;
+            if (state.blocksMovement()) break;
 
             Fluid fluid = state.getFluidState().getFluid();
             if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
