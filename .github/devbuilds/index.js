@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 const branch = process.argv[2];
 const compareUrl = process.argv[3];
@@ -57,7 +58,11 @@ if (success) {
     });
 
     let form = new FormData();
-    form.append("file", fs.createReadStream(jar));
+    form.set(
+        "file",
+        new Blob([readFileSync(jar)], { type: "application/java-archive" }),
+        path.basename(jar)
+    );
 
     fetch("https://meteorclient.com/api/uploadDevBuild", {
         method: "POST",
