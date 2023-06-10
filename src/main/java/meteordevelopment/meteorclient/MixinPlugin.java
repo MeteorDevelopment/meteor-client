@@ -24,9 +24,10 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     private static boolean isOriginsPresent;
     private static boolean isIndigoPresent;
-    public static boolean isSodiumPresent;
+    private static boolean isSodiumPresent;
     private static boolean isCanvasPresent;
     private static boolean isLithiumPresent;
+    public static boolean isIrisPresent;
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -70,6 +71,7 @@ public class MixinPlugin implements IMixinConfigPlugin {
         isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
         isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");
         isLithiumPresent = FabricLoader.getInstance().isModLoaded("lithium");
+        isIrisPresent = FabricLoader.getInstance().isModLoaded("iris");
 
         loaded = true;
     }

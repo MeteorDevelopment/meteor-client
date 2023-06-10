@@ -97,6 +97,6 @@ public class ChamsShader extends EntityShader {
     @Override
     public boolean shouldDraw(Entity entity) {
         if (!shouldDraw()) return false;
-        return chams.entities.get().getBoolean(entity.getType()) && (entity != mc.player || !chams.ignoreSelfDepth.get());
+        return chams.entities.get().contains(entity.getType()) && (entity != mc.player || !chams.ignoreSelfDepth.get());
     }
 }

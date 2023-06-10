@@ -32,7 +32,7 @@ jobs:
         run: |
           cd .github/devbuilds
           npm install
-          npm run get_number
+          node get_number.js >> $GITHUB_OUTPUT
 
       - name: Build
         run: ./gradlew build -Pcommit=${{ github.sha }} -Pdevbuild=${{ steps.dev-build.outputs.number }}
