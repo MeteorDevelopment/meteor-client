@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.accounts;
 import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
+import com.mojang.authlib.yggdrasil.ServicesKeyType;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
@@ -30,7 +31,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
 
     protected final AccountCache cache;
 
-    public Account(AccountType type, String name) {
+    protected Account(AccountType type, String name) {
         this.type = type;
         this.name = name;
         this.cache = new AccountCache();
@@ -77,7 +78,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
         mca.setAuthenticationService(authService);
-        mca.setServicesSignatureVerifier(SignatureVerifier.create(authService.getServicesKey()));
+        SignatureVerifier.create(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
         mca.setSessionService(sessService);
         mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir(), sessService));
     }

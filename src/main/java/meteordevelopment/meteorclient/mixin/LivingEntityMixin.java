@@ -51,7 +51,7 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "damage", at = @At("HEAD"))
     private void onDamageHead(DamageSource source, float amount, CallbackInfoReturnable<Boolean> info) {
-        if (Utils.canUpdate() && world.isClient)
+        if (Utils.canUpdate() && getWorld().isClient)
             MeteorClient.EVENT_BUS.post(DamageEvent.get((LivingEntity) (Object) this, source, amount));
     }
 
