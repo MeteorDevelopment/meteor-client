@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -302,7 +303,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     private void renderSplitLines(boolean increment, double delta) {
         if (increment) splitLinesAnimation += delta * 6;
         else splitLinesAnimation -= delta * 6;
-        splitLinesAnimation = Utils.clamp(splitLinesAnimation, 0, 1);
+        splitLinesAnimation = MathHelper.clamp(splitLinesAnimation, 0, 1);
 
         Renderer2D renderer = Renderer2D.COLOR;
         renderer.begin();
@@ -412,8 +413,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             int prevY = y;
 
             int border = Hud.get().border.get();
-            x = Utils.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
-            y = Utils.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
+            x = MathHelper.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
+            y = MathHelper.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
             for (HudElement element : selection) element.move(x - prevX, y - prevY);
         }

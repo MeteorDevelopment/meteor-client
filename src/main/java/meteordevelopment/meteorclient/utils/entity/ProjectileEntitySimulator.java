@@ -165,7 +165,7 @@ public class ProjectileEntitySimulator {
 
         Utils.set(pos, user, tickDelta).sub(i * 0.3, 0, h * 0.3).add(0, user.getEyeHeight(user.getPose()), 0);
 
-        velocity.set(-i, Utils.clamp(-(k / j), -5, 5), -h);
+        velocity.set(-i, MathHelper.clamp(-(k / j), -5, 5), -h);
 
         double l = velocity.length();
         velocity.mul(0.6 / l + 0.5, 0.6 / l + 0.5, 0.6 / l + 0.5);
