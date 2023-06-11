@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
-import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -484,21 +483,6 @@ public class Utils {
 
     public static boolean isThrowable(Item item) {
         return item instanceof ExperienceBottleItem || item instanceof BowItem || item instanceof CrossbowItem || item instanceof SnowballItem || item instanceof EggItem || item instanceof EnderPearlItem || item instanceof SplashPotionItem || item instanceof LingeringPotionItem || item instanceof FishingRodItem || item instanceof TridentItem;
-    }
-
-    public static int clamp(int value, int min, int max) {
-        if (value < min) return min;
-        return Math.min(value, max);
-    }
-
-    public static float clamp(float value, float min, float max) {
-        if (value < min) return min;
-        return Math.min(value, max);
-    }
-
-    public static double clamp(double value, double min, double max) {
-        if (value < min) return min;
-        return Math.min(value, max);
     }
 
     public static void addEnchantment(ItemStack itemStack, Enchantment enchantment, int level) {
