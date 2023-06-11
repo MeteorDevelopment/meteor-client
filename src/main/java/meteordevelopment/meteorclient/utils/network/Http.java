@@ -90,7 +90,7 @@ public class Http {
 
             try {
                 var res = CLIENT.send(builder.build(), responseBodyHandler);
-                return res.statusCode() == 200 ? res.body() : null;
+                return res.body();
             } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
                 return null;
