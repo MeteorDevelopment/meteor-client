@@ -63,10 +63,8 @@ public class SaveMapCommand extends Command {
             saveMap(map, state, path, 128);
 
             return SINGLE_SUCCESS;
-        }).then(argument("scale", IntegerArgumentType.integer()).executes(context -> {
+        }).then(argument("scale", IntegerArgumentType.integer(1)).executes(context -> {
             int scale = IntegerArgumentType.getInteger(context, "scale");
-
-            if (scale < 1) throw new SimpleCommandExceptionType(Text.literal("Scale must be greater than 0.")).create();
 
             MapState state = getMapState();
             if (state == null) throw MAP_NOT_FOUND.create();
