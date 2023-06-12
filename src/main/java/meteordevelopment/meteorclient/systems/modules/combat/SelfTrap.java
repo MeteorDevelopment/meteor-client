@@ -182,22 +182,20 @@ public class SelfTrap extends Module {
         BlockPos pos = mc.player.getBlockPos();
 
         switch (topPlacement.get()) {
-            case Full:
+            case Full -> {
                 add(pos.add(0, 2, 0), block);
                 add(pos.add(1, 1, 0), block);
                 add(pos.add(-1, 1, 0), block);
                 add(pos.add(0, 1, 1), block);
                 add(pos.add(0, 1, -1), block);
-                break;
-            case Top:
-                add(pos.add(0, 2, 0), block);
-                break;
-            case AntiFacePlace:
+            }
+            case Top -> add(pos.add(0, 2, 0), block);
+            case AntiFacePlace -> {
                 add(pos.add(1, 1, 0), block);
                 add(pos.add(-1, 1, 0), block);
                 add(pos.add(0, 1, 1), block);
                 add(pos.add(0, 1, -1), block);
-
+            }
         }
 
         if (bottomPlacement.get() == BottomMode.Single) add(pos.add(0, -1, 0), block);
@@ -205,6 +203,8 @@ public class SelfTrap extends Module {
 
 
     private void add(BlockPos blockPos, Block block) {
-        if (!placePositions.contains(blockPos) && mc.world.getBlockState(blockPos).getMaterial().isReplaceable() && mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
+        if (!placePositions.contains(blockPos) &&
+            mc.world.getBlockState(blockPos).isReplaceable() &&
+            mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent())) placePositions.add(blockPos);
     }
 }

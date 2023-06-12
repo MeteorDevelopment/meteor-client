@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.utils.AlignmentX;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.util.math.MathHelper;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_LEFT;
@@ -66,10 +66,10 @@ public class WMeteorModule extends WPressable implements MeteorWidget {
         double pad = pad();
 
         animationProgress1 += delta * 4 * ((module.isActive() || mouseOver) ? 1 : -1);
-        animationProgress1 = Utils.clamp(animationProgress1, 0, 1);
+        animationProgress1 = MathHelper.clamp(animationProgress1, 0, 1);
 
         animationProgress2 += delta * 6 * (module.isActive() ? 1 : -1);
-        animationProgress2 = Utils.clamp(animationProgress2, 0, 1);
+        animationProgress2 = MathHelper.clamp(animationProgress2, 0, 1);
 
         if (animationProgress1 > 0) {
             renderer.quad(x, y, width * animationProgress1, height, theme.moduleBackground.get());

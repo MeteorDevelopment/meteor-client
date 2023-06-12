@@ -40,7 +40,7 @@ public class SettingValueArgumentType implements ArgumentType<String> {
         try {
             setting = SettingArgumentType.get(context);
         } catch (CommandSyntaxException ignored) {
-            return null;
+            return Suggestions.empty();
         }
 
         Iterable<Identifier> identifiers = setting.getIdentifierSuggestions();

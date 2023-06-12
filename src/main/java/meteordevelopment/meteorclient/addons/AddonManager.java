@@ -66,8 +66,8 @@ public class AddonManager {
             MeteorAddon addon;
             try {
                 addon = entrypoint.getEntrypoint();
-            } catch (Exception exception) {
-                throw new RuntimeException("Exception during addon init \"%s\".".formatted(metadata.getName()), exception);
+            } catch (Throwable throwable) {
+                throw new RuntimeException("Exception during addon init \"%s\".".formatted(metadata.getName()), throwable);
             }
 
             addon.name = metadata.getName();

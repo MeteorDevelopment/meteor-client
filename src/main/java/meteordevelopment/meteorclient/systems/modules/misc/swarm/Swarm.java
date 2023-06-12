@@ -50,7 +50,7 @@ public class Swarm extends Module {
     public SwarmWorker worker;
 
     public Swarm() {
-        super(Categories.Misc, "Swarm", "Allows you to control multiple instances of Meteor from one central host.");
+        super(Categories.Misc, "swarm", "Allows you to control multiple instances of Meteor from one central host.");
     }
 
     @Override
