@@ -49,7 +49,7 @@ public class ItemPhysics extends Module {
     }
 
     @EventHandler
-    private void onRenderItemEntityNew(RenderItemEntityEvent event) {
+    private void onRenderItemEntity(RenderItemEntityEvent event) {
         MatrixStack matrices = event.matrixStack;
         matrices.push();
 
@@ -61,6 +61,8 @@ public class ItemPhysics extends Module {
 
         applyTransformation(matrices, model);
         matrices.translate(0, info.offsetY, 0);
+        offsetInWater(matrices, event.itemEntity);
+        preventZFighting(matrices, event.itemEntity);
 
         if (info.flat) {
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(90));
@@ -142,6 +144,21 @@ public class ItemPhysics extends Module {
         transformation.translation.y = prevY;
     }
 
+    private void offsetInWater(MatrixStack matrices, ItemEntity entity) {
+        if (entity.isTouchingWater()) {
+            matrices.translate(0, 0.333f, 0);
+        }
+    }
+
+    private void preventZFighting(MatrixStack matrices, ItemEntity entity) {
+        float offset = 0.0001f;
+
+        float distance = (float) mc.gameRenderer.getCamera().getPos().distanceTo(entity.getPos());
+        offset = Math.min(offset * Math.max(1, distance), 0.01f); // Ensure distance is at least 1 and that final offset is not bigger than 0.01
+
+        matrices.translate(0, offset, 0);
+    }
+
     private BakedModel getModel(ItemEntity entity) {
         ItemStack itemStack = entity.getStack();
 
@@ -190,9 +207,7 @@ public class ItemPhysics extends Module {
 
         boolean flat = (x > PIXEL_SIZE && y > PIXEL_SIZE && z <= PIXEL_SIZE);
 
-        // Need to add a slight offset to move the item up so when Minecraft renders the enchantment glint the geometry
-        // won't intersect with the block below. Or Mojang could just use back face culling but that's probably not happening
-        return new ModelInfo(flat, 0.5f - minY + 0.0001f, minZ - minY);
+        return new ModelInfo(flat, 0.5f - minY, minZ - minY);
     }
 
     record ModelInfo(boolean flat, float offsetY, float offsetZ) {}
