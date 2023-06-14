@@ -23,15 +23,19 @@ public interface TextRenderer {
 
     default void beginBig() { begin(1, false, true); }
 
-    double getWidth(String text, int length, boolean shadow);
+    double getWidth(String text, int length, boolean shadow, boolean title);
+    default double getWidth(String text, int length, boolean shadow) { return getWidth(text, length, shadow, false); }
     default double getWidth(String text, boolean shadow) { return getWidth(text, text.length(), shadow); }
     default double getWidth(String text) { return getWidth(text, text.length(), false); }
 
     double getHeight(boolean shadow);
     default double getHeight() { return getHeight(false); }
 
-    double render(String text, double x, double y, Color color, boolean shadow);
-    default double render(String text, double x, double y, Color color) { return render(text, x, y, color, false); }
+    double getTitleScale();
+
+    double render(String text, double x, double y, Color color, boolean shadow, boolean title);
+    default double render(String text, double x, double y, Color color, boolean shadow) { return render(text, x, y, color, shadow, false); }
+    default double render(String text, double x, double y, Color color) { return render(text, x, y, color, false, false); }
 
     boolean isBuilding();
 

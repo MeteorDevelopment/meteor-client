@@ -38,8 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public abstract class GuiTheme implements ISerializable<GuiTheme> {
-    public static final double TITLE_TEXT_SCALE = 1.25;
-
     public final String name;
     public final Settings settings = new Settings();
 
@@ -277,14 +275,14 @@ public abstract class GuiTheme implements ISerializable<GuiTheme> {
     public abstract boolean hideHUD();
 
     public double textWidth(String text, int length, boolean title) {
-        return scale(textRenderer().getWidth(text, length, false) * (title ? TITLE_TEXT_SCALE : 1));
+        return scale(textRenderer().getWidth(text, length, false, title) * (title ? textRenderer().getTitleScale() : 1));
     }
     public double textWidth(String text) {
         return textWidth(text, text.length(), false);
     }
 
     public double textHeight(boolean title) {
-        return scale(textRenderer().getHeight() * (title ? TITLE_TEXT_SCALE : 1));
+        return scale(textRenderer().getHeight() * (title ? textRenderer().getTitleScale() : 1));
     }
     public double textHeight() {
         return textHeight(false);

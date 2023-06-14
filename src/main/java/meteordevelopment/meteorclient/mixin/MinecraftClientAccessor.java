@@ -9,6 +9,7 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.font.FontManager;
 import net.minecraft.client.network.SocialInteractionsManager;
 import net.minecraft.client.report.AbuseReportContext;
 import net.minecraft.client.resource.ResourceReloadLogger;
@@ -78,4 +79,7 @@ public interface MinecraftClientAccessor {
     @Mutable
     @Accessor("abuseReportContext")
     void setAbuseReportContext(AbuseReportContext abuseReportContext);
+
+    @Accessor("fontManager")
+    FontManager meteor$getFontManager();
 }

@@ -20,16 +20,16 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPlus;
+import meteordevelopment.meteorclient.mixin.FontManagerAccessor;
+import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.util.Identifier;
 import org.apache.commons.lang3.StringUtils;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -70,6 +70,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
         factories.put(Vector3dSetting.class, (table, setting) -> vector3dW(table, (Vector3dSetting) setting));
+        factories.put(VanillaFontSetting.class, (table, setting) -> vanillaFontW(table, (VanillaFontSetting) setting));
     }
 
     @Override
@@ -456,6 +457,15 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         table.row();
 
         return component;
+    }
+
+    private void vanillaFontW(WTable table, VanillaFontSetting setting) {
+        Set<Identifier> loadedFonts = ((FontManagerAccessor) ((MinecraftClientAccessor) mc).meteor$getFontManager()).meteor$getFontStorages().keySet();
+        Identifier[] fonts = loadedFonts.toArray(new Identifier[0]);
+        WDropdown<Identifier> dropdown = table.add(theme.dropdown(fonts, setting.get())).expandX().widget();
+        dropdown.action = () -> setting.set(dropdown.get());
+
+        reset(table, setting, () -> dropdown.set(setting.get()));
     }
 
     // Other

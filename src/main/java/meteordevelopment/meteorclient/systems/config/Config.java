@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.config;
 
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.renderer.Fonts;
 import meteordevelopment.meteorclient.renderer.text.FontFace;
 import meteordevelopment.meteorclient.settings.*;
@@ -16,6 +17,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,6 +45,24 @@ public class Config extends System<Config> {
         .description("Custom font to use.")
         .visible(customFont::get)
         .onChanged(Fonts::load)
+        .build()
+    );
+
+    public final Setting<Boolean> shadows = sgVisual.add(new BoolSetting.Builder()
+        .name("text-shadow")
+        .description("Display a drop-shadow under text.")
+        .visible(() -> !customFont.get())
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Identifier> vanillaFont = sgVisual.add(new VanillaFontSetting.Builder()
+        .name("vanilla-font")
+        .description("Custom resource pack font to use.")
+        .visible(() -> !customFont.get())
+        .onChanged(o -> {
+            if (mc.currentScreen instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
+        })
         .build()
     );
 

@@ -6,12 +6,16 @@
 package meteordevelopment.meteorclient.renderer.text;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.font.TextRenderer.TextLayerType;
 import net.minecraft.client.render.BufferBuilder;
 import net.minecraft.client.render.LightmapTextureManager;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.OrderedText;
+import net.minecraft.text.Style;
+import net.minecraft.text.Text;
 import org.joml.Matrix4f;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -41,16 +45,22 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double getWidth(String text, int length, boolean shadow) {
+    public double getWidth(String text, int length, boolean shadow, boolean title) {
         if (text.isEmpty()) return 0;
 
         if (length != text.length()) text = text.substring(0, length);
-        return (mc.textRenderer.getWidth(text) + (shadow ? 1 : 0)) * scale;
+        OrderedText orderedText = Text.literal(text).setStyle(Style.EMPTY.withBold(title).withFont(Config.get().vanillaFont.get())).asOrderedText();
+        return (mc.textRenderer.getWidth(orderedText) + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
     public double getHeight(boolean shadow) {
         return (mc.textRenderer.fontHeight + (shadow ? 1 : 0)) * scale;
+    }
+
+    @Override
+    public double getTitleScale() {
+        return 1;
     }
 
     @Override
@@ -62,7 +72,7 @@ public class VanillaTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double render(String text, double x, double y, Color color, boolean shadow) {
+    public double render(String text, double x, double y, Color color, boolean shadow, boolean title) {
         boolean wasBuilding = building;
         if (!wasBuilding) begin();
 
@@ -79,7 +89,8 @@ public class VanillaTextRenderer implements TextRenderer {
             matrix = matrices.peek().getPositionMatrix();
         }
 
-        double x2 = mc.textRenderer.draw(text, (float) (x / scale), (float) (y / scale), color.getPacked(), shadow, matrix, immediate, TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+        OrderedText orderedText = Text.literal(text).setStyle(Style.EMPTY.withFont(Config.get().vanillaFont.get()).withBold(title)).asOrderedText();
+        double x2 = mc.textRenderer.draw(orderedText, (float) (x / scale), (float) (y / scale), color.getPacked(), Config.get().shadows.get(), matrix, immediate, TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
 
         if (scaleIndividually) matrices.pop();
 

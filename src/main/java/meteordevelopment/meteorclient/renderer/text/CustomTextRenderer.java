@@ -76,7 +76,7 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double getWidth(String text, int length, boolean shadow) {
+    public double getWidth(String text, int length, boolean shadow, boolean title) {
         if (text.isEmpty()) return 0;
 
         Font font = building ? this.font : fonts[0];
@@ -90,7 +90,12 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double render(String text, double x, double y, Color color, boolean shadow) {
+    public double getTitleScale() {
+        return 1.25;
+    }
+
+    @Override
+    public double render(String text, double x, double y, Color color, boolean shadow, boolean title) {
         boolean wasBuilding = building;
         if (!wasBuilding) begin();
 

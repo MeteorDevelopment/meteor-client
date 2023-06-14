@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.gui.themes.meteor.widgets;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.WLabel;
+import meteordevelopment.meteorclient.renderer.text.VanillaTextRenderer;
 
 public class WMeteorLabel extends WLabel implements MeteorWidget {
     public WMeteorLabel(String text, boolean title) {

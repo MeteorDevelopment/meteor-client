@@ -24,6 +24,6 @@ public class TextOperation extends GuiRenderOperation<TextOperation> {
 
     @Override
     protected void onRun() {
-        renderer.render(text, x, y, color);
+        renderer.render(text, x, y, color, false, title);
     }
 }

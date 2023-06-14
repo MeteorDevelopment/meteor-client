@@ -83,6 +83,7 @@
     "FireworksSparkParticleSubMixin",
     "FluidRendererMixin",
     "FoliageColorsMixin",
+    "FontManagerAccessor",
     "GameOptionsMixin",
     "GameRendererMixin",
     "HandledScreenAccessor",

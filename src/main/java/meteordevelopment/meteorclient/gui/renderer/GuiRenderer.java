@@ -117,7 +117,7 @@ public class GuiRenderer {
         theme.textRenderer().end(drawContext.getMatrices());
 
         // Title text
-        theme.textRenderer().begin(theme.scale(1.25));
+        theme.textRenderer().begin(theme.scale(theme.textRenderer().getTitleScale()));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }
