@@ -114,7 +114,7 @@ public class Burrow extends Module {
 
     @Override
     public void onActivate() {
-        if (!mc.world.getBlockState(mc.player.getBlockPos()).getMaterial().isReplaceable()) {
+        if (!mc.world.getBlockState(mc.player.getBlockPos()).isReplaceable()) {
             error("Already burrowed, disabling.");
             toggle();
             return;
@@ -231,11 +231,11 @@ public class Burrow extends Module {
         BlockState blockState2 = mc.world.getBlockState(blockPos.set(mc.player.getX() + .3, mc.player.getY() + 2.3, mc.player.getZ() - .3));
         BlockState blockState3 = mc.world.getBlockState(blockPos.set(mc.player.getX() - .3, mc.player.getY() + 2.3, mc.player.getZ() - .3));
         BlockState blockState4 = mc.world.getBlockState(blockPos.set(mc.player.getX() - .3, mc.player.getY() + 2.3, mc.player.getZ() + .3));
-        boolean air1 = blockState1.getMaterial().isReplaceable();
-        boolean air2 = blockState2.getMaterial().isReplaceable();
-        boolean air3 = blockState3.getMaterial().isReplaceable();
-        boolean air4 = blockState4.getMaterial().isReplaceable();
-        return air1 & air2 & air3 & air4;
+        boolean air1 = blockState1.isReplaceable();
+        boolean air2 = blockState2.isReplaceable();
+        boolean air3 = blockState3.isReplaceable();
+        boolean air4 = blockState4.isReplaceable();
+        return air1 && air2 && air3 && air4;
     }
 
     public enum Block {

@@ -19,7 +19,6 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.P
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -30,6 +29,7 @@ import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.RaycastContext;
 
@@ -361,13 +361,13 @@ public class ElytraFly extends Module {
             if (!underCollidable && under2Collidable) {
                 ((IVec3d)event.movement).set(event.movement.x, -0.1f, event.movement.z);
 
-                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
+                mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f)); // clamp between -50 and 20 (>= 30 will pop you off, but lag makes that threshold lower)
             }
 
             if (underCollidable) {
                 ((IVec3d)event.movement).set(event.movement.x, -0.03f, event.movement.z);
 
-                mc.player.setPitch(Utils.clamp(mc.player.getPitch(0), -50.f, 20.f));
+                mc.player.setPitch(MathHelper.clamp(mc.player.getPitch(0), -50.f, 20.f));
 
                 if (mc.player.getPos().y <= mc.player.getBlockPos().down().getY() + 1.34f) {
                     ((IVec3d)event.movement).set(event.movement.x, 0, event.movement.z);
