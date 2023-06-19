@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.mixin.EntityBucketItemAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.combat.AutoArmor;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.ByteCountDataOutput;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -25,6 +26,8 @@ import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BannerPattern;
 import net.minecraft.block.entity.BannerPatterns;
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -145,10 +148,18 @@ public class BetterTooltips extends Module {
 
     // Extras
 
-    public final Setting<Boolean> byteSize = sgOther.add(new BoolSetting.Builder()
-        .name("byte-size")
-        .description("Displays an item's size in bytes in the tooltip.")
+    private final Setting<Boolean> size = sgOther.add(new BoolSetting.Builder()
+        .name("size")
+        .description("Displays an item's size in the tooltip.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<SortSize> sizeType = sgOther.add(new EnumSetting.Builder<SortSize>()
+        .name("size-type")
+        .description("Displays an item's size in the specified type in the tooltip.")
+        .defaultValue(SortSize.All)
+        .visible(size::get)
         .build()
     );
 
@@ -280,7 +291,7 @@ public class BetterTooltips extends Module {
         }
 
         // Item size tooltip
-        if (byteSize.get()) {
+        if (size.get()) {
             try {
                 event.itemStack.writeNbt(new NbtCompound()).write(ByteCountDataOutput.INSTANCE);
 
@@ -289,8 +300,27 @@ public class BetterTooltips extends Module {
 
                 ByteCountDataOutput.INSTANCE.reset();
 
-                if (byteCount >= 1024) count = String.format("%.2f kb", byteCount / (float) 1024);
-                else count = String.format("%d bytes", byteCount);
+                switch (sizeType.get()) {
+                    case Bytes:
+                        count = String.format("%d bytes", byteCount);
+                        break;
+                    case KiloBytes:
+                        count = String.format("%.2f kb", byteCount / (float) 1024);
+                        break;
+                    case MegaBytes:
+                        count = String.format("%.4f mb", byteCount / (float) 1024 / 1024);
+                        break;
+                    case All:
+                        if (byteCount >= 1048576) count = String.format("%.2f mb", byteCount / (float) 1048576);
+                        else if (byteCount >= 1024) count = String.format("%.4f kb", byteCount / (float) 1024);
+                        else count = String.format("%d bytes", byteCount);
+                        break;
+                    default:
+                        if (byteCount >= 1048576) count = String.format("%.2f mb", byteCount / (float) 1048576);
+                        else if (byteCount >= 1024) count = String.format("%.4f kb", byteCount / (float) 1024);
+                        else count = String.format("%d bytes", byteCount);
+                        break;
+                }
 
                 event.list.add(Text.literal(count).formatted(Formatting.GRAY));
             } catch (IOException e) {
@@ -504,5 +534,12 @@ public class BetterTooltips extends Module {
     public enum DisplayWhen {
         Keybind,
         Always
+    }
+
+    public enum SortSize {
+        Bytes,
+        KiloBytes,
+        MegaBytes,
+        All,
     }
 }
