@@ -61,6 +61,7 @@ public class Commands {
         add(new RotationCommand());
         add(new WaypointCommand());
         add(new InputCommand());
+        add(new KickCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));
     }
