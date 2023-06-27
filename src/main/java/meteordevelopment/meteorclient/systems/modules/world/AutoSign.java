@@ -12,7 +12,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.SignBlockEntity;
-import net.minecraft.client.gui.screen.ingame.SignEditScreen;
+import net.minecraft.client.gui.screen.ingame.AbstractSignEditScreen;
 import net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket;
 
 public class AutoSign extends Module {
@@ -36,7 +36,7 @@ public class AutoSign extends Module {
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
-        if (!(event.screen instanceof SignEditScreen) || text == null) return;
+        if (!(event.screen instanceof AbstractSignEditScreen) || text == null) return;
 
         SignBlockEntity sign = ((AbstractSignEditScreenAccessor) event.screen).getSign();
 
