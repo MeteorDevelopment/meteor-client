@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
@@ -211,7 +213,7 @@ public class BetterChat extends Module {
 
     private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
-    public final ArrayList<Integer> lines = new ArrayList<>();
+    public final IntList lines = new IntArrayList();
 
     public BetterChat() {
         super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");

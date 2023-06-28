@@ -85,7 +85,13 @@ public abstract class ChatHudMixin implements IChatHud {
         if (event.isCancelled()) info.cancel();
         else {
             visibleMessages.removeIf(msg -> ((IChatHudLine) (Object) msg).getId() == nextId && nextId != 0);
-            messages.removeIf(msg -> ((IChatHudLine) (Object) msg).getId() == nextId && nextId != 0);
+
+            for (int i = messages.size() - 1; i > -1 ; i--) {
+                if (((IChatHudLine) (Object) messages.get(i)).getId() == nextId && nextId != 0) {
+                    messages.remove(i);
+                    Modules.get().get(BetterChat.class).lines.remove(i);
+                }
+            }
 
             if (event.isModified()) {
                 info.cancel();
@@ -236,6 +242,11 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @Inject(method = "clear", at = @At("HEAD"))
     private void onClear(boolean clearHistory, CallbackInfo ci) {
+        Modules.get().get(BetterChat.class).lines.clear();
+    }
+
+    @Inject(method = "refresh", at = @At("HEAD"))
+    private void onRefresh(CallbackInfo ci) {
         Modules.get().get(BetterChat.class).lines.clear();
     }
 }
