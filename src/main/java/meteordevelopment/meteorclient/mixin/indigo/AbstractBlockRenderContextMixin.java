@@ -35,10 +35,6 @@ public class AbstractBlockRenderContextMixin {
     }
 
     private int rewriteQuadAlpha(int color, int alpha) {
-        int red = ((color >>> 16) & 0xFF);
-        int green = ((color >>> 8) & 0xFF);
-        int blue = (color & 0xFF);
-
-        return ((alpha & 0xFF) << 24) | (red << 16) | (green << 8) | blue;
+        return ((alpha & 0xFF) << 24) | (color & 0x00FFFFFF);
     }
 }
