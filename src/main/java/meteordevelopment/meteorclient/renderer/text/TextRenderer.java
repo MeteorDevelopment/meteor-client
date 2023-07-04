@@ -31,7 +31,9 @@ public interface TextRenderer {
     double getHeight(boolean shadow);
     default double getHeight() { return getHeight(false); }
 
-    double getTitleScale();
+    default double getTitleScale() {
+        return Config.get().titleTextSize.get();
+    }
 
     double render(String text, double x, double y, Color color, boolean shadow, boolean title);
     default double render(String text, double x, double y, Color color, boolean shadow) { return render(text, x, y, color, shadow, false); }

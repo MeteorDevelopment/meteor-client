@@ -60,9 +60,26 @@ public class Config extends System<Config> {
         .name("vanilla-font")
         .description("Custom resource pack font to use.")
         .visible(() -> !customFont.get())
-        .onChanged(o -> {
-            if (mc.currentScreen instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
-        })
+        .onChanged(setting -> invalidateScreen())
+        .build()
+    );
+
+    public final Setting<Double> titleTextSize = sgVisual.add(new DoubleSetting.Builder()
+        .name("title-text-size")
+        .description("Size of the title texts.")
+        .defaultValue(1.25)
+        .range(1, 3)
+        .decimalPlaces(2)
+        .onChanged(setting -> invalidateScreen())
+        .build()
+    );
+
+    public final Setting<Boolean> snapTitleTextSize = sgVisual.add(new BoolSetting.Builder()
+        .name("snap-title-text-size")
+        .description("Snap title text size to prevent inconsistent pixel scaling.")
+        .defaultValue(true)
+        .visible(() -> !customFont.get())
+        .onChanged(setting -> invalidateScreen())
         .build()
     );
 
@@ -170,6 +187,10 @@ public class Config extends System<Config> {
 
     public static Config get() {
         return Systems.get(Config.class);
+    }
+
+    private void invalidateScreen() {
+        if (mc.currentScreen instanceof WidgetScreen widgetScreen) widgetScreen.invalidate();
     }
 
     @Override

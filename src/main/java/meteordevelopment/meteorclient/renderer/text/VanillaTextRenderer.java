@@ -60,7 +60,7 @@ public class VanillaTextRenderer implements TextRenderer {
 
     @Override
     public double getTitleScale() {
-        return 1;
+        return Config.get().snapTitleTextSize.get() ? Math.round(Config.get().titleTextSize.get()) : Config.get().titleTextSize.get();
     }
 
     @Override

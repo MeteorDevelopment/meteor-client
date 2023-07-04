@@ -90,11 +90,6 @@ public class CustomTextRenderer implements TextRenderer {
     }
 
     @Override
-    public double getTitleScale() {
-        return 1.25;
-    }
-
-    @Override
     public double render(String text, double x, double y, Color color, boolean shadow, boolean title) {
         boolean wasBuilding = building;
         if (!wasBuilding) begin();
