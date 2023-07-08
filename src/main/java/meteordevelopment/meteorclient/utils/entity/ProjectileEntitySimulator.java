@@ -114,21 +114,41 @@ public class ProjectileEntitySimulator {
         this.waterDrag = waterDrag;
     }
 
-    public boolean set(Entity entity, boolean accurate, double tickDelta) {
+    public boolean set(Entity entity, boolean accurate, double tickDelta, boolean noGravity) {
         // skip entities in ground
         if (entity instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor) entity).getInGround()) return false;
 
         if (entity instanceof ArrowEntity arrow) {
             // im not sure if arrow.getVelocity().length() is correct but it works ¯\_(ツ)_/¯
-            set(entity, arrow.getVelocity().length(), 0.05000000074505806, 0.6, accurate, tickDelta);
+            double gravity = 0.05000000074505806;
+            if (noGravity) {
+                gravity = 0;
+            }
+            set(entity, arrow.getVelocity().length(), gravity, 0.6, accurate, tickDelta);
         } else if (entity instanceof EnderPearlEntity || entity instanceof SnowballEntity || entity instanceof EggEntity) {
-            set(entity, 1.5, 0.03, 0.8, accurate, tickDelta);
+            double gravity = 0.03;
+            if (noGravity) {
+                gravity = 0;
+            }
+            set(entity, 1.5, gravity, 0.8, accurate, tickDelta);
         } else if (entity instanceof TridentEntity) {
-            set(entity, 2.5, 0.05000000074505806, 0.99, accurate, tickDelta);
+            double gravity = 0.05000000074505806;
+            if (noGravity) {
+                gravity = 0;
+            }
+            set(entity, 2.5, gravity, 0.99, accurate, tickDelta);
         } else if (entity instanceof ExperienceBottleEntity) {
-            set(entity, 0.7,  0.07, 0.8, accurate, tickDelta);
+            double gravity = 0.07;
+            if (noGravity) {
+                gravity = 0;
+            }
+            set(entity, 0.7,  gravity, 0.8, accurate, tickDelta);
         } else if (entity instanceof ThrownEntity) {
-            set(entity, 0.5, 0.05, 0.8, accurate, tickDelta);
+            double gravity = 0.05;
+            if (noGravity) {
+                gravity = 0;
+            }
+            set(entity, 0.5, gravity, 0.8, accurate, tickDelta);
         } else if (entity instanceof WitherSkullEntity || entity instanceof FireballEntity || entity instanceof DragonFireballEntity) {
             set(entity, 0.95, 0, 0.8, accurate, tickDelta);
         }
