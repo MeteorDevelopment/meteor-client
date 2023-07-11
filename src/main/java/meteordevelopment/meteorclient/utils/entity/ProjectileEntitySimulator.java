@@ -37,7 +37,7 @@ public class ProjectileEntitySimulator {
     private final Vector3d velocity = new Vector3d();
 
     private double gravity;
-    private double airDrag, waterDrag;
+    private double airDrag, waterDrag, speed;
 
     public boolean set(Entity user, ItemStack itemStack, double simulated, boolean accurate, double tickDelta) {
         Item item = itemStack.getItem();
@@ -114,46 +114,27 @@ public class ProjectileEntitySimulator {
         this.waterDrag = waterDrag;
     }
 
-    public boolean set(Entity entity, boolean accurate, double tickDelta, boolean noGravity) {
+    public boolean set(Entity entity, boolean accurate, double tickDelta) {
         // skip entities in ground
         if (entity instanceof PersistentProjectileEntity && ((ProjectileInGroundAccessor) entity).getInGround()) return false;
 
         if (entity instanceof ArrowEntity arrow) {
             // im not sure if arrow.getVelocity().length() is correct but it works ¯\_(ツ)_/¯
-            double gravity = 0.05000000074505806;
-            if (noGravity) {
-                gravity = 0;
-            }
-            set(entity, arrow.getVelocity().length(), gravity, 0.6, accurate, tickDelta);
+            set(entity, arrow.getVelocity().length(), 0.05000000074505806, 0.6, accurate, tickDelta);
         } else if (entity instanceof EnderPearlEntity || entity instanceof SnowballEntity || entity instanceof EggEntity) {
-            double gravity = 0.03;
-            if (noGravity) {
-                gravity = 0;
-            }
-            set(entity, 1.5, gravity, 0.8, accurate, tickDelta);
+            set(entity, 1.5, 0.03, 0.8, accurate, tickDelta);
         } else if (entity instanceof TridentEntity) {
-            double gravity = 0.05000000074505806;
-            if (noGravity) {
-                gravity = 0;
-            }
-            set(entity, 2.5, gravity, 0.99, accurate, tickDelta);
+            set(entity, 2.5, 0.05000000074505806, 0.99, accurate, tickDelta);
         } else if (entity instanceof ExperienceBottleEntity) {
-            double gravity = 0.07;
-            if (noGravity) {
-                gravity = 0;
-            }
-            set(entity, 0.7,  gravity, 0.8, accurate, tickDelta);
+            set(entity, 0.7,  0.07, 0.8, accurate, tickDelta);
         } else if (entity instanceof ThrownEntity) {
-            double gravity = 0.05;
-            if (noGravity) {
-                gravity = 0;
-            }
-            set(entity, 0.5, gravity, 0.8, accurate, tickDelta);
+            set(entity, 0.5, 0.05, 0.8, accurate, tickDelta);
         } else if (entity instanceof WitherSkullEntity || entity instanceof FireballEntity || entity instanceof DragonFireballEntity) {
             set(entity, 0.95, 0, 0.8, accurate, tickDelta);
         }
-        else {
-            return false;
+
+        if (entity.hasNoGravity()) {
+            set(entity, speed, 0, waterDrag, accurate, tickDelta);
         }
 
         return true;
@@ -169,6 +150,7 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, entity.isOnGround() ? 0.0D : vel.y, vel.z);
         }
 
+        this.speed = speed; // so it is known in line 160
         this.gravity = gravity;
         this.airDrag = 0.99;
         this.waterDrag = waterDrag;

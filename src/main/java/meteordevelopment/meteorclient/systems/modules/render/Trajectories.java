@@ -103,7 +103,7 @@ public class Trajectories extends Module {
     private final Pool<Vector3d> vec3s = new Pool<>(Vector3d::new);
     private final List<Path> paths = new ArrayList<>();
 
-    private final double multishotOffset = Math.toRadians(10); // accurate-ish offset of crossbow multishot in radians (10° degrees)
+    private static final double MULTISHOT_OFFSET = Math.toRadians(10); // accurate-ish offset of crossbow multishot in radians (10° degrees)
 
     public Trajectories() {
         super(Categories.Render, "trajectories", "Predicts the trajectory of throwable items.");
@@ -148,10 +148,10 @@ public class Trajectories extends Module {
         getEmptyPath().calculate();
 
         if (itemStack.getItem() instanceof CrossbowItem && EnchantmentHelper.getLevel(Enchantments.MULTISHOT, itemStack) > 0) {
-            if (!simulator.set(player, itemStack, multishotOffset, accurate.get(), tickDelta)) return; // left multishot arrow
+            if (!simulator.set(player, itemStack, MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
             getEmptyPath().calculate();
 
-            if (!simulator.set(player, itemStack, -multishotOffset, accurate.get(), tickDelta)) return; // right multishot arrow
+            if (!simulator.set(player, itemStack, -MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // right multishot arrow
             getEmptyPath().calculate();
         }
     }
@@ -159,14 +159,8 @@ public class Trajectories extends Module {
     private void calculateFiredPath(Entity entity, double tickDelta) {
         for (Path path : paths) path.clear();
 
-        if (entity.hasNoGravity()) {
-            if (!simulator.set(entity, accurate.get(), tickDelta, true)) return;
-            getEmptyPath().calculate();
-            return;
-        }
-
         // Calculate paths
-        if (!simulator.set(entity, accurate.get(), tickDelta, false)) return;
+        if (!simulator.set(entity, accurate.get(), tickDelta)) return;
         getEmptyPath().calculate();
     }
 
