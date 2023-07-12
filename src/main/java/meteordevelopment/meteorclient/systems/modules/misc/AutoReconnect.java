@@ -5,16 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
-import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.world.ConnectToServerEvent;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
-
-import java.net.InetSocketAddress;
+import net.minecraft.client.network.ServerInfo;
 
 public class AutoReconnect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -28,17 +24,10 @@ public class AutoReconnect extends Module {
         .build()
     );
 
-    public InetSocketAddress lastServerConnection;
+    public ServerInfo lastServerInfo;
 
     public AutoReconnect() {
         super(Categories.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
-        MeteorClient.EVENT_BUS.subscribe(new StaticListener());
-    }
-
-    private class StaticListener {
-        @EventHandler
-        private void onGameJoined(ConnectToServerEvent event) {
-            lastServerConnection = event.address;
-        }
+        runInMainMenu = true;
     }
 }
