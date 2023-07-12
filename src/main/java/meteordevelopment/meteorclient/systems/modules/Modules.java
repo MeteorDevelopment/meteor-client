@@ -547,7 +547,7 @@ public class Modules extends System<Modules> {
         add(new AntiPacketKick());
         add(new AutoClicker());
         add(new AutoLog());
-        add(new AutoReconnect());
+        add(new Reconnect());
         add(new AutoRespawn());
         add(new BetterBeacons());
         add(new BetterChat());

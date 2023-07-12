@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import net.minecraft.client.network.ServerInfo;
 
-public class AutoReconnect extends Module {
+public class Reconnect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     public final Setting<Boolean> autoReconnect = sgGeneral.add(new BoolSetting.Builder()
@@ -34,8 +34,8 @@ public class AutoReconnect extends Module {
 
     public ServerInfo lastServerInfo;
 
-    public AutoReconnect() {
-        super(Categories.Misc, "auto-reconnect", "Automatically reconnects when disconnected from a server.");
+    public Reconnect() {
+        super(Categories.Misc, "auto-reconnect", "Shows a reconnect button when you get disconnected from a server.");
         runInMainMenu = true;
     }
 }
