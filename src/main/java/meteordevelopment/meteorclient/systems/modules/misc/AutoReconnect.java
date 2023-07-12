@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
@@ -14,6 +15,13 @@ import net.minecraft.client.network.ServerInfo;
 
 public class AutoReconnect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    public final Setting<Boolean> autoReconnect = sgGeneral.add(new BoolSetting.Builder()
+        .name("auto-reconnect")
+        .description("Automatically reconnects when disconnected from a server.")
+        .defaultValue(true)
+        .build()
+    );
 
     public final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
         .name("delay")

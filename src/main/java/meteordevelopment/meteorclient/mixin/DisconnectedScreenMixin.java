@@ -36,7 +36,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget;refreshPositions()V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onInit_before(CallbackInfo info, GridWidget.Adder adder) {
-        if (autoReconnect.lastServerInfo == null) return;
+        if (autoReconnect.isActive() && autoReconnect.lastServerInfo == null) return;
 
         grid = new GridWidget();
         adder.add(grid);
@@ -61,12 +61,13 @@ public abstract class DisconnectedScreenMixin extends Screen {
             grid.refreshPositions();
             grid.forEachChild(this::addDrawableChild);
         }
+        tick();
     }
 
     @Override
     public void tick() {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
-        if (!autoReconnect.isActive() || autoReconnect.lastServerInfo == null) return;
+        if (!autoReconnect.isActive() || !autoReconnect.autoReconnect.get() || autoReconnect.lastServerInfo == null) return;
 
         if (time <= 0) {
             reconnect();
