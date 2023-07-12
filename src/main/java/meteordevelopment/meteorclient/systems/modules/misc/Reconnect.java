@@ -5,12 +5,14 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import meteordevelopment.meteorclient.events.world.ConnectToServerEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.DoubleSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ServerInfo;
 
 public class Reconnect extends Module {
@@ -37,5 +39,10 @@ public class Reconnect extends Module {
     public Reconnect() {
         super(Categories.Misc, "auto-reconnect", "Shows a reconnect button when you get disconnected from a server.");
         runInMainMenu = true;
+    }
+
+    @EventHandler
+    private void onConnectToServer(ConnectToServerEvent event) {
+        lastServerInfo = event.info;
     }
 }

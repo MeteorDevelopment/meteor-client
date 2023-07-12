@@ -29,7 +29,6 @@ public abstract class DisconnectedScreenMixin extends Screen {
     @Unique private GridWidget grid;
     @Unique private ButtonWidget reconnectBtn;
     @Unique private double time = Modules.get().get(Reconnect.class).time.get() * 20;
-    @Unique
     Reconnect reconnect = Modules.get().get(Reconnect.class);
 
     protected DisconnectedScreenMixin(Text title) {
@@ -80,7 +79,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
 
     private MutableText getText() {
         String reconnectText = "Reconnect";
-        if (Modules.get().isActive(Reconnect.class)) reconnectText += " " + String.format("(%.1f)", time / 20);
+        if (reconnect.autoReconnect.get()) reconnectText += " " + String.format("(%.1f)", time / 20);
         return Text.literal(reconnectText);
     }
 
