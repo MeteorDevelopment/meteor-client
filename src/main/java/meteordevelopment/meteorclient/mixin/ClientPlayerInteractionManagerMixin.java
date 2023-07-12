@@ -113,6 +113,11 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         info.setReturnValue(Modules.get().get(Reach.class).blockReach());
     }
 
+    @Inject(method = "hasExtendedReach", at = @At("HEAD"), cancellable = true)
+    private void onHasExtendedReach(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().isActive(Reach.class)) info.setReturnValue(false);
+    }
+
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
     private void creativeBreakDelayChange(ClientPlayerInteractionManager interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
