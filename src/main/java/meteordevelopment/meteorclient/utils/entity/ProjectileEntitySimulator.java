@@ -37,7 +37,7 @@ public class ProjectileEntitySimulator {
     private final Vector3d velocity = new Vector3d();
 
     private double gravity;
-    private double airDrag, waterDrag, speed;
+    private double airDrag, waterDrag;
 
     public boolean set(Entity user, ItemStack itemStack, double simulated, boolean accurate, double tickDelta) {
         Item item = itemStack.getItem();
@@ -134,7 +134,7 @@ public class ProjectileEntitySimulator {
         }
 
         if (entity.hasNoGravity()) {
-            set(entity, speed, 0, waterDrag, accurate, tickDelta);
+            this.gravity = 0;
         }
 
         return true;
@@ -150,7 +150,6 @@ public class ProjectileEntitySimulator {
             velocity.add(vel.x, entity.isOnGround() ? 0.0D : vel.y, vel.z);
         }
 
-        this.speed = speed; // so it is known in line 160
         this.gravity = gravity;
         this.airDrag = 0.99;
         this.waterDrag = waterDrag;
