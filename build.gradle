@@ -1,5 +1,5 @@
 plugins {
-    id "fabric-loom" version "1.1-SNAPSHOT"
+    id "fabric-loom" version "1.2-SNAPSHOT"
     id "maven-publish"
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
@@ -12,9 +12,9 @@ group = project.maven_group
 
 repositories {
     maven {
-		name = "meteor-maven"
-		url = "https://maven.meteordev.org/releases"
-	}
+        name = "meteor-maven"
+        url = "https://maven.meteordev.org/releases"
+    }
     maven {
         name = "meteor-maven-snapshots"
         url = "https://maven.meteordev.org/snapshots"
@@ -45,20 +45,20 @@ configurations {
 }
 
 dependencies {
-	// Fabric
+    // Fabric
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
 
-	// Compat fixes
+    // Compat fixes
     modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
     modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:lithium:${project.lithium_version}") { transitive = false }
     modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
     //modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false } // TODO: 1.19.3
 
-	// Baritone (https://github.com/MeteorDevelopment/baritone)
+    // Baritone (https://github.com/MeteorDevelopment/baritone)
     modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
 
     // Libraries
@@ -86,7 +86,7 @@ afterEvaluate {
 }
 
 shadowJar {
-	configurations = [ project.configurations.shadow ]
+    configurations = [project.configurations.shadow]
 
     dependencies {
         exclude {
@@ -98,22 +98,22 @@ shadowJar {
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-               "devbuild": project.findProperty("devbuild") ?: "",
-               "commit": project.findProperty("commit") ?: ""
+            "devbuild": project.findProperty("devbuild") ?: "",
+            "commit": project.findProperty("commit") ?: ""
     }
 }
 
 jar {
-	from "LICENSE"
+    from "LICENSE"
 
-	manifest {
-		attributes("Main-Class": "meteordevelopment.meteorclient.Main")
-	}
+    manifest {
+        attributes("Main-Class": "meteordevelopment.meteorclient.Main")
+    }
 }
 
 remapJar {
-	dependsOn shadowJar
-	inputFile.set(shadowJar.archiveFile)
+    dependsOn shadowJar
+    inputFile.set(shadowJar.archiveFile)
 }
 
 javadoc {
@@ -123,7 +123,7 @@ javadoc {
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier.set("sources")
-	from sourceSets.main.allSource
+    from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar) {

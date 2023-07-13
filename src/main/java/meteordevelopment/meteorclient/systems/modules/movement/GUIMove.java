@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.mixin.KeyBindingAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
@@ -23,6 +22,7 @@ import net.minecraft.client.gui.screen.ingame.*;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.util.math.MathHelper;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -129,7 +129,7 @@ public class GUIMove extends Module {
                 if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += 0.5;
             }
 
-            pitch = Utils.clamp(pitch, -90, 90);
+            pitch = MathHelper.clamp(pitch, -90, 90);
 
             mc.player.setYaw(yaw);
             mc.player.setPitch(pitch);

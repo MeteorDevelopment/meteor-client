@@ -18,7 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Material;
+import net.minecraft.block.BlockState;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
@@ -215,10 +215,9 @@ public class Jesus extends Module {
     private void onFluidCollisionShape(CollisionShapeEvent event) {
         if (event.state.getFluidState().isEmpty()) return;
 
-        if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
+        if (event.state.getFluidState().isOf(Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
-        }
-        else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && lavaShouldBeSolid()) {
+        } else if (event.state.getFluidState().isOf(Fluids.LAVA) && !mc.player.isInLava() && lavaShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
         }
     }
@@ -305,10 +304,11 @@ public class Jesus extends Module {
 
         for (Box bb : blockCollisions) {
             blockPos.set(MathHelper.lerp(0.5D, bb.minX, bb.maxX), MathHelper.lerp(0.5D, bb.minY, bb.maxY), MathHelper.lerp(0.5D, bb.minZ, bb.maxZ));
-            Material material = mc.world.getBlockState(blockPos).getMaterial();
+            BlockState blockState = mc.world.getBlockState(blockPos);
 
-            if (material == Material.WATER || material == Material.LAVA) foundLiquid = true;
-            else if (material != Material.AIR) foundSolid = true;
+            if (blockState.getFluidState().isOf(Fluids.WATER) || blockState.getFluidState().isOf(Fluids.LAVA))
+                foundLiquid = true;
+            else if (!blockState.isAir()) foundSolid = true;
         }
 
         return foundLiquid && !foundSolid;
