@@ -103,7 +103,7 @@ public class PacketDelay extends Module {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onReceivePacket(PacketEvent.Receive event) {
         if (s2cPackets.get().contains(event.packet.getClass())) {
             s2cPacketQueue.add(new PacketAndTime(event.packet, mc.world.getTime()));
@@ -111,7 +111,7 @@ public class PacketDelay extends Module {
         }
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST + 1)
+    @EventHandler(priority = EventPriority.HIGHEST)
     private void onSendPacket(PacketEvent.Send event) {
         if (c2sPackets.get().contains(event.packet.getClass())) {
             c2sPacketQueue.add(new PacketAndTime(event.packet, mc.world.getTime()));
