@@ -22,8 +22,10 @@ import meteordevelopment.meteorclient.systems.proxies.Proxy;
 import net.minecraft.network.ClientConnection;
 import net.minecraft.network.NetworkSide;
 import net.minecraft.network.PacketEncoderException;
+import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.listener.PacketListener;
 import net.minecraft.network.packet.Packet;
+import net.minecraft.network.packet.s2c.play.BundleS2CPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
@@ -34,12 +36,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.net.InetSocketAddress;
+import java.util.Iterator;
 
 @Mixin(ClientConnection.class)
 public class ClientConnectionMixin {
     @Inject(method = "handlePacket", at = @At("HEAD"), cancellable = true)
     private static <T extends PacketListener> void onHandlePacket(Packet<T> packet, PacketListener listener, CallbackInfo info) {
-        if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet)).isCancelled()) info.cancel();
+        if (packet instanceof BundleS2CPacket bundle) {
+            for (Iterator<Packet<ClientPlayPacketListener>> it = bundle.getPackets().iterator(); it.hasNext(); ) {
+                if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(it.next())).isCancelled()) it.remove();
+            }
+        } else if (MeteorClient.EVENT_BUS.post(PacketEvent.Receive.get(packet)).isCancelled()) info.cancel();
     }
 
     @Inject(method = "disconnect", at = @At("HEAD"))
