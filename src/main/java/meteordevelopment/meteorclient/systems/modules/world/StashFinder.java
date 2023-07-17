@@ -48,7 +48,7 @@ public class StashFinder extends Module {
     );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
-        .name("minimum-storage-cont")
+        .name("minimum-storage-count")
         .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
