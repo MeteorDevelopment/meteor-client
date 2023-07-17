@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
@@ -436,7 +436,7 @@ public class BetterTooltips extends Module {
 
         try {
             return Text.Serializer.fromLenientJson(pages.getString(0));
-        } catch (JsonSyntaxException e) {
+        } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }
     }
