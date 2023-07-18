@@ -432,7 +432,6 @@ public class Notebot extends Module {
             setupNoteblocksMap();
             if (noteBlockPositions.isEmpty()) {
                 error("Can't find any valid noteblock to play song.");
-                NotebotUtils.getRequirementString(song.getRequirements());
                 stop();
                 return;
             }
@@ -531,7 +530,7 @@ public class Notebot extends Module {
             }
         }
 
-        warning("Missing note: ");
+        if (!uniqueNotesToUse.isEmpty()) warning("Missing note: ");
         NotebotUtils.getRequirementString(uniqueNotesToUse).forEach(this::warning);
     }
 
@@ -661,6 +660,18 @@ public class Notebot extends Module {
     public void disable() {
         resetVariables();
         if (!isActive()) toggle();
+    }
+
+    public void getRequirements(File file) {
+        try {
+            if (song != null || stage != Stage.None) return;
+            song = SongDecoders.parse(file);
+            scanForNoteblocks();
+            setupNoteblocksMap();
+            song = null;
+        } catch (Exception e) {
+            error("Invalid song.");
+        }
     }
 
     /**
