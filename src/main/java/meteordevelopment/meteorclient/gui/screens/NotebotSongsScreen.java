@@ -14,12 +14,17 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoders;
+import meteordevelopment.meteorclient.utils.notebot.song.Song;
+import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class NotebotSongsScreen extends WindowScreen {
@@ -62,7 +67,7 @@ public class NotebotSongsScreen extends WindowScreen {
                 if (SongDecoders.hasDecoder(path)) {
                     String name = path.getFileName().toString();
 
-                    if (Utils.searchTextDefault(name, filterText, false)){
+                    if (Utils.searchTextDefault(name, filterText, false)) {
                         addPath(path);
                         noSongsFound.set(false);
                     }
@@ -90,6 +95,22 @@ public class NotebotSongsScreen extends WindowScreen {
         WButton preview = table.add(theme.button("Preview")).right().widget();
         preview.action = () -> {
             notebot.previewSong(path.toFile());
+        };
+        WButton requirements = table.add(theme.button("Requirements")).right().widget();
+        requirements.action = () -> {
+            List<String> messages = new ArrayList<>();
+            try {
+                Song song = SongDecoders.parse(path.toFile());
+                messages.addAll(NotebotUtils.getRequirementString(song.getRequirements()));
+            } catch (Exception e) {
+                messages.add("Failed to decode song.");
+            }
+
+            OkPrompt.create()
+                .title("Message")
+                .messages(messages)
+                .onOk(this::close)
+                .show(false);
         };
 
         table.row();
