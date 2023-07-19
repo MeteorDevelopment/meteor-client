@@ -155,7 +155,7 @@ public class BetterTooltips extends Module {
     private final Setting<SortSize> sizeType = sgOther.add(new EnumSetting.Builder<SortSize>()
         .name("size-type")
         .description("Displays an item's size in the specified type in the tooltip.")
-        .defaultValue(SortSize.All)
+        .defaultValue(SortSize.Dynamic)
         .visible(size::get)
         .build()
     );
@@ -307,7 +307,7 @@ public class BetterTooltips extends Module {
                     case MegaBytes:
                         count = String.format("%.4f mb", byteCount / (float) 1024 / 1024);
                         break;
-                    case All:
+                    case Dynamic:
                         if (byteCount >= 1048576) count = String.format("%.2f mb", byteCount / (float) 1048576);
                         else if (byteCount >= 1024) count = String.format("%.4f kb", byteCount / (float) 1024);
                         else count = String.format("%d bytes", byteCount);
@@ -537,6 +537,6 @@ public class BetterTooltips extends Module {
         Bytes,
         KiloBytes,
         MegaBytes,
-        All,
+        Dynamic,
     }
 }
