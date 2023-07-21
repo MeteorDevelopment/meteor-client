@@ -25,24 +25,24 @@ public class AutoMend extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<List<Item>> blacklist = sgGeneral.add(new ItemListSetting.Builder()
-            .name("blacklist")
-            .description("Item blacklist.")
-            .filter(Item::isDamageable)
-            .build()
+        .name("blacklist")
+        .description("Item blacklist.")
+        .filter(Item::isDamageable)
+        .build()
     );
 
     private final Setting<Boolean> force = sgGeneral.add(new BoolSetting.Builder()
-            .name("force")
-            .description("Replaces item in offhand even if there is some other non-repairable item.")
-            .defaultValue(false)
-            .build()
+        .name("force")
+        .description("Replaces item in offhand even if there is some other non-repairable item.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> autoDisable = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-disable")
-            .description("Automatically disables when there are no more items to repair.")
-            .defaultValue(true)
-            .build()
+        .name("auto-disable")
+        .description("Automatically disables when there are no more items to repair.")
+        .defaultValue(true)
+        .build()
     );
 
     private boolean didMove;

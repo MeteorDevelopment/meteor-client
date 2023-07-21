@@ -9,11 +9,10 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterBeacons;
 import net.minecraft.block.entity.BeaconBlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawableHelper;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ingame.BeaconScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.BeaconScreenHandler;
@@ -58,9 +57,9 @@ public abstract class BeaconScreenMixin extends HandledScreen<BeaconScreenHandle
     }
 
     @Inject(method = "drawBackground", at = @At("TAIL"))
-    private void onDrawBackground(MatrixStack matrices, float delta, int mouseX, int mouseY, CallbackInfo ci) {
+    private void onDrawBackground(DrawContext context, float delta, int mouseX, int mouseY, CallbackInfo ci) {
         if (!Modules.get().get(BetterBeacons.class).isActive()) return;
         //this will clear the background from useless pyramid graphics
-        DrawableHelper.fill(matrices,this.x+10,this.y+7,this.x+220,this.y+98, 0xFF212121);
+        context.fill(x + 10, y + 7, x + 220, y + 98, 0xFF212121);
     }
 }

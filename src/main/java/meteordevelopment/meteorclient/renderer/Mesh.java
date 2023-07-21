@@ -186,6 +186,17 @@ public class Mesh {
         growIfNeeded();
     }
 
+    public void triangle(int i1, int i2, int i3) {
+        long p = indicesPointer + indicesCount * 4L;
+
+        memPutInt(p, i1);
+        memPutInt(p + 4, i2);
+        memPutInt(p + 8, i3);
+
+        indicesCount += 3;
+        growIfNeeded();
+    }
+
     public void growIfNeeded() {
         // Vertices
         if ((vertexI + 1) * primitiveVerticesSize >= vertices.capacity()) {

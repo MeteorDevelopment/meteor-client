@@ -37,7 +37,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgEditor = settings.createGroup("Editor");
-    private final SettingGroup sgKeybind = settings.createGroup("Keybindings");
+    private final SettingGroup sgKeybind = settings.createGroup("Bind");
 
     // General
 
@@ -53,7 +53,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     private final Setting<Double> textScale = sgGeneral.add(new DoubleSetting.Builder()
         .name("text-scale")
-        .description("Scale of text if not overriden by the element.")
+        .description("Scale of text if not overridden by the element.")
         .defaultValue(1)
         .min(0.5)
         .sliderRange(0.5, 3)
@@ -87,7 +87,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
 
     // Keybindings
     private final Setting<Keybind> keybind = sgKeybind.add(new KeybindSetting.Builder()
-        .name("keybind")
+        .name("bind")
         .defaultValue(Keybind.none())
         .action(() -> active = !active)
         .build()
@@ -216,7 +216,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         if (Utils.isLoading()) return;
         if (!(active && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
 
-        HudRenderer.INSTANCE.begin();
+        HudRenderer.INSTANCE.begin(event.drawContext);
 
         for (HudElement element : elements) {
             element.updatePos();

@@ -14,13 +14,15 @@ import meteordevelopment.meteorclient.renderer.GL;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.Texture;
 import meteordevelopment.meteorclient.utils.PostInit;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.ByteTexture;
+import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -58,7 +60,7 @@ public class GuiRenderer {
     public WWidget tooltipWidget;
     private double tooltipAnimProgress;
 
-    private MatrixStack matrices;
+    private DrawContext drawContext;
 
     public static GuiTexture addTexture(Identifier id) {
         return TEXTURE_PACKER.add(id);
@@ -76,17 +78,15 @@ public class GuiRenderer {
         TEXTURE = TEXTURE_PACKER.pack();
     }
 
-    public void begin(MatrixStack matrices) {
-        this.matrices = matrices;
+    public void begin(DrawContext drawContext) {
+        this.drawContext = drawContext;
 
         GL.enableBlend();
         GL.enableScissorTest();
         scissorStart(0, 0, getWindowWidth(), getWindowHeight());
     }
 
-    public void end(MatrixStack matrices) {
-        this.matrices = matrices;
-
+    public void end() {
         scissorEnd();
 
         for (Runnable task : postTasks) task.run();
@@ -104,24 +104,24 @@ public class GuiRenderer {
         r.end();
         rTex.end();
 
-        r.render(matrices);
+        r.render(drawContext.getMatrices());
 
         GL.bindTexture(TEXTURE.getGlId());
-        rTex.render(matrices);
+        rTex.render(drawContext.getMatrices());
 
         // Normal text
         theme.textRenderer().begin(theme.scale(1));
         for (TextOperation text : texts) {
             if (!text.title) text.run(textPool);
         }
-        theme.textRenderer().end(matrices);
+        theme.textRenderer().end(drawContext.getMatrices());
 
         // Title text
         theme.textRenderer().begin(theme.scale(1.25));
         for (TextOperation text : texts) {
             if (text.title) text.run(textPool);
         }
-        theme.textRenderer().end(matrices);
+        theme.textRenderer().end(drawContext.getMatrices());
 
         texts.clear();
     }
@@ -155,9 +155,9 @@ public class GuiRenderer {
         scissorPool.free(scissor);
     }
 
-    public boolean renderTooltip(double mouseX, double mouseY, double delta, MatrixStack matrices) {
+    public boolean renderTooltip(DrawContext drawContext, double mouseX, double mouseY, double delta) {
         tooltipAnimProgress += (tooltip != null ? 1 : -1) * delta * 14;
-        tooltipAnimProgress = Utils.clamp(tooltipAnimProgress, 0, 1);
+        tooltipAnimProgress = MathHelper.clamp(tooltipAnimProgress, 0, 1);
 
         boolean toReturn = false;
 
@@ -171,9 +171,9 @@ public class GuiRenderer {
 
             setAlpha(tooltipAnimProgress);
 
-            begin(matrices);
+            begin(drawContext);
             tooltipWidget.render(this, mouseX, mouseY, delta);
-            end(matrices);
+            end();
 
             setAlpha(1);
 
@@ -216,6 +216,10 @@ public class GuiRenderer {
         rTex.texQuad(x, y, width, height, rotation, texture.get(width, height), color);
     }
 
+    public void triangle(double x1, double y1, double x2, double y2, double x3, double y3, Color color) {
+        r.triangle(x1, y1, x2, y2, x3, y3 ,color);
+    }
+
     public void text(String text, double x, double y, Color color, boolean title) {
         texts.add(getOp(textPool, x, y, color).set(text, theme.textRenderer(), title));
     }
@@ -227,12 +231,16 @@ public class GuiRenderer {
             rTex.end();
 
             texture.bind();
-            rTex.render(matrices);
+            rTex.render(drawContext.getMatrices());
         });
     }
 
     public void post(Runnable task) {
         scissorStack.peek().postTasks.add(task);
+    }
+
+    public void item(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        RenderUtils.drawItem(drawContext, itemStack, x, y, scale, overlay);
     }
 
     public void absolutePost(Runnable task) {

@@ -1,7 +1,7 @@
 plugins {
-    id 'fabric-loom' version '1.0-SNAPSHOT'
-    id 'maven-publish'
-    id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id "fabric-loom" version "1.2-SNAPSHOT"
+    id "maven-publish"
+    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
@@ -12,9 +12,9 @@ group = project.maven_group
 
 repositories {
     maven {
-		name = "meteor-maven"
-		url = "https://maven.meteordev.org/releases"
-	}
+        name = "meteor-maven"
+        url = "https://maven.meteordev.org/releases"
+    }
     maven {
         name = "meteor-maven-snapshots"
         url = "https://maven.meteordev.org/snapshots"
@@ -45,18 +45,20 @@ configurations {
 }
 
 dependencies {
-	// Fabric
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    // Fabric
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
 
-	// Compat fixes
+    // Compat fixes
     modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)
     modCompileOnly("maven.modrinth:sodium:${project.sodium_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:lithium:${project.lithium_version}") { transitive = false }
+    modCompileOnly("maven.modrinth:iris:${project.iris_version}") { transitive = false }
     //modCompileOnly("io.vram:canvas-fabric-mc119:1.0.+") { transitive = false } // TODO: 1.19.3
 
-	// Baritone (https://github.com/MeteorDevelopment/baritone)
+    // Baritone (https://github.com/MeteorDevelopment/baritone)
     modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
 
     // Libraries
@@ -66,6 +68,8 @@ dependencies {
     library "org.reflections:reflections:${project.reflections_version}"
     library("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
     library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
+    library "com.github.LlamaLad7.MixinExtras:mixinextras-fabric:${project.mixin_extras_version}"
+    annotationProcessor "com.github.LlamaLad7.MixinExtras:mixinextras-fabric:${project.mixin_extras_version}"
 
     // Launch sub project
     shadow project(":launch")
@@ -82,7 +86,7 @@ afterEvaluate {
 }
 
 shadowJar {
-	configurations = [ project.configurations.shadow ]
+    configurations = [project.configurations.shadow]
 
     dependencies {
         exclude {
@@ -94,32 +98,32 @@ shadowJar {
 processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
-               "devbuild": project.findProperty("devbuild") ?: "",
-               "commit": project.findProperty("commit") ?: ""
+            "devbuild": project.findProperty("devbuild") ?: "",
+            "commit": project.findProperty("commit") ?: ""
     }
 }
 
 jar {
-	from "LICENSE"
+    from "LICENSE"
 
-	manifest {
-		attributes("Main-Class": "meteordevelopment.meteorclient.Main")
-	}
+    manifest {
+        attributes("Main-Class": "meteordevelopment.meteorclient.Main")
+    }
 }
 
 remapJar {
-	dependsOn shadowJar
-	inputFile.set(shadowJar.archiveFile)
+    dependsOn shadowJar
+    inputFile.set(shadowJar.archiveFile)
 }
 
 javadoc {
-    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption("Xdoclint:none", "-quiet")
     options.encoding = "UTF-8"
 }
 
 task sourcesJar(type: Jar, dependsOn: classes) {
     archiveClassifier.set("sources")
-	from sourceSets.main.allSource
+    from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar) {
