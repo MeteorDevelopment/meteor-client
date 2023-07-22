@@ -17,13 +17,13 @@ import java.util.Random;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
 public class AbstractBlockStateMixin {
-    private static final Random random = new Random();
+    private static final Random RANDOM = new Random();
 
     @ModifyVariable(method = "getModelOffset", at = @At("HEAD"), argsOnly = true)
     private BlockPos modifyPos(BlockPos pos) {
         if (Modules.get() == null) return pos;
 
-        if (Modules.get().get(NoRender.class).noTextureRotations()) return pos.multiply(random.nextInt());
+        if (Modules.get().get(NoRender.class).noTextureRotations()) return pos.multiply(RANDOM.nextInt());
         return pos;
     }
 }
