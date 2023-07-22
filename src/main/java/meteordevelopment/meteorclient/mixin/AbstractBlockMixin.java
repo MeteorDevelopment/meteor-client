@@ -33,6 +33,6 @@ public class AbstractBlockMixin {
 
     @Inject(method = "getRenderingSeed", at = @At("HEAD"), cancellable = true)
     private void onRenderingSeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Long> cir) {
-        if (Modules.get().get(NoRender.class).noTextureRotations()) cir.setReturnValue(random.nextLong()); //cir.setReturnValue(0L);
+        if (Modules.get().get(NoRender.class).noTextureRotations()) cir.setReturnValue(random.nextLong());
     }
 }
