@@ -290,6 +290,14 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noTextureRotations = sgWorld.add(new BoolSetting.Builder()
+        .name("texture-rotations")
+        .description("Changes texture rotations and model offsets to use a random value instead of the block position.")
+        .defaultValue(false)
+        .onChanged(b -> mc.worldRenderer.reload())
+        .build()
+    );
+
     // Entity
 
     private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
@@ -518,6 +526,10 @@ public class NoRender extends Module {
 
     public boolean noBarrierInvis() {
         return isActive() && noBarrierInvis.get();
+    }
+
+    public boolean noTextureRotations() {
+        return isActive() && noTextureRotations.get();
     }
 
     // Entity
