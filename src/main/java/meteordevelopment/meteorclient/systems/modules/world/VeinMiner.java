@@ -27,7 +27,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3i;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.hit.BlockHitResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -92,6 +94,18 @@ public class VeinMiner extends Module {
         .build()
     );
 
+	private final Setting<Boolean> mineUnderPlayer = sgGeneral.add(new BoolSetting.Builder()
+        .name("mine-under-player")
+        .description("Enable the possibility to mine under you.")
+        .defaultValue(true)
+        .build());
+
+	private final Setting<Boolean> checkVisibility = sgGeneral.add(new BoolSetting.Builder()
+        .name("check-visibility")
+        .description("Mine only block in line of sight.")
+        .defaultValue(false)
+        .build());
+
     // Render
 
     private final Setting<Boolean> swingHand = sgRender.add(new BoolSetting.Builder()
@@ -154,6 +168,25 @@ public class VeinMiner extends Module {
         return false;
     }
 
+    private MyBlock getNextVisibleBlock() {
+        if (checkVisibility.get()){
+            for (MyBlock block : blocks) {
+                BlockHitResult hitResult = BlockUtils.raycastBlock(block.blockPos);
+
+                if (hitResult.getBlockPos().equals(block.blockPos)) {
+                    block.direction = hitResult.getSide();
+                    return block;
+                }
+            }
+
+            for (MyBlock block : blocks) {
+                block.reachable = false;
+            }
+        }
+
+        return blocks.get(0);
+    }
+
     @EventHandler
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         BlockState state = mc.world.getBlockState(event.blockPos);
@@ -180,12 +213,14 @@ public class VeinMiner extends Module {
         blocks.removeIf(MyBlock::shouldRemove);
 
         if (!blocks.isEmpty()) {
-            if (tick < delay.get() && !blocks.get(0).mining) {
+            MyBlock block = getNextVisibleBlock();
+
+            if (tick < delay.get() && !block.mining && block.reachable) {
                 tick++;
                 return;
             }
             tick = 0;
-            blocks.get(0).mine();
+            block.mine();
         }
     }
 
@@ -200,6 +235,7 @@ public class VeinMiner extends Module {
         public BlockPos blockPos;
         public Direction direction;
         public Block originalBlock;
+        public boolean reachable;
         public boolean mining;
 
         public void set(StartBreakingBlockEvent event) {
@@ -207,6 +243,7 @@ public class VeinMiner extends Module {
             this.direction = event.direction;
             this.originalBlock = mc.world.getBlockState(blockPos).getBlock();
             this.mining = false;
+            this.reachable = true;
         }
 
         public void set(BlockPos pos, Direction dir) {
@@ -214,10 +251,11 @@ public class VeinMiner extends Module {
             this.direction = dir;
             this.originalBlock = mc.world.getBlockState(pos).getBlock();
             this.mining = false;
+            this.reachable = true;
         }
 
         public boolean shouldRemove() {
-            return mc.world.getBlockState(blockPos).getBlock() != originalBlock || Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, blockPos.getX() + direction.getOffsetX(), blockPos.getY() + direction.getOffsetY(), blockPos.getZ() + direction.getOffsetZ()) > mc.interactionManager.getReachDistance();
+            return this.reachable == false || mc.world.getBlockState(blockPos).getBlock() != originalBlock || getClosestDistance(blockPos) > mc.interactionManager.getReachDistance();
         }
 
         public void mine() {
@@ -230,7 +268,9 @@ public class VeinMiner extends Module {
         }
 
         private void updateBlockBreakingProgress() {
-            BlockUtils.breakBlock(blockPos, swingHand.get());
+            if (this.reachable == true){
+                BlockUtils.breakBlock(blockPos, swingHand.get(), this.direction);
+            }
         }
 
         public void render(Render3DEvent event) {
@@ -256,18 +296,42 @@ public class VeinMiner extends Module {
         }
     }
 
+    private double getClosestDistance(BlockPos pos) {
+        double closestDistance = 100000f;
+    
+        for (Direction direction : Direction.values()){
+            BlockPos offsetPos = pos.offset(direction);
+            Vec3d eyePos = mc.player.getCameraPosVec(1.0F);
+            double eyeHeightOffset = mc.player.getEyeHeight(mc.player.getPose()) + 0.5;
+            double distance = Utils.distance(eyePos.getX(), eyePos.getY() + eyeHeightOffset, eyePos.getZ(), offsetPos.getX(), offsetPos.getY(), offsetPos.getZ());
+    
+            closestDistance = Math.min(closestDistance, distance);
+        }
+    
+        return closestDistance;
+    }
+    
     private void mineNearbyBlocks(Item item, BlockPos pos, Direction dir, int depth) {
         if (depth<=0) return;
         if (foundBlockPositions.contains(pos)) return;
         foundBlockPositions.add(pos);
-        if (Utils.distance(mc.player.getX() - 0.5, mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ() - 0.5, pos.getX(), pos.getY(), pos.getZ()) > mc.interactionManager.getReachDistance()) return;
+        if (getClosestDistance(pos) > mc.interactionManager.getReachDistance()) return;
         for(Vec3i neighbourOffset: blockNeighbours) {
             BlockPos neighbour = pos.add(neighbourOffset);
+
             if (mc.world.getBlockState(neighbour).getBlock().asItem() == item) {
-                MyBlock block = blockPool.get();
-                block.set(neighbour,dir);
-                blocks.add(block);
-                mineNearbyBlocks(item, neighbour, dir, depth-1);
+                boolean allowed = true;
+
+                if (!mineUnderPlayer.get()){
+                    allowed = mc.player.getY() <= neighbour.getY();
+                }
+        
+                if (allowed){
+                    MyBlock block = blockPool.get();
+                    block.set(neighbour,dir);
+                    blocks.add(block);
+                    mineNearbyBlocks(item, neighbour, dir, depth-1);
+                }
             }
         }
     }
