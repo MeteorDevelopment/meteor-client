@@ -292,7 +292,7 @@ public class NoRender extends Module {
 
     private final Setting<Boolean> noTextureRotations = sgWorld.add(new BoolSetting.Builder()
         .name("texture-rotations")
-        .description("Changes texture rotations and model offsets to use a constant value instead of the block position.")
+        .description("Changes texture rotations and model offsets to use a random value instead of the block position.")
         .defaultValue(false)
         .onChanged(b -> mc.worldRenderer.reload())
         .build()
