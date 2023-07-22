@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
+import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -23,5 +25,10 @@ public class AbstractBlockMixin {
         AmbientOcclusionEvent event = MeteorClient.EVENT_BUS.post(AmbientOcclusionEvent.get());
 
         if (event.lightLevel != -1) info.setReturnValue(event.lightLevel);
+    }
+
+    @Inject(method = "getRenderingSeed", at = @At("HEAD"), cancellable = true)
+    private void onRenderingSeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Long> cir) {
+        if (Modules.get().get(NoRender.class).noTextureRotations()) cir.setReturnValue(0L);
     }
 }
