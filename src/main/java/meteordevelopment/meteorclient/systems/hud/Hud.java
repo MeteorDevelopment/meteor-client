@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -18,6 +19,10 @@ import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.GameMenuScreen;
+import net.minecraft.client.gui.screen.MessageScreen;
+import net.minecraft.client.gui.screen.ProgressScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
@@ -47,6 +52,16 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .defaultValue(true)
         .onChanged(aBoolean -> {
             for (HudElement element : elements) element.onFontChanged();
+        })
+        .build()
+    );
+
+    private final Setting<Boolean> hideInMenus = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-in-menus")
+        .description("Hides the meteor hud when in inventory screens or game menus.")
+        .defaultValue(false)
+        .onChanged(v -> {
+            if (mc.currentScreen instanceof GameMenuScreen || mc.currentScreen instanceof HandledScreen<?>) shouldRender = !v;
         })
         .build()
     );
@@ -94,6 +109,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     );
 
     private boolean resetToDefaultElements;
+    private boolean shouldRender = true;
 
     public Hud() {
         super("hud");
@@ -214,7 +230,7 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
-        if (!(active && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
+        if (!((active && shouldRender) && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
 
         HudRenderer.INSTANCE.begin(event.drawContext);
 
@@ -225,6 +241,18 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         }
 
         HudRenderer.INSTANCE.end();
+    }
+
+    @EventHandler
+    private void onScreen(OpenScreenEvent event) {
+        if (!hideInMenus.get()) return;
+
+        if (event.screen instanceof GameMenuScreen || event.screen instanceof HandledScreen<?>) {
+            shouldRender = false;
+        }
+        else if (event.screen == null || event.screen instanceof ProgressScreen || event.screen instanceof MessageScreen) {
+            shouldRender = true;    // needed to ensure the hud renders again if you toggle the setting off in the main menu
+        }
     }
 
     @EventHandler
