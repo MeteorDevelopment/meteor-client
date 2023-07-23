@@ -222,7 +222,9 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
-        if (!((active && !shouldHideHud()) && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
+
+        if (!active || shouldHideHud()) return;
+        if ((mc.options.hudHidden || mc.options.debugEnabled) && !HudEditorScreen.isOpen()) return;
 
         HudRenderer.INSTANCE.begin(event.drawContext);
 
