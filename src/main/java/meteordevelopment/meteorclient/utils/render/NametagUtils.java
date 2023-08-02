@@ -7,7 +7,9 @@ package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix4f;
 import org.joml.Vector3d;
 import org.joml.Vector4f;
@@ -77,7 +79,15 @@ public class NametagUtils {
 
     public static void begin(Vector3d pos) {
         MatrixStack matrices = RenderSystem.getModelViewStack();
+        begin(matrices, pos);
+    }
 
+    public static void begin(Vector3d pos, DrawContext drawContext) {
+        begin(pos);
+        begin(drawContext.getMatrices(), pos);
+    }
+
+    private static void begin(MatrixStack matrices, Vector3d pos) {
         matrices.push();
         matrices.translate(pos.x, pos.y, 0);
         matrices.scale((float) scale, (float) scale, 1);
@@ -87,9 +97,14 @@ public class NametagUtils {
         RenderSystem.getModelViewStack().pop();
     }
 
+    public static void end(DrawContext drawContext) {
+        end();
+        drawContext.getMatrices().pop();
+    }
+
     private static double getScale(Vector3d pos) {
         double dist = camera.distance(pos);
-        return Utils.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
+        return MathHelper.clamp(1 - dist * 0.01, 0.5, Integer.MAX_VALUE);
     }
 
     private static void toScreen(Vector4f vec) {

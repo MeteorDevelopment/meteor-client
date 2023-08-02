@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
@@ -416,10 +416,10 @@ public class BetterTooltips extends Module {
     private MutableText getStatusText(StatusEffectInstance effect) {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.durationToString(effect, 1).getString()));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1).getString()));
         }
         else {
-            text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1).getString()));
+            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1).getString()));
         }
 
         if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
@@ -436,7 +436,7 @@ public class BetterTooltips extends Module {
 
         try {
             return Text.Serializer.fromLenientJson(pages.getString(0));
-        } catch (JsonSyntaxException e) {
+        } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }
     }

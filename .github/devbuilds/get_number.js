@@ -1,5 +1,3 @@
-const axios = require("axios").default;
-
-axios.get("https://meteorclient.com/api/stats").then(res => {
-    console.log("number=" + (parseInt(res.data.devBuild) + 1));
-});
+fetch("https://meteorclient.com/api/stats")
+    .then(res => res.json())
+    .then(res => console.log("number=" + (parseInt(res.devBuild) + 1)))

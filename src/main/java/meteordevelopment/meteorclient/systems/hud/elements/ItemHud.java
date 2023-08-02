@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.hud.elements;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
@@ -14,17 +13,12 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class ItemHud extends HudElement {
-    public static HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
-
-    private static final MatrixStack MATRICES = new MatrixStack();
+    public static final HudElementInfo<ItemHud> INFO = new HudElementInfo<>(Hud.GROUP, "item", "Displays the item count.", ItemHud::new);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
@@ -104,50 +98,39 @@ public class ItemHud extends HudElement {
                 renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
                 renderer.line(x, y + getHeight(), x + getWidth(), y, Color.GRAY);
             }
-        }
-        else {
+        } else {
             renderer.post(() -> {
-                MatrixStack matrices = RenderSystem.getModelViewStack();
-
-                matrices.push();
-                matrices.scale(scale.get().floatValue(), scale.get().floatValue(), 1);
-
                 double x = this.x + border.get();
                 double y = this.y + border.get();
 
-                render(itemStack, (int) (x / scale.get()), (int) (y / scale.get()));
-
-                matrices.pop();
+                render(renderer, itemStack, (int) x, (int) y);
             });
         }
 
-        if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
-        }
+        if (background.get()) renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
     }
 
-    private void render(ItemStack itemStack, int x, int y) {
-        switch (noneMode.get()) {
-            case HideItem -> {
-                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
-                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
-            }
-            case HideCount -> {
-                if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
-                if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
-
-                if (!itemStack.isEmpty()) {
-                    mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount()));
-                }
-            }
-            case ShowCount -> {
-                if (itemStack.getCount() == 0) itemStack.setCount(Integer.MAX_VALUE);
-                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, x, y);
-                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, x, y, Integer.toString(itemStack.getCount() == Integer.MAX_VALUE ? 0 : itemStack.getCount()));
-                if (itemStack.getCount() == Integer.MAX_VALUE) itemStack.setCount(0);
-            }
+    private void render(HudRenderer renderer, ItemStack itemStack, int x, int y) {
+        if (noneMode.get() == NoneMode.HideItem) {
+            renderer.item(itemStack, x, y, scale.get().floatValue(), true);
+            return;
         }
+
+        String countOverride = null;
+        boolean resetToZero = false;
+
+        if (itemStack.isEmpty()) {
+            if (noneMode.get() == NoneMode.ShowCount)
+                countOverride = "0";
+
+            itemStack.setCount(1);
+            resetToZero = true;
+        }
+
+        renderer.item(itemStack, x, y, scale.get().floatValue(), true, countOverride);
+
+        if (resetToZero)
+            itemStack.setCount(0);
     }
 
     public enum NoneMode {

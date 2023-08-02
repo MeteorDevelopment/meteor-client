@@ -15,7 +15,6 @@ import net.minecraft.client.resource.ResourceReloadLogger;
 import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.client.util.ProfileKeys;
 import net.minecraft.client.util.Session;
-import net.minecraft.network.encryption.SignatureVerifier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
@@ -67,10 +66,6 @@ public interface MinecraftClientAccessor {
     @Mutable
     @Accessor("authenticationService")
     void setAuthenticationService(YggdrasilAuthenticationService authenticationService);
-
-    @Mutable
-    @Accessor("servicesSignatureVerifier")
-    void setServicesSignatureVerifier(SignatureVerifier servicesSignatureVerifier);
 
     @Mutable
     @Accessor("skinProvider")

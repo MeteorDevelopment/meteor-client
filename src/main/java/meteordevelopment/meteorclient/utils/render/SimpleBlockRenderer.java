@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
+import meteordevelopment.meteorclient.mixininterface.IBakedQuad;
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
@@ -60,12 +61,12 @@ public class SimpleBlockRenderer {
     private static void renderQuads(List<BakedQuad> quads, double offsetX, double offsetY, double offsetZ, VertexConsumer consumer) {
         //noinspection ForLoopReplaceableByForEach
         for (int i = 0; i < quads.size(); i++) {
-            int[] vertexData = quads.get(i).getVertexData();
+            IBakedQuad quad = (IBakedQuad) quads.get(i);
 
             for (int j = 0; j < 4; j++) {
-                float x = Float.intBitsToFloat(vertexData[j * 8]);
-                float y = Float.intBitsToFloat(vertexData[j * 8 + 1]);
-                float z = Float.intBitsToFloat(vertexData[j * 8 + 2]);
+                float x = quad.meteor$getX(j);
+                float y = quad.meteor$getY(j);
+                float z = quad.meteor$getZ(j);
 
                 consumer.vertex(offsetX + x, offsetY + y, offsetZ + z).next();
             }

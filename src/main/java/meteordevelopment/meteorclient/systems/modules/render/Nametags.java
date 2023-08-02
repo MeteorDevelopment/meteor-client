@@ -331,7 +331,7 @@ public class Nametags extends Module {
             EntityType<?> type = entity.getType();
 
             if (NametagUtils.to2D(pos, scale.get())) {
-                if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity, shadow);
+                if (type == EntityType.PLAYER) renderNametagPlayer(event, (PlayerEntity) entity, shadow);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
                 else if (type == EntityType.ITEM_FRAME)
                     renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), shadow);
@@ -362,9 +362,9 @@ public class Nametags extends Module {
         return height;
     }
 
-    private void renderNametagPlayer(PlayerEntity player, boolean shadow) {
+    private void renderNametagPlayer(Render2DEvent event, PlayerEntity player, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, event.drawContext);
 
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);
@@ -489,7 +489,7 @@ public class Nametags extends Module {
             for (int i = 0; i < 6; i++) {
                 ItemStack stack = getItem(player, i);
 
-                RenderUtils.drawItem(stack, (int) x, (int) y, 2, true);
+                RenderUtils.drawItem(event.drawContext, stack, (int) x, (int) y, 2, true);
 
                 if (maxEnchantCount > 0 && displayEnchants.get()) {
                     text.begin(0.5 * enchantTextScale.get(), false, true);
@@ -536,7 +536,7 @@ public class Nametags extends Module {
             }
         } else if (displayEnchants.get()) displayEnchants.set(false);
 
-        NametagUtils.end();
+        NametagUtils.end(event.drawContext);
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
