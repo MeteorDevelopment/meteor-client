@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import baritone.api.BaritoneAPI;
 import baritone.api.IBaritone;
+import baritone.api.utils.BetterBlockPos;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -19,7 +20,6 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.hit.BlockHitResult;
-import net.minecraft.util.math.BlockPos;
 import org.lwjgl.glfw.GLFW;
 
 public class Excavator extends Module {
@@ -79,6 +79,7 @@ public class Excavator extends Module {
     }
 
     private Status status = Status.SEL_START;
+    private BetterBlockPos start, end;
 
     public Excavator() {
         super(Categories.World, "excavator", "Excavate a selection area.");
@@ -86,9 +87,7 @@ public class Excavator extends Module {
 
     @Override
     public void onDeactivate() {
-        if (status == Status.SEL_END) baritone.getCommandManager().execute("sel clear");
-        else baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
-
+        baritone.getSelectionManager().removeSelection(baritone.getSelectionManager().getLastSelection());
         if (baritone.getBuilderProcess().isActive()) baritone.getCommandManager().execute("stop");
         status = Status.SEL_START;
     }
@@ -113,20 +112,19 @@ public class Excavator extends Module {
         if (!(mc.crosshairTarget instanceof BlockHitResult result)) return;
 
         if (status == Status.SEL_START) {
-            BlockPos start = result.getBlockPos();
+            start = BetterBlockPos.from(result.getBlockPos());
             status = Status.SEL_END;
-            baritone.getCommandManager().execute("sel 1 %d %d %d".formatted(start.getX(), start.getY(), start.getZ()));
             if (logSelection.get()) {
                 info("Start corner set: (%d, %d, %d)".formatted(start.getX(), start.getY(), start.getZ()));
             }
         } else if (status == Status.SEL_END) {
-            BlockPos end = result.getBlockPos();
+            end = BetterBlockPos.from(result.getBlockPos());
             status = Status.WORKING;
-            baritone.getCommandManager().execute("sel 2 %d %d %d".formatted(end.getX(), end.getY(), end.getZ()));
             if (logSelection.get()) {
                 info("End corner set: (%d, %d, %d)".formatted(end.getX(), end.getY(), end.getZ()));
             }
-            baritone.getCommandManager().execute("sel cleararea");
+            baritone.getSelectionManager().addSelection(start, end);
+            baritone.getBuilderProcess().clearArea(start, end);
         }
     }
 
