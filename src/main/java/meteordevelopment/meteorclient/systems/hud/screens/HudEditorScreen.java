@@ -15,8 +15,10 @@ import meteordevelopment.meteorclient.systems.hud.HudRenderer;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.other.Snapper;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.util.math.MathHelper;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.ArrayList;
@@ -258,8 +260,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(matrices);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (!Utils.canUpdate()) renderBackground(context);
 
         double s = mc.getWindow().getScaleFactor();
 
@@ -270,7 +272,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
         boolean renderSplitLines = pressed && !selection.isEmpty() && moved;
         if (renderSplitLines || splitLinesAnimation > 0) renderSplitLines(renderSplitLines, delta / 20);
-        renderElements();
+        renderElements(context);
 
         Renderer2D.COLOR.begin();
         onRender(mouseX, mouseY);
@@ -280,11 +282,11 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
         runAfterRenderTasks();
     }
 
-    public static void renderElements() {
+    public static void renderElements(DrawContext drawContext) {
         Hud hud = Hud.get();
         boolean inactiveOnly = Utils.canUpdate() && hud.active;
 
-        HudRenderer.INSTANCE.begin();
+        HudRenderer.INSTANCE.begin(drawContext);
 
         for (HudElement element : hud) {
             element.updatePos();
@@ -301,7 +303,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
     private void renderSplitLines(boolean increment, double delta) {
         if (increment) splitLinesAnimation += delta * 6;
         else splitLinesAnimation -= delta * 6;
-        splitLinesAnimation = Utils.clamp(splitLinesAnimation, 0, 1);
+        splitLinesAnimation = MathHelper.clamp(splitLinesAnimation, 0, 1);
 
         Renderer2D renderer = Renderer2D.COLOR;
         renderer.begin();
@@ -411,8 +413,8 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
             int prevY = y;
 
             int border = Hud.get().border.get();
-            x = Utils.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
-            y = Utils.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
+            x = MathHelper.clamp(x + deltaX, border, Utils.getWindowWidth() - width - border);
+            y = MathHelper.clamp(y + deltaY, border, Utils.getWindowHeight() - height - border);
 
             for (HudElement element : selection) element.move(x - prevX, y - prevY);
         }

@@ -6,14 +6,9 @@
 package meteordevelopment.meteorclient.gui.widgets;
 
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class WItem extends WWidget {
-    private static final MatrixStack MATRICES = new MatrixStack();
-
     protected ItemStack itemStack;
 
     public WItem(ItemStack itemStack) {
@@ -33,15 +28,7 @@ public class WItem extends WWidget {
         if (!itemStack.isEmpty()) {
             renderer.post(() -> {
                 double s = theme.scale(2);
-
-                MATRICES.push();
-                MATRICES.scale((float) s, (float) s, 1);
-                MATRICES.translate(x / s, y / s, 0);
-
-                mc.getItemRenderer().renderGuiItemIcon(MATRICES, itemStack, 0, 0);
-                mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, 0, 0);
-
-                MATRICES.pop();
+                renderer.item(itemStack, (int) x, (int) y, (float) s, true);
             });
         }
     }

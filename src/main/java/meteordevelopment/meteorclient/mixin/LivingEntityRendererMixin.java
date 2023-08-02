@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
@@ -40,10 +41,9 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     // Freecam
 
-    @Redirect(method = "hasLabel(Lnet/minecraft/entity/LivingEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
-    private Entity hasLabelGetCameraEntityProxy(MinecraftClient mc) {
-        if (Modules.get().isActive(Freecam.class)) return null;
-        return mc.getCameraEntity();
+    @ModifyExpressionValue(method = "hasLabel(Lnet/minecraft/entity/LivingEntity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/MinecraftClient;getCameraEntity()Lnet/minecraft/entity/Entity;"))
+    private Entity hasLabelGetCameraEntityProxy(Entity cameraEntity) {
+        return Modules.get().isActive(Freecam.class) ? null : cameraEntity;
     }
 
     //3rd Person Rotation

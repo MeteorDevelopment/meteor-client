@@ -45,9 +45,6 @@ public class SodiumFluidRendererMixin {
         else alphas.set(alpha);
     }
 
-    /**
-     * @author Walaryne
-     */
     @Inject(method = "updateQuad", at = @At("TAIL"))
     private void onUpdateQuad(ModelQuadView quad, BlockRenderView world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, ColorSampler<FluidState> colorSampler, FluidState fluidState, CallbackInfo info) {
         // Ambience
@@ -55,8 +52,7 @@ public class SodiumFluidRendererMixin {
 
         if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {
             Arrays.fill(quadColors, ColorARGB.toABGR(ambience.lavaColor.get().getPacked()));
-        }
-        else {
+        } else {
             // XRay and Wallhack
             int alpha = alphas.get();
 

@@ -43,74 +43,74 @@ public class AutoGap extends Module {
     // General
 
     private final Setting<Boolean> allowEgap = sgGeneral.add(new BoolSetting.Builder()
-            .name("allow-egap")
-            .description("Allow eating E-Gaps over Gaps if found.")
-            .defaultValue(true)
-            .build()
+        .name("allow-egap")
+        .description("Allow eating E-Gaps over Gaps if found.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> always = sgGeneral.add(new BoolSetting.Builder()
-            .name("always")
-            .description("If it should always eat.")
-            .defaultValue(false)
-            .build()
+        .name("always")
+        .description("If it should always eat.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-auras")
-            .description("Pauses all auras when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-auras")
+        .description("Pauses all auras when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-baritone")
-            .description("Pause baritone when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-baritone")
+        .description("Pause baritone when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     // Potions
 
     private final Setting<Boolean> potionsRegeneration = sgPotions.add(new BoolSetting.Builder()
-            .name("potions-regeneration")
-            .description("If it should eat when Regeneration runs out.")
-            .defaultValue(false)
-            .build()
+        .name("potions-regeneration")
+        .description("If it should eat when Regeneration runs out.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> potionsFireResistance = sgPotions.add(new BoolSetting.Builder()
-            .name("potions-fire-resistance")
-            .description("If it should eat when Fire Resistance runs out. Requires E-Gaps.")
-            .defaultValue(true)
-            .visible(allowEgap::get)
-            .build()
+        .name("potions-fire-resistance")
+        .description("If it should eat when Fire Resistance runs out. Requires E-Gaps.")
+        .defaultValue(true)
+        .visible(allowEgap::get)
+        .build()
     );
 
     private final Setting<Boolean> potionsResistance = sgPotions.add(new BoolSetting.Builder()
-            .name("potions-absorption")
-            .description("If it should eat when Resistance runs out. Requires E-Gaps.")
-            .defaultValue(false)
-            .visible(allowEgap::get)
-            .build()
+        .name("potions-absorption")
+        .description("If it should eat when Resistance runs out. Requires E-Gaps.")
+        .defaultValue(false)
+        .visible(allowEgap::get)
+        .build()
     );
 
     // Health
 
     private final Setting<Boolean> healthEnabled = sgHealth.add(new BoolSetting.Builder()
-            .name("health-enabled")
-            .description("If it should eat when health drops below threshold.")
-            .defaultValue(true)
-            .build()
+        .name("health-enabled")
+        .description("If it should eat when health drops below threshold.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> healthThreshold = sgHealth.add(new IntSetting.Builder()
-            .name("health-threshold")
-            .description("Health threshold to eat at. Includes absorption.")
-            .defaultValue(20)
-            .min(0)
-            .sliderMax(40)
-            .build()
+        .name("health-threshold")
+        .description("Health threshold to eat at. Includes absorption.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(40)
+        .build()
     );
 
     private boolean requiresEGap;

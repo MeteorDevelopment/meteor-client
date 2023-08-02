@@ -5,15 +5,19 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.render.RenderBlockEntityEvent;
 import meteordevelopment.meteorclient.events.world.AmbientOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -70,7 +74,7 @@ public class Xray extends Module {
     );
 
     private final Setting<Boolean> exposedOnly = sgGeneral.add(new BoolSetting.Builder()
-        .name("exposed only")
+        .name("exposed-only")
         .description("Show only exposed ores.")
         .defaultValue(false)
         .onChanged(onChanged -> {
@@ -92,6 +96,11 @@ public class Xray extends Module {
         mc.worldRenderer.reload();
     }
 
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? theme.label("Warning: Due to shaders in use, opacity is overridden to 0.") : null;
+    }
+
     @EventHandler
     private void onRenderBlockEntity(RenderBlockEntityEvent event) {
         if (isBlocked(event.blockEntity.getCachedState().getBlock(), event.blockEntity.getPos())) event.cancel();
@@ -111,7 +120,7 @@ public class Xray extends Module {
         if (!returns && !isBlocked(state.getBlock(), pos)) {
             BlockPos adjPos = pos.offset(facing);
             BlockState adjState = view.getBlockState(adjPos);
-            return adjState.getCullingFace(view , adjPos,  facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
+            return adjState.getCullingFace(view, adjPos, facing.getOpposite()) != VoxelShapes.fullCube() || adjState.getBlock() != state.getBlock() || BlockUtils.isExposed(adjPos);
         }
 
         return returns;
@@ -126,6 +135,8 @@ public class Xray extends Module {
         Xray xray = Modules.get().get(Xray.class);
 
         if (wallHack.isActive() && wallHack.blocks.get().contains(state.getBlock())) {
+            if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return 0;
+
             int alpha;
 
             if (xray.isActive()) alpha = xray.opacity.get();
@@ -134,7 +145,7 @@ public class Xray extends Module {
             return alpha;
         }
         else if (xray.isActive() && !wallHack.isActive() && xray.isBlocked(state.getBlock(), pos)) {
-            return xray.opacity.get();
+            return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? 0 : xray.opacity.get();
         }
 
         return -1;

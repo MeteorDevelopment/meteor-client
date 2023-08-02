@@ -109,7 +109,7 @@ public abstract class BookEditScreenMixin extends Screen {
                     }
                 })
                 .position(4, 4 + 20 + 2)
-                .size(4, 4 + 20 + 2)
+                .size(120, 20)
                 .build()
         );
     }
