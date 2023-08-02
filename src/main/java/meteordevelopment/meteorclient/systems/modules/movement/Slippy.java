@@ -25,8 +25,7 @@ public class Slippy extends Module {
     );
 
     public final Setting<ListMode> listMode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
-        .name("mode")
-        .description("If only these blocks should be slippy all but not these.")
+        .name("list-mode")
         .defaultValue(ListMode.Ignore)
         .build()
     );
