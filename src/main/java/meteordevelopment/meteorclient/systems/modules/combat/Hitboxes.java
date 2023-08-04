@@ -37,7 +37,7 @@ public class Hitboxes extends Module {
 
     private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-friends")
-        .description("Doesn't draw tracers to friends.")
+        .description("Doesn't expand the hitboxes of friends.")
         .defaultValue(true)
         .build()
     );
