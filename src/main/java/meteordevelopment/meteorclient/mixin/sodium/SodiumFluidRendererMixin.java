@@ -37,9 +37,6 @@ public class SodiumFluidRendererMixin {
     @Unique
     private Ambience ambience;
 
-    @Unique
-    private final ThreadLocal<Integer> alphas = new ThreadLocal<>();
-
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         ambience = Modules.get().get(Ambience.class);
@@ -50,7 +47,6 @@ public class SodiumFluidRendererMixin {
         int alpha = Xray.getAlpha(fluidState.getBlockState(), blockPos);
 
         if (alpha == 0) info.cancel();
-        else alphas.set(alpha);
     }
 
     @Inject(method = "updateQuad", at = @At("TAIL"))
@@ -58,14 +54,6 @@ public class SodiumFluidRendererMixin {
         // Ambience
         if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {
             Arrays.fill(quadColors, ColorABGR.withAlpha(ambience.lavaColor.get().getPacked(), 255));
-        }
-        else {
-            // XRay and Wallhack
-            int alpha = alphas.get();
-
-            for (int i = 0; i < quadColors.length; i++) {
-                quadColors[i] = ColorABGR.withAlpha(quadColors[i], alpha / 255f);
-            }
         }
     }
 }
