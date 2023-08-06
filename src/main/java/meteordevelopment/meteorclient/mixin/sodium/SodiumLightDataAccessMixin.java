@@ -21,20 +21,24 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LightDataAccess.class, remap = false)
-public class LightDataAccessMixin {
+public class SodiumLightDataAccessMixin {
+    @Unique
     private static final int FULL_LIGHT = 15 << 20 | 15 << 4;
 
-    @Shadow protected BlockRenderView world;
-    @Shadow @Final private BlockPos.Mutable pos;
+    @Shadow
+    protected BlockRenderView world;
+    @Shadow @Final
+    private BlockPos.Mutable pos;
 
-    @Unique private Xray xray;
+    @Unique
+    private Xray xray;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void onInit(CallbackInfo info) {
         xray = Modules.get().get(Xray.class);
     }
 
-    @ModifyVariable(method = "compute", at = @At(value = "STORE"), name = "lm")
+    @ModifyVariable(method = "compute", at = @At(value = "TAIL"), name = "bl")
     private int compute_modifyAO(int light) {
         if (xray.isActive()) {
             BlockState state = world.getBlockState(pos);
