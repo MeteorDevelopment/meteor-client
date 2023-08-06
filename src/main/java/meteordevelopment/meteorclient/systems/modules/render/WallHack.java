@@ -68,7 +68,10 @@ public class WallHack extends Module {
 
     @Override
     public WWidget getWidget(GuiTheme theme) {
-        return (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) ? theme.label("Warning: Due to shaders in use, opacity is overridden to 0.") : null;
+        if (MixinPlugin.isSodiumPresent) return theme.label("Warning: Due to Sodium in use, opacity is overridden to 0.");
+        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
+
+        return null;
     }
 
     @EventHandler
