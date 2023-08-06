@@ -72,9 +72,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
     }
 
     private void tryConnecting() {
-        var conn = Modules.get().get(AutoReconnect.class).lastServerConnection;
-        var host = conn.getAddress().getHostName();
-        if (host.contains(":")) host = host.substring(0, host.indexOf(":"));
-        ConnectScreen.connect(new TitleScreen(), mc, new ServerAddress(host, conn.getPort()), new ServerInfo(I18n.translate("selectServer.defaultName"), host, false), false);
+        var lastServer = Modules.get().get(AutoReconnect.class).lastServerConnection;
+        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false);
     }
 }
