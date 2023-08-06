@@ -51,6 +51,6 @@ public class SodiumLightDataAccessMixin {
 
     @ModifyVariable(method = "compute", at = @At(value = "TAIL"), name = "sl")
     private int compute_modifySL(int light) {
-        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), blockLight);
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), light);
     }
 }
