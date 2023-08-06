@@ -16,7 +16,6 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.util.math.MathHelper;
 
@@ -24,19 +23,19 @@ public class Zoom extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> zoom = sgGeneral.add(new DoubleSetting.Builder()
-            .name("zoom")
-            .description("How much to zoom.")
-            .defaultValue(6)
-            .min(1)
-            .build()
+        .name("zoom")
+        .description("How much to zoom.")
+        .defaultValue(6)
+        .min(1)
+        .build()
     );
 
     private final Setting<Double> scrollSensitivity = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scroll-sensitivity")
-            .description("Allows you to change zoom value using scroll wheel. 0 to disable.")
-            .defaultValue(1)
-            .min(0)
-            .build()
+        .name("scroll-sensitivity")
+        .description("Allows you to change zoom value using scroll wheel. 0 to disable.")
+        .defaultValue(1)
+        .min(0)
+        .build()
     );
 
     private final Setting<Boolean> smooth = sgGeneral.add(new BoolSetting.Builder()
@@ -47,10 +46,10 @@ public class Zoom extends Module {
     );
 
     private final Setting<Boolean> cinematic = sgGeneral.add(new BoolSetting.Builder()
-            .name("cinematic")
-            .description("Enables cinematic camera.")
-            .defaultValue(false)
-            .build()
+        .name("cinematic")
+        .description("Enables cinematic camera.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> renderHands = sgGeneral.add(new BoolSetting.Builder()
@@ -129,7 +128,7 @@ public class Zoom extends Module {
         if (isActive()) time += event.frameTime * 5;
         else time -= event.frameTime * 5;
 
-        time = Utils.clamp(time, 0, 1);
+        time = MathHelper.clamp(time, 0, 1);
     }
 
     @EventHandler

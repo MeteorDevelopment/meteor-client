@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.render;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -15,6 +14,7 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -43,23 +43,23 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(ItemStack itemStack, int x, int y, double scale, boolean overlay) {
-        //RenderSystem.disableDepthTest();
-
-        MatrixStack matrices = RenderSystem.getModelViewStack();
-
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride) {
+        MatrixStack matrices = drawContext.getMatrices();
         matrices.push();
-        matrices.scale((float) scale, (float) scale, 1);
+        matrices.scale(scale, scale, 1f);
+        matrices.translate(0, 0, 401); // Thanks Mojang
 
-        mc.getItemRenderer().renderGuiItemIcon(itemStack, (int) (x / scale), (int) (y / scale));
-        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(mc.textRenderer, itemStack, (int) (x / scale), (int) (y / scale), null);
+        int scaledX = (int) (x / scale);
+        int scaledY = (int) (y / scale);
+
+        drawContext.drawItem(itemStack, scaledX, scaledY);
+        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
 
         matrices.pop();
-        //RenderSystem.enableDepthTest();
     }
 
-    public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
-        drawItem(itemStack, x, y, 1, overlay);
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        drawItem(drawContext, itemStack, x, y, scale, overlay, null);
     }
 
     public static void updateScreenCenter() {
@@ -89,19 +89,29 @@ public class RenderUtils {
             float h = -(playerEntity.horizontalSpeed + g * f);
             float i = MathHelper.lerp(f, playerEntity.prevStrideDistance, playerEntity.strideDistance);
 
-            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), -(-Math.abs(MathHelper.cos(h * 3.1415927f) * i)), 0);
+            matrices.translate(-(MathHelper.sin(h * 3.1415927f) * i * 0.5), Math.abs(MathHelper.cos(h * 3.1415927f) * i), 0);
             matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(MathHelper.sin(h * 3.1415927f) * i * 3));
             matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(Math.abs(MathHelper.cos(h * 3.1415927f - 0.2f) * i) * 5));
         }
     }
 
     public static void renderTickingBlock(BlockPos blockPos, Color sideColor, Color lineColor, ShapeMode shapeMode, int excludeDir, int duration, boolean fade, boolean shrink) {
+        // Ensure there aren't multiple fading blocks in one pos
+        Iterator<RenderBlock> iterator = renderBlocks.iterator();
+        while (iterator.hasNext()) {
+            RenderBlock next = iterator.next();
+            if (next.pos.equals(blockPos)) {
+                iterator.remove();
+                renderBlockPool.free(next);
+            }
+        }
+
         renderBlocks.add(renderBlockPool.get().set(blockPos, sideColor, lineColor, shapeMode, excludeDir, duration, fade, shrink));
     }
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        if (renderBlocks.size() == 0) return;
+        if (renderBlocks.isEmpty()) return;
 
         renderBlocks.forEach(RenderBlock::tick);
 

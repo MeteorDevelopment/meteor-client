@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
@@ -48,9 +49,9 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
         if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.cancel();
     }
 
-    @Inject(method = "getSkyLight", at = @At("RETURN"), cancellable = true)
-    private void onGetSkyLight(CallbackInfoReturnable<Integer> info) {
-        info.setReturnValue(Math.max(Modules.get().get(Fullbright.class).getLuminance(), info.getReturnValueI()));
+    @ModifyReturnValue(method = "getSkyLight", at = @At("RETURN"))
+    private int onGetSkyLight(int original) {
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), original);
     }
 
     @Override

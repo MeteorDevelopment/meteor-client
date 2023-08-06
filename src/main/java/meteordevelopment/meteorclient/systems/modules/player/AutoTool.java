@@ -174,7 +174,7 @@ public class AutoTool extends Module {
 
         if (shouldStopUsing(currentStack) && isTool(currentStack)) {
             mc.options.attackKey.setPressed(false);
-            event.setCancelled(true);
+            event.cancel();
         }
     }
 
@@ -184,6 +184,7 @@ public class AutoTool extends Module {
 
     public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
+        if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooSaplingBlock))) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST

@@ -166,6 +166,10 @@ public class GL {
         GlStateManager._glUseProgram(program);
     }
 
+    public static void viewport(int x, int y, int width, int height) {
+        GlStateManager._viewport(x, y, width, height);
+    }
+
     // Uniforms
 
     public static int getUniformLocation(int program, String name) {

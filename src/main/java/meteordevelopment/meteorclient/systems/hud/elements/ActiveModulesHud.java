@@ -96,6 +96,23 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
+    private final Setting<Boolean> customScale = sgGeneral.add(new BoolSetting.Builder()
+        .name("custom-scale")
+        .description("Applies custom text scale rather than the global one.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
+        .name("scale")
+        .description("Custom scale.")
+        .visible(customScale::get)
+        .defaultValue(1)
+        .min(0.5)
+        .sliderRange(0.5, 3)
+        .build()
+    );
+
     private final Setting<Double> rainbowSpeed = sgGeneral.add(new DoubleSetting.Builder()
         .name("rainbow-speed")
         .description("Rainbow speed of rainbow color mode.")
@@ -137,7 +154,8 @@ public class ActiveModulesHud extends HudElement {
     private final List<Module> modules = new ArrayList<>();
 
     private final Color rainbow = new Color(255, 255, 255);
-    private double rainbowHue1, rainbowHue2;
+    private double rainbowHue1;
+    private double rainbowHue2;
 
     private double prevX;
     private double prevTextLength;
@@ -149,30 +167,23 @@ public class ActiveModulesHud extends HudElement {
 
     @Override
     public void tick(HudRenderer renderer) {
-        if (Modules.get() == null) {
-            setSize(renderer.textWidth("Active Modules", shadow.get()), renderer.textHeight(shadow.get()));
-            return;
-        }
-
         modules.clear();
 
         for (Module module : Modules.get().getActive()) {
             if (!hiddenModules.get().contains(module)) modules.add(module);
         }
 
-        modules.sort((o1, o2) -> {
-            double _1 = getModuleWidth(renderer, o1);
-            double _2 = getModuleWidth(renderer, o2);
-
-            if (sort.get() == Sort.Smallest) {
-                double temp = _1;
-                _1 = _2;
-                _2 = temp;
+        if (modules.isEmpty()) {
+            if (isInEditor()) {
+                setSize(renderer.textWidth("Active Modules", shadow.get(), getScale()), renderer.textHeight(shadow.get(), getScale()));
             }
+            return;
+        }
 
-            int a = Double.compare(_1, _2);
-            if (a == 0) return 0;
-            return a < 0 ? 1 : -1;
+        modules.sort((e1, e2) -> switch (sort.get()) {
+            case Alphabetical -> e1.title.compareTo(e2.title);
+            case Biggest -> Double.compare(getModuleWidth(renderer, e2), getModuleWidth(renderer, e1));
+            case Smallest -> Double.compare(getModuleWidth(renderer, e1), getModuleWidth(renderer, e2));
         });
 
         double width = 0;
@@ -182,7 +193,7 @@ public class ActiveModulesHud extends HudElement {
             Module module = modules.get(i);
 
             width = Math.max(width, getModuleWidth(renderer, module));
-            height += renderer.textHeight(shadow.get());
+            height += renderer.textHeight(shadow.get(), getScale());
             if (i > 0) height += 2;
         }
 
@@ -194,8 +205,10 @@ public class ActiveModulesHud extends HudElement {
         double x = this.x;
         double y = this.y;
 
-        if (Modules.get() == null) {
-            renderer.text("Active Modules", x, y, WHITE, shadow.get());
+        if (modules.isEmpty()) {
+            if (isInEditor()) {
+                renderer.text("Active Modules", x, y, WHITE, shadow.get(), getScale());
+            }
             return;
         }
 
@@ -212,7 +225,7 @@ public class ActiveModulesHud extends HudElement {
             renderModule(renderer, modules, i, x + offset, y);
 
             prevX = x + offset;
-            y += 2 + renderer.textHeight(shadow.get());
+            y += 2 + renderer.textHeight(shadow.get(), getScale());
         }
     }
 
@@ -220,30 +233,29 @@ public class ActiveModulesHud extends HudElement {
         Module module = modules.get(index);
         Color color = flatColor.get();
 
-        ColorMode colorMode = this.colorMode.get();
-        if (colorMode == ColorMode.Random) color = module.color;
-        else if (colorMode == ColorMode.Rainbow) {
-            rainbowHue2 += rainbowSpread.get();
-            int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
-
-            rainbow.r = Color.toRGBAR(c);
-            rainbow.g = Color.toRGBAG(c);
-            rainbow.b = Color.toRGBAB(c);
-
-            color = rainbow;
+        switch (colorMode.get()) {
+            case Random -> color = module.color;
+            case Rainbow -> {
+                rainbowHue2 += rainbowSpread.get();
+                int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
+                rainbow.r = Color.toRGBAR(c);
+                rainbow.g = Color.toRGBAG(c);
+                rainbow.b = Color.toRGBAB(c);
+                color = rainbow;
+            }
         }
 
-        renderer.text(module.title, x, y, color, shadow.get());
+        renderer.text(module.title, x, y, color, shadow.get(), getScale());
 
-		double emptySpace = renderer.textWidth(" ", shadow.get());
-        double textHeight = renderer.textHeight(shadow.get());
-        double textLength = renderer.textWidth(module.title, shadow.get());
+        double emptySpace = renderer.textWidth(" ", shadow.get(), getScale());
+        double textHeight = renderer.textHeight(shadow.get(), getScale());
+        double textLength = renderer.textWidth(module.title, shadow.get(), getScale());
 
         if (activeInfo.get()) {
             String info = module.getInfoString();
             if (info != null) {
-                renderer.text(info, x + emptySpace + textLength, y, moduleInfoColor.get(), shadow.get());
-                textLength += emptySpace + renderer.textWidth(info, shadow.get());
+                renderer.text(info, x + emptySpace + textLength, y, moduleInfoColor.get(), shadow.get(), getScale());
+                textLength += emptySpace + renderer.textWidth(info, shadow.get(), getScale());
             }
         }
 
@@ -285,17 +297,22 @@ public class ActiveModulesHud extends HudElement {
     }
 
     private double getModuleWidth(HudRenderer renderer, Module module) {
-        double width = renderer.textWidth(module.title, shadow.get());
+        double width = renderer.textWidth(module.title, shadow.get(), getScale());
 
         if (activeInfo.get()) {
             String info = module.getInfoString();
-            if (info != null) width += renderer.textWidth(" ", shadow.get()) + renderer.textWidth(info, shadow.get());
+            if (info != null) width += renderer.textWidth(" ", shadow.get(), getScale()) + renderer.textWidth(info, shadow.get(), getScale());
         }
 
         return width;
     }
 
+    private double getScale() {
+        return customScale.get() ? scale.get() : -1;
+    }
+
     public enum Sort {
+        Alphabetical,
         Biggest,
         Smallest
     }

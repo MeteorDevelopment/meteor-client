@@ -39,24 +39,24 @@ public class StorageESP extends Module {
     );
 
     private final Setting<List<BlockEntityType<?>>> storageBlocks = sgGeneral.add(new StorageBlockListSetting.Builder()
-            .name("storage-blocks")
-            .description("Select the storage blocks to display.")
-            .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
-            .build()
+        .name("storage-blocks")
+        .description("Select the storage blocks to display.")
+        .defaultValue(StorageBlockListSetting.STORAGE_BLOCKS)
+        .build()
     );
 
     private final Setting<Boolean> tracers = sgGeneral.add(new BoolSetting.Builder()
-            .name("tracers")
-            .description("Draws tracers to storage blocks.")
-            .defaultValue(false)
-            .build()
+        .name("tracers")
+        .description("Draws tracers to storage blocks.")
+        .defaultValue(false)
+        .build()
     );
 
     public final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     public final Setting<Integer> fillOpacity = sgGeneral.add(new IntSetting.Builder()
@@ -91,54 +91,54 @@ public class StorageESP extends Module {
     );
 
     private final Setting<SettingColor> chest = sgGeneral.add(new ColorSetting.Builder()
-            .name("chest")
-            .description("The color of chests.")
-            .defaultValue(new SettingColor(255, 160, 0, 255))
-            .build()
+        .name("chest")
+        .description("The color of chests.")
+        .defaultValue(new SettingColor(255, 160, 0, 255))
+        .build()
     );
 
     private final Setting<SettingColor> trappedChest = sgGeneral.add(new ColorSetting.Builder()
-            .name("trapped-chest")
-            .description("The color of trapped chests.")
-            .defaultValue(new SettingColor(255, 0, 0, 255))
-            .build()
+        .name("trapped-chest")
+        .description("The color of trapped chests.")
+        .defaultValue(new SettingColor(255, 0, 0, 255))
+        .build()
     );
 
     private final Setting<SettingColor> barrel = sgGeneral.add(new ColorSetting.Builder()
-            .name("barrel")
-            .description("The color of barrels.")
-            .defaultValue(new SettingColor(255, 160, 0, 255))
-            .build()
+        .name("barrel")
+        .description("The color of barrels.")
+        .defaultValue(new SettingColor(255, 160, 0, 255))
+        .build()
     );
 
     private final Setting<SettingColor> shulker = sgGeneral.add(new ColorSetting.Builder()
-            .name("shulker")
-            .description("The color of Shulker Boxes.")
-            .defaultValue(new SettingColor(255, 160, 0, 255))
-            .build()
+        .name("shulker")
+        .description("The color of Shulker Boxes.")
+        .defaultValue(new SettingColor(255, 160, 0, 255))
+        .build()
     );
 
     private final Setting<SettingColor> enderChest = sgGeneral.add(new ColorSetting.Builder()
-            .name("ender-chest")
-            .description("The color of Ender Chests.")
-            .defaultValue(new SettingColor(120, 0, 255, 255))
-            .build()
+        .name("ender-chest")
+        .description("The color of Ender Chests.")
+        .defaultValue(new SettingColor(120, 0, 255, 255))
+        .build()
     );
 
     private final Setting<SettingColor> other = sgGeneral.add(new ColorSetting.Builder()
-            .name("other")
-            .description("The color of furnaces, dispenders, droppers and hoppers.")
-            .defaultValue(new SettingColor(140, 140, 140, 255))
-            .build()
+        .name("other")
+        .description("The color of furnaces, dispenders, droppers and hoppers.")
+        .defaultValue(new SettingColor(140, 140, 140, 255))
+        .build()
     );
 
     private final Setting<Double> fadeDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fade-distance")
-            .description("The distance at which the color will fade.")
-            .defaultValue(6)
-            .min(0)
-            .sliderMax(12)
-            .build()
+        .name("fade-distance")
+        .description("The distance at which the color will fade.")
+        .defaultValue(6)
+        .min(0)
+        .sliderMax(12)
+        .build()
     );
 
     private final Color lineColor = new Color(0, 0, 0, 0);

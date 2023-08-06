@@ -50,8 +50,8 @@ public class PlayerUtils {
             return color.set(Config.get().friendColor.get()).a(defaultColor.a);
         }
 
-        if (!color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE) && Config.get().useTeamColor.get()) {
-            return color.set(color).a(defaultColor.a);
+        if (Config.get().useTeamColor.get() && !color.set(TextUtils.getMostPopularColor(entity.getDisplayName())).equals(WHITE)) {
+            return color.a(defaultColor.a);
         }
 
         return defaultColor;
@@ -328,7 +328,7 @@ public class PlayerUtils {
     }
 
     public static boolean isWithinReach(double x, double y, double z) {
-        return squaredDistanceTo(x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
+        return squaredDistance(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ(), x, y, z) <= mc.interactionManager.getReachDistance() * mc.interactionManager.getReachDistance();
     }
 
     public static Dimension getDimension() {

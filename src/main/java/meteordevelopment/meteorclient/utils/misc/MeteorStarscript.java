@@ -74,7 +74,6 @@ public class MeteorStarscript {
         StandardLib.init(ss);
 
         // General
-        ss.set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "");
         ss.set("mc_version", SharedConstants.getGameVersion().getName());
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
         ss.set("ping", MeteorStarscript::ping);
@@ -82,6 +81,8 @@ public class MeteorStarscript {
 
         // Meteor
         ss.set("meteor", new ValueMap()
+            .set("name", MeteorClient.NAME)
+            .set("version", MeteorClient.VERSION != null ? (MeteorClient.DEV_BUILD.isEmpty() ? MeteorClient.VERSION.toString() : MeteorClient.VERSION + " " + MeteorClient.DEV_BUILD) : "")
             .set("modules", () -> Value.number(Modules.get().getAll().size()))
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
@@ -95,6 +96,7 @@ public class MeteorStarscript {
             .set("distance_to_goal", MeteorStarscript::baritoneDistanceToGoal)
             .set("process", MeteorStarscript::baritoneProcess)
             .set("process_name", MeteorStarscript::baritoneProcessName)
+            .set("eta", MeteorStarscript::baritoneETA)
         );
 
         // Camera
@@ -121,8 +123,16 @@ public class MeteorStarscript {
         ss.set("player", new ValueMap()
             .set("_toString", () -> Value.string(mc.getSession().getUsername()))
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
+            .set("absorption", () -> Value.number(mc.player != null ? mc.player.getAbsorptionAmount() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
-            .set("speed", () -> Value.number(Utils.getPlayerSpeed()))
+            
+            .set("speed", () -> Value.number(Utils.getPlayerSpeed().horizontalLength()))
+            .set("speed_all", new ValueMap()
+                .set("_toString", () -> Value.string(mc.player != null ? Utils.getPlayerSpeed().toString() : ""))
+                .set("x", () -> Value.number(mc.player != null ? Utils.getPlayerSpeed().x : 0))
+                .set("y", () -> Value.number(mc.player != null ? Utils.getPlayerSpeed().y : 0))
+                .set("z", () -> Value.number(mc.player != null ? Utils.getPlayerSpeed().z : 0))
+            )
 
             .set("breaking_progress", () -> Value.number(mc.interactionManager != null ? ((ClientPlayerInteractionManagerAccessor) mc.interactionManager).getBreakingProgress() : 0))
             .set("biome", MeteorStarscript::biome)
@@ -221,12 +231,12 @@ public class MeteorStarscript {
         String caller = getCallerName();
 
         if (caller != null) {
-            if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
-            else ChatUtils.error("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
+            if (i != -1) ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s (from %s)", i, error.character, error.ch, error.message, caller);
+            else ChatUtils.errorPrefix("Starscript", "%d '%c': %s (from %s)", error.character, error.ch, error.message, caller);
         }
         else {
-            if (i != -1) ChatUtils.error("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
-            else ChatUtils.error("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
+            if (i != -1) ChatUtils.errorPrefix("Starscript", "%d, %d '%c': %s", i, error.character, error.ch, error.message);
+            else ChatUtils.errorPrefix("Starscript", "%d '%c': %s", error.character, error.ch, error.message);
         }
     }
 
@@ -237,8 +247,8 @@ public class MeteorStarscript {
     public static void printChatError(StarscriptError e) {
         String caller = getCallerName();
 
-        if (caller != null) ChatUtils.error("Starscript", "%s (from %s)", e.getMessage(), caller);
-        else ChatUtils.error("Starscript", "%s", e.getMessage());
+        if (caller != null) ChatUtils.errorPrefix("Starscript", "%s (from %s)", e.getMessage(), caller);
+        else ChatUtils.errorPrefix("Starscript", "%s", e.getMessage());
     }
 
     private static String getCallerName() {
@@ -399,6 +409,13 @@ public class MeteorStarscript {
         String name = SB.toString();
         SB.setLength(0);
         return Value.string(name);
+    }
+
+    // Returns the ETA in seconds
+    private static Value baritoneETA() {
+        if (mc.player == null) return Value.number(0);
+        Optional<Double> ticksTillGoal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().estimatedTicksToGoal();
+        return ticksTillGoal.map(aDouble -> Value.number(aDouble / 20)).orElseGet(() -> Value.number(0));
     }
 
     private static Value oppositeX(boolean camera) {
@@ -577,7 +594,8 @@ public class MeteorStarscript {
         return Value.map(new ValueMap()
             .set("_toString", Value.string(entity.getName().getString()))
             .set("id", Value.string(Registries.ENTITY_TYPE.getId(entity.getType()).toString()))
-            .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth() : 0))
+            .set("health", Value.number(entity instanceof LivingEntity e ? e.getHealth(): 0))
+            .set("absorption", Value.number(entity instanceof LivingEntity e ? e.getAbsorptionAmount() : 0))
             .set("pos", Value.map(new ValueMap()
                 .set("_toString", posString(entity.getX(), entity.getY(), entity.getZ()))
                 .set("x", Value.number(entity.getX()))

@@ -17,6 +17,10 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class FakePlayerManager {
     private static final List<FakePlayerEntity> ENTITIES = new ArrayList<>();
 
+    public static List<FakePlayerEntity> getFakePlayers() {
+        return ENTITIES;
+    }
+
     public static FakePlayerEntity get(String name) {
         for (FakePlayerEntity fp : ENTITIES) {
             if (fp.getEntityName().equals(name)) return fp;
