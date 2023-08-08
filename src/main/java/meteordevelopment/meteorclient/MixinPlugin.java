@@ -22,7 +22,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
 
     private static boolean loaded;
 
-    private static boolean isOriginsPresent;
     private static boolean isIndigoPresent;
     public static boolean isSodiumPresent;
     private static boolean isCanvasPresent;
@@ -67,7 +66,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
         }
 
         isIndigoPresent = FabricLoader.getInstance().isModLoaded("fabric-renderer-indigo");
-        isOriginsPresent = FabricLoader.getInstance().isModLoaded("origins");
         isSodiumPresent = FabricLoader.getInstance().isModLoaded("sodium");
         isCanvasPresent = FabricLoader.getInstance().isModLoaded("canvas");
         isLithiumPresent = FabricLoader.getInstance().isModLoaded("lithium");
@@ -85,9 +83,6 @@ public class MixinPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         if (!mixinClassName.startsWith(mixinPackage)) {
             throw new RuntimeException("Mixin " + mixinClassName + " is not in the mixin package");
-        }
-        else if (mixinClassName.endsWith("PlayerEntityRendererMixin")) {
-            return !isOriginsPresent;
         }
         else if (mixinClassName.startsWith(mixinPackage + ".sodium")) {
             return isSodiumPresent;
