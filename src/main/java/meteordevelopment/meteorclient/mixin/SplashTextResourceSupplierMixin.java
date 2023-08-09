@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.config.Config;
+import net.minecraft.client.gui.screen.SplashTextRenderer;
 import net.minecraft.client.resource.SplashTextResourceSupplier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,10 +25,10 @@ public class SplashTextResourceSupplierMixin {
     private final List<String> meteorSplashes = getMeteorSplashes();
 
     @Inject(method = "get", at = @At("HEAD"), cancellable = true)
-    private void onApply(CallbackInfoReturnable<String> cir) {
+    private void onApply(CallbackInfoReturnable<SplashTextRenderer> cir) {
         if (Config.get() == null || !Config.get().titleScreenSplashes.get()) return;
 
-        if (override) cir.setReturnValue(meteorSplashes.get(random.nextInt(meteorSplashes.size())));
+        if (override) cir.setReturnValue(new SplashTextRenderer(meteorSplashes.get(random.nextInt(meteorSplashes.size()))));
         override = !override;
     }
 

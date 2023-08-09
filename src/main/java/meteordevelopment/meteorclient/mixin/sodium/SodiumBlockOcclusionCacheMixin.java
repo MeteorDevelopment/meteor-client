@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin.sodium;
 
-import me.jellysquid.mods.sodium.client.render.occlusion.BlockOcclusionCache;
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import me.jellysquid.mods.sodium.client.render.chunk.compile.pipeline.BlockOcclusionCache;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import net.minecraft.block.BlockState;
@@ -13,18 +14,27 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.world.BlockView;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = BlockOcclusionCache.class, remap = false)
 public class SodiumBlockOcclusionCacheMixin {
-    @Inject(method = "shouldDrawSide", at = @At("RETURN"), cancellable = true)
-    private void shouldDrawSide(BlockState state, BlockView view, BlockPos pos, Direction facing, CallbackInfoReturnable<Boolean> info) {
-        Xray xray = Modules.get().get(Xray.class);
+    @Unique
+    private Xray xray;
 
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void onInit(CallbackInfo info) {
+        xray = Modules.get().get(Xray.class);
+    }
+
+    @ModifyReturnValue(method = "shouldDrawSide", at = @At("RETURN"))
+    private boolean shouldDrawSide(boolean original, BlockState state, BlockView view, BlockPos pos, Direction facing) {
         if (xray.isActive()) {
-            info.setReturnValue(xray.modifyDrawSide(state, view, pos, facing, info.getReturnValueZ()));
+            return xray.modifyDrawSide(state, view, pos, facing, original);
         }
+
+        return original;
     }
 }

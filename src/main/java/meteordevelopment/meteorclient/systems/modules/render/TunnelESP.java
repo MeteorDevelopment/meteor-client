@@ -79,7 +79,7 @@ public class TunnelESP extends Module {
     private final Long2ObjectMap<TChunk> chunks = new Long2ObjectOpenHashMap<>();
 
     public TunnelESP() {
-        super(Categories.Render, "tunnel-ESP", "Highlights tunnels.");
+        super(Categories.Render, "tunnel-esp", "Highlights tunnels.");
     }
 
     @Override

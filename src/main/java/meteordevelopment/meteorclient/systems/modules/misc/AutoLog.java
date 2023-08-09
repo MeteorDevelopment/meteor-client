@@ -31,8 +31,8 @@ public class AutoLog extends Module {
         .name("health")
         .description("Automatically disconnects when health is lower or equal to this value.")
         .defaultValue(6)
-        .range(0, 20)
-        .sliderMax(20)
+        .range(0, 19)
+        .sliderMax(19)
         .build()
     );
 

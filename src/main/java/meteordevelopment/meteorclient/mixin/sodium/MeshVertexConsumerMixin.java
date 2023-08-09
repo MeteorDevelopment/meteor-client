@@ -19,6 +19,7 @@ public abstract class MeshVertexConsumerMixin implements VertexConsumer, VertexB
     @Override
     public void push(MemoryStack stack, long ptr, int count, VertexFormatDescription format) {
         int positionOffset = format.getElementOffset(CommonVertexAttribute.POSITION);
+
         if (positionOffset == -1) return;
 
         for (int i = 0; i < count; i++) {

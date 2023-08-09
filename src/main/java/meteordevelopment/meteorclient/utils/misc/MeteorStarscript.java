@@ -96,6 +96,7 @@ public class MeteorStarscript {
             .set("distance_to_goal", MeteorStarscript::baritoneDistanceToGoal)
             .set("process", MeteorStarscript::baritoneProcess)
             .set("process_name", MeteorStarscript::baritoneProcessName)
+            .set("eta", MeteorStarscript::baritoneETA)
         );
 
         // Camera
@@ -408,6 +409,13 @@ public class MeteorStarscript {
         String name = SB.toString();
         SB.setLength(0);
         return Value.string(name);
+    }
+
+    // Returns the ETA in seconds
+    private static Value baritoneETA() {
+        if (mc.player == null) return Value.number(0);
+        Optional<Double> ticksTillGoal = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().estimatedTicksToGoal();
+        return ticksTillGoal.map(aDouble -> Value.number(aDouble / 20)).orElseGet(() -> Value.number(0));
     }
 
     private static Value oppositeX(boolean camera) {

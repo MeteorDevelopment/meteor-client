@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
 import meteordevelopment.meteorclient.events.world.ParticleEvent;
 import meteordevelopment.meteorclient.settings.*;
@@ -18,6 +17,7 @@ import net.minecraft.particle.ParticleType;
 import net.minecraft.particle.ParticleTypes;
 
 import java.util.List;
+import java.util.Set;
 
 public class NoRender extends Module {
     private final SettingGroup sgOverlay = settings.createGroup("Overlay");
@@ -329,9 +329,17 @@ public class NoRender extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noTextureRotations = sgWorld.add(new BoolSetting.Builder()
+        .name("texture-rotations")
+        .description("Changes texture rotations and model offsets to use a random value instead of the block position.")
+        .defaultValue(false)
+        .onChanged(b -> mc.worldRenderer.reload())
+        .build()
+    );
+
     // Entity
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgEntity.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Disables rendering of selected entities.")
         .build()
@@ -579,14 +587,18 @@ public class NoRender extends Module {
         return isActive() && noBarrierInvis.get();
     }
 
+    public boolean noTextureRotations() {
+        return isActive() && noTextureRotations.get();
+    }
+
     // Entity
 
     public boolean noEntity(Entity entity) {
-        return isActive() && entities.get().getBoolean(entity.getType());
+        return isActive() && entities.get().contains(entity.getType());
     }
 
     public boolean noEntity(EntityType<?> entity) {
-        return isActive() && entities.get().getBoolean(entity);
+        return isActive() && entities.get().contains(entity);
     }
 
     public boolean getDropSpawnPacket() {

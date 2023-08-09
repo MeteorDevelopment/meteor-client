@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,8 +32,6 @@ import java.util.List;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class RenderUtils {
-    private static final MatrixStack MATRICES = new MatrixStack();
-
     public static Vec3d center;
 
     private static final Pool<RenderBlock> renderBlockPool = new Pool<>(RenderBlock::new);
@@ -44,22 +43,23 @@ public class RenderUtils {
     }
 
     // Items
-    public static void drawItem(ItemStack itemStack, int x, int y, float scale, boolean overlay) {
-        MATRICES.push();
-        MATRICES.scale(scale, scale, 1f);
-        MATRICES.translate(0, 0, 401); // Thanks Mojang
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay, String countOverride) {
+        MatrixStack matrices = drawContext.getMatrices();
+        matrices.push();
+        matrices.scale(scale, scale, 1f);
+        matrices.translate(0, 0, 401); // Thanks Mojang
 
         int scaledX = (int) (x / scale);
         int scaledY = (int) (y / scale);
 
-        mc.getItemRenderer().renderInGuiWithOverrides(MATRICES, itemStack, scaledX, scaledY);
-        if (overlay) mc.getItemRenderer().renderGuiItemOverlay(MATRICES, mc.textRenderer, itemStack, scaledX, scaledY, null);
+        drawContext.drawItem(itemStack, scaledX, scaledY);
+        if (overlay) drawContext.drawItemInSlot(mc.textRenderer, itemStack, scaledX, scaledY, countOverride);
 
-        MATRICES.pop();
+        matrices.pop();
     }
 
-    public static void drawItem(ItemStack itemStack, int x, int y, boolean overlay) {
-        drawItem(itemStack, x, y, 1, overlay);
+    public static void drawItem(DrawContext drawContext, ItemStack itemStack, int x, int y, float scale, boolean overlay) {
+        drawItem(drawContext, itemStack, x, y, scale, overlay, null);
     }
 
     public static void updateScreenCenter() {
@@ -111,7 +111,7 @@ public class RenderUtils {
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        if (renderBlocks.size() == 0) return;
+        if (renderBlocks.isEmpty()) return;
 
         renderBlocks.forEach(RenderBlock::tick);
 

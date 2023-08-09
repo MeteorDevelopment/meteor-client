@@ -113,6 +113,11 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         info.setReturnValue(Modules.get().get(Reach.class).blockReach());
     }
 
+    @Inject(method = "hasExtendedReach", at = @At("HEAD"), cancellable = true)
+    private void onHasExtendedReach(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().isActive(Reach.class)) info.setReturnValue(false);
+    }
+
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
     private void creativeBreakDelayChange(ClientPlayerInteractionManager interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
@@ -131,7 +136,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         blockBreakingCooldown = event.cooldown;
     }
 
-    @Redirect(method = "method_41930",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
+    @Redirect(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
     private float deltaChange(BlockState blockState, PlayerEntity player, BlockView world, BlockPos pos) {
         float delta = blockState.calcBlockBreakingDelta(player, world, pos);
         if (Modules.get().get(BreakDelay.class).noInstaBreak.get() && delta >= 1) {
