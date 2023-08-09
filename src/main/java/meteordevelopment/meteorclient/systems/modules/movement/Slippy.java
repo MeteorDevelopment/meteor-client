@@ -26,21 +26,22 @@ public class Slippy extends Module {
 
     public final Setting<ListMode> listMode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("list-mode")
-        .defaultValue(ListMode.Ignore)
+        .description("The mode to select blocks.")
+        .defaultValue(ListMode.Blacklist)
         .build()
     );
 
     public final Setting<List<Block>> ignoredBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("ignored-blocks")
         .description("Decide which blocks not to slip on")
-        .visible(() -> listMode.get() == ListMode.Ignore)
+        .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
     public final Setting<List<Block>> allowedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("allowed-blocks")
         .description("Decide which blocks to slip on")
-        .visible(() -> listMode.get() == ListMode.Allow)
+        .visible(() -> listMode.get() == ListMode.Whitelist)
         .build()
     );
 
@@ -49,7 +50,7 @@ public class Slippy extends Module {
     }
 
     public enum ListMode {
-        Allow,
-        Ignore
+        Whitelist,
+        Blacklist
     }
 }
