@@ -355,7 +355,7 @@ public class AnchorAura extends Module {
     }
 
     private boolean isValidPlace(BlockPos pos) {
-        return Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pos)) <= placeRange.get() && getDamagePlace(pos) && (BlockUtils.canPlace(pos, true) || mc.world.getBlockState(pos).getFluidState().getFluid() instanceof FlowableFluid);
+        return Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pos)) <= placeRange.get() && getDamagePlace(pos) && BlockUtils.canPlace(pos, true);
     }
 
     private boolean isValidBreak(BlockPos pos) {
