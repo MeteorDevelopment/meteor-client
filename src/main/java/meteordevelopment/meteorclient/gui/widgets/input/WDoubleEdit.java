@@ -29,6 +29,7 @@ public class WDoubleEdit extends WHorizontalList {
         this.value = value;
         this.min = min;
         this.max = max;
+        this.decimalPlaces = decimalPlaces;
         this.sliderMin = sliderMin;
         this.sliderMax = sliderMax;
 

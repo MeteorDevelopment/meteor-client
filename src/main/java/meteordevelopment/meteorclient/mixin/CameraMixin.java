@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -30,8 +31,6 @@ import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 @Mixin(Camera.class)
 public abstract class CameraMixin implements ICamera {
     @Shadow private boolean thirdPerson;
-
-    @Shadow protected abstract double clipToSpace(double desiredCameraDistance);
 
     @Shadow private float yaw;
     @Shadow private float pitch;
@@ -46,12 +45,9 @@ public abstract class CameraMixin implements ICamera {
         if (Modules.get().get(NoRender.class).noLiquidOverlay()) ci.setReturnValue(CameraSubmersionType.NONE);
     }
 
-    @ModifyArgs(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/render/Camera;moveBy(DDD)V", ordinal = 0))
-    private void modifyCameraDistance(Args args) {
-        args.set(0, -clipToSpace(Modules.get().get(CameraTweaks.class).getDistance()));
-        if (Modules.get().isActive(Freecam.class)) {
-            args.set(0, -clipToSpace(0));
-        }
+    @ModifyVariable(method = "clipToSpace", at = @At("HEAD"), ordinal = 0, argsOnly = true)
+    private double modifyClipToSpace(double d) {
+        return (Modules.get().get(Freecam.class).isActive() ? 0 : Modules.get().get(CameraTweaks.class).getDistance());
     }
 
     @Inject(method = "clipToSpace", at = @At("HEAD"), cancellable = true)

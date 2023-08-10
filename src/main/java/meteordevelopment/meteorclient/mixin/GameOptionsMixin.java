@@ -36,6 +36,8 @@ public class GameOptionsMixin {
 
     @Inject(method = "setPerspective", at = @At("HEAD"), cancellable = true)
     private void setPerspective(Perspective perspective, CallbackInfo info) {
+        if (Modules.get() == null) return; // nothing is loaded yet, shouldersurfing compat
+
         ChangePerspectiveEvent event = MeteorClient.EVENT_BUS.post(ChangePerspectiveEvent.get(perspective));
 
         if (event.isCancelled()) info.cancel();

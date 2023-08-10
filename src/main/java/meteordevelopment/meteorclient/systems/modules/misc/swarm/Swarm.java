@@ -40,7 +40,7 @@ public class Swarm extends Module {
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
         .name("port")
         .description("The port used for connections.")
-        .defaultValue(420)
+        .defaultValue(6969)
         .range(1, 65535)
         .noSlider()
         .build()

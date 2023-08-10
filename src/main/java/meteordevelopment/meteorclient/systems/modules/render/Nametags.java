@@ -111,6 +111,13 @@ public class Nametags extends Module {
 
     //Players
 
+    private final Setting<Boolean> displayHealth = sgPlayers.add(new BoolSetting.Builder()
+        .name("health")
+        .description("Shows the player's health.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
         .name("gamemode")
         .description("Shows the player's GameMode.")
@@ -387,14 +394,12 @@ public class Nametags extends Module {
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
         else name = player.getEntityName();
 
-        name = name + " ";
-
         // Health
         float absorption = player.getAbsorptionAmount();
         int health = Math.round(player.getHealth() + absorption);
         double healthPercentage = health / (player.getMaxHealth() + absorption);
 
-        String healthText = String.valueOf(health);
+        String healthText = " " + health;
         Color healthColor;
 
         if (healthPercentage <= 0.333) healthColor = RED;
@@ -415,10 +420,12 @@ public class Nametags extends Module {
         double healthWidth = text.getWidth(healthText, shadow);
         double pingWidth = text.getWidth(pingText, shadow);
         double distWidth = text.getWidth(distText, shadow);
-        double width = nameWidth + healthWidth;
+
+        double width = nameWidth;
 
         boolean renderPlayerDistance = player != mc.cameraEntity || Modules.get().isActive(Freecam.class);
 
+        if (displayHealth.get()) width += healthWidth;
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
         if (displayDistance.get() && renderPlayerDistance) width += distWidth;
@@ -436,7 +443,7 @@ public class Nametags extends Module {
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, gamemodeColor.get(), shadow);
         hX = text.render(name, hX, hY, nameColor, shadow);
 
-        hX = text.render(healthText, hX, hY, healthColor, shadow);
+        if (displayHealth.get()) hX = text.render(healthText, hX, hY, healthColor, shadow);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, pingColor.get(), shadow);
         if (displayDistance.get() && renderPlayerDistance) {
             switch (distanceColorMode.get()) {
