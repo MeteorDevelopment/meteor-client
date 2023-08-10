@@ -52,8 +52,8 @@ public class ClientConnectionMixin {
         }
     }
 
-    @Inject(method = "connect(Ljava/net/InetSocketAddress;ZLnet/minecraft/network/ClientConnection;)Lio/netty/channel/ChannelFuture;", at = @At("HEAD"))
-    private static void onConnect(InetSocketAddress address, boolean useEpoll, ClientConnection connection, CallbackInfoReturnable<ChannelFuture> cir) {
+    @Inject(method = "connect", at = @At("HEAD"))
+    private static void onConnect(InetSocketAddress address, boolean useEpoll, CallbackInfoReturnable<?> cir) {
         MeteorClient.EVENT_BUS.post(ServerConnectEndEvent.get(address));
     }
 
