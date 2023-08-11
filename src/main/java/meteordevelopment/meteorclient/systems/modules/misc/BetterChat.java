@@ -270,7 +270,7 @@ public class BetterChat extends Module {
         if (messages.isEmpty()) return null;
 
         for (int i = 0; i < Math.min(antiSpamDepth.get(), messages.size()); i++) {
-            String stringToCheck = messages.get(i).content().copy().getString();
+            String stringToCheck = messages.get(i).content().getString();
 
             Matcher timestampMatcher = timestampRegex.matcher(stringToCheck);
             if (timestampMatcher.find()) {
@@ -304,17 +304,17 @@ public class BetterChat extends Module {
 
             int start = -1;
             for (int i = 0; i < messageIndex; i++) {
-                start += lines.get(i);
+                start += lines.getInt(i);
             }
 
-            int i = lines.get(messageIndex);
+            int i = lines.getInt(messageIndex);
             while (i > 0) {
                 visible.remove(start + 1);
                 i--;
             }
 
             messages.remove(messageIndex);
-            lines.remove(messageIndex);
+            lines.removeInt(messageIndex);
         }
 
         return returnText;
