@@ -10,8 +10,11 @@ import meteordevelopment.meteorclient.systems.hud.*;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
+import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffectUtil;
+
+import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -23,6 +26,19 @@ public class PotionTimersHud extends HudElement {
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
     // General
+
+    private final Setting<List<StatusEffect>> hiddenEffects = sgGeneral.add(new StatusEffectListSetting.Builder()
+        .name("hidden-effects")
+        .description("Which effects not to show in the list.")
+        .build()
+    );
+
+    private final Setting<Boolean> showAmbient = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-ambient")
+        .description("Whether to show ambient effects like from beacons and conduits.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<ColorMode> colorMode = sgGeneral.add(new EnumSetting.Builder<ColorMode>()
         .name("color-mode")
@@ -165,6 +181,8 @@ public class PotionTimersHud extends HudElement {
         double height = 0;
 
         for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType())) continue;
+            if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             width = Math.max(width, renderer.textWidth(getString(statusEffectInstance), shadow.get(), getScale()));
             height += renderer.textHeight(shadow.get(), getScale());
         }
@@ -193,6 +211,8 @@ public class PotionTimersHud extends HudElement {
         rainbowHue2 = rainbowHue1;
 
         for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType())) continue;
+            if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
             Color color = new Color(255, 255, 255);
 
             switch (colorMode.get()) {
