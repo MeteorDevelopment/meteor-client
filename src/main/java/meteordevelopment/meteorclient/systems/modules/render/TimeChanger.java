@@ -26,7 +26,7 @@ public class TimeChanger extends Module {
 
     private final Setting<Boolean> controlSpeed = sgGeneral.add(new BoolSetting.Builder()
         .name("control-speed")
-        .description("Weather to control the rate at which time passes.")
+        .description("Whether to control the rate at which time passes.")
         .defaultValue(false)
         .build()
     );
