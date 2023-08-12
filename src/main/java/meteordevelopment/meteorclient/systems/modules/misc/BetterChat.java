@@ -59,6 +59,14 @@ public class BetterChat extends Module {
         .build()
     );
 
+    private final Setting<Boolean> showSeconds = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-seconds")
+        .description("Shows seconds in the chat message timestamps.")
+        .defaultValue(false)
+        .onChanged(o -> updateDateFormat())
+        .build()
+    );
+
     private final Setting<Boolean> playerHeads = sgGeneral.add(new BoolSetting.Builder()
         .name("player-heads")
         .description("Displays player heads next to their messages.")
@@ -206,10 +214,9 @@ public class BetterChat extends Module {
     );
 
     private static final Pattern antiSpamRegex = Pattern.compile(".*(\\([0-9]+\\)$)");
-    private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}>\\s)");
+    private static final Pattern timestampRegex = Pattern.compile("^(<[0-9]{2}:[0-9]{2}(?::[0-9]{2})?> )");
 
     private final Char2CharMap SMALL_CAPS = new Char2CharOpenHashMap();
-    private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm");
 
     public BetterChat() {
         super(Categories.Misc, "better-chat", "Improves your chat experience in various ways.");
@@ -338,6 +345,14 @@ public class BetterChat extends Module {
         }
 
         event.message = message;
+    }
+
+    // Timestamps
+
+    private SimpleDateFormat dateFormat;
+
+    private void updateDateFormat() {
+        dateFormat = new SimpleDateFormat(showSeconds.get() ? "HH:mm:ss" : "HH:mm");
     }
 
     // Annoy
