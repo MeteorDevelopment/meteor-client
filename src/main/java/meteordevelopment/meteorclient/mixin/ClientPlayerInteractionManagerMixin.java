@@ -76,8 +76,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
                     clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
                     ci.cancel();
                 } else if (actionType == SlotActionType.SWAP) {
-                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                    ci.cancel();
+                    if (button >= 10) {
+                        clickSlot(syncId, 45, armorSlot, SlotActionType.SWAP, player);
+                        ci.cancel();
+                    } else {
+                        clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
+                        ci.cancel();
+                    }
                 }
             }
         }
