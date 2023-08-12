@@ -251,12 +251,9 @@ public class BetterChat extends Module {
         }
 
         if (timestamps.get()) {
-            Matcher matcher = timestampRegex.matcher(message.getString());
-            if (matcher.matches()) message.getSiblings().subList(0, 8).clear();
-
             Text timestamp = Text.literal("<" + dateFormat.format(new Date()) + "> ").formatted(Formatting.GRAY);
 
-            message = Text.literal("").append(timestamp).append(message);
+            message = Text.empty().append(timestamp).append(message);
         }
 
         event.setMessage(message);
