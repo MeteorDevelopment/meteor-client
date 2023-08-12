@@ -54,6 +54,7 @@
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "wurst": "*"
+    "wurst": "*",
+    "sodium": "<0.5.0"
   }
 }
