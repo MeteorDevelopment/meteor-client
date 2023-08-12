@@ -78,30 +78,32 @@ public class Trajectories extends Module {
     // Render
 
     private final Setting<ShapeMode> shapeMode = sgRender.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgRender.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color.")
-            .defaultValue(new SettingColor(255, 150, 0, 35))
-            .build()
+        .name("side-color")
+        .description("The side color.")
+        .defaultValue(new SettingColor(255, 150, 0, 35))
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgRender.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color.")
-            .defaultValue(new SettingColor(255, 150, 0))
-            .build()
+        .name("line-color")
+        .description("The line color.")
+        .defaultValue(new SettingColor(255, 150, 0))
+        .build()
     );
 
     private final ProjectileEntitySimulator simulator = new ProjectileEntitySimulator();
 
     private final Pool<Vector3d> vec3s = new Pool<>(Vector3d::new);
     private final List<Path> paths = new ArrayList<>();
+
+    private static final double MULTISHOT_OFFSET = Math.toRadians(10); // accurate-ish offset of crossbow multishot in radians (10° degrees)
 
     public Trajectories() {
         super(Categories.Render, "trajectories", "Predicts the trajectory of throwable items.");
@@ -146,10 +148,10 @@ public class Trajectories extends Module {
         getEmptyPath().calculate();
 
         if (itemStack.getItem() instanceof CrossbowItem && EnchantmentHelper.getLevel(Enchantments.MULTISHOT, itemStack) > 0) {
-            if (!simulator.set(player, itemStack, -10, accurate.get(), tickDelta)) return;
+            if (!simulator.set(player, itemStack, MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // left multishot arrow
             getEmptyPath().calculate();
 
-            if (!simulator.set(player, itemStack, 10, accurate.get(), tickDelta)) return;
+            if (!simulator.set(player, itemStack, -MULTISHOT_OFFSET, accurate.get(), tickDelta)) return; // right multishot arrow
             getEmptyPath().calculate();
         }
     }

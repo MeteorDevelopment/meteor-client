@@ -19,12 +19,11 @@ public class TimeChanger extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> time = sgGeneral.add(new DoubleSetting.Builder()
-            .name("time")
-            .description("The specified time to be set.")
-            .defaultValue(0)
-            .sliderMin(-20000)
-            .sliderMax(20000)
-            .build()
+        .name("time")
+        .description("The specified time to be set.")
+        .defaultValue(0)
+        .sliderRange(-20000, 20000)
+        .build()
     );
 
     long oldTime;
@@ -47,7 +46,7 @@ public class TimeChanger extends Module {
     private void onPacketReceive(PacketEvent.Receive event) {
         if (event.packet instanceof WorldTimeUpdateS2CPacket) {
             oldTime = ((WorldTimeUpdateS2CPacket) event.packet).getTime();
-            event.setCancelled(true);
+            event.cancel();
         }
     }
 

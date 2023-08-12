@@ -240,7 +240,7 @@ public class Scaffold extends Module {
             List<BlockPos> blocks = new ArrayList<>();
             for (int x = (int) (mc.player.getX() - radius.get()); x < mc.player.getX() + radius.get(); x++) {
                 for (int z = (int) (mc.player.getZ() - radius.get()); z < mc.player.getZ() + radius.get(); z++) {
-                    blocks.add(new BlockPos(x, mc.player.getY() - 0.5, z));
+                    blocks.add(BlockPos.ofFloored(x, mc.player.getY() - 0.5, z));
                 }
             }
 
@@ -306,7 +306,7 @@ public class Scaffold extends Module {
                     mc.player.setVelocity(0, -0.28f, 0);
             }
         } else {
-            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get()) {
+            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get() && InvUtils.testInHotbar(stack -> validItem(stack, mc.player.getBlockPos()))) {
                 Vec3d vel = mc.player.getVelocity();
                 mc.player.setVelocity(cancelVelocity.get() ? 0 : vel.x, 0.42, cancelVelocity.get() ? 0 : vel.z);
             }

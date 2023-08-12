@@ -16,18 +16,18 @@ public class NameProtect extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> nameProtect = sgGeneral.add(new BoolSetting.Builder()
-            .name("name-protect")
-            .description("Hides your name client-side.")
-            .defaultValue(true)
-            .build()
+        .name("name-protect")
+        .description("Hides your name client-side.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
-            .name("name")
-            .description("Name to be replaced with.")
-            .defaultValue("seasnail")
-            .visible(nameProtect::get)
-            .build()
+        .name("name")
+        .description("Name to be replaced with.")
+        .defaultValue("seasnail")
+        .visible(nameProtect::get)
+        .build()
     );
 
     private final Setting<Boolean> skinProtect = sgGeneral.add(new BoolSetting.Builder()
