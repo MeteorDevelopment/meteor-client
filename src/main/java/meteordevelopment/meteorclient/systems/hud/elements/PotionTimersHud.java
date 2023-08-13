@@ -172,7 +172,7 @@ public class PotionTimersHud extends HudElement {
 
     @Override
     public void tick(HudRenderer renderer) {
-        if (mc.player == null || (isInEditor() && mc.player.getStatusEffects().isEmpty())) {
+        if (mc.player == null || (isInEditor() && hasNoVisibleEffects())) {
             setSize(renderer.textWidth("Potion Timers 0:00", shadow.get(), getScale()), renderer.textHeight(shadow.get(), getScale()));
             return;
         }
@@ -199,7 +199,7 @@ public class PotionTimersHud extends HudElement {
             renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
         }
 
-        if (mc.player == null || (isInEditor() && mc.player.getStatusEffects().isEmpty())) {
+        if (mc.player == null || (isInEditor() && hasNoVisibleEffects())) {
             renderer.text("Potion Timers 0:00", x, y, Color.WHITE, shadow.get(), getScale());
             return;
         }
@@ -249,6 +249,16 @@ public class PotionTimersHud extends HudElement {
 
     private double getScale() {
         return customScale.get() ? scale.get() : -1;
+    }
+
+    private boolean hasNoVisibleEffects() {
+        for (StatusEffectInstance statusEffectInstance : mc.player.getStatusEffects()) {
+            if (hiddenEffects.get().contains(statusEffectInstance.getEffectType())) continue;
+            if (!showAmbient.get() && statusEffectInstance.isAmbient()) continue;
+            return false;
+        }
+
+        return true;
     }
 
     public enum ColorMode {
