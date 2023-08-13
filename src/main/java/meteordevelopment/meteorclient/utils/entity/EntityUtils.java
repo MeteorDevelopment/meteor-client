@@ -14,6 +14,7 @@ import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
 import meteordevelopment.meteorclient.mixin.WorldAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -42,8 +43,6 @@ import java.util.function.Predicate;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityUtils {
-    private static BlockPos.Mutable testPos = new BlockPos.Mutable();
-
     public static boolean isAttackable(EntityType<?> type) {
         return type != EntityType.AREA_EFFECT_CLOUD && type != EntityType.ARROW && type != EntityType.FALLING_BLOCK && type != EntityType.FIREWORK_ROCKET && type != EntityType.ITEM && type != EntityType.LLAMA_SPIT && type != EntityType.SPECTRAL_ARROW && type != EntityType.ENDER_PEARL && type != EntityType.EXPERIENCE_BOTTLE && type != EntityType.POTION && type != EntityType.TRIDENT && type != EntityType.LIGHTNING_BOLT && type != EntityType.FISHING_BOBBER && type != EntityType.EXPERIENCE_ORB && type != EntityType.EGG;
     }
@@ -116,7 +115,7 @@ public class EntityUtils {
         Direction bestDirection = null;
 
         for (Direction direction : Direction.HORIZONTAL) {
-            testPos.set(player.getBlockPos().offset(direction));
+            BlockPos testPos = player.getBlockPos().offset(direction);
 
             Block block = mc.world.getBlockState(testPos).getBlock();
             if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
@@ -219,5 +218,9 @@ public class EntityUtils {
     public static EntityGroup getGroup(Entity entity) {
         if (entity instanceof LivingEntity livingEntity) return livingEntity.getGroup();
         else return EntityGroup.DEFAULT;
+    }
+
+    public static boolean isOnAir(Entity entity) {
+        return entity.getWorld().getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
 }

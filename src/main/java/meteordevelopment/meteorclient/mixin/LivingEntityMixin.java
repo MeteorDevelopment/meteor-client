@@ -10,20 +10,19 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.EntityControl;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
@@ -44,6 +43,9 @@ public abstract class LivingEntityMixin extends Entity {
     @Shadow
     @Final
     private Map<StatusEffect, StatusEffectInstance> activeStatusEffects;
+
+    @Shadow
+    protected abstract float getSaddledSpeed(PlayerEntity controllingPlayer);
 
     public LivingEntityMixin(EntityType<?> type, World world) {
         super(type, world);
@@ -114,5 +116,10 @@ public abstract class LivingEntityMixin extends Entity {
         if (Modules.get().get(PotionSpoof.class).shouldBlock(effect)) return false;
 
         return original;
+    }
+
+    @Redirect(method = "travelControlled", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;getSaddledSpeed(Lnet/minecraft/entity/player/PlayerEntity;)F"))
+    private float getSaddledSpeed(LivingEntity instance, PlayerEntity controllingPlayer) {
+        return Modules.get().get(EntityControl.class).getSaddledSpeed(getSaddledSpeed(controllingPlayer));
     }
 }

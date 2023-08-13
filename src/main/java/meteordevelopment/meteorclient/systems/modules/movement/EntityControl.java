@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.entity.EntityMoveEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -25,15 +24,24 @@ import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 import net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket;
 import net.minecraft.util.math.Vec3d;
 
+import java.util.Set;
+
 public class EntityControl extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSpeed = settings.createGroup("Speed");
     private final SettingGroup sgFlight = settings.createGroup("Flight");
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Target entities.")
         .defaultValue(EntityType.BOAT, EntityType.CHEST_BOAT, EntityType.DONKEY, EntityType.HORSE, EntityType.MULE, EntityType.PIG, EntityType.SKELETON_HORSE, EntityType.STRIDER, EntityType.ZOMBIE_HORSE)
+        .build()
+    );
+
+    private final Setting<Boolean> spoofSaddle = sgGeneral.add(new BoolSetting.Builder()
+        .name("spoof-saddle")
+        .description("Let you control entities without actually having a saddle.")
+        .defaultValue(true)
         .build()
     );
 
@@ -157,7 +165,7 @@ public class EntityControl extends Module {
     @EventHandler
     private void onEntityMove(EntityMoveEvent event) {
         Entity entity = event.entity;
-        if (entity.getPrimaryPassenger() != mc.player || !entities.get().getBoolean(entity.getType())) return;
+        if (entity.getFirstPassenger() != mc.player || !entities.get().contains(entity.getType())) return;
 
         double velX = entity.getVelocity().x;
         double velY = entity.getVelocity().y;
@@ -219,20 +227,24 @@ public class EntityControl extends Module {
 
     public boolean maxJump() {
         if (mc.player.getVehicle() == null) return false;
-        return isActive() && entities.get().getBoolean(mc.player.getVehicle().getType()) && maxJump.get();
+        return isActive() && entities.get().contains(mc.player.getVehicle().getType()) && maxJump.get();
     }
 
     public boolean cancelBoatPaddle() {
         if (!(mc.player.getVehicle() instanceof BoatEntity boat)) return false;
-        return isActive() && entities.get().getBoolean(boat.getType()) && cancelBoatPaddle.get() && speed.get();
+        return isActive() && entities.get().contains(boat.getType()) && cancelBoatPaddle.get() && speed.get();
     }
 
     public boolean cancelJump() {
         if (!(mc.player.getVehicle() instanceof AbstractHorseEntity horse)) return false;
-        return isActive() && entities.get().getBoolean(horse.getType()) && flight.get();
+        return isActive() && entities.get().contains(horse.getType()) && flight.get();
     }
 
     public float getSaddledSpeed(float defaultSpeed) {
-        return isActive() && entities.get().getBoolean(mc.player.getVehicle().getType()) && speed.get() ? horizontalSpeed.get().floatValue() : defaultSpeed;
+        return isActive() && entities.get().contains(mc.player.getVehicle().getType()) && speed.get() ? horizontalSpeed.get().floatValue() : defaultSpeed;
+    }
+
+    public boolean spoofsSaddle(Entity entity) {
+        return isActive() && entities.get().contains(entity.getType()) && spoofSaddle.get();
     }
 }
