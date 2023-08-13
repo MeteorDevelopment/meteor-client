@@ -14,7 +14,6 @@ import meteordevelopment.meteorclient.mixin.SimpleEntityLookupAccessor;
 import meteordevelopment.meteorclient.mixin.WorldAccessor;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -74,7 +73,7 @@ public class EntityUtils {
         for (int i = 0; i < 64; i++) {
             BlockState state = mc.world.getBlockState(blockPos);
 
-            if (state.getMaterial().blocksMovement()) break;
+            if (state.blocksMovement()) break;
 
             Fluid fluid = state.getFluidState().getFluid();
             if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
@@ -85,10 +84,6 @@ public class EntityUtils {
         }
 
         return false;
-    }
-
-    public static boolean isOnAir(Entity entity) {
-        return entity.world.getStatesInBox(entity.getBoundingBox().expand(0.0625).stretch(0.0, -0.55, 0.0)).allMatch(AbstractBlock.AbstractBlockState::isAir);
     }
 
     public static boolean isInRenderDistance(Entity entity) {

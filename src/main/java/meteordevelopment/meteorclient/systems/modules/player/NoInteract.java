@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
@@ -26,6 +25,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
+import java.util.Set;
 
 public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
@@ -68,7 +68,7 @@ public class NoInteract extends Module {
 
     // Entities
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entityHit = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-hit")
         .description("Cancel entity hitting.")
         .onlyAttackable()
@@ -82,7 +82,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entityInteract = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-interact")
         .description("Cancel entity interaction.")
         .onlyAttackable()
@@ -194,12 +194,12 @@ public class NoInteract extends Module {
 
         // Entities
         if (entityHitMode.get() == ListMode.BlackList &&
-            entityHit.get().getBoolean(entity.getType())) {
+            entityHit.get().contains(entity.getType())) {
             return false;
         }
 
         else return entityHitMode.get() != ListMode.WhiteList ||
-            entityHit.get().getBoolean(entity.getType());
+            entityHit.get().contains(entity.getType());
     }
 
     private boolean shouldInteractEntity(Entity entity, Hand hand) {
@@ -227,11 +227,11 @@ public class NoInteract extends Module {
 
         // Entities
         if (entityInteractMode.get() == ListMode.BlackList &&
-            entityInteract.get().getBoolean(entity.getType())) {
+            entityInteract.get().contains(entity.getType())) {
             return false;
         }
         else return entityInteractMode.get() != ListMode.WhiteList ||
-            entityInteract.get().getBoolean(entity.getType());
+            entityInteract.get().contains(entity.getType());
     }
 
     public enum HandMode {

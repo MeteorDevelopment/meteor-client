@@ -66,6 +66,9 @@ public class MeteorClient implements ClientModInitializer {
         String versionString = MOD_META.getVersion().getFriendlyString();
         if (versionString.contains("-")) versionString = versionString.split("-")[0];
 
+        // When building and running through IntelliJ and not Gradle it doesn't replace the version so just use a dummy
+        if (versionString.equals("${version}")) versionString = "0.0.0";
+
         VERSION = new Version(versionString);
         DEV_BUILD = MOD_META.getCustomValue(MeteorClient.MOD_ID + ":devbuild").getAsString();
     }

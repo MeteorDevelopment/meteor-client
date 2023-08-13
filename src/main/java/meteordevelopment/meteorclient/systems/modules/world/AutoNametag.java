@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -22,45 +21,46 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
+import java.util.Set;
+
 public class AutoNametag extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Which entities to nametag.")
-            .build()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("entities")
+        .description("Which entities to nametag.")
+        .build()
     );
 
     private final Setting<Double> range = sgGeneral.add(new DoubleSetting.Builder()
-            .name("range")
-            .description("The maximum range an entity can be to be nametagged.")
-            .defaultValue(5)
-            .min(0)
-            .sliderMax(6)
-            .build()
+        .name("range")
+        .description("The maximum range an entity can be to be nametagged.")
+        .defaultValue(5)
+        .min(0)
+        .sliderMax(6)
+        .build()
     );
 
     private final Setting<SortPriority> priority = sgGeneral.add(new EnumSetting.Builder<SortPriority>()
-            .name("priority")
-            .description("Priority sort")
-            .defaultValue(SortPriority.LowestDistance)
-            .build()
+        .name("priority")
+        .description("Priority sort")
+        .defaultValue(SortPriority.LowestDistance)
+        .build()
     );
 
     private final Setting<Boolean> renametag = sgGeneral.add(new BoolSetting.Builder()
-            .name("renametag")
-            .description("Allows already nametagged entities to be renamed.")
-            .defaultValue(true)
-            .build()
+        .name("renametag")
+        .description("Allows already nametagged entities to be renamed.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically faces towards the mob being nametagged.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically faces towards the mob being nametagged.")
+        .defaultValue(true)
+        .build()
     );
-
 
     private Entity target;
     private boolean offHand;
@@ -84,7 +84,7 @@ public class AutoNametag extends Module {
         // Target
         target = TargetUtils.get(entity -> {
             if (!PlayerUtils.isWithin(entity, range.get())) return false;
-            if (!entities.get().getBoolean(entity.getType())) return false;
+            if (!entities.get().contains(entity.getType())) return false;
             if (entity.hasCustomName()) {
                 return renametag.get() && entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
             }

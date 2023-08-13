@@ -40,7 +40,7 @@ public class Swarm extends Module {
     private final Setting<Integer> serverPort = sgGeneral.add(new IntSetting.Builder()
         .name("port")
         .description("The port used for connections.")
-        .defaultValue(420)
+        .defaultValue(6969)
         .range(1, 65535)
         .noSlider()
         .build()
@@ -50,7 +50,7 @@ public class Swarm extends Module {
     public SwarmWorker worker;
 
     public Swarm() {
-        super(Categories.Misc, "Swarm", "Allows you to control multiple instances of Meteor from one central host.");
+        super(Categories.Misc, "swarm", "Allows you to control multiple instances of Meteor from one central host.");
     }
 
     @Override

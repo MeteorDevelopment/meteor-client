@@ -76,6 +76,13 @@ public class NoSlow extends Module {
         .build()
     );
 
+    private final Setting<Boolean> fluidDrag = sgGeneral.add(new BoolSetting.Builder()
+        .name("fluid-drag")
+        .description("Whether or not fluid drag will not slow you down.")
+        .defaultValue(false)
+        .build()
+    );
+
     private final Setting<Boolean> sneaking = sgGeneral.add(new BoolSetting.Builder()
         .name("sneaking")
         .description("Whether or not sneaking will not slow you down.")
@@ -134,6 +141,10 @@ public class NoSlow extends Module {
 
     public boolean berryBush() {
         return isActive() && berryBush.get();
+    }
+
+    public boolean fluidDrag() {
+        return isActive() && fluidDrag.get();
     }
 
     public boolean sneaking() {

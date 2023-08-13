@@ -16,10 +16,10 @@ public class NoMiningTrace extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> onlyWhenHoldingPickaxe = sgGeneral.add(new BoolSetting.Builder()
-            .name("only-when-holding-a-pickaxe")
-            .description("Whether or not to work only when holding a pickaxe.")
-            .defaultValue(true)
-            .build()
+        .name("only-when-holding-a-pickaxe")
+        .description("Whether or not to work only when holding a pickaxe.")
+        .defaultValue(true)
+        .build()
     );
 
     public NoMiningTrace() {
