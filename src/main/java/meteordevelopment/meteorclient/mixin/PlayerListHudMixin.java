@@ -7,13 +7,13 @@ package meteordevelopment.meteorclient.mixin;
 
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterTab;
-import meteordevelopment.meteorclient.utils.Utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.PlayerListHud;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -43,19 +43,18 @@ public class PlayerListHudMixin {
     }
 
     @Inject(method = "renderLatencyIcon", at = @At("HEAD"), cancellable = true)
-    private void onRenderLatencyIcon(MatrixStack matrices, int width, int x, int y, PlayerListEntry entry, CallbackInfo info) {
+    private void onRenderLatencyIcon(DrawContext context, int width, int x, int y, PlayerListEntry entry, CallbackInfo ci) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
 
         if (betterTab.isActive() && betterTab.accurateLatency.get()) {
             MinecraftClient mc = MinecraftClient.getInstance();
             TextRenderer textRenderer = mc.textRenderer;
 
-            int latency = Utils.clamp(entry.getLatency(), 0, 9999);
+            int latency = MathHelper.clamp(entry.getLatency(), 0, 9999);
             int color = latency < 150 ? 0x00E970 : latency < 300 ? 0xE7D020 : 0xD74238;
             String text = latency + "ms";
-            textRenderer.drawWithShadow(matrices, text, (float) x + width - textRenderer.getWidth(text), (float) y, color);
-
-            info.cancel();
+            context.drawTextWithShadow(textRenderer, text, x + width - textRenderer.getWidth(text), y, color);
+            ci.cancel();
         }
     }
 }

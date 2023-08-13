@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -30,7 +31,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -103,10 +103,9 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
-    private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
-        if (Modules.get().get(NoRender.class).noNausea()) return 0;
-        return MathHelper.lerp(delta, first, second);
+    @ModifyExpressionValue(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
+    private float applyCameraTransformationsMathHelperLerpProxy(float original) {
+        return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
     }
 
     // Freecam

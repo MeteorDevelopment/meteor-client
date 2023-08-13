@@ -7,12 +7,12 @@ package meteordevelopment.meteorclient.utils.render;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.GameRenderer;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.client.toast.Toast;
 import net.minecraft.client.toast.ToastManager;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.sound.SoundEvents;
@@ -47,29 +47,29 @@ public class MeteorToast implements Toast {
         this.duration = 6000;
     }
 
-    public Visibility draw(MatrixStack matrices, ToastManager toastManager, long currentTime) {
+    @Override
+    public Visibility draw(DrawContext context, ToastManager toastManager, long currentTime) {
         if (justUpdated) {
             start = currentTime;
             justUpdated = false;
         }
 
         RenderSystem.setShader(GameRenderer::getPositionTexProgram);
-        RenderSystem.setShaderTexture(0, TEXTURE);
         RenderSystem.setShaderColor(1, 1, 1, 1);
 
-        toastManager.drawTexture(matrices, 0, 0, 0, 0, getWidth(), getHeight());
+        context.drawTexture(TEXTURE, 0, 0, 0, 0, getWidth(), getHeight());
 
         int x = icon != null ? 28 : 12;
         int titleY = 12;
 
         if (text != null) {
-            mc.textRenderer.draw(matrices, text, x, 18, TEXT_COLOR);
+            context.drawText(mc.textRenderer, title, x, 18, TITLE_COLOR, false);
             titleY = 7;
         }
 
-        mc.textRenderer.draw(matrices, title, x, titleY, TITLE_COLOR);
+        context.drawText(mc.textRenderer, title, x, titleY, TITLE_COLOR, false);
 
-        if (icon != null) mc.getItemRenderer().renderInGui(matrices, icon, 8, 8);
+        if (icon != null) context.drawItem(icon, 8, 8);
 
         if (!playedSound) {
             mc.getSoundManager().play(getSound());

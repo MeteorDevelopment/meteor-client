@@ -25,6 +25,10 @@ public class Version {
         }
     }
 
+    public boolean isZero() {
+        return numbers[0] == 0 && numbers[1] == 0 && numbers[2] == 0;
+    }
+
     public boolean isHigherThan(Version version) {
         for (int i = 0; i < 3; i++) {
             if (numbers[i] > version.numbers[i]) return true;

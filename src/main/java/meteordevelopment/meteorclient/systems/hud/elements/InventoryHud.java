@@ -93,7 +93,7 @@ public class InventoryHud extends HudElement {
                     int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * scale.get()) : (int) (x + (1 + i * 18) * scale.get());
                     int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * scale.get()) : (int) (y + (1 + row * 18) * scale.get());
 
-                    RenderUtils.drawItem(stack, itemX, itemY, scale.get().floatValue(), true);
+                    renderer.item(stack, itemX, itemY, scale.get().floatValue(), true);
                 }
             }
         });

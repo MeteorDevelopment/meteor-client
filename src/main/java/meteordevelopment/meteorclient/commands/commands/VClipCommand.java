@@ -31,6 +31,14 @@ public class VClipCommand extends Command {
             // Paper allows you to teleport 10 blocks for each move packet you send in that tick
             // Video explanation by LiveOverflow: https://www.youtube.com/watch?v=3HSnDsfkJT8
             int packetsRequired = (int) Math.ceil(Math.abs(blocks / 10));
+
+            if (packetsRequired > 20) {
+                // Wouldn't work on paper anyway.
+                // Some servers don't have a vertical limit, so if it is more than 200 blocks, just use a "normal" tp
+                // This makes it, so you don't get kicked for sending too many packets
+                packetsRequired = 1;
+            }
+
             if (mc.player.hasVehicle()) {
                 // Vehicle version
                 // For each 10 blocks, send a vehicle move packet with no delta

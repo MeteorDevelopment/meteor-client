@@ -19,6 +19,9 @@
   "icon": "assets/meteor-client/icon.png",
   "environment": "client",
   "entrypoints": {
+    "preLaunch": [
+      "com.llamalad7.mixinextras.MixinExtrasBootstrap::init"
+    ],
     "client": [
       "meteordevelopment.meteorclient.MeteorClient"
     ]
@@ -44,13 +47,14 @@
   },
   "depends": {
     "java": ">=17",
-    "minecraft": ">=1.19.4",
-    "fabricloader": ">=0.14.17"
+    "minecraft": [ "1.20", "1.20.1" ],
+    "fabricloader": ">=0.14.21"
   },
   "breaks": {
     "optifabric": "*",
     "feather": "*",
     "origins": "*",
-    "wurst": "*"
+    "wurst": "*",
+    "sodium": "<0.5.0"
   }
 }

@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.TitleScreenCredits;
 import meteordevelopment.meteorclient.utils.render.prompts.OkPrompt;
 import meteordevelopment.meteorclient.utils.render.prompts.YesNoPrompt;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.Util;
 import org.lwjgl.glfw.GLFW;
@@ -33,43 +33,46 @@ public class TitleScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screen/TitleScreen;drawTextWithShadow(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)V", ordinal = 0))
-    private void onRenderIdkDude(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Ljava/lang/String;III)I", ordinal = 0))
+    private void onRenderIdkDude(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (Utils.firstTimeTitleScreen) {
             Utils.firstTimeTitleScreen = false;
-            MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-            MeteorExecutor.execute(() -> {
-                String res = Http.get("https://meteorclient.com/api/stats").sendString();
-                if (res == null) return;
+            if (!MeteorClient.VERSION.isZero()) {
+                MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-                Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());
+                MeteorExecutor.execute(() -> {
+                    String res = Http.get("https://meteorclient.com/api/stats").sendString();
+                    if (res == null) return;
 
-                if (latestVer.isHigherThan(MeteorClient.VERSION)) {
-                    YesNoPrompt.create()
-                        .title("New Update")
-                        .message("A new version of Meteor has been released.")
-                        .message("Your version: %s", MeteorClient.VERSION)
-                        .message("Latest version: %s", latestVer)
-                        .message("Do you want to update?")
-                        .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
-                        .onNo(() -> OkPrompt.create()
-                            .title("Are you sure?")
-                            .message("Using old versions of Meteor is not recommended")
-                            .message("and could report in issues.")
-                            .id("new-update-no")
-                            .onOk(this::close)
-                            .show())
-                        .id("new-update")
-                        .show();
-                }
-            });
+                    Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());
+
+                    if (latestVer.isHigherThan(MeteorClient.VERSION)) {
+                        YesNoPrompt.create()
+                            .title("New Update")
+                            .message("A new version of Meteor has been released.")
+                            .message("Your version: %s", MeteorClient.VERSION)
+                            .message("Latest version: %s", latestVer)
+                            .message("Do you want to update?")
+                            .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
+                            .onNo(() -> OkPrompt.create()
+                                .title("Are you sure?")
+                                .message("Using old versions of Meteor is not recommended")
+                                .message("and could report in issues.")
+                                .id("new-update-no")
+                                .onOk(this::close)
+                                .show())
+                            .id("new-update")
+                            .show();
+                    }
+                });
+            }
         }
     }
 
     @Inject(method = "render", at = @At("TAIL"))
-    private void onRender(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo info) {
-        if (Config.get().titleScreenCredits.get()) TitleScreenCredits.render(matrices);
+    private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        if (Config.get().titleScreenCredits.get()) TitleScreenCredits.render(context);
     }
 
     @Inject(method = "mouseClicked", at = @At("HEAD"), cancellable = true)

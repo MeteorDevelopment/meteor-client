@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.widgets.WRoot;
 import meteordevelopment.meteorclient.gui.widgets.containers.WVerticalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WPressable;
-import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.util.math.MathHelper;
 
 public abstract class WDropdown<T> extends WPressable {
     public Runnable action;
@@ -103,7 +103,7 @@ public abstract class WDropdown<T> extends WPressable {
         boolean render = super.render(renderer, mouseX, mouseY, delta);
 
         animProgress += (expanded ? 1 : -1) * delta * 14;
-        animProgress = Utils.clamp(animProgress, 0, 1);
+        animProgress = MathHelper.clamp(animProgress, 0, 1);
 
         if (!render && animProgress > 0) {
             renderer.absolutePost(() -> {

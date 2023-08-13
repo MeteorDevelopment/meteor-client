@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
@@ -117,7 +116,7 @@ public class HoleHud extends HudElement {
         Block block = dir == Direction.DOWN ? Blocks.OBSIDIAN : mc.world.getBlockState(mc.player.getBlockPos().offset(dir)).getBlock();
         if (!safe.get().contains(block)) return;
 
-        RenderUtils.drawItem(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get().floatValue(), false);
+        renderer.item(block.asItem().getDefaultStack(), (int) x, (int) y, scale.get().floatValue(), false);
 
         if (dir == Direction.DOWN) return;
 

@@ -227,7 +227,6 @@ public class Flight extends Module {
         mc.player.getAbilities().allowFlying = false;
     }
 
-    // All the multiplication below is to get the speed to roughly match the speed you get when using vanilla fly
     @EventHandler
     private void onGetOffGroundSpeed(OffGroundSpeedEvent event) {
         if (mode.get() != Mode.Velocity) return;

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
+import net.minecraft.network.packet.BundlePacket;
 import net.minecraft.network.packet.Packet;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
@@ -234,6 +235,7 @@ public class PacketUtilsUtil {
         Set<Class<? extends Packet>> s2cPackets = s2c.getSubTypesOf(Packet.class);
 
         for (Class<? extends Packet> s2cPacket : s2cPackets) {
+            if (s2cPacket == BundlePacket.class) continue;
             String name = s2cPacket.getName();
             String className = name.substring(name.lastIndexOf('.') + 1).replace('$', '.');
             String fullName = name.replace('$', '.');
