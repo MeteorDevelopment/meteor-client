@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -35,7 +34,6 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
@@ -141,7 +139,7 @@ public class InventoryTweaks extends Module {
     private InventorySorter sorter;
     private boolean invOpened;
 
-    public CompletableFuture<Void> task;
+    private Thread task;
 
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
@@ -345,23 +343,29 @@ public class InventoryTweaks extends Module {
             if (initial) {
                 sleep = initDelay.get();
                 initial = false;
-            } else sleep = getSleepTime();
+            } else
+                sleep = delay.get() + (randomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, randomDelay.get()) : 0);
             if (sleep > 0) {
                 try {
                     Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                } catch (InterruptedException ignored) {
                 }
             }
         }
 
         public void execute(ScreenHandler handler) {
-            if (task != null && !task.isCancelled()) task.cancel(true);
-            initial = initDelay.get() != 0;
-            task = CompletableFuture.runAsync(() -> execute0(handler), MeteorExecutor.executor);
+            if (task != null && task.isAlive()) task.stop();
+            task = new Thread(() -> {
+                try {
+                    initial = initDelay.get() != 0;
+                    execute0(handler);
+                } catch (ThreadDeath ignored) {
+                }
+            });
+            task.start();
         }
 
-        public abstract void execute0(ScreenHandler handler);
+        protected abstract void execute0(ScreenHandler handler);
 
         public boolean showButton(ScreenHandler handler) {
             try {
@@ -369,10 +373,6 @@ public class InventoryTweaks extends Module {
             } catch (UnsupportedOperationException e) {
                 return false;
             }
-        }
-
-        int getSleepTime() {
-            return delay.get() + (randomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, randomDelay.get()) : 0);
         }
 
         boolean canAutoExecute(ScreenHandler handler) {
