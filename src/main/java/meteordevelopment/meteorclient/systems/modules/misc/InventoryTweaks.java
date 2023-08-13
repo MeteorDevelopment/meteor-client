@@ -141,6 +141,8 @@ public class InventoryTweaks extends Module {
     private InventorySorter sorter;
     private boolean invOpened;
 
+    public CompletableFuture<Void> task;
+
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
     }
@@ -260,7 +262,7 @@ public class InventoryTweaks extends Module {
 
     public abstract class Button {
         public final String buttonName;
-        public CompletableFuture<Void> task;
+        private boolean initial;
 
         final SettingGroup sg;
 
@@ -339,7 +341,6 @@ public class InventoryTweaks extends Module {
         }
 
         protected void delay() {
-            boolean initial = initDelay.get() != 0;
             int sleep;
             if (initial) {
                 sleep = initDelay.get();
@@ -356,6 +357,7 @@ public class InventoryTweaks extends Module {
 
         public void execute(ScreenHandler handler) {
             if (task != null && task.isCancelled()) task.cancel(false);
+            initial = initDelay.get() != 0;
             task = CompletableFuture.runAsync(() -> execute0(handler), MeteorExecutor.executor);
         }
 
