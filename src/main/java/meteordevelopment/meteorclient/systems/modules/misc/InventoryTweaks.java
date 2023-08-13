@@ -356,7 +356,7 @@ public class InventoryTweaks extends Module {
         }
 
         public void execute(ScreenHandler handler) {
-            if (task != null && task.isCancelled()) task.cancel(false);
+            if (task != null && !task.isCancelled()) task.cancel(true);
             initial = initDelay.get() != 0;
             task = CompletableFuture.runAsync(() -> execute0(handler), MeteorExecutor.executor);
         }
