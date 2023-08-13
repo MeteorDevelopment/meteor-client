@@ -36,7 +36,7 @@ public class Scaffold extends Module {
 
     private final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
         .name("blocks-filter")
-        .description("How to use the block list setting")
+        .description("How to use the block list setting.")
         .defaultValue(FilterMode.Blacklist)
         .build()
     );

@@ -187,7 +187,7 @@ public class NoInteract extends Module {
         if ((nametagged.get() == InteractMode.Both || nametagged.get() == InteractMode.Hit) && entity.hasCustomName()) return false;
 
         // Entities
-        return !entityHitMode.get().test(hitEntities.get(), entity);
+        return !entityHitMode.get().test(hitEntities.get(), entity.getType());
     }
 
     private boolean shouldInteractEntity(Entity entity, Hand hand) {
@@ -214,7 +214,7 @@ public class NoInteract extends Module {
         if ((nametagged.get() == InteractMode.Both || nametagged.get() == InteractMode.Interact) && entity.hasCustomName()) return false;
 
         // Entities
-        return !entityInteractMode.get().test(interactEntities.get(), entity);
+        return !entityInteractMode.get().test(interactEntities.get(), entity.getType());
     }
 
     public enum HandMode {
