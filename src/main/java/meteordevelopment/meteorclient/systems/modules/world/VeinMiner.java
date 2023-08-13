@@ -57,14 +57,14 @@ public class VeinMiner extends Module {
     private final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
         .name("blocks-filter")
         .description("Selection mode.")
-        .defaultValue(FilterMode.Whitelist)
+        .defaultValue(FilterMode.Blacklist)
         .build()
     );
 
     private final Setting<List<Block>> selectedBlocks = sgGeneral.add(new BlockListSetting.Builder()
         .name("blocks")
         .description("Which blocks to select.")
-        .defaultValue(Blocks.STONE, Blocks.DIRT, Blocks.GRASS)
+        .defaultValue(Blocks.GRASS_BLOCK)
         .visible(() -> !blocksFilter.get().isWildCard())
         .build()
     );

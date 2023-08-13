@@ -35,6 +35,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
@@ -259,6 +260,7 @@ public class InventoryTweaks extends Module {
 
     public abstract class Button {
         public final String buttonName;
+        public CompletableFuture<Void> task;
 
         final SettingGroup sg;
 
@@ -269,7 +271,6 @@ public class InventoryTweaks extends Module {
         final Setting<Integer> delay;
         final Setting<Integer> initDelay;
         final Setting<Integer> randomDelay;
-
 
         protected Button(String buttonName, String category) {
             this.buttonName = buttonName;
@@ -294,7 +295,7 @@ public class InventoryTweaks extends Module {
             itemsFilter = sg.add(new EnumSetting.Builder<FilterMode>()
                 .name("items-filter")
                 .description("The method for filtering items.")
-                .defaultValue(FilterMode.Whitelist)
+                .defaultValue(FilterMode.Blacklist)
                 .visible(() -> triggerMode.get() != TriggerMode.Disabled)
                 .build()
             );
@@ -337,7 +338,28 @@ public class InventoryTweaks extends Module {
             );
         }
 
-        public abstract void execute(ScreenHandler handler);
+        protected void delay() {
+            boolean initial = initDelay.get() != 0;
+            int sleep;
+            if (initial) {
+                sleep = initDelay.get();
+                initial = false;
+            } else sleep = getSleepTime();
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public void execute(ScreenHandler handler) {
+            if (task != null && task.isCancelled()) task.cancel(false);
+            task = CompletableFuture.runAsync(() -> execute0(handler), MeteorExecutor.executor);
+        }
+
+        public abstract void execute0(ScreenHandler handler);
 
         public boolean showButton(ScreenHandler handler) {
             try {
@@ -376,163 +398,113 @@ public class InventoryTweaks extends Module {
     }
 
     private class Delete extends Button {
-        private final Setting<Boolean> excludeSelf;
+        private final Setting<Boolean> excludeSelf = sg.add(new BoolSetting.Builder()
+            .name("exclude-self")
+            .description("Whether or not to exclude deleting your own Inventory's items.")
+            .defaultValue(true)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            .build()
+        );
 
         protected Delete() {
-            super("Delete","Item Deleter");
-
-            excludeSelf = sg.add(new BoolSetting.Builder()
-                .name("exclude-self")
-                .description("Whether or not to exclude deleting your own Inventory's items.")
-                .defaultValue(true)
-                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
-                .build()
-            );
+            super("Delete", "Item Deleter");
         }
 
         @Override
-        public void execute(ScreenHandler handler) {
-            MeteorExecutor.execute(() -> {
-                boolean initial = initDelay.get() != 0;
-                int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
-                int playerInvEnd = excludeSelf.get() ? playerInvOffset : playerInvOffset + 4 * 9;
+        public void execute0(ScreenHandler handler) {
+            int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
+            int playerInvEnd = excludeSelf.get() ? playerInvOffset : playerInvOffset + 4 * 9;
 
-                for (int i = 0; i < playerInvEnd; i++) {
-                    if (!handler.getSlot(i).hasStack()) continue;
+            for (int i = 0; i < playerInvEnd; i++) {
+                if (!handler.getSlot(i).hasStack()) continue;
 
-                    int sleep;
-                    if (initial) {
-                        sleep = initDelay.get();
-                        initial = false;
-                    } else sleep = getSleepTime();
-                    if (sleep > 0) {
-                        try {
-                            Thread.sleep(sleep);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                delay();
 
-                    if (mc.currentScreen == null || !Utils.canUpdate()) break;
+                if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
-                    Item item = handler.getSlot(i).getStack().getItem();
-                    if (!itemsFilter.get().test(items.get() , item)) continue;
+                Item item = handler.getSlot(i).getStack().getItem();
+                if (!itemsFilter.get().test(items.get(), item)) continue;
 
-                    mc.interactionManager.clickSlot(handler.syncId, i, 100, SlotActionType.SWAP, mc.player);
-                }
-            });
+                mc.interactionManager.clickSlot(handler.syncId, i, 100, SlotActionType.SWAP, mc.player);
+            }
         }
     }
 
     private class Steal extends Button {
-        private final Setting<Boolean> drop;
-        private final Setting<Boolean> dropBackwards;
+        private final Setting<Boolean> drop = sg.add(new BoolSetting.Builder()
+            .name("drop-items")
+            .description("Drop items to the ground instead of stealing them.")
+            .defaultValue(false)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            .build()
+        );
+
+        private final Setting<Boolean> dropBackwards = sg.add(new BoolSetting.Builder()
+            .name("drop-backwards")
+            .description("Drop items behind you.")
+            .defaultValue(false)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled && drop.get())
+            .build()
+        );
 
         protected Steal() {
-            super("Steal","Item Stealer");
-
-            drop = sg.add(new BoolSetting.Builder()
-                .name("drop-items")
-                .description("Drop items to the ground instead of stealing them.")
-                .defaultValue(false)
-                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
-                .build()
-            );
-
-            dropBackwards = sg.add(new BoolSetting.Builder()
-                .name("drop-backwards")
-                .description("Drop items behind you.")
-                .defaultValue(false)
-                .visible(() -> triggerMode.get() != TriggerMode.Disabled && drop.get())
-                .build()
-            );
+            super("Steal", "Item Stealer");
         }
 
         @Override
-        public void execute(ScreenHandler handler) {
-            MeteorExecutor.execute(() -> {
-                boolean initial = initDelay.get() != 0;
-                for (int i = 0; i < SlotUtils.indexToId(SlotUtils.MAIN_START); i++) {
-                    if (!handler.getSlot(i).hasStack()) continue;
+        public void execute0(ScreenHandler handler) {
+            for (int i = 0; i < SlotUtils.indexToId(SlotUtils.MAIN_START); i++) {
+                if (!handler.getSlot(i).hasStack()) continue;
 
-                    int sleep;
-                    if (initial) {
-                        sleep = initDelay.get();
-                        initial = false;
-                    } else sleep = getSleepTime();
-                    if (sleep > 0) {
-                        try {
-                            Thread.sleep(sleep);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
+                delay();
+
+                if (mc.currentScreen == null || !Utils.canUpdate()) break;
+
+                Item item = handler.getSlot(i).getStack().getItem();
+                if (!itemsFilter.get().test(items.get(), item)) continue;
+
+                if (drop.get()) {
+                    if (dropBackwards.get()) {
+                        int iCopy = i;
+                        Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
+                    } else {
+                        InvUtils.drop().slotId(i);
                     }
-
-                    if (mc.currentScreen == null || !Utils.canUpdate()) break;
-
-                    Item item = handler.getSlot(i).getStack().getItem();
-                    if (!itemsFilter.get().test(items.get(), item)) continue;
-
-                    if (drop.get()) {
-                        if (dropBackwards.get()) {
-                            int iCopy = i;
-                            Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
-                        } else {
-                            InvUtils.drop().slotId(i);
-                        }
-                    } else InvUtils.quickMove().slotId(i);
-                }
-            });
+                } else InvUtils.quickMove().slotId(i);
+            }
         }
     }
 
     private class Dump extends Button {
-        private final Setting<Boolean> excludeHotbar;
+        private final Setting<Boolean> excludeHotbar = sg.add(new BoolSetting.Builder()
+            .name("exclude-hotbar")
+            .description("Exclude items in hotbar from dumping into container.")
+            .defaultValue(false)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            .build()
+        );
 
         protected Dump() {
-            super("Dump","Item Dumper");
-
-            excludeHotbar = sg.add(new BoolSetting.Builder()
-                .name("exclude-hotbar")
-                .description("Exclude items in hotbar from dumping into container.")
-                .defaultValue(false)
-                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
-                .build()
-            );
+            super("Dump", "Item Dumper");
         }
 
         @Override
-        public void execute(ScreenHandler handler) {
-            MeteorExecutor.execute(() -> {
-                boolean initial = initDelay.get() != 0;
+        public void execute0(ScreenHandler handler) {
+            int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
+            int playerInvEnd = excludeHotbar.get() ? (playerInvOffset + 3 * 9) : (playerInvOffset + 4 * 9);
 
-                int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
-                int playerInvEnd = excludeHotbar.get() ? (playerInvOffset + 3 * 9) : (playerInvOffset + 4 * 9);
+            for (int i = playerInvOffset; i < playerInvEnd; i++) {
+                if (!handler.getSlot(i).hasStack()) continue;
 
-                for (int i = playerInvOffset; i < playerInvEnd; i++) {
-                    if (!handler.getSlot(i).hasStack()) continue;
+                delay();
 
-                    int sleep;
-                    if (initial) {
-                        sleep = initDelay.get();
-                        initial = false;
-                    } else sleep = getSleepTime();
-                    if (sleep > 0) {
-                        try {
-                            Thread.sleep(sleep);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                    }
+                if (mc.currentScreen == null || !Utils.canUpdate()) break;
 
-                    if (mc.currentScreen == null || !Utils.canUpdate()) break;
+                Item item = handler.getSlot(i).getStack().getItem();
+                if (!itemsFilter.get().test(items.get(), item)) continue;
 
-                    Item item = handler.getSlot(i).getStack().getItem();
-                    if (!itemsFilter.get().test(items.get(), item)) continue;
-
-                    InvUtils.quickMove().slotId(i);
-                }
-            });
+                InvUtils.quickMove().slotId(i);
+            }
         }
     }
 }
