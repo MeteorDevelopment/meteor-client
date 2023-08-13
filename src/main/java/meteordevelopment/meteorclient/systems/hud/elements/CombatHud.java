@@ -20,7 +20,6 @@ import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -49,8 +48,6 @@ public class CombatHud extends HudElement {
     private static final Color BLACK = new Color(0, 0, 0, 255);
 
     public static final HudElementInfo<CombatHud> INFO = new HudElementInfo<>(Hud.GROUP, "combat", "Displays information about your combat target.", CombatHud::new);
-
-    private static final MatrixStack MATRICES = new MatrixStack();
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
@@ -211,7 +208,7 @@ public class CombatHud extends HudElement {
 
             // Player Model
             InventoryScreen.drawEntity(
-                MATRICES,
+                renderer.drawContext,
                 (int) (x + (25 * scale.get())),
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
@@ -341,7 +338,7 @@ public class CombatHud extends HudElement {
 
                 ItemStack itemStack = getItem(slot);
 
-                RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, true);
+                renderer.item(itemStack, (int) (armorX * scale.get()), (int) (armorY * scale.get()), scale.get().floatValue(), true);
 
                 armorY += 18;
 

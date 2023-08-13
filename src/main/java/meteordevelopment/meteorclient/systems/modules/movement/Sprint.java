@@ -17,10 +17,10 @@ public class Sprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> whenStationary = sgGeneral.add(new BoolSetting.Builder()
-            .name("when-stationary")
-            .description("Continues sprinting even if you do not move.")
-            .defaultValue(true)
-            .build()
+        .name("when-stationary")
+        .description("Continues sprinting even if you do not move.")
+        .defaultValue(false)
+        .build()
     );
 
     public Sprint() {

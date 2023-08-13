@@ -33,7 +33,10 @@ import net.minecraft.world.BlockView;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.*;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArgs;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
@@ -73,8 +76,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
                     clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
                     ci.cancel();
                 } else if (actionType == SlotActionType.SWAP) {
-                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                    ci.cancel();
+                    if (button >= 10) {
+                        clickSlot(syncId, 45, armorSlot, SlotActionType.SWAP, player);
+                        ci.cancel();
+                    } else {
+                        clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
+                        ci.cancel();
+                    }
                 }
             }
         }
@@ -107,7 +115,12 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        info.setReturnValue(Modules.get().get(Reach.class).getReach());
+        info.setReturnValue(Modules.get().get(Reach.class).blockReach());
+    }
+
+    @Inject(method = "hasExtendedReach", at = @At("HEAD"), cancellable = true)
+    private void onHasExtendedReach(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().isActive(Reach.class)) info.setReturnValue(false);
     }
 
     @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
@@ -128,7 +141,7 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
         blockBreakingCooldown = event.cooldown;
     }
 
-    @Redirect(method = "method_41930",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
+    @Redirect(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
     private float deltaChange(BlockState blockState, PlayerEntity player, BlockView world, BlockPos pos) {
         float delta = blockState.calcBlockBreakingDelta(player, world, pos);
         if (Modules.get().get(BreakDelay.class).noInstaBreak.get() && delta >= 1) {

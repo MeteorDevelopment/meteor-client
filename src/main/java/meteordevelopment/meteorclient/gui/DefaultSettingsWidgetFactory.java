@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -68,6 +69,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
         factories.put(ColorListSetting.class, (table, setting) -> colorListW(table, (ColorListSetting) setting));
         factories.put(FontFaceSetting.class, (table, setting) -> fontW(table, (FontFaceSetting) setting));
+        factories.put(Vector3dSetting.class, (table, setting) -> vector3dW(table, (Vector3dSetting) setting));
     }
 
     @Override
@@ -86,7 +88,9 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         list.minWidth = list.width;
 
         // Remove hidden settings
-        for (RemoveInfo removeInfo : removeInfoList) removeInfo.remove(list);
+        for (RemoveInfo removeInfo : removeInfoList) {
+            removeInfo.remove(list);
+        }
 
         return list;
     }
@@ -423,6 +427,35 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
             t.row();
             i++;
         }
+    }
+
+    private void vector3dW(WTable table, Vector3dSetting setting) {
+        WTable internal = table.add(theme.table()).expandX().widget();
+
+        WDoubleEdit x = addVectorComponent(internal, "X", setting.get().x, val -> setting.get().x = val, setting);
+        WDoubleEdit y = addVectorComponent(internal, "Y", setting.get().y, val -> setting.get().y = val, setting);
+        WDoubleEdit z = addVectorComponent(internal, "Z", setting.get().z, val -> setting.get().z = val, setting);
+
+        reset(table, setting, () -> {
+            x.set(setting.get().x);
+            y.set(setting.get().y);
+            z.set(setting.get().z);
+        });
+    }
+
+    private WDoubleEdit addVectorComponent(WTable table, String label, double value, Consumer<Double> update, Vector3dSetting setting) {
+        table.add(theme.label(label + ": "));
+
+        WDoubleEdit component = table.add(theme.doubleEdit(value, setting.min, setting.max, setting.sliderMin, setting.sliderMax, setting.decimalPlaces, setting.noSlider)).expandX().widget();
+        if (setting.onSliderRelease) {
+            component.actionOnRelease = () -> update.accept(component.get());
+        } else {
+            component.action = () -> update.accept(component.get());
+        }
+
+        table.row();
+
+        return component;
     }
 
     // Other

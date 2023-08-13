@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.mixin;
 import baritone.api.BaritoneAPI;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.entity.EntityDestroyEvent;
 import meteordevelopment.meteorclient.events.entity.player.PickItemsEvent;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
@@ -18,7 +19,6 @@ import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosionS2CPacket;
-import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
@@ -144,7 +144,7 @@ public abstract class ClientPlayNetworkHandlerMixin {
 
         if (message.startsWith(Config.get().prefix.get())) {
             try {
-                Commands.get().dispatch(message.substring(Config.get().prefix.get().length()));
+                Commands.dispatch(message.substring(Config.get().prefix.get().length()));
             } catch (CommandSyntaxException e) {
                 ChatUtils.error(e.getMessage());
             }

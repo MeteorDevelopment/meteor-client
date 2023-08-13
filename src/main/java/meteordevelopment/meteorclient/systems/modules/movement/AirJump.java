@@ -21,10 +21,10 @@ public class AirJump extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> maintainLevel = sgGeneral.add(new BoolSetting.Builder()
-            .name("maintain-level")
-            .description("Maintains your current Y level when holding the jump key.")
-            .defaultValue(false)
-            .build()
+        .name("maintain-level")
+        .description("Maintains your current Y level when holding the jump key.")
+        .defaultValue(false)
+        .build()
     );
 
     private int level;

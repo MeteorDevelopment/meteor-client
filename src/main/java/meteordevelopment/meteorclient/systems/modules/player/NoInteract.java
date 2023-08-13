@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.entity.player.AttackEntityEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractBlockEvent;
 import meteordevelopment.meteorclient.events.entity.player.InteractEntityEvent;
@@ -27,6 +26,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
+import java.util.Set;
 
 public class NoInteract extends Module {
     private final SettingGroup sgBlocks = settings.createGroup("Blocks");
@@ -78,7 +78,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> hitEntities = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> hitEntities = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-hit")
         .description("Cancel hitting selected entities.")
         .onlyAttackable()
@@ -94,7 +94,7 @@ public class NoInteract extends Module {
         .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> interactEntities = sgEntities.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> interactEntities = sgEntities.add(new EntityTypeListSetting.Builder()
         .name("entity-interact")
         .description("Cancel interaction with selected entities.")
         .onlyAttackable()

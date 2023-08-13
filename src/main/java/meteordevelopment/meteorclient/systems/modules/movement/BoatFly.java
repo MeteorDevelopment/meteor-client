@@ -23,36 +23,36 @@ public class BoatFly extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> speed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("speed")
-            .description("Horizontal speed in blocks per second.")
-            .defaultValue(10)
-            .min(0)
-            .sliderMax(50)
-            .build()
+        .name("speed")
+        .description("Horizontal speed in blocks per second.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(50)
+        .build()
     );
 
     private final Setting<Double> verticalSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("vertical-speed")
-            .description("Vertical speed in blocks per second.")
-            .defaultValue(6)
-            .min(0)
-            .sliderMax(20)
-            .build()
+        .name("vertical-speed")
+        .description("Vertical speed in blocks per second.")
+        .defaultValue(6)
+        .min(0)
+        .sliderMax(20)
+        .build()
     );
 
     private final Setting<Double> fallSpeed = sgGeneral.add(new DoubleSetting.Builder()
-            .name("fall-speed")
-            .description("How fast you fall in blocks per second.")
-            .defaultValue(0.1)
-            .min(0)
-            .build()
+        .name("fall-speed")
+        .description("How fast you fall in blocks per second.")
+        .defaultValue(0.1)
+        .min(0)
+        .build()
     );
 
     private final Setting<Boolean> cancelServerPackets = sgGeneral.add(new BoolSetting.Builder()
-            .name("cancel-server-packets")
-            .description("Cancels incoming boat move packets.")
-            .defaultValue(false)
-            .build()
+        .name("cancel-server-packets")
+        .description("Cancels incoming boat move packets.")
+        .defaultValue(false)
+        .build()
     );
 
     public BoatFly() {

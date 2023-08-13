@@ -23,38 +23,38 @@ public class BlockSelection extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Boolean> advanced = sgGeneral.add(new BoolSetting.Builder()
-            .name("advanced")
-            .description("Shows a more advanced outline on different types of shape blocks.")
-            .defaultValue(true)
-            .build()
+        .name("advanced")
+        .description("Shows a more advanced outline on different types of shape blocks.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> oneSide = sgGeneral.add(new BoolSetting.Builder()
-            .name("single-side")
-            .description("Only renders the side you are looking at.")
-            .defaultValue(false)
-            .build()
+        .name("single-side")
+        .description("Only renders the side you are looking at.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     private final Setting<SettingColor> sideColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("side-color")
-            .description("The side color.")
-            .defaultValue(new SettingColor(255, 255, 255, 50))
-            .build()
+        .name("side-color")
+        .description("The side color.")
+        .defaultValue(new SettingColor(255, 255, 255, 50))
+        .build()
     );
 
     private final Setting<SettingColor> lineColor = sgGeneral.add(new ColorSetting.Builder()
-            .name("line-color")
-            .description("The line color.")
-            .defaultValue(new SettingColor(255, 255, 255, 255))
-            .build()
+        .name("line-color")
+        .description("The line color.")
+        .defaultValue(new SettingColor(255, 255, 255, 255))
+        .build()
     );
 
     private final Setting<Boolean> hideInside = sgGeneral.add(new BoolSetting.Builder()

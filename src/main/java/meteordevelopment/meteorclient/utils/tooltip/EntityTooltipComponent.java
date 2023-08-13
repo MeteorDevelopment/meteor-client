@@ -6,11 +6,11 @@
 package meteordevelopment.meteorclient.utils.tooltip;
 
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.client.render.DiffuseLighting;
 import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
-import net.minecraft.client.render.item.ItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -46,11 +46,12 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     @Override
-    public void drawItems(TextRenderer textRenderer, int x, int y, MatrixStack matrices, ItemRenderer itemRenderer) {
+    public void drawItems(TextRenderer textRenderer, int x, int y, DrawContext context) {
+        MatrixStack matrices = context.getMatrices();
         matrices.push();
         matrices.translate(15, 2, 0);
-        this.entity.setVelocity(1.f, 1.f, 1.f);
-        this.renderEntity(matrices, x, y);
+        entity.setVelocity(1.f, 1.f, 1.f);
+        renderEntity(matrices, x, y);
         matrices.pop();
     }
 
@@ -108,13 +109,13 @@ public class EntityTooltipComponent implements MeteorTooltipData, TooltipCompone
     }
 
     protected void setupAngles() {
-        float yaw = (float) (((System.currentTimeMillis() / 10)) % 360);
+        float yaw = (((float) System.currentTimeMillis() / 10) % 360);
         entity.setYaw(yaw);
         entity.setHeadYaw(yaw);
         entity.setPitch(0.f);
-        if (entity instanceof LivingEntity) {
-            if (entity instanceof GoatEntity) ((LivingEntity) entity).headYaw = yaw;
-            ((LivingEntity) entity).bodyYaw = yaw;
+        if (entity instanceof LivingEntity livingEntity) {
+            if (entity instanceof GoatEntity) livingEntity.headYaw = yaw;
+            livingEntity.bodyYaw = yaw;
         }
     }
 }
