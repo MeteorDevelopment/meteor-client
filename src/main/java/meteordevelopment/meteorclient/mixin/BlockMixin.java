@@ -47,7 +47,7 @@ public abstract class BlockMixin extends AbstractBlock implements ItemConvertibl
         Block block = (Block) (Object) this;
 
 
-        if (slippy.isActive() && !slippy.blocksFilter.get().test(slippy.blocks.get(), block))
+        if (slippy.isActive() && slippy.blocksFilter.get().test(slippy.blocks.get(), block))
             return slippy.friction.get().floatValue();
 
         if (block == Blocks.SLIME_BLOCK && Modules.get().get(NoSlow.class).slimeBlock()) return 0.6F;
