@@ -68,7 +68,7 @@ public class Flamethrower extends Module {
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
         .name("rotate")
-        .description("Automatically faces towards the animal while roasting.")
+        .description("Automatically faces towards the entity while roasting.")
         .defaultValue(true)
         .build()
     );
