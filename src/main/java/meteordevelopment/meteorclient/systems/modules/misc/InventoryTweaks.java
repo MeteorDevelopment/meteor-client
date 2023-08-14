@@ -21,6 +21,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
@@ -34,6 +35,7 @@ import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
@@ -139,7 +141,7 @@ public class InventoryTweaks extends Module {
     private InventorySorter sorter;
     private boolean invOpened;
 
-    private Thread task;
+    private Future<?> task;
 
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
@@ -338,7 +340,7 @@ public class InventoryTweaks extends Module {
             );
         }
 
-        protected void delay() {
+        boolean delayAndCheckConditions() {
             int sleep;
             if (initial) {
                 sleep = initDelay.get();
@@ -349,20 +351,24 @@ public class InventoryTweaks extends Module {
                 try {
                     Thread.sleep(sleep);
                 } catch (InterruptedException ignored) {
+                    return true;
                 }
             }
+            return mc.currentScreen == null || !Utils.canUpdate();
         }
 
         public void execute(ScreenHandler handler) {
-            if (task != null && task.isAlive()) task.stop();
-            task = new Thread(() -> {
+            if (task != null) if (!task.isDone()) {
                 try {
-                    initial = initDelay.get() != 0;
-                    execute0(handler);
-                } catch (ThreadDeath ignored) {
+                    task.cancel(true);
+                    task.get();
+                } catch (Exception ignored) {
                 }
+            }
+            task = MeteorExecutor.executor.submit(() -> {
+                initial = initDelay.get() != 0;
+                execute0(handler);
             });
-            task.start();
         }
 
         protected abstract void execute0(ScreenHandler handler);
@@ -419,11 +425,7 @@ public class InventoryTweaks extends Module {
 
             for (int i = 0; i < playerInvEnd; i++) {
                 if (!handler.getSlot(i).hasStack()) continue;
-
-                delay();
-
-                if (mc.currentScreen == null || !Utils.canUpdate()) break;
-
+                if (delayAndCheckConditions()) break;
                 Item item = handler.getSlot(i).getStack().getItem();
                 if (!itemsFilter.get().test(items.get(), item)) continue;
 
@@ -457,11 +459,7 @@ public class InventoryTweaks extends Module {
         public void execute0(ScreenHandler handler) {
             for (int i = 0; i < SlotUtils.indexToId(SlotUtils.MAIN_START); i++) {
                 if (!handler.getSlot(i).hasStack()) continue;
-
-                delay();
-
-                if (mc.currentScreen == null || !Utils.canUpdate()) break;
-
+                if (delayAndCheckConditions()) break;
                 Item item = handler.getSlot(i).getStack().getItem();
                 if (!itemsFilter.get().test(items.get(), item)) continue;
 
@@ -497,11 +495,7 @@ public class InventoryTweaks extends Module {
 
             for (int i = playerInvOffset; i < playerInvEnd; i++) {
                 if (!handler.getSlot(i).hasStack()) continue;
-
-                delay();
-
-                if (mc.currentScreen == null || !Utils.canUpdate()) break;
-
+                if (delayAndCheckConditions()) break;
                 Item item = handler.getSlot(i).getStack().getItem();
                 if (!itemsFilter.get().test(items.get(), item)) continue;
 
