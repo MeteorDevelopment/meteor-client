@@ -5,8 +5,7 @@
 
 package meteordevelopment.meteorclient.mixininterface;
 
-import net.minecraft.text.Text;
-
-public interface IChatHud {
-    void meteor$add(Text message, int id);
+public interface IChatHudLineVisible extends IChatHudLine {
+    boolean meteor$isStartOfEntry();
+    void meteor$setStartOfEntry(boolean start);
 }
