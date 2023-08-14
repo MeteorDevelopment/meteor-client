@@ -5,11 +5,15 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import meteordevelopment.meteorclient.MixinPlugin;
 import meteordevelopment.meteorclient.events.world.ChunkOcclusionEvent;
+import meteordevelopment.meteorclient.gui.GuiTheme;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
+import net.irisshaders.iris.api.v0.IrisApi;
 import net.minecraft.block.Block;
 
 import java.util.List;
@@ -60,6 +64,14 @@ public class WallHack extends Module {
     @Override
     public void onDeactivate() {
         mc.worldRenderer.reload();
+    }
+
+    @Override
+    public WWidget getWidget(GuiTheme theme) {
+        if (MixinPlugin.isSodiumPresent) return theme.label("Warning: Due to Sodium in use, opacity is overridden to 0.");
+        if (MixinPlugin.isIrisPresent && IrisApi.getInstance().isShaderPackInUse()) return theme.label("Warning: Due to shaders in use, opacity is overridden to 0.");
+
+        return null;
     }
 
     @EventHandler

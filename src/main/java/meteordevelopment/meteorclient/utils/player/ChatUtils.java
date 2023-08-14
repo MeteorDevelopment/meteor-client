@@ -68,7 +68,7 @@ public class ChatUtils {
     public static void sendPlayerMsg(String message) {
         mc.inGameHud.getChatHud().addToMessageHistory(message);
 
-        if (message.startsWith("/")) mc.player.networkHandler.sendCommand(message.substring(1));
+        if (message.startsWith("/")) mc.player.networkHandler.sendChatCommand(message.substring(1));
         else mc.player.networkHandler.sendChatMessage(message);
     }
 
@@ -140,7 +140,7 @@ public class ChatUtils {
 
         if (!Config.get().deleteChatFeedback.get()) id = 0;
 
-        ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
+        ((IChatHud) mc.inGameHud.getChatHud()).meteor$add(message, id);
     }
 
     private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {

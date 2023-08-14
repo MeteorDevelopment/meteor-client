@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -26,6 +25,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+
+import java.util.Set;
 
 public class Flamethrower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -66,23 +67,23 @@ public class Flamethrower extends Module {
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically faces towards the entity while roasting.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically faces towards the animal while roasting.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to cook.")
-            .defaultValue(
-                EntityType.PIG,
-                EntityType.COW,
-                EntityType.SHEEP,
-                EntityType.CHICKEN,
-                EntityType.RABBIT
-            )
-            .build()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("entities")
+        .description("Entities to cook.")
+        .defaultValue(
+            EntityType.PIG,
+            EntityType.COW,
+            EntityType.SHEEP,
+            EntityType.CHICKEN,
+            EntityType.RABBIT
+        )
+        .build()
     );
 
     private Entity entity;
@@ -103,11 +104,11 @@ public class Flamethrower extends Module {
         entity = null;
         ticks++;
         for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().getBoolean(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
+            if (!entities.get().contains(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
             if (!entity.isAlive()) continue;
             if (entity == mc.player) continue;
             if (entity.isWet() || entity.inPowderSnow || entity.isFireImmune()) continue;
-            if (!targetBabies.get() && entity instanceof LivingEntity && ((LivingEntity)entity).isBaby()) continue;
+            if (!targetBabies.get() && entity instanceof LivingEntity lentity && lentity.isBaby()) continue;
 
             FindItemResult item = InvUtils.findInHotbar(itemStack -> (itemStack.isOf(Items.FLINT_AND_STEEL) || itemStack.isOf(Items.FIRE_CHARGE)) &&
                 (!itemStack.isDamageable() || !antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));

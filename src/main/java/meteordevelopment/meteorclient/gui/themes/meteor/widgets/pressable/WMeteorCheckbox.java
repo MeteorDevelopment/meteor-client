@@ -9,7 +9,7 @@ import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorGuiTheme;
 import meteordevelopment.meteorclient.gui.themes.meteor.MeteorWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
-import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.util.math.MathHelper;
 
 public class WMeteorCheckbox extends WCheckbox implements MeteorWidget {
     private double animProgress;
@@ -24,7 +24,7 @@ public class WMeteorCheckbox extends WCheckbox implements MeteorWidget {
         MeteorGuiTheme theme = theme();
 
         animProgress += (checked ? 1 : -1) * delta * 14;
-        animProgress = Utils.clamp(animProgress, 0, 1);
+        animProgress = MathHelper.clamp(animProgress, 0, 1);
 
         renderBackground(renderer, this, pressed, mouseOver);
 

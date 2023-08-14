@@ -172,7 +172,7 @@ public class ArrowDodge extends Module {
         }
 
         if (checkGround) {
-            BlockPos blockPos = mc.player.getBlockPos().add(velocity.x, velocity.y, velocity.z);
+            BlockPos blockPos = mc.player.getBlockPos().add(BlockPos.ofFloored(velocity.x, velocity.y, velocity.z));
 
             // check if target pos is air
             if (!mc.world.getBlockState(blockPos).getCollisionShape(mc.world, blockPos).isEmpty()) return false;

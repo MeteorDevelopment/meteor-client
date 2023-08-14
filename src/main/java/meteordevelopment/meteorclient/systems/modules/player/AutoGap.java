@@ -42,73 +42,75 @@ public class AutoGap extends Module {
 
     // General
 
-    private final Setting<Boolean> preferEGap = sgGeneral.add(new BoolSetting.Builder()
-            .name("prefer-egap")
-            .description("Prefers to eat E-Gap over Gaps if found.")
-            .defaultValue(true)
-            .build()
+    private final Setting<Boolean> allowEgap = sgGeneral.add(new BoolSetting.Builder()
+        .name("allow-egap")
+        .description("Allow eating E-Gaps over Gaps if found.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> always = sgGeneral.add(new BoolSetting.Builder()
-            .name("always")
-            .description("If it should always eat.")
-            .defaultValue(false)
-            .build()
+        .name("always")
+        .description("If it should always eat.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> pauseAuras = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-auras")
-            .description("Pauses all auras when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-auras")
+        .description("Pauses all auras when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Boolean> pauseBaritone = sgGeneral.add(new BoolSetting.Builder()
-            .name("pause-baritone")
-            .description("Pause baritone when eating.")
-            .defaultValue(true)
-            .build()
+        .name("pause-baritone")
+        .description("Pause baritone when eating.")
+        .defaultValue(true)
+        .build()
     );
 
     // Potions
 
     private final Setting<Boolean> potionsRegeneration = sgPotions.add(new BoolSetting.Builder()
-            .name("potions-regeneration")
-            .description("If it should eat when Regeneration runs out.")
-            .defaultValue(false)
-            .build()
+        .name("potions-regeneration")
+        .description("If it should eat when Regeneration runs out.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> potionsFireResistance = sgPotions.add(new BoolSetting.Builder()
-            .name("potions-fire-resistance")
-            .description("If it should eat when Fire Resistance runs out. Requires E-Gaps.")
-            .defaultValue(true)
-            .build()
+        .name("potions-fire-resistance")
+        .description("If it should eat when Fire Resistance runs out. Requires E-Gaps.")
+        .defaultValue(true)
+        .visible(allowEgap::get)
+        .build()
     );
 
     private final Setting<Boolean> potionsResistance = sgPotions.add(new BoolSetting.Builder()
-            .name("potions-absorption")
-            .description("If it should eat when Resistance runs out. Requires E-Gaps.")
-            .defaultValue(false)
-            .build()
+        .name("potions-absorption")
+        .description("If it should eat when Resistance runs out. Requires E-Gaps.")
+        .defaultValue(false)
+        .visible(allowEgap::get)
+        .build()
     );
 
     // Health
 
     private final Setting<Boolean> healthEnabled = sgHealth.add(new BoolSetting.Builder()
-            .name("health-enabled")
-            .description("If it should eat when health drops below threshold.")
-            .defaultValue(true)
-            .build()
+        .name("health-enabled")
+        .description("If it should eat when health drops below threshold.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> healthThreshold = sgHealth.add(new IntSetting.Builder()
-            .name("health-threshold")
-            .description("Health threshold to eat at. Includes absorption.")
-            .defaultValue(20)
-            .min(0)
-            .sliderMax(40)
-            .build()
+        .name("health-threshold")
+        .description("Health threshold to eat at. Includes absorption.")
+        .defaultValue(20)
+        .min(0)
+        .sliderMax(40)
+        .build()
     );
 
     private boolean requiresEGap;
@@ -276,11 +278,8 @@ public class AutoGap extends Module {
     }
 
     private int findSlot() {
-        boolean preferEGap = this.preferEGap.get();
-        if (requiresEGap) preferEGap = true;
-
+        boolean preferEGap = this.allowEgap.get() || requiresEGap;
         int slot = -1;
-        Item currentItem = null;
 
         for (int i = 0; i < 9; i++) {
             // Skip if item stack is empty
@@ -291,34 +290,17 @@ public class AutoGap extends Module {
             if (isNotGapOrEGap(stack)) continue;
             Item item = stack.getItem();
 
-            // If this is the first apple found then set it without looking at preferEGap setting
-            if (currentItem == null) {
+            // If egap was found and preferEGap is true we can return the current slot
+            if (item == Items.ENCHANTED_GOLDEN_APPLE && preferEGap) {
                 slot = i;
-                currentItem = item;
+                break;
             }
-            else {
-                // Skip if current item and item are the same
-                if (currentItem == item) continue;
-
-                // If egap was found and preferEGap is true we can return the current slot
-                if (item == Items.ENCHANTED_GOLDEN_APPLE && preferEGap) {
-                    slot = i;
-                    currentItem = item;
-
-                    break;
-                }
-                // If gap was found and preferEGap is false we can return the current slot
-                else if (item == Items.GOLDEN_APPLE && !preferEGap) {
-                    slot = i;
-                    currentItem = item;
-
-                    break;
-                }
+            // If gap was found and egap is not required we can return the current slot
+            else if (item == Items.GOLDEN_APPLE && !requiresEGap) {
+                slot = i;
+                if (!preferEGap) break;
             }
         }
-
-        // If requiresEGap is true but no egap was found return -1
-        if (requiresEGap && currentItem != Items.ENCHANTED_GOLDEN_APPLE) return -1;
 
         return slot;
     }

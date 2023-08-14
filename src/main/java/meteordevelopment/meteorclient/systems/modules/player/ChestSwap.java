@@ -19,27 +19,20 @@ import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 
 public class ChestSwap extends Module {
-    public enum Chestplate {
-        Diamond,
-        Netherite,
-        PreferDiamond,
-        PreferNetherite
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Chestplate> chestplate = sgGeneral.add(new EnumSetting.Builder<Chestplate>()
-            .name("chestplate")
-            .description("Which type of chestplate to swap to.")
-            .defaultValue(Chestplate.PreferNetherite)
-            .build()
+        .name("chestplate")
+        .description("Which type of chestplate to swap to.")
+        .defaultValue(Chestplate.PreferNetherite)
+        .build()
     );
 
     private final Setting<Boolean> stayOn = sgGeneral.add(new BoolSetting.Builder()
-            .name("stay-on")
-            .description("Stays on and activates when you turn it off.")
-            .defaultValue(false)
-            .build()
+        .name("stay-on")
+        .description("Stays on and activates when you turn it off.")
+        .defaultValue(false)
+        .build()
     );
 
     public ChestSwap() {
@@ -133,5 +126,12 @@ public class ChestSwap extends Module {
     public void sendToggledMsg() {
         if (stayOn.get()) super.sendToggledMsg();
         else if (Config.get().chatFeedback.get() && chatFeedback) info("Triggered (highlight)%s(default).", title);
+    }
+
+    public enum Chestplate {
+        Diamond,
+        Netherite,
+        PreferDiamond,
+        PreferNetherite
     }
 }

@@ -21,8 +21,8 @@ public class BuildHeight extends Module {
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
         if (!(event.packet instanceof PlayerInteractBlockC2SPacket p)) return;
-
-        if (p.getBlockHitResult().getPos().y >= 255 && p.getBlockHitResult().getSide() == Direction.UP) {
+        if (mc.world == null) return;
+        if (p.getBlockHitResult().getPos().y >= mc.world.getTopY() && p.getBlockHitResult().getSide() == Direction.UP) {
             ((BlockHitResultAccessor) p.getBlockHitResult()).setSide(Direction.DOWN);
         }
     }

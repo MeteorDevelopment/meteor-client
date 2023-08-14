@@ -26,25 +26,25 @@ public class AutoShearer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> distance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("distance")
-            .description("The maximum distance the sheep have to be to be sheared.")
-            .min(0.0)
-            .defaultValue(5.0)
-            .build()
+        .name("distance")
+        .description("The maximum distance the sheep have to be to be sheared.")
+        .min(0.0)
+        .defaultValue(5.0)
+        .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
-            .name("anti-break")
-            .description("Prevents shears from being broken.")
-            .defaultValue(false)
-            .build()
+        .name("anti-break")
+        .description("Prevents shears from being broken.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically faces towards the animal being sheared.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically faces towards the animal being sheared.")
+        .defaultValue(true)
+        .build()
     );
 
     private Entity entity;

@@ -34,7 +34,7 @@ public class BannerBlockEntityRendererMixin {
     @Final
     @Shadow private ModelPart crossbar;
 
-    @Inject(method = "render", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "render(Lnet/minecraft/block/entity/BannerBlockEntity;FLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;II)V", at = @At("HEAD"), cancellable = true)
     private void render(BannerBlockEntity bannerBlockEntity, float f, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, int j, CallbackInfo ci) {
         if (bannerBlockEntity.getWorld() != null) { //Don't modify banners in item form
             NoRender.BannerRenderMode renderMode = Modules.get().get(NoRender.class).getBannerRenderMode();
