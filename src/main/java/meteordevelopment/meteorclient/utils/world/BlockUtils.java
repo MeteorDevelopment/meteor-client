@@ -88,11 +88,11 @@ public class BlockUtils {
             side = Direction.UP;
             neighbour = blockPos;
         } else {
-            neighbour = blockPos.offset(side.getOpposite());
-            hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
+            neighbour = blockPos.offset(side);
+            hitPos = hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
         }
 
-        BlockHitResult bhr = new BlockHitResult(hitPos, side, neighbour, false);
+        BlockHitResult bhr = new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
 
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
@@ -148,8 +148,6 @@ public class BlockUtils {
     public static Direction getPlaceSide(BlockPos blockPos) {
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
-            Direction side2 = side.getOpposite();
-
             BlockState state = mc.world.getBlockState(neighbor);
 
             // Check if neighbour isn't empty
@@ -158,7 +156,7 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            return side2;
+            return side;
         }
 
         return null;
