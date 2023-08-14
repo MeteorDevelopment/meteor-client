@@ -167,7 +167,9 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "MessageHandlerMixin",
+    "ChatHudLineVisibleMixin"
   ],
   "injectors": {
     "defaultRequire": 1

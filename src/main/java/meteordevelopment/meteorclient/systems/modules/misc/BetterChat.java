@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.chars.Char2CharMap;
 import it.unimi.dsi.fastutil.chars.Char2CharOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
@@ -13,18 +15,25 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.events.game.ReceiveMessageEvent;
 import meteordevelopment.meteorclient.events.game.SendMessageEvent;
 import meteordevelopment.meteorclient.mixin.ChatHudAccessor;
+import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
+import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ChatHudLine;
+import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.Identifier;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -238,10 +247,6 @@ public class BetterChat extends Module {
             }
         }
 
-        if (playerHeads.get()) {
-            message = Text.literal("  ").append(message);
-        }
-
         if (antiSpam.get()) {
             Text antiSpammed = appendAntiSpam(message);
 
@@ -339,6 +344,97 @@ public class BetterChat extends Module {
         }
 
         event.message = message;
+    }
+
+    // Player Heads
+
+    private record CustomHeadEntry(String prefix, Identifier texture) {}
+
+    private static final List<CustomHeadEntry> CUSTOM_HEAD_ENTRIES = new ArrayList<>();
+
+    private static final Pattern TIMESTAMP_REGEX = Pattern.compile("^<\\d{1,2}:\\d{1,2}>");
+
+    /** Registers a custom player head to render based on a message prefix */
+    public static void registerCustomHead(String prefix, Identifier texture) {
+        CUSTOM_HEAD_ENTRIES.add(new CustomHeadEntry(prefix, texture));
+    }
+
+    static {
+        registerCustomHead("[Meteor]", new MeteorIdentifier("textures/icons/chat/meteor.png"));
+        registerCustomHead("[Baritone]", new MeteorIdentifier("textures/icons/chat/baritone.png"));
+    }
+
+    public int modifyChatWidth(int width) {
+        if (isActive() && playerHeads.get()) return width + 10;
+        return width;
+    }
+
+    public void drawPlayerHead(DrawContext context, ChatHudLine.Visible line, int y, int color) {
+        if (!isActive() || !playerHeads.get()) return;
+
+        // Only draw the first line of multiple line messages
+        if (((IChatHudLineVisible) (Object) line).meteor$isStartOfEntry())  {
+            RenderSystem.enableBlend();
+            RenderSystem.setShaderColor(1, 1, 1, Color.toRGBAA(color) / 255f);
+
+            drawTexture(context, (IChatHudLine) (Object) line, y);
+
+            RenderSystem.setShaderColor(1, 1, 1, 1);
+            RenderSystem.disableBlend();
+        }
+
+        // Offset
+        context.getMatrices().translate(10, 0, 0);
+    }
+
+    private void drawTexture(DrawContext context, IChatHudLine line, int y) {
+        String text = line.meteor$getText().trim();
+
+        // Custom
+        int startOffset = 0;
+
+        try {
+            startOffset = TIMESTAMP_REGEX.matcher(text).end();
+        }
+        catch (IllegalStateException ignored) {}
+
+        for (CustomHeadEntry entry : CUSTOM_HEAD_ENTRIES) {
+            // Check prefix
+            if (text.startsWith(entry.prefix(), startOffset)) {
+                context.drawTexture(entry.texture(), 0, y, 8, 8, 0, 0, 64, 64, 64, 64);
+            }
+        }
+
+        // Player
+        GameProfile sender = getSender(line, text);
+        if (sender == null) return;
+
+        PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.getId());
+        if (entry == null) return;
+
+        Identifier skin = entry.getSkinTexture();
+
+        context.drawTexture(skin, 0, y, 8, 8, 8, 8, 8, 8, 64, 64);
+        context.drawTexture(skin, 0, y, 8, 8, 40, 8, 8, 8, 64, 64);
+    }
+
+    private GameProfile getSender(IChatHudLine line, String text) {
+        GameProfile sender = line.meteor$getSender();
+
+        // If the packet did not contain a sender field then try to get the sender from the message
+        if (sender == null) {
+            int openingI = text.indexOf('<');
+            int closingI = text.indexOf('>');
+
+            if (openingI != -1 && closingI != -1 && closingI > openingI) {
+                String username = text.substring(openingI + 1, closingI);
+
+                PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(username);
+                if (entry != null) sender = entry.getProfile();
+            }
+        }
+
+        return sender;
     }
 
     // Annoy
@@ -440,8 +536,6 @@ public class BetterChat extends Module {
     public boolean isLongerChat() {
         return isActive() && longerChatHistory.get();
     }
-
-    public boolean displayPlayerHeads() { return isActive() && playerHeads.get(); }
 
     public boolean keepHistory() { return isActive() && keepHistory.get(); }
 

@@ -6,23 +6,31 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.mojang.authlib.GameProfile;
-import meteordevelopment.meteorclient.mixininterface.IChatHudLine;
+import meteordevelopment.meteorclient.mixininterface.IChatHudLineVisible;
 import net.minecraft.client.gui.hud.ChatHudLine;
-import net.minecraft.text.Text;
+import net.minecraft.text.OrderedText;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-@Mixin(value = ChatHudLine.class)
-public class ChatHudLineMixin implements IChatHudLine {
-    @Shadow @Final private Text content;
+@Mixin(ChatHudLine.Visible.class)
+public class ChatHudLineVisibleMixin implements IChatHudLineVisible {
+    @Shadow @Final private OrderedText content;
     @Unique private int id;
     @Unique private GameProfile sender;
+    @Unique private boolean startOfEntry;
 
     @Override
     public String meteor$getText() {
-        return content.getString();
+        StringBuilder sb = new StringBuilder();
+
+        content.accept((index, style, codePoint) -> {
+            sb.appendCodePoint(codePoint);
+            return true;
+        });
+
+        return sb.toString();
     }
 
     @Override
@@ -43,5 +51,15 @@ public class ChatHudLineMixin implements IChatHudLine {
     @Override
     public void meteor$setSender(GameProfile profile) {
         sender = profile;
+    }
+
+    @Override
+    public boolean meteor$isStartOfEntry() {
+        return startOfEntry;
+    }
+
+    @Override
+    public void meteor$setStartOfEntry(boolean start) {
+        startOfEntry = start;
     }
 }
