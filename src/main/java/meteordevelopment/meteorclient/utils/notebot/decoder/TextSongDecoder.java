@@ -13,21 +13,14 @@ import net.minecraft.block.enums.Instrument;
 import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
 
 public class TextSongDecoder extends SongDecoder {
 
     @Override
-    public Song parse(File file) {
-        List<String> data;
-        try {
-            data = Files.readAllLines(file.toPath());
-        } catch (IOException e) {
-            notebot.error("Error while reading \"%s\"", file.getName());
-            return null;
-        }
+    public Song parse(File file) throws Exception {
+        List<String> data = Files.readAllLines(file.toPath());
 
         Multimap<Integer, Note> notesMap = MultimapBuilder.linkedHashKeys().arrayListValues().build();
         String title = FilenameUtils.getBaseName(file.getName());

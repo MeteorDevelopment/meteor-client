@@ -10,10 +10,11 @@ import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.render.ItemHighlight;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.ScreenHandlerProvider;
-import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.screen.ScreenHandler;
@@ -52,6 +53,27 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
         super(title);
     }
 
+    @Inject(method = "init", at = @At("TAIL"))
+    private void onInit(CallbackInfo info) {
+        InventoryTweaks invTweaks = Modules.get().get(InventoryTweaks.class);
+
+        if (invTweaks.isActive() && invTweaks.showButtons() && invTweaks.canSteal(getScreenHandler())) {
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Steal"), button -> invTweaks.steal(getScreenHandler()))
+                    .position(width / 2 - 41, 3)
+                    .size(40, 20)
+                    .build()
+            );
+
+            addDrawableChild(
+                new ButtonWidget.Builder(Text.literal("Dump"), button -> invTweaks.dump(getScreenHandler()))
+                    .position(width / 2 + 2, 3)
+                    .size(40, 20)
+                    .build()
+            );
+        }
+    }
+
     // Inventory Tweaks
     @Inject(method = "mouseDragged", at = @At("TAIL"))
     private void onMouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY, CallbackInfoReturnable<Boolean> info) {
@@ -76,8 +98,8 @@ public abstract class HandledScreenMixin<T extends ScreenHandler> extends Screen
 
     // Item Highlight
     @Inject(method = "drawSlot", at = @At("HEAD"))
-    private void onDrawSlot(MatrixStack matrices, Slot slot, CallbackInfo info) {
+    private void onDrawSlot(DrawContext context, Slot slot, CallbackInfo ci) {
         int color = Modules.get().get(ItemHighlight.class).getColor(slot.getStack());
-        if (color != -1) fill(matrices, slot.x, slot.y, slot.x + 16, slot.y + 16, color);
+        if (color != -1) context.fill(slot.x, slot.y, slot.x + 16, slot.y + 16, color);
     }
 }

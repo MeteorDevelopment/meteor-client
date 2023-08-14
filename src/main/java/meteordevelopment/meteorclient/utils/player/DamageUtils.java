@@ -22,7 +22,6 @@ import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
-import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -164,9 +163,9 @@ public class DamageUtils {
     // Anchor damage
 
     public static double anchorDamage(LivingEntity player, Vec3d anchor) {
-        mc.world.removeBlock(new BlockPos(anchor), false);
+        mc.world.removeBlock(BlockPos.ofFloored(anchor), false);
         double damage = bedDamage(player, anchor);
-        mc.world.setBlockState(new BlockPos(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
+        mc.world.setBlockState(BlockPos.ofFloored(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
         return damage;
     }
 
@@ -182,7 +181,7 @@ public class DamageUtils {
     }
 
     private static double normalProtReduction(Entity player, double damage) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.GENERIC);
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().generic());
         if (protLevel > 20) protLevel = 20;
 
         damage *= 1 - (protLevel / 25.0);
@@ -190,7 +189,7 @@ public class DamageUtils {
     }
 
     private static double blastProtReduction(Entity player, double damage, Explosion explosion) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), DamageSource.explosion(explosion));
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().explosion(explosion));
         if (protLevel > 20) protLevel = 20;
 
         damage *= (1 - (protLevel / 25.0));
@@ -269,7 +268,7 @@ public class DamageUtils {
             return d <= e ? blockHitResult : blockHitResult2;
         }, (raycastContext) -> {
             Vec3d vec3d = raycastContext.getStart().subtract(raycastContext.getEnd());
-            return BlockHitResult.createMissed(raycastContext.getEnd(), Direction.getFacing(vec3d.x, vec3d.y, vec3d.z), new BlockPos(raycastContext.getEnd()));
+            return BlockHitResult.createMissed(raycastContext.getEnd(), Direction.getFacing(vec3d.x, vec3d.y, vec3d.z), BlockPos.ofFloored(raycastContext.getEnd()));
         });
     }
 }

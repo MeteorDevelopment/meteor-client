@@ -18,6 +18,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.item.Item;
@@ -230,6 +231,9 @@ public class AutoEat extends Module {
                 bestHunger = hunger;
             }
         }
+
+        Item offHandItem = mc.player.getOffHandStack().getItem();
+        if (offHandItem.isFood() && !blacklist.get().contains(offHandItem) && offHandItem.getFoodComponent().getHunger() > bestHunger) slot = SlotUtils.OFFHAND;
 
         return slot;
     }

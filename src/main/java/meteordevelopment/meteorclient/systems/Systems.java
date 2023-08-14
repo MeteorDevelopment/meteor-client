@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
-import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.hud.Hud;
@@ -35,14 +34,17 @@ public class Systems {
     }
 
     public static void init() {
-        System<?> config = add(new Config());
-        config.init();
-        config.load();
+        Config config = new Config();
+        System<?> configSystem = add(config);
+        configSystem.init();
+        configSystem.load();
+
+        // Registers the colors from config tab. This allows rainbow colours to work for friends.
+        config.settings.registerColorSettings(null);
 
         add(new Modules());
-        add(new Commands());
-        add(new Friends());
         add(new Macros());
+        add(new Friends());
         add(new Accounts());
         add(new Waypoints());
         add(new Profiles());

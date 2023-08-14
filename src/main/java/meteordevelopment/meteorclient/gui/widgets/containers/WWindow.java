@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.gui.utils.Cell;
 import meteordevelopment.meteorclient.gui.utils.WindowConfig;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WTriangle;
-import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.function.Consumer;
 
@@ -236,7 +236,7 @@ public abstract class WWindow extends WVerticalList {
         @Override
         public boolean render(GuiRenderer renderer, double mouseX, double mouseY, double delta) {
             animProgress += (expanded ? 1 : -1) * delta * 14;
-            animProgress = Utils.clamp(animProgress, 0, 1);
+            animProgress = MathHelper.clamp(animProgress, 0, 1);
 
             triangle.rotation = (1 - animProgress) * -90;
 

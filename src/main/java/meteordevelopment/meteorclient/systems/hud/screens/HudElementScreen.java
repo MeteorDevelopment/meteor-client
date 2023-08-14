@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.systems.hud.screens;
 
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
+import meteordevelopment.meteorclient.gui.utils.Cell;
+import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WContainer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
@@ -19,6 +21,7 @@ import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.XAnchor;
 import meteordevelopment.meteorclient.systems.hud.YAnchor;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.nbt.NbtCompound;
 
 import static meteordevelopment.meteorclient.utils.Utils.getWindowWidth;
@@ -88,6 +91,15 @@ public class HudElementScreen extends WindowScreen {
 
         add(theme.horizontalSeparator()).expandX();
 
+        // Custom widget
+        WWidget widget = element.getWidget(theme);
+
+        if (widget != null) {
+            Cell<WWidget> cell = add(widget);
+            if (widget instanceof WContainer) cell.expandX();
+            add(theme.horizontalSeparator()).expandX();
+        }
+
         // Bottom
         WHorizontalList bottomList = add(theme.horizontalList()).expandX().widget();
 
@@ -118,8 +130,8 @@ public class HudElementScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(float delta) {
-        HudEditorScreen.renderElements();
+    protected void onRenderBefore(DrawContext drawContext, float delta) {
+        HudEditorScreen.renderElements(drawContext);
     }
 
     @Override

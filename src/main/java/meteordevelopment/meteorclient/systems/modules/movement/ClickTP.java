@@ -26,10 +26,10 @@ public class ClickTP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> maxDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("max-distance")
-            .description("The maximum distance you can teleport.")
-            .defaultValue(5)
-            .build()
+        .name("max-distance")
+        .description("The maximum distance you can teleport.")
+        .defaultValue(5)
+        .build()
     );
 
     public ClickTP() {

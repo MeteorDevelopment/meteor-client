@@ -1,47 +1,54 @@
-const axios = require("axios").default;
-const FormData = require("form-data");
 const fs = require("fs");
+const path = require("path");
 
 const branch = process.argv[2];
 const compareUrl = process.argv[3];
 const success = process.argv[4] === "true";
 
 function send(version, number) {
-    axios.get(compareUrl).then(res => {
-        let description = "";
+    fetch(compareUrl)
+        .then(res => res.json())
+        .then(res => {
+            let description = "";
 
-        description += "**Branch:** " + branch;
-        description += "\n**Status:** " + (success ? "success" : "failure");
+            description += "**Branch:** " + branch;
+            description += "\n**Status:** " + (success ? "success" : "failure");
 
-        let changes = "\n\n**Changes:**";
-        let hasChanges = false;
-        for (let i in res.data.commits) {
-            let commit = res.data.commits[i];
+            let changes = "\n\n**Changes:**";
+            let hasChanges = false;
+            for (let i in res.commits) {
+                let commit = res.commits[i];
 
-            changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MeteorDevelopment/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*";
-            hasChanges = true;
-        }
-        if (hasChanges) description += changes;
+                changes += "\n- [`" + commit.sha.substring(0, 7) + "`](https://github.com/MeteorDevelopment/meteor-client/commit/" + commit.sha + ") *" + commit.commit.message + "*";
+                hasChanges = true;
+            }
+            if (hasChanges) description += changes;
 
-        if (success) {
-            description += "\n\n**Download:** [meteor-client-" + version + "-" + number + "](https://meteorclient.com/download?devBuild=" + number + ")";
-        }
+            if (success) {
+                description += "\n\n**Download:** [meteor-client-" + version + "-" + number + "](https://meteorclient.com/download?devBuild=" + number + ")";
+            }
 
-        const webhook = {
-            username: "Dev Builds",
-            avatar_url: "https://meteorclient.com/icon.png",
-            embeds: [
-                {
-                    title: "meteor client v" + version + " build #" + number,
-                    description: description,
-                    url: "https://meteorclient.com",
-                        color: success ? 2672680 : 13117480
-                }
-            ]
-        };
+            const webhook = {
+                username: "Dev Builds",
+                avatar_url: "https://meteorclient.com/icon.png",
+                embeds: [
+                    {
+                        title: "meteor client v" + version + " build #" + number,
+                        description: description,
+                        url: "https://meteorclient.com",
+                            color: success ? 2672680 : 13117480
+                    }
+                ]
+            };
 
-        axios.post(process.env.DISCORD_WEBHOOK, webhook);
-    });
+            fetch(process.env.DISCORD_WEBHOOK, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(webhook)
+            });
+        });
 }
 
 if (success) {
@@ -51,19 +58,32 @@ if (success) {
     });
 
     let form = new FormData();
-    form.append("file", fs.createReadStream(jar));
+    form.set(
+        "file",
+        new Blob([fs.readFileSync(jar)], { type: "application/java-archive" }),
+        path.basename(jar)
+    );
 
-    axios.post("https://meteorclient.com/api/uploadDevBuild", form, {
+    fetch("https://meteorclient.com/api/uploadDevBuild", {
+        method: "POST",
         headers: {
-            ...form.getHeaders(),
             "Authorization": process.env.SERVER_TOKEN
-        }
-    }).then(res => {
-        send(res.data.version, res.data.number)
-    });
+        },
+        body: form
+    })
+        .then(async res => {
+            let data = await res.json();
+
+            if (res.ok) {
+                send(data.version, data.number);
+            }
+            else {
+                console.log("Failed to upload dev build: " + data.error);
+            }
+        });
 }
 else {
-    axios.get("https://meteorclient.com/api/stats").then(res => {
-        send(res.data.dev_build_version, parseInt(res.data.devBuild) + 1)
-    });
+    fetch("https://meteorclient.com/api/stats")
+        .then(res => res.json())
+        .then(res => send(res.dev_build_version, parseInt(res.devBuild) + 1));
 }

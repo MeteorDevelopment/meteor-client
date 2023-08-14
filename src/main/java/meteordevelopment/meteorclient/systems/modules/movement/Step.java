@@ -63,7 +63,7 @@ public class Step extends Module {
 
     @Override
     public void onActivate() {
-        prevStepHeight = mc.player.stepHeight;
+        prevStepHeight = mc.player.getStepHeight();
         prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
 
         BaritoneAPI.getSettings().assumeStep.value = true;
@@ -74,16 +74,16 @@ public class Step extends Module {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
         if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
-            mc.player.stepHeight = height.get().floatValue();
+            mc.player.setStepHeight(height.get().floatValue());
         } else {
-            mc.player.stepHeight = prevStepHeight;
+            mc.player.setStepHeight(prevStepHeight);
         }
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, -1, 0));
     }
 
     @Override
     public void onDeactivate() {
-        mc.player.stepHeight = prevStepHeight;
+        mc.player.setStepHeight(prevStepHeight);
         BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
     }
 

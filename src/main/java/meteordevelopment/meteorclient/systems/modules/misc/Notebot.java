@@ -24,6 +24,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.notebot.NotebotUtils;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoder;
 import meteordevelopment.meteorclient.utils.notebot.decoder.SongDecoders;
+import meteordevelopment.meteorclient.utils.notebot.instrumentdetect.InstrumentDetectMode;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.meteorclient.utils.notebot.song.Song;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -45,11 +46,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.io.FilenameUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3d;
 
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
@@ -84,6 +87,13 @@ public class Notebot extends Module {
         .name("mode")
         .description("Select mode of notebot")
         .defaultValue(NotebotUtils.NotebotMode.ExactInstruments)
+        .build()
+    );
+
+    public final Setting<InstrumentDetectMode> instrumentDetectMode = sgGeneral.add(new EnumSetting.Builder<InstrumentDetectMode>()
+        .name("instrument-detect-mode")
+        .description("Select an instrument detect mode. Can be useful when server has a plugin that modifies noteblock state (e.g ItemsAdder) but noteblock can still play the right note")
+        .defaultValue(InstrumentDetectMode.BlockState)
         .build()
     );
 
@@ -230,6 +240,7 @@ public class Notebot extends Module {
     private final Multimap<Note, BlockPos> scannedNoteblocks = MultimapBuilder.linkedHashKeys().arrayListValues().build(); // Found noteblocks
     private final List<BlockPos> clickedBlocks = new ArrayList<>();
     private Stage stage = Stage.None;
+    private PlayingMode playingMode = PlayingMode.None;
     private boolean isPlaying = false;
     private int currentTick = 0;
     private int ticks = 0;
@@ -259,7 +270,11 @@ public class Notebot extends Module {
 
     @Override
     public String getInfoString() {
-        return stage.toString();
+        if (stage == Stage.None) {
+            return "None";
+        } else {
+            return playingMode.toString() + " | " + stage.toString();
+        }
     }
 
     @Override
@@ -277,6 +292,7 @@ public class Notebot extends Module {
         tuneHits.clear();
         anyNoteblockTuned = false;
         currentTick = 0;
+        playingMode = PlayingMode.None;
         isPlaying = false;
         stage = Stage.None;
         song = null;
@@ -424,7 +440,7 @@ public class Notebot extends Module {
         else if (stage == Stage.Tune) {
             tune();
         }
-        else if (stage == Stage.Preview || stage == Stage.Playing) {
+        else if (stage == Stage.Playing) {
             if (!isPlaying) return;
 
             if (mc.player == null || currentTick > song.getLastTick()) {
@@ -434,7 +450,7 @@ public class Notebot extends Module {
             }
 
             if (song.getNotesMap().containsKey(currentTick)) {
-                if (stage == Stage.Preview) onTickPreview();
+                if (playingMode == PlayingMode.Preview) onTickPreview();
                 else if (mc.player.getAbilities().creativeMode) {
                     error("You need to be in survival mode.");
                     stop();
@@ -455,7 +471,9 @@ public class Notebot extends Module {
     private void setupNoteblocksMap() {
         noteBlockPositions.clear();
 
+        // Modifiable list of unique notes
         List<Note> uniqueNotesToUse = new ArrayList<>(song.getRequirements());
+        // A map with noteblocks that have incorrect note level
         Map<Instrument, List<BlockPos>> incorrectNoteBlocks = new HashMap<>();
 
         // Check if there are already tuned noteblocks
@@ -464,12 +482,13 @@ public class Notebot extends Module {
             List<BlockPos> noteblocks = new ArrayList<>(entry.getValue());
 
             if (uniqueNotesToUse.contains(note)) {
+                // Add correct noteblock position to a noteBlockPositions
                 noteBlockPositions.put(note, noteblocks.remove(0));
                 uniqueNotesToUse.remove(note);
             }
 
             if (!noteblocks.isEmpty()) {
-                // Add excess for mapping process note -> block pos
+                // Add excess noteblocks for mapping process [note -> block pos]
 
                 if (!incorrectNoteBlocks.containsKey(note.getInstrument())) {
                     incorrectNoteBlocks.put(note.getInstrument(), new ArrayList<>());
@@ -479,7 +498,7 @@ public class Notebot extends Module {
             }
         }
 
-        // Map note -> block pos
+        // Map [note -> block pos]
         for (var entry : incorrectNoteBlocks.entrySet()) {
             List<BlockPos> positions = entry.getValue();
 
@@ -584,7 +603,7 @@ public class Notebot extends Module {
         if (!this.isActive()) return "Module disabled.";
         if (song == null) return "No song loaded.";
         if (isPlaying) return String.format("Playing song. %d/%d", currentTick, song.getLastTick());
-        if (stage == Stage.Playing || stage == Stage.Preview) return "Ready to play.";
+        if (stage == Stage.Playing) return "Ready to play.";
         if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks) return "Setting up the noteblocks.";
         else return String.format("Stage: %s.", stage.toString());
     }
@@ -594,9 +613,9 @@ public class Notebot extends Module {
      */
     public void play() {
         if (mc.player == null) return;
-        if (mc.player.getAbilities().creativeMode && stage != Stage.Preview) {
+        if (mc.player.getAbilities().creativeMode && playingMode != PlayingMode.Preview) {
             error("You need to be in survival mode.");
-        } else if (stage == Stage.Preview || stage == Stage.Playing) {
+        } else if (stage == Stage.Playing) {
             isPlaying = true;
             info("Playing.");
         } else {
@@ -617,18 +636,12 @@ public class Notebot extends Module {
 
     public void stop() {
         info("Stopping.");
-        if (stage == Stage.SetUp || stage == Stage.Tune || stage == Stage.WaitingToCheckNoteblocks || stage == Stage.LoadingSong) {
-            resetVariables();
-        } else {
-            isPlaying = false;
-            currentTick = 0;
-        }
-        updateStatus();
         disable();
+        updateStatus();
     }
 
     public void onSongEnd() {
-        if (autoPlay.get() && stage != Stage.Preview) {
+        if (autoPlay.get() && playingMode != PlayingMode.Preview) {
             playRandomSong();
         } else {
             stop();
@@ -659,10 +672,12 @@ public class Notebot extends Module {
      */
     public void loadSong(File file) {
         if (!isActive()) toggle();
+        resetVariables();
+
+        this.playingMode = PlayingMode.Noteblocks;
         if (!loadFileToMap(file, () -> stage = Stage.SetUp)) {
-            if (autoPlay.get()) {
-                playRandomSong();
-            }
+            onSongEnd();
+            return;
         }
         updateStatus();
     }
@@ -674,8 +689,11 @@ public class Notebot extends Module {
      */
     public void previewSong(File file) {
         if (!isActive()) toggle();
+        resetVariables();
+
+        this.playingMode = PlayingMode.Preview;
         loadFileToMap(file, () -> {
-            stage = Stage.Preview;
+            stage = Stage.Playing;
             play();
         });
         updateStatus();
@@ -698,26 +716,43 @@ public class Notebot extends Module {
             error("File is in wrong format. Decoder not found.");
             return false;
         }
-        resetVariables();
+
         info("Loading song \"%s\".", FilenameUtils.getBaseName(file.getName()));
 
-        loadingSongFuture = CompletableFuture.supplyAsync(() -> SongDecoders.parse(file));
-        loadingSongFuture.completeOnTimeout(null, 10, TimeUnit.SECONDS);
+        // Start loading song
+        loadingSongFuture = CompletableFuture.supplyAsync(() -> {
+            try {
+                return SongDecoders.parse(file);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        loadingSongFuture.completeOnTimeout(null, 60, TimeUnit.SECONDS);
 
         stage = Stage.LoadingSong;
         long time1 = System.currentTimeMillis();
-        loadingSongFuture.thenAccept(song -> {
-            if (song != null) {
+        loadingSongFuture.whenComplete((song ,ex) -> {
+            if (ex == null) {
+                // Song is null only when it times out
+                if (song == null) {
+                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' timed out.");
+                    onSongEnd();
+                    return;
+                }
+
                 this.song = song;
                 long time2 = System.currentTimeMillis();
                 long diff = time2 - time1;
 
-                info("Song '"+FilenameUtils.getBaseName(file.getName())+"' has been loaded to the memory! Took "+diff+"ms");
+                info("Song '" + FilenameUtils.getBaseName(file.getName()) + "' has been loaded to the memory! Took "+diff+"ms");
                 callback.run();
             } else {
-                error("Could not load song '"+FilenameUtils.getBaseName(file.getName())+"'");
-                if (autoPlay.get()) {
-                    playRandomSong();
+                if (ex instanceof CancellationException) {
+                    error("Loading song '" + FilenameUtils.getBaseName(file.getName()) + "' was cancelled.");
+                } else {
+                    error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'. See the logs for more details");
+                    MeteorClient.LOG.error("An error occurred while loading song '" + FilenameUtils.getBaseName(file.getName()) + "'", ex);
+                    onSongEnd();
                 }
             }
         });
@@ -750,7 +785,7 @@ public class Notebot extends Module {
 
                     if (!isValidScanSpot(pos)) continue;
 
-                    Note note = NotebotUtils.getNoteFromNoteBlock(blockState, mode.get());
+                    Note note = NotebotUtils.getNoteFromNoteBlock(blockState, pos, mode.get(), instrumentDetectMode.get().getInstrumentDetectFunction());
                     scannedNoteblocks.put(note, pos);
                 }
             }
@@ -856,6 +891,8 @@ public class Notebot extends Module {
     private void onTickPlay() {
         Collection<Note> notes = song.getNotesMap().get(this.currentTick);
         if (!notes.isEmpty()) {
+
+            // Rotate player's head
             if (autoRotate.get()) {
                 Optional<Note> firstNote = notes.stream().findFirst();
                 if (firstNote.isPresent()) {
@@ -867,10 +904,12 @@ public class Notebot extends Module {
                 }
             }
 
+            // Swing arm
             if (swingArm.get()) {
                 mc.player.swingHand(Hand.MAIN_HAND);
             }
 
+            // Play notes
             for (Note note : notes) {
                 BlockPos pos = noteBlockPositions.get(note);
                 if (pos == null) {
@@ -899,10 +938,17 @@ public class Notebot extends Module {
         return mc.world.getBlockState(pos.up()).isAir();
     }
 
+    /**
+     * Gets an Instrument from Note Map
+     *
+     * @param inst An instrument
+     * @return A new instrument mapped by instrument given in parameters
+     */
     @Nullable
-    public Instrument getMappedInstrument(Instrument inst) {
+    public Instrument getMappedInstrument(@NotNull Instrument inst) {
         if (mode.get() == NotebotUtils.NotebotMode.ExactInstruments) {
-            return ((NotebotUtils.OptionalInstrument) sgNoteMap.getByIndex(inst.ordinal()).get()).toMinecraftInstrument();
+            NotebotUtils.OptionalInstrument optionalInstrument = (NotebotUtils.OptionalInstrument) sgNoteMap.getByIndex(inst.ordinal()).get();
+            return optionalInstrument.toMinecraftInstrument();
         } else {
             return inst;
         }
@@ -927,7 +973,12 @@ public class Notebot extends Module {
         SetUp,
         Tune,
         WaitingToCheckNoteblocks,
-        Playing,
-        Preview
+        Playing
+    }
+
+    public enum PlayingMode {
+        None,
+        Preview,
+        Noteblocks
     }
 }

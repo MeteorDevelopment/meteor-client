@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -113,7 +112,7 @@ public class Anchor extends Module {
 
         for (int i = 0; i < maxHeight.get(); i++) {
             y--;
-            if (y <= 0 || !isAir(x, y, z)) break;
+            if (y <= mc.world.getBottomY() || !isAir(x, y, z)) break;
 
             if (isHole(x, y, z)) {
                 foundHole = true;
@@ -125,8 +124,8 @@ public class Anchor extends Module {
 
         if (foundHole) {
             controlMovement = true;
-            deltaX = Utils.clamp(holeX - mc.player.getX(), -0.05, 0.05);
-            deltaZ = Utils.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
+            deltaX = MathHelper.clamp(holeX - mc.player.getX(), -0.05, 0.05);
+            deltaZ = MathHelper.clamp(holeZ - mc.player.getZ(), -0.05, 0.05);
 
             ((IVec3d) mc.player.getVelocity()).set(deltaX, mc.player.getVelocity().y - (pull.get() ? pullSpeed.get() : 0), deltaZ);
         }

@@ -5,13 +5,13 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -46,7 +46,7 @@ public class Nametags extends Module {
 
     // General
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
         .name("entities")
         .description("Select entities to draw nametags on.")
         .defaultValue(EntityType.PLAYER, EntityType.ITEM)
@@ -65,6 +65,13 @@ public class Nametags extends Module {
         .name("ignore-self")
         .description("Ignore yourself when in third person or freecam.")
         .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Ignore rendering nametags for friends.")
+        .defaultValue(false)
         .build()
     );
 
@@ -103,6 +110,13 @@ public class Nametags extends Module {
     );
 
     //Players
+
+    private final Setting<Boolean> displayHealth = sgPlayers.add(new BoolSetting.Builder()
+        .name("health")
+        .description("Shows the player's health.")
+        .defaultValue(true)
+        .build()
+    );
 
     private final Setting<Boolean> displayGameMode = sgPlayers.add(new BoolSetting.Builder()
         .name("gamemode")
@@ -225,7 +239,7 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> pingColor = sgRender.add(new ColorSetting.Builder()
         .name("ping-color")
-        .description("The color of the nametag names.")
+        .description("The color of the nametag ping.")
         .defaultValue(new SettingColor(20, 170, 170))
         .visible(displayPing::get)
         .build()
@@ -233,17 +247,25 @@ public class Nametags extends Module {
 
     private final Setting<SettingColor> gamemodeColor = sgRender.add(new ColorSetting.Builder()
         .name("gamemode-color")
-        .description("The color of the nametag names.")
+        .description("The color of the nametag gamemode.")
         .defaultValue(new SettingColor(232, 185, 35))
         .visible(displayGameMode::get)
         .build()
     );
 
+    private final Setting<DistanceColorMode> distanceColorMode = sgRender.add(new EnumSetting.Builder<DistanceColorMode>()
+        .name("distance-color-mode")
+        .description("The mode to color the nametag distance with.")
+        .defaultValue(DistanceColorMode.Gradient)
+        .visible(displayDistance::get)
+        .build()
+    );
+
     private final Setting<SettingColor> distanceColor = sgRender.add(new ColorSetting.Builder()
         .name("distance-color")
-        .description("The color of the nametag names.")
+        .description("The color of the nametag distance.")
         .defaultValue(new SettingColor(150, 150, 150))
-        .visible(displayDistance::get)
+        .visible(() -> displayDistance.get() && distanceColorMode.get() == DistanceColorMode.Flat)
         .build()
     );
 
@@ -286,11 +308,12 @@ public class Nametags extends Module {
 
         for (Entity entity : mc.world.getEntities()) {
             EntityType<?> type = entity.getType();
-            if (!entities.get().containsKey(type)) continue;
+            if (!entities.get().contains(type)) continue;
 
             if (type == EntityType.PLAYER) {
                 if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
                 if (EntityUtils.getGameMode((PlayerEntity) entity) == null && ignoreBots.get()) continue;
+                if (Friends.get().isFriend((PlayerEntity) entity) && ignoreFriends.get()) continue;
             }
 
             if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {
@@ -315,7 +338,7 @@ public class Nametags extends Module {
             EntityType<?> type = entity.getType();
 
             if (NametagUtils.to2D(pos, scale.get())) {
-                if (type == EntityType.PLAYER) renderNametagPlayer((PlayerEntity) entity, shadow);
+                if (type == EntityType.PLAYER) renderNametagPlayer(event, (PlayerEntity) entity, shadow);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
                 else if (type == EntityType.ITEM_FRAME)
                     renderNametagItem(((ItemFrameEntity) entity).getHeldItemStack(), shadow);
@@ -346,9 +369,9 @@ public class Nametags extends Module {
         return height;
     }
 
-    private void renderNametagPlayer(PlayerEntity player, boolean shadow) {
+    private void renderNametagPlayer(Render2DEvent event, PlayerEntity player, boolean shadow) {
         TextRenderer text = TextRenderer.get();
-        NametagUtils.begin(pos);
+        NametagUtils.begin(pos, event.drawContext);
 
         // Gamemode
         GameMode gm = EntityUtils.getGameMode(player);
@@ -371,14 +394,12 @@ public class Nametags extends Module {
         if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getEntityName());
         else name = player.getEntityName();
 
-        name = name + " ";
-
         // Health
         float absorption = player.getAbsorptionAmount();
         int health = Math.round(player.getHealth() + absorption);
         double healthPercentage = health / (player.getMaxHealth() + absorption);
 
-        String healthText = String.valueOf(health);
+        String healthText = " " + health;
         Color healthColor;
 
         if (healthPercentage <= 0.333) healthColor = RED;
@@ -399,10 +420,12 @@ public class Nametags extends Module {
         double healthWidth = text.getWidth(healthText, shadow);
         double pingWidth = text.getWidth(pingText, shadow);
         double distWidth = text.getWidth(distText, shadow);
-        double width = nameWidth + healthWidth;
+
+        double width = nameWidth;
 
         boolean renderPlayerDistance = player != mc.cameraEntity || Modules.get().isActive(Freecam.class);
 
+        if (displayHealth.get()) width += healthWidth;
         if (displayGameMode.get()) width += gmWidth;
         if (displayPing.get()) width += pingWidth;
         if (displayDistance.get() && renderPlayerDistance) width += distWidth;
@@ -420,9 +443,15 @@ public class Nametags extends Module {
         if (displayGameMode.get()) hX = text.render(gmText, hX, hY, gamemodeColor.get(), shadow);
         hX = text.render(name, hX, hY, nameColor, shadow);
 
-        hX = text.render(healthText, hX, hY, healthColor, shadow);
+        if (displayHealth.get()) hX = text.render(healthText, hX, hY, healthColor, shadow);
         if (displayPing.get()) hX = text.render(pingText, hX, hY, pingColor.get(), shadow);
-        if (displayDistance.get() && renderPlayerDistance) text.render(distText, hX, hY, distanceColor.get(), shadow);
+        if (displayDistance.get() && renderPlayerDistance) {
+            switch (distanceColorMode.get()) {
+                case Flat ->  text.render(distText, hX, hY, distanceColor.get(), shadow);
+                case Gradient -> text.render(distText, hX, hY, EntityUtils.getColorFromDistance(player), shadow);
+            }
+        }
+
         text.end();
 
         if (displayItems.get()) {
@@ -467,7 +496,7 @@ public class Nametags extends Module {
             for (int i = 0; i < 6; i++) {
                 ItemStack stack = getItem(player, i);
 
-                RenderUtils.drawItem(stack, (int) x, (int) y, 2, true);
+                RenderUtils.drawItem(event.drawContext, stack, (int) x, (int) y, 2, true);
 
                 if (maxEnchantCount > 0 && displayEnchants.get()) {
                     text.begin(0.5 * enchantTextScale.get(), false, true);
@@ -514,7 +543,7 @@ public class Nametags extends Module {
             }
         } else if (displayEnchants.get()) displayEnchants.set(false);
 
-        NametagUtils.end();
+        NametagUtils.end(event.drawContext);
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
@@ -631,11 +660,16 @@ public class Nametags extends Module {
         OnTop
     }
 
+    public enum DistanceColorMode {
+        Gradient,
+        Flat;
+    }
+
     public boolean excludeBots() {
         return ignoreBots.get();
     }
 
     public boolean playerNametags() {
-        return isActive() && entities.get().containsKey(EntityType.PLAYER);
+        return isActive() && entities.get().contains(EntityType.PLAYER);
     }
 }
