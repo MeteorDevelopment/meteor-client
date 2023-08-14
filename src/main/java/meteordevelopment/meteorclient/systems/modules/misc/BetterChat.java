@@ -372,7 +372,7 @@ public class BetterChat extends Module {
     public void drawPlayerHead(DrawContext context, ChatHudLine.Visible line, int y, int color) {
         if (!isActive() || !playerHeads.get()) return;
 
-        // Only draw the first line of multiple line messages
+        // Only draw the first line of multi line messages
         if (((IChatHudLineVisible) (Object) line).meteor$isStartOfEntry())  {
             RenderSystem.enableBlend();
             RenderSystem.setShaderColor(1, 1, 1, Color.toRGBAA(color) / 255f);
@@ -402,6 +402,7 @@ public class BetterChat extends Module {
             // Check prefix
             if (text.startsWith(entry.prefix(), startOffset)) {
                 context.drawTexture(entry.texture(), 0, y, 8, 8, 0, 0, 64, 64, 64, 64);
+                return;
             }
         }
 
