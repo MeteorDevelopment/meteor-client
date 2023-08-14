@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
@@ -29,12 +30,14 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(ItemStack.class)
 public abstract class ItemStackMixin {
-    @Inject(method = "getTooltip", at = @At("TAIL"), cancellable = true)
-    private void onGetTooltip(PlayerEntity player, TooltipContext context, CallbackInfoReturnable<List<Text>> info) {
+    @ModifyReturnValue(method = "getTooltip", at = @At("RETURN"))
+    private List<Text> onGetTooltip(List<Text> original, PlayerEntity player, TooltipContext context) {
         if (Utils.canUpdate()) {
-            ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(ItemStackTooltipEvent.get((ItemStack) (Object) this, info.getReturnValue()));
-            info.setReturnValue(event.list);
+            ItemStackTooltipEvent event = MeteorClient.EVENT_BUS.post(ItemStackTooltipEvent.get((ItemStack) (Object) this, original));
+            return event.list;
         }
+
+        return original;
     }
 
     @Inject(method = "finishUsing", at = @At("HEAD"))
@@ -51,9 +54,9 @@ public abstract class ItemStackMixin {
         }
     }
 
-    @Inject(method = "isSectionVisible", at = @At("RETURN"), cancellable = true)
-    private static void onSectionVisible(int flags, ItemStack.TooltipSection tooltipSection, CallbackInfoReturnable<Boolean> info) {
-        SectionVisibleEvent event = MeteorClient.EVENT_BUS.post(SectionVisibleEvent.get(tooltipSection, info.getReturnValueZ()));
-        info.setReturnValue(event.visible);
+    @ModifyReturnValue(method = "isSectionVisible", at = @At("RETURN"))
+    private static boolean onSectionVisible(boolean original, int flags, ItemStack.TooltipSection tooltipSection) {
+        SectionVisibleEvent event = MeteorClient.EVENT_BUS.post(SectionVisibleEvent.get(tooltipSection, original));
+        return event.visible;
     }
 }

@@ -19,7 +19,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class PlayerModelHud extends HudElement {
     public static final HudElementInfo<PlayerModelHud> INFO = new HudElementInfo<>(Hud.GROUP, "player-model", "Displays a model of your player.", PlayerModelHud::new);
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgBackground = settings.createGroup("Background");
 
@@ -100,11 +99,11 @@ public class PlayerModelHud extends HudElement {
             float yaw = copyYaw.get() ? MathHelper.wrapDegrees(player.prevYaw + (player.getYaw() - player.prevYaw) * mc.getTickDelta()) : (float) customYaw.get();
             float pitch = copyPitch.get() ? player.getPitch() : (float) customPitch.get();
 
-            InventoryScreen.drawEntity((int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
+            InventoryScreen.drawEntity(renderer.drawContext, (int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), -yaw, -pitch, player);
         });
 
         if (background.get()) {
-            renderer.quad(this.x, this.y, getWidth(), getHeight(), backgroundColor.get());
+            renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
         }
     }
 }

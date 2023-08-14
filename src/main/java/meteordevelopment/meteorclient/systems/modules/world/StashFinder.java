@@ -48,7 +48,7 @@ public class StashFinder extends Module {
     );
 
     private final Setting<Integer> minimumStorageCount = sgGeneral.add(new IntSetting.Builder()
-        .name("minimum-storage-cont")
+        .name("minimum-storage-count")
         .description("The minimum amount of storage blocks in a chunk to record the chunk.")
         .defaultValue(4)
         .min(1)
@@ -268,6 +268,11 @@ public class StashFinder extends Module {
 
     private File getCsvFile() {
         return new File(new File(new File(MeteorClient.FOLDER, "stashes"), Utils.getFileWorldName()), "stashes.csv");
+    }
+
+    @Override
+    public String getInfoString() {
+        return String.valueOf(chunks.size());
     }
 
     public enum Mode {
