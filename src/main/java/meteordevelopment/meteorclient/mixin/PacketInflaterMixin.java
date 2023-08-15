@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(PacketInflater.class)
 public class PacketInflaterMixin {
-    @ModifyConstant(method = "decode", constant = @Constant(intValue = 8388608))
+    @ModifyConstant(method = "decode", constant = @Constant(intValue = 8388608), require = 0)
     private int maxValue(int value) {
         return Modules.get().isActive(AntiPacketKick.class) ? Integer.MAX_VALUE : value;
     }
