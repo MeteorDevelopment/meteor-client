@@ -473,6 +473,7 @@ public class Modules extends System<Modules> {
         add(new Step());
         add(new TridentBoost());
         add(new Velocity());
+        add(new TestScaffold());
     }
 
     private void initRender() {

@@ -3,7 +3,7 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.interaction;
+package meteordevelopment.meteorclient.utils.interaction.api;
 
 import net.minecraft.util.math.BlockPos;
 

@@ -3,8 +3,9 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.utils.interaction;
+package meteordevelopment.meteorclient.utils.interaction.api;
 
+import meteordevelopment.meteorclient.utils.interaction.RotationUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;

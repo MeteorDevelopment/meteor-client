@@ -23,6 +23,8 @@ import meteordevelopment.meteorclient.utils.PostInit;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.ReflectInit;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.interaction.impl.DefaultInteractionManager;
+import meteordevelopment.meteorclient.utils.interaction.api.InteractionManager;
 import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
@@ -56,6 +58,9 @@ public class MeteorClient implements ClientModInitializer {
     public static final IEventBus EVENT_BUS = new EventBus();
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
+
+    // TODO: This is just temoprary
+    public static final InteractionManager INTERACTIONS = new DefaultInteractionManager();
 
     static {
         MOD_META = FabricLoader.getInstance().getModContainer(MOD_ID).orElseThrow().getMetadata();
@@ -131,6 +136,8 @@ public class MeteorClient implements ClientModInitializer {
 
         // Post init
         ReflectInit.init(PostInit.class);
+
+        EVENT_BUS.subscribe(INTERACTIONS);
 
         // Save on shutdown
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
