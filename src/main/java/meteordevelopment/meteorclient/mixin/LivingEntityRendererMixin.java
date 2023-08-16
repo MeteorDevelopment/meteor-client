@@ -6,12 +6,12 @@
 package meteordevelopment.meteorclient.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Chams;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.render.VertexConsumerProvider;
@@ -48,19 +48,22 @@ public abstract class LivingEntityRendererMixin<T extends LivingEntity, M extend
 
     @ModifyVariable(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", ordinal = 2, at = @At(value = "STORE", ordinal = 0))
     public float changeYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
+        //if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
+        if (entity.equals(mc.player) && MeteorClient.INTERACTIONS.rotating) return MeteorClient.INTERACTIONS.serverYaw;
         return oldValue;
     }
 
     @ModifyVariable(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", ordinal = 3, at = @At(value = "STORE", ordinal = 0))
     public float changeHeadYaw(float oldValue, LivingEntity entity) {
-        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
+        //if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverYaw;
+        if (entity.equals(mc.player) && MeteorClient.INTERACTIONS.rotating) return MeteorClient.INTERACTIONS.serverYaw;
         return oldValue;
     }
 
     @ModifyVariable(method = "render(Lnet/minecraft/entity/LivingEntity;FFLnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/client/render/VertexConsumerProvider;I)V", ordinal = 5, at = @At(value = "STORE", ordinal = 3))
     public float changePitch(float oldValue, LivingEntity entity) {
-        if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
+        //if (entity.equals(mc.player) && Rotations.rotationTimer < 10) return Rotations.serverPitch;
+        if (entity.equals(mc.player) && MeteorClient.INTERACTIONS.rotating) return MeteorClient.INTERACTIONS.serverPitch;
         return oldValue;
     }
 

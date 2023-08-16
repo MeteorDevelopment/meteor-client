@@ -28,6 +28,7 @@ public class Config extends System<Config> {
     private final SettingGroup sgVisual = settings.createGroup("Visual");
     private final SettingGroup sgChat = settings.createGroup("Chat");
     private final SettingGroup sgMisc = settings.createGroup("Misc");
+    private final SettingGroup sgInteractions = settings.createGroup("Interactions");
 
     // Visual
 
@@ -139,6 +140,46 @@ public class Config extends System<Config> {
         .description("Amount of modules and settings to be shown in the module search bar.")
         .defaultValue(8)
         .min(1).sliderMax(12)
+        .build()
+    );
+
+    // Interactions
+
+    public final Setting<Integer> placementsPerTick = sgInteractions.add(new IntSetting.Builder()
+        .name("placements-per-tick")
+        .description("The maximum number of blocks to place per tick.")
+        .defaultValue(1)
+        .min(1)
+        .build()
+    );
+
+    /* todo these settings
+    public final Setting<Boolean> rotate = sgInteractions.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Whether to rotate to face the interaction. Can slow interactions down.")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> validDirection = sgInteractions.add(new BoolSetting.Builder()
+        .name("valid-direction")
+        .description("Whether to check to ensure you're interacting with a valid block side (e.g. not placing on top of a block when you're underneath it).")
+        .defaultValue(true)
+        .build()
+    );
+
+    public final Setting<Boolean> raytrace = sgInteractions.add(new BoolSetting.Builder()
+        .name("raytrace")
+        .description("Whether to perform a strict raytrace to ensure you're only interacting with something you can see.")
+        .defaultValue(true)
+        .build()
+    );
+     */
+
+    public final Setting<Boolean> airPlace = sgInteractions.add(new BoolSetting.Builder()
+        .name("air-place")
+        .description("Whether to allow airplacing if a valid side to place against wasn't found.")
+        .defaultValue(false)
         .build()
     );
 

@@ -176,9 +176,9 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @ModifyArgs(method = "interactItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/c2s/play/PlayerMoveC2SPacket$Full;<init>(DDDFFZ)V"))
     private void onInteractItem(Args args) {
-        if (Rotations.rotating) {
-            args.set(3, Rotations.serverYaw);
-            args.set(4, Rotations.serverPitch);
+        if (MeteorClient.INTERACTIONS.rotating) {
+            args.set(3, MeteorClient.INTERACTIONS.serverYaw);
+            args.set(4, MeteorClient.INTERACTIONS.serverPitch);
         }
     }
 

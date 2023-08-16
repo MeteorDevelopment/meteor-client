@@ -41,8 +41,11 @@ public interface InteractionManager {
      *  If a FindItemResult is passed, the client will swap to that item before performing the interaction. */
     EntityAction interactEntity(Entity entity, @Nullable FindItemResult item, EntityInteractType interaction, int priority);
 
-    /** Needs to be called from TickEvent.Pre and then the modules can check the state in TickEvent.Post. */
-    //  todo - handle modules wanting to update their own rotation and how that should be handled alongside priorities
+    /** Needs to be called from TickEvent.Pre and then the modules can check the state in TickEvent.Post.
+     * The Cancelled state will be returned for the rotation with lower priority if two separate modules send a
+     * rotation in the same tick.
+     * The Pending state will be returned before the rotation packet has been sent.
+     * The Finished state will be returned after the rotation packet has been sent. */
     Action rotate(double yaw, double pitch, int priority);
 
     default Action rotate(double yaw, double pitch) {

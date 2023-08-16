@@ -12,6 +12,7 @@ import net.minecraft.util.math.BlockPos;
 public class DefaultBlockAction extends DefaultAction implements BlockAction {
     private final BlockPos pos;
     private final FindItemResult item;
+    public boolean rotated = false;
 
     public DefaultBlockAction(BlockPos pos, FindItemResult item, int priority, State state) {
         super(priority, state);
