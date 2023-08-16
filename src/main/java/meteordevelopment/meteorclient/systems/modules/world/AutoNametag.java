@@ -21,6 +21,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.item.Items;
 import net.minecraft.util.Hand;
 
+import java.util.Objects;
 import java.util.Set;
 
 public class AutoNametag extends Module {
@@ -87,8 +88,7 @@ public class AutoNametag extends Module {
             if (!entities.get().contains(entity.getType())) return false;
             if (!entity.hasCustomName()) {
                 return entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
-            }
-            if (entity.hasCustomName() && renametag.get()) {
+            } else if (renametag.get() && entity.hasCustomName() && !Objects.equals(mc.player.getInventory().getStack(findNametag.slot()).getName().toString(), Objects.requireNonNull(entity.getCustomName()).toString())) {
                 return entity.getCustomName() != mc.player.getInventory().getStack(findNametag.slot()).getName();
             }
             return false;
