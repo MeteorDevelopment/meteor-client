@@ -13,28 +13,18 @@ import net.minecraft.util.math.Vec3d;
 import javax.annotation.Nullable;
 
 public interface InteractionManager {
-    interface Action {
-        enum State {
-            Pending,
-            Finished,
-            Cancelled
-        }
-
-        /** The priority of this interaction. */
-        int getPriority();
-
-        /** The state the interaction is currently in. */
-        State getState();
-
-        /** Sets the interaction state. */
-        void setState(State state);
+    class Priority {
+        public static final int HIGHEST = 200;
+        public static final int HIGH = 100;
+        public static final int NORMAL = 0;
+        public static final int LOW = -100;
+        public static final int LOWEST = -200;
     }
-
 
     /** Needs to be called from TickEvent.Pre and then modules can check the state in TickEvent.Post.
      *  If a FindItemResult is passed, the client will swap to that item before performing the interaction.
      *  All interactions that can't be executed in the current tick will be cancelled. */
-    Action placeBlock(BlockPos pos, @Nullable FindItemResult item, int priority);
+    BlockAction placeBlock(BlockPos pos, @Nullable FindItemResult item, int priority);
 
     /** Needs to be called from TickEvent.Pre and then modules can check the state in TickEvent.Post.
      *  If a FindItemResult is passed, the client will swap to that item before performing the interaction.
@@ -44,18 +34,11 @@ public interface InteractionManager {
      *  object returned by this method will be the same between all the ticks a module continues to break a block at the
      *  same location. The Pending state will be reported all the way until the block is either broken or an interaction
      *  has been cancelled by some other, higher priority interaction. */
-    Action breakBlock(BlockPos pos, @Nullable FindItemResult item, int priority);
+    BlockAction breakBlock(BlockPos pos, @Nullable FindItemResult item, int priority);
 
     /** Needs to be called from TickEvent.Pre and then modules can check the state in TickEvent.Post.
      *  If a FindItemResult is passed, the client will swap to that item before performing the interaction. */
-    Action interactEntity(Entity entity, @Nullable FindItemResult item, EntityInteractType interaction, int priority);
-
-    enum EntityInteractType {
-        ATTACK,
-        INTERACT,
-        INTERACT_AT
-    }
-
+    EntityAction interactEntity(Entity entity, @Nullable FindItemResult item, EntityInteractType interaction, int priority);
 
     /** Needs to be called from TickEvent.Pre and then the modules can check the state in TickEvent.Post. */
     //  todo - handle modules wanting to update their own rotation and how that should be handled alongside priorities
@@ -75,14 +58,5 @@ public interface InteractionManager {
 
     default Action rotate(BlockPos pos) {
         return rotate(RotationUtils.getYaw(pos), RotationUtils.getPitch(pos));
-    }
-
-
-    class Priority {
-        public static final int HIGHEST = 200;
-        public static final int HIGH = 100;
-        public static final int NORMAL = 0;
-        public static final int LOW = -100;
-        public static final int LOWEST = -200;
     }
 }

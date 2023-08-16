@@ -5,9 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.interaction;
 
-import net.minecraft.util.math.BlockPos;
-
-public interface BlockAction extends Action {
-    /** The position of this action. */
-    BlockPos getPos();
+public enum EntityInteractType {
+    ATTACK,
+    INTERACT,
+    INTERACT_AT
 }
