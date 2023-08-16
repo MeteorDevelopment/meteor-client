@@ -324,7 +324,7 @@ public class BedAura extends Module {
         boolean wasSneaking = mc.player.isSneaking();
         if (wasSneaking) mc.player.setSneaking(false);
 
-        mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(mc.player.getPos(), Direction.UP, pos, false));
+        mc.interactionManager.interactBlock(mc.player, Hand.OFF_HAND, new BlockHitResult(Vec3d.ofCenter(pos), Direction.UP, pos, false));
 
         mc.player.setSneaking(wasSneaking);
     }

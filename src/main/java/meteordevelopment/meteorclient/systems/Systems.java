@@ -34,9 +34,13 @@ public class Systems {
     }
 
     public static void init() {
-        System<?> config = add(new Config());
-        config.init();
-        config.load();
+        Config config = new Config();
+        System<?> configSystem = add(config);
+        configSystem.init();
+        configSystem.load();
+
+        // Registers the colors from config tab. This allows rainbow colours to work for friends.
+        config.settings.registerColorSettings(null);
 
         add(new Modules());
         add(new Macros());

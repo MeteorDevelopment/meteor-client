@@ -6,11 +6,13 @@
 package meteordevelopment.meteorclient.systems.modules.combat;
 
 import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.AxeItem;
 import net.minecraft.item.SwordItem;
 
@@ -33,6 +35,13 @@ public class Hitboxes extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-friends")
+        .description("Doesn't expand the hitboxes of friends.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<Boolean> onlyOnWeapon = sgGeneral.add(new BoolSetting.Builder()
         .name("only-on-weapon")
         .description("Only modifies hitbox when holding a weapon in hand.")
@@ -45,7 +54,7 @@ public class Hitboxes extends Module {
     }
 
     public double getEntityValue(Entity entity) {
-        if (!(isActive() && testWeapon())) return 0;
+        if (!(isActive() && testWeapon()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity))) return 0;
         if (entities.get().contains(entity.getType())) return value.get();
         return 0;
     }

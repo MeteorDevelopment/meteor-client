@@ -28,7 +28,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 @Mixin(DisconnectedScreen.class)
 public abstract class DisconnectedScreenMixin extends Screen {
-    @Unique private GridWidget grid;
     @Unique private ButtonWidget reconnectBtn;
     @Unique private double time = Modules.get().get(AutoReconnect.class).time.get() * 20;
 
@@ -37,33 +36,19 @@ public abstract class DisconnectedScreenMixin extends Screen {
     }
 
     @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget;refreshPositions()V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onInit_before(CallbackInfo info, GridWidget.Adder adder) {
+    private void addButtons(CallbackInfo info, GridWidget.Adder adder) {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
 
         if (autoReconnect.lastServerConnection != null) {
-            grid = new GridWidget();
-            adder.add(grid);
+            reconnectBtn = adder.add(new ButtonWidget.Builder(Text.literal(getText()), button -> tryConnecting()).build());
 
-            grid.setRowSpacing(2);
-            GridWidget.Adder myAdder = grid.createAdder(1);
-
-            reconnectBtn = myAdder.add(new ButtonWidget.Builder(Text.literal(getText()), button -> tryConnecting()).build());
-
-            myAdder.add(
+            adder.add(
                 new ButtonWidget.Builder(Text.literal("Toggle Auto Reconnect"), button -> {
                     autoReconnect.toggle();
                     reconnectBtn.setMessage(Text.literal(getText()));
                     time = autoReconnect.time.get() * 20;
                 }).build()
             );
-        }
-    }
-
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget;refreshPositions()V", shift = At.Shift.AFTER))
-    private void onInit_after(CallbackInfo info) {
-        if (grid != null) {
-            grid.refreshPositions();
-            grid.forEachChild(this::addDrawableChild);
         }
     }
 
@@ -87,9 +72,7 @@ public abstract class DisconnectedScreenMixin extends Screen {
     }
 
     private void tryConnecting() {
-        var conn = Modules.get().get(AutoReconnect.class).lastServerConnection;
-        var host = conn.getAddress().getHostName();
-        if (host.contains(":")) host = host.substring(0, host.indexOf(":"));
-        ConnectScreen.connect(new TitleScreen(), mc, new ServerAddress(host, conn.getPort()), new ServerInfo(I18n.translate("selectServer.defaultName"), host, false), false);
+        var lastServer = Modules.get().get(AutoReconnect.class).lastServerConnection;
+        ConnectScreen.connect(new TitleScreen(), mc, lastServer.left(), lastServer.right(), false);
     }
 }

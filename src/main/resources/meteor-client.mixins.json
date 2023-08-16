@@ -6,6 +6,7 @@
   "client": [
     "AbstractBlockAccessor",
     "AbstractBlockMixin",
+    "AbstractBlockStateMixin",
     "AbstractClientPlayerEntityMixin",
     "AbstractFurnaceScreenHandlerMixin",
     "AbstractFurnaceScreenMixin",
@@ -58,6 +59,7 @@
     "CloseHandledScreenC2SPacketAccessor",
     "CobwebBlockMixin",
     "CompassAnglePredicateProviderMixin",
+    "ConnectScreenMixin",
     "CrashReportMixin",
     "CreativeInventoryScreenAccessor",
     "CreativeSlotMixin",
@@ -116,7 +118,6 @@
     "MouseMixin",
     "MultiplayerScreenMixin",
     "PacketByteBufMixin",
-    "PacketInflaterMixin",
     "ParticleManagerMixin",
     "PlayerArmorSlotMixin",
     "PlayerEntityMixin",
@@ -165,7 +166,9 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "MessageHandlerMixin",
+    "ChatHudLineVisibleMixin"
   ],
   "injectors": {
     "defaultRequire": 1
