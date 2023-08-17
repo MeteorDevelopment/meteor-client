@@ -140,7 +140,7 @@ public class ChatUtils {
 
         if (!Config.get().deleteChatFeedback.get()) id = 0;
 
-        ((IChatHud) mc.inGameHud.getChatHud()).add(message, id);
+        ((IChatHud) mc.inGameHud.getChatHud()).meteor$add(message, id);
     }
 
     private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {

@@ -118,7 +118,6 @@
     "MouseMixin",
     "MultiplayerScreenMixin",
     "PacketByteBufMixin",
-    "PacketInflaterMixin",
     "ParticleManagerMixin",
     "PlayerArmorSlotMixin",
     "PlayerEntityMixin",
@@ -167,7 +166,9 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor"
+    "YggdrasilMinecraftSessionServiceAccessor",
+    "MessageHandlerMixin",
+    "ChatHudLineVisibleMixin"
   ],
   "injectors": {
     "defaultRequire": 1
