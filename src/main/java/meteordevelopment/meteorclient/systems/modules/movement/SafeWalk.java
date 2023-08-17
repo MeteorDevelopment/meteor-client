@@ -58,7 +58,7 @@ public class SafeWalk extends Module {
             .name("render-player-box")
             .description("Render player box helper.")
             .defaultValue(true)
-            .visible(() -> this.renderEdgeDistance.get())
+            .visible(() -> this.sneak.get())
             .build());
 
     public SafeWalk() {
@@ -67,7 +67,7 @@ public class SafeWalk extends Module {
 
     @EventHandler
     private void onClipAtLedge(ClipAtLedgeEvent event) {
-        if (sneak.get()) {
+        if (this.sneak.get()) {
             boolean closeToEdge = false;
             boolean isSprinting = this.sneakSprint.get() ? false : mc.options.sprintKey.isPressed();
 
@@ -98,7 +98,7 @@ public class SafeWalk extends Module {
 
     @EventHandler
     private void onRender(Render3DEvent event) {
-        if (this.renderEdgeDistance.get()) {
+        if (this.sneak.get() && this.renderEdgeDistance.get()) {
             Box playerBox = mc.player.getBoundingBox();
             Box adjustedBox = getAdjustedPlayerBox(playerBox);
 
