@@ -42,7 +42,7 @@ public class SpeedMine extends Module {
     public final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
         .name("blocks-filter")
         .description("How to use the blocks setting.")
-        .defaultValue(FilterMode.Blacklist
+        .defaultValue(FilterMode.Blacklist)
         .visible(() -> mode.get() != Mode.Haste)
         .build()
     );
