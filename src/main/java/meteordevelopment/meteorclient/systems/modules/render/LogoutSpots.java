@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.entity.EntityAddedEvent;
+import meteordevelopment.meteorclient.events.entity.player.PlayerRespawnEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -19,7 +20,6 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.entity.Entity;
@@ -98,7 +98,6 @@ public class LogoutSpots extends Module {
     private final List<PlayerEntity> lastPlayers = new ArrayList<>();
 
     private int timer;
-    private Dimension lastDimension;
 
     public LogoutSpots() {
         super(Categories.Render, "logout-spots", "Displays a box where another player has logged out at.");
@@ -111,7 +110,6 @@ public class LogoutSpots extends Module {
         updateLastPlayers();
 
         timer = 10;
-        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -125,6 +123,11 @@ public class LogoutSpots extends Module {
         for (Entity entity : mc.world.getEntities()) {
             if (entity instanceof PlayerEntity) lastPlayers.add((PlayerEntity) entity);
         }
+    }
+
+    @EventHandler
+    private void onPlayerRespawn(PlayerRespawnEvent event) {
+        players.clear();
     }
 
     @EventHandler
@@ -169,10 +172,6 @@ public class LogoutSpots extends Module {
         } else {
             timer--;
         }
-
-        Dimension dimension = PlayerUtils.getDimension();
-        if (dimension != lastDimension) players.clear();
-        lastDimension = dimension;
     }
 
     private void add(Entry entry) {

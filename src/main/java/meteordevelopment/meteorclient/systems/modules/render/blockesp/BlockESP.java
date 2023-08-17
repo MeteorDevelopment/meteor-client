@@ -7,33 +7,32 @@ package meteordevelopment.meteorclient.systems.modules.render.blockesp;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import meteordevelopment.meteorclient.events.entity.player.PlayerRespawnEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.BlockUpdateEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
-import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
-import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
-import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
+
+    private final ExecutorService executor = Executors.newSingleThreadExecutor((task) -> new Thread(task,"Meteor-BlockESP"));
 
     // General
 
@@ -80,8 +79,6 @@ public class BlockESP extends Module {
     private final Long2ObjectMap<ESPChunk> chunks = new Long2ObjectOpenHashMap<>();
     private final List<ESPGroup> groups = new UnorderedArrayList<>();
 
-    private Dimension lastDimension;
-
     public BlockESP() {
         super(Categories.Render, "block-esp", "Renders specified blocks through walls.");
 
@@ -98,8 +95,6 @@ public class BlockESP extends Module {
         for (Chunk chunk : Utils.chunks()) {
             searchChunk(chunk, null);
         }
-
-        lastDimension = PlayerUtils.getDimension();
     }
 
     @Override
@@ -152,12 +147,17 @@ public class BlockESP extends Module {
     }
 
     @EventHandler
+    private void onPlayerRespawn(PlayerRespawnEvent event) {
+        onActivate();
+    }
+
+    @EventHandler
     private void onChunkData(ChunkDataEvent event) {
         searchChunk(event.chunk, event);
     }
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
-        MeteorExecutor.execute(() -> {
+        executor.execute(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
@@ -193,7 +193,7 @@ public class BlockESP extends Module {
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
 
         if (added || removed) {
-            MeteorExecutor.execute(() -> {
+            executor.execute(() -> {
                 synchronized (chunks) {
                     ESPChunk chunk = chunks.get(key);
 
@@ -225,22 +225,13 @@ public class BlockESP extends Module {
     }
 
     @EventHandler
-    private void onPostTick(TickEvent.Post event) {
-        Dimension dimension = PlayerUtils.getDimension();
-
-        if (lastDimension != dimension) onActivate();
-
-        lastDimension = dimension;
-    }
-
-    @EventHandler
     private void onRender(Render3DEvent event) {
         synchronized (chunks) {
             for (Iterator<ESPChunk> it = chunks.values().iterator(); it.hasNext();) {
                 ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
-                    MeteorExecutor.execute(() -> {
+                    executor.execute(() -> {
                         for (ESPBlock block : chunk.blocks.values()) {
                             block.group.remove(block, false);
                             block.loaded = false;
