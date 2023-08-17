@@ -153,7 +153,6 @@ public class Config extends System<Config> {
         .build()
     );
 
-    /* todo these settings
     public final Setting<Boolean> rotate = sgInteractions.add(new BoolSetting.Builder()
         .name("rotate")
         .description("Whether to rotate to face the interaction. Can slow interactions down.")
@@ -161,8 +160,8 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<Boolean> validDirection = sgInteractions.add(new BoolSetting.Builder()
-        .name("valid-direction")
+    public final Setting<Boolean> validBlockSide = sgInteractions.add(new BoolSetting.Builder()
+        .name("valid-block-side")
         .description("Whether to check to ensure you're interacting with a valid block side (e.g. not placing on top of a block when you're underneath it).")
         .defaultValue(true)
         .build()
@@ -174,7 +173,6 @@ public class Config extends System<Config> {
         .defaultValue(true)
         .build()
     );
-     */
 
     public final Setting<Boolean> airPlace = sgInteractions.add(new BoolSetting.Builder()
         .name("air-place")

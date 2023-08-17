@@ -13,10 +13,12 @@ import meteordevelopment.meteorclient.utils.interaction.api.*;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import org.apache.commons.lang3.NotImplementedException;
@@ -84,7 +86,7 @@ public class DefaultInteractionManager implements InteractionManager {
         Vec3d hitPos = Vec3d.ofCenter(action.getPos());
 
         BlockPos neighbour;
-        Direction side = BlockUtils.getPlaceSide(action.getPos());
+        Direction side = getPlaceSide(action.getPos());
 
         if (side == null) {
             if (!config.airPlace.get()) {
@@ -107,6 +109,55 @@ public class DefaultInteractionManager implements InteractionManager {
         return true;
     }
 
+    public Direction getPlaceSide(BlockPos blockPos) {
+        for (Direction side : Direction.values()) {
+            BlockPos neighbor = blockPos.offset(side);
+            BlockState state = mc.world.getBlockState(neighbor);
+
+            // Check if neighbour isn't empty
+            if (state.isAir() || BlockUtils.isClickable(state.getBlock())) continue;
+
+            // Check if neighbour is a fluid
+            if (!state.getFluidState().isEmpty()) continue;
+
+            // ensure you're placing against a side you can see
+            if (config.validBlockSide.get()) {
+                Vec3d vec = new Vec3d(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ());
+                Box blockBox = new Box(blockPos);
+
+                switch (side) {
+                    case UP -> {
+                        if (vec.y > blockBox.maxY) continue;
+                    }
+
+                    case DOWN -> {
+                        if (vec.y < blockBox.minY) continue;
+                    }
+
+                    case NORTH -> {
+                        if (vec.z < blockBox.minZ) continue;
+                    }
+
+                    case SOUTH -> {
+                        if (vec.z > blockBox.maxZ) continue;
+                    }
+
+                    case EAST -> {
+                        if (vec.x > blockBox.maxX) continue;
+                    }
+
+                    case WEST -> {
+                        if (vec.x < blockBox.minX) continue;
+                    }
+                }
+            }
+
+            return side;
+        }
+
+        return null;
+    }
+
     // Rotations
     // todo change everything to use rotations from here
 
@@ -122,7 +173,7 @@ public class DefaultInteractionManager implements InteractionManager {
 
     @Override
     public Action rotate(double yaw, double pitch, int priority) {
-        System.out.println("new rotation: " + yaw + " " + pitch);
+        log.info("new rotation: {} {}", yaw, pitch);
         Rotation rotation = new Rotation();
         rotation.set(yaw, pitch, priority);
         rotation.action = new DefaultAction(priority, null);
