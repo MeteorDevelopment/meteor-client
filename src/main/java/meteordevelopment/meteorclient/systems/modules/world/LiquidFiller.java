@@ -29,6 +29,7 @@ import java.util.List;
 
 public class LiquidFiller extends Module {
     private final SettingGroup sgGeneral  = settings.getDefaultGroup();
+    private final SettingGroup sgWhitelist = settings.createGroup("Whitelist");
 
     private final Setting<PlaceIn> placeInLiquids = sgGeneral.add(new EnumSetting.Builder<PlaceIn>()
         .name("place-in")
@@ -76,8 +77,24 @@ public class LiquidFiller extends Module {
         .build()
     );
 
-    private final Setting<List<Block>> whitelist = sgGeneral.add(new BlockListSetting.Builder()
-        .name("block-whitelist")
+    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
+        .name("rotate")
+        .description("Automatically rotates towards the space targeted for filling.")
+        .defaultValue(true)
+        .build()
+    );
+
+    // Whitelist and blacklist
+
+    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
+        .name("list-mode")
+        .description("Selection mode.")
+        .defaultValue(ListMode.Whitelist)
+        .build()
+    );
+
+    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
+        .name("whitelist")
         .description("The allowed blocks that it will use to fill up the liquid.")
         .defaultValue(
             Blocks.DIRT,
@@ -88,13 +105,14 @@ public class LiquidFiller extends Module {
             Blocks.GRANITE,
             Blocks.ANDESITE
         )
+        .visible(() -> listMode.get() == ListMode.Whitelist)
         .build()
     );
 
-    private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-        .name("rotate")
-        .description("Automatically rotates towards the space targeted for filling.")
-        .defaultValue(true)
+    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
+        .name("blacklist")
+        .description("The denied blocks that it not will use to fill up the liquid.")
+        .visible(() -> listMode.get() == ListMode.Blacklist)
         .build()
     );
 
@@ -131,7 +149,12 @@ public class LiquidFiller extends Module {
         if (shape.get() == Shape.UniformCube) range.set((double) Math.round(range.get()));
 
         // Find slot with a block
-        FindItemResult item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        FindItemResult item;
+        if (listMode.get() == ListMode.Whitelist) {
+            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && whitelist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        } else {
+            item = InvUtils.findInHotbar(itemStack -> itemStack.getItem() instanceof BlockItem && !blacklist.get().contains(Block.getBlockFromItem(itemStack.getItem())));
+        }
         if (!item.found()) return;
 
         // Loop blocks around the player
@@ -145,8 +168,8 @@ public class LiquidFiller extends Module {
             // Check if the block is a source block and set to be filled
             Fluid fluid = blockState.getFluidState().getFluid();
             if ((placeInLiquids.get() == PlaceIn.Both && (fluid != Fluids.WATER && fluid != Fluids.LAVA))
-                || (placeInLiquids.get() == PlaceIn.Lava && fluid != Fluids.LAVA)
-                || (placeInLiquids.get() == PlaceIn.Water && fluid != Fluids.WATER))
+                || (placeInLiquids.get() == PlaceIn.Water && fluid != Fluids.WATER)
+                || (placeInLiquids.get() == PlaceIn.Lava && fluid != Fluids.LAVA))
                 return;
 
             // Check if the player can place at pos
@@ -174,10 +197,15 @@ public class LiquidFiller extends Module {
         });
     }
 
+    public enum ListMode {
+        Whitelist,
+        Blacklist
+    }
+
     public enum PlaceIn {
-        Lava,
+        Both,
         Water,
-        Both
+        Lava
     }
 
     public enum SortMode {
@@ -189,8 +217,8 @@ public class LiquidFiller extends Module {
     }
 
     public enum Shape {
-        UniformCube,
-        Sphere
+        Sphere,
+        UniformCube
     }
 
     private static double maxDist(double x1, double y1, double z1, double x2, double y2, double z2) {
