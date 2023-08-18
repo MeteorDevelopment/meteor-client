@@ -7,10 +7,12 @@ package meteordevelopment.meteorclient.utils.interaction.impl;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.interaction.api.*;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
@@ -36,6 +38,8 @@ public class DefaultInteractionManager implements InteractionManager {
     private final Logger log = LoggerFactory.getLogger(DefaultInteractionManager.class);
     private final List<DefaultAction> actions = new ArrayList<>();
     private final Config config;
+    private Vec3d lastHitPos;
+    private Vec3d lastPlayerPos;
 
     public DefaultInteractionManager() {
         config = Config.get();
@@ -100,7 +104,12 @@ public class DefaultInteractionManager implements InteractionManager {
         else {
             neighbour = action.getPos().offset(side);
             hitPos = hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
+            // todo fix hitPos for blocks with weird bounding boxes
+            // https://cdn.discordapp.com/attachments/811945882198999050/1142064813795721267/2023-08-18_12.56.25.png
         }
+
+        lastHitPos = hitPos;
+        lastPlayerPos = mc.player.getEyePos();
 
         BlockHitResult hit = new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit);
@@ -122,40 +131,28 @@ public class DefaultInteractionManager implements InteractionManager {
 
             // ensure you're placing against a side you can see
             if (config.validBlockSide.get()) {
-                Vec3d vec = new Vec3d(mc.player.getX(), mc.player.getEyeY(), mc.player.getZ());
                 Box blockBox = new Box(blockPos);
 
-                switch (side) {
-                    case UP -> {
-                        if (vec.y > blockBox.maxY) continue;
-                    }
-
-                    case DOWN -> {
-                        if (vec.y < blockBox.minY) continue;
-                    }
-
-                    case NORTH -> {
-                        if (vec.z < blockBox.minZ) continue;
-                    }
-
-                    case SOUTH -> {
-                        if (vec.z > blockBox.maxZ) continue;
-                    }
-
-                    case EAST -> {
-                        if (vec.x > blockBox.maxX) continue;
-                    }
-
-                    case WEST -> {
-                        if (vec.x < blockBox.minX) continue;
-                    }
-                }
+                if (switch (side) {
+                    case UP -> mc.player.getEyeY() > blockBox.maxY;
+                    case DOWN -> mc.player.getEyeY() < blockBox.minY;
+                    case NORTH -> mc.player.getZ() < blockBox.minZ;
+                    case SOUTH -> mc.player.getZ() > blockBox.maxZ;
+                    case EAST -> mc.player.getX() > blockBox.maxX;
+                    case WEST -> mc.player.getX() < blockBox.minX;
+                }) continue;
             }
 
             return side;
         }
 
         return null;
+    }
+
+    @EventHandler
+    private void onRender3d(Render3DEvent event) {
+        if (lastHitPos == null || lastPlayerPos == null) return;
+        event.renderer.line(lastHitPos.x, lastHitPos.y, lastHitPos.z, lastPlayerPos.x, lastPlayerPos.y, lastPlayerPos.z, Color.WHITE);
     }
 
     // Rotations
