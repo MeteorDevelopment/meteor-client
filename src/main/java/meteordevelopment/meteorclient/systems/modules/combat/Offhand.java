@@ -19,9 +19,6 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.*;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtil;
-import net.minecraft.potion.Potions;
 
 import static meteordevelopment.orbit.EventPriority.HIGHEST;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -134,6 +131,7 @@ public class Offhand extends Module {
             boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
             FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, 0, 35);
 
+            // Calculates Damage from Falling, Explosions + Elyta
             locked = (low || ely);
 
             if (locked && mc.player.getOffHandStack().getItem() != Items.TOTEM_OF_UNDYING) {
@@ -146,6 +144,7 @@ public class Offhand extends Module {
         ticks++;
 
         AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
+            // Returns to the original Item 
             currentItem = preferreditem.get();
 
             // Sword Gap & Right Gap
@@ -196,10 +195,12 @@ public class Offhand extends Module {
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
+        // Detects if the User is right-clicking
         isClicking = mc.currentScreen == null && !Modules.get().get(AutoTotem.class).isLocked() && !usableItem() && !mc.player.isUsingItem() && event.action == KeyAction.Press && event.button == GLFW_MOUSE_BUTTON_RIGHT;
     }
 
     private boolean usableItem() {
+        // What counts as a Usable Item
         return mc.player.getMainHandStack().getItem() == Items.BOW
             || mc.player.getMainHandStack().getItem() == Items.TRIDENT
             || mc.player.getMainHandStack().getItem() == Items.CROSSBOW
@@ -212,6 +213,7 @@ public class Offhand extends Module {
     }
 
     public enum Item {
+        // Items the module could put on your offhand
         EGap(Items.ENCHANTED_GOLDEN_APPLE),
         Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
