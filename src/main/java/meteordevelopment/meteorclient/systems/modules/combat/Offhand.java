@@ -51,7 +51,7 @@ public class Offhand extends Module {
         .build()
     );
 
-    private final Setting<Boolean> rightgapple = sgCombat.add(new BoolSetting.Builder()
+    private final Setting<Boolean> rightGapple = sgCombat.add(new BoolSetting.Builder()
         .name("right-gapple")
         .description("Will switch to a gapple when holding right click.")
         .defaultValue(true)
@@ -63,7 +63,7 @@ public class Offhand extends Module {
         .name("sword-gapple")
         .description("Will switch to a gapple when holding right click.")
         .defaultValue(true)
-        .visible(rightgapple::get)
+        .visible(rightGapple::get)
         .build()
     );
 
@@ -146,7 +146,7 @@ public class Offhand extends Module {
         currentItem = preferredItem.get();
 
         // swordGap
-        if (rightgapple.get()) {
+        if (rightGapple.get()) {
             if (!locked) {
                 if (swordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
                     if (isClicking) {
