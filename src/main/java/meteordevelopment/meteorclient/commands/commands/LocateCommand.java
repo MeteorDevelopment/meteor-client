@@ -146,7 +146,7 @@ public class LocateCommand extends Command {
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
+                BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getType() == EntityType.EYE_OF_ENDER);
                 firstStart = null;
                 firstEnd = null;
                 secondStart = null;
