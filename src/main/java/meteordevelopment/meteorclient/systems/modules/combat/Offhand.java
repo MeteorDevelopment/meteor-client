@@ -19,6 +19,9 @@ import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.item.*;
+import net.minecraft.potion.Potion;
+import net.minecraft.potion.PotionUtil;
+import net.minecraft.potion.Potions;
 
 import static meteordevelopment.orbit.EventPriority.HIGHEST;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_RIGHT;
@@ -53,7 +56,7 @@ public class Offhand extends Module {
 
     private final Setting<Boolean> rightgapple = sgCombat.add(new BoolSetting.Builder()
         .name("Right Gapple")
-        .description("Will switch to a gapple when holding right click.")
+        .description("Will switch to a gapple when holding right click.(DO NOT USE WITH POTION ON)")
         .defaultValue(true)
         .build()
     );
@@ -61,7 +64,7 @@ public class Offhand extends Module {
 
     private final Setting<Boolean> SwordGap = sgCombat.add(new BoolSetting.Builder()
         .name("Sword Gapple")
-        .description("Will switch to a gapple when holding right click.")
+        .description("Will switch to a gapple when holding a sword and right click.")
         .defaultValue(true)
         .visible(rightgapple::get)
         .build()
@@ -145,7 +148,7 @@ public class Offhand extends Module {
         AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
             currentItem = preferreditem.get();
 
-            // Sword Gap
+            // Sword Gap & Right Gap
             if (rightgapple.get()) {
                     if (!locked) {
                         if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
@@ -160,6 +163,7 @@ public class Offhand extends Module {
                         }
                     }
                 }
+
 
             else currentItem = preferreditem.get();
 
@@ -212,8 +216,8 @@ public class Offhand extends Module {
         Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
         Totem(Items.TOTEM_OF_UNDYING),
-        Shield(Items.SHIELD);
-        
+        Shield(Items.SHIELD),
+        Potion(Items.POTION);
         net.minecraft.item.Item item;
         Item(net.minecraft.item.Item item) {
             this.item = item;
@@ -222,4 +226,3 @@ public class Offhand extends Module {
     }
 
 }
-
