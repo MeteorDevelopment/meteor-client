@@ -160,9 +160,12 @@ public class Config extends System<Config> {
         .build()
     );
 
-    public final Setting<Boolean> validBlockSide = sgInteractions.add(new BoolSetting.Builder()
-        .name("valid-block-side")
-        .description("Whether to check to ensure you're interacting with a valid block side (e.g. not placing on top of a block when you're underneath it).")
+    /** Doesn't actually perform a raytrace to ensure you can see what you're interacting with, just does a position
+     *  check to make sure the interaction is against a logical side - you cant interact with the top of a block if
+     *  you're underneath it, for example.*/
+    public final Setting<Boolean> strictSides = sgInteractions.add(new BoolSetting.Builder()
+        .name("strict-sides")
+        .description("Whether to check to ensure you're not interacting with an invalid block side (e.g. not placing on top of a block when you're underneath it).")
         .defaultValue(true)
         .build()
     );

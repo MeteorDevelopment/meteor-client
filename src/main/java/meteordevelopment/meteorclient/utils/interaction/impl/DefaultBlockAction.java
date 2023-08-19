@@ -7,12 +7,14 @@ package meteordevelopment.meteorclient.utils.interaction.impl;
 
 import meteordevelopment.meteorclient.utils.interaction.api.BlockAction;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 
 public class DefaultBlockAction extends DefaultAction implements BlockAction {
     private final BlockPos pos;
     private final FindItemResult item;
     public boolean rotated = false;
+    public BlockHitResult bhr;
 
     public DefaultBlockAction(BlockPos pos, FindItemResult item, int priority, State state) {
         super(priority, state);

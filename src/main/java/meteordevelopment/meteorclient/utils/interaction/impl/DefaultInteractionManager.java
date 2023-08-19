@@ -10,11 +10,13 @@ import meteordevelopment.meteorclient.events.entity.player.SendMovementPacketsEv
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.interaction.RotationUtils;
 import meteordevelopment.meteorclient.utils.interaction.api.*;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
+import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Hand;
@@ -37,6 +39,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class DefaultInteractionManager implements InteractionManager {
     private final Logger log = LoggerFactory.getLogger(DefaultInteractionManager.class);
     private final List<DefaultAction> actions = new ArrayList<>();
+    private DefaultAction rotateAction;
     private final Config config;
     private Vec3d lastHitPos;
     private Vec3d lastPlayerPos;
@@ -66,27 +69,77 @@ public class DefaultInteractionManager implements InteractionManager {
         throw new NotImplementedException();
     }
 
-    // TODO: This should happen after rotations are sent, not in a post tick event
-    @EventHandler
-    private void onTickPost(TickEvent.Post event) {
+   /*   interaction manager tick structure
+    *
+    *   --- TICK START ---
+    *
+    *   TickEvent.Pre:
+    *       - interaction manager receives interaction requests from modules
+    *       - sorts them by priority
+    *       - if rotations aren't enabled, place as many blocks as determined by placementsPerTick
+    *       - if rotations are enabled, interact with whatever we rotated to the previous tick
+    *       - cancel remaining interactions
+    *
+    *   SendMovementPacketsEvent
+    *       - determine where to rotate based on priority
+    *
+    *   TickEvent.Post
+    *       - modules can check the state of their pending actions
+    *
+    *   --- TICK END ---
+    *
+    *   need to keep in mind, if rotations are disabled we can place blocks as soon as we receive the requests to do so,
+    *   while if rotations are enabled we can place at most one block per tick, and there is a necessary tick of delay
+    *   since we need to rotate towards where we're placing
+    */
+    @EventHandler(priority = EventPriority.LOWEST)
+    private void onTickPre(TickEvent.Pre event) {
         actions.sort(Comparator.comparingInt(DefaultAction::getPriority));
 
         int blockActionCount = 0;
 
-        for (DefaultAction action : actions) {
-            if (action instanceof DefaultBlockAction blockAction) {
-                if (blockActionCount < config.placementsPerTick.get()) {
-                    if (place(blockAction)) blockActionCount++;
+        if (config.rotate.get()) { // if rotate is enabled, only one action is really possible per tick
+            if (rotateAction instanceof DefaultBlockAction blockAction && blockAction.rotated) {
+                place(blockAction);
+            }
+
+            rotateAction = null;
+
+            if (!actions.isEmpty()) {
+                if (actions.get(0) instanceof DefaultBlockAction blockAction) {
+                    blockAction.bhr = getBHR(blockAction);
+                    rotateAction = blockAction;
                 }
-                else blockAction.setState(Action.State.Cancelled);
+            }
+        }
+        else {
+            for (DefaultAction action : actions) {
+                if (action instanceof DefaultBlockAction blockAction) {
+                    if (blockActionCount < config.placementsPerTick.get()) {
+                        blockAction.bhr = getBHR(blockAction);
+                        if (place(blockAction)) blockActionCount++;
+                    }
+                    else blockAction.setState(Action.State.Cancelled);
+                }
             }
         }
 
         actions.clear();
     }
 
-    // TODO: Needs slot switching
+    // TODO: Needs slot switching, offhand placing
     private boolean place(DefaultBlockAction action) {
+        if (action.bhr == null) return false;
+
+        lastHitPos = action.bhr.getPos();
+        lastPlayerPos = mc.player.getEyePos();
+
+        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, action.bhr);
+        action.setState(Action.State.Finished);
+        return true;
+    }
+
+    public BlockHitResult getBHR(DefaultBlockAction action) {
         Vec3d hitPos = Vec3d.ofCenter(action.getPos());
 
         BlockPos neighbour;
@@ -95,7 +148,7 @@ public class DefaultInteractionManager implements InteractionManager {
         if (side == null) {
             if (!config.airPlace.get()) {
                 action.setState(Action.State.Cancelled);
-                return false;
+                return null;
             }
 
             side = Direction.UP;
@@ -108,14 +161,7 @@ public class DefaultInteractionManager implements InteractionManager {
             // https://cdn.discordapp.com/attachments/811945882198999050/1142064813795721267/2023-08-18_12.56.25.png
         }
 
-        lastHitPos = hitPos;
-        lastPlayerPos = mc.player.getEyePos();
-
-        BlockHitResult hit = new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
-        mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, hit);
-
-        action.setState(Action.State.Finished);
-        return true;
+        return new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
     }
 
     public Direction getPlaceSide(BlockPos blockPos) {
@@ -129,8 +175,8 @@ public class DefaultInteractionManager implements InteractionManager {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            // ensure you're placing against a side you can see
-            if (config.validBlockSide.get()) {
+            // ensure you're placing against a logical block side
+            if (config.strictSides.get()) {
                 Box blockBox = new Box(blockPos);
 
                 if (switch (side) {
@@ -155,6 +201,7 @@ public class DefaultInteractionManager implements InteractionManager {
         event.renderer.line(lastHitPos.x, lastHitPos.y, lastHitPos.z, lastPlayerPos.x, lastPlayerPos.y, lastPlayerPos.z, Color.WHITE);
     }
 
+
     // Rotations
     // todo change everything to use rotations from here
 
@@ -172,8 +219,7 @@ public class DefaultInteractionManager implements InteractionManager {
     public Action rotate(double yaw, double pitch, int priority) {
         log.info("new rotation: {} {}", yaw, pitch);
         Rotation rotation = new Rotation();
-        rotation.set(yaw, pitch, priority);
-        rotation.action = new DefaultAction(priority, null);
+        rotation.set(yaw, pitch, priority, new DefaultAction(priority, null));
 
         if (currentRotation == null || currentRotation.action.getState() == Action.State.Finished || rotation.priority > currentRotation.priority) {
             if (currentRotation != null) currentRotation.action.setState(currentRotation.action.getState() == null ? Action.State.Cancelled : Action.State.Finished);
@@ -189,6 +235,17 @@ public class DefaultInteractionManager implements InteractionManager {
     @EventHandler
     private void onSendMovementPacketsPre(SendMovementPacketsEvent.Pre event) {
         if (mc.cameraEntity != mc.player) return;
+
+        if (rotateAction != null && (currentRotation == null || currentRotation.priority < rotateAction.getPriority())) {
+            if (rotateAction instanceof DefaultBlockAction blockAction && blockAction.bhr != null) {
+                currentRotation = new Rotation().set(
+                    RotationUtils.getYaw(blockAction.bhr.getPos()),
+                    RotationUtils.getPitch(blockAction.bhr.getPos()),
+                    blockAction.getPriority(),
+                    rotateAction
+                );
+            }
+        }
 
         if (currentRotation != null) {
             rotating = true;
@@ -217,6 +274,7 @@ public class DefaultInteractionManager implements InteractionManager {
             if (mc.cameraEntity == mc.player) resetPreRotation();
 
             currentRotation.action.setState(Action.State.Finished);
+            if (currentRotation.action instanceof DefaultBlockAction blockAction) blockAction.rotated = true;
         } else if (currentRotation.action.getState() == Action.State.Finished) {
             resetPreRotation();
         }
@@ -255,10 +313,13 @@ public class DefaultInteractionManager implements InteractionManager {
         public int priority;
         public DefaultAction action;
 
-        public void set(double yaw, double pitch, int priority) {
+        public Rotation set(double yaw, double pitch, int priority, DefaultAction action) {
             this.yaw = yaw;
             this.pitch = pitch;
             this.priority = priority;
+            this.action = action;
+
+            return this;
         }
     }
 }

@@ -22,7 +22,7 @@ public class TestScaffold extends Module {
         super(Categories.Movement, "test-scaffold", "Module to test the new interaction manager");
     }
 
-    @EventHandler
+    @EventHandler // todo if rotations are enabled you cant seem to place fast enough to stop yourself from falling down
     private void onTickPre(TickEvent.Pre event) {
         BlockPos pos = mc.player.getBlockPos().down();
         BlockState blockState = mc.world.getBlockState(pos);
@@ -30,7 +30,6 @@ public class TestScaffold extends Module {
         if (blockState.isReplaceable()) {
             FindItemResult item = InvUtils.find(stack -> stack.getItem() instanceof BlockItem);
             MeteorClient.INTERACTIONS.placeBlock(pos, item, InteractionManager.Priority.NORMAL);
-            MeteorClient.INTERACTIONS.rotate(pos);
         }
     }
 }
