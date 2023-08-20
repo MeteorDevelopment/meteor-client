@@ -43,27 +43,31 @@ public class Sprint extends Module {
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
-    
+
     @Override
     public void onDeactivate() {
         mc.player.setSprinting(false);
     }
-    
-    private static void sprint() {
-        if ((hunger.get() && mc.player.getHungerManager().getFoodLevel() > 6) || !hunger.get()) {
-            mc.player.setSprinting(true)
-        }
+
+    private void sprint() {
+        if (mc.player.getHungerManager().getFoodLevel() <= 6 && hunger.get()) return;
+        mc.player.setSprinting(true);
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        Mode currentmode = mode.get();
-        if (currentmode == Mode.Omni && PlayerUtils.isMoving()) {
-            sprint()
-        } else if (currentmode == Mode.Strict && mc.player.forwardSpeed > 0) {
-            sprint()
-        } else if (currentmode == Mode.Rage) {
-            sprint()
+        switch (mode.get()) {
+            case Strict -> {
+                if (mc.player.forwardSpeed > 0) {
+                    sprint();
+                }
+            }
+            case Omni -> {
+                if (PlayerUtils.isMoving()) {
+                    sprint();
+                }
+            }
+            case Rage -> sprint();
+            }
         }
     }
-}
