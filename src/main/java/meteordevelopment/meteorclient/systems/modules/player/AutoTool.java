@@ -12,15 +12,13 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.BambooBlock;
-import net.minecraft.block.BambooSaplingBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.*;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.*;
@@ -44,6 +42,13 @@ public class AutoTool extends Module {
     private final Setting<Boolean> silkTouchForEnderChest = sgGeneral.add(new BoolSetting.Builder()
         .name("silk-touch-for-ender-chest")
         .description("Mines Ender Chests only with the Silk Touch enchantment.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
+        .name("fortune-for-ores-and-crops")
+        .description("Mines Ores and crops only with the Fortune enchantment.")
         .defaultValue(true)
         .build()
     );
@@ -153,7 +158,7 @@ public class AutoTool extends Module {
             if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(itemStack.getItem())) continue;
             if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(itemStack.getItem())) continue;
 
-            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
+            double score = getScore(itemStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack2 -> !shouldStopUsing(itemStack2));
             if (score < 0) continue;
 
             if (score > bestScore) {
@@ -162,7 +167,7 @@ public class AutoTool extends Module {
             }
         }
 
-        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
+        if ((bestSlot != -1 && (bestScore > getScore(currentStack, blockState, silkTouchForEnderChest.get(), fortuneForOresCrops.get(), prefer.get(), itemStack -> !shouldStopUsing(itemStack))) || shouldStopUsing(currentStack) || !isTool(currentStack))) {
             ticks = switchDelay.get();
 
             if (ticks == 0) InvUtils.swap(bestSlot, true);
@@ -182,13 +187,19 @@ public class AutoTool extends Module {
         return antiBreak.get() && (itemStack.getMaxDamage() - itemStack.getDamage()) < (itemStack.getMaxDamage() * breakDurability.get() / 100);
     }
 
-    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
+    public static double getScore(ItemStack itemStack, BlockState state, boolean silkTouchEnderChest, boolean fortuneOre, EnchantPreference enchantPreference, Predicate<ItemStack> good) {
         if (!good.test(itemStack) || !isTool(itemStack)) return -1;
         if (!itemStack.isSuitableFor(state) && !(itemStack.getItem() instanceof SwordItem && (state.getBlock() instanceof BambooBlock || state.getBlock() instanceof BambooSaplingBlock))) return -1;
 
         if (silkTouchEnderChest
             && state.getBlock() == Blocks.ENDER_CHEST
             && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) == 0) {
+            return -1;
+        }
+
+        if (fortuneOre
+            && isFortunable(state.getBlock())
+            && EnchantmentHelper.getLevel(Enchantments.FORTUNE, itemStack) == 0) {
             return -1;
         }
 
@@ -214,6 +225,11 @@ public class AutoTool extends Module {
     }
     public static boolean isTool(ItemStack itemStack) {
         return isTool(itemStack.getItem());
+    }
+
+    private static boolean isFortunable(Block block) {
+        if (block == Blocks.ANCIENT_DEBRIS) return false;
+        return Xray.ORES.contains(block) || block instanceof CropBlock;
     }
 
     public enum EnchantPreference {
