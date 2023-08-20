@@ -39,7 +39,6 @@ public class Sprint extends Module {
         .build()
     );
 
-
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
@@ -68,6 +67,6 @@ public class Sprint extends Module {
                 }
             }
             case Rage -> sprint();
-            }
         }
     }
+}
