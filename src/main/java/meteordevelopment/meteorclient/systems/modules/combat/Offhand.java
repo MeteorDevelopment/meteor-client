@@ -208,8 +208,8 @@ public class Offhand extends Module {
     }
 
     public enum Item {
-        eGap(Items.ENCHANTED_GOLDEN_APPLE),
-        gap(Items.GOLDEN_APPLE),
+        EGap(Items.ENCHANTED_GOLDEN_APPLE),
+        Gap(Items.GOLDEN_APPLE),
         Crystal(Items.END_CRYSTAL),
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD);
