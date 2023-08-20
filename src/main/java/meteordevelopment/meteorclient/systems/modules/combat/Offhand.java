@@ -150,12 +150,12 @@ public class Offhand extends Module {
             if (!locked) {
                 if (swordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
                     if (isClicking) {
-                        currentItem = Item.eGap;
+                        currentItem = Item.EGap;
                     }
                 }
                 if (!swordGap.get()) {
                     if (isClicking) {
-                        currentItem = Item.eGap;
+                        currentItem = Item.EGap;
                     }
                 }
             }
