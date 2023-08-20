@@ -43,46 +43,27 @@ public class Sprint extends Module {
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
     }
-
-    public Mode currentmode;
-
+    
     @Override
     public void onDeactivate() {
         mc.player.setSprinting(false);
     }
+    
+    private static void sprint() {
+        if ((hunger.get() && mc.player.getHungerManager().getFoodLevel() > 6) || !hunger.get()) {
+            mc.player.setSprinting(true)
+        }
+    }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        currentmode = mode.get();
-        if (currentmode == Mode.Omni) {
-            if (PlayerUtils.isMoving()) {
-                if (hunger.get() && mc.player.getHungerManager().getFoodLevel() > 6) {
-                    mc.player.setSprinting(true);
-                }
-                if (!hunger.get()){
-                    mc.player.setSprinting(true);
-                }
-            }
-
-        }
-        if (currentmode == Mode.Strict) {
-            if (mc.player.forwardSpeed > 0) {
-                if (hunger.get() && mc.player.getHungerManager().getFoodLevel() > 6) {
-                    mc.player.setSprinting(true);
-                }
-                if (!hunger.get()){
-                    mc.player.setSprinting(true);
-                }
-            }
-        }
-        if (currentmode == Mode.Rage) {
-            if (hunger.get() && mc.player.getHungerManager().getFoodLevel() > 6) {
-                mc.player.setSprinting(true);
-            }
-            if (!hunger.get()){
-                mc.player.setSprinting(true);
-            }
-
+        Mode currentmode = mode.get();
+        if (currentmode == Mode.Omni && PlayerUtils.isMoving()) {
+            sprint()
+        } else if (currentmode == Mode.Strict && mc.player.forwardSpeed > 0) {
+            sprint()
+        } else if (currentmode == Mode.Rage) {
+            sprint()
         }
     }
 }
