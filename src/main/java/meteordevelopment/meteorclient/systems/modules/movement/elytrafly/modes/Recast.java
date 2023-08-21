@@ -3,6 +3,10 @@
  * Copyright (c) Meteor Development.
  */
 
+/*
+ * Credit to Luna (https://github.com/InLieuOfLuna) for making the original Elytra Recast mod (https://github.com/InLieuOfLuna/elytra-recast)!
+ */
+
 package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -23,6 +27,7 @@ public class Recast extends ElytraFlightMode {
     public static boolean rubberbanded = false;
 
     int tickDelay = elytraFly.restartDelay.get();
+
     @Override
     public void onTick() {
         super.onTick();
