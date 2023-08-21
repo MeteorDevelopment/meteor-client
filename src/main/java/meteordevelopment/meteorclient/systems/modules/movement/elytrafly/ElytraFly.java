@@ -127,7 +127,6 @@ public class ElytraFly extends Module {
         .name("no-unloaded-chunks")
         .description("Stops you from going into unloaded chunks.")
         .defaultValue(true)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Recast)
         .build()
     );
 
@@ -350,40 +349,42 @@ public class ElytraFly extends Module {
 
         currentMode.autoTakeoff();
 
-        if (mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Recast) {
+        if (mc.player.isFallFlying()) {
 
-            currentMode.velX = 0;
-            currentMode.velY = event.movement.y;
-            currentMode.velZ = 0;
-            currentMode.forward = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(0.1);
-            currentMode.right = Vec3d.fromPolar(0, mc.player.getYaw() + 90).multiply(0.1);
+            if (flightMode.get() != ElytraFlightModes.Recast) {
+                currentMode.velX = 0;
+                currentMode.velY = event.movement.y;
+                currentMode.velZ = 0;
+                currentMode.forward = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(0.1);
+                currentMode.right = Vec3d.fromPolar(0, mc.player.getYaw() + 90).multiply(0.1);
 
-            // Handle stopInWater
-            if (mc.player.isTouchingWater() && stopInWater.get()) {
-                mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
-                return;
+                // Handle stopInWater
+                if (mc.player.isTouchingWater() && stopInWater.get()) {
+                    mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+                    return;
+                }
+
+                currentMode.handleFallMultiplier();
+                currentMode.handleAutopilot();
+
+                currentMode.handleAcceleration();
+                currentMode.handleHorizontalSpeed(event);
+                currentMode.handleVerticalSpeed(event);
             }
-
-            currentMode.handleFallMultiplier();
-            currentMode.handleAutopilot();
-
-            currentMode.handleAcceleration();
-            currentMode.handleHorizontalSpeed(event);
-            currentMode.handleVerticalSpeed(event);
 
             int chunkX = (int) ((mc.player.getX() + currentMode.velX) / 16);
             int chunkZ = (int) ((mc.player.getZ() + currentMode.velZ) / 16);
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
-                    ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+                    if (flightMode.get() != ElytraFlightModes.Recast) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
                 } else {
                     ((IVec3d) event.movement).set(0, currentMode.velY, 0);
                 }
-            } else ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+            } else if (flightMode.get() != ElytraFlightModes.Recast) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
 
-            currentMode.onPlayerMove();
+            if (flightMode.get() != ElytraFlightModes.Recast) currentMode.onPlayerMove();
         } else {
-            if (currentMode.lastForwardPressed) {
+            if (currentMode.lastForwardPressed && flightMode.get() != ElytraFlightModes.Recast) {
                 mc.options.forwardKey.setPressed(false);
                 currentMode.lastForwardPressed = false;
             }
