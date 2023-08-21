@@ -34,6 +34,7 @@ public class Main {
                 try {
                     Desktop.getDesktop().browse(URI.create("https://meteorclient.com/faq/installation"));
                 } catch (IOException ignored) {}
+                break;
             }
             case 1: {
                 String path;
@@ -55,6 +56,7 @@ public class Main {
                 try {
                     Desktop.getDesktop().browse(URI.create("https://discord.com/invite/bBGQZvd"));
                 } catch (IOException ignored) {}
+                break;
             }
         }
     }
