@@ -41,13 +41,11 @@ public class Recast extends ElytraFlightMode {
         // Make sure all the conditions are met (player has an elytra, isn't in water, etc)
         if (checkConditions(mc.player)) {
 
-            if (elytraFly.flightMode.get() == ElytraFlightModes.Recast) {
-                mc.player.setSprinting(true);
-                setPressed(mc.options.forwardKey, true);
-                if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
-                mc.player.setYaw(getSmartYawDirection());
-                mc.player.setPitch(elytraFly.pitch.get());
-            }
+            mc.player.setSprinting(true);
+            setPressed(mc.options.forwardKey, true);
+            if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
+            mc.player.setYaw(getSmartYawDirection());
+            mc.player.setPitch(elytraFly.pitch.get());
 
             // Rubberbanding
             if (rubberbanded && elytraFly.restart.get()) {

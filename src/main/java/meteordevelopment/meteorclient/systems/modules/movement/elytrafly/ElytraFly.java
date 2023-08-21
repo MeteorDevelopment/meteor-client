@@ -169,7 +169,7 @@ public class ElytraFly extends Module {
         .description("The bottom height boundary for pitch40.")
         .defaultValue(80)
         .min(-128)
-        .sliderMax(260)
+        .sliderMax(360)
         .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
         .build()
     );
@@ -179,7 +179,7 @@ public class ElytraFly extends Module {
         .description("The upper height boundary for pitch40.")
         .defaultValue(120)
         .min(-128)
-        .sliderMax(260)
+        .sliderMax(360)
         .visible(() -> flightMode.get() == ElytraFlightModes.Pitch40)
         .build()
     );
@@ -279,7 +279,7 @@ public class ElytraFly extends Module {
         .name("auto-pilot")
         .description("Moves forward while elytra flying.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
         .build()
     );
 
@@ -287,7 +287,7 @@ public class ElytraFly extends Module {
         .name("use-fireworks")
         .description("Uses firework rockets every second of your choice.")
         .defaultValue(false)
-        .visible(autoPilot::get)
+        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
         .build()
     );
 
@@ -297,7 +297,7 @@ public class ElytraFly extends Module {
         .min(1)
         .defaultValue(8)
         .sliderMax(20)
-        .visible(useFireworks::get)
+        .visible(() -> useFireworks.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
         .build()
     );
 
@@ -307,7 +307,7 @@ public class ElytraFly extends Module {
         .defaultValue(120)
         .min(-128)
         .sliderMax(260)
-        .visible(autoPilot::get)
+        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
         .build()
     );
 
