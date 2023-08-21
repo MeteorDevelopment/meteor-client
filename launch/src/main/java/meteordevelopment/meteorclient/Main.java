@@ -28,14 +28,14 @@ public class Main {
         );
 
         switch (option) {
-            case 0: getOS().open("https://meteorclient.com/installation"); break;
+            case 0: getOS().open("https://meteorclient.com/faq/installation"); break;
             case 1: {
                 String path;
 
                 switch (getOS()) {
                     case WINDOWS: path = System.getenv("AppData") + "/.minecraft/mods"; break;
                     case OSX:     path = System.getProperty("user.home") + "/Library/Application Support/minecraft/mods"; break;
-                    default:      path = System.getProperty("user.home") + "/.minecraft"; break;
+                    default:      path = System.getProperty("user.home") + "/.minecraft/mods"; break;
                 }
 
                 File mods = new File(path);
