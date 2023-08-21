@@ -128,7 +128,9 @@ public class Blur extends Module {
 
         if (enabled) {
             if (!shouldRender) {
-                if (fadeEndAt == -1) fadeEndAt = System.currentTimeMillis() + fadeTime.get();
+                if (fadeEndAt == -1) {
+                    fadeEndAt = System.currentTimeMillis() + fadeTime.get();
+                }
 
                 if (time >= fadeEndAt) {
                     enabled = false;
@@ -216,14 +218,30 @@ public class Blur extends Module {
     }
 
     private boolean shouldRender() {
-        if (!isActive()) return false;
+        if (!isActive()) {
+            return false;
+        }
         Screen screen = mc.currentScreen;
 
-        if (screen instanceof WidgetScreen) return meteor.get();
-        if (screen instanceof HandledScreen) return inventories.get();
-        if (screen instanceof ChatScreen) return chat.get();
-        if (screen != null) return other.get();
+        // Checks if the screen is a WidgetScreen
+        if (screen instanceof WidgetScreen) {
+            return meteor.get();
+        } else {
+            // Checks if the screen is a HandledScreen
+            if (screen instanceof HandledScreen) {
+                return inventories.get();
+            } else {
+                // Checks if the screen is a ChatScreen
+                if (screen instanceof ChatScreen) {
+                    return chat.get();
+                } else {
+                    if (screen != null) {
+                        return other.get();
+                    }
 
-        return false;
+                    return false;
+                }
+            }
+        }
     }
 }

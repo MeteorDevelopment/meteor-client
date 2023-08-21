@@ -38,26 +38,30 @@ public class EntityOwner extends Module {
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale of the text.")
-        .defaultValue(1)
-        .min(0)
-        .build()
-    );
+    private final Setting<Double> scale;
 
-    private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
-        .name("projectiles")
-        .description("Display owner names of projectiles.")
-        .defaultValue(false)
-        .build()
-    );
+    private final Setting<Boolean> projectiles;
 
     private final Vector3d pos = new Vector3d();
     private final Map<UUID, String> uuidToName = new HashMap<>();
 
     public EntityOwner() {
         super(Categories.Render, "entity-owner", "Displays the name of the player who owns the entity you're looking at.");
+
+        scale = sgGeneral.add(new DoubleSetting.Builder()
+            .name("scale")
+            .description("The scale of the text.")
+            .defaultValue(1)
+            .min(0)
+            .build()
+        );
+
+        projectiles = sgGeneral.add(new BoolSetting.Builder()
+            .name("projectiles")
+            .description("Display owner names of projectiles.")
+            .defaultValue(false)
+            .build()
+        );
     }
 
     @Override
@@ -67,14 +71,32 @@ public class EntityOwner extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
+        // iterate the list of entities in the world
+        assert mc.world != null;
         for (Entity entity : mc.world.getEntities()) {
             UUID ownerUuid;
 
-            if (entity instanceof TameableEntity tameable) ownerUuid = tameable.getOwnerUuid();
-            else if (entity instanceof AbstractHorseEntity horse) ownerUuid = horse.getOwnerUuid();
-            else if (entity instanceof ProjectileEntity && projectiles.get()) ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
-            else continue;
+            // checks if the Entity is tameable
+            if (entity instanceof TameableEntity tameable) {
+                // Sets the owner UUID to the tameable entities specified UUID
+                ownerUuid = tameable.getOwnerUuid();
+            } else {
+                // checks if the Entity is a horse
+                if (entity instanceof AbstractHorseEntity horse) {
+                    // Sets the owner UUID to the horses owner UUID
+                    ownerUuid = horse.getOwnerUuid();
+                } else {
+                    // checks if the Entity is a projectile.
+                    if (entity instanceof ProjectileEntity && projectiles.get()) {
+                        // Sets the owner UUID to the projectiles owner UUID
+                        ownerUuid = ((ProjectileEntityAccessor) entity).getOwnerUuid();
+                    } else {
+                        continue;
+                    }
+                }
+            }
 
+            // checks if the owner UUID does not equal null
             if (ownerUuid != null) {
                 Utils.set(pos, entity, event.tickDelta);
                 pos.add(0, entity.getEyeHeight(entity.getPose()) + 0.75, 0);
@@ -92,11 +114,12 @@ public class EntityOwner extends Module {
         NametagUtils.begin(pos);
         text.beginBig();
 
+        // initialize the position / text variables
         double w = text.getWidth(name);
-
         double x = -w / 2;
         double y = -text.getHeight();
 
+        // render the items
         Renderer2D.COLOR.begin();
         Renderer2D.COLOR.quad(x - 1, y - 1, w + 2, text.getHeight() + 2, BACKGROUND);
         Renderer2D.COLOR.render(null);
@@ -109,28 +132,38 @@ public class EntityOwner extends Module {
 
     private String getOwnerName(UUID uuid) {
         // Check if the player is online
+        assert mc.world != null;
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
-        if (player != null) return player.getEntityName();
 
-        // Check cache
-        String name = uuidToName.get(uuid);
-        if (name != null) return name;
+        // Check if the player is null
+        if (player == null) {
+            // Check cache
+            String name = uuidToName.get(uuid);
 
-        // Makes a HTTP request to Mojang API
-        MeteorExecutor.execute(() -> {
-            if (isActive()) {
-                ProfileResponse res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "")).sendJson(ProfileResponse.class);
+            if (name == null) {
 
-                if (isActive()) {
-                    if (res == null) uuidToName.put(uuid, "Failed to get name");
-                    else uuidToName.put(uuid, res.name);
-                }
+                // Makes a HTTP request to Mojang API
+                MeteorExecutor.execute(() -> {
+                    if (isActive()) {
+                        ProfileResponse res = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + uuid.toString().replace("-", "")).sendJson(ProfileResponse.class);
+
+                        if (isActive()) {
+                            if (res == null) uuidToName.put(uuid, "Failed to get name");
+                            else uuidToName.put(uuid, res.name);
+                        }
+                    }
+                });
+
+                name = "Retrieving";
+                uuidToName.put(uuid, name);
+                return name;
+            } else {
+                return name;
             }
-        });
+        } else {
+            return player.getEntityName();
+        }
 
-        name = "Retrieving";
-        uuidToName.put(uuid, name);
-        return name;
     }
 
     private static class ProfileResponse {
