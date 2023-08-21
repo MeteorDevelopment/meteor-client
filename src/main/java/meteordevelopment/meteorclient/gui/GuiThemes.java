@@ -43,7 +43,7 @@ public class GuiThemes {
             }
         }
 
-        if (theme == null) select(MeteorClient.MOD_NAME);
+        if (theme == null) select(MeteorClient.NAME);
     }
 
     public static void add(GuiTheme theme) {
