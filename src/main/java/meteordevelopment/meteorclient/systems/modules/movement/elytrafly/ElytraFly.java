@@ -447,30 +447,6 @@ public class ElytraFly extends Module {
         currentMode.onPacketReceive(event);
     }
 
-    // Recast
-
-    public static boolean recastElytra(ClientPlayerEntity player) {
-        if (checkConditions(player) && ignoreGround(player)) {
-            player.networkHandler.sendPacket(new ClientCommandC2SPacket(player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
-            return true;
-        } else return false;
-    }
-
-    public static boolean checkConditions(ClientPlayerEntity player) {
-        ItemStack itemStack = player.getEquippedStack(EquipmentSlot.CHEST);
-        return (!player.getAbilities().flying && !player.hasVehicle() && !player.isClimbing() && itemStack.isOf(Items.ELYTRA) && ElytraItem.isUsable(itemStack));
-    }
-
-    private static boolean ignoreGround(ClientPlayerEntity player) {
-        if (!player.isTouchingWater() && !player.hasStatusEffect(StatusEffects.LEVITATION)) {
-            ItemStack itemStack = player.getEquippedStack(EquipmentSlot.CHEST);
-            if (itemStack.isOf(Items.ELYTRA) && ElytraItem.isUsable(itemStack)) {
-                player.startFallFlying();
-                return true;
-            } else return false;
-        } else return false;
-    }
-
     private void onModeChanged(ElytraFlightModes mode) {
         switch (mode) {
             case Vanilla -> currentMode = new Vanilla();

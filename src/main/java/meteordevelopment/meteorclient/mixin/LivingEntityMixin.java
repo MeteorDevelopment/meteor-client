@@ -118,7 +118,7 @@ public abstract class LivingEntityMixin extends Entity {
         boolean elytra = cir.getReturnValue();
         ElytraFly elytraFly = Modules.get().get(ElytraFly.class);
         if (previousElytra && !elytra && elytraFly.isActive() && elytraFly.flightMode.get() == ElytraFlightModes.Recast) {
-            cir.setReturnValue(ElytraFly.recastElytra(mc.player));
+            cir.setReturnValue(Recast.recastElytra(mc.player));
         }
         previousElytra = elytra;
     }
