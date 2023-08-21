@@ -10,7 +10,9 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.entity.DamageEvent;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Recast;
 import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
@@ -107,6 +109,18 @@ public abstract class LivingEntityMixin extends Entity {
         }
 
         return original;
+    }
+
+    private boolean previousElytra = false;
+
+    @Inject(method = "isFallFlying", at = @At("TAIL"), cancellable = true)
+    public void recastOnLand(CallbackInfoReturnable<Boolean> cir) {
+        boolean elytra = cir.getReturnValue();
+        ElytraFly elytraFly = Modules.get().get(ElytraFly.class);
+        if (previousElytra && !elytra && elytraFly.isActive() && elytraFly.flightMode.get() == ElytraFlightModes.Recast) {
+            cir.setReturnValue(Recast.recastElytra(mc.player));
+        }
+        previousElytra = elytra;
     }
 
     @ModifyReturnValue(method = "hasStatusEffect", at = @At("RETURN"))
