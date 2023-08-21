@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.hud;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
@@ -28,7 +29,7 @@ import java.util.*;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class Hud extends System<Hud> implements Iterable<HudElement> {
-    public static final HudGroup GROUP = new HudGroup("Meteor");
+    public static final HudGroup GROUP = new HudGroup(MeteorClient.MOD_NAME);
 
     public boolean active;
     public Settings settings = new Settings();

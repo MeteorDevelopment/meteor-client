@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.themes.meteor;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.gui.DefaultSettingsWidgetFactory;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
@@ -166,7 +167,7 @@ public class MeteorGuiTheme extends GuiTheme {
     private final Setting<SettingColor> starscriptAccessedObjects = color(sgStarscript, "starscript-accessed-objects", "Color of accessed objects (before a dot) in Starscript code.", new SettingColor(152, 118, 170));
 
     public MeteorGuiTheme() {
-        super("Meteor");
+        super(MeteorClient.MOD_NAME);
 
         settingsFactory = new DefaultSettingsWidgetFactory(this);
     }

@@ -33,7 +33,7 @@ public class ChatUtils {
         PREFIX = Text.literal("")
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
-            .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked()))))
+            .append(Text.literal(MeteorClient.MOD_NAME).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked()))))
             .append("] ");
     }
 
