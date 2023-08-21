@@ -16,9 +16,11 @@ import net.minecraft.client.render.VertexConsumerProvider;
 import net.minecraft.client.render.item.HeldItemRenderer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Arm;
 import net.minecraft.util.Hand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
@@ -83,6 +85,13 @@ public abstract class HeldItemRendererMixin {
         MeteorClient.EVENT_BUS.post(ArmRenderEvent.get(hand, matrices));
     }
 
+    @Inject(method = "applyEatOrDrinkTransformation", at = @At(value = "INVOKE", target = "Ljava/lang/Math;pow(DD)D", shift = At.Shift.BEFORE), cancellable = true)
+    private void cancelTransformations(MatrixStack matrices, float tickDelta, Arm arm, ItemStack stack, CallbackInfo ci) {
+        if (Modules.get().get(HandView.class).disableFoodAnimation()) ci.cancel();
+    }
+
+
+    @Unique
     private boolean showSwapping(ItemStack stack1, ItemStack stack2) {
         return !Modules.get().get(HandView.class).showSwapping() || ItemStack.areEqual(stack1, stack2);
     }
