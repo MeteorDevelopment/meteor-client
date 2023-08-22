@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.interaction.RotationUtils;
 import meteordevelopment.meteorclient.utils.interaction.api.*;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -25,6 +26,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.shape.VoxelShape;
+import net.minecraft.util.shape.VoxelShapes;
 import org.apache.commons.lang3.NotImplementedException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -69,6 +72,7 @@ public class DefaultInteractionManager implements InteractionManager {
         throw new NotImplementedException();
     }
 
+
    /*   interaction manager tick structure
     *
     *   --- TICK START ---
@@ -99,15 +103,19 @@ public class DefaultInteractionManager implements InteractionManager {
         int blockActionCount = 0;
 
         if (config.rotate.get()) { // if rotate is enabled, only one action is really possible per tick
-            if (rotateAction instanceof DefaultBlockAction blockAction && blockAction.rotated) {
-                place(blockAction);
+            if (rotateAction instanceof DefaultBlockAction blockAction) {
+                if (blockAction.rotated || (mc.crosshairTarget instanceof BlockHitResult bhr && bhr.getBlockPos().equals(blockAction.getPos()))) {
+                    place(blockAction);
+                }
             }
 
             rotateAction = null;
 
             if (!actions.isEmpty()) {
-                if (actions.get(0) instanceof DefaultBlockAction blockAction) {
-                    blockAction.bhr = getBHR(blockAction);
+                for (DefaultAction action : actions) {
+                    if (!(action instanceof DefaultBlockAction blockAction)) continue;
+                    if ((blockAction.bhr = getBHR(blockAction)) == null) continue;
+
                     rotateAction = blockAction;
                 }
             }
@@ -127,12 +135,30 @@ public class DefaultInteractionManager implements InteractionManager {
         actions.clear();
     }
 
-    // TODO: Needs slot switching, offhand placing
+    @EventHandler
+    private void onRender3d(Render3DEvent event) {
+        if (lastHitPos == null || lastPlayerPos == null) return;
+        event.renderer.line(lastHitPos.x, lastHitPos.y, lastHitPos.z, lastPlayerPos.x, lastPlayerPos.y, lastPlayerPos.z, Color.WHITE);
+    }
+
+
+    // TODO: offhand placing
     private boolean place(DefaultBlockAction action) {
         if (action.bhr == null) return false;
 
         lastHitPos = action.bhr.getPos();
         lastPlayerPos = mc.player.getEyePos();
+
+        if (action.item != null && action.item.isHotbar()) InvUtils.swap(action.item.slot(), false);
+        /*  todo:
+         *      investigate using inventory bypass - InvUtils.quickMove().from(invSlot).to(mc.player.getInventory().selectedSlot)
+         *      silent swapping vs normal swapping
+         *      swap back
+         *
+         *  probably don't want to end up having a ton of arguments in the method again, like BlockUtils.place, so we
+         *  will have to do something to get around it - global config settings, or a record the module can pass in with
+         *  the setting configuration?
+         */
 
         mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, action.bhr);
         action.setState(Action.State.Finished);
@@ -140,8 +166,7 @@ public class DefaultInteractionManager implements InteractionManager {
     }
 
     public BlockHitResult getBHR(DefaultBlockAction action) {
-        Vec3d hitPos = Vec3d.ofCenter(action.getPos());
-
+        Vec3d hitPos;
         BlockPos neighbour;
         Direction side = getPlaceSide(action.getPos());
 
@@ -153,12 +178,23 @@ public class DefaultInteractionManager implements InteractionManager {
 
             side = Direction.UP;
             neighbour = action.getPos();
+            hitPos = Vec3d.ofCenter(action.getPos());
         }
         else {
             neighbour = action.getPos().offset(side);
-            hitPos = hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
-            // todo fix hitPos for blocks with weird bounding boxes
-            // https://cdn.discordapp.com/attachments/811945882198999050/1142064813795721267/2023-08-18_12.56.25.png
+
+            VoxelShape shape = mc.world.getBlockState(neighbour).getOutlineShape(mc.world, neighbour);
+            if (shape.isEmpty()) shape = VoxelShapes.fullCube();
+            Box box = shape.getBoundingBox();
+
+            // getting the centre of the block
+            hitPos = Vec3d.of(neighbour).add(0.5, box.getYLength() * 0.5, 0.5).add(mc.world.getBlockState(neighbour).getModelOffset(mc.world, neighbour));
+
+            //  todo there are some blocks with ingame models that dont match the outline shape (e.g. small drip leaf),
+            //   which means the calculations with getModelOffset dont work.
+
+            // setting the crosshair to the centre of the relevant side
+            hitPos = hitPos.subtract(box.getXLength() * side.getOffsetX() * 0.5, box.getYLength() * side.getOffsetY() * 0.5, box.getZLength() * side.getOffsetZ() * 0.5);
         }
 
         return new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
@@ -193,12 +229,6 @@ public class DefaultInteractionManager implements InteractionManager {
         }
 
         return null;
-    }
-
-    @EventHandler
-    private void onRender3d(Render3DEvent event) {
-        if (lastHitPos == null || lastPlayerPos == null) return;
-        event.renderer.line(lastHitPos.x, lastHitPos.y, lastHitPos.z, lastPlayerPos.x, lastPlayerPos.y, lastPlayerPos.z, Color.WHITE);
     }
 
 

@@ -234,13 +234,14 @@ public class BlockUtils {
         return block instanceof CraftingTableBlock
             || block instanceof AnvilBlock
             || block instanceof ButtonBlock
-            || block instanceof AbstractPressurePlateBlock
             || block instanceof BlockWithEntity
             || block instanceof BedBlock
             || block instanceof FenceGateBlock
             || block instanceof DoorBlock
             || block instanceof NoteBlock
-            || block instanceof TrapdoorBlock;
+            || block instanceof TrapdoorBlock
+            || block instanceof FlowerPotBlock
+            || block instanceof LeverBlock;
     }
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos, boolean newMobSpawnLightLevel) {
