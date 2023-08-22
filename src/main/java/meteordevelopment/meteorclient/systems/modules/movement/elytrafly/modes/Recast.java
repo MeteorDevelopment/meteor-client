@@ -45,7 +45,7 @@ public class Recast extends ElytraFlightMode {
             setPressed(mc.options.forwardKey, true);
             if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
             mc.player.setYaw(getSmartYawDirection());
-            mc.player.setPitch(elytraFly.pitch.get());
+            mc.player.setPitch(elytraFly.pitch.get().floatValue());
 
             // Rubberbanding
             if (rubberbanded && elytraFly.restart.get()) {
