@@ -49,7 +49,7 @@ public class AutoTool extends Module {
     private final Setting<Boolean> fortuneForOresCrops = sgGeneral.add(new BoolSetting.Builder()
         .name("fortune-for-ores-and-crops")
         .description("Mines Ores and crops only with the Fortune enchantment.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
