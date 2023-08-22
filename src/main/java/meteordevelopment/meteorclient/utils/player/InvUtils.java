@@ -178,6 +178,11 @@ public class InvUtils {
         return ACTION;
     }
 
+    public static Action quickSwap() {
+        ACTION.type = SlotActionType.SWAP;
+        return ACTION;
+    }
+
     public static Action shiftClick() {
         ACTION.type = SlotActionType.QUICK_MOVE;
         return ACTION;
@@ -289,6 +294,11 @@ public class InvUtils {
 
         private void run() {
             boolean hadEmptyCursor = mc.player.currentScreenHandler.getCursorStack().isEmpty();
+
+            if (type == SlotActionType.SWAP) {
+                data = from;
+                from = to;
+            }
 
             if (type != null && from != -1 && to != -1) {
                click(from);
