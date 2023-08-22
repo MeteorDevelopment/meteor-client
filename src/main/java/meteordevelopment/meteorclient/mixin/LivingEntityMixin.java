@@ -13,7 +13,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Recast;
-import meteordevelopment.meteorclient.systems.modules.player.OffhandCrash;
 import meteordevelopment.meteorclient.systems.modules.player.PotionSpoof;
 import meteordevelopment.meteorclient.systems.modules.render.HandView;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
@@ -77,13 +76,6 @@ public abstract class LivingEntityMixin extends Entity {
     private void spawnItemParticles(ItemStack stack, int count, CallbackInfo info) {
         NoRender noRender = Modules.get().get(NoRender.class);
         if (noRender.noEatParticles() && stack.isFood()) info.cancel();
-    }
-
-    @Inject(method = "onEquipStack", at = @At("HEAD"), cancellable = true)
-    private void onEquipStack(EquipmentSlot slot, ItemStack oldStack, ItemStack newStack, CallbackInfo info) {
-        if ((Object) this == mc.player && Modules.get().get(OffhandCrash.class).isAntiCrash()) {
-            info.cancel();
-        }
     }
 
     @ModifyArg(method = "swingHand(Lnet/minecraft/util/Hand;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;swingHand(Lnet/minecraft/util/Hand;Z)V"))
