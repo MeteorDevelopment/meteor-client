@@ -17,15 +17,9 @@ import java.util.concurrent.atomic.AtomicReference;
 
 public class Main {
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
-        Path gpPath = Paths.get("gradle.properties");
-        String gradleProperties = Files.readString(gpPath);
-        AtomicReference<String> mcVersion = new AtomicReference<>();
-        gradleProperties.lines().forEach(l -> {
-            if (l.startsWith("minecraft_version=")) mcVersion.set(l.replace("minecraft_version=", ""));
-        });
         int option = JOptionPane.showOptionDialog(
                 null,
-                "To install Meteor Client, you need to put it in your mods folder and run Fabric for " + mcVersion.get() + "\nNeed help? Join our Discord",
+                "To install Meteor Client, you need to put it in your mods folder and run Fabric with the latest Minecraft version\nNeed help? Join our Discord",
                 "Meteor Client",
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
