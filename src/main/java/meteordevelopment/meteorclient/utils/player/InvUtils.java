@@ -178,7 +178,7 @@ public class InvUtils {
         return ACTION;
     }
 
-    public static Action quickMove() {
+    public static Action shiftClick() {
         ACTION.type = SlotActionType.QUICK_MOVE;
         return ACTION;
     }
