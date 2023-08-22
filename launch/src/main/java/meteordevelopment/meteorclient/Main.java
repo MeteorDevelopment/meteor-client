@@ -16,7 +16,8 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class Main {
-    public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException, IOException {
+    public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         int option = JOptionPane.showOptionDialog(
                 null,
                 "To install Meteor Client, you need to put it in your mods folder and run Fabric with the latest Minecraft version\nNeed help? Join our Discord",
