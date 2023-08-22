@@ -382,16 +382,13 @@ public class Modules extends System<Modules> {
 
     private void initCombat() {
         add(new AnchorAura());
-        add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
-        add(new AutoAnvil());
         add(new AutoArmor());
         add(new AutoCity());
         add(new AutoEXP());
         add(new AutoTotem());
         add(new AutoTrap());
-        add(new AutoWeapon());
         add(new AutoWeb());
         add(new BedAura());
         add(new BowAimbot());
@@ -429,7 +426,6 @@ public class Modules extends System<Modules> {
         add(new NoInteract());
         add(new NoMiningTrace());
         add(new NoRotate());
-        add(new OffhandCrash());
         add(new PacketMine());
         add(new Portals());
         add(new PotionSaver());
@@ -444,7 +440,6 @@ public class Modules extends System<Modules> {
         add(new Anchor());
         add(new AntiAFK());
         add(new AntiVoid());
-        add(new AutoJump());
         add(new AutoWalk());
         add(new Blink());
         add(new BoatFly());
@@ -465,7 +460,6 @@ public class Modules extends System<Modules> {
         add(new ReverseStep());
         add(new SafeWalk());
         add(new Scaffold());
-        add(new Slippy());
         add(new Sneak());
         add(new Speed());
         add(new Spider());
@@ -519,18 +513,14 @@ public class Modules extends System<Modules> {
         add(new AirPlace());
         add(new Ambience());
         add(new Collisions());
-        add(new AutoBreed());
         add(new AutoBrewer());
         add(new AutoMount());
         add(new AutoNametag());
-        add(new AutoShearer());
         add(new AutoSign());
-        add(new AutoSmelter());
         add(new BuildHeight());
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Excavator());
-        add(new Flamethrower());
         add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
