@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.combat.AutoTotem;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -37,7 +36,6 @@ public class Offhand extends Module {
         .sliderMax(20)
         .build()
     );
-
     private final Setting<Item> preferreditem = sgCombat.add(new EnumSetting.Builder<Item>()
         .name("item")
         .description("Which item to hold in your offhand.")
@@ -55,7 +53,7 @@ public class Offhand extends Module {
     private final Setting<Boolean> rightgapple = sgCombat.add(new BoolSetting.Builder()
         .name("right-gapple")
         .description("Will switch to a gapple when holding right click.(DO NOT USE WITH POTION ON)")
-        .defaultValue(false)
+        .defaultValue(true)
         .build()
     );
 
@@ -63,7 +61,7 @@ public class Offhand extends Module {
     private final Setting<Boolean> SwordGap = sgCombat.add(new BoolSetting.Builder()
         .name("sword-gapple")
         .description("Will switch to a gapple when holding a sword and right click.")
-        .defaultValue(true)
+        .defaultValue(false)
         .visible(rightgapple::get)
         .build()
     );
@@ -73,6 +71,22 @@ public class Offhand extends Module {
         .description("Holds an Enchanted Golden Apple when you are holding a sword.")
         .defaultValue(false)
         .visible(() -> !rightgapple.get())
+        .build()
+    );
+
+
+    private final Setting<Boolean> alwaysPot = sgCombat.add(new BoolSetting.Builder()
+        .name("always-pot-on-sword")
+        .description("Will switch to a potion when holding a sword")
+        .defaultValue(false)
+        .visible(() -> !rightgapple.get() && !alwaysSwordGap.get())
+        .build()
+    );
+    private final Setting<Boolean> potionClick = sgCombat.add(new BoolSetting.Builder()
+        .name("sword-pot")
+        .description("Will switch to a potion when holding a sword and right click.")
+        .defaultValue(false)
+        .visible(() -> !rightgapple.get() && !alwaysPot.get() && !alwaysSwordGap.get() )
         .build()
     );
 
@@ -115,7 +129,6 @@ public class Offhand extends Module {
     private Item currentItem;
     public boolean locked;
 
-
     private int totems, ticks;
 
     public Offhand() {
@@ -154,28 +167,42 @@ public class Offhand extends Module {
         ticks++;
 
         AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
+
         // Returns to the original Item
         currentItem = preferreditem.get();
 
         // Sword Gap & Right Gap
         if (rightgapple.get()) {
-                if (!locked) {
-                    if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
-                        if (isClicking) {
-                            currentItem = Item.EGap;
-                        }
+            if (!locked) {
+                if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                    if (isClicking) {
+                        currentItem = Item.EGap;
                     }
-                    if (!SwordGap.get()) {
-                        if (isClicking) {
-                            currentItem = Item.EGap;
-                        }
+                }
+                if (!SwordGap.get()) {
+                    if (isClicking) {
+                        currentItem = Item.EGap;
                     }
                 }
             }
+        }
 
         // Always Gap
-        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem
-        || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
+        else if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
+
+            // Potion Click
+        else if (potionClick.get()) {
+            if (!locked) {
+                if (mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                    if (isClicking) {
+                        currentItem = Item.Potion;
+                    }
+                }
+            }
+        }
+
+        // Always Pot
+        else if ((mc.player.getMainHandStack().getItem() instanceof SwordItem || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysPot.get()) currentItem = Item.Potion;
 
 
         else currentItem = preferreditem.get();
@@ -234,10 +261,10 @@ public class Offhand extends Module {
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD),
         Potion(Items.POTION);
-
         net.minecraft.item.Item item;
         Item(net.minecraft.item.Item item) {
             this.item = item;
         }
     }
+
 }
