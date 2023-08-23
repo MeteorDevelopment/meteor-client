@@ -30,15 +30,16 @@ public class Offhand extends Module {
     //Combat
 
     private final Setting<Integer> delayTicks = sgCombat.add(new IntSetting.Builder()
-        .name("Item Switch Delay")
+        .name("item-switch-delay")
         .description("The delay in ticks between slot movements.")
         .defaultValue(0)
         .min(0)
         .sliderMax(20)
         .build()
     );
+
     private final Setting<Item> preferreditem = sgCombat.add(new EnumSetting.Builder<Item>()
-        .name("Item")
+        .name("item")
         .description("Which item to hold in your offhand.")
         .defaultValue(Item.Crystal)
         .build()
@@ -52,7 +53,7 @@ public class Offhand extends Module {
     );
 
     private final Setting<Boolean> rightgapple = sgCombat.add(new BoolSetting.Builder()
-        .name("Right Gapple")
+        .name("right-gapple")
         .description("Will switch to a gapple when holding right click.(DO NOT USE WITH POTION ON)")
         .defaultValue(false)
         .build()
@@ -60,7 +61,7 @@ public class Offhand extends Module {
 
 
     private final Setting<Boolean> SwordGap = sgCombat.add(new BoolSetting.Builder()
-        .name("Sword Gapple")
+        .name("sword-gapple")
         .description("Will switch to a gapple when holding a sword and right click.")
         .defaultValue(true)
         .visible(rightgapple::get)
@@ -68,7 +69,7 @@ public class Offhand extends Module {
     );
 
     private final Setting<Boolean> alwaysSwordGap = sgCombat.add(new BoolSetting.Builder()
-        .name("Always Gap")
+        .name("always-gap-on-sword")
         .description("Holds an Enchanted Golden Apple when you are holding a sword.")
         .defaultValue(false)
         .visible(() -> !rightgapple.get())
@@ -93,13 +94,13 @@ public class Offhand extends Module {
         .build()
     );
 
-
     private final Setting<Boolean> falling = sgTotem.add(new BoolSetting.Builder()
         .name("falling")
         .description("Will hold a totem if fall damage could kill you.")
         .defaultValue(false)
         .build()
     );
+
     private final Setting<Boolean> explosion = sgTotem.add(new BoolSetting.Builder()
         .name("explosion")
         .description("Will hold a totem when explosion damage could kill you.")
@@ -153,58 +154,58 @@ public class Offhand extends Module {
         ticks++;
 
         AutoTotem autoTotem = Modules.get().get(AutoTotem.class);
-            // Returns to the original Item
-            currentItem = preferreditem.get();
+        // Returns to the original Item
+        currentItem = preferreditem.get();
 
-            // Sword Gap & Right Gap
-            if (rightgapple.get()) {
-                    if (!locked) {
-                        if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
-                            if (isClicking) {
-                                currentItem = Item.EGap;
-                            }
-                        }
-                        if (!SwordGap.get()) {
-                            if (isClicking) {
-                                currentItem = Item.EGap;
-                            }
+        // Sword Gap & Right Gap
+        if (rightgapple.get()) {
+                if (!locked) {
+                    if (SwordGap.get() && mc.player.getMainHandStack().getItem() instanceof SwordItem) {
+                        if (isClicking) {
+                            currentItem = Item.EGap;
                         }
                     }
-                }
-
-        // Always Gap
-            if ((mc.player.getMainHandStack().getItem() instanceof SwordItem
-            || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
-
-
-            else currentItem = preferreditem.get();
-
-            // Checking offhand item
-            if (mc.player.getOffHandStack().getItem() != currentItem.item) {
-                if (ticks >= delayTicks.get()) {
-                    if (!locked) {
-                        FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, hotbar.get() ? 0 : 9, 35);
-
-                        // No offhand item
-                        if (!item.found()) {
-                            if (!sentMessage) {
-                                warning("Chosen item not found.");
-                                sentMessage = true;
-                            }
+                    if (!SwordGap.get()) {
+                        if (isClicking) {
+                            currentItem = Item.EGap;
                         }
-
-                        // Swap to offhand
-                        else if ((isClicking || !autoTotem.isLocked() && !item.isOffhand())) {
-                            InvUtils.move().from(item.slot()).toOffhand();
-                            sentMessage = false;
-                        }
-                        ticks = 0;
-                        return;
                     }
-                    ticks++;
                 }
             }
+
+        // Always Gap
+        if ((mc.player.getMainHandStack().getItem() instanceof SwordItem
+        || mc.player.getMainHandStack().getItem() instanceof AxeItem) && alwaysSwordGap.get()) currentItem = Item.EGap;
+
+
+        else currentItem = preferreditem.get();
+
+        // Checking offhand item
+        if (mc.player.getOffHandStack().getItem() != currentItem.item) {
+            if (ticks >= delayTicks.get()) {
+                if (!locked) {
+                    FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, hotbar.get() ? 0 : 9, 35);
+
+                    // No offhand item
+                    if (!item.found()) {
+                        if (!sentMessage) {
+                            warning("Chosen item not found.");
+                            sentMessage = true;
+                        }
+                    }
+
+                    // Swap to offhand
+                    else if ((isClicking || !autoTotem.isLocked() && !item.isOffhand())) {
+                        InvUtils.move().from(item.slot()).toOffhand();
+                        sentMessage = false;
+                    }
+                    ticks = 0;
+                    return;
+                }
+                ticks++;
+            }
         }
+    }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
@@ -233,10 +234,10 @@ public class Offhand extends Module {
         Totem(Items.TOTEM_OF_UNDYING),
         Shield(Items.SHIELD),
         Potion(Items.POTION);
+
         net.minecraft.item.Item item;
         Item(net.minecraft.item.Item item) {
             this.item = item;
         }
-
     }
 }
