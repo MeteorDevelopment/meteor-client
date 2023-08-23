@@ -17,7 +17,6 @@ import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.ShapeContext;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.item.BlockItem;
@@ -173,7 +172,7 @@ public class LiquidFiller extends Module {
                 return;
 
             // Check if the player can place at pos
-            if (!mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent())) return;
+            if (!BlockUtils.canPlace(blockPos)) return;
 
             // Add block
             blocks.add(blockPos.mutableCopy());
