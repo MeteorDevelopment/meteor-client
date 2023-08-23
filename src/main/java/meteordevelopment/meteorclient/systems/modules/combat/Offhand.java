@@ -53,7 +53,7 @@ public class Offhand extends Module {
     private final Setting<Boolean> rightgapple = sgCombat.add(new BoolSetting.Builder()
         .name("right-gapple")
         .description("Will switch to a gapple when holding right click.(DO NOT USE WITH POTION ON)")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
