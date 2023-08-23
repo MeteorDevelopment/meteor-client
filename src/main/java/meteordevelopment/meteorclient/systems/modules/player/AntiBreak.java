@@ -56,7 +56,7 @@ public class AntiBreak extends Module {
         return !itemStack.isDamageable() || itemStack.getMaxDamage() - itemStack.getDamage() >= itemStack.getMaxDamage() * breakDurability.get() / 100;
     }
 
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH - 10) //after autotool
     private void onStartBreakingBlock(StartBreakingBlockEvent event) {
         if (!preventMine.get() || Modules.get().isActive(InfinityMiner.class)) return;
 
