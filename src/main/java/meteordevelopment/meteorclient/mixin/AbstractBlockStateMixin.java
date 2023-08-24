@@ -13,17 +13,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-import java.util.Random;
+import static meteordevelopment.meteorclient.utils.Utils.random;
 
 @Mixin(AbstractBlock.AbstractBlockState.class)
 public class AbstractBlockStateMixin {
-    private static final Random RANDOM = new Random();
 
     @ModifyVariable(method = "getModelOffset", at = @At("HEAD"), argsOnly = true)
     private BlockPos modifyPos(BlockPos pos) {
         if (Modules.get() == null) return pos;
 
-        if (Modules.get().get(NoRender.class).noTextureRotations()) return pos.multiply(RANDOM.nextInt());
+        if (Modules.get().get(NoRender.class).noTextureRotations()) return pos.multiply(random.nextInt());
         return pos;
     }
 }

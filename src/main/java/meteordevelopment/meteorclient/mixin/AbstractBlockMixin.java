@@ -18,11 +18,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import java.util.Random;
+import static meteordevelopment.meteorclient.utils.Utils.random;
 
 @Mixin(AbstractBlock.class)
 public class AbstractBlockMixin {
-    private static final Random RANDOM = new Random();
 
     @Inject(method = "getAmbientOcclusionLightLevel", at = @At("HEAD"), cancellable = true)
     private void onGetAmbientOcclusionLightLevel(BlockState state, BlockView world, BlockPos pos, CallbackInfoReturnable<Float> info) {
@@ -33,6 +32,6 @@ public class AbstractBlockMixin {
 
     @Inject(method = "getRenderingSeed", at = @At("HEAD"), cancellable = true)
     private void onRenderingSeed(BlockState state, BlockPos pos, CallbackInfoReturnable<Long> cir) {
-        if (Modules.get().get(NoRender.class).noTextureRotations()) cir.setReturnValue(RANDOM.nextLong());
+        if (Modules.get().get(NoRender.class).noTextureRotations()) cir.setReturnValue(random.nextLong());
     }
 }

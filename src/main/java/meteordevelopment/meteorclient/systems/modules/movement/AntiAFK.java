@@ -26,7 +26,8 @@ import net.minecraft.nbt.NbtString;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+
+import static meteordevelopment.meteorclient.utils.Utils.random;
 
 public class AntiAFK extends Module {
     public enum SpinMode {
@@ -140,8 +141,6 @@ public class AntiAFK extends Module {
     private int strafeTimer = 0;
     private boolean direction = false;
 
-    private final Random random = new Random();
-
     private float prevYaw;
 
     public AntiAFK() {
@@ -194,7 +193,7 @@ public class AntiAFK extends Module {
                 if (timer <= 0) {
                     int i;
                     if (randomMessage.get()) {
-                        i = Utils.random(0, messages.size());
+                        i = random(0, messages.size());
                     } else {
                         if (messageI >= messages.size()) messageI = 0;
                         i = messageI++;

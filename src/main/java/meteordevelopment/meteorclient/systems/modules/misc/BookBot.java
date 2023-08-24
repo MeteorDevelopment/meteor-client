@@ -42,7 +42,8 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.PrimitiveIterator;
-import java.util.Random;
+
+import static meteordevelopment.meteorclient.utils.Utils.random;
 
 public class BookBot extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -99,7 +100,6 @@ public class BookBot extends Module {
     private final PointerBuffer filters;
 
     private int delayTimer, bookCount;
-    private Random random;
 
     public BookBot() {
         super(Categories.Misc, "book-bot", "Automatically writes in books.");
@@ -150,7 +150,6 @@ public class BookBot extends Module {
             return;
         }
 
-        random = new Random();
         delayTimer = delay.get();
         bookCount = 0;
     }

@@ -29,10 +29,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 
 import java.util.List;
-import java.util.Random;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
+import static meteordevelopment.meteorclient.utils.Utils.random;
 
 public class SwarmCommand extends Command {
 
@@ -361,7 +361,6 @@ public class SwarmCommand extends Command {
     }
 
     private void scatter(int radius) {
-        Random random = new Random();
         double a = random.nextDouble() * 2 * Math.PI;
         double r = radius * Math.sqrt(random.nextDouble());
         double x = mc.player.getX() + r * Math.cos(a);

@@ -15,12 +15,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+
+import static meteordevelopment.meteorclient.utils.Utils.random;
 
 @Mixin(SplashTextResourceSupplier.class)
 public class SplashTextResourceSupplierMixin {
     private boolean override = true;
-    private final Random random = new Random();
 
     private final List<String> meteorSplashes = getMeteorSplashes();
 
