@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import net.minecraft.item.SpawnEggItem;
+import meteordevelopment.meteorclient.events.entity.player.InteractItemEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
-import net.minecraft.util.Hand;
+import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 
@@ -80,15 +80,16 @@ public class AirPlace extends Module {
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
+    private void onTick(TickEvent.Pre event) {
         double r = customRange.get() ? range.get() : mc.interactionManager.getReachDistance();
         hitResult = mc.getCameraEntity().raycast(r, 0, false);
+    }
 
-        if (!(hitResult instanceof BlockHitResult) || !(mc.player.getMainHandStack().getItem() instanceof BlockItem) && !(mc.player.getMainHandStack().getItem() instanceof SpawnEggItem)) return;
+    @EventHandler
+    private void onInteractItem(InteractItemEvent event) {
+        if (!(hitResult instanceof BlockHitResult) || !(mc.player.getStackInHand(event.hand).getItem() instanceof BlockItem) && !(mc.player.getStackInHand(event.hand).getItem() instanceof SpawnEggItem)) return;
 
-        if (mc.options.useKey.isPressed()) {
-            BlockUtils.place(((BlockHitResult) hitResult).getBlockPos(), Hand.MAIN_HAND, mc.player.getInventory().selectedSlot, false, 0, true, true, false);
-        }
+        BlockUtils.place(((BlockHitResult) hitResult).getBlockPos(), event.hand, mc.player.getInventory().selectedSlot, false, 0, true, true, false);
     }
 
     @EventHandler
@@ -96,6 +97,7 @@ public class AirPlace extends Module {
         if (!(hitResult instanceof BlockHitResult)
             || !mc.world.getBlockState(((BlockHitResult) hitResult).getBlockPos()).isReplaceable()
             || !(mc.player.getMainHandStack().getItem() instanceof BlockItem) && !(mc.player.getMainHandStack().getItem() instanceof SpawnEggItem)
+            && !(mc.player.getOffHandStack().getItem() instanceof BlockItem) && !(mc.player.getOffHandStack().getItem() instanceof SpawnEggItem)
             || !render.get()) return;
 
         event.renderer.box(((BlockHitResult) hitResult).getBlockPos(), sideColor.get(), lineColor.get(), shapeMode.get(), 0);
