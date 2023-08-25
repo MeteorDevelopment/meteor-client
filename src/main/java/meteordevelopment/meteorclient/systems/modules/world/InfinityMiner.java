@@ -188,7 +188,7 @@ public class InfinityMiner extends Module {
             && !Utils.hasEnchantments(stack, Enchantments.SILK_TOUCH));
         FindItemResult bestPick = InvUtils.findInHotbar(pickaxePredicate);
 
-        if (bestPick.isOffhand()) InvUtils.quickMove().fromOffhand().toHotbar(mc.player.getInventory().selectedSlot);
+        if (bestPick.isOffhand()) InvUtils.shiftClick().fromOffhand().toHotbar(mc.player.getInventory().selectedSlot);
         else if (bestPick.isHotbar()) InvUtils.swap(bestPick.slot(), false);
 
         return InvUtils.testInMainHand(pickaxePredicate);
@@ -233,7 +233,7 @@ public class InfinityMiner extends Module {
         for (int i = 0; i <= 35; i++) {
             ItemStack itemStack = mc.player.getInventory().getStack(i);
             if (itemStack.isEmpty()) return false;
-            
+
             for (Item item : targetItems.get()) {
                 if (itemStack.getItem() == item && itemStack.getCount() < itemStack.getMaxCount()) {
                     return false;
