@@ -19,9 +19,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
-import meteordevelopment.meteorclient.utils.misc.FakeClientPlayer;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
@@ -196,18 +194,21 @@ public class CombatHud extends HudElement {
             Color primaryColor = TextHud.getSectionColor(0);
             Color secondaryColor = TextHud.getSectionColor(1);
 
-            if (isInEditor()) playerEntity = FakeClientPlayer.getPlayer();
+            if (isInEditor()) playerEntity = mc.player;
             else playerEntity = TargetUtils.getPlayerTarget(range.get(), SortPriority.LowestDistance);
 
-            if (playerEntity == null) return;
+            if (playerEntity == null && !isInEditor()) return;
 
             // Background
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
             Renderer2D.COLOR.render(null);
 
+            if (playerEntity == null) return;
+
             // Player Model
             InventoryScreen.drawEntity(
+                renderer.drawContext,
                 (int) (x + (25 * scale.get())),
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
@@ -337,7 +338,7 @@ public class CombatHud extends HudElement {
 
                 ItemStack itemStack = getItem(slot);
 
-                RenderUtils.drawItem(itemStack, (int) armorX, (int) armorY, true);
+                renderer.item(itemStack, (int) (armorX * scale.get()), (int) (armorY * scale.get()), scale.get().floatValue(), true);
 
                 armorY += 18;
 

@@ -56,7 +56,11 @@ public class Macro implements ISerializable<Macro> {
     }
 
     public boolean onAction(boolean isKey, int value) {
-        if (keybind.get().matches(isKey, value) && mc.currentScreen == null) {
+        if (!keybind.get().matches(isKey, value) || mc.currentScreen != null) return false;
+        return onAction();
+    }
+
+    public boolean onAction() {
             if (dirty) {
                 scripts.clear();
 
@@ -77,9 +81,6 @@ public class Macro implements ISerializable<Macro> {
             }
 
             return true;
-        }
-
-        return false;
     }
 
     @Override

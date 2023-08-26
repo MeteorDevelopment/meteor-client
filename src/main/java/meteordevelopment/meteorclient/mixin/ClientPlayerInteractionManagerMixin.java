@@ -11,14 +11,19 @@ import meteordevelopment.meteorclient.events.entity.player.*;
 import meteordevelopment.meteorclient.mixininterface.IClientPlayerInteractionManager;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
+import meteordevelopment.meteorclient.systems.modules.player.BreakDelay;
 import meteordevelopment.meteorclient.systems.modules.player.Reach;
+import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
+import net.minecraft.block.BlockState;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.network.ClientPlayerInteractionManager;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
@@ -27,7 +32,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.BlockView;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,6 +45,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.invoke.arg.Args;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 @Mixin(ClientPlayerInteractionManager.class)
 public abstract class ClientPlayerInteractionManagerMixin implements IClientPlayerInteractionManager {
     @Shadow private int blockBreakingCooldown;
@@ -46,6 +55,10 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Shadow
     public abstract void clickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player);
+
+    @Shadow
+    @Final
+    private ClientPlayNetworkHandler networkHandler;
 
     @Inject(method = "clickSlot", at = @At("HEAD"), cancellable = true)
     private void onClickSlot(int syncId, int slotId, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo info) {
@@ -73,8 +86,13 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
                     clickSlot(syncId, 17, armorSlot, SlotActionType.SWAP, player); //armor slot <-> inv slot
                     ci.cancel();
                 } else if (actionType == SlotActionType.SWAP) {
-                    clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
-                    ci.cancel();
+                    if (button >= 10) {
+                        clickSlot(syncId, 45, armorSlot, SlotActionType.SWAP, player);
+                        ci.cancel();
+                    } else {
+                        clickSlot(syncId, 36 + button, armorSlot, SlotActionType.SWAP, player); //invert swap
+                        ci.cancel();
+                    }
                 }
             }
         }
@@ -83,6 +101,19 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
     @Inject(method = "attackBlock", at = @At("HEAD"), cancellable = true)
     private void onAttackBlock(BlockPos blockPos, Direction direction, CallbackInfoReturnable<Boolean> info) {
         if (MeteorClient.EVENT_BUS.post(StartBreakingBlockEvent.get(blockPos, direction)).isCancelled()) info.cancel();
+        else {
+            SpeedMine sm = Modules.get().get(SpeedMine.class);
+            BlockState state = mc.world.getBlockState(blockPos);
+
+            if (!sm.instamine() || !sm.filter(state.getBlock())) return;
+
+            if (state.calcBlockBreakingDelta(mc.player, mc.world, blockPos) > 0.5f) {
+                mc.world.breakBlock(blockPos, true, mc.player);
+                networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, blockPos, direction));
+                networkHandler.sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                info.setReturnValue(true);
+            }
+        }
     }
 
     @Inject(method = "interactBlock", at = @At("HEAD"), cancellable = true)
@@ -107,25 +138,41 @@ public abstract class ClientPlayerInteractionManagerMixin implements IClientPlay
 
     @Inject(method = "getReachDistance", at = @At("HEAD"), cancellable = true)
     private void onGetReachDistance(CallbackInfoReturnable<Float> info) {
-        info.setReturnValue(Modules.get().get(Reach.class).getReach());
+        info.setReturnValue(Modules.get().get(Reach.class).blockReach());
     }
 
-    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", ordinal = 3))
-    private void updateBlockBreakingProgress3(ClientPlayerInteractionManager interactionManager, int value) {
+    @Inject(method = "hasExtendedReach", at = @At("HEAD"), cancellable = true)
+    private void onHasExtendedReach(CallbackInfoReturnable<Boolean> info) {
+        if (Modules.get().isActive(Reach.class)) info.setReturnValue(false);
+    }
+
+    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void creativeBreakDelayChange(ClientPlayerInteractionManager interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
         blockBreakingCooldown = event.cooldown;
     }
 
-    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", ordinal = 4))
-    private void updateBlockBreakingProgress4(ClientPlayerInteractionManager interactionManager, int value) {
+    @Redirect(method = "updateBlockBreakingProgress", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD, ordinal = 2))
+    private void survivalBreakDelayChange(ClientPlayerInteractionManager interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
         blockBreakingCooldown = event.cooldown;
     }
 
     @Redirect(method = "attackBlock", at = @At(value = "FIELD", target = "Lnet/minecraft/client/network/ClientPlayerInteractionManager;blockBreakingCooldown:I", opcode = Opcodes.PUTFIELD))
-    private void attackBlock(ClientPlayerInteractionManager interactionManager, int value) {
+    private void creativeBreakDelayChange2(ClientPlayerInteractionManager interactionManager, int value) {
         BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(value));
         blockBreakingCooldown = event.cooldown;
+    }
+
+    @Redirect(method = "method_41930", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockState;calcBlockBreakingDelta(Lnet/minecraft/entity/player/PlayerEntity;Lnet/minecraft/world/BlockView;Lnet/minecraft/util/math/BlockPos;)F"))
+    private float deltaChange(BlockState blockState, PlayerEntity player, BlockView world, BlockPos pos) {
+        float delta = blockState.calcBlockBreakingDelta(player, world, pos);
+        if (Modules.get().get(BreakDelay.class).noInstaBreak.get() && delta >= 1) {
+            BlockBreakingCooldownEvent event = MeteorClient.EVENT_BUS.post(BlockBreakingCooldownEvent.get(blockBreakingCooldown));
+            blockBreakingCooldown = event.cooldown;
+            return 0;
+        }
+        return delta;
     }
 
     @Inject(method = "breakBlock", at = @At("HEAD"), cancellable = true)

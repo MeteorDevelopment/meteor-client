@@ -15,6 +15,7 @@ import net.minecraft.entity.passive.AbstractHorseEntity;
 import net.minecraft.entity.passive.HorseEntity;
 import net.minecraft.entity.passive.LlamaEntity;
 import net.minecraft.item.ItemGroups;
+import net.minecraft.registry.Registries;
 import net.minecraft.screen.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -36,26 +37,26 @@ public class SlotUtils {
         ScreenHandler handler = mc.player.currentScreenHandler;
 
         if (handler instanceof PlayerScreenHandler) return survivalInventory(i);
-        else if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
-        else if (handler instanceof GenericContainerScreenHandler) return genericContainer(i, ((GenericContainerScreenHandler) handler).getRows());
-        else if (handler instanceof CraftingScreenHandler) return craftingTable(i);
-        else if (handler instanceof FurnaceScreenHandler) return furnace(i);
-        else if (handler instanceof BlastFurnaceScreenHandler) return furnace(i);
-        else if (handler instanceof SmokerScreenHandler) return furnace(i);
-        else if (handler instanceof Generic3x3ContainerScreenHandler) return generic3x3(i);
-        else if (handler instanceof EnchantmentScreenHandler) return enchantmentTable(i);
-        else if (handler instanceof BrewingStandScreenHandler) return brewingStand(i);
-        else if (handler instanceof MerchantScreenHandler) return villager(i);
-        else if (handler instanceof BeaconScreenHandler) return beacon(i);
-        else if (handler instanceof AnvilScreenHandler) return anvil(i);
-        else if (handler instanceof HopperScreenHandler) return hopper(i);
-        else if (handler instanceof ShulkerBoxScreenHandler) return genericContainer(i, 3);
-        else if (handler instanceof HorseScreenHandler) return horse(handler, i);
-        else if (handler instanceof CartographyTableScreenHandler) return cartographyTable(i);
-        else if (handler instanceof GrindstoneScreenHandler) return grindstone(i);
-        else if (handler instanceof LecternScreenHandler) return lectern();
-        else if (handler instanceof LoomScreenHandler) return loom(i);
-        else if (handler instanceof StonecutterScreenHandler) return stonecutter(i);
+        if (handler instanceof CreativeInventoryScreen.CreativeScreenHandler) return creativeInventory(i);
+        if (handler instanceof GenericContainerScreenHandler genericContainerScreenHandler) return genericContainer(i, genericContainerScreenHandler.getRows());
+        if (handler instanceof CraftingScreenHandler) return craftingTable(i);
+        if (handler instanceof FurnaceScreenHandler) return furnace(i);
+        if (handler instanceof BlastFurnaceScreenHandler) return furnace(i);
+        if (handler instanceof SmokerScreenHandler) return furnace(i);
+        if (handler instanceof Generic3x3ContainerScreenHandler) return generic3x3(i);
+        if (handler instanceof EnchantmentScreenHandler) return enchantmentTable(i);
+        if (handler instanceof BrewingStandScreenHandler) return brewingStand(i);
+        if (handler instanceof MerchantScreenHandler) return villager(i);
+        if (handler instanceof BeaconScreenHandler) return beacon(i);
+        if (handler instanceof AnvilScreenHandler) return anvil(i);
+        if (handler instanceof HopperScreenHandler) return hopper(i);
+        if (handler instanceof ShulkerBoxScreenHandler) return genericContainer(i, 3);
+        if (handler instanceof HorseScreenHandler) return horse(handler, i);
+        if (handler instanceof CartographyTableScreenHandler) return cartographyTable(i);
+        if (handler instanceof GrindstoneScreenHandler) return grindstone(i);
+        if (handler instanceof LecternScreenHandler) return lectern();
+        if (handler instanceof LoomScreenHandler) return loom(i);
+        if (handler instanceof StonecutterScreenHandler) return stonecutter(i);
 
         return -1;
     }
@@ -67,7 +68,8 @@ public class SlotUtils {
     }
 
     private static int creativeInventory(int i) {
-        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != ItemGroups.INVENTORY) return -1;
+        if (!(mc.currentScreen instanceof CreativeInventoryScreen) || CreativeInventoryScreenAccessor.getSelectedTab() != Registries.ITEM_GROUP.get(ItemGroups.INVENTORY))
+            return -1;
         return survivalInventory(i);
     }
 
@@ -134,8 +136,8 @@ public class SlotUtils {
     private static int horse(ScreenHandler handler, int i) {
         AbstractHorseEntity entity = ((HorseScreenHandlerAccessor) handler).getEntity();
 
-        if (entity instanceof LlamaEntity) {
-            int strength = ((LlamaEntity) entity).getStrength();
+        if (entity instanceof LlamaEntity llamaEntity) {
+            int strength = llamaEntity.getStrength();
             if (isHotbar(i)) return (2 + 3 * strength) + 28 + i;
             if (isMain(i)) return (2 + 3 * strength) + 1 + (i - 9);
         }
@@ -143,8 +145,8 @@ public class SlotUtils {
             if (isHotbar(i)) return 29 + i;
             if (isMain(i)) return 2 + (i - 9);
         }
-        else if (entity instanceof AbstractDonkeyEntity) {
-            boolean chest = ((AbstractDonkeyEntity) entity).hasChest();
+        else if (entity instanceof AbstractDonkeyEntity abstractDonkeyEntity) {
+            boolean chest = abstractDonkeyEntity.hasChest();
             if (isHotbar(i)) return (chest ? 44 : 29) + i;
             if (isMain(i)) return (chest ? 17 : 2) + (i - 9);
         }

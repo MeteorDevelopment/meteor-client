@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.misc.text;
 
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.OrderedText;
@@ -21,7 +23,7 @@ public class TextUtils {
         Stack<ColoredText> stack = new Stack<>();
         List<ColoredText> coloredTexts = new ArrayList<>();
         preOrderTraverse(text, stack, coloredTexts);
-        coloredTexts.removeIf(e -> e.getText().equals(""));
+        coloredTexts.removeIf(e -> e.getText().isEmpty());
         return coloredTexts;
     }
 
@@ -44,15 +46,15 @@ public class TextUtils {
      * Returns the {@link Color} that is most prevalent through the given {@link Text}
      *
      * @param text the {@link Text} to scan through
-     * @return You know what it returns. Read the docs! Also, returns white if the internal {@link Optional} is empty
+     * @return You know what it returns. Read the docs! Also, returns white if the internal {@link Object2IntMap.Entry} is null
      */
     public static Color getMostPopularColor(Text text) {
-        Comparator<Integer> integerComparator = Comparator.naturalOrder();
-        Optional<Map.Entry<Color, Integer>> optionalColor = getColoredCharacterCount(toColoredTextList(text))
-                .entrySet().stream()
-                .max((a, b) -> integerComparator.compare(a.getValue(), b.getValue()));
-
-        return optionalColor.map(Map.Entry::getKey).orElse(new Color(255, 255, 255));
+        Object2IntMap.Entry<Color> biggestEntry = null;
+        for (var entry : getColoredCharacterCount(toColoredTextList(text)).object2IntEntrySet()) {
+            if (biggestEntry == null) biggestEntry = entry;
+            else if (entry.getIntValue() > biggestEntry.getIntValue()) biggestEntry = entry;
+        }
+        return biggestEntry == null ? new Color(255, 255, 255) : biggestEntry.getKey();
     }
 
     /**
@@ -64,13 +66,13 @@ public class TextUtils {
      * if the argument for this function is fed from the return from {@link #toColoredTextList(Text)}), and the corresponding values being {@link Integer}s
      * representing the number of occurrences of text that bear that color. The order of the keys are in no particular order
      */
-    public static Map<Color, Integer> getColoredCharacterCount(List<ColoredText> coloredTexts) {
-        Map<Color, Integer> colorCount = new HashMap<>();
+    public static Object2IntMap<Color> getColoredCharacterCount(List<ColoredText> coloredTexts) {
+        Object2IntMap<Color> colorCount = new Object2IntOpenHashMap<>();
 
         for (ColoredText coloredText : coloredTexts) {
             if (colorCount.containsKey(coloredText.getColor())) {
                 // Since color was already catalogued, simply update the record by adding the length of the new text segment to the old one
-                colorCount.put(coloredText.getColor(), colorCount.get(coloredText.getColor()) + coloredText.getText().length());
+                colorCount.put(coloredText.getColor(), colorCount.getInt(coloredText.getColor()) + coloredText.getText().length());
             } else {
                 // Add new entry to the hashmap
                 colorCount.put(coloredText.getColor(), coloredText.getText().length());

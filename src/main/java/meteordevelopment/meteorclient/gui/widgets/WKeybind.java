@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.widgets;
 
-import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.widgets.containers.WHorizontalList;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -33,13 +32,10 @@ public class WKeybind extends WHorizontalList {
         WButton set = add(theme.button("Set")).widget();
         set.action = () -> {
             listening = true;
-            label.set(appendBindText("..."));
+            label.set("...");
 
             if (actionOnSet != null) actionOnSet.run();
         };
-
-        WButton reset = add(theme.button(GuiRenderer.RESET)).expandCellX().right().widget();
-        reset.action = this::resetBind;
 
         refreshLabel();
     }
@@ -69,10 +65,6 @@ public class WKeybind extends WHorizontalList {
     }
 
     private void refreshLabel() {
-        label.set(appendBindText(keybind.toString()));
-    }
-
-    private String appendBindText(String text) {
-        return "Bind: " + text;
+        label.set(keybind.toString());
     }
 }

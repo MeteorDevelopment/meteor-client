@@ -21,19 +21,19 @@ public class CameraTweaks extends Module {
     // General
 
     private final Setting<Boolean> clip = sgGeneral.add(new BoolSetting.Builder()
-            .name("clip")
-            .description("Allows the camera to clip through blocks.")
-            .defaultValue(true)
-            .build()
+        .name("clip")
+        .description("Allows the camera to clip through blocks.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Double> cameraDistance = sgGeneral.add(new DoubleSetting.Builder()
-            .name("camera-distance")
-            .description("The distance the third person camera is from the player.")
-            .defaultValue(4)
-            .min(0)
-            .onChanged(value -> distance = value)
-            .build()
+        .name("camera-distance")
+        .description("The distance the third person camera is from the player.")
+        .defaultValue(4)
+        .min(0)
+        .onChanged(value -> distance = value)
+        .build()
     );
 
     // Scrolling
@@ -46,12 +46,12 @@ public class CameraTweaks extends Module {
     );
 
     private final Setting<Double> scrollSensitivity = sgScrolling.add(new DoubleSetting.Builder()
-            .name("scroll-sensitivity")
-            .description("Scroll sensitivity when changing the cameras distance. 0 to disable.")
-            .visible(scrollingEnabled::get)
-            .defaultValue(1)
-            .min(0)
-            .build()
+        .name("scroll-sensitivity")
+        .description("Scroll sensitivity when changing the cameras distance. 0 to disable.")
+        .visible(scrollingEnabled::get)
+        .defaultValue(1)
+        .min(0)
+        .build()
     );
 
     private final Setting<Keybind> scrollKeybind = sgScrolling.add(new KeybindSetting.Builder()

@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.utils.world;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -37,8 +36,6 @@ import net.minecraft.world.World;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockUtils {
-    private static final Vec3d hitPos = new Vec3d(0, 0, 0);
-
     public static boolean breaking;
     private static boolean breakingThisTick;
 
@@ -82,7 +79,7 @@ public class BlockUtils {
         if (slot < 0 || slot > 8) return false;
         if (!canPlace(blockPos, checkEntities)) return false;
 
-        ((IVec3d) hitPos).set(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5);
+        Vec3d hitPos = Vec3d.ofCenter(blockPos);
 
         BlockPos neighbour;
         Direction side = getPlaceSide(blockPos);
@@ -91,24 +88,24 @@ public class BlockUtils {
             side = Direction.UP;
             neighbour = blockPos;
         } else {
-            neighbour = blockPos.offset(side.getOpposite());
-            hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
+            neighbour = blockPos.offset(side);
+            hitPos = hitPos.add(side.getOffsetX() * 0.5, side.getOffsetY() * 0.5, side.getOffsetZ() * 0.5);
         }
 
-        Direction s = side;
+        BlockHitResult bhr = new BlockHitResult(hitPos, side.getOpposite(), neighbour, false);
 
         if (rotate) {
             Rotations.rotate(Rotations.getYaw(hitPos), Rotations.getPitch(hitPos), rotationPriority, () -> {
                 InvUtils.swap(slot, swapBack);
 
-                place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
+                interact(bhr, hand, swingHand);
 
                 if (swapBack) InvUtils.swapBack();
             });
         } else {
             InvUtils.swap(slot, swapBack);
 
-            place(new BlockHitResult(hitPos, s, neighbour, false), hand, swingHand);
+            interact(bhr, hand, swingHand);
 
             if (swapBack) InvUtils.swapBack();
         }
@@ -117,7 +114,7 @@ public class BlockUtils {
         return true;
     }
 
-    private static void place(BlockHitResult blockHitResult, Hand hand, boolean swing) {
+    public static void interact(BlockHitResult blockHitResult, Hand hand, boolean swing) {
         boolean wasSneaking = mc.player.input.sneaking;
         mc.player.input.sneaking = false;
 
@@ -138,7 +135,7 @@ public class BlockUtils {
         if (!World.isValid(blockPos)) return false;
 
         // Check if current block is replaceable
-        if (!mc.world.getBlockState(blockPos).getMaterial().isReplaceable()) return false;
+        if (!mc.world.getBlockState(blockPos).isReplaceable()) return false;
 
         // Check if intersects entities
         return !checkEntities || mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent());
@@ -151,8 +148,6 @@ public class BlockUtils {
     public static Direction getPlaceSide(BlockPos blockPos) {
         for (Direction side : Direction.values()) {
             BlockPos neighbor = blockPos.offset(side);
-            Direction side2 = side.getOpposite();
-
             BlockState state = mc.world.getBlockState(neighbor);
 
             // Check if neighbour isn't empty
@@ -161,7 +156,7 @@ public class BlockUtils {
             // Check if neighbour is a fluid
             if (!state.getFluidState().isEmpty()) continue;
 
-            return side2;
+            return side;
         }
 
         return null;
@@ -256,7 +251,7 @@ public class BlockUtils {
         if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
             if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube())
                 return MobSpawn.Never;
-            if (mc.world.getBlockState(blockPos.down()).isTranslucent(mc.world, blockPos.down())) return MobSpawn.Never;
+            if (mc.world.getBlockState(blockPos.down()).isTransparent(mc.world, blockPos.down())) return MobSpawn.Never;
         }
 
         if (mc.world.getLightLevel(blockPos, 0) <= spawnLightLimit) return MobSpawn.Potential;

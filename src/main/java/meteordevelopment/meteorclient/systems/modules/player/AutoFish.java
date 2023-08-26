@@ -12,10 +12,11 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.sound.SoundInstance;
 import net.minecraft.entity.projectile.FishingBobberEntity;
-import net.minecraft.item.FishingRodItem;
+import net.minecraft.item.Items;
 
 public class AutoFish extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -24,54 +25,61 @@ public class AutoFish extends Module {
     // General
 
     private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-cast")
-            .description("Automatically casts when not fishing.")
-            .defaultValue(true)
-            .build()
+        .name("auto-cast")
+        .description("Automatically casts when not fishing.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
-            .name("ticks-auto-cast")
-            .description("The amount of ticks to wait before recasting automatically.")
-            .defaultValue(10)
-            .min(0)
-            .sliderMax(60)
-            .build()
+        .name("ticks-auto-cast")
+        .description("The amount of ticks to wait before recasting automatically.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(60)
+        .build()
     );
 
     private final Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
-            .name("catch-delay")
-            .description("The amount of ticks to wait before catching the fish.")
-            .defaultValue(6)
-            .min(0)
-            .sliderMax(60)
-            .build()
+        .name("catch-delay")
+        .description("The amount of ticks to wait before catching the fish.")
+        .defaultValue(6)
+        .min(0)
+        .sliderMax(60)
+        .build()
     );
 
     private final Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
-            .name("throw-delay")
-            .description("The amount of ticks to wait before throwing the bobber.")
-            .defaultValue(14)
-            .min(0)
-            .sliderMax(60)
-            .build()
+        .name("throw-delay")
+        .description("The amount of ticks to wait before throwing the bobber.")
+        .defaultValue(14)
+        .min(0)
+        .sliderMax(60)
+        .build()
+    );
+
+    private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
+        .name("anti-break")
+        .description("Prevents fishing rod from being broken.")
+        .defaultValue(false)
+        .build()
     );
 
     // Splash Detection
 
     private final Setting<Boolean> splashDetectionRangeEnabled = sgSplashRangeDetection.add(new BoolSetting.Builder()
-            .name("splash-detection-range-enabled")
-            .description("Allows you to use multiple accounts next to each other.")
-            .defaultValue(false)
-            .build()
+        .name("splash-detection-range-enabled")
+        .description("Allows you to use multiple accounts next to each other.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
-            .name("splash-detection-range")
-            .description("The detection range of a splash. Lower values will not work when the TPS is low.")
-            .defaultValue(10)
-            .min(0)
-            .build()
+        .name("splash-detection-range")
+        .description("The detection range of a splash. Lower values will not work when the TPS is low.")
+        .defaultValue(10)
+        .min(0)
+        .build()
     );
 
     private boolean ticksEnabled;
@@ -114,7 +122,7 @@ public class AutoFish extends Module {
         if (autoCastCheckTimer <= 0) {
             autoCastCheckTimer = 30;
 
-            if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && mc.player.getMainHandStack().getItem() instanceof FishingRodItem) {
+            if (autoCast.get() && !ticksEnabled && !autoCastEnabled && mc.player.fishHook == null && hasFishingRod()) {
                 autoCastTimer = 0;
                 autoCastEnabled = true;
             }
@@ -151,5 +159,9 @@ public class AutoFish extends Module {
     @EventHandler
     private void onKey(KeyEvent event) {
         if (mc.options.useKey.isPressed()) ticksEnabled = false;
+    }
+
+    private boolean hasFishingRod() {
+        return InvUtils.swap(InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FISHING_ROD && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1)).slot(), false);
     }
 }

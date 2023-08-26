@@ -5,11 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.modules.world;
 
-import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
@@ -24,6 +24,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+
+import java.util.Set;
 
 public class Flamethrower extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -64,27 +66,28 @@ public class Flamethrower extends Module {
     );
 
     private final Setting<Boolean> rotate = sgGeneral.add(new BoolSetting.Builder()
-            .name("rotate")
-            .description("Automatically faces towards the animal roasted.")
-            .defaultValue(true)
-            .build()
+        .name("rotate")
+        .description("Automatically faces towards the animal roasted.")
+        .defaultValue(true)
+        .build()
     );
 
-    private final Setting<Object2BooleanMap<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
-            .name("entities")
-            .description("Entities to cook.")
-            .defaultValue(
-                EntityType.PIG,
-                EntityType.COW,
-                EntityType.SHEEP,
-                EntityType.CHICKEN,
-                EntityType.RABBIT
-            )
-            .build()
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("entities")
+        .description("Entities to cook.")
+        .defaultValue(
+            EntityType.PIG,
+            EntityType.COW,
+            EntityType.SHEEP,
+            EntityType.CHICKEN,
+            EntityType.RABBIT
+        )
+        .build()
     );
 
     private Entity entity;
     private int ticks = 0;
+    private Hand hand;
 
     public Flamethrower() {
         super(Categories.World, "flamethrower", "Ignites every alive piece of food.");
@@ -100,21 +103,21 @@ public class Flamethrower extends Module {
         entity = null;
         ticks++;
         for (Entity entity : mc.world.getEntities()) {
-            if (!entities.get().getBoolean(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
+            if (!entities.get().contains(entity.getType()) || !PlayerUtils.isWithin(entity, distance.get())) continue;
             if (entity.isFireImmune()) continue;
             if (entity == mc.player) continue;
             if (!targetBabies.get() && entity instanceof LivingEntity && ((LivingEntity)entity).isBaby()) continue;
 
-            boolean success = selectSlot();
+            FindItemResult findFlintAndSteel = InvUtils.findInHotbar(itemStack -> itemStack.getItem() == Items.FLINT_AND_STEEL && (!antiBreak.get() || itemStack.getDamage() < itemStack.getMaxDamage() - 1));
+            if (!InvUtils.swap(findFlintAndSteel.slot(), true)) return;
 
-            if (success) {
-                this.entity = entity;
+            this.hand = findFlintAndSteel.getHand();
+            this.entity = entity;
 
-                if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
-                else interact();
+            if (rotate.get()) Rotations.rotate(Rotations.getYaw(entity.getBlockPos()), Rotations.getPitch(entity.getBlockPos()), -100, this::interact);
+            else interact();
 
-                return;
-            }
+            return;
         }
     }
 
@@ -132,31 +135,12 @@ public class Flamethrower extends Module {
             mc.interactionManager.attackBlock(entity.getBlockPos().south(), Direction.DOWN);
         } else {
             if (ticks >= tickInterval.get() && !entity.isOnFire()) {
-                mc.interactionManager.interactBlock(mc.player, Hand.MAIN_HAND, new BlockHitResult(
+                mc.interactionManager.interactBlock(mc.player, hand, new BlockHitResult(
                     entity.getPos().subtract(new Vec3d(0, 1, 0)), Direction.UP, entity.getBlockPos().down(), false));
                 ticks = 0;
             }
         }
 
         InvUtils.swapBack();
-    }
-
-    private boolean selectSlot() {
-        boolean findNewFlintAndSteel = false;
-        if (mc.player.getInventory().getMainHandStack().getItem() == Items.FLINT_AND_STEEL) {
-            if (antiBreak.get() && mc.player.getInventory().getMainHandStack().getDamage() >= mc.player.getInventory().getMainHandStack().getMaxDamage() - 1)
-                findNewFlintAndSteel = true;
-        } else if (mc.player.getInventory().offHand.get(0).getItem() == Items.FLINT_AND_STEEL) {
-            if (antiBreak.get() && mc.player.getInventory().offHand.get(0).getDamage() >= mc.player.getInventory().offHand.get(0).getMaxDamage() - 1)
-                findNewFlintAndSteel = true;
-        } else {
-            findNewFlintAndSteel = true;
-        }
-
-        boolean foundFlintAndSteel = !findNewFlintAndSteel;
-        if (findNewFlintAndSteel) {
-            foundFlintAndSteel = InvUtils.swap(InvUtils.findInHotbar(itemStack -> (!antiBreak.get() || (antiBreak.get() && itemStack.getDamage() < itemStack.getMaxDamage() - 1)) && itemStack.getItem() == Items.FLINT_AND_STEEL).slot(), true);
-        }
-        return foundFlintAndSteel;
     }
 }

@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.gui.widgets.input;
 
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
-import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.util.math.MathHelper;
 
 public abstract class WSlider extends WWidget {
     public Runnable action;
@@ -24,7 +24,7 @@ public abstract class WSlider extends WWidget {
     protected double valueAtDragStart;
 
     public WSlider(double value, double min, double max) {
-        this.value = Utils.clamp(value, min, max);
+        this.value = MathHelper.clamp(value, min, max);
         this.min = min;
         this.max = max;
     }
@@ -87,7 +87,7 @@ public abstract class WSlider extends WWidget {
         if (dragging) {
             if (mouseOverX) {
                 valueWidth += mouseX - lastMouseX;
-                valueWidth = Utils.clamp(valueWidth, 0, width - s);
+                valueWidth = MathHelper.clamp(valueWidth, 0, width - s);
 
                 set((valueWidth / (width - s)) * (max - min) + min);
                 if (action != null) action.run();
@@ -145,7 +145,7 @@ public abstract class WSlider extends WWidget {
 	}
 
     public void set(double value) {
-        this.value = Utils.clamp(value, min, max);
+        this.value = MathHelper.clamp(value, min, max);
     }
 
     public double get() {

@@ -138,7 +138,7 @@ public class AutoSmelter extends Module {
         ItemStack resultStack = c.slots.get(2).getStack();
         if (resultStack.isEmpty()) return;
 
-        InvUtils.quickMove().slotId(2);
+        InvUtils.shiftClick().slotId(2);
 
         if (!resultStack.isEmpty()) {
             error("Your inventory is full. Disabling.");

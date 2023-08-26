@@ -56,8 +56,7 @@ public class InvUtils {
     }
 
     public static boolean testInHotbar(Predicate<ItemStack> predicate) {
-        if (testInMainHand(predicate)) return true;
-        if (testInOffHand(predicate)) return true;
+        if (testInHands(predicate)) return true;
 
         for (int i = SlotUtils.HOTBAR_START; i < SlotUtils.HOTBAR_END; i++) {
             ItemStack stack = mc.player.getInventory().getStack(i);
@@ -90,11 +89,11 @@ public class InvUtils {
     }
 
     public static FindItemResult findInHotbar(Predicate<ItemStack> isGood) {
-        if (isGood.test(mc.player.getOffHandStack())) {
+        if (testInOffHand(isGood)) {
             return new FindItemResult(SlotUtils.OFFHAND, mc.player.getOffHandStack().getCount());
         }
 
-        if (isGood.test(mc.player.getMainHandStack())) {
+        if (testInMainHand(isGood)) {
             return new FindItemResult(mc.player.getInventory().selectedSlot, mc.player.getMainHandStack().getCount());
         }
 
@@ -137,7 +136,10 @@ public class InvUtils {
         int slot = -1;
 
         for (int i = 0; i < 9; i++) {
-            float score = mc.player.getInventory().getStack(i).getMiningSpeedMultiplier(state);
+            ItemStack stack = mc.player.getInventory().getStack(i);
+            if (!stack.isSuitableFor(state)) continue;
+
+            float score = stack.getMiningSpeedMultiplier(state);
             if (score > bestScore) {
                 bestScore = score;
                 slot = i;
@@ -150,6 +152,7 @@ public class InvUtils {
     // Interactions
 
     public static boolean swap(int slot, boolean swapBack) {
+        if (slot == SlotUtils.OFFHAND) return true;
         if (slot < 0 || slot > 8) return false;
         if (swapBack && previousSlot == -1) previousSlot = mc.player.getInventory().selectedSlot;
         else if (!swapBack) previousSlot = -1;
@@ -178,7 +181,17 @@ public class InvUtils {
         return ACTION;
     }
 
-    public static Action quickMove() {
+    /**
+     * When writing code with quickSwap, both to and from should provide the ID of a slot, not the index.
+     * From should be the slot in the hotbar, to should be the slot you're switching an item from.
+     */
+
+    public static Action quickSwap() {
+        ACTION.type = SlotActionType.SWAP;
+        return ACTION;
+    }
+
+    public static Action shiftClick() {
         ACTION.type = SlotActionType.QUICK_MOVE;
         return ACTION;
     }
@@ -289,6 +302,11 @@ public class InvUtils {
 
         private void run() {
             boolean hadEmptyCursor = mc.player.currentScreenHandler.getCursorStack().isEmpty();
+
+            if (type == SlotActionType.SWAP) {
+                data = from;
+                from = to;
+            }
 
             if (type != null && from != -1 && to != -1) {
                click(from);

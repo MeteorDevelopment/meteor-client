@@ -99,17 +99,17 @@ public abstract class Module implements ISerializable<Module>, Comparable<Module
 
     public void info(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.info(title, message, args);
+        ChatUtils.infoPrefix(title, message, args);
     }
 
     public void warning(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.warning(title, message, args);
+        ChatUtils.warningPrefix(title, message, args);
     }
 
     public void error(String message, Object... args) {
         ChatUtils.forceNextPrefixClass(getClass());
-        ChatUtils.error(title, message, args);
+        ChatUtils.errorPrefix(title, message, args);
     }
 
     public boolean isActive() {

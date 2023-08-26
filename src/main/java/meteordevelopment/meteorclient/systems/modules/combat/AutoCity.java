@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
@@ -151,7 +150,7 @@ public class AutoCity extends Module {
 
         targetPos = EntityUtils.getCityBlock(target);
         if (targetPos == null || PlayerUtils.distanceTo(targetPos) > breakRange.get()) {
-            if (chatInfo.get()) error("Couldn't find a target, disabling.");
+            if (chatInfo.get()) error("Couldn't find a good block, disabling.");
             toggle();
             return;
         }

@@ -7,8 +7,6 @@ accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC
 accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractTypeHandler
 accessible   class   net/minecraft/client/world/ClientChunkManager$ClientChunkMap
 
-accessible   method  net/minecraft/text/TextColor <init> (I)V
-
 accessible   field   net/minecraft/client/network/AbstractClientPlayerEntity playerListEntry Lnet/minecraft/client/network/PlayerListEntry;
 
 accessible   field   net/minecraft/client/model/ModelPart cuboids Ljava/util/List;
@@ -72,4 +70,7 @@ accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadSt
 accessible   field   net/minecraft/block/AbstractBlock collidable Z
 accessible field net/minecraft/util/math/Direction HORIZONTAL [Lnet/minecraft/util/math/Direction;
 
-accessible   field   net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/item/ItemGroup;
+accessible field net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/registry/RegistryKey;
+
+accessible field net/minecraft/client/render/item/ItemRenderer TRIDENT Lnet/minecraft/client/util/ModelIdentifier;
+accessible field net/minecraft/client/render/item/ItemRenderer SPYGLASS Lnet/minecraft/client/util/ModelIdentifier;

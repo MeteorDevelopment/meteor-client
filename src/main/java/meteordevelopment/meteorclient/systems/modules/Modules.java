@@ -28,8 +28,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
+import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -381,9 +381,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initCombat() {
-        add(new AimAssist());
         add(new AnchorAura());
-//        add(new AntiAnchor());
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
@@ -446,7 +444,6 @@ public class Modules extends System<Modules> {
         add(new AirJump());
         add(new Anchor());
         add(new AntiAFK());
-        add(new AntiLevitation());
         add(new AntiVoid());
         add(new AutoJump());
         add(new AutoWalk());
@@ -522,7 +519,7 @@ public class Modules extends System<Modules> {
     private void initWorld() {
         add(new AirPlace());
         add(new Ambience());
-        add(new AntiCactus());
+        add(new Collisions());
         add(new AutoBreed());
         add(new AutoBrewer());
         add(new AutoMount());
@@ -533,6 +530,7 @@ public class Modules extends System<Modules> {
         add(new BuildHeight());
         add(new EChestFarmer());
         add(new EndermanLook());
+        add(new Excavator());
         add(new Flamethrower());
         add(new InfinityMiner());
         add(new LiquidFiller());
