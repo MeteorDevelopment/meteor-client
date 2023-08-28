@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.UnorderedArrayList;
+import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.RainbowColors;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
@@ -26,13 +27,9 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class BlockESP extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-
-    private final ExecutorService executor = Executors.newSingleThreadExecutor((task) -> new Thread(task,"Meteor-BlockESP"));
 
     // General
 
@@ -157,7 +154,7 @@ public class BlockESP extends Module {
     }
 
     private void searchChunk(Chunk chunk, ChunkDataEvent event) {
-        executor.execute(() -> {
+        MeteorExecutor.execute(() -> {
             if (!isActive()) return;
             ESPChunk schunk = ESPChunk.searchChunk(chunk, blocks.get());
 
@@ -193,7 +190,7 @@ public class BlockESP extends Module {
         boolean removed = !added && !blocks.get().contains(event.newState.getBlock()) && blocks.get().contains(event.oldState.getBlock());
 
         if (added || removed) {
-            executor.execute(() -> {
+            MeteorExecutor.execute(() -> {
                 synchronized (chunks) {
                     ESPChunk chunk = chunks.get(key);
 
@@ -231,7 +228,7 @@ public class BlockESP extends Module {
                 ESPChunk chunk = it.next();
 
                 if (chunk.shouldBeDeleted()) {
-                    executor.execute(() -> {
+                    MeteorExecutor.execute(() -> {
                         for (ESPBlock block : chunk.blocks.values()) {
                             block.group.remove(block, false);
                             block.loaded = false;
