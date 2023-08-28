@@ -23,11 +23,7 @@ import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractSkullBlock;
-import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Equipment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
@@ -263,18 +259,14 @@ public class InventoryTweaks extends Module {
     private void onKey(KeyEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(true, event.key)) {
-            if (sort()) event.cancel();
-        }
+        if (sortingKey.get().matches(true, event.key) && sort()) event.cancel();
     }
 
     @EventHandler
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action != KeyAction.Press) return;
 
-        if (sortingKey.get().matches(false, event.button)) {
-            if (sort()) event.cancel();
-        }
+        if (sortingKey.get().matches(false, event.button) && sort()) event.cancel();
     }
 
     private boolean sort() {
@@ -283,8 +275,7 @@ public class InventoryTweaks extends Module {
 
         if (!mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
             FindItemResult empty = InvUtils.findEmpty();
-            if (!empty.found()) InvUtils.click().slot(-999);
-            else InvUtils.click().slot(empty.slot());
+            InvUtils.click().slot(empty.found() ? empty.slot() : -999);
         }
 
         Slot focusedSlot = ((HandledScreenAccessor) screen).getFocusedSlot();
@@ -292,14 +283,6 @@ public class InventoryTweaks extends Module {
 
         sorter = new InventorySorter(screen, focusedSlot);
         return true;
-    }
-
-    private boolean isWearable(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-
-        if (item instanceof Equipment) return true;
-        return item instanceof BlockItem blockItem &&
-            (blockItem.getBlock() instanceof AbstractSkullBlock || blockItem.getBlock() instanceof CarvedPumpkinBlock);
     }
 
     @EventHandler
@@ -382,15 +365,11 @@ public class InventoryTweaks extends Module {
 
             Item item = handler.getSlot(i).getStack().getItem();
             if (steal) {
-                if (stealFilter.get() == ListMode.Whitelist && !stealItems.get().contains(item))
-                    continue;
-                if (stealFilter.get() == ListMode.Blacklist && stealItems.get().contains(item))
-                    continue;
+                if (stealFilter.get() == ListMode.Whitelist && !stealItems.get().contains(item)) continue;
+                if (stealFilter.get() == ListMode.Blacklist && stealItems.get().contains(item)) continue;
             } else {
-                if (dumpFilter.get() == ListMode.Whitelist && !dumpItems.get().contains(item))
-                    continue;
-                if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
-                    continue;
+                if (dumpFilter.get() == ListMode.Whitelist && !dumpItems.get().contains(item)) continue;
+                if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item)) continue;
             }
 
             if (steal && stealDrop.get()) {
