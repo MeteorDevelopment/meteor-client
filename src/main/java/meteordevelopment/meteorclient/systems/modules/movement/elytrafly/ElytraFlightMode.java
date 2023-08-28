@@ -63,6 +63,9 @@ public class ElytraFlightMode {
     public void onPacketSend(PacketEvent.Send event) {
     }
 
+    public void onPacketReceive(PacketEvent.Receive event) {
+    }
+
     public void onPlayerMove() {
     }
 
@@ -103,7 +106,7 @@ public class ElytraFlightMode {
     public void handleAutopilot() {
         if (!mc.player.isFallFlying()) return;
 
-        if (elytraFly.autoPilot.get() && mc.player.getY() > elytraFly.autoPilotMinimumHeight.get()) {
+        if (elytraFly.autoPilot.get() && mc.player.getY() > elytraFly.autoPilotMinimumHeight.get() && elytraFly.flightMode.get() != ElytraFlightModes.Recast) {
             mc.options.forwardKey.setPressed(true);
             lastForwardPressed = true;
         }

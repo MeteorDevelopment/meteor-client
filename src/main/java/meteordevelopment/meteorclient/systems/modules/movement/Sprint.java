@@ -6,7 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -16,12 +16,20 @@ import meteordevelopment.orbit.EventHandler;
 public class Sprint extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Boolean> whenStationary = sgGeneral.add(new BoolSetting.Builder()
-        .name("when-stationary")
-        .description("Continues sprinting even if you do not move.")
-        .defaultValue(false)
+    public enum Mode {
+        Strict,
+        Rage
+    }
+
+    private final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
+        .name("speed-mode")
+        .description("What mode of sprinting.")
+        .defaultValue(Mode.Strict)
         .build()
     );
+
+    // Removed whenStationary as it was just Rage sprint
+
 
     public Sprint() {
         super(Categories.Movement, "sprint", "Automatically sprints.");
@@ -32,12 +40,20 @@ public class Sprint extends Module {
         mc.player.setSprinting(false);
     }
 
+    private void sprint() {
+        if (mc.player.getHungerManager().getFoodLevel() <= 6) return;
+        mc.player.setSprinting(true);
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        if (mc.player.forwardSpeed > 0 && !whenStationary.get()) {
-            mc.player.setSprinting(true);
-        } else if (whenStationary.get()) {
-            mc.player.setSprinting(true);
+        switch (mode.get()) {
+            case Strict -> {
+                if (mc.player.forwardSpeed > 0) {
+                    sprint();
+                }
+            }
+            case Rage -> sprint();
+            }
         }
-    }
 }
