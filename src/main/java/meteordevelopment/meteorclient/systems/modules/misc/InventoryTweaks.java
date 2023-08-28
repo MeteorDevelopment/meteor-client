@@ -470,7 +470,7 @@ public class InventoryTweaks extends Module {
                     } else {
                         InvUtils.drop().slotId(i);
                     }
-                } else InvUtils.quickMove().slotId(i);
+                } else InvUtils.shiftClick().slotId(i);
             }
         }
     }
@@ -499,7 +499,7 @@ public class InventoryTweaks extends Module {
                 Item item = handler.getSlot(i).getStack().getItem();
                 if (!itemsFilter.get().test(items.get(), item)) continue;
 
-                InvUtils.quickMove().slotId(i);
+                InvUtils.shiftClick().slotId(i);
             }
         }
     }
