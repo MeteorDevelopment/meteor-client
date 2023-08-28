@@ -202,7 +202,7 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    public final Setting<Double> pitch = sgGeneral.add(new DoubleSetting.Builder()
+    public final Setting<Integer> pitch = sgGeneral.add(new IntSetting.Builder()
         .name("pitch")
         .description("The pitch angle to look at when using the recast mode.")
         .defaultValue(85)
@@ -224,7 +224,7 @@ public class ElytraFly extends Module {
         .name("restart-delay")
         .description("How many ticks to wait before restarting the elytra again after rubberbanding.")
         .defaultValue(7)
-        .range(0, 20)
+        .min(0)
         .sliderRange(0, 20)
         .visible(() -> flightMode.get() == ElytraFlightModes.Recast && restart.get())
         .build()
@@ -321,7 +321,7 @@ public class ElytraFly extends Module {
     public void onActivate() {
         currentMode.onActivate();
         if ((chestSwap.get() == ChestSwapMode.Always || chestSwap.get() == ChestSwapMode.WaitForGround)
-                && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
+            && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
             Modules.get().get(ChestSwap.class).swap();
         }
     }

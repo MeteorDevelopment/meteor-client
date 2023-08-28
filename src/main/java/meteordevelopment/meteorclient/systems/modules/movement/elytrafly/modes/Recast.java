@@ -12,7 +12,6 @@ package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
-import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
@@ -33,6 +32,7 @@ public class Recast extends ElytraFlightMode {
     public static boolean rubberbanded = false;
 
     int tickDelay = elytraFly.restartDelay.get();
+    double prevFov = mc.options.getFovEffectScale().getValue();
 
     @Override
     public void onTick() {
@@ -40,20 +40,25 @@ public class Recast extends ElytraFlightMode {
 
         // Make sure all the conditions are met (player has an elytra, isn't in water, etc)
         if (checkConditions(mc.player)) {
+            if (!rubberbanded) {
+                if (prevFov != 0) mc.options.getFovEffectScale().setValue(0.0);
+                if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
+                setPressed(mc.options.forwardKey, true);
+                mc.player.setYaw(getSmartYawDirection());
+                mc.player.setPitch(elytraFly.pitch.get());
+            }
 
-            mc.player.setSprinting(true);
-            setPressed(mc.options.forwardKey, true);
-            if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
-            mc.player.setYaw(getSmartYawDirection());
-            mc.player.setPitch(elytraFly.pitch.get().floatValue());
+            // Sprinting all the time (when not onn ground) makes it rubberband.
+            if (mc.player.isFallFlying()) mc.player.setSprinting(mc.player.isOnGround());
+            else mc.player.setSprinting(true);
 
             // Rubberbanding
             if (rubberbanded && elytraFly.restart.get()) {
                 if (tickDelay > 0) {
                     tickDelay--;
                 } else {
-                    rubberbanded = false;
                     mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+                    rubberbanded = false;
                     tickDelay = elytraFly.restartDelay.get();
                 }
             }
@@ -108,5 +113,6 @@ public class Recast extends ElytraFlightMode {
     @Override
     public void onDeactivate() {
         unpress();
+        if (prevFov != 0) mc.options.getFovEffectScale().setValue(prevFov);
     }
 }
