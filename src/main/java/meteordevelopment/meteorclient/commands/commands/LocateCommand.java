@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.utils.misc.BaritoneUtils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -271,7 +272,7 @@ public class LocateCommand extends Command {
     }
 
     private void findStronghold() {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
+        BaritoneUtils.stop();
         if (this.firstStart == null || this.firstEnd == null || this.secondStart == null || this.secondEnd == null) {
             error("Missing position data");
             cancel();
