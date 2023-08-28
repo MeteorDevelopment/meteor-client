@@ -32,7 +32,7 @@ public class Recast extends ElytraFlightMode {
     public static boolean rubberbanded = false;
 
     int tickDelay = elytraFly.restartDelay.get();
-    double prevFov = mc.options.getFovEffectScale().getValue();
+    double prevFov;
 
     @Override
     public void onTick() {
@@ -108,6 +108,11 @@ public class Recast extends ElytraFlightMode {
 
     private float getSmartYawDirection() {
         return Math.round((mc.player.getYaw() + 1f) / 45f) * 45f;
+    }
+
+    @Override
+    public void onActivate() {
+        prevFov = mc.options.getFovEffectScale().getValue();
     }
 
     @Override
