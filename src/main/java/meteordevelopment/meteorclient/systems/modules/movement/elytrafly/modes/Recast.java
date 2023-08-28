@@ -45,7 +45,7 @@ public class Recast extends ElytraFlightMode {
                 if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
                 setPressed(mc.options.forwardKey, true);
                 mc.player.setYaw(getSmartYawDirection());
-                mc.player.setPitch(elytraFly.pitch.get());
+                mc.player.setPitch(elytraFly.pitch.get().floatValue());
             }
 
             // Sprinting all the time (when not onn ground) makes it rubberband.

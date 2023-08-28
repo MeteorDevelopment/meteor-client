@@ -202,7 +202,7 @@ public class ElytraFly extends Module {
         .build()
     );
 
-    public final Setting<Integer> pitch = sgGeneral.add(new IntSetting.Builder()
+    public final Setting<Double> pitch = sgGeneral.add(new DoubleSetting.Builder()
         .name("pitch")
         .description("The pitch angle to look at when using the recast mode.")
         .defaultValue(85)
