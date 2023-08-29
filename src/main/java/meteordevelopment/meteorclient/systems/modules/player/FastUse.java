@@ -5,12 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import meteordevelopment.meteorclient.events.world.TickEvent;
-import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -60,15 +57,11 @@ public class FastUse extends Module {
         super(Categories.Player, "fast-use", "Allows you to use items at very high speeds.");
     }
 
-    @EventHandler
-    private void onTick(TickEvent.Post event) {
-        int cooldownTicks = Math.min(((MinecraftClientAccessor) mc).getItemUseCooldown(), cooldown.get());
-        if (mode.get() == Mode.All || shouldWorkSome()) ((MinecraftClientAccessor) mc).setItemUseCooldown(cooldownTicks);
-    }
-
-    private boolean shouldWorkSome() {
-        if (shouldWorkSome(mc.player.getMainHandStack())) return true;
-        return shouldWorkSome(mc.player.getOffHandStack());
+    public int getItemUseCooldown(ItemStack itemStack) {
+        if (mode.get() == Mode.All || shouldWorkSome(itemStack)) {
+            return cooldown.get();
+        }
+        return 4; //default cooldown
     }
 
     private boolean shouldWorkSome(ItemStack itemStack) {
