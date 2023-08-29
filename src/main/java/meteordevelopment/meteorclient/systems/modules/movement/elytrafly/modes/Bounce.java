@@ -23,10 +23,10 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
-public class Recast extends ElytraFlightMode {
+public class Bounce extends ElytraFlightMode {
 
-    public Recast() {
-        super(ElytraFlightModes.Recast);
+    public Bounce() {
+        super(ElytraFlightModes.Bounce);
     }
 
     public static boolean rubberbanded = false;
@@ -49,7 +49,10 @@ public class Recast extends ElytraFlightMode {
             }
 
             // Sprinting all the time (when not onn ground) makes it rubberband.
-            if (mc.player.isFallFlying()) mc.player.setSprinting(mc.player.isOnGround());
+            if (mc.player.isFallFlying()) {
+                if (elytraFly.sprint.get()) mc.player.setSprinting(true);
+                else mc.player.setSprinting(mc.player.isOnGround());
+            }
             else mc.player.setSprinting(true);
 
             // Rubberbanding
