@@ -124,7 +124,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Inject(method = "doItemUse", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;isItemEnabled(Lnet/minecraft/resource/featuretoggle/FeatureSet;)Z"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void onDoItemUseHand(CallbackInfo ci, Hand[] var1, int var2, int var3, Hand hand, ItemStack itemStack) {
         FastUse fastUse = Modules.get().get(FastUse.class);
-        if(fastUse.isActive()) {
+        if (fastUse.isActive()) {
             itemUseCooldown = fastUse.getItemUseCooldown(itemStack);
         }
     }
