@@ -33,15 +33,14 @@ public class NoGhostBlocks extends Module {
     }
     @EventHandler
     public void onInteractBlock(InteractBlockEvent event) {
-        if(mc.isInSingleplayer()) return;
-        if(event.result.getType() == HitResult.Type.MISS) return;
-        ItemStack itemStack;
-        if(event.hand == Hand.OFF_HAND)
-            itemStack = mc.player.getOffHandStack();
-        else
-            itemStack = mc.player.getMainHandStack();
+        if (mc.isInSingleplayer()) return;
+        if (event.result.getType() == HitResult.Type.MISS) return;
+        
+        ItemStack itemStack = event.hand == Hand.OFF_HAND
+            ? mc.player.getOffHandStack()
+            : mc.player.getMainHandStack();
 
-        if(itemStack.getItem() instanceof BlockItem) {
+        if (itemStack.getItem() instanceof BlockItem) {
             mc.player.swingHand(event.hand);
             //Send place packet
             mc.getNetworkHandler().sendPacket(new PlayerInteractBlockC2SPacket(event.hand, event.result, 42069));
