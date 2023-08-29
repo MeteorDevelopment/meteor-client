@@ -31,6 +31,7 @@ public class NoGhostBlocks extends Module {
         BlockState blockState = mc.world.getBlockState(event.blockPos);
         blockState.getBlock().onBreak(mc.world, event.blockPos, blockState, mc.player);
     }
+
     @EventHandler
     public void onInteractBlock(InteractBlockEvent event) {
         if (mc.isInSingleplayer()) return;
@@ -47,9 +48,5 @@ public class NoGhostBlocks extends Module {
 
             event.cancel();
         }
-
-
-
-
     }
 }
