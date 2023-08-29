@@ -21,7 +21,6 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static meteordevelopment.meteorclient.utils.Utils.getRenderDistance;
 
 public class ESPChunk {
-    private static final BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
     private final int x, z;
     public Long2ObjectMap<ESPBlock> blocks;
@@ -90,6 +89,8 @@ public class ESPChunk {
     public static ESPChunk searchChunk(Chunk chunk, List<Block> blocks) {
         ESPChunk schunk = new ESPChunk(chunk.getPos().x, chunk.getPos().z);
         if (schunk.shouldBeDeleted()) return schunk;
+
+        BlockPos.Mutable blockPos = new BlockPos.Mutable();
 
         for (int x = chunk.getPos().getStartX(); x <= chunk.getPos().getEndX(); x++) {
             for (int z = chunk.getPos().getStartZ(); z <= chunk.getPos().getEndZ(); z++) {
