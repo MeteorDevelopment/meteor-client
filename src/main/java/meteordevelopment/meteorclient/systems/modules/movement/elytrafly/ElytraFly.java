@@ -202,6 +202,16 @@ public class ElytraFly extends Module {
         .build()
     );
 
+    public final Setting<Double> autoJumpSpeedLimit = sgGeneral.add(new DoubleSetting.Builder()
+        .name("auto-jump-speed-limit")
+        .description("Only automatically jumps when below a certain speed.")
+        .defaultValue(27)
+        .min(0)
+        .sliderMax(50)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Recast && autoJump.get())
+        .build()
+    );
+
     public final Setting<Double> pitch = sgGeneral.add(new DoubleSetting.Builder()
         .name("pitch")
         .description("The pitch angle to look at when using the recast mode.")

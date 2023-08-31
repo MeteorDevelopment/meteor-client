@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
@@ -43,7 +44,15 @@ public class Recast extends ElytraFlightMode {
 
             mc.player.setSprinting(true);
             setPressed(mc.options.forwardKey, true);
-            if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
+            if (elytraFly.autoJump.get()) {
+                // If we're constantly jumping, we're also constantly accelerating
+                // and too high of a speed is a problem
+                if (Utils.getPlayerSpeed().horizontalLength() < elytraFly.autoJumpSpeedLimit.get()) {
+                    setPressed(mc.options.jumpKey, true);
+                } else {
+                    setPressed(mc.options.jumpKey, false);
+                }
+            }
             mc.player.setYaw(getSmartYawDirection());
             mc.player.setPitch(elytraFly.pitch.get().floatValue());
 
