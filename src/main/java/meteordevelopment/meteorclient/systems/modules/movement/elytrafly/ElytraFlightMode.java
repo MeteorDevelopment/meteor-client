@@ -60,6 +60,9 @@ public class ElytraFlightMode {
         }
     }
 
+    public void onPreTick() {
+    }
+
     public void onPacketSend(PacketEvent.Send event) {
     }
 

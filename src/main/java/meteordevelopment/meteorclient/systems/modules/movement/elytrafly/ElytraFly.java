@@ -440,6 +440,11 @@ public class ElytraFly extends Module {
     }
 
     @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        currentMode.onPreTick();
+    }
+
+    @EventHandler
     private void onPacketSend(PacketEvent.Send event) {
         currentMode.onPacketSend(event);
     }
