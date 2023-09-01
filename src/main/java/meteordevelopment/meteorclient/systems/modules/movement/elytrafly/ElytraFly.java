@@ -54,7 +54,7 @@ public class ElytraFly extends Module {
         .name("auto-take-off")
         .description("Automatically takes off when you hold jump without needing to double jump.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
