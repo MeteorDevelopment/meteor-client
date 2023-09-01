@@ -226,7 +226,7 @@ public class ElytraFly extends Module {
 
     public final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
         .name("sprint")
-        .description("Sprints all the time while bouncing on the ground.")
+        .description("Sprints all the time. If turned off, it will only sprint when the player is touching the ground.")
         .defaultValue(true)
         .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
         .build()
