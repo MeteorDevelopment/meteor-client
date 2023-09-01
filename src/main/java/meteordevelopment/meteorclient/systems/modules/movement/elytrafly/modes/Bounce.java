@@ -52,20 +52,19 @@ public class Bounce extends ElytraFlightMode {
             }
 
             if (!elytraFly.sprint.get()) {
-
-                // Sprinting all the time (when not onn ground) makes it rubberband.
+                // Sprinting all the time (when not on ground) makes it rubberband on certain anticheats.
                 if (mc.player.isFallFlying()) mc.player.setSprinting(mc.player.isOnGround());
                 else mc.player.setSprinting(true);
+            }
 
-                // Rubberbanding
-                if (rubberbanded && elytraFly.restart.get()) {
-                    if (tickDelay > 0) {
-                        tickDelay--;
-                    } else {
-                        mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
-                        rubberbanded = false;
-                        tickDelay = elytraFly.restartDelay.get();
-                    }
+            // Rubberbanding
+            if (rubberbanded && elytraFly.restart.get()) {
+                if (tickDelay > 0) {
+                    tickDelay--;
+                } else {
+                    mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+                    rubberbanded = false;
+                    tickDelay = elytraFly.restartDelay.get();
                 }
             }
         }
