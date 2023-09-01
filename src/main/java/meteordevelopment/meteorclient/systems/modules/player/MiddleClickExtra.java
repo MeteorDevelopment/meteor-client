@@ -13,12 +13,16 @@ import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.systems.friends.Friend;
+import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
+import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
@@ -36,18 +40,35 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
+    private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
+        .name("switch-mode")
+        .description("How to swap to the item.")
+        .defaultValue(SwitchMode.Silent)
+        .build()
+    );
+
+    private final Setting<Boolean> message = sgGeneral.add(new BoolSetting.Builder()
+        .name("message")
+        .description("Sends a message to the player when you add them as a friend.")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.AddFriend)
+        .build()
+    );
+
     private final Setting<Boolean> notify = sgGeneral.add(new BoolSetting.Builder()
         .name("notify")
         .description("Notifies you when you do not have the specified item in your hotbar.")
         .defaultValue(true)
+        .visible(() -> mode.get() != Mode.AddFriend)
         .build()
     );
 
-    private boolean isUsing;
-
     public MiddleClickExtra() {
-        super(Categories.Player, "middle-click-extra", "Lets you use items when you middle click.");
+        super(Categories.Player, "middle-click-extra", "Perform various actions when you middle click.");
     }
+
+    private boolean isUsing;
+    private int itemSlot;
 
     @Override
     public void onDeactivate() {
@@ -58,19 +79,40 @@ public class MiddleClickExtra extends Module {
     private void onMouseButton(MouseButtonEvent event) {
         if (event.action != KeyAction.Press || event.button != GLFW_MOUSE_BUTTON_MIDDLE || mc.currentScreen != null) return;
 
-        FindItemResult result = InvUtils.findInHotbar(mode.get().item);
+        if (mode.get() == Mode.AddFriend) {
+            if (mc.targetedEntity == null) return;
+            if (!(mc.targetedEntity instanceof PlayerEntity player)) return;
 
-        if (!result.found()) {
+            if (!Friends.get().isFriend(player)) {
+                Friends.get().add(new Friend(player));
+                info("Added %s to friends", player.getEntityName());
+                if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getEntityName() + " I just friended you on Meteor.");
+            } else {
+                Friends.get().remove(Friends.get().get(player));
+                info("Removed %s from friends", player.getEntityName());
+            }
+
+            return;
+        }
+
+        FindItemResult result = InvUtils.find(mode.get().item);
+        if (!result.found() || !result.isHotbar() && switchMode.get() != SwitchMode.Inventory) {
             if (notify.get()) warning("Unable to find specified item.");
             return;
         }
 
-        InvUtils.swap(result.slot(), true);
+        itemSlot = result.slot();
+
+        if (result.isHotbar()) {
+            InvUtils.swap(itemSlot, switchMode.get() != SwitchMode.Normal);
+        } else {
+            InvUtils.quickSwap().fromId(mc.player.getInventory().selectedSlot).toId(itemSlot);
+        }
 
         switch (mode.get().type) {
             case Immediate -> {
                 mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                InvUtils.swapBack();
+                swapBack();
             }
             case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
             case Longer -> {
@@ -106,8 +148,16 @@ public class MiddleClickExtra extends Module {
     private void stopIfUsing() {
         if (isUsing) {
             mc.options.useKey.setPressed(false);
-            InvUtils.swapBack();
+            swapBack();
             isUsing = false;
+        }
+    }
+
+    void swapBack() {
+        if (itemSlot >= 0 && itemSlot <= 8) {
+            InvUtils.swapBack();
+        } else {
+            InvUtils.quickSwap().fromId(mc.player.getInventory().selectedSlot).toId(itemSlot);
         }
     }
 
@@ -121,7 +171,9 @@ public class MiddleClickExtra extends Module {
         Gap(Items.GOLDEN_APPLE, Type.Longer),
         EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
         Chorus(Items.CHORUS_FRUIT, Type.Longer),
-        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate);
+        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate),
+
+        AddFriend(null, null);
 
         private final Item item;
         private final Type type;
@@ -130,6 +182,12 @@ public class MiddleClickExtra extends Module {
             this.item = item;
             this.type = type;
         }
+    }
+
+    public enum SwitchMode {
+        Normal,
+        Silent,
+        Inventory
     }
 
     private enum Type {
