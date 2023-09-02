@@ -12,6 +12,7 @@ package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
+import meteordevelopment.meteorclient.systems.modules.player.Rotation;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
@@ -47,7 +48,7 @@ public class Bounce extends ElytraFlightMode {
                 if (prevFov != 0 && !elytraFly.sprint.get()) mc.options.getFovEffectScale().setValue(0.0); // This stops the FOV effects from constantly going on and off.
                 if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
                 setPressed(mc.options.forwardKey, true);
-                mc.player.setYaw(getSmartYawDirection());
+                mc.player.setYaw(getYawDirection());
                 mc.player.setPitch(elytraFly.pitch.get().floatValue());
             }
 
@@ -125,8 +126,20 @@ public class Bounce extends ElytraFlightMode {
         } else return false;
     }
 
-    private float getSmartYawDirection() {
-        return Math.round((mc.player.getYaw() + 1f) / 45f) * 45f;
+    private float getYawDirection() {
+        switch (elytraFly.yawLockMode.get()) {
+            case None -> {
+                return mc.player.getYaw();
+            }
+            case Smart -> {
+                return Math.round((mc.player.getYaw() + 1f) / 45f) * 45f;
+            }
+            case Simple -> {
+                return elytraFly.yaw.get().floatValue();
+            }
+        };
+        throw new IllegalArgumentException("um wtf");
+
     }
 
     @Override
