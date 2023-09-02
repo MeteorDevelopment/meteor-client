@@ -29,7 +29,7 @@ public class Bounce extends ElytraFlightMode {
         super(ElytraFlightModes.Bounce);
     }
 
-    public static boolean rubberbanded = false;
+    boolean rubberbanded = false;
 
     int tickDelay = elytraFly.restartDelay.get();
     double prevFov;
@@ -90,6 +90,13 @@ public class Bounce extends ElytraFlightMode {
         }
     }
 
+    @Override
+    public void onPacketSend(PacketEvent.Send event) {
+        if (event.packet instanceof ClientCommandC2SPacket && ((ClientCommandC2SPacket) event.packet).getMode().equals(ClientCommandC2SPacket.Mode.START_FALL_FLYING) && !elytraFly.sprint.get()) {
+            mc.player.setSprinting(true);
+        }
+    }
+
 
     private void setPressed(KeyBinding key, boolean pressed) {
         key.setPressed(pressed);
@@ -130,6 +137,7 @@ public class Bounce extends ElytraFlightMode {
     @Override
     public void onDeactivate() {
         unpress();
+        rubberbanded = false;
         if (prevFov != 0 && !elytraFly.sprint.get()) mc.options.getFovEffectScale().setValue(prevFov);
     }
 }

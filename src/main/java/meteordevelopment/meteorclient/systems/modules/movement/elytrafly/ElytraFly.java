@@ -146,7 +146,7 @@ public class ElytraFly extends Module {
         .defaultValue(5)
         .range(1, 15)
         .sliderMin(1)
-        .visible(noCrash::get)
+        .visible(() -> noCrash.get() && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
