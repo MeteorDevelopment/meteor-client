@@ -124,9 +124,9 @@ public class AntiAFK extends Module {
     private final Setting<Integer> delay = sgMessages.add(new IntSetting.Builder()
         .name("delay")
         .description("The delay between specified messages in seconds.")
-        .defaultValue(10)
+        .defaultValue(15)
         .min(0)
-        .sliderMax(20)
+        .sliderMax(30)
         .visible(sendMessages::get)
         .build()
     );
