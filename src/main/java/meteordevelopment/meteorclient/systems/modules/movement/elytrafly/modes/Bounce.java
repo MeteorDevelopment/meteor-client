@@ -12,7 +12,6 @@ package meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightMode;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFlightModes;
-import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraFly;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
@@ -24,40 +23,58 @@ import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 
-public class Recast extends ElytraFlightMode {
+public class Bounce extends ElytraFlightMode {
 
-    public Recast() {
-        super(ElytraFlightModes.Recast);
+    public Bounce() {
+        super(ElytraFlightModes.Bounce);
     }
 
-    public static boolean rubberbanded = false;
+    boolean rubberbanded = false;
 
     int tickDelay = elytraFly.restartDelay.get();
+    double prevFov;
 
     @Override
     public void onTick() {
         super.onTick();
 
+        if (mc.options.jumpKey.isPressed() && !mc.player.isFallFlying()) mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+
         // Make sure all the conditions are met (player has an elytra, isn't in water, etc)
         if (checkConditions(mc.player)) {
 
-            mc.player.setSprinting(true);
-            setPressed(mc.options.forwardKey, true);
-            if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
-            mc.player.setYaw(getSmartYawDirection());
-            mc.player.setPitch(elytraFly.pitch.get().floatValue());
+            if (!rubberbanded) {
+                if (prevFov != 0 && !elytraFly.sprint.get()) mc.options.getFovEffectScale().setValue(0.0); // This stops the FOV effects from constantly going on and off.
+                if (elytraFly.autoJump.get()) setPressed(mc.options.jumpKey, true);
+                setPressed(mc.options.forwardKey, true);
+                mc.player.setYaw(getSmartYawDirection());
+                mc.player.setPitch(elytraFly.pitch.get().floatValue());
+            }
+
+            if (!elytraFly.sprint.get()) {
+                // Sprinting all the time (when not on ground) makes it rubberband on certain anticheats.
+                if (mc.player.isFallFlying()) mc.player.setSprinting(mc.player.isOnGround());
+                else mc.player.setSprinting(true);
+            }
 
             // Rubberbanding
             if (rubberbanded && elytraFly.restart.get()) {
                 if (tickDelay > 0) {
                     tickDelay--;
                 } else {
-                    rubberbanded = false;
                     mc.getNetworkHandler().sendPacket(new ClientCommandC2SPacket(mc.player, ClientCommandC2SPacket.Mode.START_FALL_FLYING));
+                    rubberbanded = false;
                     tickDelay = elytraFly.restartDelay.get();
                 }
             }
         }
+    }
+
+    @Override
+    public void onPreTick() {
+        super.onPreTick();
+
+        if (checkConditions(mc.player) && elytraFly.sprint.get()) mc.player.setSprinting(true);
     }
 
     private void unpress() {
@@ -70,6 +87,13 @@ public class Recast extends ElytraFlightMode {
         if (event.packet instanceof PlayerPositionLookS2CPacket) {
             rubberbanded = true;
             mc.player.stopFallFlying();
+        }
+    }
+
+    @Override
+    public void onPacketSend(PacketEvent.Send event) {
+        if (event.packet instanceof ClientCommandC2SPacket && ((ClientCommandC2SPacket) event.packet).getMode().equals(ClientCommandC2SPacket.Mode.START_FALL_FLYING) && !elytraFly.sprint.get()) {
+            mc.player.setSprinting(true);
         }
     }
 
@@ -106,7 +130,14 @@ public class Recast extends ElytraFlightMode {
     }
 
     @Override
+    public void onActivate() {
+        prevFov = mc.options.getFovEffectScale().getValue();
+    }
+
+    @Override
     public void onDeactivate() {
         unpress();
+        rubberbanded = false;
+        if (prevFov != 0 && !elytraFly.sprint.get()) mc.options.getFovEffectScale().setValue(prevFov);
     }
 }
