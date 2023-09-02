@@ -21,7 +21,10 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.Saddleable;
+import net.minecraft.entity.mob.SkeletonHorseEntity;
+import net.minecraft.entity.mob.ZombieHorseEntity;
 import net.minecraft.entity.passive.LlamaEntity;
+import net.minecraft.entity.passive.PigEntity;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
 
@@ -58,13 +61,16 @@ public class AutoMount extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player.hasVehicle()) return;
+        if (mc.player.isSneaking()) return;
         if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
 
         for (Entity entity : mc.world.getEntities()) {
             if (!entities.get().contains(entity.getType())) continue;
             if (!PlayerUtils.isWithin(entity, 4)) continue;
+            if ((entity instanceof PigEntity || entity instanceof SkeletonHorseEntity || entity instanceof ZombieHorseEntity) && !((Saddleable) entity).isSaddled()) continue;
             if (!(entity instanceof LlamaEntity) && entity instanceof Saddleable saddleable && checkSaddle.get() && !saddleable.isSaddled()) continue;
             interact(entity);
+            return;
         }
     }
 
