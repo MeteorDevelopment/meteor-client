@@ -16,21 +16,15 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Packet;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Pitch40;
-import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Recast;
+import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Bounce;
 import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.modes.Vanilla;
 import meteordevelopment.meteorclient.systems.modules.player.ChestSwap;
 import meteordevelopment.meteorclient.systems.modules.render.Freecam;
-import meteordevelopment.meteorclient.utils.misc.input.Input;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
 import net.minecraft.entity.EquipmentSlot;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.item.ElytraItem;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
@@ -60,7 +54,7 @@ public class ElytraFly extends Module {
         .name("auto-take-off")
         .description("Automatically takes off when you hold jump without needing to double jump.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -69,7 +63,7 @@ public class ElytraFly extends Module {
         .description("Controls how fast will you go down naturally.")
         .defaultValue(0.01)
         .min(0)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -78,7 +72,7 @@ public class ElytraFly extends Module {
         .description("How fast you go forward and backward.")
         .defaultValue(1)
         .min(0)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -87,14 +81,14 @@ public class ElytraFly extends Module {
         .description("How fast you go up and down.")
         .defaultValue(1)
         .min(0)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
     public final Setting<Boolean> acceleration = sgGeneral.add(new BoolSetting.Builder()
         .name("acceleration")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -103,7 +97,7 @@ public class ElytraFly extends Module {
         .min(0.1)
         .max(5)
         .defaultValue(1)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get() && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get() && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -111,7 +105,7 @@ public class ElytraFly extends Module {
         .name("acceleration-start")
         .min(0.1)
         .defaultValue(0)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get() && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && acceleration.get() && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -119,7 +113,7 @@ public class ElytraFly extends Module {
         .name("stop-in-water")
         .description("Stops flying in water.")
         .defaultValue(true)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -134,7 +128,7 @@ public class ElytraFly extends Module {
         .name("auto-hover")
         .description("Automatically hover .3 blocks off ground when holding shift.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -142,7 +136,7 @@ public class ElytraFly extends Module {
         .name("no-crash")
         .description("Stops you from going into walls.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -152,7 +146,7 @@ public class ElytraFly extends Module {
         .defaultValue(5)
         .range(1, 15)
         .sliderMin(1)
-        .visible(noCrash::get)
+        .visible(() -> noCrash.get() && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -160,7 +154,7 @@ public class ElytraFly extends Module {
         .name("insta-drop")
         .description("Makes you drop out of flight instantly.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -198,7 +192,7 @@ public class ElytraFly extends Module {
         .name("auto-jump")
         .description("Automatically jumps for you.")
         .defaultValue(true)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -208,7 +202,7 @@ public class ElytraFly extends Module {
         .defaultValue(85)
         .range(0, 90)
         .sliderRange(0, 90)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -216,7 +210,7 @@ public class ElytraFly extends Module {
         .name("restart")
         .description("Restarts flying with the elytra when rubberbanding.")
         .defaultValue(true)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -224,9 +218,17 @@ public class ElytraFly extends Module {
         .name("restart-delay")
         .description("How many ticks to wait before restarting the elytra again after rubberbanding.")
         .defaultValue(7)
-        .range(0, 20)
+        .min(0)
         .sliderRange(0, 20)
-        .visible(() -> flightMode.get() == ElytraFlightModes.Recast && restart.get())
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce && restart.get())
+        .build()
+    );
+
+    public final Setting<Boolean> sprint = sgGeneral.add(new BoolSetting.Builder()
+        .name("sprint")
+        .description("Sprints all the time. If turned off, it will only sprint when the player is touching the ground.")
+        .defaultValue(true)
+        .visible(() -> flightMode.get() == ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -279,7 +281,7 @@ public class ElytraFly extends Module {
         .name("auto-pilot")
         .description("Moves forward while elytra flying.")
         .defaultValue(false)
-        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -287,7 +289,7 @@ public class ElytraFly extends Module {
         .name("use-fireworks")
         .description("Uses firework rockets every second of your choice.")
         .defaultValue(false)
-        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -297,7 +299,7 @@ public class ElytraFly extends Module {
         .min(1)
         .defaultValue(8)
         .sliderMax(20)
-        .visible(() -> useFireworks.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> useFireworks.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -307,7 +309,7 @@ public class ElytraFly extends Module {
         .defaultValue(120)
         .min(-128)
         .sliderMax(260)
-        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Recast)
+        .visible(() -> autoPilot.get() && flightMode.get() != ElytraFlightModes.Pitch40 && flightMode.get() != ElytraFlightModes.Bounce)
         .build()
     );
 
@@ -321,7 +323,7 @@ public class ElytraFly extends Module {
     public void onActivate() {
         currentMode.onActivate();
         if ((chestSwap.get() == ChestSwapMode.Always || chestSwap.get() == ChestSwapMode.WaitForGround)
-                && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
+            && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() != Items.ELYTRA) {
             Modules.get().get(ChestSwap.class).swap();
         }
     }
@@ -351,7 +353,7 @@ public class ElytraFly extends Module {
 
         if (mc.player.isFallFlying()) {
 
-            if (flightMode.get() != ElytraFlightModes.Recast) {
+            if (flightMode.get() != ElytraFlightModes.Bounce) {
                 currentMode.velX = 0;
                 currentMode.velY = event.movement.y;
                 currentMode.velZ = 0;
@@ -376,21 +378,21 @@ public class ElytraFly extends Module {
             int chunkZ = (int) ((mc.player.getZ() + currentMode.velZ) / 16);
             if (dontGoIntoUnloadedChunks.get()) {
                 if (mc.world.getChunkManager().isChunkLoaded(chunkX, chunkZ)) {
-                    if (flightMode.get() != ElytraFlightModes.Recast) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+                    if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
                 } else {
                     ((IVec3d) event.movement).set(0, currentMode.velY, 0);
                 }
-            } else if (flightMode.get() != ElytraFlightModes.Recast) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
+            } else if (flightMode.get() != ElytraFlightModes.Bounce) ((IVec3d) event.movement).set(currentMode.velX, currentMode.velY, currentMode.velZ);
 
-            if (flightMode.get() != ElytraFlightModes.Recast) currentMode.onPlayerMove();
+            if (flightMode.get() != ElytraFlightModes.Bounce) currentMode.onPlayerMove();
         } else {
-            if (currentMode.lastForwardPressed && flightMode.get() != ElytraFlightModes.Recast) {
+            if (currentMode.lastForwardPressed && flightMode.get() != ElytraFlightModes.Bounce) {
                 mc.options.forwardKey.setPressed(false);
                 currentMode.lastForwardPressed = false;
             }
         }
 
-        if (noCrash.get() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Recast) {
+        if (noCrash.get() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Bounce) {
             Vec3d lookAheadPos = mc.player.getPos().add(mc.player.getVelocity().normalize().multiply(crashLookAhead.get()));
             RaycastContext raycastContext = new RaycastContext(mc.player.getPos(), new Vec3d(lookAheadPos.getX(), mc.player.getY(), lookAheadPos.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, mc.player);
             BlockHitResult hitResult = mc.world.raycast(raycastContext);
@@ -399,7 +401,7 @@ public class ElytraFly extends Module {
             }
         }
 
-        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Recast) {
+        if (autoHover.get() && mc.player.input.sneaking && !Modules.get().get(Freecam.class).isActive() && mc.player.isFallFlying() && flightMode.get() != ElytraFlightModes.Bounce) {
             BlockState underState = mc.world.getBlockState(mc.player.getBlockPos().down());
             Block under = underState.getBlock();
             BlockState under2State = mc.world.getBlockState(mc.player.getBlockPos().down().down());
@@ -438,6 +440,11 @@ public class ElytraFly extends Module {
     }
 
     @EventHandler
+    private void onPreTick(TickEvent.Pre event) {
+        currentMode.onPreTick();
+    }
+
+    @EventHandler
     private void onPacketSend(PacketEvent.Send event) {
         currentMode.onPacketSend(event);
     }
@@ -455,7 +462,7 @@ public class ElytraFly extends Module {
                 currentMode = new Pitch40();
                 autoPilot.set(false); // Pitch 40 is an autopilot of its own
             }
-            case Recast -> currentMode = new Recast();
+            case Bounce -> currentMode = new Bounce();
         }
     }
 
