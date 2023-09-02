@@ -216,7 +216,7 @@ public class AntiAFK extends Module {
         // Messages
         if (sendMessages.get() && !messages.get().isEmpty() && messageTimer-- <= 0) {
             if (randomMessage.get()) messageI = random.nextInt(messages.get().size());
-            else if (messageI++ >= messages.get().size()) messageI = 0;
+            else if (++messageI >= messages.get().size()) messageI = 0;
 
             ChatUtils.sendPlayerMsg(messages.get().get(messageI));
             messageTimer = delay.get() * 20;
