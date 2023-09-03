@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.modules.player;
 import meteordevelopment.meteorclient.events.entity.player.FinishUsingItemEvent;
 import meteordevelopment.meteorclient.events.entity.player.StoppedUsingItemEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
@@ -26,6 +27,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.util.Hand;
 
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
@@ -40,18 +42,19 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
-    private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
-        .name("switch-mode")
-        .description("How to swap to the item.")
-        .defaultValue(SwitchMode.Silent)
-        .build()
-    );
-
     private final Setting<Boolean> message = sgGeneral.add(new BoolSetting.Builder()
         .name("message")
         .description("Sends a message to the player when you add them as a friend.")
         .defaultValue(false)
         .visible(() -> mode.get() == Mode.AddFriend)
+        .build()
+    );
+
+    private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
+        .name("switch-mode")
+        .description("How to swap to the item.")
+        .defaultValue(SwitchMode.Silent)
+        .visible(() -> mode.get() != Mode.AddFriend)
         .build()
     );
 
@@ -132,6 +135,13 @@ public class MiddleClickExtra extends Module {
             }
 
             mc.options.useKey.setPressed(pressed);
+        }
+    }
+
+    @EventHandler
+    private void onPacketSend(PacketEvent.Send event) {
+        if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
+            stopIfUsing();
         }
     }
 
