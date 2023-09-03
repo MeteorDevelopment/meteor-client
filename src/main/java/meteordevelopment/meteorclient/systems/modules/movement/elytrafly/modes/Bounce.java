@@ -127,18 +127,11 @@ public class Bounce extends ElytraFlightMode {
     }
 
     private float getYawDirection() {
-        switch (elytraFly.yawLockMode.get()) {
-            case None -> {
-                return mc.player.getYaw();
-            }
-            case Smart -> {
-                return Math.round((mc.player.getYaw() + 1f) / 45f) * 45f;
-            }
-            case Simple -> {
-                return elytraFly.yaw.get().floatValue();
-            }
+        return switch (elytraFly.yawLockMode.get()) {
+            case None -> mc.player.getYaw();
+            case Smart -> Math.round((mc.player.getYaw() + 1f) / 45f) * 45f;
+            case Simple -> elytraFly.yaw.get().floatValue();
         };
-        throw new IllegalArgumentException("um wtf");
 
     }
 
