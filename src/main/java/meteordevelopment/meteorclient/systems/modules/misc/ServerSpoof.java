@@ -14,8 +14,9 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
+import net.minecraft.network.packet.BrandCustomPayload;
+import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
@@ -80,7 +81,7 @@ public class ServerSpoof extends Module {
             CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
             Identifier id = packet.getChannel();
 
-            if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
+            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID))
                 packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
             if (blockChannels.get()) {
@@ -106,7 +107,7 @@ public class ServerSpoof extends Module {
                 link.setStyle(link.getStyle()
                     .withColor(Formatting.BLUE)
                     .withUnderline(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getUrl()))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
                 );
                 msg.append(link);

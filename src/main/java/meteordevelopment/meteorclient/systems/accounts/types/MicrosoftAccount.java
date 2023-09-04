@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
 
 import java.util.Optional;
 

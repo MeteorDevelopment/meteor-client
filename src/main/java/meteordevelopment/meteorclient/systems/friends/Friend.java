@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
-import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
@@ -50,7 +49,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
         APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
         if (res == null || res.name == null || res.id == null) return;
         name = res.name;
-        id = UUIDTypeAdapter.fromString(res.id);
+        id = UUID.fromString(res.id);
         headTexture = PlayerHeadUtils.fetchHead(id);
         updating = false;
     }
@@ -64,7 +63,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
         NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
-        if (id != null) tag.putString("id", UUIDTypeAdapter.fromUUID(id));
+        if (id != null) tag.putUuid("id", id);
 
         return tag;
     }

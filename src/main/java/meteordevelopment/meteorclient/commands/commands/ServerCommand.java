@@ -194,7 +194,7 @@ public class ServerCommand extends Command {
 
         info("Port: %d", ServerAddress.parse(server.address).getPort());
 
-        info("Type: %s", mc.player.getServerBrand() != null ? mc.player.getServerBrand() : "unknown");
+        info("Type: %s", mc.player.getServer().getSaveProperties().getServerBrands() != null ? mc.player.getServer().getSaveProperties().getServerBrands() : "unknown");
 
         info("Motd: %s", server.label != null ? server.label.getString() : "unknown");
 

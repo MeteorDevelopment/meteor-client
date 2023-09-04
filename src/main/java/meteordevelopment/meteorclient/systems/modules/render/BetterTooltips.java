@@ -236,7 +236,7 @@ public class BetterTooltips extends Module {
                             NbtCompound effectTag = effects.getCompound(i);
                             byte effectId = effectTag.getByte("EffectId");
                             int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
-                            StatusEffect type = StatusEffect.byRawId(effectId);
+                            StatusEffect type = Registries.STATUS_EFFECT.get(effectId);
 
                             if (type != null) {
                                 StatusEffectInstance effect = new StatusEffectInstance(type, effectDuration, 0);

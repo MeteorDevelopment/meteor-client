@@ -15,11 +15,11 @@ import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.network.SocialInteractionsManager;
-import net.minecraft.client.report.AbuseReportContext;
-import net.minecraft.client.report.ReporterEnvironment;
+import net.minecraft.client.session.ProfileKeys;
+import net.minecraft.client.session.Session;
+import net.minecraft.client.session.report.AbuseReportContext;
+import net.minecraft.client.session.report.ReporterEnvironment;
 import net.minecraft.client.texture.PlayerSkinProvider;
-import net.minecraft.client.util.ProfileKeys;
-import net.minecraft.client.util.Session;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.encryption.SignatureVerifier;
 
@@ -80,7 +80,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         mca.setAuthenticationService(authService);
         SignatureVerifier.create(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
         mca.setSessionService(sessService);
-        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir(), sessService));
+        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir().toPath(), sessService, mc));
     }
 
     @Override

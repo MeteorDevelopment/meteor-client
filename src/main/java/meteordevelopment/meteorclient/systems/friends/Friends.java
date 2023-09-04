@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
-import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -16,10 +15,7 @@ import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtElement;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 public class Friends extends System<Friends> implements Iterable<Friend> {
     private final List<Friend> friends = new ArrayList<>();
@@ -117,9 +113,9 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
             String name = friendTag.getString("name");
             if (get(name) != null) continue;
 
-            String uuid = friendTag.getString("id");
-            Friend friend = !uuid.isBlank()
-                ? new Friend(name, UUIDTypeAdapter.fromString(uuid))
+            UUID uuid = friendTag.getUuid("id");
+            Friend friend = !uuid.toString().isBlank()
+                ? new Friend(name, uuid)
                 : new Friend(name);
 
             friends.add(friend);

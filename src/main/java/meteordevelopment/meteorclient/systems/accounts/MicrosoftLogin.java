@@ -19,17 +19,19 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 public class MicrosoftLogin {
     public static class LoginData {
         public String mcToken;
         public String newRefreshToken;
-        public String uuid, username;
+        public UUID uuid;
+        public String username;
 
         public LoginData() {}
 
-        public LoginData(String mcToken, String newRefreshToken, String uuid, String username) {
+        public LoginData(String mcToken, String newRefreshToken, UUID uuid, String username) {
             this.mcToken = mcToken;
             this.newRefreshToken = newRefreshToken;
             this.uuid = uuid;
@@ -217,7 +219,7 @@ public class MicrosoftLogin {
     }
 
     private static class ProfileResponse {
-        public String id;
+        public UUID id;
         public String name;
     }
 }

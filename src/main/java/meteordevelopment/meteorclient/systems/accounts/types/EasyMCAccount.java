@@ -12,16 +12,17 @@ import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAcce
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EasyMCAccount extends Account<EasyMCAccount> {
 
-    private static final Environment ENVIRONMENT = Environment.create("https://authserver.mojang.com", "https://api.mojang.com", "https://sessionserver.easymc.io", "https://api.minecraftservices.com", "EasyMC");
-    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "", ENVIRONMENT);
+    private static final Environment ENVIRONMENT = new Environment("https://authserver.mojang.com",  "https://sessionserver.easymc.io", "https://api.minecraftservices.com", "EasyMC");
+    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
 
     public EasyMCAccount(String token) {
         super(AccountType.EasyMC, token);
@@ -59,7 +60,7 @@ public class EasyMCAccount extends Account<EasyMCAccount> {
 
     private static class AuthResponse {
         public String mcName;
-        public String uuid;
+        public UUID uuid;
         public String session;
         public String message;
     }

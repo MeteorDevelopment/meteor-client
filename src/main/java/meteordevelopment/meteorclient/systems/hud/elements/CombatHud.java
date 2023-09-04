@@ -213,7 +213,8 @@ public class CombatHud extends HudElement {
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
                 -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
-                -playerEntity.getPitch(), playerEntity
+                -playerEntity.getPitch(),
+                playerEntity
             );
 
             // Moving pos to past player model

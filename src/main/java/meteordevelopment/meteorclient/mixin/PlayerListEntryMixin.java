@@ -23,7 +23,7 @@ public abstract class PlayerListEntryMixin {
     @Shadow
     public abstract GameProfile getProfile();
 
-    @Inject(method = "getSkinTexture", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "getSkinTextures", at = @At("HEAD"), cancellable = true)
     private void onGetTexture(CallbackInfoReturnable<Identifier> info) {
         if (getProfile().getName().equals(MinecraftClient.getInstance().getSession().getUsername())) {
             if (Modules.get().get(NameProtect.class).skinProtect()) {
