@@ -9,26 +9,30 @@ package meteordevelopment.meteorclient.systems.modules.world;
 
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.EntityTypeListSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.Saddleable;
 import net.minecraft.entity.mob.SkeletonHorseEntity;
-import net.minecraft.entity.passive.*;
-import net.minecraft.entity.vehicle.BoatEntity;
-import net.minecraft.entity.vehicle.MinecartEntity;
+import net.minecraft.entity.mob.ZombieHorseEntity;
+import net.minecraft.entity.passive.LlamaEntity;
+import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.StriderEntity;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraft.util.Hand;
 
+import java.util.Set;
+
 public class AutoMount extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
-    private final SettingGroup sgMount = settings.createGroup("Mount");
-
-    // General
 
     private final Setting<Boolean> checkSaddle = sgGeneral.add(new BoolSetting.Builder()
         .name("check-saddle")
@@ -44,61 +48,10 @@ public class AutoMount extends Module {
         .build()
     );
 
-    // Mount
-
-    private final Setting<Boolean> horses = sgMount.add(new BoolSetting.Builder()
-        .name("horse")
-        .description("Horse")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> donkeys = sgMount.add(new BoolSetting.Builder()
-        .name("donkey")
-        .description("Donkey")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> mules = sgMount.add(new BoolSetting.Builder()
-        .name("mule")
-        .description("Mule")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> skeletonHorse = sgMount.add(new BoolSetting.Builder()
-        .name("skeleton-horse")
-        .description("Skeleton Horse")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> llamas = sgMount.add(new BoolSetting.Builder()
-        .name("llama")
-        .description("Llama")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> pigs = sgMount.add(new BoolSetting.Builder()
-        .name("pig")
-        .description("Pig")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> boats = sgMount.add(new BoolSetting.Builder()
-        .name("boat")
-        .description("Boat")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> minecarts = sgMount.add(new BoolSetting.Builder()
-        .name("minecart")
-        .description("Minecart")
-        .defaultValue(false)
+    private final Setting<Set<EntityType<?>>> entities = sgGeneral.add(new EntityTypeListSetting.Builder()
+        .name("entities")
+        .description("Rideable entities.")
+        .filter(EntityUtils::isRideable)
         .build()
     );
 
@@ -109,29 +62,16 @@ public class AutoMount extends Module {
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (mc.player.hasVehicle()) return;
+        if (mc.player.isSneaking()) return;
+        if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
 
-        for (Entity entity : mc.world.getEntities()){
+        for (Entity entity : mc.world.getEntities()) {
+            if (!entities.get().contains(entity.getType())) continue;
             if (!PlayerUtils.isWithin(entity, 4)) continue;
-
-            if (mc.player.getMainHandStack().getItem() instanceof SpawnEggItem) return;
-
-            if (donkeys.get() && entity instanceof DonkeyEntity && (!checkSaddle.get() || ((DonkeyEntity) entity).isSaddled())) {
-                interact(entity);
-            } else if (llamas.get() && entity instanceof LlamaEntity) {
-                interact(entity);
-            } else if (boats.get() && entity instanceof BoatEntity) {
-                interact(entity);
-            } else if (minecarts.get() && entity instanceof MinecartEntity) {
-                interact(entity);
-            } else if (horses.get() && entity instanceof HorseEntity && (!checkSaddle.get() || ((HorseEntity) entity).isSaddled())) {
-                interact(entity);
-            } else if (pigs.get() && entity instanceof PigEntity && ((PigEntity) entity).isSaddled()) {
-                interact(entity);
-            } else if (mules.get() && entity instanceof MuleEntity && (!checkSaddle.get() || ((MuleEntity) entity).isSaddled())) {
-                interact(entity);
-            } else if (skeletonHorse.get() && entity instanceof SkeletonHorseEntity && (!checkSaddle.get() || ((SkeletonHorseEntity) entity).isSaddled())) {
-                interact(entity);
-            }
+            if ((entity instanceof PigEntity || entity instanceof SkeletonHorseEntity || entity instanceof StriderEntity || entity instanceof ZombieHorseEntity) && !((Saddleable) entity).isSaddled()) continue;
+            if (!(entity instanceof LlamaEntity) && entity instanceof Saddleable saddleable && checkSaddle.get() && !saddleable.isSaddled()) continue;
+            interact(entity);
+            return;
         }
     }
 

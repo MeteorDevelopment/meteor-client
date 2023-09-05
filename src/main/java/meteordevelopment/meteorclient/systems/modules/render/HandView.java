@@ -32,6 +32,27 @@ public class HandView extends Module {
         .build()
     );
 
+    public final Setting<Boolean> oldAnimations = sgGeneral.add(new BoolSetting.Builder()
+        .name("old-animations")
+        .description("Changes hit animations to those like 1.8")
+        .defaultValue(false)
+        .build()
+    );
+
+    public final Setting<Boolean> showSwapping = sgGeneral.add(new BoolSetting.Builder()
+        .name("show-swapping")
+        .description("Whether or not to show the item swapping animation")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Boolean> disableFoodAnimation = sgGeneral.add(new BoolSetting.Builder()
+        .name("disable-eating-animation")
+        .description("Disables the eating animation. Potentially desirable if it goes offscreen.")
+        .defaultValue(false)
+        .build()
+    );
+
     public final Setting<SwingMode> swingMode = sgGeneral.add(new EnumSetting.Builder<SwingMode>()
         .name("swing-mode")
         .description("Modifies your client & server hand swinging.")
@@ -66,20 +87,6 @@ public class HandView extends Module {
         .build()
     );
 
-    public final Setting<Boolean> oldAnimations = sgGeneral.add(new BoolSetting.Builder()
-        .name("old-animations")
-        .description("Changes hit animations to those like 1.8")
-        .defaultValue(false)
-        .build()
-    );
-
-    public final Setting<Boolean> showSwapping = sgGeneral.add(new BoolSetting.Builder()
-        .name("show-swapping")
-        .description("Whether or not to show the item swapping animation")
-        .defaultValue(true)
-        .build()
-    );
-
     // Main Hand
 
     private final Setting<Vector3d> scaleMain = sgMainHand.add(new Vector3dSetting.Builder()
@@ -109,7 +116,7 @@ public class HandView extends Module {
         .build()
     );
 
-    // Off Hand
+    // Offhand
 
     private final Setting<Vector3d> scaleOff = sgOffHand.add(new Vector3dSetting.Builder()
         .name("scale")
@@ -218,6 +225,10 @@ public class HandView extends Module {
 
     public boolean showSwapping() {
         return isActive() && showSwapping.get();
+    }
+
+    public boolean disableFoodAnimation() {
+        return isActive() && disableFoodAnimation.get();
     }
 
     public enum SwingMode {

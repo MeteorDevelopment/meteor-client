@@ -864,7 +864,7 @@ public class HighwayBuilder extends Module {
             int bestSlot = -1;
 
             for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
-                double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, AutoTool.EnchantPreference.None, itemStack -> {
+                double score = AutoTool.getScore(b.mc.player.getInventory().getStack(i), blockState, false, false, AutoTool.EnchantPreference.None, itemStack -> {
                     if (noSilkTouch && EnchantmentHelper.getLevel(Enchantments.SILK_TOUCH, itemStack) != 0) return false;
                     return !b.dontBreakTools.get() || itemStack.getMaxDamage() - itemStack.getDamage() > 1;
                 });
