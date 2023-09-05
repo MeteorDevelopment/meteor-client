@@ -69,6 +69,13 @@ public class BetterTab extends Module {
         .build()
     );
 
+    public final Setting<Boolean> alwaysShow = sgGeneral.add(new BoolSetting.Builder()
+        .name("always-show")
+        .description("Display tablist all the time.")
+        .defaultValue(false)
+        .build()
+    );
+
 
     public BetterTab() {
         super(Categories.Misc, "better-tab", "Various improvements to the tab list.");
