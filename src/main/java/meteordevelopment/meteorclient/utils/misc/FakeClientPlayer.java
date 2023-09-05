@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.network.ClientConnectionState;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.OtherClientPlayerEntity;
 import net.minecraft.client.network.PlayerListEntry;
@@ -45,7 +46,18 @@ public class FakeClientPlayer {
 
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
-                world = new ClientWorld(new ClientPlayNetworkHandler(mc, null, new ClientConnection(NetworkSide.CLIENTBOUND), mc.getCurrentServerEntry(), new GameProfile(id, mc.getSession().getUsername()), null), new ClientWorld.Properties(Difficulty.NORMAL, false, false), world.getRegistryKey(), world.getDimensionEntry(), 1, 1, mc::getProfiler, null, false, 0);
+                world = new ClientWorld(
+                    new ClientPlayNetworkHandler(mc, new ClientConnection(NetworkSide.CLIENTBOUND), new ClientConnectionState(null, null, null, null, null, null, null)),
+                    new ClientWorld.Properties(Difficulty.NORMAL, false, false),
+                    world.getRegistryKey(),
+                    world.getDimensionEntry(),
+                    1,
+                    1,
+                    mc::getProfiler,
+                    null,
+                    false,
+                    0
+                );
             }
 
             player = new OtherClientPlayerEntity(world, new GameProfile(id, mc.getSession().getUsername()));

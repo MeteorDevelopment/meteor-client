@@ -6,16 +6,11 @@
 package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.Environment;
-import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
-import net.minecraft.client.session.Session;
-
-import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -29,7 +24,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
     @Override
     public boolean fetchInfo() {
-        YggdrasilUserAuthentication auth = getAuth();
+        /*YggdrasilUserAuthentication auth = getAuth();
 
         try {
             auth.logIn();
@@ -40,14 +35,15 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
             return true;
         } catch (AuthenticationException e) {
             return false;
-        }
+        }*/
+        return true;
     }
 
     @Override
     public boolean login() {
         applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE, ENVIRONMENT));
 
-        YggdrasilUserAuthentication auth = getAuth();
+        /*YggdrasilUserAuthentication auth = getAuth();
 
         try {
             auth.logIn();
@@ -60,15 +56,16 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
         } catch (AuthenticationException e) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");
             return false;
-        }
+        }*/
+        return true;
     }
 
-    private YggdrasilUserAuthentication getAuth() {
+    /*private YggdrasilUserAuthentication getAuth() {
         YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) SERVICE.createUserAuthentication(Agent.MINECRAFT);
 
         auth.setUsername(name);
         auth.setPassword("Meteor on Crack!");
 
         return auth;
-    }
+    }*/
 }

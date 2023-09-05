@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import io.netty.buffer.Unpooled;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -78,11 +77,10 @@ public class ServerSpoof extends Module {
         private void onPacketSend(PacketEvent.Send event) {
             if (!isActive()) return;
             if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
-            Identifier id = packet.getChannel();
+            Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().id();
 
             if (spoofBrand.get() && id.equals(BrandCustomPayload.ID))
-                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+                event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {

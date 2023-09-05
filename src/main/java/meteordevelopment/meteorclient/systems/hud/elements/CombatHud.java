@@ -209,9 +209,12 @@ public class CombatHud extends HudElement {
             // Player Model
             InventoryScreen.drawEntity(
                 renderer.drawContext,
+                (int) x,
+                (int) y,
                 (int) (x + (25 * scale.get())),
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
+                0,
                 -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
                 -playerEntity.getPitch(),
                 playerEntity
@@ -255,8 +258,7 @@ public class CombatHud extends HudElement {
             if (Friends.get().isFriend(playerEntity)) {
                 friendText = "Friend";
                 friendColor = Config.get().friendColor.get();
-            }
-            else {
+            } else {
                 boolean naked = true;
 
                 for (int position = 3; position >= 0; position--) {
@@ -268,8 +270,7 @@ public class CombatHud extends HudElement {
                 if (naked) {
                     friendText = "Naked";
                     friendColor = GREEN;
-                }
-                else {
+                } else {
                     boolean threat = false;
 
                     for (int position = 5; position >= 0; position--) {
