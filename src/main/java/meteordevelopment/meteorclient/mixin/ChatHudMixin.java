@@ -130,7 +130,7 @@ public abstract class ChatHudMixin implements IChatHud {
 
     @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;ceil(F)I"))
     private int onRender_modifyWidth(int width) {
-        return betterChat.modifyChatWidth(width);
+        return getBetterChat().modifyChatWidth(width);
     }
 
     @ModifyReceiver(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/DrawContext;drawTextWithShadow(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/OrderedText;III)I"))
