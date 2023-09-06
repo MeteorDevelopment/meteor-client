@@ -50,11 +50,19 @@ public class MiddleClickExtra extends Module {
         .build()
     );
 
-    private final Setting<SwitchMode> switchMode = sgGeneral.add(new EnumSetting.Builder<SwitchMode>()
-        .name("switch-mode")
-        .description("How to swap to the item.")
-        .defaultValue(SwitchMode.Silent)
+    private final Setting<Boolean> quickSwap = sgGeneral.add(new BoolSetting.Builder()
+        .name("quick-swap")
+        .description("Allows you to use items in your inventory by simulating hotbar key presses. May get flagged by anticheats.")
+        .defaultValue(false)
         .visible(() -> mode.get() != Mode.AddFriend)
+        .build()
+    );
+
+    private final Setting<Boolean> swapBack = sgGeneral.add(new BoolSetting.Builder()
+        .name("swap-back")
+        .description("Swap back to your original slot when you finish using an item.")
+        .defaultValue(false)
+        .visible(() -> mode.get() != Mode.AddFriend && !quickSwap.get())
         .build()
     );
 
@@ -71,11 +79,13 @@ public class MiddleClickExtra extends Module {
     }
 
     private boolean isUsing;
+    private boolean wasHeld;
     private int itemSlot;
+    private int selectedSlot;
 
     @Override
     public void onDeactivate() {
-        stopIfUsing();
+        stopIfUsing(false);
     }
 
     @EventHandler
@@ -99,110 +109,95 @@ public class MiddleClickExtra extends Module {
         }
 
         FindItemResult result = InvUtils.find(mode.get().item);
-        if (!result.found() || !result.isHotbar() && switchMode.get() != SwitchMode.Inventory) {
+        if (!result.found() || !result.isHotbar() && !quickSwap.get()) {
             if (notify.get()) warning("Unable to find specified item.");
             return;
         }
 
+        selectedSlot = mc.player.getInventory().selectedSlot;
         itemSlot = result.slot();
+        wasHeld = result.isMainHand();
 
-        if (result.isHotbar()) {
-            InvUtils.swap(itemSlot, switchMode.get() != SwitchMode.Normal);
-        } else {
-            InvUtils.quickSwap().fromId(mc.player.getInventory().selectedSlot).toId(itemSlot);
+        if (!wasHeld) {
+            if (!quickSwap.get()) InvUtils.swap(result.slot(), swapBack.get());
+            else InvUtils.quickSwap().fromId(selectedSlot).to(itemSlot);
         }
 
-        switch (mode.get().type) {
-            case Immediate -> {
-                mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-                swapBack();
-            }
-            case LongerSingleClick -> mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
-            case Longer -> {
-                mc.options.useKey.setPressed(true);
-                isUsing = true;
-            }
+        if (mode.get().immediate) {
+            mc.interactionManager.interactItem(mc.player, Hand.MAIN_HAND);
+            swapBack(false);
+        } else {
+            mc.options.useKey.setPressed(true);
+            isUsing = true;
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
-        if (isUsing) {
-            boolean pressed = true;
+        if (!isUsing) return;
+        boolean pressed = true;
 
-            if (mc.player.getMainHandStack().getItem() instanceof BowItem) {
-                pressed = BowItem.getPullProgress(mc.player.getItemUseTime()) < 1;
-            }
-
-            mc.options.useKey.setPressed(pressed);
+        if (mc.player.getMainHandStack().getItem() instanceof BowItem) {
+            pressed = BowItem.getPullProgress(mc.player.getItemUseTime()) < 1;
         }
+
+        mc.options.useKey.setPressed(pressed);
     }
 
     @EventHandler
-    private void onPacketSend(PacketEvent.Send event) {
+    private void onPacketSendEvent(PacketEvent.Send event) {
         if (event.packet instanceof UpdateSelectedSlotC2SPacket) {
-            stopIfUsing();
+            stopIfUsing(true);
         }
-    }
-
-    @EventHandler
-    private void onFinishUsingItem(FinishUsingItemEvent event) {
-        stopIfUsing();
     }
 
     @EventHandler
     private void onStoppedUsingItem(StoppedUsingItemEvent event) {
-        stopIfUsing();
+        stopIfUsing(false);
     }
 
-    private void stopIfUsing() {
+    @EventHandler
+    private void onFinishUsingItem(FinishUsingItemEvent event) {
+        stopIfUsing(false);
+    }
+
+    private void stopIfUsing(boolean wasCancelled) {
         if (isUsing) {
+            swapBack(wasCancelled);
             mc.options.useKey.setPressed(false);
-            swapBack();
             isUsing = false;
         }
     }
 
-    void swapBack() {
-        if (itemSlot >= 0 && itemSlot <= 8) {
-            InvUtils.swapBack();
+    void swapBack(boolean wasCancelled) {
+        if (wasHeld) return;
+
+        if (quickSwap.get()) {
+            InvUtils.quickSwap().fromId(selectedSlot).to(itemSlot);
         } else {
-            InvUtils.quickSwap().fromId(mc.player.getInventory().selectedSlot).toId(itemSlot);
+            if (!swapBack.get() || wasCancelled) return;
+            InvUtils.swapBack();
         }
     }
 
     public enum Mode {
-        Pearl(Items.ENDER_PEARL, Type.Immediate),
-        Rocket(Items.FIREWORK_ROCKET, Type.Immediate),
+        Pearl(Items.ENDER_PEARL, true),
+        XP(Items.EXPERIENCE_BOTTLE, true),
+        Rocket(Items.FIREWORK_ROCKET, true),
 
-        Rod(Items.FISHING_ROD, Type.LongerSingleClick),
+        Bow(Items.BOW, false),
+        Gap(Items.GOLDEN_APPLE, false),
+        EGap(Items.ENCHANTED_GOLDEN_APPLE, false),
+        Chorus(Items.CHORUS_FRUIT, false),
 
-        Bow(Items.BOW, Type.Longer),
-        Gap(Items.GOLDEN_APPLE, Type.Longer),
-        EGap(Items.ENCHANTED_GOLDEN_APPLE, Type.Longer),
-        Chorus(Items.CHORUS_FRUIT, Type.Longer),
-        XP(Items.EXPERIENCE_BOTTLE, Type.Immediate),
-
-        AddFriend(null, null);
+        AddFriend(null, true);
 
         private final Item item;
-        private final Type type;
+        private final boolean immediate;
 
-        Mode(Item item, Type type) {
+        Mode(Item item, boolean immediate) {
             this.item = item;
-            this.type = type;
+            this.immediate = immediate;
         }
-    }
-
-    public enum SwitchMode {
-        Normal,
-        Silent,
-        Inventory
-    }
-
-    private enum Type {
-        Immediate,
-        LongerSingleClick,
-        Longer
     }
 }
