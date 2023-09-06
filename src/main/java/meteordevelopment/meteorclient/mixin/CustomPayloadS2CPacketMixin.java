@@ -14,8 +14,8 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 
 @Mixin(CustomPayloadS2CPacket.class)
 public class CustomPayloadS2CPacketMixin {
-    @ModifyConstant(method = "<init>", constant = @Constant(intValue = 1048576))
-    private int maxValue(int value) {
+    @ModifyConstant(method = "readUnknownPayload", constant = @Constant(intValue = 1048576))
+    private static int maxValue(int value) {
         return Modules.get().isActive(AntiPacketKick.class) ? Integer.MAX_VALUE : value;
     }
 }

@@ -13,9 +13,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.GridWidget;
-import net.minecraft.client.network.ServerAddress;
-import net.minecraft.client.network.ServerInfo;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -35,8 +32,8 @@ public abstract class DisconnectedScreenMixin extends Screen {
         super(title);
     }
 
-    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/GridWidget;refreshPositions()V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void addButtons(CallbackInfo info, GridWidget.Adder adder) {
+    @Inject(method = "init", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/DirectionalLayoutWidget;refreshPositions()V", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
+    private void addButtons(CallbackInfo ci, ButtonWidget buttonWidget, GridWidget.Adder adder) {
         AutoReconnect autoReconnect = Modules.get().get(AutoReconnect.class);
 
         if (autoReconnect.lastServerConnection != null) {
