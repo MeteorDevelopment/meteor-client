@@ -211,7 +211,7 @@ public class AutoCity extends Module {
         InvUtils.swap(pick.slot(), switchMode.get() == SwitchMode.Silent);
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(targetPos), Rotations.getPitch(targetPos));
 
-        Direction direction = (mc.player.getY() > targetPos.getY()) ? Direction.UP : Direction.DOWN;
+        Direction direction = BlockUtils.getDirection(targetPos);
         if (!done) mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, targetPos, direction));
         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction));
 
