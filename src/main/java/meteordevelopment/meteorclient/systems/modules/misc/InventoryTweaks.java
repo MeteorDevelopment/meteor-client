@@ -18,34 +18,30 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.*;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.AbstractSkullBlock;
-import net.minecraft.block.CarvedPumpkinBlock;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Equipment;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.screen.slot.Slot;
+import net.minecraft.screen.slot.SlotActionType;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Future;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class InventoryTweaks extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgSorting = settings.createGroup("Sorting");
     private final SettingGroup sgAutoDrop = settings.createGroup("Auto Drop");
-    private final SettingGroup sgStealDump = settings.createGroup("Steal and Dump");
-    private final SettingGroup sgAutoSteal = settings.createGroup("Auto Steal");
 
     // General
 
@@ -136,108 +132,16 @@ public class InventoryTweaks extends Module {
         .build()
     );
 
-    // Steal & Dump
-
-    public final Setting<List<ScreenHandlerType<?>>> stealScreens = sgStealDump.add(new ScreenHandlerListSetting.Builder()
-        .name("steal-screens")
-        .description("Select the screens to display buttons and auto steal.")
-        .defaultValue(Arrays.asList(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6))
-        .build()
-    );
-
-    private final Setting<Boolean> buttons = sgStealDump.add(new BoolSetting.Builder()
-        .name("inventory-buttons")
-        .description("Shows steal and dump buttons in container guis.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> stealDrop = sgStealDump.add(new BoolSetting.Builder()
-        .name("steal-drop")
-        .description("Drop items to the ground instead of stealing them.")
-        .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Boolean> dropBackwards = sgStealDump.add(new BoolSetting.Builder()
-        .name("drop-backwards")
-        .description("Drop items behind you.")
-        .defaultValue(false)
-        .visible(stealDrop::get)
-        .build()
-    );
-
-    private final Setting<ListMode> dumpFilter = sgStealDump.add(new EnumSetting.Builder<ListMode>()
-        .name("dump-filter")
-        .description("Dump mode.")
-        .defaultValue(ListMode.None)
-        .build()
-    );
-
-    private final Setting<List<Item>> dumpItems = sgStealDump.add(new ItemListSetting.Builder()
-        .name("dump-items")
-        .description("Items to dump.")
-        .build()
-    );
-
-    private final Setting<ListMode> stealFilter = sgStealDump.add(new EnumSetting.Builder<ListMode>()
-        .name("steal-filter")
-        .description("Steal mode.")
-        .defaultValue(ListMode.None)
-        .build()
-    );
-
-    private final Setting<List<Item>> stealItems = sgStealDump.add(new ItemListSetting.Builder()
-        .name("steal-items")
-        .description("Items to steal.")
-        .build()
-    );
-
-    // Auto Steal
-
-    private final Setting<Boolean> autoSteal = sgAutoSteal.add(new BoolSetting.Builder()
-        .name("auto-steal")
-        .description("Automatically removes all possible items when you open a container.")
-        .defaultValue(false)
-        .onChanged(val -> checkAutoStealSettings())
-        .build()
-    );
-
-    private final Setting<Boolean> autoDump = sgAutoSteal.add(new BoolSetting.Builder()
-        .name("auto-dump")
-        .description("Automatically dumps all possible items when you open a container.")
-        .defaultValue(false)
-        .onChanged(val -> checkAutoStealSettings())
-        .build()
-    );
-
-    private final Setting<Integer> autoStealDelay = sgAutoSteal.add(new IntSetting.Builder()
-        .name("delay")
-        .description("The minimum delay between stealing the next stack in milliseconds.")
-        .defaultValue(20)
-        .sliderMax(1000)
-        .build()
-    );
-
-    private final Setting<Integer> autoStealInitDelay = sgAutoSteal.add(new IntSetting.Builder()
-        .name("initial-delay")
-        .description("The initial delay before stealing in milliseconds. 0 to use normal delay instead.")
-        .defaultValue(50)
-        .sliderMax(1000)
-        .build()
-    );
-
-    private final Setting<Integer> autoStealRandomDelay = sgAutoSteal.add(new IntSetting.Builder()
-        .name("random")
-        .description("Randomly adds a delay of up to the specified time in milliseconds.")
-        .min(0)
-        .sliderMax(1000)
-        .defaultValue(50)
-        .build()
-    );
+    public final Button[] buttons = {
+        new Delete(),
+        new Steal(),
+        new Dump()
+    };
 
     private InventorySorter sorter;
     private boolean invOpened;
+
+    private Future<?> task;
 
     public InventoryTweaks() {
         super(Categories.Misc, "inventory-tweaks", "Various inventory related utilities.");
@@ -294,14 +198,6 @@ public class InventoryTweaks extends Module {
         return true;
     }
 
-    private boolean isWearable(ItemStack itemStack) {
-        Item item = itemStack.getItem();
-
-        if (item instanceof Equipment) return true;
-        return item instanceof BlockItem blockItem &&
-            (blockItem.getBlock() instanceof AbstractSkullBlock || blockItem.getBlock() instanceof CarvedPumpkinBlock);
-    }
-
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
         sorter = null;
@@ -311,8 +207,6 @@ public class InventoryTweaks extends Module {
     private void onTickPre(TickEvent.Pre event) {
         if (sorter != null && sorter.tick(sortingDelay.get())) sorter = null;
     }
-
-    // Auto Drop
 
     @EventHandler
     private void onTickPost(TickEvent.Post event) {
@@ -346,73 +240,16 @@ public class InventoryTweaks extends Module {
         }
     }
 
-    // Auto Steal
+    @EventHandler
+    private void onInventory(InventoryEvent event) {
+        ScreenHandler handler = mc.player.currentScreenHandler;
+        if (event.packet.getSyncId() != handler.syncId) return;
 
-    private void checkAutoStealSettings() {
-        if (autoSteal.get() && autoDump.get()) {
-            error("You can't enable Auto Steal and Auto Dump at the same time!");
-            autoDump.set(false);
-        }
-    }
-
-    private int getSleepTime() {
-        return autoStealDelay.get() + (autoStealRandomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, autoStealRandomDelay.get()) : 0);
-    }
-
-    private void moveSlots(ScreenHandler handler, int start, int end, boolean steal) {
-        boolean initial = autoStealInitDelay.get() != 0;
-        for (int i = start; i < end; i++) {
-            if (!handler.getSlot(i).hasStack()) continue;
-
-            int sleep;
-            if (initial) {
-                sleep = autoStealInitDelay.get();
-                initial = false;
-            } else sleep = getSleepTime();
-            if (sleep > 0) {
-                try {
-                    Thread.sleep(sleep);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        for (Button button : buttons) {
+            if (button.canAutoExecute(handler)) {
+                button.execute(handler);
             }
-
-            // Exit if user closes screen or exit world
-            if (mc.currentScreen == null || !Utils.canUpdate()) break;
-
-            Item item = handler.getSlot(i).getStack().getItem();
-            if (steal) {
-                if (stealFilter.get() == ListMode.Whitelist && !stealItems.get().contains(item))
-                    continue;
-                if (stealFilter.get() == ListMode.Blacklist && stealItems.get().contains(item))
-                    continue;
-            } else {
-                if (dumpFilter.get() == ListMode.Whitelist && !dumpItems.get().contains(item))
-                    continue;
-                if (dumpFilter.get() == ListMode.Blacklist && dumpItems.get().contains(item))
-                    continue;
-            }
-
-            if (steal && stealDrop.get()) {
-                if (dropBackwards.get()) {
-                    int iCopy = i;
-                    Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
-                }
-            } else InvUtils.shiftClick().slotId(i);
         }
-    }
-
-    public void steal(ScreenHandler handler) {
-        MeteorExecutor.execute(() -> moveSlots(handler, 0, SlotUtils.indexToId(SlotUtils.MAIN_START), true));
-    }
-
-    public void dump(ScreenHandler handler) {
-        int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
-        MeteorExecutor.execute(() -> moveSlots(handler, playerInvOffset, playerInvOffset + 4 * 9, false));
-    }
-
-    public boolean showButtons() {
-        return isActive() && buttons.get();
     }
 
     public boolean mouseDragItemMove() {
@@ -423,29 +260,247 @@ public class InventoryTweaks extends Module {
         return isActive() && armorStorage.get();
     }
 
-    public boolean canSteal(ScreenHandler handler) {
-        try {
-            return (stealScreens.get().contains(handler.getType()));
-        } catch (UnsupportedOperationException e) {
-            return false;
+    public abstract class Button {
+        public final String buttonName;
+        private boolean initial;
+
+        final SettingGroup sg;
+
+        final Setting<TriggerMode> triggerMode;
+        final Setting<List<ScreenHandlerType<?>>> containersList;
+        final Setting<FilterMode> itemsFilter;
+        final Setting<List<Item>> items;
+        final Setting<Integer> delay;
+        final Setting<Integer> initDelay;
+        final Setting<Integer> randomDelay;
+
+        protected Button(String buttonName, String category) {
+            this.buttonName = buttonName;
+            this.sg = settings.createGroup(category);
+
+            triggerMode = sg.add(new EnumSetting.Builder<TriggerMode>()
+                .name("trigger")
+                .description("How this action will be triggered.")
+                .defaultValue(TriggerMode.Button)
+                .onChanged(this::checkButtons)
+                .build()
+            );
+
+            containersList = sg.add(new ScreenHandlerListSetting.Builder()
+                .name("containers-list")
+                .description("Containers list where this action can be triggered in.")
+                .defaultValue(ScreenHandlerType.GENERIC_9X3, ScreenHandlerType.GENERIC_9X6)
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+                .build()
+            );
+
+            itemsFilter = sg.add(new EnumSetting.Builder<FilterMode>()
+                .name("items-filter")
+                .description("The method for filtering items.")
+                .defaultValue(FilterMode.Blacklist)
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+                .build()
+            );
+
+            items = sg.add(new ItemListSetting.Builder()
+                .name("items")
+                .description("Items list.")
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled && !itemsFilter.get().isWildCard())
+                .build()
+            );
+
+            delay = sg.add(new IntSetting.Builder()
+                .name("delay")
+                .description("The minimum delay between moving on to next stack.")
+                .defaultValue(20)
+                .min(0)
+                .sliderMax(1000)
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+                .build()
+            );
+
+            initDelay = sg.add(new IntSetting.Builder()
+                .name("initial-delay")
+                .description("The initial delay before starting in milliseconds. Use 0 to use normal delay instead.")
+                .defaultValue(50)
+                .min(0)
+                .sliderMax(1000)
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+                .build()
+            );
+
+            randomDelay = sg.add(new IntSetting.Builder()
+                .name("random-delay")
+                .description("Randomly adds delay of up to the specified time in milliseconds.")
+                .defaultValue(50)
+                .min(0)
+                .sliderMax(1000)
+                .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+                .build()
+            );
+        }
+
+        boolean delayAndCheckConditions() {
+            int sleep;
+            if (initial) {
+                sleep = initDelay.get();
+                initial = false;
+            } else
+                sleep = delay.get() + (randomDelay.get() > 0 ? ThreadLocalRandom.current().nextInt(0, randomDelay.get()) : 0);
+            if (sleep > 0) {
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException ignored) {
+                    return true;
+                }
+            }
+            return mc.currentScreen == null || !Utils.canUpdate();
+        }
+
+        public void execute(ScreenHandler handler) {
+            if (task != null) if (!task.isDone()) {
+                try {
+                    task.cancel(true);
+                    task.get();
+                } catch (Exception ignored) {
+                }
+            }
+            task = MeteorExecutor.executor.submit(() -> {
+                initial = initDelay.get() != 0;
+                execute0(handler);
+            });
+        }
+
+        protected abstract void execute0(ScreenHandler handler);
+
+        public boolean showButton(ScreenHandler handler) {
+            try {
+                return triggerMode.get() == TriggerMode.Button && containersList.get().contains(handler.getType());
+            } catch (UnsupportedOperationException e) {
+                return false;
+            }
+        }
+
+        boolean canAutoExecute(ScreenHandler handler) {
+            try {
+                return triggerMode.get() == TriggerMode.Auto && containersList.get().contains(handler.getType());
+            } catch (UnsupportedOperationException e) {
+                return false;
+            }
+        }
+
+        private void checkButtons(TriggerMode newValue) {
+            for (Button button : buttons) {
+                if (button != this && (button.triggerMode.get() == TriggerMode.Auto && newValue == TriggerMode.Auto)) {
+                    error("You can't enable Auto-Trigger mode for multiple buttons at same time.");
+                    button.triggerMode.set(TriggerMode.Disabled);
+                }
+            }
+        }
+
+        public enum TriggerMode {
+            Auto,
+            Button,
+            Disabled
         }
     }
 
-    @EventHandler
-    private void onInventory(InventoryEvent event) {
-        ScreenHandler handler = mc.player.currentScreenHandler;
-        if (canSteal(handler) && event.packet.getSyncId() == handler.syncId) {
-            if (autoSteal.get()) {
-                steal(handler);
-            } else if (autoDump.get()) {
-                dump(handler);
+    private class Delete extends Button {
+        private final Setting<Boolean> excludeSelf = sg.add(new BoolSetting.Builder()
+            .name("exclude-self")
+            .description("Whether or not to exclude deleting your own Inventory's items.")
+            .defaultValue(true)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            .build()
+        );
+
+        protected Delete() {
+            super("Delete", "Item Deleter");
+        }
+
+        @Override
+        public void execute0(ScreenHandler handler) {
+            int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
+            int playerInvEnd = excludeSelf.get() ? playerInvOffset : playerInvOffset + 4 * 9;
+
+            for (int i = 0; i < playerInvEnd; i++) {
+                if (!handler.getSlot(i).hasStack()) continue;
+                if (delayAndCheckConditions()) break;
+                Item item = handler.getSlot(i).getStack().getItem();
+                if (!itemsFilter.get().test(items.get(), item)) continue;
+
+                mc.interactionManager.clickSlot(handler.syncId, i, 100, SlotActionType.SWAP, mc.player);
             }
         }
     }
 
-    public enum ListMode {
-        Whitelist,
-        Blacklist,
-        None
+    private class Steal extends Button {
+        private final Setting<Boolean> drop = sg.add(new BoolSetting.Builder()
+            .name("drop-items")
+            .description("Drop items to the ground instead of stealing them.")
+            .defaultValue(false)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            .build()
+        );
+
+        private final Setting<Boolean> dropBackwards = sg.add(new BoolSetting.Builder()
+            .name("drop-backwards")
+            .description("Drop items behind you.")
+            .defaultValue(false)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled && drop.get())
+            .build()
+        );
+
+        protected Steal() {
+            super("Steal", "Item Stealer");
+        }
+
+        @Override
+        public void execute0(ScreenHandler handler) {
+            for (int i = 0; i < SlotUtils.indexToId(SlotUtils.MAIN_START); i++) {
+                if (!handler.getSlot(i).hasStack()) continue;
+                if (delayAndCheckConditions()) break;
+                Item item = handler.getSlot(i).getStack().getItem();
+                if (!itemsFilter.get().test(items.get(), item)) continue;
+
+                if (drop.get()) {
+                    if (dropBackwards.get()) {
+                        int iCopy = i;
+                        Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
+                    } else {
+                        InvUtils.drop().slotId(i);
+                    }
+                } else InvUtils.shiftClick().slotId(i);
+            }
+        }
+    }
+
+    private class Dump extends Button {
+        private final Setting<Boolean> excludeHotbar = sg.add(new BoolSetting.Builder()
+            .name("exclude-hotbar")
+            .description("Exclude items in hotbar from dumping into container.")
+            .defaultValue(false)
+            .visible(() -> triggerMode.get() != TriggerMode.Disabled)
+            .build()
+        );
+
+        protected Dump() {
+            super("Dump", "Item Dumper");
+        }
+
+        @Override
+        public void execute0(ScreenHandler handler) {
+            int playerInvOffset = SlotUtils.indexToId(SlotUtils.MAIN_START);
+            int playerInvEnd = excludeHotbar.get() ? (playerInvOffset + 3 * 9) : (playerInvOffset + 4 * 9);
+
+            for (int i = playerInvOffset; i < playerInvEnd; i++) {
+                if (!handler.getSlot(i).hasStack()) continue;
+                if (delayAndCheckConditions()) break;
+                Item item = handler.getSlot(i).getStack().getItem();
+                if (!itemsFilter.get().test(items.get(), item)) continue;
+
+                InvUtils.shiftClick().slotId(i);
+            }
+        }
     }
 }

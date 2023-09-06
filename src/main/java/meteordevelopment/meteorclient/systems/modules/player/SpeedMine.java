@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffectInstance;
@@ -38,10 +39,10 @@ public class SpeedMine extends Module {
         .build()
     );
 
-    private final Setting<ListMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<ListMode>()
+    public final Setting<FilterMode> blocksFilter = sgGeneral.add(new EnumSetting.Builder<FilterMode>()
         .name("blocks-filter")
         .description("How to use the blocks setting.")
-        .defaultValue(ListMode.Blacklist)
+        .defaultValue(FilterMode.Blacklist)
         .visible(() -> mode.get() != Mode.Haste)
         .build()
     );
@@ -112,8 +113,7 @@ public class SpeedMine extends Module {
     }
 
     public boolean filter(Block block) {
-        if (blocksFilter.get() == ListMode.Blacklist && !blocks.get().contains(block)) return true;
-        return blocksFilter.get() == ListMode.Whitelist && blocks.get().contains(block);
+        return blocksFilter.get().test(blocks.get(), block);
     }
 
     public boolean instamine() {
@@ -124,10 +124,5 @@ public class SpeedMine extends Module {
         Normal,
         Haste,
         Damage
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 }

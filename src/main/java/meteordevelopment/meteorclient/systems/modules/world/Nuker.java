@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
+import meteordevelopment.meteorclient.utils.misc.FilterMode;
 import meteordevelopment.meteorclient.utils.misc.Pool;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
@@ -153,26 +154,19 @@ public class Nuker extends Module {
         .build()
     );
 
-    // Whitelist and blacklist
+    // Whitelist
 
-    private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
-        .name("list-mode")
-        .description("Selection mode.")
-        .defaultValue(ListMode.Whitelist)
+    private final Setting<FilterMode> filterMode = sgWhitelist.add(new EnumSetting.Builder<FilterMode>()
+        .name("blocks-filter")
+        .description("Filter mode for Blocks.")
+        .defaultValue(FilterMode.Whitelist)
         .build()
     );
 
-    private final Setting<List<Block>> blacklist = sgWhitelist.add(new BlockListSetting.Builder()
-        .name("blacklist")
-        .description("The blocks you don't want to mine.")
-        .visible(() -> listMode.get() == ListMode.Blacklist)
-        .build()
-    );
-
-    private final Setting<List<Block>> whitelist = sgWhitelist.add(new BlockListSetting.Builder()
-        .name("whitelist")
-        .description("The blocks you want to mine.")
-        .visible(() -> listMode.get() == ListMode.Whitelist)
+    private final Setting<List<Block>> blocksList = sgWhitelist.add(new BlockListSetting.Builder()
+        .name("blocks")
+        .description("Select blocks for mining.")
+        .visible(() -> !filterMode.get().isWildCard())
         .build()
     );
 
@@ -355,9 +349,8 @@ public class Nuker extends Module {
             // Smash
             if (mode.get() == Mode.Smash && blockState.getHardness(mc.world, blockPos) != 0) return;
 
-            // Check whitelist or blacklist
-            if (listMode.get() == ListMode.Whitelist && !whitelist.get().contains(blockState.getBlock())) return;
-            if (listMode.get() == ListMode.Blacklist && blacklist.get().contains(blockState.getBlock())) return;
+            // Check block filter
+            if (!filterMode.get().test(blocksList.get(), blockState.getBlock())) return;
 
             // Add block
             blocks.add(blockPosPool.get().set(blockPos));
@@ -421,15 +414,10 @@ public class Nuker extends Module {
             blocks.clear();
         });
     }
-    
+
     @EventHandler(priority = EventPriority.HIGHEST)
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
         event.cooldown = 0;
-    }
-
-    public enum ListMode {
-        Whitelist,
-        Blacklist
     }
 
     public enum Mode {
