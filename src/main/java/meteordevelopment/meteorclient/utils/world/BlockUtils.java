@@ -187,8 +187,8 @@ public class BlockUtils {
         BlockPos pos = blockPos instanceof BlockPos.Mutable ? new BlockPos(blockPos) : blockPos;
 
         if (mc.interactionManager.isBreakingBlock())
-            mc.interactionManager.updateBlockBreakingProgress(pos, Direction.UP);
-        else mc.interactionManager.attackBlock(pos, Direction.UP);
+            mc.interactionManager.updateBlockBreakingProgress(pos, getDirection(blockPos));
+        else mc.interactionManager.attackBlock(pos, getDirection(blockPos));
 
         if (swing) mc.player.swingHand(Hand.MAIN_HAND);
         else mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
@@ -263,6 +263,29 @@ public class BlockUtils {
     public static boolean topSurface(BlockState blockState) {
         if (blockState.getBlock() instanceof SlabBlock && blockState.get(SlabBlock.TYPE) == SlabType.TOP) return true;
         else return blockState.getBlock() instanceof StairsBlock && blockState.get(StairsBlock.HALF) == BlockHalf.TOP;
+    }
+
+    // Finds the best block direction to get when interacting with the block.
+    public static Direction getDirection(BlockPos pos) {
+        Vec3d eyesPos = new Vec3d(mc.player.getX(), mc.player.getY() + mc.player.getEyeHeight(mc.player.getPose()), mc.player.getZ());
+        if ((double) pos.getY() > eyesPos.y) {
+            if (mc.world.getBlockState(pos.add(0, -1, 0)).isReplaceable()) return Direction.DOWN;
+            else return getOppositeDirection();
+        }
+        if (!mc.world.getBlockState(pos.add(0, 1, 0)).isReplaceable()) return getOppositeDirection();
+        return Direction.UP;
+    }
+
+    // Example: If the player is facing east, then that means they would click the west side of a block.
+    private static Direction getOppositeDirection() {
+        return switch (mc.player.getHorizontalFacing()) {
+            case DOWN -> Direction.UP;
+            case UP -> Direction.DOWN;
+            case NORTH -> Direction.SOUTH;
+            case SOUTH -> Direction.NORTH;
+            case WEST -> Direction.EAST;
+            case EAST -> Direction.WEST;
+        };
     }
 
     public enum MobSpawn {
