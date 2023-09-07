@@ -38,10 +38,10 @@ public class PacketUtils {
         C2S_PACKETS_R.put("PlayerInteractItemC2SPacket", net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.login.EnterConfigurationC2SPacket.class, "EnterConfigurationC2SPacket");
         C2S_PACKETS_R.put("EnterConfigurationC2SPacket", net.minecraft.network.packet.c2s.login.EnterConfigurationC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
-        C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.class, "PlayerActionC2SPacket");
         C2S_PACKETS_R.put("PlayerActionC2SPacket", net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
+        C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket.class, "CommandExecutionC2SPacket");
         C2S_PACKETS_R.put("CommandExecutionC2SPacket", net.minecraft.network.packet.c2s.play.CommandExecutionC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RenameItemC2SPacket.class, "RenameItemC2SPacket");
@@ -54,12 +54,12 @@ public class PacketUtils {
         C2S_PACKETS_R.put("QueryBlockNbtC2SPacket", net.minecraft.network.packet.c2s.play.QueryBlockNbtC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket.class, "PlayerInteractEntityC2SPacket");
         C2S_PACKETS_R.put("PlayerInteractEntityC2SPacket", net.minecraft.network.packet.c2s.play.PlayerInteractEntityC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket.class, "AcknowledgeReconfigurationC2SPacket");
+        C2S_PACKETS_R.put("AcknowledgeReconfigurationC2SPacket", net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket.class, "RequestCommandCompletionsC2SPacket");
         C2S_PACKETS_R.put("RequestCommandCompletionsC2SPacket", net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdatePlayerAbilitiesC2SPacket.class, "UpdatePlayerAbilitiesC2SPacket");
         C2S_PACKETS_R.put("UpdatePlayerAbilitiesC2SPacket", net.minecraft.network.packet.c2s.play.UpdatePlayerAbilitiesC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket.class, "AcknowledgeReconfigurationC2SPacket");
-        C2S_PACKETS_R.put("AcknowledgeReconfigurationC2SPacket", net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.query.QueryRequestC2SPacket.class, "QueryRequestC2SPacket");
         C2S_PACKETS_R.put("QueryRequestC2SPacket", net.minecraft.network.packet.c2s.query.QueryRequestC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class, "UpdateCommandBlockC2SPacket");
@@ -70,8 +70,6 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ClickSlotC2SPacket", net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket.class, "AdvancementTabC2SPacket");
         C2S_PACKETS_R.put("AdvancementTabC2SPacket", net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket.class, "ClientSettingsC2SPacket");
-        C2S_PACKETS_R.put("ClientSettingsC2SPacket", net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket.class, "AcknowledgeChunksC2SPacket");
         C2S_PACKETS_R.put("AcknowledgeChunksC2SPacket", net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class, "SpectatorTeleportC2SPacket");
@@ -92,6 +90,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ResourcePackStatusC2SPacket", net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket.class, "PlayerMoveC2SPacket");
         C2S_PACKETS_R.put("PlayerMoveC2SPacket", net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.ClientOptionsC2SPacket.class, "ClientOptionsC2SPacket");
+        C2S_PACKETS_R.put("ClientOptionsC2SPacket", net.minecraft.network.packet.c2s.common.ClientOptionsC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket.class, "CustomPayloadC2SPacket");
         C2S_PACKETS_R.put("CustomPayloadC2SPacket", net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PickFromInventoryC2SPacket.class, "PickFromInventoryC2SPacket");
@@ -297,8 +297,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("TitleFadeS2CPacket", net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.query.PingResultS2CPacket.class, "PingResultS2CPacket");
         S2C_PACKETS_R.put("PingResultS2CPacket", net.minecraft.network.packet.s2c.query.PingResultS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket.class, "PlayerSpawnS2CPacket");
-        S2C_PACKETS_R.put("PlayerSpawnS2CPacket", net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerActionResponseS2CPacket.class, "PlayerActionResponseS2CPacket");
         S2C_PACKETS_R.put("PlayerActionResponseS2CPacket", net.minecraft.network.packet.s2c.play.PlayerActionResponseS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.InventoryS2CPacket.class, "InventoryS2CPacket");
