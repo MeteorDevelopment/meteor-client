@@ -32,7 +32,8 @@
     "meteor-client-indigo.mixins.json",
     "meteor-client-sodium.mixins.json",
     "meteor-client-canvas.mixins.json",
-    "meteor-client-lithium.mixins.json"
+    "meteor-client-lithium.mixins.json",
+    "meteor-client-indium.mixins.json"
   ],
   "accessWidener": "meteor-client.accesswidener",
   "custom": {
