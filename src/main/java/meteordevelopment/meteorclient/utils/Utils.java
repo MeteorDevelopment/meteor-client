@@ -73,6 +73,10 @@ public class Utils {
     public static Screen screenToOpen;
     public static VertexSorter vertexSorter;
 
+    public static int cps;
+    private static long lastTime;
+    public static ArrayList<Integer> clickList = new ArrayList<>();
+
     public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
 
     @PreInit
@@ -85,6 +89,28 @@ public class Utils {
         if (screenToOpen != null && mc.currentScreen == null) {
             mc.setScreen(screenToOpen);
             screenToOpen = null;
+        }
+    }
+
+    public static void cpsChecker() {
+        long currentTime = System.currentTimeMillis();
+        // Run every second
+        if (currentTime - Utils.lastTime >= 1000) {
+            // If the player did not click in that second
+            // empty the cps list
+            if (Utils.cps == 0) {
+                clickList.clear();
+            } else {
+                // Add the previous cps to the list
+                // and reset the CPS and time
+                clickList.add(clickList.isEmpty() ? 0 : clickList.get(clickList.size() - 1));
+                Utils.cps = 0;
+                Utils.lastTime = currentTime;
+            }
+        }
+        if (!clickList.isEmpty()) {
+            // Set the current CPS to the last element of the list
+            clickList.set(clickList.size() - 1, Utils.cps);
         }
     }
 

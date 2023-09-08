@@ -82,6 +82,9 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
     @Inject(at = @At("HEAD"), method = "tick")
     private void onPreTick(CallbackInfo info) {
         OnlinePlayers.update();
+        // CPS Checker function should run every tick
+        Utils.cpsChecker();
+
         doItemUseCalled = false;
 
         getProfiler().push(MeteorClient.MOD_ID + "_pre_update");

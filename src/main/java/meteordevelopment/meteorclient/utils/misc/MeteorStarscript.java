@@ -78,6 +78,7 @@ public class MeteorStarscript {
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
+        ss.set("cps", MeteorStarscript::cps);
 
         // Meteor
         ss.set("meteor", new ValueMap()
@@ -125,7 +126,7 @@ public class MeteorStarscript {
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
             .set("absorption", () -> Value.number(mc.player != null ? mc.player.getAbsorptionAmount() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
-            
+
             .set("speed", () -> Value.number(Utils.getPlayerSpeed().horizontalLength()))
             .set("speed_all", new ValueMap()
                 .set("_toString", () -> Value.string(mc.player != null ? Utils.getPlayerSpeed().toString() : ""))
@@ -382,6 +383,18 @@ public class MeteorStarscript {
     }
 
     // Other
+
+    private static Value cps() {
+        int cpsAverage;
+        if (Utils.clickList.isEmpty()) {
+            cpsAverage = 0;
+        } else {
+            cpsAverage = Utils.clickList.stream().mapToInt(i -> i).sum() / Utils.clickList.size();
+        }
+
+
+        return Value.number(cpsAverage);
+    }
 
     private static Value baritoneProcess() {
         Optional<IBaritoneProcess> process = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().mostRecentInControl();
