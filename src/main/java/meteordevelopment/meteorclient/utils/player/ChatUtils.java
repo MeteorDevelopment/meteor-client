@@ -122,14 +122,12 @@ public class ChatUtils {
     }
 
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
-        MutableText message = formatMsg(messageContent, messageColor, args);
-        message.formatted(messageColor);
+        MutableText message = formatMsg(String.format(messageContent, args), messageColor);
         sendMsg(id, prefixTitle, prefixColor, message);
     }
 
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
-        MutableText message = Text.literal(messageContent);
-        message.formatted(messageColor);
+        MutableText message = formatMsg(messageContent, messageColor);
         sendMsg(id, prefixTitle, prefixColor, message);
     }
 
@@ -199,8 +197,8 @@ public class ChatUtils {
         return PREFIX;
     }
 
-    private static MutableText formatMsg(String format, Formatting defaultColor, Object... args) {
-        StringReader reader = new StringReader(String.format(format, args));
+    private static MutableText formatMsg(String message, Formatting defaultColor) {
+        StringReader reader = new StringReader(message);
         MutableText text = Text.empty();
         Style style = Style.EMPTY.withFormatting(defaultColor);
         StringBuilder result = new StringBuilder();
