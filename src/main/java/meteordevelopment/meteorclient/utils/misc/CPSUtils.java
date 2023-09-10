@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
-import meteordevelopment.starscript.value.Value;
 
 
 public class CPSUtils {
@@ -25,22 +24,6 @@ public class CPSUtils {
 
     @EventHandler
     private static void onTick(TickEvent.Pre event) {
-        CPSUtils.cpsChecker();
-    }
-
-
-    public static void onAttack() {
-        CPSUtils.clicks++;
-        CPSUtils.cps++;
-    }
-
-    public static Value getCpsAverage() {
-        return Value.number((int)(
-            clicks / (secondsClicking == 0 ? 1 : (float)secondsClicking)
-        ));
-    }
-
-    public static void cpsChecker() {
         long currentTime = System.currentTimeMillis();
         // Run every second
         if (currentTime - CPSUtils.lastTime >= 1000) {
@@ -55,4 +38,13 @@ public class CPSUtils {
         }
     }
 
+
+    public static void onAttack() {
+        CPSUtils.clicks++;
+        CPSUtils.cps++;
+    }
+
+    public static int getCpsAverage() {
+        return clicks / (secondsClicking == 0 ? 1 : secondsClicking);
+    }
 }
