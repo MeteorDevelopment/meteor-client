@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.utils.player;
 
 import baritone.api.BaritoneAPI;
+import com.mojang.brigadier.StringReader;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.systems.config.Config;
@@ -121,12 +122,14 @@ public class ChatUtils {
     }
 
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Formatting messageColor, String messageContent, Object... args) {
-        sendMsg(id, prefixTitle, prefixColor, formatMsg(messageContent, messageColor, args), messageColor);
+        MutableText message = formatMsg(messageContent, messageColor, args);
+        message.formatted(messageColor);
+        sendMsg(id, prefixTitle, prefixColor, message);
     }
 
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, String messageContent, Formatting messageColor) {
         MutableText message = Text.literal(messageContent);
-        message.setStyle(message.getStyle().withFormatting(messageColor));
+        message.formatted(messageColor);
         sendMsg(id, prefixTitle, prefixColor, message);
     }
 
@@ -196,19 +199,50 @@ public class ChatUtils {
         return PREFIX;
     }
 
-    private static String formatMsg(String format, Formatting defaultColor, Object... args) {
-        String msg = String.format(format, args);
-        msg = msg.replace("(default)", defaultColor.toString());
-        msg = msg.replace("(highlight)", Formatting.WHITE.toString());
-        msg = msg.replace("(underline)", Formatting.UNDERLINE.toString());
+    private static MutableText formatMsg(String format, Formatting defaultColor, Object... args) {
+        StringReader reader = new StringReader(String.format(format, args));
+        MutableText text = Text.empty();
+        Style style = Style.EMPTY.withFormatting(defaultColor);
+        StringBuilder result = new StringBuilder();
+        boolean formatting = false;
+        while (reader.canRead()) {
+            char c = reader.read();
+            if (c == '(') {
+                text.append(Text.literal(result.toString()).setStyle(style));
+                result.setLength(0);
+                result.append(c);
+                formatting = true;
+            } else {
+                result.append(c);
 
-        return msg;
+                if (formatting && c == ')') {
+                    switch (result.toString()) {
+                        case "(default)" -> {
+                            style = style.withFormatting(defaultColor);
+                            result.setLength(0);
+                        }
+                        case "(highlight)" -> {
+                            style = style.withFormatting(Formatting.WHITE);
+                            result.setLength(0);
+                        }
+                        case "(underline)" -> {
+                            style = style.withFormatting(Formatting.UNDERLINE);
+                            result.setLength(0);
+                        }
+                    }
+                    formatting = false;
+                }
+            }
+        }
+
+        if (!result.isEmpty()) text.append(Text.literal(result.toString()).setStyle(style));
+
+        return text;
     }
 
     public static MutableText formatCoords(Vec3d pos) {
         String coordsString = String.format("(highlight)(underline)%.0f, %.0f, %.0f(default)", pos.x, pos.y, pos.z);
-        coordsString = formatMsg(coordsString, Formatting.GRAY);
-        MutableText coordsText = Text.literal(coordsString);
+        MutableText coordsText = formatMsg(coordsString, Formatting.GRAY);
         coordsText.setStyle(coordsText.getStyle()
                 .withFormatting(Formatting.BOLD)
                 .withClickEvent(new ClickEvent(
