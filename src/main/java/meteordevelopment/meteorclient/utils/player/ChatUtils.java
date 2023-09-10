@@ -31,7 +31,7 @@ public class ChatUtils {
 
     @PostInit
     public static void init() {
-        PREFIX = Text.literal("")
+        PREFIX = Text.empty()
             .setStyle(Style.EMPTY.withFormatting(Formatting.GRAY))
             .append("[")
             .append(Text.literal("Meteor").setStyle(Style.EMPTY.withColor(TextColor.fromRgb(MeteorClient.ADDON.color.getPacked()))))
@@ -134,7 +134,7 @@ public class ChatUtils {
     public static void sendMsg(int id, @Nullable String prefixTitle, @Nullable Formatting prefixColor, Text msg) {
         if (mc.world == null) return;
 
-        MutableText message = Text.literal("");
+        MutableText message = Text.empty();
         message.append(getPrefix());
         if (prefixTitle != null) message.append(getCustomPrefix(prefixTitle, prefixColor));
         message.append(msg);
@@ -145,7 +145,7 @@ public class ChatUtils {
     }
 
     private static MutableText getCustomPrefix(String prefixTitle, Formatting prefixColor) {
-        MutableText prefix = Text.literal("");
+        MutableText prefix = Text.empty();
         prefix.setStyle(prefix.getStyle().withFormatting(Formatting.GRAY));
 
         prefix.append("[");
