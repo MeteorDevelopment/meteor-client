@@ -78,7 +78,7 @@ public class MeteorStarscript {
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
-        ss.set("cps", MeteorStarscript::cps);
+        ss.set("cps", CPSUtils::getCpsAverage);
 
         // Meteor
         ss.set("meteor", new ValueMap()
@@ -383,18 +383,6 @@ public class MeteorStarscript {
     }
 
     // Other
-
-    private static Value cps() {
-        int cpsAverage;
-        if (Utils.clickList.isEmpty()) {
-            cpsAverage = 0;
-        } else {
-            cpsAverage = Utils.clickList.stream().mapToInt(i -> i).sum() / Utils.clickList.size();
-        }
-
-
-        return Value.number(cpsAverage);
-    }
 
     private static Value baritoneProcess() {
         Optional<IBaritoneProcess> process = BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().mostRecentInControl();
