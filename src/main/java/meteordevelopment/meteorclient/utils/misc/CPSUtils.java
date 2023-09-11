@@ -31,12 +31,14 @@ public class CPSUtils {
 
     @EventHandler
     public static void onClick(MouseButtonEvent event) {
-        if (event.button == 0 && event.action == KeyAction.Press) {
-            CPSUtils.clicks++;
-            CPSUtils.cps++;
-        } else if (event.button == 1 && event.action == KeyAction.Press) {
-            CPSUtils.rightClicks++;
-            CPSUtils.rightCps++;
+        if (MeteorClient.mc.currentScreen == null) {
+            if (event.button == 0 && event.action == KeyAction.Press) {
+                CPSUtils.clicks++;
+                CPSUtils.cps++;
+            } else if (event.button == 1 && event.action == KeyAction.Press) {
+                CPSUtils.rightClicks++;
+                CPSUtils.rightCps++;
+            }
         }
     }
 
