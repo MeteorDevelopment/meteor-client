@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.player.FastUse;
 import meteordevelopment.meteorclient.systems.modules.render.UnfocusedCPU;
 import meteordevelopment.meteorclient.utils.Utils;
-import meteordevelopment.meteorclient.utils.misc.CPSUtils;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
 import meteordevelopment.starscript.Script;
@@ -99,11 +98,6 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         getProfiler().push(MeteorClient.MOD_ID + "_post_update");
         MeteorClient.EVENT_BUS.post(TickEvent.Post.get());
         getProfiler().pop();
-    }
-
-    @Inject(method = "doAttack", at = @At("HEAD"))
-    private void onAttack(CallbackInfoReturnable<Boolean> cir) {
-        CPSUtils.onAttack();
     }
 
     @Inject(method = "doItemUse", at = @At("HEAD"))
