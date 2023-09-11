@@ -159,7 +159,7 @@ public class AutoBrewer extends Module {
 
     private boolean takePotions(BrewingStandScreenHandler c) {
         for (int i = 0; i < 3; i++) {
-            InvUtils.quickMove().slotId(i);
+            InvUtils.shiftClick().slotId(i);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
                 error("You do not have a sufficient amount of inventory space... disabling.");

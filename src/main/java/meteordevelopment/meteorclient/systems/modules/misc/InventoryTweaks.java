@@ -398,7 +398,7 @@ public class InventoryTweaks extends Module {
                     int iCopy = i;
                     Rotations.rotate(mc.player.getYaw() - 180, mc.player.getPitch(), () -> InvUtils.drop().slotId(iCopy));
                 }
-            } else InvUtils.quickMove().slotId(i);
+            } else InvUtils.shiftClick().slotId(i);
         }
     }
 
