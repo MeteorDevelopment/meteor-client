@@ -123,7 +123,7 @@ public class DamageUtils {
         // Reduce by enchants
         damage = normalProtReduction(entity, damage);
 
-        return damage < 0 ? 0 : damage;
+        return Math.max(damage, 0);
     }
 
     // Bed damage
@@ -150,16 +150,16 @@ public class DamageUtils {
         // Reduce by enchants
         damage = blastProtReduction(player, damage);
 
-        if (damage < 0) damage = 0;
-        return damage;
+        return Math.max(damage, 0);
     }
 
     // Anchor damage
 
     public static double anchorDamage(LivingEntity player, Vec3d anchor) {
-        mc.world.removeBlock(BlockPos.ofFloored(anchor), false);
+        BlockPos anchorPos = BlockPos.ofFloored(anchor);
+        mc.world.removeBlock(anchorPos, false);
         double damage = bedDamage(player, anchor);
-        mc.world.setBlockState(BlockPos.ofFloored(anchor), Blocks.RESPAWN_ANCHOR.getDefaultState());
+        mc.world.setBlockState(anchorPos, Blocks.RESPAWN_ANCHOR.getDefaultState());
         return damage;
     }
 
