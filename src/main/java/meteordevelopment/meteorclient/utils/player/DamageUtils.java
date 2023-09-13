@@ -21,6 +21,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -33,8 +34,6 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.explosion.Explosion;
-
-import java.util.Objects;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -110,9 +109,9 @@ public class DamageUtils {
             }
         }
 
-        if (entity.getActiveStatusEffects().containsKey(StatusEffects.STRENGTH)) {
-            int strength = Objects.requireNonNull(entity.getStatusEffect(StatusEffects.STRENGTH)).getAmplifier() + 1;
-            damage += 3 * strength;
+        StatusEffectInstance strength = entity.getStatusEffect(StatusEffects.STRENGTH);
+        if (strength != null) {
+            damage += 3 * (strength.getAmplifier() + 1);
         }
 
         // Reduce by resistance
