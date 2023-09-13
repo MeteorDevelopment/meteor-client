@@ -9,7 +9,6 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosion;
 import meteordevelopment.meteorclient.mixininterface.IRaycastContext;
-import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
@@ -40,7 +39,6 @@ import java.util.Objects;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
-    private static final Vec3d vec3d = new Vec3d(0, 0, 0);
     private static Explosion explosion;
     private static RaycastContext raycastContext;
 
@@ -61,10 +59,9 @@ public class DamageUtils {
         if (player == null) return 0;
         if (EntityUtils.getGameMode(player) == GameMode.CREATIVE && !(player instanceof FakePlayerEntity)) return 0;
 
-        ((IVec3d) vec3d).set(player.getPos().x, player.getPos().y, player.getPos().z);
-        if (predictMovement) ((IVec3d) vec3d).set(vec3d.x + player.getVelocity().x, vec3d.y + player.getVelocity().y, vec3d.z + player.getVelocity().z);
+        Vec3d playerPosition = predictMovement ? player.getPos().add(player.getVelocity()) : player.getPos();
 
-        double modDistance = Math.sqrt(vec3d.squaredDistanceTo(crystal));
+        double modDistance = playerPosition.distanceTo(crystal);
         if (modDistance > 12) return 0;
 
         double exposure = getExposure(crystal, player, predictMovement, raycastContext, obsidianPos, ignoreTerrain);
@@ -78,7 +75,7 @@ public class DamageUtils {
         ((IExplosion) explosion).set(crystal, 6, false);
         damage = blastProtReduction(player, damage, explosion);
 
-        return damage < 0 ? 0 : damage;
+        return Math.max(damage, 0);
     }
 
     public static double crystalDamage(PlayerEntity player, Vec3d crystal) {
@@ -229,7 +226,7 @@ public class DamageUtils {
                         double o = MathHelper.lerp(l, box.minY, box.maxY);
                         double p = MathHelper.lerp(m, box.minZ, box.maxZ);
 
-                        ((IVec3d) vec3d).set(n + g, o, p + h);
+                        Vec3d vec3d = new Vec3d(n + g, o, p + h);
                         ((IRaycastContext) raycastContext).set(vec3d, source, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.NONE, entity);
 
                         if (raycast(raycastContext, obsidianPos, ignoreTerrain).getType() == HitResult.Type.MISS) i++;
