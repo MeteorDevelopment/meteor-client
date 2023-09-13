@@ -7,7 +7,6 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
-import meteordevelopment.meteorclient.mixininterface.IExplosion;
 import meteordevelopment.meteorclient.mixininterface.IRaycastContext;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -21,6 +20,7 @@ import net.minecraft.entity.DamageUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
@@ -39,7 +39,7 @@ import java.util.Objects;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
-    private static Explosion explosion;
+    private static DamageSource damageSource;
     private static RaycastContext raycastContext;
 
     @PreInit
@@ -49,7 +49,7 @@ public class DamageUtils {
 
     @EventHandler
     private static void onGameJoined(GameJoinedEvent event) {
-        explosion = new Explosion(mc.world, null, 0, 0, 0, 6, false, Explosion.DestructionType.DESTROY);
+        damageSource = mc.world.getDamageSources().explosion(null);
         raycastContext = new RaycastContext(null, null, RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.ANY, mc.player);
     }
 
@@ -72,8 +72,7 @@ public class DamageUtils {
         damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
         damage = resistanceReduction(player, damage);
 
-        ((IExplosion) explosion).set(crystal, 6, false);
-        damage = blastProtReduction(player, damage, explosion);
+        damage = blastProtReduction(player, damage);
 
         return Math.max(damage, 0);
     }
@@ -150,8 +149,7 @@ public class DamageUtils {
         damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         // Reduce by enchants
-        ((IExplosion) explosion).set(bed, 5, true);
-        damage = blastProtReduction(player, damage, explosion);
+        damage = blastProtReduction(player, damage);
 
         if (damage < 0) damage = 0;
         return damage;
@@ -185,8 +183,8 @@ public class DamageUtils {
         return damage < 0 ? 0 : damage;
     }
 
-    private static double blastProtReduction(Entity player, double damage, Explosion explosion) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().explosion(explosion));
+    private static double blastProtReduction(Entity player, double damage) {
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), damageSource);
         if (protLevel > 20) protLevel = 20;
 
         damage *= (1 - (protLevel / 25.0));
