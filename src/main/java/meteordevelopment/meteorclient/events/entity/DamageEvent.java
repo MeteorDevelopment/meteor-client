@@ -13,12 +13,12 @@ public class DamageEvent {
 
     public LivingEntity entity;
     public DamageSource source;
-    public float amount;
+    @Deprecated(forRemoval = true)
+    public final float amount = 0;
 
-    public static DamageEvent get(LivingEntity entity, DamageSource source, float amount) {
+    public static DamageEvent get(LivingEntity entity, DamageSource source) {
         INSTANCE.entity = entity;
         INSTANCE.source = source;
-        INSTANCE.amount = amount;
         return INSTANCE;
     }
 }
