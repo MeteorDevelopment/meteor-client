@@ -77,6 +77,9 @@ public class DamageUtils {
 
     // Sword damage
 
+    /**
+     * @deprecated Use {@link DamageUtils#getAttackDamage(PlayerEntity)} instead.
+     */
     @Deprecated(forRemoval = true)
     public static double getSwordDamage(PlayerEntity entity, boolean charged) {
         return getAttackDamage(entity);
