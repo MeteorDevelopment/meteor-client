@@ -81,6 +81,9 @@ public class DamageUtils {
         return getAttackDamage(entity);
     }
 
+    /**
+     * @see PlayerEntity#attack(Entity)
+     */
     public static double getAttackDamage(PlayerEntity entity) {
         // Get item damage
         double itemDamage = 1;
@@ -206,6 +209,9 @@ public class DamageUtils {
         return Math.max(damage, 0);
     }
 
+    /**
+     * @see Explosion#getExposure(Vec3d, Entity)
+     */
     private static double getExposure(Vec3d source, Entity entity, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
         Box box = entity.getBoundingBox();
         if (predictMovement) {
