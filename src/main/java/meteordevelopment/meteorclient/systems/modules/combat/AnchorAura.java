@@ -27,6 +27,7 @@ import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import org.jetbrains.annotations.Nullable;
 
 public class AnchorAura extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -225,6 +226,7 @@ public class AnchorAura extends Module {
     private int placeDelayLeft;
     private int breakDelayLeft;
     private PlayerEntity target;
+    private final BlockPos.Mutable mutable = new BlockPos.Mutable();
 
     public AnchorAura() {
         super(Categories.Combat, "anchor-aura", "Automatically places and breaks Respawn Anchors to harm entities.");
@@ -301,48 +303,50 @@ public class AnchorAura extends Module {
         }
     }
 
+    @Nullable
     private BlockPos findPlacePos(BlockPos targetPlacePos) {
         switch (placePositions.get()) {
-            case All:
-                if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
-                else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
-                else if (isValidPlace(targetPlacePos.add(1, 0, 0))) return targetPlacePos.add(1, 0, 0);
-                else if (isValidPlace(targetPlacePos.add(-1, 0, 0))) return targetPlacePos.add(-1, 0, 0);
-                else if (isValidPlace(targetPlacePos.add(0, 0, 1))) return targetPlacePos.add(0, 0, 1);
-                else if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
-                else if (isValidPlace(targetPlacePos.add(1, 1, 0))) return targetPlacePos.add(1, 1, 0);
-                else if (isValidPlace(targetPlacePos.add(-1, -1, 0))) return targetPlacePos.add(-1, -1, 0);
-                else if (isValidPlace(targetPlacePos.add(0, 1, 1))) return targetPlacePos.add(0, 1, 1);
-                else if (isValidPlace(targetPlacePos.add(0, 0, -1))) return targetPlacePos.add(0, 0, -1);
-                break;
-            case Above:
-                if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
-                break;
-            case AboveAndBelow:
-                if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
-                else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
-                break;
-            case Around:
-                if (isValidPlace(targetPlacePos.north())) return targetPlacePos.north();
-                else if (isValidPlace(targetPlacePos.east())) return targetPlacePos.east();
-                else if (isValidPlace(targetPlacePos.west())) return targetPlacePos.west();
-                else if (isValidPlace(targetPlacePos.south())) return targetPlacePos.south();
-                break;
+            case All -> {
+                if (isValidPlace(BlockUtils.mutateDown(mutable, targetPlacePos))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateUp(mutable, targetPlacePos, 2))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, 1, 0, 0))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, -1, 0, 0))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, 0, 0, 1))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, 0, 0, -1))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, 1, 1, 0))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, -1, -1, 0))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, 0, 1, 1))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateAround(mutable, targetPlacePos, 0, 0, -1))) return mutable;
+            }
+            case Above -> {
+                if (isValidPlace(BlockUtils.mutateUp(mutable, targetPlacePos, 2))) return mutable;
+            }
+            case AboveAndBelow -> {
+                if (isValidPlace(BlockUtils.mutateDown(mutable, targetPlacePos))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateUp(mutable, targetPlacePos, 2))) return mutable;
+            }
+            case Around -> {
+                if (isValidPlace(BlockUtils.mutateNorth(mutable, targetPlacePos))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateEast(mutable, targetPlacePos))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateWest(mutable, targetPlacePos))) return mutable;
+                else if (isValidPlace(BlockUtils.mutateSouth(mutable, targetPlacePos))) return mutable;
+            }
         }
         return null;
     }
 
+    @Nullable
     private BlockPos findBreakPos(BlockPos targetPos) {
-        if (isValidBreak(targetPos.down())) return targetPos.down();
-        else if (isValidBreak(targetPos.up(2))) return targetPos.up(2);
-        else if (isValidBreak(targetPos.add(1, 0, 0))) return targetPos.add(1, 0, 0);
-        else if (isValidBreak(targetPos.add(-1, 0, 0))) return targetPos.add(-1, 0, 0);
-        else if (isValidBreak(targetPos.add(0, 0, 1))) return targetPos.add(0, 0, 1);
-        else if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
-        else if (isValidBreak(targetPos.add(1, 1, 0))) return targetPos.add(1, 1, 0);
-        else if (isValidBreak(targetPos.add(-1, -1, 0))) return targetPos.add(-1, -1, 0);
-        else if (isValidBreak(targetPos.add(0, 1, 1))) return targetPos.add(0, 1, 1);
-        else if (isValidBreak(targetPos.add(0, 0, -1))) return targetPos.add(0, 0, -1);
+        if (isValidBreak(BlockUtils.mutateDown(mutable, targetPos))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateUp(mutable, targetPos, 2))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, 1, 0, 0))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, -1, 0, 0))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, 0, 0, 1))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, 0, 0, -1))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, 1, 1, 0))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, -1, -1, 0))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, 0, 1, 1))) return mutable;
+        else if (isValidBreak(BlockUtils.mutateAround(mutable, targetPos, 0, 0, -1))) return mutable;
         return null;
     }
 

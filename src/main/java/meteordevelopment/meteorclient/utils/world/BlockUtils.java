@@ -336,4 +336,42 @@ public class BlockUtils {
 
         return speed;
     }
+
+    /** {@link BlockPos.Mutable} mutations around an origin */
+
+    public static BlockPos.Mutable mutateAround(BlockPos.Mutable mutable, BlockPos origin, int xOffset, int yOffset, int zOffset) {
+        return mutable.set(origin.getX() + xOffset, origin.getY() + yOffset, origin.getZ() + zOffset);
+    }
+
+    public static BlockPos.Mutable mutateDown(BlockPos.Mutable mutable, BlockPos origin) {
+        return mutable.set(origin.getX(), origin.getY() - 1, origin.getZ());
+    }
+
+    public static BlockPos.Mutable mutateDown(BlockPos.Mutable mutable, BlockPos origin, int blocks) {
+        return mutable.set(origin.getX(), origin.getY() - blocks, origin.getZ());
+    }
+
+    public static BlockPos.Mutable mutateUp(BlockPos.Mutable mutable, BlockPos origin) {
+        return mutable.set(origin.getX(), origin.getY() + 1, origin.getZ());
+    }
+
+    public static BlockPos.Mutable mutateUp(BlockPos.Mutable mutable, BlockPos origin, int blocks) {
+        return mutable.set(origin.getX(), origin.getY() + blocks, origin.getZ());
+    }
+
+    public static BlockPos.Mutable mutateNorth(BlockPos.Mutable mutable, BlockPos origin) {
+        return mutable.set(origin.getX(), origin.getY(), origin.getZ() - 1);
+    }
+
+    public static BlockPos.Mutable mutateSouth(BlockPos.Mutable mutable, BlockPos origin) {
+        return mutable.set(origin.getX(), origin.getY(), origin.getZ() + 1);
+    }
+
+    public static BlockPos.Mutable mutateWest(BlockPos.Mutable mutable, BlockPos origin) {
+        return mutable.set(origin.getX() - 1, origin.getY(), origin.getZ());
+    }
+
+    public static BlockPos.Mutable mutateEast(BlockPos.Mutable mutable, BlockPos origin) {
+        return mutable.set(origin.getX() + 1, origin.getY(), origin.getZ());
+    }
 }
