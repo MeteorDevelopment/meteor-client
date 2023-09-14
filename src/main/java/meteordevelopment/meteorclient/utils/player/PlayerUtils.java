@@ -191,16 +191,14 @@ public class PlayerUtils {
         if (entities) {
             for (Entity entity : mc.world.getEntities()) {
                 // Check for end crystals
-                if (entity instanceof EndCrystalEntity && damageTaken < DamageUtils.crystalDamage(mc.player, entity.getPos())) {
-                    damageTaken = DamageUtils.crystalDamage(mc.player, entity.getPos());
+                if (entity instanceof EndCrystalEntity) {
+                    double crystalDamage = DamageUtils.crystalDamage(mc.player, entity.getPos());
+                    if (crystalDamage > damageTaken) damageTaken = crystalDamage;
                 }
                 // Check for players holding swords
-                else if (entity instanceof PlayerEntity && damageTaken < DamageUtils.getSwordDamage((PlayerEntity) entity, true)) {
-                    if (!Friends.get().isFriend((PlayerEntity) entity) && isWithin(entity, 5)) {
-                        if (((PlayerEntity) entity).getActiveItem().getItem() instanceof SwordItem) {
-                            damageTaken = DamageUtils.getSwordDamage((PlayerEntity) entity, true);
-                        }
-                    }
+                else if (entity instanceof PlayerEntity player && !Friends.get().isFriend(player) && isWithin(entity, 5)) {
+                    double attackDamage = DamageUtils.getAttackDamage(player);
+                    if (attackDamage > damageTaken) damageTaken = attackDamage;
                 }
             }
 
@@ -210,8 +208,9 @@ public class PlayerUtils {
                     BlockPos bp = blockEntity.getPos();
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
 
-                    if (blockEntity instanceof BedBlockEntity && damageTaken < DamageUtils.bedDamage(mc.player, pos)) {
-                        damageTaken = DamageUtils.bedDamage(mc.player, pos);
+                    if (blockEntity instanceof BedBlockEntity) {
+                        double explosionDamage = DamageUtils.bedDamage(mc.player, pos);
+                        if (explosionDamage > damageTaken) damageTaken = explosionDamage;
                     }
                 }
             }
