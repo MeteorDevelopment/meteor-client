@@ -24,7 +24,7 @@ import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -82,36 +82,48 @@ public class DamageUtils {
 
     // Sword damage
 
+    @Deprecated(forRemoval = true)
     public static double getSwordDamage(PlayerEntity entity, boolean charged) {
-        // Get sword damage
-        double damage = 0;
-        if (charged) {
-            if (entity.getActiveItem().getItem() == Items.NETHERITE_SWORD) {
-                damage += 8;
-            } else if (entity.getActiveItem().getItem() == Items.DIAMOND_SWORD) {
-                damage += 7;
-            } else if (entity.getActiveItem().getItem() == Items.GOLDEN_SWORD) {
-                damage += 4;
-            } else if (entity.getActiveItem().getItem() == Items.IRON_SWORD) {
-                damage += 6;
-            } else if (entity.getActiveItem().getItem() == Items.STONE_SWORD) {
-                damage += 5;
-            } else if (entity.getActiveItem().getItem() == Items.WOODEN_SWORD) {
-                damage += 4;
-            }
-            damage *= 1.5;
-        }
+        return getAttackDamage(entity);
+    }
 
+    public static double getAttackDamage(PlayerEntity entity) {
+        // Get item damage
+        double itemDamage = 1;
+        if (entity.getActiveItem().getItem() instanceof SwordItem swordItem) itemDamage += swordItem.getAttackDamage();
+        else if (entity.getActiveItem().getItem() instanceof MiningToolItem miningToolItem) itemDamage += miningToolItem.getAttackDamage();
+        else if (entity.getActiveItem().getItem() instanceof ToolItem toolItem) itemDamage += toolItem.getMaterial().getAttackDamage();
+
+        // Get enchant damage
+        double enchantDamage = 0;
         if (entity.getActiveItem().getEnchantments() != null) {
-            if (EnchantmentHelper.get(entity.getActiveItem()).containsKey(Enchantments.SHARPNESS)) {
-                int level = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
-                damage += (0.5 * level) + 0.5;
+            int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
+            if (sharpnessLevel > 0) {
+                enchantDamage = (0.5d * sharpnessLevel) + 0.5d;
             }
         }
 
+        // Factor strength
         StatusEffectInstance strength = entity.getStatusEffect(StatusEffects.STRENGTH);
         if (strength != null) {
-            damage += 3 * (strength.getAmplifier() + 1);
+            itemDamage += 3 * (strength.getAmplifier() + 1);
+        }
+
+        // Factor charge
+        float charge = entity.getAttackCooldownProgress(0.5f);
+        itemDamage *= 0.2d + charge * charge * 0.8d;
+        enchantDamage *= charge;
+
+        // Factor critical hit
+        if (charge > 0.9f && entity.fallDistance > 0f && !entity.isOnGround() && !entity.isClimbing() && !entity.isTouchingWater() && !entity.hasStatusEffect(StatusEffects.BLINDNESS) && !entity.hasVehicle()) {
+            itemDamage *= 1.5d;
+        }
+
+        double damage = itemDamage + enchantDamage;
+
+        // Factor Fire Aspect
+        if (EnchantmentHelper.getFireAspect(entity) > 0 && !mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
+            damage++;
         }
 
         // Reduce by resistance
@@ -179,7 +191,7 @@ public class DamageUtils {
         if (protLevel > 20) protLevel = 20;
 
         damage *= 1 - (protLevel / 25.0);
-        return damage < 0 ? 0 : damage;
+        return Math.max(damage, 0);
     }
 
     private static double blastProtReduction(Entity player, double damage) {
@@ -187,16 +199,17 @@ public class DamageUtils {
         if (protLevel > 20) protLevel = 20;
 
         damage *= (1 - (protLevel / 25.0));
-        return damage < 0 ? 0 : damage;
+        return Math.max(damage, 0);
     }
 
     private static double resistanceReduction(LivingEntity player, double damage) {
-        if (player.hasStatusEffect(StatusEffects.RESISTANCE)) {
-            int lvl = (player.getStatusEffect(StatusEffects.RESISTANCE).getAmplifier() + 1);
+        StatusEffectInstance resistance = player.getStatusEffect(StatusEffects.RESISTANCE);
+        if (resistance != null) {
+            int lvl = resistance.getAmplifier() + 1;
             damage *= (1 - (lvl * 0.2));
         }
 
-        return damage < 0 ? 0 : damage;
+        return Math.max(damage, 0);
     }
 
     private static double getExposure(Vec3d source, Entity entity, boolean predictMovement, RaycastContext raycastContext, BlockPos obsidianPos, boolean ignoreTerrain) {
