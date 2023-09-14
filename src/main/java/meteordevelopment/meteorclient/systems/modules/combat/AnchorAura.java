@@ -266,7 +266,8 @@ public class AnchorAura extends Module {
                 breakDelayLeft = 0;
 
                 if (rotationMode.get() == RotationMode.Both || rotationMode.get() == RotationMode.Break) {
-                    Rotations.rotate(Rotations.getYaw(breakPos), Rotations.getPitch(breakPos), 50, () -> breakAnchor(breakPos, anchor, glowStone));
+                    BlockPos immutableBreakPos = breakPos.toImmutable();
+                    Rotations.rotate(Rotations.getYaw(breakPos), Rotations.getPitch(breakPos), 50, () -> breakAnchor(immutableBreakPos, anchor, glowStone));
                 } else breakAnchor(breakPos, anchor, glowStone);
             }
         }
@@ -276,7 +277,7 @@ public class AnchorAura extends Module {
 
             if (placePos != null) {
                 placeDelayLeft = 0;
-                BlockUtils.place(placePos, anchor, (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both), 50);
+                BlockUtils.place(placePos.toImmutable(), anchor, (rotationMode.get() == RotationMode.Place || rotationMode.get() == RotationMode.Both), 50);
             }
         }
 
