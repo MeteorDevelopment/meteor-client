@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.utils.player;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
@@ -241,12 +242,14 @@ public class DamageUtils {
             double endY = box.maxY;
             double endZ = box.maxZ + zOffset;
 
+            Vec3d position = new Vec3d(0, 0, 0);
+
             for (double x = startX; x <= endX; x += xStep) {
                 for (double y = startY; y <= endY; y += yStep) {
                     for (double z = startZ; z <= endZ; z += zStep) {
-                        Vec3d vec3d = new Vec3d(x, y, z);
+                        ((IVec3d) position).set(x, y, z);
 
-                        if (raycast(vec3d, source, obsidianPos, ignoreTerrain) == HitResult.Type.MISS) misses++;
+                        if (raycast(position, source, obsidianPos, ignoreTerrain) == HitResult.Type.MISS) misses++;
 
                         hits++;
                     }
