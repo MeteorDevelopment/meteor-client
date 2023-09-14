@@ -78,63 +78,64 @@ public class DamageUtils {
     // Sword damage
 
     /**
-     * @deprecated Use {@link DamageUtils#getAttackDamage(PlayerEntity)} instead.
+     * @deprecated Use {@link DamageUtils#getAttackDamage(PlayerEntity, LivingEntity)} instead.
      */
     @Deprecated(forRemoval = true)
     public static double getSwordDamage(PlayerEntity entity, boolean charged) {
-        return getAttackDamage(entity);
+        return getAttackDamage(entity, mc.player);
     }
 
     /**
      * @see PlayerEntity#attack(Entity)
      */
-    public static double getAttackDamage(PlayerEntity entity) {
+    public static double getAttackDamage(PlayerEntity attacker, LivingEntity target) {
         // Get item damage
         double itemDamage = 1;
-        if (entity.getActiveItem().getItem() instanceof SwordItem swordItem) itemDamage += swordItem.getAttackDamage();
-        else if (entity.getActiveItem().getItem() instanceof MiningToolItem miningToolItem) itemDamage += miningToolItem.getAttackDamage();
-        else if (entity.getActiveItem().getItem() instanceof ToolItem toolItem) itemDamage += toolItem.getMaterial().getAttackDamage();
+        ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
+        if (stack.getItem() instanceof SwordItem swordItem) itemDamage += swordItem.getAttackDamage();
+        else if (stack.getItem() instanceof MiningToolItem miningToolItem) itemDamage += miningToolItem.getAttackDamage();
+        else if (stack.getItem() instanceof ToolItem toolItem) itemDamage += toolItem.getMaterial().getAttackDamage();
 
         // Get enchant damage
         double enchantDamage = 0;
-        if (entity.getActiveItem().getEnchantments() != null) {
-            int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, entity.getActiveItem());
+        if (stack.getEnchantments() != null) {
+            int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, attacker.getActiveItem());
             if (sharpnessLevel > 0) {
                 enchantDamage = (0.5d * sharpnessLevel) + 0.5d;
             }
         }
 
         // Factor strength
-        StatusEffectInstance strength = entity.getStatusEffect(StatusEffects.STRENGTH);
+        StatusEffectInstance strength = attacker.getStatusEffect(StatusEffects.STRENGTH);
         if (strength != null) {
             itemDamage += 3 * (strength.getAmplifier() + 1);
         }
 
         // Factor charge
-        float charge = entity.getAttackCooldownProgress(0.5f);
+        float charge = attacker.getAttackCooldownProgress(0.5f);
         itemDamage *= 0.2d + charge * charge * 0.8d;
         enchantDamage *= charge;
 
         // Factor critical hit
-        if (charge > 0.9f && entity.fallDistance > 0f && !entity.isOnGround() && !entity.isClimbing() && !entity.isTouchingWater() && !entity.hasStatusEffect(StatusEffects.BLINDNESS) && !entity.hasVehicle()) {
+        if (charge > 0.9f && attacker.fallDistance > 0f && !attacker.isOnGround() && !attacker.isClimbing() && !attacker.isTouchingWater() && !attacker.hasStatusEffect(StatusEffects.BLINDNESS) && !attacker.hasVehicle()) {
             itemDamage *= 1.5d;
         }
 
         double damage = itemDamage + enchantDamage;
 
         // Factor Fire Aspect
-        if (EnchantmentHelper.getFireAspect(entity) > 0 && !mc.player.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
+        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
             damage++;
         }
 
         // Reduce by resistance
-        damage = resistanceReduction(entity, damage);
+        damage = resistanceReduction(target, damage);
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) entity.getArmor(), (float) entity.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float) damage, (float) target.getArmor(), (float) target.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
 
         // Reduce by enchants
-        damage = normalProtReduction(entity, damage);
+        damage = normalProtReduction(target, damage);
 
         return Math.max(damage, 0);
     }

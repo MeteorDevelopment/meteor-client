@@ -197,7 +197,7 @@ public class PlayerUtils {
                 }
                 // Check for players holding swords
                 else if (entity instanceof PlayerEntity player && !Friends.get().isFriend(player) && isWithin(entity, 5)) {
-                    double attackDamage = DamageUtils.getAttackDamage(player);
+                    double attackDamage = DamageUtils.getAttackDamage(player, mc.player);
                     if (attackDamage > damageTaken) damageTaken = attackDamage;
                 }
             }

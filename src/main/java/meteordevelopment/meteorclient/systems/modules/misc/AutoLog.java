@@ -119,7 +119,7 @@ public class AutoLog extends Module {
                         if (toggleOff.get()) this.toggle();
                         break;
                 }
-                if (PlayerUtils.isWithin(player, 8) && instantDeath.get() && DamageUtils.getAttackDamage(player)
+                if (PlayerUtils.isWithin(player, 8) && instantDeath.get() && DamageUtils.getAttackDamage(player, mc.player)
                         > playerHealth + mc.player.getAbsorptionAmount()) {
                     mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] Anti-32k measures.")));
                     if (toggleOff.get()) this.toggle();
