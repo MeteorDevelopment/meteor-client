@@ -188,6 +188,10 @@ public class DamageUtils {
         };
     }
 
+    /**
+     * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
+     */
+    @SuppressWarnings("JavadocReference")
     private static double normalProtReduction(Entity player, double damage) {
         int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().generic());
         if (protLevel > 20) protLevel = 20;
@@ -196,6 +200,10 @@ public class DamageUtils {
         return Math.max(damage, 0);
     }
 
+    /**
+     * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
+     */
+    @SuppressWarnings("JavadocReference")
     private static double blastProtReduction(Entity player, double damage) {
         int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), damageSource);
         if (protLevel > 20) protLevel = 20;
@@ -204,6 +212,10 @@ public class DamageUtils {
         return Math.max(damage, 0);
     }
 
+    /**
+     * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
+     */
+    @SuppressWarnings("JavadocReference")
     private static double resistanceReduction(LivingEntity player, double damage) {
         StatusEffectInstance resistance = player.getStatusEffect(StatusEffects.RESISTANCE);
         if (resistance != null) {
