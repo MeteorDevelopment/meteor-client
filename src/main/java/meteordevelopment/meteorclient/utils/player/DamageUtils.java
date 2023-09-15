@@ -99,7 +99,7 @@ public class DamageUtils {
         // Get enchant damage
         double enchantDamage = 0;
         if (stack.getEnchantments() != null) {
-            int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, attacker.getActiveItem());
+            int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
             if (sharpnessLevel > 0) {
                 enchantDamage = (0.5d * sharpnessLevel) + 0.5d;
             }
@@ -128,11 +128,11 @@ public class DamageUtils {
             damage++;
         }
 
-        // Reduce by resistance
-        damage = resistanceReduction(target, damage);
-
         // Reduce by armour
         damage = DamageUtil.getDamageLeft((float) damage, (float) target.getArmor(), (float) target.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+
+        // Reduce by resistance
+        damage = resistanceReduction(target, damage);
 
         // Reduce by enchants
         damage = normalProtReduction(target, damage);
@@ -155,11 +155,11 @@ public class DamageUtils {
         // Multiply damage by difficulty
         damage = getDamageForDifficulty(damage);
 
-        // Reduce by resistance
-        damage = resistanceReduction(player, damage);
-
         // Reduce by armour
         damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+
+        // Reduce by resistance
+        damage = resistanceReduction(player, damage);
 
         // Reduce by enchants
         damage = blastProtReduction(player, damage);
