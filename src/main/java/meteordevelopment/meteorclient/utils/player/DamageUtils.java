@@ -9,6 +9,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.PreInit;
+import meteordevelopment.meteorclient.utils.entity.EntityAttributeManager;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.orbit.EventHandler;
@@ -16,10 +17,8 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
-import net.minecraft.entity.DamageUtil;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.attribute.EntityAttributes;
+import net.minecraft.entity.*;
+import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
@@ -63,7 +62,7 @@ public class DamageUtils {
         double damage = ((impact * impact + impact) / 2 * 7 * (6 * 2) + 1);
 
         damage = getDamageForDifficulty(damage);
-        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
         damage = resistanceReduction(player, damage);
 
         damage = blastProtReduction(player, damage);
@@ -89,27 +88,16 @@ public class DamageUtils {
      * @see PlayerEntity#attack(Entity)
      */
     public static double getAttackDamage(PlayerEntity attacker, LivingEntity target) {
-        // Get item damage
-        double itemDamage = 1;
-        ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
-        if (stack.getItem() instanceof SwordItem swordItem) itemDamage += swordItem.getAttackDamage();
-        else if (stack.getItem() instanceof MiningToolItem miningToolItem) itemDamage += miningToolItem.getAttackDamage();
-        else if (stack.getItem() instanceof ToolItem toolItem) itemDamage += toolItem.getMaterial().getAttackDamage();
-        else if (stack.getItem() == Items.TRIDENT) itemDamage += TridentItem.ATTACK_DAMAGE;
+        double itemDamage = EntityAttributeManager.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
 
         // Get enchant damage
         double enchantDamage = 0;
+        ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
         if (stack.getEnchantments() != null) {
             int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
             if (sharpnessLevel > 0) {
                 enchantDamage = (0.5d * sharpnessLevel) + 0.5d;
             }
-        }
-
-        // Factor strength
-        StatusEffectInstance strength = attacker.getStatusEffect(StatusEffects.STRENGTH);
-        if (strength != null) {
-            itemDamage += 3 * (strength.getAmplifier() + 1);
         }
 
         // Factor charge
@@ -130,7 +118,7 @@ public class DamageUtils {
         }
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) target.getArmor(), (float) target.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float) damage, (float) target.getArmor(), (float) EntityAttributeManager.getAttributeValue(target, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Reduce by resistance
         damage = resistanceReduction(target, damage);
@@ -157,7 +145,7 @@ public class DamageUtils {
         damage = getDamageForDifficulty(damage);
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) player.getAttributeInstance(EntityAttributes.GENERIC_ARMOR_TOUGHNESS).getValue());
+        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Reduce by resistance
         damage = resistanceReduction(player, damage);
