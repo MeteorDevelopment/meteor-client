@@ -77,7 +77,7 @@ public class DamageUtils {
     // Sword damage
 
     /**
-     * @deprecated Use {@link DamageUtils#getAttackDamage(PlayerEntity, LivingEntity)} instead.
+     * @deprecated Use {@link DamageUtils#getAttackDamage(LivingEntity, LivingEntity)} instead.
      */
     @Deprecated(forRemoval = true)
     public static double getSwordDamage(PlayerEntity entity, boolean charged) {
@@ -87,7 +87,7 @@ public class DamageUtils {
     /**
      * @see PlayerEntity#attack(Entity)
      */
-    public static double getAttackDamage(PlayerEntity attacker, LivingEntity target) {
+    public static double getAttackDamage(LivingEntity attacker, LivingEntity target) {
         double itemDamage = EntityAttributeManager.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
 
         // Get enchant damage
@@ -101,13 +101,15 @@ public class DamageUtils {
         }
 
         // Factor charge
-        float charge = attacker.getAttackCooldownProgress(0.5f);
-        itemDamage *= 0.2d + charge * charge * 0.8d;
-        enchantDamage *= charge;
+        if (attacker instanceof PlayerEntity playerEntity) {
+            float charge = playerEntity.getAttackCooldownProgress(0.5f);
+            itemDamage *= 0.2d + charge * charge * 0.8d;
+            enchantDamage *= charge;
 
-        // Factor critical hit
-        if (charge > 0.9f && attacker.fallDistance > 0f && !attacker.isOnGround() && !attacker.isClimbing() && !attacker.isTouchingWater() && !attacker.hasStatusEffect(StatusEffects.BLINDNESS) && !attacker.hasVehicle()) {
-            itemDamage *= 1.5d;
+            // Factor critical hit
+            if (charge > 0.9f && attacker.fallDistance > 0f && !attacker.isOnGround() && !attacker.isClimbing() && !attacker.isTouchingWater() && !attacker.hasStatusEffect(StatusEffects.BLINDNESS) && !attacker.hasVehicle()) {
+                itemDamage *= 1.5d;
+            }
         }
 
         double damage = itemDamage + enchantDamage;
