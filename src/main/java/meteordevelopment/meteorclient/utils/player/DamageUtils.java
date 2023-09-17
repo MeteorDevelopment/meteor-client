@@ -95,6 +95,7 @@ public class DamageUtils {
         if (stack.getItem() instanceof SwordItem swordItem) itemDamage += swordItem.getAttackDamage();
         else if (stack.getItem() instanceof MiningToolItem miningToolItem) itemDamage += miningToolItem.getAttackDamage();
         else if (stack.getItem() instanceof ToolItem toolItem) itemDamage += toolItem.getMaterial().getAttackDamage();
+        else if (stack.getItem() == Items.TRIDENT) itemDamage += TridentItem.ATTACK_DAMAGE;
 
         // Get enchant damage
         double enchantDamage = 0;
