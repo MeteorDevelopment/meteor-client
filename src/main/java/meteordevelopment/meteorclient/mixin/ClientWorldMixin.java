@@ -34,7 +34,7 @@ public abstract class ClientWorldMixin {
 
     @Shadow @Nullable public abstract Entity getEntityById(int id);
 
-    @Inject(method = "method_53875", at = @At("TAIL"))
+    @Inject(method = "addEntity", at = @At("TAIL"))
     private void onAddEntity(Entity entity, CallbackInfo info) {
         if (entity != null) MeteorClient.EVENT_BUS.post(EntityAddedEvent.get(entity));
     }
