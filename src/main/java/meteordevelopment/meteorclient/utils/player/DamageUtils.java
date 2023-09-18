@@ -22,6 +22,7 @@ import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
@@ -114,9 +115,9 @@ public class DamageUtils {
 
         double damage = itemDamage + enchantDamage;
 
-        // Factor Fire Aspect
-        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
-            damage++;
+        // Factor difficulty modifier
+        if (!(attacker instanceof PlayerEntity) && target instanceof PlayerEntity) {
+            damage = getDamageForDifficulty(damage);
         }
 
         // Reduce by armour
@@ -127,6 +128,11 @@ public class DamageUtils {
 
         // Reduce by enchants
         damage = normalProtReduction(target, damage);
+
+        // Factor Fire Aspect
+        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
+            damage++;
+        }
 
         return Math.max(damage, 0);
     }
