@@ -92,14 +92,8 @@ public class DamageUtils {
         double itemDamage = EntityAttributeManager.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
 
         // Get enchant damage
-        double enchantDamage = 0;
         ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
-        if (stack.getEnchantments() != null) {
-            int sharpnessLevel = EnchantmentHelper.getLevel(Enchantments.SHARPNESS, stack);
-            if (sharpnessLevel > 0) {
-                enchantDamage = (0.5d * sharpnessLevel) + 0.5d;
-            }
-        }
+        double enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getGroup());
 
         // Factor charge
         if (attacker instanceof PlayerEntity playerEntity) {
