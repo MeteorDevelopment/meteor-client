@@ -42,7 +42,7 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributeInstance(EntityAttribute)
      */
     public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
-        if (entity == mc.player) return entity.getAttributeInstance(attribute)
+        if (entity == mc.player) return entity.getAttributeInstance(attribute);
 
         double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
         EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
