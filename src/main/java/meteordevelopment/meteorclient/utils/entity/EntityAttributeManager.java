@@ -15,10 +15,38 @@ import net.minecraft.item.ItemStack;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EntityAttributeManager {
-    public static double getAttributeValue(LivingEntity entity, EntityAttribute attribute) {
-        if (entity == mc.player) return entity.getAttributeValue(attribute);
+    /**
+     * @see LivingEntity#getAttributes()
+     */
+    public static AttributeContainer getAttributes(LivingEntity entity) {
+        if (entity == mc.player) return entity.getAttributes();
 
-        EntityAttributeInstance attributeInstance = createDefault(entity, attribute);
+        @SuppressWarnings("unchecked")
+        AttributeContainer attributes = new AttributeContainer(DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()));
+
+        // Equipment
+        for (var equipmentSlot : EquipmentSlot.values()) {
+            ItemStack stack = entity.getEquippedStack(equipmentSlot);
+            attributes.addTemporaryModifiers(stack.getAttributeModifiers(equipmentSlot));
+        }
+
+        // Status effects
+        for (var statusEffect : entity.getStatusEffects()) {
+            statusEffect.getEffectType().onApplied(entity, attributes, statusEffect.getAmplifier());
+        }
+
+        return attributes;
+    }
+
+    /**
+     * @see LivingEntity#getAttributeInstance(EntityAttribute)
+     */
+    public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
+        if (entity == mc.player) return entity.getAttributeInstance(attribute)
+
+        double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
+        EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
+        attributeInstance.setBaseValue(baseValue);
 
         // Equipment
         for (var equipmentSlot : EquipmentSlot.values()) {
@@ -34,14 +62,15 @@ public class EntityAttributeManager {
             attributeInstance.addTemporaryModifier(new EntityAttributeModifier(modifier.getId(), statusEffect.getTranslationKey() + " " + statusEffect.getAmplifier(), statusEffect.getEffectType().adjustModifierAmount(statusEffect.getAmplifier(), modifier), modifier.getOperation()));
         }
 
-        return attributeInstance.getValue();
+        return attributeInstance;
     }
 
-    @SuppressWarnings("unchecked")
-    public static EntityAttributeInstance createDefault(LivingEntity entity, EntityAttribute attribute) {
-        double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
-        EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o -> {});
-        attributeInstance.setBaseValue(baseValue);
-        return attributeInstance;
+    /**
+     * @see LivingEntity#getAttributeValue(EntityAttribute)
+     */
+    public static double getAttributeValue(LivingEntity entity, EntityAttribute attribute) {
+        if (entity == mc.player) return entity.getAttributeValue(attribute);
+
+        return getAttributeInstance(entity, attribute).getValue();
     }
 }
