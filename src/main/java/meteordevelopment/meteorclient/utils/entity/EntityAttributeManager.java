@@ -44,6 +44,7 @@ public class EntityAttributeManager {
     public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
         if (entity == mc.player) return entity.getAttributeInstance(attribute);
 
+        @SuppressWarnings("unchecked")
         double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
         EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
         attributeInstance.setBaseValue(baseValue);
