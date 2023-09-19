@@ -33,6 +33,15 @@ public class BetterTab extends Module {
         .build()
     );
 
+    public final Setting<Integer> tabHeight = sgGeneral.add(new IntSetting.Builder()
+        .name("tablist-height")
+        .description("How many players to display vertically.")
+        .defaultValue(45)
+        .min(1)
+        .sliderRange(1, 1000)
+        .build()
+    );
+
     private final Setting<Boolean> self = sgGeneral.add(new BoolSetting.Builder()
         .name("highlight-self")
         .description("Highlights yourself in the tablist.")
