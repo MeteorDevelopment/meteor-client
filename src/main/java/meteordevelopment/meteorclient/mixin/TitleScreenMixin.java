@@ -37,33 +37,36 @@ public class TitleScreenMixin extends Screen {
     private void onRenderIdkDude(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         if (Utils.firstTimeTitleScreen) {
             Utils.firstTimeTitleScreen = false;
-            MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-            MeteorExecutor.execute(() -> {
-                String res = Http.get("https://meteorclient.com/api/stats").sendString();
-                if (res == null) return;
+            if (!MeteorClient.VERSION.isZero()) {
+                MeteorClient.LOG.info("Checking latest version of Meteor Client");
 
-                Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());
+                MeteorExecutor.execute(() -> {
+                    String res = Http.get("https://meteorclient.com/api/stats").sendString();
+                    if (res == null) return;
 
-                if (latestVer.isHigherThan(MeteorClient.VERSION)) {
-                    YesNoPrompt.create()
-                        .title("New Update")
-                        .message("A new version of Meteor has been released.")
-                        .message("Your version: %s", MeteorClient.VERSION)
-                        .message("Latest version: %s", latestVer)
-                        .message("Do you want to update?")
-                        .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
-                        .onNo(() -> OkPrompt.create()
-                            .title("Are you sure?")
-                            .message("Using old versions of Meteor is not recommended")
-                            .message("and could report in issues.")
-                            .id("new-update-no")
-                            .onOk(this::close)
-                            .show())
-                        .id("new-update")
-                        .show();
-                }
-            });
+                    Version latestVer = new Version(JsonParser.parseString(res).getAsJsonObject().get("version").getAsString());
+
+                    if (latestVer.isHigherThan(MeteorClient.VERSION)) {
+                        YesNoPrompt.create()
+                            .title("New Update")
+                            .message("A new version of Meteor has been released.")
+                            .message("Your version: %s", MeteorClient.VERSION)
+                            .message("Latest version: %s", latestVer)
+                            .message("Do you want to update?")
+                            .onYes(() -> Util.getOperatingSystem().open("https://meteorclient.com/"))
+                            .onNo(() -> OkPrompt.create()
+                                .title("Are you sure?")
+                                .message("Using old versions of Meteor is not recommended")
+                                .message("and could report in issues.")
+                                .id("new-update-no")
+                                .onOk(this::close)
+                                .show())
+                            .id("new-update")
+                            .show();
+                    }
+                });
+            }
         }
     }
 

@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.ProtectionEnchantment;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
@@ -215,9 +216,9 @@ public class Jesus extends Module {
     private void onFluidCollisionShape(CollisionShapeEvent event) {
         if (event.state.getFluidState().isEmpty()) return;
 
-        if (event.state.getFluidState().isOf(Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
+        if ((event.state.getBlock() == Blocks.WATER | event.state.getFluidState().getFluid() == Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
-        } else if (event.state.getFluidState().isOf(Fluids.LAVA) && !mc.player.isInLava() && lavaShouldBeSolid()) {
+        } else if (event.state.getBlock() == Blocks.LAVA && !mc.player.isInLava() && lavaShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
         }
     }
@@ -306,7 +307,7 @@ public class Jesus extends Module {
             blockPos.set(MathHelper.lerp(0.5D, bb.minX, bb.maxX), MathHelper.lerp(0.5D, bb.minY, bb.maxY), MathHelper.lerp(0.5D, bb.minZ, bb.maxZ));
             BlockState blockState = mc.world.getBlockState(blockPos);
 
-            if (blockState.getFluidState().isOf(Fluids.WATER) || blockState.getFluidState().isOf(Fluids.LAVA))
+            if ((blockState.getBlock() == Blocks.WATER | blockState.getFluidState().getFluid() == Fluids.WATER) || blockState.getBlock() == Blocks.LAVA)
                 foundLiquid = true;
             else if (!blockState.isAir()) foundSolid = true;
         }

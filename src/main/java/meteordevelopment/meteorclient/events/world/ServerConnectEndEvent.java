@@ -7,11 +7,11 @@ package meteordevelopment.meteorclient.events.world;
 
 import java.net.InetSocketAddress;
 
-public class ConnectToServerEvent {
-    private static final ConnectToServerEvent INSTANCE = new ConnectToServerEvent();
+public class ServerConnectEndEvent {
+    private static final ServerConnectEndEvent INSTANCE = new ServerConnectEndEvent();
     public InetSocketAddress address;
 
-    public static ConnectToServerEvent get(InetSocketAddress address) {
+    public static ServerConnectEndEvent get(InetSocketAddress address) {
         INSTANCE.address = address;
         return INSTANCE;
     }

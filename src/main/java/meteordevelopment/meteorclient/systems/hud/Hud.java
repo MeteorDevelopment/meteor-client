@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.systems.hud;
 import meteordevelopment.meteorclient.events.meteor.CustomFontChangedEvent;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
@@ -48,6 +49,13 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         .onChanged(aBoolean -> {
             for (HudElement element : elements) element.onFontChanged();
         })
+        .build()
+    );
+
+    private final Setting<Boolean> hideInMenus = sgGeneral.add(new BoolSetting.Builder()
+        .name("hide-in-menus")
+        .description("Hides the meteor hud when in inventory screens or game menus.")
+        .defaultValue(false)
         .build()
     );
 
@@ -214,7 +222,9 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
     @EventHandler
     private void onRender(Render2DEvent event) {
         if (Utils.isLoading()) return;
-        if (!(active && ((!mc.options.hudHidden && !mc.options.debugEnabled) || HudEditorScreen.isOpen()))) return;
+
+        if (!active || shouldHideHud()) return;
+        if ((mc.options.hudHidden || mc.options.debugEnabled) && !HudEditorScreen.isOpen()) return;
 
         HudRenderer.INSTANCE.begin(event.drawContext);
 
@@ -225,6 +235,10 @@ public class Hud extends System<Hud> implements Iterable<HudElement> {
         }
 
         HudRenderer.INSTANCE.end();
+    }
+
+    private boolean shouldHideHud() {
+        return hideInMenus.get() && mc.currentScreen != null && !(mc.currentScreen instanceof WidgetScreen);
     }
 
     @EventHandler

@@ -529,6 +529,7 @@ public class Modules extends System<Modules> {
         add(new BuildHeight());
         add(new EChestFarmer());
         add(new EndermanLook());
+        add(new Excavator());
         add(new Flamethrower());
         add(new InfinityMiner());
         add(new LiquidFiller());
@@ -555,7 +556,6 @@ public class Modules extends System<Modules> {
         add(new BookBot());
         add(new DiscordPresence());
         add(new MessageAura());
-        add(new MiddleClickFriend());
         add(new NameProtect());
         add(new Notebot());
         add(new Notifier());
