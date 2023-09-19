@@ -278,7 +278,7 @@ public class DamageUtils {
                 if (blockState.getBlock().getBlastResistance() < 600 && ignoreTerrain) return null;
             }
 
-            BlockHitResult hitResult = blockState.getOutlineShape(mc.world, blockPos).raycast(start, end, blockPos);
+            BlockHitResult hitResult = blockState.getCollisionShape(mc.world, blockPos).raycast(start, end, blockPos);
             return hitResult == null ? null : hitResult.getType();
         }, (_null) -> HitResult.Type.MISS);
     }
