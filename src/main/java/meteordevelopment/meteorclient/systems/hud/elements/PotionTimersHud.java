@@ -244,7 +244,7 @@ public class PotionTimersHud extends HudElement {
     }
 
     private String getString(StatusEffectInstance statusEffectInstance) {
-        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType()), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.getDurationText(statusEffectInstance, 1).getString());
+        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType()), statusEffectInstance.getAmplifier() + 1, statusEffectInstance.isInfinite() ? "inf" : StatusEffectUtil.getDurationText(statusEffectInstance, 1).getString()); //todo remove "inf" when font rendering can use symbols
     }
 
     private double getScale() {
