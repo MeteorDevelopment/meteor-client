@@ -81,13 +81,13 @@ public class CustomTextRenderer implements TextRenderer {
         if (text.isEmpty()) return 0;
 
         Font font = building ? this.font : fonts[0];
-        return (font.getWidth(text, length) + (shadow ? fontScale : 0)) * scale;
+        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
     public double getHeight(boolean shadow) {
         Font font = building ? this.font : fonts[0];
-        return (font.getHeight() + 1 + (shadow ? fontScale : 0)) * scale;
+        return (font.getHeight() + 1 + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
