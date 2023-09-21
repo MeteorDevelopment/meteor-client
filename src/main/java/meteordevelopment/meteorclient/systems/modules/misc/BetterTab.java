@@ -26,7 +26,7 @@ public class BetterTab extends Module {
 
     public final Setting<Integer> tabSize = sgGeneral.add(new IntSetting.Builder()
         .name("tablist-size")
-        .description("How many players to display in the tablist.")
+        .description("How many players in total to display in the tablist.")
         .defaultValue(100)
         .min(1)
         .sliderRange(1, 1000)
@@ -34,9 +34,9 @@ public class BetterTab extends Module {
     );
 
     public final Setting<Integer> tabHeight = sgGeneral.add(new IntSetting.Builder()
-        .name("tablist-height")
-        .description("How many players to display vertically.")
-        .defaultValue(45)
+        .name("column-height")
+        .description("How many players to display in each column.")
+        .defaultValue(20)
         .min(1)
         .sliderRange(1, 1000)
         .build()
