@@ -42,6 +42,12 @@ public class PlayerListHudMixin {
         return module.isActive() && module.accurateLatency.get() ? width + 30 : width;
     }
 
+    @ModifyConstant(constant = @Constant(intValue = 20), method = "render")
+    private int modifyHeight(int height) {
+        BetterTab module = Modules.get().get(BetterTab.class);
+        return module.isActive() ? module.tabHeight.get() : height;
+    }
+
     @Inject(method = "renderLatencyIcon", at = @At("HEAD"), cancellable = true)
     private void onRenderLatencyIcon(DrawContext context, int width, int x, int y, PlayerListEntry entry, CallbackInfo ci) {
         BetterTab betterTab = Modules.get().get(BetterTab.class);
