@@ -28,6 +28,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.RaycastContext;
 import net.minecraft.world.explosion.Explosion;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -259,6 +260,9 @@ public class DamageUtils {
         return 0;
     }
 
+    /**
+     * @see BlockView#raycast(RaycastContext) 
+     */
     private static HitResult.Type raycast(Vec3d start, Vec3d end, BlockPos obsidianPos, boolean ignoreTerrain) {
         return BlockView.raycast(start, end, null, (_null, blockPos) -> {
             BlockState blockState;
