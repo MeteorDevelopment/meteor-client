@@ -141,6 +141,7 @@
     "SectionedEntityCacheAccessor",
     "ShapeIndexBufferAccessor",
     "ShulkerBoxBlockMixin",
+    "ShulkerEntityAccessor",
     "SignBlockEntityRendererMixin",
     "SimpleEntityLookupAccessor",
     "SimpleOptionMixin",

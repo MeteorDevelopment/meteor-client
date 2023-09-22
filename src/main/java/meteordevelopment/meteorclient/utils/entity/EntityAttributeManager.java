@@ -6,11 +6,16 @@
 package meteordevelopment.meteorclient.utils.entity;
 
 import com.google.common.collect.Multimap;
+import meteordevelopment.meteorclient.mixin.ShulkerEntityAccessor;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
+import net.minecraft.entity.mob.ShulkerEntity;
 import net.minecraft.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -34,6 +39,8 @@ public class EntityAttributeManager {
         for (var statusEffect : entity.getStatusEffects()) {
             statusEffect.getEffectType().onApplied(entity, attributes, statusEffect.getAmplifier());
         }
+
+        handleSpecialCases(entity, attributes::getCustomInstance);
 
         return attributes;
     }
@@ -60,8 +67,10 @@ public class EntityAttributeManager {
         for (var statusEffect : entity.getStatusEffects()) {
             EntityAttributeModifier modifier = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
             if (modifier == null) continue;
-            attributeInstance.addTemporaryModifier(new EntityAttributeModifier(modifier.getId(), statusEffect.getTranslationKey() + " " + statusEffect.getAmplifier(), statusEffect.getEffectType().adjustModifierAmount(statusEffect.getAmplifier(), modifier), modifier.getOperation()));
+            attributeInstance.addPersistentModifier(new EntityAttributeModifier(modifier.getId(), statusEffect.getTranslationKey() + " " + statusEffect.getAmplifier(), statusEffect.getEffectType().adjustModifierAmount(statusEffect.getAmplifier(), modifier), modifier.getOperation()));
         }
+
+        handleSpecialCases(entity, someAttribute -> someAttribute == attribute ? attributeInstance : null);
 
         return attributeInstance;
     }
@@ -73,5 +82,14 @@ public class EntityAttributeManager {
         if (entity == mc.player) return entity.getAttributeValue(attribute);
 
         return getAttributeInstance(entity, attribute).getValue();
+    }
+
+    private static void handleSpecialCases(LivingEntity entity, Function<EntityAttribute, EntityAttributeInstance> consumer) {
+        if (entity instanceof ShulkerEntity shulkerEntity) {
+            if (shulkerEntity.getDataTracker().get(ShulkerEntityAccessor.meteor$getPeekAmount()) == 0) {
+                @Nullable EntityAttributeInstance attributeInstance = consumer.apply(EntityAttributes.GENERIC_ARMOR);
+                if (attributeInstance != null) attributeInstance.addPersistentModifier(ShulkerEntityAccessor.meteor$getCoveredArmorBonus());
+            }
+        }
     }
 }
