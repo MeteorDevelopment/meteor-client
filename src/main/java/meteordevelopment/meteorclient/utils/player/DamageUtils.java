@@ -62,7 +62,7 @@ public class DamageUtils {
         double damage = ((impact * impact + impact) / 2 * 7 * (6 * 2) + 1);
 
         damage = getDamageForDifficulty(damage);
-        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
         damage = resistanceReduction(player, damage);
 
         damage = blastProtReduction(player, damage);
@@ -106,7 +106,7 @@ public class DamageUtils {
         }
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) target.getArmor(), (float) EntityAttributeManager.getAttributeValue(target, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(target), (float) EntityAttributeManager.getAttributeValue(target, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Reduce by resistance
         damage = resistanceReduction(target, damage);
@@ -138,7 +138,7 @@ public class DamageUtils {
         damage = getDamageForDifficulty(damage);
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) player.getArmor(), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Reduce by resistance
         damage = resistanceReduction(player, damage);
@@ -160,6 +160,10 @@ public class DamageUtils {
     }
 
     // Utils
+
+    private static int getArmor(LivingEntity entity) {
+        return MathHelper.floor(EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
+    }
 
     private static double getDamageForDifficulty(double damage) {
         return switch (mc.world.getDifficulty()) {
@@ -261,7 +265,7 @@ public class DamageUtils {
     }
 
     /**
-     * @see BlockView#raycast(RaycastContext) 
+     * @see BlockView#raycast(RaycastContext)
      */
     private static HitResult.Type raycast(Vec3d start, Vec3d end, BlockPos obsidianPos, boolean ignoreTerrain) {
         return BlockView.raycast(start, end, null, (_null, blockPos) -> {
