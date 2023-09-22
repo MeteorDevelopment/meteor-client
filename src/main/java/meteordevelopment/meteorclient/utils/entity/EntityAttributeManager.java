@@ -58,7 +58,7 @@ public class EntityAttributeManager {
 
         // Status effects
         for (var statusEffect : entity.getStatusEffects()) {
-            EntityAttributeModifier modifier = statusEffect.getEffectType().getAttributeModifiers().get(EntityAttributes.GENERIC_ATTACK_DAMAGE);
+            EntityAttributeModifier modifier = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
             if (modifier == null) continue;
             attributeInstance.addTemporaryModifier(new EntityAttributeModifier(modifier.getId(), statusEffect.getTranslationKey() + " " + statusEffect.getAmplifier(), statusEffect.getEffectType().adjustModifierAmount(statusEffect.getAmplifier(), modifier), modifier.getOperation()));
         }
