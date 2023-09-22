@@ -16,13 +16,11 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.entity.mob.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
 import net.minecraft.util.hit.BlockHitResult;
@@ -76,14 +74,6 @@ public class DamageUtils {
     }
 
     // Sword damage
-
-    /**
-     * @deprecated Use {@link DamageUtils#getAttackDamage(LivingEntity, LivingEntity)} instead.
-     */
-    @Deprecated(forRemoval = true)
-    public static double getSwordDamage(PlayerEntity entity, boolean charged) {
-        return getAttackDamage(entity, mc.player);
-    }
 
     /**
      * @see PlayerEntity#attack(Entity)
