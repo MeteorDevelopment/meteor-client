@@ -165,7 +165,7 @@ public class Nuker extends Module {
     private final Setting<ListMode> listMode = sgWhitelist.add(new EnumSetting.Builder<ListMode>()
             .name("list-mode")
             .description("Selection mode.")
-            .defaultValue(ListMode.Whitelist)
+            .defaultValue(ListMode.Blacklist)
             .build()
     );
 
