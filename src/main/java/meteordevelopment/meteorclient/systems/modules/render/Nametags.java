@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import java.util.stream.Collectors;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -15,6 +16,7 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
+import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -30,6 +32,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -214,12 +217,38 @@ public class Nametags extends Module {
 
     //Items
 
+    private final Setting<ListMode> shownItemFilterType = sgItems.add(new EnumSetting.Builder<ListMode>()
+        .name("Shown mode")
+        .description("Shown item filter mode")
+        .defaultValue(ListMode.All)
+        .build()
+    );
+
+    private final Set<Integer> shownItemIds = new HashSet<>();
+    private final Setting<List<Item>> shownItems = sgItems.add(new ItemListSetting.Builder()
+        .name("shown-items")
+        .description("Select items to draw nametags on.")
+        .defaultValue()
+        .onChanged(items -> {
+             shownItemIds.clear();
+             shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
+        }).build()
+    );
+
     private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
-        .name("show-count")
-        .description("Displays the number of items in the stack.")
+       .name("show-count")
+       .description("Displays the number of items in the stack.")
+       .defaultValue(true)
+       .build()
+    );
+
+    private final Setting<Boolean> alwaysShowNamed = sgItems.add(new BoolSetting.Builder()
+        .name("show-named")
+        .description("Display named items regardless of being included in list.")
         .defaultValue(true)
         .build()
     );
+
 
     // Render
 
@@ -547,6 +576,16 @@ public class Nametags extends Module {
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
+        boolean showCustomNamed = stack.hasCustomName() && alwaysShowNamed.get();
+
+        boolean showInList = shownItemFilterType.get() == ListMode.All
+                || (shownItemFilterType.get() == ListMode.Whitelist && shownItemIds.contains(Item.getRawId(stack.getItem())))
+                || (shownItemFilterType.get() == ListMode.Blacklist && !shownItemIds.contains(Item.getRawId(stack.getItem())));
+
+        if (!showCustomNamed && !showInList) {
+            return;
+        }
+
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -671,5 +710,12 @@ public class Nametags extends Module {
 
     public boolean playerNametags() {
         return isActive() && entities.get().contains(EntityType.PLAYER);
+    }
+
+    public enum ListMode {
+        Whitelist,
+        Blacklist,
+        None,
+        All
     }
 }
