@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import java.util.HashSet;
+import it.unimi.dsi.fastutil.ints.AbstractIntSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import java.util.List;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -80,29 +81,39 @@ public class Tracers extends Module {
     );
 
     // items
+    private final Setting<Boolean> filterItems = sgItems.add(new BoolSetting.Builder()
+         .name("filter-items")
+         .description("Only draw tracers for specific items types.")
+         .defaultValue(false)
+         .build()
+    );
 
     private final Setting<ListMode> shownItemFilterType = sgItems.add(new EnumSetting.Builder<ListMode>()
-        .name("Shown mode")
+        .name("selection-mode")
         .description("Shown item filter mode")
-        .defaultValue(ListMode.All)
+        .defaultValue(ListMode.None)
+        .visible(filterItems::get)
         .build()
     );
 
-    private final Set<Integer> shownItemIds = new HashSet<>();
+    private final AbstractIntSet shownItemIds = new IntOpenHashSet();
     private final Setting<List<Item>> shownItems = sgItems.add(new ItemListSetting.Builder()
-        .name("shown-item-filter")
+        .name("item-selection")
         .description("Select items to draw tracers for.")
         .defaultValue()
         .onChanged(items -> {
-             shownItemIds.clear();
-             shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
-        }).build()
+            shownItemIds.clear();
+            shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
+        })
+        .visible(() -> filterItems.get() && shownItemFilterType.get() != ListMode.None)
+        .build()
     );
 
     private final Setting<Boolean> alwaysShowNamed = sgItems.add(new BoolSetting.Builder()
-        .name("show-named")
+        .name("always-show-named")
         .description("Display for named items regardless of being included in list.")
         .defaultValue(false)
+        .visible(filterItems::get)
         .build()
     );
 
@@ -253,7 +264,7 @@ public class Tracers extends Module {
     private boolean shouldBeIgnored(ItemStack stack) {
         boolean showCustomNamed = stack.hasCustomName() && alwaysShowNamed.get();
 
-        boolean showInList = shownItemFilterType.get() == ListMode.All
+        boolean showInList = !filterItems.get()
             || (shownItemFilterType.get() == ListMode.Whitelist && shownItemIds.contains(Item.getRawId(stack.getItem())))
             || (shownItemFilterType.get() == ListMode.Blacklist && !shownItemIds.contains(Item.getRawId(stack.getItem())));
 
@@ -426,7 +437,6 @@ public class Tracers extends Module {
     public enum ListMode {
         Whitelist,
         Blacklist,
-        None,
-        All
+        None
     }
 }

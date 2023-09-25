@@ -5,7 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import java.util.stream.Collectors;
+import it.unimi.dsi.fastutil.ints.AbstractIntSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -16,7 +17,6 @@ import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.misc.InventoryTweaks;
 import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
@@ -217,37 +217,49 @@ public class Nametags extends Module {
 
     //Items
 
-    private final Setting<ListMode> shownItemFilterType = sgItems.add(new EnumSetting.Builder<ListMode>()
-        .name("Shown mode")
-        .description("Shown item filter mode")
-        .defaultValue(ListMode.All)
-        .build()
-    );
-
-    private final Set<Integer> shownItemIds = new HashSet<>();
-    private final Setting<List<Item>> shownItems = sgItems.add(new ItemListSetting.Builder()
-        .name("shown-items")
-        .description("Select items to draw nametags on.")
-        .defaultValue()
-        .onChanged(items -> {
-             shownItemIds.clear();
-             shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
-        }).build()
-    );
-
     private final Setting<Boolean> itemCount = sgItems.add(new BoolSetting.Builder()
-       .name("show-count")
-       .description("Displays the number of items in the stack.")
-       .defaultValue(true)
-       .build()
-    );
-
-    private final Setting<Boolean> alwaysShowNamed = sgItems.add(new BoolSetting.Builder()
-        .name("show-named")
-        .description("Display named items regardless of being included in list.")
+        .name("show-count")
+        .description("Displays the number of items in the stack.")
         .defaultValue(true)
         .build()
     );
+
+    private final Setting<Boolean> filterItems = sgItems.add(new BoolSetting.Builder()
+        .name("filter-items")
+        .description("Only show nametags for specific items types.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<ListMode> shownItemFilterType = sgItems.add(new EnumSetting.Builder<ListMode>()
+        .name("selection-mode")
+        .description("Shown item filter mode")
+        .defaultValue(ListMode.None)
+        .visible(filterItems::get)
+        .build()
+    );
+
+    private final AbstractIntSet shownItemIds = new IntOpenHashSet();
+    private final Setting<List<Item>> shownItems = sgItems.add(new ItemListSetting.Builder()
+        .name("item-selection")
+        .description("Select items to render nametags for.")
+        .defaultValue()
+        .onChanged(items -> {
+            shownItemIds.clear();
+            shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
+        })
+        .visible(() -> filterItems.get() && shownItemFilterType.get() != ListMode.None)
+        .build()
+    );
+
+    private final Setting<Boolean> alwaysShowNamed = sgItems.add(new BoolSetting.Builder()
+        .name("always-show-named")
+        .description("Display for named items regardless of being included in list.")
+        .defaultValue(false)
+        .visible(filterItems::get)
+        .build()
+    );
+
 
 
     // Render
@@ -578,7 +590,7 @@ public class Nametags extends Module {
     private void renderNametagItem(ItemStack stack, boolean shadow) {
         boolean showCustomNamed = stack.hasCustomName() && alwaysShowNamed.get();
 
-        boolean showInList = shownItemFilterType.get() == ListMode.All
+        boolean showInList = !filterItems.get()
                 || (shownItemFilterType.get() == ListMode.Whitelist && shownItemIds.contains(Item.getRawId(stack.getItem())))
                 || (shownItemFilterType.get() == ListMode.Blacklist && !shownItemIds.contains(Item.getRawId(stack.getItem())));
 
@@ -715,7 +727,6 @@ public class Nametags extends Module {
     public enum ListMode {
         Whitelist,
         Blacklist,
-        None,
-        All
+        None
     }
 }
