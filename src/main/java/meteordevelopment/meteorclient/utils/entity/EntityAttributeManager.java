@@ -42,6 +42,9 @@ public class EntityAttributeManager {
 
         handleSpecialCases(entity, attributes::getCustomInstance);
 
+        // Copy tracked attributes
+        attributes.setFrom(entity.getAttributes());
+
         return attributes;
     }
 
@@ -49,7 +52,7 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributeInstance(EntityAttribute)
      */
     public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
-        if (entity == mc.player) return entity.getAttributeInstance(attribute);
+        if (entity == mc.player || attribute.isTracked()) return entity.getAttributeInstance(attribute);
 
         @SuppressWarnings("unchecked")
         double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
@@ -79,7 +82,7 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributeValue(EntityAttribute)
      */
     public static double getAttributeValue(LivingEntity entity, EntityAttribute attribute) {
-        if (entity == mc.player) return entity.getAttributeValue(attribute);
+        if (entity == mc.player || attribute.isTracked()) return entity.getAttributeValue(attribute);
 
         return getAttributeInstance(entity, attribute).getValue();
     }
