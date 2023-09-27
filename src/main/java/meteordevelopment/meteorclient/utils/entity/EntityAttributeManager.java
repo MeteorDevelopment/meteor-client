@@ -17,15 +17,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class EntityAttributeManager {
     /**
      * @see LivingEntity#getAttributes()
      */
     public static AttributeContainer getAttributes(LivingEntity entity) {
-        if (entity == mc.player) return entity.getAttributes();
-
         @SuppressWarnings("unchecked")
         AttributeContainer attributes = new AttributeContainer(DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()));
 
@@ -52,8 +48,6 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributeInstance(EntityAttribute)
      */
     public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
-        if (entity == mc.player || attribute.isTracked()) return entity.getAttributeInstance(attribute);
-
         @SuppressWarnings("unchecked")
         double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
         EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
@@ -82,8 +76,6 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributeValue(EntityAttribute)
      */
     public static double getAttributeValue(LivingEntity entity, EntityAttribute attribute) {
-        if (entity == mc.player || attribute.isTracked()) return entity.getAttributeValue(attribute);
-
         return getAttributeInstance(entity, attribute).getValue();
     }
 
