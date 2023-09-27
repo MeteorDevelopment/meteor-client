@@ -7,6 +7,8 @@ package meteordevelopment.meteorclient.utils.entity;
 
 import com.google.common.collect.Multimap;
 import meteordevelopment.meteorclient.mixin.ShulkerEntityAccessor;
+import meteordevelopment.meteorclient.mixininterface.IAttributeContainer;
+import meteordevelopment.meteorclient.mixininterface.IEntityAttributeInstance;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
@@ -39,7 +41,7 @@ public class EntityAttributeManager {
         handleSpecialCases(entity, attributes::getCustomInstance);
 
         // Copy tracked attributes
-        attributes.setFrom(entity.getAttributes());
+        ((IAttributeContainer) attributes).meteor$union(entity.getAttributes());
 
         return attributes;
     }
@@ -68,6 +70,10 @@ public class EntityAttributeManager {
         }
 
         handleSpecialCases(entity, someAttribute -> someAttribute == attribute ? attributeInstance : null);
+
+        // Copy tracked modifiers
+        EntityAttributeInstance trackedInstance = entity.getAttributeInstance(attribute);
+        if (trackedInstance != null) ((IEntityAttributeInstance) attributeInstance).meteor$union(trackedInstance);
 
         return attributeInstance;
     }

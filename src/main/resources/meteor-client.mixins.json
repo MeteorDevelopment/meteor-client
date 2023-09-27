@@ -12,6 +12,7 @@
     "AbstractFurnaceScreenMixin",
     "AbstractSignEditScreenAccessor",
     "ArmorFeatureRendererMixin",
+    "AttributeContainerMixin",
     "BackgroundRendererMixin",
     "BakedQuadMixin",
     "BannerBlockEntityRendererMixin",
@@ -39,6 +40,7 @@
     "CapabilityTrackerMixin",
     "ChatHudAccessor",
     "ChatHudLineMixin",
+    "ChatHudLineVisibleMixin",
     "ChatHudMixin",
     "ChatInputSuggestorMixin",
     "ChatScreenMixin",
@@ -72,6 +74,7 @@
     "EnchantingTableBlockEntityRendererMixin",
     "EndCrystalEntityRendererMixin",
     "EntityAccessor",
+    "EntityAttributeInstanceMixin",
     "EntityBucketItemAccessor",
     "EntityMixin",
     "EntityRenderDispatcherMixin",
@@ -111,6 +114,7 @@
     "LivingEntityRendererMixin",
     "MapRendererAccessor",
     "MapRendererMixin",
+    "MessageHandlerMixin",
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
     "MinecraftServerAccessor",
@@ -167,9 +171,7 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor",
-    "MessageHandlerMixin",
-    "ChatHudLineVisibleMixin"
+    "YggdrasilMinecraftSessionServiceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
