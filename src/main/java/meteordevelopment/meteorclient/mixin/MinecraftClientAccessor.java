@@ -36,12 +36,6 @@ public interface MinecraftClientAccessor {
     @Accessor("networkProxy")
     Proxy getProxy();
 
-    @Accessor("itemUseCooldown")
-    void setItemUseCooldown(int itemUseCooldown);
-
-    @Accessor("itemUseCooldown")
-    int getItemUseCooldown();
-
     @Accessor("resourceReloadLogger")
     ResourceReloadLogger getResourceReloadLogger();
 

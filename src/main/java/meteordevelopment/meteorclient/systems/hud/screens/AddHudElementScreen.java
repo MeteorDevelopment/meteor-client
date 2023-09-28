@@ -104,6 +104,7 @@ public class AddHudElementScreen extends WindowScreen {
     }
 
     private void runObject(Object object) {
+        if (object == null) return;
         if (object instanceof HudElementInfo.Preset preset) {
             Hud.get().add(preset, x, y);
             close();
