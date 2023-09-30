@@ -51,7 +51,7 @@ public class EasyMCAccount extends Account<EasyMCAccount> {
 
     @Override
     public boolean login() {
-        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE, ENVIRONMENT));
+        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
         setSession(new Session(cache.username, cache.uuid, name, Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
         cache.loadHead();

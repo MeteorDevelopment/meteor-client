@@ -41,7 +41,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
     @Override
     public boolean login() {
-        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE, ENVIRONMENT));
+        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
 
         /*YggdrasilUserAuthentication auth = getAuth();
 

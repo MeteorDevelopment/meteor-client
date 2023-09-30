@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.client.util.DefaultSkinHelper;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.util.SkinTextures;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,10 +24,10 @@ public abstract class PlayerListEntryMixin {
     public abstract GameProfile getProfile();
 
     @Inject(method = "getSkinTextures", at = @At("HEAD"), cancellable = true)
-    private void onGetTexture(CallbackInfoReturnable<Identifier> info) {
+    private void onGetTexture(CallbackInfoReturnable<SkinTextures> info) {
         if (getProfile().getName().equals(MinecraftClient.getInstance().getSession().getUsername())) {
             if (Modules.get().get(NameProtect.class).skinProtect()) {
-                info.setReturnValue(DefaultSkinHelper.getTexture());
+                info.setReturnValue(DefaultSkinHelper.getTexture(getProfile()));
             }
         }
     }
