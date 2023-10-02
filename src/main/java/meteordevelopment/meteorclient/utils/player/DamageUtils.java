@@ -37,7 +37,7 @@ public class DamageUtils {
 
     // Crystal damage
 
-    public static double crystalDamage(PlayerEntity player, Vec3d crystal, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
+    public static float crystalDamage(PlayerEntity player, Vec3d crystal, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
         if (player == null) return 0;
         if (EntityUtils.getGameMode(player) == GameMode.CREATIVE && !(player instanceof FakePlayerEntity)) return 0;
 
@@ -48,10 +48,10 @@ public class DamageUtils {
 
         double exposure = getExposure(crystal, player, predictMovement, obsidianPos, ignoreTerrain);
         double impact = (1 - (modDistance / 12)) * exposure;
-        double damage = ((impact * impact + impact) / 2 * 7 * (6 * 2) + 1);
+        float damage = (int) ((impact * impact + impact) / 2 * 7 * 12 + 1);
 
         damage = getDamageForDifficulty(damage);
-        damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
         damage = resistanceReduction(player, damage);
 
         damage = protectionReduction(player, damage, explosion);
@@ -59,7 +59,7 @@ public class DamageUtils {
         return Math.max(damage, 0);
     }
 
-    public static double crystalDamage(PlayerEntity player, Vec3d crystal) {
+    public static float crystalDamage(PlayerEntity player, Vec3d crystal) {
         return crystalDamage(player, crystal, false, null, false);
     }
 
@@ -68,26 +68,26 @@ public class DamageUtils {
     /**
      * @see PlayerEntity#attack(Entity)
      */
-    public static double getAttackDamage(LivingEntity attacker, LivingEntity target) {
-        double itemDamage = EntityAttributeManager.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
+    public static float getAttackDamage(LivingEntity attacker, LivingEntity target) {
+        float itemDamage = (float) EntityAttributeManager.getAttributeValue(attacker, EntityAttributes.GENERIC_ATTACK_DAMAGE);
 
         // Get enchant damage
         ItemStack stack = attacker.getStackInHand(attacker.getActiveHand());
-        double enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getGroup());
+        float enchantDamage = EnchantmentHelper.getAttackDamage(stack, target.getGroup());
 
         // Factor charge
         if (attacker instanceof PlayerEntity playerEntity) {
             float charge = playerEntity.getAttackCooldownProgress(0.5f);
-            itemDamage *= 0.2d + charge * charge * 0.8d;
+            itemDamage *= 0.2f + charge * charge * 0.8f;
             enchantDamage *= charge;
 
             // Factor critical hit
             if (charge > 0.9f && attacker.fallDistance > 0f && !attacker.isOnGround() && !attacker.isClimbing() && !attacker.isTouchingWater() && !attacker.hasStatusEffect(StatusEffects.BLINDNESS) && !attacker.hasVehicle()) {
-                itemDamage *= 1.5d;
+                itemDamage *= 1.5f;
             }
         }
 
-        double damage = itemDamage + enchantDamage;
+        float damage = itemDamage + enchantDamage;
 
         // Factor difficulty modifier
         if (!(attacker instanceof PlayerEntity) && target instanceof PlayerEntity) {
@@ -95,7 +95,7 @@ public class DamageUtils {
         }
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(target), (float) EntityAttributeManager.getAttributeValue(target, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(damage, (float) getArmor(target), (float) EntityAttributeManager.getAttributeValue(target, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Reduce by resistance
         damage = resistanceReduction(target, damage);
@@ -113,7 +113,7 @@ public class DamageUtils {
 
     // Bed damage
 
-    public static double bedDamage(LivingEntity player, Vec3d bed) {
+    public static float bedDamage(LivingEntity player, Vec3d bed) {
         if (player instanceof PlayerEntity && ((PlayerEntity) player).getAbilities().creativeMode) return 0;
 
         double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
@@ -121,13 +121,13 @@ public class DamageUtils {
 
         double exposure = Explosion.getExposure(bed, player);
         double impact = (1.0 - (modDistance / 10.0)) * exposure;
-        double damage = (impact * impact + impact) / 2 * 7 * (5 * 2) + 1;
+        float damage = (int) ((impact * impact + impact) / 2 * 7 * 10 + 1);
 
         // Multiply damage by difficulty
         damage = getDamageForDifficulty(damage);
 
         // Reduce by armour
-        damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+        damage = DamageUtil.getDamageLeft(damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
 
         // Reduce by resistance
         damage = resistanceReduction(player, damage);
@@ -140,10 +140,10 @@ public class DamageUtils {
 
     // Anchor damage
 
-    public static double anchorDamage(LivingEntity player, Vec3d anchor) {
+    public static float anchorDamage(LivingEntity player, Vec3d anchor) {
         BlockPos anchorPos = BlockPos.ofFloored(anchor);
         mc.world.removeBlock(anchorPos, false);
-        double damage = bedDamage(player, anchor);
+        float damage = bedDamage(player, anchor);
         mc.world.setBlockState(anchorPos, Blocks.RESPAWN_ANCHOR.getDefaultState());
         return damage;
     }
@@ -154,7 +154,7 @@ public class DamageUtils {
         return MathHelper.floor(EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
     }
 
-    private static double getDamageForDifficulty(double damage) {
+    private static float getDamageForDifficulty(float damage) {
         return switch (mc.world.getDifficulty()) {
             case PEACEFUL -> 0;
             case EASY     -> Math.min(damage / 2 + 1, damage);
@@ -176,11 +176,11 @@ public class DamageUtils {
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
     @SuppressWarnings("JavadocReference")
-    private static double resistanceReduction(LivingEntity player, double damage) {
+    private static float resistanceReduction(LivingEntity player, float damage) {
         StatusEffectInstance resistance = StatusEffectManager.getStatusEffect(player, StatusEffects.RESISTANCE);
         if (resistance != null) {
             int lvl = resistance.getAmplifier() + 1;
-            damage *= (1 - (lvl * 0.2));
+            damage *= (1 - (lvl * 0.2f));
         }
 
         return Math.max(damage, 0);
@@ -189,7 +189,7 @@ public class DamageUtils {
     /**
      * @see Explosion#getExposure(Vec3d, Entity)
      */
-    private static double getExposure(Vec3d source, Entity entity, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
+    private static float getExposure(Vec3d source, Entity entity, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
         Box box = entity.getBoundingBox();
         if (predictMovement) {
             Vec3d v = entity.getVelocity();
@@ -232,10 +232,10 @@ public class DamageUtils {
                 }
             }
 
-            return (double) misses / hits;
+            return (float) misses / hits;
         }
 
-        return 0;
+        return 0f;
     }
 
     /**
