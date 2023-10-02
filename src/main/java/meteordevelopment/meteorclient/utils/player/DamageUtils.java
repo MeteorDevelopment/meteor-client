@@ -5,25 +5,23 @@
 
 package meteordevelopment.meteorclient.utils.player;
 
-import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.EntityAttributeManager;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.StatusEffectManager;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
+import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -35,17 +33,7 @@ import net.minecraft.world.explosion.Explosion;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
-    private static DamageSource damageSource;
-
-    @PreInit
-    public static void init() {
-        MeteorClient.EVENT_BUS.subscribe(DamageUtils.class);
-    }
-
-    @EventHandler
-    private static void onGameJoined(GameJoinedEvent event) {
-        damageSource = mc.world.getDamageSources().explosion(null);
-    }
+    private static final DamageSource explosion = new DamageSource(mc.getNetworkHandler().getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.EXPLOSION));
 
     // Crystal damage
 
@@ -66,7 +54,7 @@ public class DamageUtils {
         damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
         damage = resistanceReduction(player, damage);
 
-        damage = protectionReduction(player, damage, true);
+        damage = protectionReduction(player, damage, explosion);
 
         return Math.max(damage, 0);
     }
@@ -113,7 +101,7 @@ public class DamageUtils {
         damage = resistanceReduction(target, damage);
 
         // Reduce by enchants
-        damage = protectionReduction(target, damage, false);
+        damage = protectionReduction(target, damage, mc.world.getDamageSources().generic());
 
         // Factor Fire Aspect
         if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
@@ -145,7 +133,7 @@ public class DamageUtils {
         damage = resistanceReduction(player, damage);
 
         // Reduce by enchants
-        damage = protectionReduction(player, damage, true);
+        damage = protectionReduction(player, damage, explosion);
 
         return Math.max(damage, 0);
     }
@@ -179,12 +167,9 @@ public class DamageUtils {
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
     @SuppressWarnings("JavadocReference")
-    private static double protectionReduction(Entity player, double damage, boolean explosion) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), explosion ? damageSource : mc.world.getDamageSources().generic());
-        if (protLevel > 20) protLevel = 20;
-
-        damage *= 1 - (protLevel / 25.0);
-        return Math.max(damage, 0);
+    private static float protectionReduction(Entity player, float damage, DamageSource source) {
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), source);
+        return DamageUtil.getInflictedDamage(damage, protLevel);
     }
 
     /**
