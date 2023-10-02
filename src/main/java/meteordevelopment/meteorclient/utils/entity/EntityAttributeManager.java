@@ -14,6 +14,7 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.mob.ShulkerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -34,7 +35,7 @@ public class EntityAttributeManager {
         }
 
         // Status effects
-        for (var statusEffect : entity.getStatusEffects()) {
+        for (var statusEffect : StatusEffectManager.getStatusEffects(entity)) {
             statusEffect.getEffectType().onApplied(entity, attributes, statusEffect.getAmplifier());
         }
 
@@ -63,7 +64,7 @@ public class EntityAttributeManager {
         }
 
         // Status effects
-        for (var statusEffect : entity.getStatusEffects()) {
+        for (var statusEffect : StatusEffectManager.getStatusEffects(entity)) {
             EntityAttributeModifier modifier = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
             if (modifier == null) continue;
             attributeInstance.addPersistentModifier(new EntityAttributeModifier(modifier.getId(), statusEffect.getTranslationKey() + " " + statusEffect.getAmplifier(), statusEffect.getEffectType().adjustModifierAmount(statusEffect.getAmplifier(), modifier), modifier.getOperation()));

@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.EntityAttributeManager;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.entity.StatusEffectManager;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
@@ -203,7 +204,7 @@ public class DamageUtils {
      */
     @SuppressWarnings("JavadocReference")
     private static double resistanceReduction(LivingEntity player, double damage) {
-        StatusEffectInstance resistance = player.getStatusEffect(StatusEffects.RESISTANCE);
+        StatusEffectInstance resistance = StatusEffectManager.getStatusEffect(player, StatusEffects.RESISTANCE);
         if (resistance != null) {
             int lvl = resistance.getAmplifier() + 1;
             damage *= (1 - (lvl * 0.2));
