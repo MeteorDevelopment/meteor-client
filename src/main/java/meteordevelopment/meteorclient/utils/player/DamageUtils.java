@@ -66,7 +66,7 @@ public class DamageUtils {
         damage = DamageUtil.getDamageLeft((float) damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
         damage = resistanceReduction(player, damage);
 
-        damage = blastProtReduction(player, damage);
+        damage = protectionReduction(player, damage, true);
 
         return Math.max(damage, 0);
     }
@@ -113,7 +113,7 @@ public class DamageUtils {
         damage = resistanceReduction(target, damage);
 
         // Reduce by enchants
-        damage = normalProtReduction(target, damage);
+        damage = protectionReduction(target, damage, false);
 
         // Factor Fire Aspect
         if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
@@ -145,7 +145,7 @@ public class DamageUtils {
         damage = resistanceReduction(player, damage);
 
         // Reduce by enchants
-        damage = blastProtReduction(player, damage);
+        damage = protectionReduction(player, damage, true);
 
         return Math.max(damage, 0);
     }
@@ -179,23 +179,11 @@ public class DamageUtils {
      * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
      */
     @SuppressWarnings("JavadocReference")
-    private static double normalProtReduction(Entity player, double damage) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), mc.world.getDamageSources().generic());
+    private static double protectionReduction(Entity player, double damage, boolean explosion) {
+        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), explosion ? damageSource : mc.world.getDamageSources().generic());
         if (protLevel > 20) protLevel = 20;
 
         damage *= 1 - (protLevel / 25.0);
-        return Math.max(damage, 0);
-    }
-
-    /**
-     * @see LivingEntity#modifyAppliedDamage(DamageSource, float)
-     */
-    @SuppressWarnings("JavadocReference")
-    private static double blastProtReduction(Entity player, double damage) {
-        int protLevel = EnchantmentHelper.getProtectionAmount(player.getArmorItems(), damageSource);
-        if (protLevel > 20) protLevel = 20;
-
-        damage *= (1 - (protLevel / 25.0));
         return Math.max(damage, 0);
     }
 
