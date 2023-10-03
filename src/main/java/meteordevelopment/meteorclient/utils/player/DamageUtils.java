@@ -27,6 +27,7 @@ import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.Heightmap;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.explosion.Explosion;
 import org.jetbrains.annotations.Nullable;
@@ -119,11 +120,21 @@ public class DamageUtils {
         if (entity instanceof PlayerEntity player && player.getAbilities().flying) return 0f;
         if (StatusEffectManager.hasStatusEffect(entity, StatusEffects.SLOW_FALLING) || StatusEffectManager.hasStatusEffect(entity, StatusEffects.LEVITATION)) return 0f;
 
+        StatusEffectInstance jumpBoostInstance = StatusEffectManager.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
+
+        int surface = mc.world.getWorldChunk(entity.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(entity.getBlockX(), entity.getBlockZ());
+        if (entity.getBlockY() >= surface) {
+            int fallHeight = (int) (entity.getPos().y - surface + entity.fallDistance - 3d);
+            if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
+            
+            return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
+        }
+
         float totalHealth = entity.getHealth() + entity.getAbsorptionAmount();
         float survivableHeight = totalHealth;
 
         // Reverse protection reduction
-        int protection = MathHelper.clamp(EnchantmentHelper.getProtectionAmount(entity.getArmorItems(), mc.world.getDamageSources().fall()), 0, 20);
+        int protection = Math.min(EnchantmentHelper.getProtectionAmount(entity.getArmorItems(), mc.world.getDamageSources().fall()), 20);
         survivableHeight /= 1f - protection * 0.04f;
 
         // Reverse resistance reduction
@@ -137,10 +148,9 @@ public class DamageUtils {
         float armor = getArmor(entity);
         float g = armor * 0.2f;
         survivableHeight /= 1f - g * 0.04f;
-        
+
         survivableHeight += (float) EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
 
-        StatusEffectInstance jumpBoostInstance = StatusEffectManager.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
         if (jumpBoostInstance != null) survivableHeight += jumpBoostInstance.getAmplifier() + 1;
 
         survivableHeight += 3f;
