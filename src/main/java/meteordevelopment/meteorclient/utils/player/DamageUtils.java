@@ -137,6 +137,8 @@ public class DamageUtils {
         float armor = getArmor(entity);
         float g = armor * 0.2f;
         survivableHeight /= 1f - g * 0.04f;
+        
+        survivableHeight += (float) EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
 
         StatusEffectInstance jumpBoostInstance = StatusEffectManager.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
         if (jumpBoostInstance != null) survivableHeight += jumpBoostInstance.getAmplifier() + 1;
