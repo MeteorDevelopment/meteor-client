@@ -29,38 +29,48 @@ import net.minecraft.world.BlockView;
 import net.minecraft.world.GameMode;
 import net.minecraft.world.RaycastContext;
 import net.minecraft.world.explosion.Explosion;
+import org.jetbrains.annotations.Nullable;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
     private static final DamageSource explosion = new DamageSource(mc.getNetworkHandler().getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.EXPLOSION));
 
-    // Crystal damage
+    // Explosion damage
 
-    public static float crystalDamage(PlayerEntity player, Vec3d crystal, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
-        if (player == null) return 0;
-        if (EntityUtils.getGameMode(player) == GameMode.CREATIVE && !(player instanceof FakePlayerEntity)) return 0;
+    public static float explosionDamage(LivingEntity target, Vec3d origin, float power, boolean predictMovement, BlockPos override, BlockState overrideState) {
+        if (target == null) return 0f;
+        if (target instanceof PlayerEntity player && EntityUtils.getGameMode(player) == GameMode.CREATIVE && !(player instanceof FakePlayerEntity)) return 0f;
 
-        Vec3d playerPosition = predictMovement ? player.getPos().add(player.getVelocity()) : player.getPos();
+        Vec3d position = predictMovement ? target.getPos().add(target.getVelocity()) : target.getPos();
 
-        double modDistance = playerPosition.distanceTo(crystal);
-        if (modDistance > 12) return 0;
+        double modDistance = position.distanceTo(origin);
+        if (modDistance > power) return 0f;
 
-        double exposure = getExposure(crystal, player, predictMovement, obsidianPos, ignoreTerrain);
-        double impact = (1 - (modDistance / 12)) * exposure;
+        Box box = target.getBoundingBox();
+        if (predictMovement) box = box.offset(target.getVelocity());
+
+        double exposure = getExposure(origin, box, override, overrideState);
+        double impact = (1 - (modDistance / power)) * exposure;
         float damage = (int) ((impact * impact + impact) / 2 * 7 * 12 + 1);
 
-        damage = getDamageForDifficulty(damage);
-        damage = DamageUtil.getDamageLeft(damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
-        damage = resistanceReduction(player, damage);
-
-        damage = protectionReduction(player, damage, explosion);
-
-        return Math.max(damage, 0);
+        return calculateReductions(damage, target, explosion);
     }
 
-    public static float crystalDamage(PlayerEntity player, Vec3d crystal) {
-        return crystalDamage(player, crystal, false, null, false);
+    public static float crystalDamage(LivingEntity target, Vec3d crystal, boolean predictMovement, BlockPos obsidianPos) {
+        return explosionDamage(target, crystal, 12f, predictMovement, obsidianPos, Blocks.OBSIDIAN.getDefaultState());
+    }
+
+    public static float crystalDamage(LivingEntity target, Vec3d crystal) {
+        return explosionDamage(target, crystal, 12f, false, null, null);
+    }
+
+    public static float bedDamage(LivingEntity target, Vec3d bed) {
+        return explosionDamage(target, bed, 10f, false, null, null);
+    }
+
+    public static float anchorDamage(LivingEntity target, Vec3d anchor) {
+        return explosionDamage(target, anchor, 10f, false, BlockPos.ofFloored(anchor), Blocks.AIR.getDefaultState());
     }
 
     // Sword damage
@@ -89,78 +99,88 @@ public class DamageUtils {
 
         float damage = itemDamage + enchantDamage;
 
-        // Factor difficulty modifier
-        if (!(attacker instanceof PlayerEntity) && target instanceof PlayerEntity) {
-            damage = getDamageForDifficulty(damage);
-        }
-
-        // Reduce by armour
-        damage = DamageUtil.getDamageLeft(damage, (float) getArmor(target), (float) EntityAttributeManager.getAttributeValue(target, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
-
-        // Reduce by resistance
-        damage = resistanceReduction(target, damage);
-
-        // Reduce by enchants
-        damage = protectionReduction(target, damage, mc.world.getDamageSources().generic());
+        damage = calculateReductions(damage, target, attacker instanceof PlayerEntity player ? mc.world.getDamageSources().playerAttack(player) : mc.world.getDamageSources().mobAttack(attacker));
 
         // Factor Fire Aspect
-        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !target.hasStatusEffect(StatusEffects.FIRE_RESISTANCE)) {
+        if (EnchantmentHelper.getFireAspect(attacker) > 0 && !StatusEffectManager.hasStatusEffect(target, StatusEffects.FIRE_RESISTANCE)) {
             damage++;
         }
 
-        return Math.max(damage, 0);
-    }
-
-    // Bed damage
-
-    public static float bedDamage(LivingEntity player, Vec3d bed) {
-        if (player instanceof PlayerEntity && ((PlayerEntity) player).getAbilities().creativeMode) return 0;
-
-        double modDistance = Math.sqrt(player.squaredDistanceTo(bed));
-        if (modDistance > 10) return 0;
-
-        double exposure = Explosion.getExposure(bed, player);
-        double impact = (1.0 - (modDistance / 10.0)) * exposure;
-        float damage = (int) ((impact * impact + impact) / 2 * 7 * 10 + 1);
-
-        // Multiply damage by difficulty
-        damage = getDamageForDifficulty(damage);
-
-        // Reduce by armour
-        damage = DamageUtil.getDamageLeft(damage, (float) getArmor(player), (float) EntityAttributeManager.getAttributeValue(player, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
-
-        // Reduce by resistance
-        damage = resistanceReduction(player, damage);
-
-        // Reduce by enchants
-        damage = protectionReduction(player, damage, explosion);
-
-        return Math.max(damage, 0);
-    }
-
-    // Anchor damage
-
-    public static float anchorDamage(LivingEntity player, Vec3d anchor) {
-        BlockPos anchorPos = BlockPos.ofFloored(anchor);
-        mc.world.removeBlock(anchorPos, false);
-        float damage = bedDamage(player, anchor);
-        mc.world.setBlockState(anchorPos, Blocks.RESPAWN_ANCHOR.getDefaultState());
         return damage;
+    }
+
+    // Fall Damage
+
+    /**
+     * @see LivingEntity#computeFallDamage(float, float) (float, float, DamageSource)
+     */
+    @SuppressWarnings("JavadocReference")
+    public static float fallDamage(LivingEntity entity) {
+        if (entity instanceof PlayerEntity player && player.getAbilities().flying) return 0f;
+        if (StatusEffectManager.hasStatusEffect(entity, StatusEffects.SLOW_FALLING) || StatusEffectManager.hasStatusEffect(entity, StatusEffects.LEVITATION)) return 0f;
+
+        float totalHealth = entity.getHealth() + entity.getAbsorptionAmount();
+        float survivableHeight = totalHealth;
+
+        // Reverse protection reduction
+        int protection = MathHelper.clamp(EnchantmentHelper.getProtectionAmount(entity.getArmorItems(), mc.world.getDamageSources().fall()), 0, 20);
+        survivableHeight /= 1f - protection * 0.04f;
+
+        // Reverse resistance reduction
+        StatusEffectInstance resistance = StatusEffectManager.getStatusEffect(entity, StatusEffects.RESISTANCE);
+        if (resistance != null) {
+            int lvl = resistance.getAmplifier() + 1;
+            survivableHeight /= 1f - lvl * 0.2f;
+        }
+
+        // Simple reverse armor reduction
+        float armor = getArmor(entity);
+        float g = armor * 0.2f;
+        survivableHeight /= 1f - g * 0.04f;
+
+        StatusEffectInstance jumpBoostInstance = StatusEffectManager.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
+        if (jumpBoostInstance != null) survivableHeight += jumpBoostInstance.getAmplifier() + 1;
+
+        survivableHeight += 3f;
+
+        int raycastLength = MathHelper.ceil(survivableHeight - entity.fallDistance);
+
+        BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(entity.getPos(), entity.getPos().subtract(0, raycastLength, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, entity));
+        if (raycastResult.getType() == HitResult.Type.MISS) return totalHealth;
+
+        float fallHeight = (float) (entity.getPos().y - raycastResult.getBlockPos().getY() + entity.fallDistance - 3d);
+        if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
+
+        return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
     }
 
     // Utils
 
-    private static int getArmor(LivingEntity entity) {
-        return MathHelper.floor(EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
+    private static float calculateReductions(float damage, LivingEntity entity, DamageSource damageSource) {
+        if (damageSource.isScaledWithDifficulty()) {
+            switch (mc.world.getDifficulty()) {
+                case PEACEFUL -> {
+                    return 0;
+                }
+                case EASY     -> damage = Math.min(damage / 2 + 1, damage);
+                case HARD     -> damage *= 1.5f;
+            }
+        }
+
+        // Armor reduction
+        damage = DamageUtil.getDamageLeft(damage, getArmor(entity), (float) EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS));
+
+        // Resistance reduction
+        damage = resistanceReduction(entity, damage);
+
+        // Protection reduction
+        damage = protectionReduction(entity, damage, damageSource);
+
+        return Math.max(damage, 0);
     }
 
-    private static float getDamageForDifficulty(float damage) {
-        return switch (mc.world.getDifficulty()) {
-            case PEACEFUL -> 0;
-            case EASY     -> Math.min(damage / 2 + 1, damage);
-            case HARD     -> damage * 3 / 2;
-            default       -> damage;
-        };
+    private static float getArmor(LivingEntity entity) {
+        return (float) Math.floor(EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR));
     }
 
     /**
@@ -189,13 +209,7 @@ public class DamageUtils {
     /**
      * @see Explosion#getExposure(Vec3d, Entity)
      */
-    private static float getExposure(Vec3d source, Entity entity, boolean predictMovement, BlockPos obsidianPos, boolean ignoreTerrain) {
-        Box box = entity.getBoundingBox();
-        if (predictMovement) {
-            Vec3d v = entity.getVelocity();
-            box = box.offset(v.x, v.y, v.z);
-        }
-
+    private static float getExposure(Vec3d source, Box box, @Nullable BlockPos override, @Nullable BlockState overrideState) {
         double xStep = 1 / ((box.maxX - box.minX) * 2 + 1);
         double yStep = 1 / ((box.maxY - box.minY) * 2 + 1);
         double zStep = 1 / ((box.maxZ - box.minZ) * 2 + 1);
@@ -225,7 +239,7 @@ public class DamageUtils {
                     for (double z = startZ; z <= endZ; z += zStep) {
                         ((IVec3d) position).set(x, y, z);
 
-                        if (raycast(position, source, obsidianPos, ignoreTerrain) == HitResult.Type.MISS) misses++;
+                        if ((override != null ? raycast(position, source, override, overrideState) : raycast(position, source)) == HitResult.Type.MISS) misses++;
 
                         hits++;
                     }
@@ -241,13 +255,24 @@ public class DamageUtils {
     /**
      * @see BlockView#raycast(RaycastContext)
      */
-    private static HitResult.Type raycast(Vec3d start, Vec3d end, BlockPos obsidianPos, boolean ignoreTerrain) {
+    private static HitResult.Type raycast(Vec3d start, Vec3d end) {
+        return BlockView.raycast(start, end, null, (_null, blockPos) -> {
+            BlockState blockState = mc.world.getBlockState(blockPos);
+            if (blockState.getBlock().getBlastResistance() < 600) return null;
+
+            BlockHitResult hitResult = blockState.getCollisionShape(mc.world, blockPos).raycast(start, end, blockPos);
+            return hitResult == null ? null : hitResult.getType();
+        }, (_null) -> HitResult.Type.MISS);
+    }
+
+
+    private static HitResult.Type raycast(Vec3d start, Vec3d end, BlockPos override, BlockState overrideState) {
         return BlockView.raycast(start, end, null, (_null, blockPos) -> {
             BlockState blockState;
-            if (blockPos.equals(obsidianPos)) blockState = Blocks.OBSIDIAN.getDefaultState();
+            if (blockPos.equals(override)) blockState = overrideState;
             else {
                 blockState = mc.world.getBlockState(blockPos);
-                if (blockState.getBlock().getBlastResistance() < 600 && ignoreTerrain) return null;
+                if (blockState.getBlock().getBlastResistance() < 600) return null;
             }
 
             BlockHitResult hitResult = blockState.getCollisionShape(mc.world, blockPos).raycast(start, end, blockPos);
