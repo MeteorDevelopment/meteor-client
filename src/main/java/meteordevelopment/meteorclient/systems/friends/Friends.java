@@ -113,9 +113,9 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
             String name = friendTag.getString("name");
             if (get(name) != null) continue;
 
-            UUID uuid = friendTag.getUuid("id");
-            Friend friend = !uuid.toString().isBlank()
-                ? new Friend(name, uuid)
+            String uuid = friendTag.getString("id");
+            Friend friend = !uuid.isBlank()
+                ? new Friend(name, UUID.fromString(uuid))
                 : new Friend(name);
 
             friends.add(friend);

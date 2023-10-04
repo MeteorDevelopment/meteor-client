@@ -32,7 +32,7 @@ public class AccountCache implements ISerializable<AccountCache> {
         NbtCompound tag = new NbtCompound();
 
         tag.putString("username", username);
-        tag.putUuid("uuid", uuid);
+        tag.putString("uuid", uuid.toString());
 
         return tag;
     }
@@ -42,7 +42,7 @@ public class AccountCache implements ISerializable<AccountCache> {
         if (!tag.contains("username") || !tag.contains("uuid")) throw new NbtException();
 
         username = tag.getString("username");
-        uuid = tag.getUuid("uuid");
+        uuid = UUID.fromString(tag.getString("uuid"));
         loadHead();
 
         return this;
