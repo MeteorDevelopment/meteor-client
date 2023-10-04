@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
+import com.mojang.util.UndashedUuid;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -102,7 +103,7 @@ public class MicrosoftLogin {
 
         if (profileRes == null) return new LoginData();
 
-        return new LoginData(mcRes.access_token, refreshToken, profileRes.id, profileRes.name);
+        return new LoginData(mcRes.access_token, refreshToken, UndashedUuid.fromString(profileRes.id), profileRes.name);
     }
 
     private static void startServer() {
@@ -219,7 +220,7 @@ public class MicrosoftLogin {
     }
 
     private static class ProfileResponse {
-        public UUID id;
+        public String id;
         public String name;
     }
 }

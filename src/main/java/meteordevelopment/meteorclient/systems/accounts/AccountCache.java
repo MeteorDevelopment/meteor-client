@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class AccountCache implements ISerializable<AccountCache> {
     public String username = "";
-    public UUID uuid = UUID.fromString("");
+    public UUID uuid = null;
     private PlayerHeadTexture headTexture;
 
     public PlayerHeadTexture getHeadTexture() {
@@ -23,7 +23,7 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     public void loadHead() {
-        if (uuid == null || uuid.toString().isBlank()) return;
+        if (uuid == null) return;
         headTexture = PlayerHeadUtils.fetchHead(uuid);
     }
 
@@ -32,7 +32,7 @@ public class AccountCache implements ISerializable<AccountCache> {
         NbtCompound tag = new NbtCompound();
 
         tag.putString("username", username);
-        tag.putString("uuid", uuid.toString());
+        tag.putUuid("uuid", uuid);
 
         return tag;
     }

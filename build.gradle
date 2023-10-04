@@ -71,6 +71,7 @@ dependencies {
     library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
     library "io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}"
     annotationProcessor "io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}"
+    library "de.florianmichael:WaybackAuthLib:1.0.0"
 
     // Launch sub project
     shadow project(":launch")
