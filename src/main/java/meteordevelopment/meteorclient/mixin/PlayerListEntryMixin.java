@@ -27,7 +27,7 @@ public abstract class PlayerListEntryMixin {
     private void onGetTexture(CallbackInfoReturnable<SkinTextures> info) {
         if (getProfile().getName().equals(MinecraftClient.getInstance().getSession().getUsername())) {
             if (Modules.get().get(NameProtect.class).skinProtect()) {
-                info.setReturnValue(DefaultSkinHelper.getTexture(getProfile()));
+                info.setReturnValue(DefaultSkinHelper.getSkinTextures(getProfile()));
             }
         }
     }

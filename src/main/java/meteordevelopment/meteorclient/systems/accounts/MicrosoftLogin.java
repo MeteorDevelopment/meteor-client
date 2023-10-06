@@ -103,7 +103,7 @@ public class MicrosoftLogin {
 
         if (profileRes == null) return new LoginData();
 
-        return new LoginData(mcRes.access_token, refreshToken, UndashedUuid.fromString(profileRes.id), profileRes.name);
+        return new LoginData(mcRes.access_token, refreshToken, UndashedUuid.fromStringLenient(profileRes.id), profileRes.name);
     }
 
     private static void startServer() {

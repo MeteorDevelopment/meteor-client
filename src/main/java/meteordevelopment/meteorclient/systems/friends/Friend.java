@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
@@ -49,7 +50,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
         APIResponse res = Http.get("https://api.mojang.com/users/profiles/minecraft/" + name).sendJson(APIResponse.class);
         if (res == null || res.name == null || res.id == null) return;
         name = res.name;
-        id = UUID.fromString(res.id);
+        id = UndashedUuid.fromStringLenient(res.id);
         headTexture = PlayerHeadUtils.fetchHead(id);
         updating = false;
     }
