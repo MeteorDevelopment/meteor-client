@@ -39,6 +39,7 @@
     "CapabilityTrackerMixin",
     "ChatHudAccessor",
     "ChatHudLineMixin",
+    "ChatHudLineVisibleMixin",
     "ChatHudMixin",
     "ChatInputSuggestorMixin",
     "ChatScreenMixin",
@@ -67,6 +68,7 @@
     "CustomPayloadC2SPacketAccessor",
     "CustomPayloadS2CPacketMixin",
     "DefaultSkinHelperMixin",
+    "DirectConnectScreenMixin",
     "DisconnectedScreenMixin",
     "DrawContextMixin",
     "EnchantingTableBlockEntityRendererMixin",
@@ -111,6 +113,7 @@
     "LivingEntityRendererMixin",
     "MapRendererAccessor",
     "MapRendererMixin",
+    "MessageHandlerMixin",
     "MinecraftClientAccessor",
     "MinecraftClientMixin",
     "MinecraftServerAccessor",
@@ -166,9 +169,7 @@
     "WorldChunkMixin",
     "WorldRendererAccessor",
     "WorldRendererMixin",
-    "YggdrasilMinecraftSessionServiceAccessor",
-    "MessageHandlerMixin",
-    "ChatHudLineVisibleMixin"
+    "YggdrasilMinecraftSessionServiceAccessor"
   ],
   "injectors": {
     "defaultRequire": 1
