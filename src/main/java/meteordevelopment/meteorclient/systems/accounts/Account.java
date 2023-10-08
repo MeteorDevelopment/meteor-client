@@ -23,8 +23,10 @@ import net.minecraft.client.session.report.ReporterEnvironment;
 import net.minecraft.client.texture.PlayerSkinProvider;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.encryption.SignatureVerifier;
+import net.minecraft.util.Util;
 
 import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -65,7 +67,6 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public static void setSession(Session session) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
         mca.setSession(session);
-//        mc.getSessionProperties().clear();
         UserApiService apiService;
         try {
             apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
@@ -76,6 +77,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         mca.setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
         mca.setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
         mca.setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
+        mca.setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getSessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
     }
 
     public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
