@@ -12,6 +12,7 @@ import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.entity.Entity;
@@ -28,7 +29,7 @@ public class Flight extends Module {
         .description("The mode for Flight.")
         .defaultValue(Mode.Abilities)
         .onChanged(mode -> {
-            if (!isActive()) return;
+            if (!isActive() || !Utils.canUpdate()) return;
             abilitiesOff();
         })
         .build()
