@@ -36,7 +36,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
             auth.logIn();
 
             cache.username = auth.getCurrentProfile().getName();
-            cache.uuid = auth.getCurrentProfile().getId();
+            cache.uuid = auth.getCurrentProfile().getId().toString();
 
             return true;
         } catch (Exception e) {
@@ -68,7 +68,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     }
 
     private WaybackAuthLib getAuth() {
-        WaybackAuthLib auth = new WaybackAuthLib(ENVIRONMENT.accountsHost()); //(YggdrasilUserAuthentication) SERVICE.createUserAuthentication(Agent.MINECRAFT);
+        WaybackAuthLib auth = new WaybackAuthLib(ENVIRONMENT.accountsHost());
 
         auth.setUsername(name);
         auth.setPassword("Meteor on Crack!");

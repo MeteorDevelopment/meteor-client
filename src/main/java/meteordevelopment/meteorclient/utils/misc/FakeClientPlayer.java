@@ -7,9 +7,7 @@ package meteordevelopment.meteorclient.utils.misc;
 
 import com.mojang.authlib.GameProfile;
 import meteordevelopment.meteorclient.MeteorClient;
-import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.network.ClientConnectionState;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.OtherClientPlayerEntity;
@@ -37,17 +35,17 @@ public class FakeClientPlayer {
         MeteorClient.EVENT_BUS.subscribe(FakeClientPlayer.class);
     }
 
-    @EventHandler
-    private static void onGameJoined(GameJoinedEvent event) {
-    }
-
     public static PlayerEntity getPlayer() {
         UUID id = mc.getSession().getUuidOrNull();
 
         if (player == null || (!id.equals(lastId))) {
             if (world == null) {
                 world = new ClientWorld(
-                    new ClientPlayNetworkHandler(mc, new ClientConnection(NetworkSide.CLIENTBOUND), new ClientConnectionState(null, null, null, null, null, null, null)),
+                    new ClientPlayNetworkHandler(
+                        mc,
+                        new ClientConnection(NetworkSide.CLIENTBOUND),
+                        new ClientConnectionState(new GameProfile(mc.getSession().getUuidOrNull(), mc.getSession().getUsername()), null, null, null, null, mc.getCurrentServerEntry(), null)
+                    ), // todo test this
                     new ClientWorld.Properties(Difficulty.NORMAL, false, false),
                     world.getRegistryKey(),
                     world.getDimensionEntry(),

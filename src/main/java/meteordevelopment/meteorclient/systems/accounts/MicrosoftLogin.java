@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.mojang.util.UndashedUuid;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -20,19 +19,17 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public class MicrosoftLogin {
     public static class LoginData {
         public String mcToken;
         public String newRefreshToken;
-        public UUID uuid;
-        public String username;
+        public String uuid, username;
 
         public LoginData() {}
 
-        public LoginData(String mcToken, String newRefreshToken, UUID uuid, String username) {
+        public LoginData(String mcToken, String newRefreshToken, String uuid, String username) {
             this.mcToken = mcToken;
             this.newRefreshToken = newRefreshToken;
             this.uuid = uuid;
@@ -103,7 +100,7 @@ public class MicrosoftLogin {
 
         if (profileRes == null) return new LoginData();
 
-        return new LoginData(mcRes.access_token, refreshToken, UndashedUuid.fromStringLenient(profileRes.id), profileRes.name);
+        return new LoginData(mcRes.access_token, refreshToken, profileRes.id, profileRes.name);
     }
 
     private static void startServer() {

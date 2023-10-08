@@ -64,7 +64,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
         NbtCompound tag = new NbtCompound();
 
         tag.putString("name", name);
-        if (id != null) tag.putString("id", id.toString());
+        if (id != null) tag.putString("id", UndashedUuid.toString(id));
 
         return tag;
     }

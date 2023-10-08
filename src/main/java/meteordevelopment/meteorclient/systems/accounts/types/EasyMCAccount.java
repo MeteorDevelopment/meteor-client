@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.Environment;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
@@ -15,7 +16,6 @@ import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.client.session.Session;
 
 import java.util.Optional;
-import java.util.UUID;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -52,7 +52,7 @@ public class EasyMCAccount extends Account<EasyMCAccount> {
     @Override
     public boolean login() {
         applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
-        setSession(new Session(cache.username, cache.uuid, name, Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
+        setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), name, Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
         cache.loadHead();
         return true;
@@ -60,7 +60,7 @@ public class EasyMCAccount extends Account<EasyMCAccount> {
 
     private static class AuthResponse {
         public String mcName;
-        public UUID uuid;
+        public String uuid;
         public String session;
         public String message;
     }

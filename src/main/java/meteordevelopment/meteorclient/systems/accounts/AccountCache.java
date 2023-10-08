@@ -12,11 +12,9 @@ import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadUtils;
 import net.minecraft.nbt.NbtCompound;
 
-import java.util.UUID;
-
 public class AccountCache implements ISerializable<AccountCache> {
     public String username = "";
-    public UUID uuid = null;
+    public String uuid = "";
     private PlayerHeadTexture headTexture;
 
     public PlayerHeadTexture getHeadTexture() {
@@ -24,8 +22,8 @@ public class AccountCache implements ISerializable<AccountCache> {
     }
 
     public void loadHead() {
-        if (uuid == null) return;
-        headTexture = PlayerHeadUtils.fetchHead(uuid);
+        if (uuid == null || uuid.isBlank()) return;
+        headTexture = PlayerHeadUtils.fetchHead(UndashedUuid.fromStringLenient(uuid));
     }
 
     @Override
@@ -33,7 +31,7 @@ public class AccountCache implements ISerializable<AccountCache> {
         NbtCompound tag = new NbtCompound();
 
         tag.putString("username", username);
-        tag.putString("uuid", uuid.toString());
+        tag.putString("uuid", uuid);
 
         return tag;
     }
@@ -43,7 +41,7 @@ public class AccountCache implements ISerializable<AccountCache> {
         if (!tag.contains("username") || !tag.contains("uuid")) throw new NbtException();
 
         username = tag.getString("username");
-        uuid = UndashedUuid.fromStringLenient(tag.getString("uuid"));
+        uuid = tag.getString("uuid");
         loadHead();
 
         return this;
