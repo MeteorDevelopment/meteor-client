@@ -29,7 +29,7 @@ public class DirectConnectScreenMixin {
         if (!Modules.get().get(ServerSpoof.class).bypassAntiDirectConnect.get()) return;
         MultiplayerServerListPinger slp = new MultiplayerServerListPinger();
         try {
-            slp.add(new ServerInfo("", this.addressField.getText(), false), () -> {});
+            slp.add(new ServerInfo("", this.addressField.getText(), ServerInfo.ServerType.OTHER), () -> {});
         } catch (UnknownHostException e) {
             e.printStackTrace();
             return;
