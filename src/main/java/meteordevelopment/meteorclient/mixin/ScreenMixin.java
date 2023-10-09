@@ -21,7 +21,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(value = Screen.class, priority = 500) // needs to be before baritone
 public abstract class ScreenMixin {
-    @Inject(method = "renderBackground(Lnet/minecraft/client/gui/DrawContext;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "renderBackground", at = @At("HEAD"), cancellable = true)
     private void onRenderBackground(CallbackInfo info) {
         if (Utils.canUpdate() && Modules.get().get(NoRender.class).noGuiBackground())
             info.cancel();

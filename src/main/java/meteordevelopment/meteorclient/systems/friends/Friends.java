@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.friends;
 
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
@@ -119,7 +119,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
 
             String uuid = friendTag.getString("id");
             Friend friend = !uuid.isBlank()
-                ? new Friend(name, UUIDTypeAdapter.fromString(uuid))
+                ? new Friend(name, UndashedUuid.fromStringLenient(uuid))
                 : new Friend(name);
 
             friends.add(friend);
