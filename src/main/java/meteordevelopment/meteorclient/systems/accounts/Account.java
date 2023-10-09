@@ -10,18 +10,23 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ServicesKeyType;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import meteordevelopment.meteorclient.mixin.FileCacheAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.PlayerSkinProviderAccessor;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.network.SocialInteractionsManager;
-import net.minecraft.client.report.AbuseReportContext;
-import net.minecraft.client.report.ReporterEnvironment;
+import net.minecraft.client.session.ProfileKeys;
+import net.minecraft.client.session.Session;
+import net.minecraft.client.session.report.AbuseReportContext;
+import net.minecraft.client.session.report.ReporterEnvironment;
 import net.minecraft.client.texture.PlayerSkinProvider;
-import net.minecraft.client.util.ProfileKeys;
-import net.minecraft.client.util.Session;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.encryption.SignatureVerifier;
+import net.minecraft.util.Util;
+
+import java.nio.file.Path;
+import java.util.concurrent.CompletableFuture;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
@@ -62,7 +67,6 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
     public static void setSession(Session session) {
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
         mca.setSession(session);
-        mc.getSessionProperties().clear();
         UserApiService apiService;
         try {
             apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
@@ -73,6 +77,7 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         mca.setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
         mca.setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));
         mca.setAbuseReportContext(AbuseReportContext.create(ReporterEnvironment.ofIntegratedServer(), apiService));
+        mca.setGameProfileFuture(CompletableFuture.supplyAsync(() -> mc.getSessionService().fetchProfile(mc.getSession().getUuidOrNull(), true), Util.getIoWorkerExecutor()));
     }
 
     public static void applyLoginEnvironment(YggdrasilAuthenticationService authService, MinecraftSessionService sessService) {
@@ -80,7 +85,9 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         mca.setAuthenticationService(authService);
         SignatureVerifier.create(authService.getServicesKeySet(), ServicesKeyType.PROFILE_KEY);
         mca.setSessionService(sessService);
-        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCacheDir(), sessService));
+        PlayerSkinProvider.FileCache skinCache = ((PlayerSkinProviderAccessor) mc.getSkinProvider()).getSkinCache();
+        Path skinCachePath = ((FileCacheAccessor) skinCache).getDirectory();
+        mca.setSkinProvider(new PlayerSkinProvider(mc.getTextureManager(), skinCachePath, sessService, mc));
     }
 
     @Override

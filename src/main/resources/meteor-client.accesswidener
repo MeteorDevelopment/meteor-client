@@ -1,5 +1,6 @@
 accessWidener	v1	named
 
+accessible   class   net/minecraft/client/texture/PlayerSkinProvider$FileCache
 accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
 accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
 accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType

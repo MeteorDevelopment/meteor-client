@@ -261,7 +261,7 @@ public class HudEditorScreen extends WidgetScreen implements Snapper.Container {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(context);
+        if (!Utils.canUpdate()) renderBackground(context, mouseX, mouseY, delta);
 
         double s = mc.getWindow().getScaleFactor();
 
