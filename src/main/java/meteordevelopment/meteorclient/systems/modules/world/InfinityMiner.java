@@ -27,7 +27,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.PickaxeItem;
-import net.minecraft.network.packet.s2c.play.DisconnectS2CPacket;
+import net.minecraft.network.packet.s2c.common.DisconnectS2CPacket;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 

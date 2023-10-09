@@ -8,14 +8,14 @@ package meteordevelopment.meteorclient.systems.modules.misc;
 import io.netty.buffer.Unpooled;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.mixin.CustomPayloadC2SPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket;
-import net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket;
+import net.minecraft.network.packet.BrandCustomPayload;
+import net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket;
+import net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
@@ -77,11 +77,10 @@ public class ServerSpoof extends Module {
         private void onPacketSend(PacketEvent.Send event) {
             if (!isActive()) return;
             if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
-            CustomPayloadC2SPacketAccessor packet = (CustomPayloadC2SPacketAccessor) event.packet;
-            Identifier id = packet.getChannel();
+            Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().id();
 
-            if (spoofBrand.get() && id.equals(CustomPayloadC2SPacket.BRAND))
-                packet.setData(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID))
+                event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
@@ -106,7 +105,7 @@ public class ServerSpoof extends Module {
                 link.setStyle(link.getStyle()
                     .withColor(Formatting.BLUE)
                     .withUnderline(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getURL()))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getUrl()))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
                 );
                 msg.append(link);

@@ -141,7 +141,7 @@ public abstract class MinecraftClientMixin implements IMinecraftClient {
         return MeteorClient.EVENT_BUS.post(ItemUseCrosshairTargetEvent.get(original)).target;
     }
 
-    @ModifyReturnValue(method = "reloadResources(Z)Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
+    @ModifyReturnValue(method = "reloadResources(ZLnet/minecraft/client/MinecraftClient$LoadingContext;)Ljava/util/concurrent/CompletableFuture;", at = @At("RETURN"))
     private CompletableFuture<Void> onReloadResourcesNewCompletableFuture(CompletableFuture<Void> original) {
         return original.thenRun(() -> MeteorClient.EVENT_BUS.post(ResourcePacksReloadedEvent.get()));
     }

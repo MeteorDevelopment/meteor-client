@@ -1,7 +1,7 @@
 plugins {
-    id "fabric-loom" version "1.2-SNAPSHOT"
+    id "fabric-loom" version "1.4-SNAPSHOT"
     id "maven-publish"
-    id "com.github.johnrengelman.shadow" version "7.1.2"
+    id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
 sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
@@ -69,8 +69,9 @@ dependencies {
     library "org.reflections:reflections:${project.reflections_version}"
     library("io.netty:netty-handler-proxy:${project.netty_version}") { transitive = false }
     library("io.netty:netty-codec-socks:${project.netty_version}") { transitive = false }
-    library "com.github.LlamaLad7.MixinExtras:mixinextras-fabric:${project.mixin_extras_version}"
-    annotationProcessor "com.github.LlamaLad7.MixinExtras:mixinextras-fabric:${project.mixin_extras_version}"
+    library "io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}"
+    annotationProcessor "io.github.llamalad7:mixinextras-fabric:${project.mixin_extras_version}"
+    library "de.florianmichael:WaybackAuthLib:1.0.0"
 
     // Launch sub project
     shadow project(":launch")

@@ -87,7 +87,7 @@ public abstract class BookEditScreenMixin extends Screen {
                     DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
                     try {
-                        NbtCompound tag = NbtIo.read(in);
+                        NbtCompound tag = NbtIo.readCompressed(in);
 
                         NbtList listTag = tag.getList("pages", 8).copy();
 
