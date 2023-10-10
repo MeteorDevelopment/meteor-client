@@ -4,8 +4,6 @@ plugins {
     id "com.github.johnrengelman.shadow" version "8.1.1"
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_17
-
 archivesBaseName = project.archives_base_name
 version = project.mod_version + (project.hasProperty("devbuild") ? ("-" + project.findProperty("devbuild")) : "")
 group = project.maven_group
@@ -113,6 +111,13 @@ jar {
     }
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    withSourcesJar()
+}
+
 remapJar {
     dependsOn shadowJar
     inputFile.set(shadowJar.archiveFile)
@@ -123,33 +128,22 @@ javadoc {
     options.encoding = "UTF-8"
 }
 
-task sourcesJar(type: Jar, dependsOn: classes) {
-    archiveClassifier.set("sources")
-    from sourceSets.main.allSource
+tasks.register("javadocJar", Jar) {
+    from javadoc
+    archiveClassifier.set("javadoc")
 }
 
-task javadocJar(type: Jar) {
-    archiveClassifier.set("javadoc")
-    from javadoc
+build {
+    dependsOn javadocJar
 }
 
 publishing {
     publications {
-        java(MavenPublication) {
+        mavenJava(MavenPublication) {
             artifactId = "meteor-client"
             version = project.hasProperty("devbuild") ? (project.mod_version + "-SNAPSHOT") : project.mod_version
 
-            artifact(remapJar) {
-                builtBy remapJar
-            }
-
-            artifact(sourcesJar) {
-                builtBy remapSourcesJar
-            }
-
-            artifact(javadocJar) {
-                builtBy javadocJar
-            }
+            from components.java
         }
     }
 
