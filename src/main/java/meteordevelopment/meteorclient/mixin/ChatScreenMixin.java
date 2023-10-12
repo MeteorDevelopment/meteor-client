@@ -15,11 +15,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(ChatScreen.class)
+@Mixin(value = ChatScreen.class, priority = 1001)
 public abstract class ChatScreenMixin {
     @Shadow protected TextFieldWidget chatField;
 
-    @Inject(method = "init", at = @At(value = "TAIL"))
+    @Inject(method = "init", at = @At(value = "RETURN"))
     private void onInit(CallbackInfo info) {
         if (Modules.get().get(BetterChat.class).isInfiniteChatBox()) chatField.setMaxLength(Integer.MAX_VALUE);
     }
