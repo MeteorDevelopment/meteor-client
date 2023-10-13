@@ -52,6 +52,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     @Unique
     private boolean ignoreChatMessage;
 
+    @Unique
     private boolean worldNotNull;
 
     protected ClientPlayNetworkHandlerMixin(MinecraftClient client, ClientConnection connection, ClientConnectionState connectionState) {
@@ -79,6 +80,12 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
         }
 
         MeteorClient.EVENT_BUS.post(GameJoinedEvent.get());
+    }
+
+    // the server sends a GameJoin packet after the reconfiguration phase
+    @Inject(method = "onEnterReconfiguration", at = @At("HEAD"))
+    private void onEnterReconfiguration(EnterReconfigurationS2CPacket packet, CallbackInfo info) {
+        MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
     }
 
     @Inject(method = "onPlaySound", at = @At("HEAD"))
