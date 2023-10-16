@@ -48,6 +48,7 @@ public class ClickTP extends Module {
 
         if (mc.options.useKey.isPressed()) {
 
+            // ensure compatibility to freecam mods which change the cameraEntity
             Entity rayStart = mc.cameraEntity == null ? mc.player : mc.cameraEntity;
 
             Vec3d startPos = rayStart.getCameraPosVec(1f/20f);
