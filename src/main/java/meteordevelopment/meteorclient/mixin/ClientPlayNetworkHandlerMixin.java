@@ -83,7 +83,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     }
 
     // the server sends a GameJoin packet after the reconfiguration phase
-    @Inject(method = "onEnterReconfiguration", at = @At("HEAD"))
+    @Inject(method = "onEnterReconfiguration", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkThreadUtils;forceMainThread(Lnet/minecraft/network/packet/Packet;Lnet/minecraft/network/listener/PacketListener;Lnet/minecraft/util/thread/ThreadExecutor;)V", shift = At.Shift.AFTER))
     private void onEnterReconfiguration(EnterReconfigurationS2CPacket packet, CallbackInfo info) {
         MeteorClient.EVENT_BUS.post(GameLeftEvent.get());
     }
