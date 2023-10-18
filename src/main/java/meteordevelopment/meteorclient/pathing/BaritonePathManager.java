@@ -59,7 +59,7 @@ public class BaritonePathManager implements IPathManager {
         settings = new Settings();
 
         // Baritone pathing control
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().registerProcess(new MeteorBaritoneProcess());
+        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().registerProcess(new BaritoneProcess());
     }
 
     @Override
@@ -257,7 +257,7 @@ public class BaritonePathManager implements IPathManager {
         }
     }
 
-    public class MeteorBaritoneProcess implements IBaritoneProcess {
+    private class BaritoneProcess implements IBaritoneProcess {
         @Override
         public boolean isActive() {
             return pathingPaused;
