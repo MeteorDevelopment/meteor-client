@@ -9,6 +9,9 @@ import baritone.api.BaritoneAPI;
 import baritone.api.pathing.goals.Goal;
 import baritone.api.pathing.goals.GoalGetToBlock;
 import baritone.api.pathing.goals.GoalXZ;
+import baritone.api.process.IBaritoneProcess;
+import baritone.api.process.PathingCommand;
+import baritone.api.process.PathingCommandType;
 import baritone.api.utils.Rotation;
 import baritone.api.utils.SettingsUtil;
 import meteordevelopment.meteorclient.MeteorClient;
@@ -31,6 +34,7 @@ public class BaritonePathManager implements IPathManager {
     private final Settings settings;
 
     private GoalDirection directionGoal;
+    private boolean pathingPaused;
 
     public BaritonePathManager() {
         // Subscribe to event bus
@@ -53,6 +57,9 @@ public class BaritonePathManager implements IPathManager {
 
         // Create settings
         settings = new Settings();
+
+        // Baritone pathing control
+        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().registerProcess(new MeteorBaritoneProcess());
     }
 
     @Override
@@ -62,12 +69,12 @@ public class BaritonePathManager implements IPathManager {
 
     @Override
     public void pause() {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+        pathingPaused = true;
     }
 
     @Override
     public void resume() {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+        pathingPaused = false;
     }
 
     @Override
@@ -247,6 +254,38 @@ public class BaritonePathManager implements IPathManager {
 
         public int getZ() {
             return this.z;
+        }
+    }
+
+    public class MeteorBaritoneProcess implements IBaritoneProcess {
+        @Override
+        public boolean isActive() {
+            return pathingPaused;
+        }
+
+        @Override
+        public PathingCommand onTick(boolean b, boolean b1) {
+            BaritoneAPI.getProvider().getPrimaryBaritone().getInputOverrideHandler().clearAllKeys();
+            return new PathingCommand(null, PathingCommandType.REQUEST_PAUSE);
+        }
+
+        @Override
+        public boolean isTemporary() {
+            return true;
+        }
+
+        @Override
+        public void onLostControl() {
+        }
+
+        @Override
+        public double priority() {
+            return 0d;
+        }
+
+        @Override
+        public String displayName0() {
+            return "Meteor Client";
         }
     }
 }
