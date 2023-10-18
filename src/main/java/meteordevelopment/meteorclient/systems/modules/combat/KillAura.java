@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -270,7 +270,7 @@ public class KillAura extends Module {
 
         if (targets.isEmpty()) {
             if (wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                PathManagers.get().resume();
                 wasPathing = false;
             }
             return;
@@ -298,8 +298,8 @@ public class KillAura extends Module {
         if (!itemInHand()) return;
 
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+        if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
+            PathManagers.get().pause();
             wasPathing = true;
         }
 

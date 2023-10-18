@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
@@ -17,6 +18,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.EyeOfEnderEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
@@ -146,7 +148,7 @@ public class LocateCommand extends Command {
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("follow entity minecraft:eye_of_ender");
+                PathManagers.get().follow(entity -> entity instanceof EyeOfEnderEntity);
                 firstStart = null;
                 firstEnd = null;
                 secondStart = null;
@@ -271,7 +273,8 @@ public class LocateCommand extends Command {
     }
 
     private void findStronghold() {
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("stop");
+        PathManagers.get().stop();
+
         if (this.firstStart == null || this.firstEnd == null || this.secondStart == null || this.secondEnd == null) {
             error("Missing position data");
             cancel();

@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -195,9 +195,9 @@ public class AutoGap extends Module {
 
         // Pause baritone
         wasBaritone = false;
-        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()) {
+        if (pauseBaritone.get() && PathManagers.get().isPathing()) {
             wasBaritone = true;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            PathManagers.get().pause();
         }
     }
 
@@ -228,7 +228,7 @@ public class AutoGap extends Module {
 
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+            PathManagers.get().resume();
         }
     }
 
