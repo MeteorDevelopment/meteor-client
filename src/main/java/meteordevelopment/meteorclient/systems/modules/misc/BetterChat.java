@@ -394,7 +394,8 @@ public class BetterChat extends Module {
         int startOffset = 0;
 
         try {
-            startOffset = TIMESTAMP_REGEX.matcher(text).end();
+            Matcher m = TIMESTAMP_REGEX.matcher(text);
+            if (m.find()) startOffset = m.end() + 1;
         }
         catch (IllegalStateException ignored) {}
 
