@@ -24,13 +24,15 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.VarHandle;
 import java.lang.reflect.Field;
 import java.util.function.Predicate;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BaritonePathManager implements IPathManager {
-    private final Field rotationField;
+    private final VarHandle rotationField;
     private final Settings settings;
 
     private GoalDirection directionGoal;
@@ -42,14 +44,16 @@ public class BaritonePathManager implements IPathManager {
 
         // Find rotation field
         Class<?> klass = BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior().getClass();
-        Field rotationField = null;
+        VarHandle rotationField = null;
 
         for (Field field : klass.getDeclaredFields()) {
             if (field.getType() == Rotation.class) {
-                field.setAccessible(true);
-
-                rotationField = field;
-                break;
+                try {
+                    rotationField = MethodHandles.lookup().unreflectVarHandle(field);
+                    break;
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
 
@@ -110,24 +114,14 @@ public class BaritonePathManager implements IPathManager {
 
     @Override
     public float getTargetYaw() {
-        if (rotationField == null) return 0;
-
-        try {
-            return ((Rotation) rotationField.get(BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior())).getYaw();
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        Rotation rotation = (Rotation) rotationField.get(BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior());
+        return rotation == null ? 0 : rotation.getYaw();
     }
 
     @Override
     public float getTargetPitch() {
-        if (rotationField == null) return 0;
-
-        try {
-            return ((Rotation) rotationField.get(BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior())).getPitch();
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException(e);
-        }
+        Rotation rotation = (Rotation) rotationField.get(BaritoneAPI.getProvider().getPrimaryBaritone().getLookBehavior());
+        return rotation == null ? 0 : rotation.getPitch();
     }
 
     @Override

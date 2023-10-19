@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.pathing;
 
+import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.PreInit;
 
 public class PathManagers {
@@ -21,6 +22,8 @@ public class PathManagers {
 
             BaritoneUtils.IS_AVAILABLE = true;
             INSTANCE = new BaritonePathManager();
+
+            MeteorClient.LOG.info("Found Baritone, using a Baritone path manager");
         } catch (ClassNotFoundException ignored) {}
     }
 }
