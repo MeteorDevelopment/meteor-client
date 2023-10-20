@@ -25,6 +25,7 @@ import meteordevelopment.meteorclient.utils.tooltip.*;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.entity.BannerPattern;
 import net.minecraft.block.entity.BannerPatterns;
+import net.minecraft.client.gui.tooltip.TooltipComponent;
 import net.minecraft.entity.Bucketable;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -325,7 +326,8 @@ public class BetterTooltips extends Module {
 
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
-            event.tooltipData = new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR);
+            event.tooltipData = EChestMemory.isKnown() ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
+                : new TextTooltipComponent(Text.literal("Unknown ender chest inventory.").formatted(Formatting.DARK_RED));
         }
 
         // Map preview
