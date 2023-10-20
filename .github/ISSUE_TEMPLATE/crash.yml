@@ -1,29 +1,24 @@
-name: Bug
-description: Report a bug to help us improve Meteor.
-labels: [ bug ]
+name: Crash
+description: Report a crash to help us improve Meteor.
+labels: [ crash ]
 body:
-  - type: textarea
-    id: description
-    attributes:
-      label: Describe the bug
-      description: |
-        A clear and concise description of what the issue is.
-        Provide as much information as possible, videos, images, etc.
-      placeholder: |
-          This module is broken / not working as intended.
-          It should do X but it does Y instead.
-    validations:
-      required: true
   - type: textarea
     id: reproducing
     attributes:
       label: Steps to reproduce
-      description: How do you trigger this bug?
+      description: How do you trigger this crash?
       placeholder: |
           1. I did this thing;
-          2. Then I did this other thing, which caused the bug.
+          2. Then I did this other thing, which caused the crash.
     validations:
       required: true
+  - type: input
+    id: crash-report
+    attributes:
+      label: Link to crash report/log (upload to https://mclo.gs and paste resulting link here)
+      placeholder: https://mclo.gs/xxxxxx
+    validations:
+        required: true
   - type: input
     id: meteor-version
     attributes:
@@ -51,11 +46,11 @@ body:
   - type: checkboxes
     id: prerequisites
     attributes:
-      label: Before submitting a bug report
+      label: Before submitting a crash report
       options:
         - label: |
-            This bug wasn't already reported (I have searched bug reports on GitHub).
+            This crash wasn't already reported (I have searched crash reports on GitHub).
           required: true
         - label: |
-            This is a valid bug (I am able to reproduce this on the latest dev build).
+            This is a valid crash (I am able to reproduce this on the latest dev build).
           required: true
