@@ -10,7 +10,6 @@ body:
       placeholder: |
           1. I did this thing;
           2. Then I did this other thing, which caused the crash.
-      render: bash
     validations:
       required: true
   - type: input
