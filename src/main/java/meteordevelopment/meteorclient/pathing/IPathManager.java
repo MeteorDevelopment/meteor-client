@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.pathing;
 
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.Settings;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -12,6 +14,8 @@ import net.minecraft.util.math.BlockPos;
 import java.util.function.Predicate;
 
 public interface IPathManager {
+    String getName();
+
     boolean isPathing();
 
     void pause();
@@ -32,16 +36,12 @@ public interface IPathManager {
     ISettings getSettings();
 
     interface ISettings {
-        boolean getWalkOnWater();
-        void setWalkOnWater(boolean value);
+        Settings get();
 
-        boolean getWalkOnLava();
-        void setWalkOnLava(boolean value);
+        Setting<Boolean> getWalkOnWater();
+        Setting<Boolean> getWalkOnLava();
 
-        boolean getStep();
-        void setStep(boolean value);
-
-        boolean getNoFall();
-        void setNoFall(boolean value);
+        Setting<Boolean> getStep();
+        Setting<Boolean> getNoFall();
     }
 }

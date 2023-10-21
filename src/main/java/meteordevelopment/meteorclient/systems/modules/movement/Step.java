@@ -65,8 +65,8 @@ public class Step extends Module {
     public void onActivate() {
         prevStepHeight = mc.player.getStepHeight();
 
-        prevPathManagerStep = PathManagers.get().getSettings().getStep();
-        PathManagers.get().getSettings().setStep(true);
+        prevPathManagerStep = PathManagers.get().getSettings().getStep().get();
+        PathManagers.get().getSettings().getStep().set(true);
     }
 
     @EventHandler
@@ -84,8 +84,8 @@ public class Step extends Module {
     @Override
     public void onDeactivate() {
         mc.player.setStepHeight(prevStepHeight);
-        
-        PathManagers.get().getSettings().setStep(prevPathManagerStep);
+
+        PathManagers.get().getSettings().getStep().set(prevPathManagerStep);
     }
 
     private float getHealth(){

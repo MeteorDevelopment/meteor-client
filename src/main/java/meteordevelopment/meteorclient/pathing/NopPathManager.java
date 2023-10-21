@@ -5,6 +5,9 @@
 
 package meteordevelopment.meteorclient.pathing;
 
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.Settings;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
@@ -12,7 +15,12 @@ import net.minecraft.util.math.BlockPos;
 import java.util.function.Predicate;
 
 public class NopPathManager implements IPathManager {
-    private final Settings settings = new Settings();
+    private final NopSettings settings = new NopSettings();
+
+    @Override
+    public String getName() {
+        return "none";
+    }
 
     @Override
     public boolean isPathing() {
@@ -55,37 +63,37 @@ public class NopPathManager implements IPathManager {
         return settings;
     }
 
-    private static class Settings implements ISettings {
+    private static class NopSettings implements ISettings {
+        private final Settings settings = new Settings();
+        private final Setting<Boolean> setting = new BoolSetting.Builder().build();
+
         @Override
-        public boolean getWalkOnWater() {
-            return false;
+        public Settings get() {
+            return settings;
         }
 
         @Override
-        public void setWalkOnWater(boolean value) {}
-
-        @Override
-        public boolean getWalkOnLava() {
-            return false;
+        public Setting<Boolean> getWalkOnWater() {
+            setting.reset();
+            return setting;
         }
 
         @Override
-        public void setWalkOnLava(boolean value) {}
-
-        @Override
-        public boolean getStep() {
-            return false;
+        public Setting<Boolean> getWalkOnLava() {
+            setting.reset();
+            return setting;
         }
 
         @Override
-        public void setStep(boolean value) {}
-
-        @Override
-        public boolean getNoFall() {
-            return false;
+        public Setting<Boolean> getStep() {
+            setting.reset();
+            return setting;
         }
 
         @Override
-        public void setNoFall(boolean value) {}
+        public Setting<Boolean> getNoFall() {
+            setting.reset();
+            return setting;
+        }
     }
 }

@@ -100,15 +100,15 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
-        prePathManagerNoFall = PathManagers.get().getSettings().getNoFall();
-        if (mode.get() == Mode.Packet) PathManagers.get().getSettings().setNoFall(true);
+        prePathManagerNoFall = PathManagers.get().getSettings().getNoFall().get();
+        if (mode.get() == Mode.Packet) PathManagers.get().getSettings().getNoFall().set(true);
 
         placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
-        PathManagers.get().getSettings().setNoFall(prePathManagerNoFall);
+        PathManagers.get().getSettings().getNoFall().set(prePathManagerNoFall);
     }
 
     @EventHandler

@@ -33,7 +33,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BaritonePathManager implements IPathManager {
     private final VarHandle rotationField;
-    private final Settings settings;
+    private final BaritoneSettings settings;
 
     private GoalDirection directionGoal;
     private boolean pathingPaused;
@@ -60,10 +60,15 @@ public class BaritonePathManager implements IPathManager {
         this.rotationField = rotationField;
 
         // Create settings
-        settings = new Settings();
+        settings = new BaritoneSettings();
 
         // Baritone pathing control
         BaritoneAPI.getProvider().getPrimaryBaritone().getPathingControlManager().registerProcess(new BaritoneProcess());
+    }
+
+    @Override
+    public String getName() {
+        return "Baritone";
     }
 
     @Override
@@ -139,48 +144,6 @@ public class BaritonePathManager implements IPathManager {
         }
 
         directionGoal.tick();
-    }
-
-    private static class Settings implements ISettings {
-        @Override
-        public boolean getWalkOnWater() {
-            return BaritoneAPI.getSettings().assumeWalkOnWater.value;
-        }
-
-        @Override
-        public void setWalkOnWater(boolean value) {
-            BaritoneAPI.getSettings().assumeWalkOnWater.value = value;
-        }
-
-        @Override
-        public boolean getWalkOnLava() {
-            return BaritoneAPI.getSettings().assumeWalkOnLava.value;
-        }
-
-        @Override
-        public void setWalkOnLava(boolean value) {
-            BaritoneAPI.getSettings().assumeWalkOnLava.value = value;
-        }
-
-        @Override
-        public boolean getStep() {
-            return BaritoneAPI.getSettings().assumeStep.value;
-        }
-
-        @Override
-        public void setStep(boolean value) {
-            BaritoneAPI.getSettings().assumeStep.value = value;
-        }
-
-        @Override
-        public boolean getNoFall() {
-            return BaritoneAPI.getSettings().maxFallHeightNoWater.value > BaritoneAPI.getSettings().maxFallHeightNoWater.defaultValue;
-        }
-
-        @Override
-        public void setNoFall(boolean value) {
-            BaritoneAPI.getSettings().maxFallHeightNoWater.value = value ? 159159 : BaritoneAPI.getSettings().maxFallHeightNoWater.defaultValue;
-        }
     }
 
     private static class GoalDirection implements Goal {

@@ -153,17 +153,17 @@ public class Jesus extends Module {
 
     @Override
     public void onActivate() {
-        prePathManagerWalkOnWater = PathManagers.get().getSettings().getWalkOnWater();
-        prePathManagerWalkOnLava = PathManagers.get().getSettings().getWalkOnLava();
+        prePathManagerWalkOnWater = PathManagers.get().getSettings().getWalkOnWater().get();
+        prePathManagerWalkOnLava = PathManagers.get().getSettings().getWalkOnLava().get();
 
-        PathManagers.get().getSettings().setWalkOnWater(waterMode.get() == Mode.Solid);
-        PathManagers.get().getSettings().setWalkOnLava(lavaMode.get() == Mode.Solid);
+        PathManagers.get().getSettings().getWalkOnWater().set(waterMode.get() == Mode.Solid);
+        PathManagers.get().getSettings().getWalkOnLava().set(lavaMode.get() == Mode.Solid);
     }
 
     @Override
     public void onDeactivate() {
-        PathManagers.get().getSettings().setWalkOnWater(prePathManagerWalkOnWater);
-        PathManagers.get().getSettings().setWalkOnLava(prePathManagerWalkOnLava);
+        PathManagers.get().getSettings().getWalkOnWater().set(prePathManagerWalkOnWater);
+        PathManagers.get().getSettings().getWalkOnLava().set(prePathManagerWalkOnLava);
     }
 
     @EventHandler

@@ -26,8 +26,8 @@ public class Tabs {
         add(new MacrosTab());
         add(new ProfilesTab());
 
-        if (BaritoneUtils.IS_AVAILABLE) {
-            add(new BaritoneTab());
+        if (PathManagers.get().getSettings().get().sizeGroups() > 0) {
+            add(new PathManagerTab());
         }
     }
 
