@@ -10,6 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
@@ -145,6 +146,11 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("stronghold").executes(s -> {
+            if (!BaritoneUtils.IS_AVAILABLE) {
+                error("Locating this structure requires Baritone.");
+                return SINGLE_SUCCESS;
+            }
+
             boolean foundEye = InvUtils.testInHotbar(Items.ENDER_EYE);
 
             if (foundEye) {
@@ -170,6 +176,11 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("nether_fortress").executes(s -> {
+            if (!BaritoneUtils.IS_AVAILABLE) {
+                error("Locating this structure requires Baritone.");
+                return SINGLE_SUCCESS;
+            }
+
             Vec3d coords = findByBlockList(netherFortressBlocks);
             if (coords == null) {
                 error("No nether fortress found.");
@@ -183,6 +194,11 @@ public class LocateCommand extends Command {
         }));
 
         builder.then(literal("monument").executes(s -> {
+            if (!BaritoneUtils.IS_AVAILABLE) {
+                error("Locating this structure requires Baritone.");
+                return SINGLE_SUCCESS;
+            }
+
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() == Items.FILLED_MAP) {
                 NbtCompound tag = stack.getNbt();

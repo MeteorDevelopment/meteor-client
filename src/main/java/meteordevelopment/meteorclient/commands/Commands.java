@@ -8,7 +8,6 @@ package meteordevelopment.meteorclient.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.commands.commands.*;
-import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PostInit;
 import net.minecraft.client.network.ClientCommandSource;
@@ -62,10 +61,7 @@ public class Commands {
         add(new RotationCommand());
         add(new WaypointCommand());
         add(new InputCommand());
-
-        if (BaritoneUtils.IS_AVAILABLE) {
-            add(new LocateCommand());
-        }
+        add(new LocateCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));
     }
