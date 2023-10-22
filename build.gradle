@@ -58,7 +58,7 @@ dependencies {
     modCompileOnly("maven.modrinth:indium:${project.indium_version}") { transitive = false }
 
     // Baritone (https://github.com/MeteorDevelopment/baritone)
-    modInclude "baritone:fabric:${project.minecraft_version}-SNAPSHOT"
+    modCompileOnly "meteordevelopment:baritone:${project.minecraft_version}-SNAPSHOT"
 
     // Libraries
     library "meteordevelopment:orbit:${project.orbit_version}"

@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.events.packets.InventoryEvent;
 import meteordevelopment.meteorclient.events.packets.PlaySoundPacketEvent;
 import meteordevelopment.meteorclient.events.world.ChunkDataEvent;
 import meteordevelopment.meteorclient.mixininterface.IExplosionS2CPacket;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
@@ -140,7 +141,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     private void onSendChatMessage(String message, CallbackInfo ci) {
         if (ignoreChatMessage) return;
 
-        if (!message.startsWith(Config.get().prefix.get()) && !message.startsWith(BaritoneAPI.getSettings().prefix.value)) {
+        if (!message.startsWith(Config.get().prefix.get()) && (BaritoneUtils.IS_AVAILABLE || !message.startsWith(BaritoneUtils.getPrefix()))) {
             SendMessageEvent event = MeteorClient.EVENT_BUS.post(SendMessageEvent.get(message));
 
             if (!event.isCancelled()) {
