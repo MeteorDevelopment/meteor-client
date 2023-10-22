@@ -8,6 +8,8 @@ package meteordevelopment.meteorclient.pathing;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.utils.PreInit;
 
+import java.lang.reflect.InvocationTargetException;
+
 public class PathManagers {
     private static IPathManager INSTANCE = new NopPathManager();
 
@@ -17,13 +19,31 @@ public class PathManagers {
 
     @PreInit
     public static void init() {
-        try {
-            Class.forName("baritone.api.BaritoneAPI");
+        if (exists("meteordevelopment.voyager.PathManager")) {
+            try {
+                INSTANCE = (IPathManager) Class.forName("meteordevelopment.voyager.PathManager").getConstructor().newInstance();
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
+                     NoSuchMethodException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
+        if (exists("baritone.api.BaritoneAPI")) {
             BaritoneUtils.IS_AVAILABLE = true;
-            INSTANCE = new BaritonePathManager();
 
-            MeteorClient.LOG.info("Found Baritone, using a Baritone path manager");
-        } catch (ClassNotFoundException ignored) {}
+            if (INSTANCE instanceof NopPathManager)
+                INSTANCE = new BaritonePathManager();
+        }
+
+        MeteorClient.LOG.info("Path Manager: {}", INSTANCE.getName());
+    }
+
+    private static boolean exists(String name) {
+        try {
+            Class.forName(name);
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
     }
 }
