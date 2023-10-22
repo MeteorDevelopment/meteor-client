@@ -43,5 +43,7 @@ public interface IPathManager {
 
         Setting<Boolean> getStep();
         Setting<Boolean> getNoFall();
+
+        void save();
     }
 }
