@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.gui.tabs.builtin;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.utils.SettingsUtil;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.tabs.Tab;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -53,7 +51,7 @@ public class PathManagerTab extends Tab {
 
         @Override
         protected void onClosed() {
-            SettingsUtil.save(BaritoneAPI.getSettings());
+            PathManagers.get().getSettings().save();
         }
     }
 }

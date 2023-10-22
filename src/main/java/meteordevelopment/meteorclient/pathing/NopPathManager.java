@@ -95,5 +95,8 @@ public class NopPathManager implements IPathManager {
             setting.reset();
             return setting;
         }
+
+        @Override
+        public void save() {}
     }
 }

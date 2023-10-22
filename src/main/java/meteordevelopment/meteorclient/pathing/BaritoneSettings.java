@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.pathing;
 
 import baritone.api.BaritoneAPI;
+import baritone.api.utils.SettingsUtil;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
@@ -52,6 +53,11 @@ public class BaritoneSettings implements IPathManager.ISettings {
     @Override
     public Setting<Boolean> getNoFall() {
         return noFall;
+    }
+
+    @Override
+    public void save() {
+        SettingsUtil.save(BaritoneAPI.getSettings());
     }
 
     // Wrappers
