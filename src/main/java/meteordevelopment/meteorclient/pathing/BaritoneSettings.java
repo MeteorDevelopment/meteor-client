@@ -3,19 +3,12 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.gui.tabs.builtin;
+package meteordevelopment.meteorclient.pathing;
 
 import baritone.api.BaritoneAPI;
-import baritone.api.utils.SettingsUtil;
-import meteordevelopment.meteorclient.gui.GuiTheme;
-import meteordevelopment.meteorclient.gui.tabs.Tab;
-import meteordevelopment.meteorclient.gui.tabs.TabScreen;
-import meteordevelopment.meteorclient.gui.tabs.WindowTabScreen;
-import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.block.Block;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.item.Item;
 
 import java.awt.*;
@@ -26,20 +19,45 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class BaritoneTab extends Tab {
-    private static Settings settings;
-    private static Map<String, String> descriptions;
+public class BaritoneSettings implements IPathManager.ISettings {
+    private final Settings settings = new Settings();
 
-    public BaritoneTab() {
-        super("Baritone");
+    private Setting<Boolean> walkOnWater, walkOnLava;
+    private Setting<Boolean> step, noFall;
+
+    public BaritoneSettings() {
+        createWrappers();
     }
 
-    @SuppressWarnings("unchecked")
-    private static Settings getSettings() {
-        if (settings != null) return settings;
+    @Override
+    public Settings get() {
+        return settings;
+    }
 
-        settings = new Settings();
+    @Override
+    public Setting<Boolean> getWalkOnWater() {
+        return walkOnWater;
+    }
 
+    @Override
+    public Setting<Boolean> getWalkOnLava() {
+        return walkOnLava;
+    }
+
+    @Override
+    public Setting<Boolean> getStep() {
+        return step;
+    }
+
+    @Override
+    public Setting<Boolean> getNoFall() {
+        return noFall;
+    }
+
+    // Wrappers
+
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    private void createWrappers() {
         SettingGroup sgBool = settings.createGroup("Checkboxes");
         SettingGroup sgDouble = settings.createGroup("Numbers");
         SettingGroup sgInt = settings.createGroup("Whole Numbers");
@@ -51,6 +69,7 @@ public class BaritoneTab extends Tab {
 
         try {
             Class<? extends baritone.api.Settings> klass = BaritoneAPI.getSettings().getClass();
+
             for (Field field : klass.getDeclaredFields()) {
                 Object obj = field.get(BaritoneAPI.getSettings());
                 if (!(obj instanceof baritone.api.Settings.Setting setting)) continue;
@@ -58,7 +77,7 @@ public class BaritoneTab extends Tab {
                 Object value = setting.value;
 
                 if (value instanceof Boolean) {
-                    sgBool.add(new BoolSetting.Builder()
+                    Setting<Boolean> wrapper = sgBool.add(new BoolSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
                         .defaultValue((boolean) setting.defaultValue)
@@ -66,7 +85,14 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(booleanSetting -> booleanSetting.set((Boolean) setting.value))
                         .build()
                     );
-                } else if (value instanceof Double) {
+
+                    switch (wrapper.name) {
+                        case "assumeWalkOnWater" -> walkOnWater = wrapper;
+                        case "assumeWalkOnLava" -> walkOnLava = wrapper;
+                        case "assumeStep" -> step = wrapper;
+                    }
+                }
+                else if (value instanceof Double) {
                     sgDouble.add(new DoubleSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -75,7 +101,8 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(doubleSetting -> doubleSetting.set((Double) setting.value))
                         .build()
                     );
-                } else if (value instanceof Float) {
+                }
+                else if (value instanceof Float) {
                     sgDouble.add(new DoubleSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -84,8 +111,9 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(doubleSetting -> doubleSetting.set(((Float) setting.value).doubleValue()))
                         .build()
                     );
-                } else if (value instanceof Integer) {
-                    sgInt.add(new IntSetting.Builder()
+                }
+                else if (value instanceof Integer) {
+                    Setting<Integer> wrapper = sgInt.add(new IntSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
                         .defaultValue((int) setting.defaultValue)
@@ -93,7 +121,18 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(integerSetting -> integerSetting.set((Integer) setting.value))
                         .build()
                     );
-                } else if (value instanceof Long) {
+
+                    if (wrapper.name.equals("maxFallHeightNoWater")) {
+                        noFall = new BoolSetting.Builder()
+                            .name(wrapper.name)
+                            .description(wrapper.description)
+                            .defaultValue(false)
+                            .onChanged(aBoolean -> wrapper.set(aBoolean ? 159159 : wrapper.getDefaultValue()))
+                            .onModuleActivated(booleanSetting -> booleanSetting.set(wrapper.get() >= 255))
+                            .build();
+                    }
+                }
+                else if (value instanceof Long) {
                     sgInt.add(new IntSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -102,7 +141,8 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(integerSetting -> integerSetting.set(((Long) setting.value).intValue()))
                         .build()
                     );
-                } else if (value instanceof String) {
+                }
+                else if (value instanceof String) {
                     sgString.add(new StringSetting.Builder()
                         .name(setting.getName())
                         .description(getDescription(setting.getName()))
@@ -111,7 +151,8 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(stringSetting -> stringSetting.set((String) setting.value))
                         .build()
                     );
-                } else if (value instanceof Color) {
+                }
+                else if (value instanceof Color) {
                     Color c = (Color) setting.value;
 
                     sgColor.add(new ColorSetting.Builder()
@@ -122,7 +163,8 @@ public class BaritoneTab extends Tab {
                         .onModuleActivated(colorSetting -> colorSetting.set(new SettingColor(c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha())))
                         .build()
                     );
-                } else if (value instanceof List) {
+                }
+                else if (value instanceof List) {
                     Type listType = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
                     Type type = ((ParameterizedType) listType).getActualTypeArguments()[0];
 
@@ -135,7 +177,8 @@ public class BaritoneTab extends Tab {
                             .onModuleActivated(blockListSetting -> blockListSetting.set((List<Block>) setting.value))
                             .build()
                         );
-                    } else if (type == Item.class) {
+                    }
+                    else if (type == Item.class) {
                         sgItemLists.add(new ItemListSetting.Builder()
                             .name(setting.getName())
                             .description(getDescription(setting.getName()))
@@ -147,22 +190,15 @@ public class BaritoneTab extends Tab {
                     }
                 }
             }
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
         }
-
-        return settings;
+        catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Override
-    public TabScreen createScreen(GuiTheme theme) {
-        return new BaritoneScreen(theme, this);
-    }
+    // Descriptions
 
-    @Override
-    public boolean isScreen(Screen screen) {
-        return screen instanceof BaritoneScreen;
-    }
+    private static Map<String, String> descriptions;
 
     private static void addDescription(String settingName, String description) {
         descriptions.put(settingName.toLowerCase(), description);
@@ -172,33 +208,6 @@ public class BaritoneTab extends Tab {
         if (descriptions == null) loadDescriptions();
 
         return descriptions.get(settingName.toLowerCase());
-    }
-
-    private static class BaritoneScreen extends WindowTabScreen {
-        public BaritoneScreen(GuiTheme theme, Tab tab) {
-            super(theme, tab);
-
-            getSettings().onActivated();
-        }
-
-        @Override
-        public void initWidgets() {
-            WTextBox filter = add(theme.textBox("")).minWidth(400).expandX().widget();
-            filter.setFocused(true);
-            filter.action = () -> {
-                clear();
-
-                add(filter);
-                add(theme.settings(getSettings(), filter.get().trim())).expandX();
-            };
-
-            add(theme.settings(getSettings(), filter.get().trim())).expandX();
-        }
-
-        @Override
-        protected void onClosed() {
-            SettingsUtil.save(BaritoneAPI.getSettings());
-        }
     }
 
     private static void loadDescriptions() {

@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -55,7 +55,7 @@ public class Step extends Module {
     );
 
     private float prevStepHeight;
-    private boolean prevBaritoneAssumeStep;
+    private boolean prevPathManagerStep;
 
     public Step() {
         super(Categories.Movement, "step", "Allows you to walk up full blocks instantly.");
@@ -64,9 +64,9 @@ public class Step extends Module {
     @Override
     public void onActivate() {
         prevStepHeight = mc.player.getStepHeight();
-        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
 
-        BaritoneAPI.getSettings().assumeStep.value = true;
+        prevPathManagerStep = PathManagers.get().getSettings().getStep().get();
+        PathManagers.get().getSettings().getStep().set(true);
     }
 
     @EventHandler
@@ -84,7 +84,8 @@ public class Step extends Module {
     @Override
     public void onDeactivate() {
         mc.player.setStepHeight(prevStepHeight);
-        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+
+        PathManagers.get().getSettings().getStep().set(prevPathManagerStep);
     }
 
     private float getHealth(){

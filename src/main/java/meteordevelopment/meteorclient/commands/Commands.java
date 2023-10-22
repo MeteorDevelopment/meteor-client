@@ -8,6 +8,7 @@ package meteordevelopment.meteorclient.commands;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import meteordevelopment.meteorclient.commands.commands.*;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.PostInit;
 import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.CommandSource;
@@ -23,7 +24,7 @@ public class Commands {
     public static final CommandSource COMMAND_SOURCE = new ClientCommandSource(null, mc);
     public static final List<Command> COMMANDS = new ArrayList<>();
 
-    @PostInit
+    @PostInit(dependencies = PathManagers.class)
     public static void init() {
         add(new VClipCommand());
         add(new HClipCommand());
@@ -35,7 +36,6 @@ public class Commands {
         add(new FriendsCommand());
         add(new CommandsCommand());
         add(new InventoryCommand());
-        add(new LocateCommand());
         add(new NbtCommand());
         add(new NotebotCommand());
         add(new PeekCommand());
@@ -61,6 +61,7 @@ public class Commands {
         add(new RotationCommand());
         add(new WaypointCommand());
         add(new InputCommand());
+        add(new LocateCommand());
 
         COMMANDS.sort(Comparator.comparing(Command::getName));
     }

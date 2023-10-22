@@ -5,8 +5,6 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
-import baritone.api.BaritoneAPI;
-import baritone.api.pathing.goals.GoalXZ;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -15,6 +13,7 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
@@ -27,6 +26,7 @@ import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
 import java.util.Random;
@@ -124,7 +124,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker() && playerEntity != null) {
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getFollowProcess().follow(entity -> entity.getEntityName().equalsIgnoreCase(playerEntity.getEntityName()));
+                    PathManagers.get().follow(entity -> entity.getEntityName().equalsIgnoreCase(playerEntity.getEntityName()));
                 }
             }
             else {
@@ -146,7 +146,7 @@ public class SwarmCommand extends Command {
                                     int x = IntegerArgumentType.getInteger(context, "x");
                                     int z = IntegerArgumentType.getInteger(context, "z");
 
-                                    BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ(x, z));
+                                    PathManagers.get().moveTo(new BlockPos(x, 0, z), true);
                                 }
                             }
                             else {
@@ -330,7 +330,7 @@ public class SwarmCommand extends Command {
                 if (swarm.isHost()) {
                     swarm.host.sendMessage(context.getInput());
                 } else if (swarm.isWorker()) {
-                    BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
+                    PathManagers.get().stop();
                 }
             } else {
                 throw SWARM_NOT_ACTIVE.create();
@@ -362,11 +362,13 @@ public class SwarmCommand extends Command {
 
     private void scatter(int radius) {
         Random random = new Random();
+
         double a = random.nextDouble() * 2 * Math.PI;
         double r = radius * Math.sqrt(random.nextDouble());
         double x = mc.player.getX() + r * Math.cos(a);
         double z = mc.player.getZ() + r * Math.sin(a);
-        BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().cancelEverything();
-        BaritoneAPI.getProvider().getPrimaryBaritone().getCustomGoalProcess().setGoalAndPath(new GoalXZ((int) x, (int) z));
+
+        PathManagers.get().stop();
+        PathManagers.get().moveTo(new BlockPos((int) x, 0, (int) z), true);
     }
 }
