@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import net.minecraft.world.LightType;
 
 public class Fullbright extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -22,6 +23,17 @@ public class Fullbright extends Module {
         .build()
     );
 
+    public final Setting<LightType> lightType = sgGeneral.add(new EnumSetting.Builder<LightType>()
+        .name("light-type")
+        .description("Which type of light to use for Luminance mode.")
+        .defaultValue(LightType.BLOCK)
+        .visible(() -> mode.get() == Mode.Luminance)
+        .onChanged(integer -> {
+            if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
+        })
+        .build()
+    );
+
     private final Setting<Integer> minimumLightLevel = sgGeneral.add(new IntSetting.Builder()
         .name("minimum-light-level")
         .description("Minimum light level when using Luminance mode.")
@@ -30,7 +42,7 @@ public class Fullbright extends Module {
         .range(0, 15)
         .sliderMax(15)
         .onChanged(integer -> {
-            if (mc.worldRenderer != null) mc.worldRenderer.reload();
+            if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
         })
         .build()
     );
@@ -49,8 +61,8 @@ public class Fullbright extends Module {
         if (mode.get() == Mode.Luminance) mc.worldRenderer.reload();
     }
 
-    public int getLuminance() {
-        if (!isActive() || mode.get() != Mode.Luminance) return 0;
+    public int getLuminance(LightType type) {
+        if (!isActive() || mode.get() != Mode.Luminance || type != lightType.get()) return 0;
         return minimumLightLevel.get();
     }
 

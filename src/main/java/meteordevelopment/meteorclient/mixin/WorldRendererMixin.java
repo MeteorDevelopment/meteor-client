@@ -17,6 +17,7 @@ import net.minecraft.client.render.*;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.LightType;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -127,6 +128,11 @@ public abstract class WorldRendererMixin {
 
     @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 0)
     private static int getLightmapCoordinatesModifySkyLight(int sky) {
-        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), sky);
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.SKY), sky);
+    }
+
+    @ModifyVariable(method = "getLightmapCoordinates(Lnet/minecraft/world/BlockRenderView;Lnet/minecraft/block/BlockState;Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "STORE"), ordinal = 1)
+    private static int getLightmapCoordinatesModifyBlockLight(int sky) {
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), sky);
     }
 }
