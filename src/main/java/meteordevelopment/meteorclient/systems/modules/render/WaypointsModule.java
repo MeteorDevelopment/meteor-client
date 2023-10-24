@@ -6,6 +6,7 @@
 package meteordevelopment.meteorclient.systems.modules.render;
 
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
+import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.renderer.GuiRenderer;
 import meteordevelopment.meteorclient.gui.screens.EditSystemScreen;
@@ -16,6 +17,7 @@ import meteordevelopment.meteorclient.gui.widgets.pressable.WButton;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WCheckbox;
 import meteordevelopment.meteorclient.gui.widgets.pressable.WMinus;
 import meteordevelopment.meteorclient.pathing.PathManagers;
+import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -23,6 +25,7 @@ import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
+import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -30,6 +33,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import org.joml.Vector3d;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -39,6 +43,7 @@ import static meteordevelopment.meteorclient.utils.player.ChatUtils.formatCoords
 
 public class WaypointsModule extends Module {
     private static final Color GRAY = new Color(200, 200, 200);
+    private static final Color TEXT = new Color(255, 255, 255);
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDeathPosition = settings.createGroup("Death Position");
@@ -74,6 +79,64 @@ public class WaypointsModule extends Module {
     }
 
     private final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+
+    @EventHandler
+    private void onRender2D(Render2DEvent event) {
+        TextRenderer text = TextRenderer.get();
+        Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
+        int textRenderDist = textRenderDistance.get();
+
+        for (Waypoint waypoint : Waypoints.get()) {
+            // Continue if this waypoint should not be rendered
+            if (!waypoint.visible.get() || !Waypoints.checkDimension(waypoint)) continue;
+
+            // Calculate distance
+            BlockPos blockPos = waypoint.getPos();
+            Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
+            double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
+
+            // Continue if this waypoint should not be rendered
+            if (dist > waypoint.maxVisible.get()) continue;
+            if (!NametagUtils.to2D(pos, 1)) continue;
+
+            // Calculate alpha and distance to center of the screen
+            double distToCenter = pos.distance(center);
+            double a = 1;
+
+            if (dist < 20) {
+                a = (dist - 10) / 10;
+                if (a < 0.01) continue;
+            }
+
+            // Render
+            NametagUtils.scale = waypoint.scale.get() - 0.2;
+            NametagUtils.begin(pos);
+
+            // Render icon
+            waypoint.renderIcon(-16, -16, a, 32);
+
+            // Render text if cursor is close enough
+            if (distToCenter <= textRenderDist) {
+                // Setup text rendering
+                int preTextA = TEXT.a;
+                TEXT.a *= a;
+                text.begin();
+
+                // Render name
+                text.render(waypoint.name.get(), -text.getWidth(waypoint.name.get()) / 2, -16 - text.getHeight(), TEXT, true);
+
+                // Render distance
+                String distText = String.format("%d blocks", (int) Math.round(dist));
+                text.render(distText, -text.getWidth(distText) / 2, 16, TEXT, true);
+
+                // End text rendering
+                text.end();
+                TEXT.a = preTextA;
+            }
+
+            NametagUtils.end();
+        }
+    }
 
     @EventHandler
     private void onOpenScreen(OpenScreenEvent event) {
