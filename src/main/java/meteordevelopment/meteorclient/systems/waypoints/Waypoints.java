@@ -8,18 +8,12 @@ package meteordevelopment.meteorclient.systems.waypoints;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
-import meteordevelopment.meteorclient.events.render.Render2DEvent;
-import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.systems.System;
 import meteordevelopment.meteorclient.systems.Systems;
-import meteordevelopment.meteorclient.systems.modules.Modules;
-import meteordevelopment.meteorclient.systems.modules.render.WaypointsModule;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import meteordevelopment.meteorclient.utils.misc.NbtUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import meteordevelopment.meteorclient.utils.render.NametagUtils;
-import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.world.Dimension;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
@@ -27,8 +21,6 @@ import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.util.math.BlockPos;
-import org.joml.Vector3d;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -37,15 +29,12 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     public static final String[] BUILTIN_ICONS = {"square", "circle", "triangle", "star", "diamond", "skull"};
-    private static final Color TEXT = new Color(255, 255, 255);
 
     public final Map<String, AbstractTexture> icons = new ConcurrentHashMap<>();
 
-    public Map<String, Waypoint> waypoints = new ConcurrentHashMap<>();
+    public final Map<String, Waypoint> waypoints = new ConcurrentHashMap<>();
 
     public Waypoints() {
         super(null);
@@ -127,67 +116,6 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
         return playerOpp && waypointOpp;
     }
 
-    @EventHandler
-    private void onRender2D(Render2DEvent event) {
-        WaypointsModule module = Modules.get().get(WaypointsModule.class);
-        if (!module.isActive()) return;
-
-        TextRenderer text = TextRenderer.get();
-        Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
-        int textRenderDist = module.textRenderDistance.get();
-
-        for (Waypoint waypoint : this) {
-            // Continue if this waypoint should not be rendered
-            if (!waypoint.visible.get() || !checkDimension(waypoint)) continue;
-
-            // Calculate distance
-            BlockPos blockPos = waypoint.getPos();
-            Vector3d pos = new Vector3d(blockPos.getX() + 0.5, blockPos.getY(), blockPos.getZ() + 0.5);
-            double dist = PlayerUtils.distanceToCamera(pos.x, pos.y, pos.z);
-
-            // Continue if this waypoint should not be rendered
-            if (dist > waypoint.maxVisible.get()) continue;
-            if (!NametagUtils.to2D(pos, 1)) continue;
-
-            // Calculate alpha and distance to center of the screen
-            double distToCenter = pos.distance(center);
-            double a = 1;
-
-            if (dist < 20) {
-                a = (dist - 10) / 10;
-                if (a < 0.01) continue;
-            }
-
-            // Render
-            NametagUtils.scale = waypoint.scale.get() - 0.2;
-            NametagUtils.begin(pos);
-
-            // Render icon
-            waypoint.renderIcon(-16, -16, a, 32);
-
-            // Render text if cursor is close enough
-            if (distToCenter <= textRenderDist) {
-                // Setup text rendering
-                int preTextA = TEXT.a;
-                TEXT.a *= a;
-                text.begin();
-
-                // Render name
-                text.render(waypoint.name.get(), -text.getWidth(waypoint.name.get()) / 2, -16 - text.getHeight(), TEXT, true);
-
-                // Render distance
-                String distText = String.format("%d blocks", (int) Math.round(dist));
-                text.render(distText, -text.getWidth(distText) / 2, 16, TEXT, true);
-
-                // End text rendering
-                text.end();
-                TEXT.a = preTextA;
-            }
-
-            NametagUtils.end();
-        }
-    }
-
     @Override
     public File getFile() {
         if (!Utils.canUpdate()) return null;
@@ -221,7 +149,8 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     @Override
     public Waypoints fromTag(NbtCompound tag) {
         Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.name.get().toLowerCase(Locale.ROOT), o -> o));
-        this.waypoints = new ConcurrentHashMap<>(fromNbt);
+        this.waypoints.clear();
+        this.waypoints.putAll(fromNbt);
 
         return this;
     }
