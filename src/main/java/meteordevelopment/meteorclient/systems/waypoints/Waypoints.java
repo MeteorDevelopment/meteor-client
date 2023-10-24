@@ -34,7 +34,7 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
 
     public final Map<String, AbstractTexture> icons = new ConcurrentHashMap<>();
 
-    public Map<String, Waypoint> waypoints = new ConcurrentHashMap<>();
+    public final Map<String, Waypoint> waypoints = new ConcurrentHashMap<>();
 
     public Waypoints() {
         super(null);
@@ -149,7 +149,8 @@ public class Waypoints extends System<Waypoints> implements Iterable<Waypoint> {
     @Override
     public Waypoints fromTag(NbtCompound tag) {
         Map<String, Waypoint> fromNbt = NbtUtils.listFromTag(tag.getList("waypoints", 10), Waypoint::new).stream().collect(Collectors.toMap(o -> o.name.get().toLowerCase(Locale.ROOT), o -> o));
-        this.waypoints = new ConcurrentHashMap<>(fromNbt);
+        this.waypoints.clear();
+        this.waypoints.putAll(fromNbt);
 
         return this;
     }
