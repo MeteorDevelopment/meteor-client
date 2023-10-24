@@ -21,7 +21,6 @@ import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -83,12 +82,9 @@ public class WaypointsModule extends Module {
 
     @EventHandler
     private void onRender2D(Render2DEvent event) {
-        WaypointsModule module = Modules.get().get(WaypointsModule.class);
-        if (!module.isActive()) return;
-
         TextRenderer text = TextRenderer.get();
         Vector3d center = new Vector3d(mc.getWindow().getFramebufferWidth() / 2.0, mc.getWindow().getFramebufferHeight() / 2.0, 0);
-        int textRenderDist = module.textRenderDistance.get();
+        int textRenderDist = textRenderDistance.get();
 
         for (Waypoint waypoint : Waypoints.get()) {
             // Continue if this waypoint should not be rendered
