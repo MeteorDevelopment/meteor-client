@@ -31,6 +31,7 @@ import java.util.function.BiPredicate;
 
 public class AutoEat extends Module {
     private static final Class<? extends Module>[] AURAS = new Class[] { KillAura.class, CrystalAura.class, AnchorAura.class, BedAura.class };
+    //BARITONE related modules
     private static final Class<? extends Module>[] BARITONE_MODULES = new Class[] { InfinityMiner.class };
 
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -187,6 +188,7 @@ public class AutoEat extends Module {
         if (pauseBaritone.get() && PathManagers.get().isPathing() && !wasBaritone) {
             wasBaritone = true;
             PathManagers.get().pause();
+            // pause baritone related modules (listed in BARITONE_MODULES)
                  for (Class<? extends Module> klass : BARITONE_MODULES) {
                 Module module = Modules.get().get(klass);
 
@@ -228,6 +230,7 @@ public class AutoEat extends Module {
         if (pauseBaritone.get() && wasBaritone) {
             wasBaritone = false;
             PathManagers.get().resume();
+            // Resume all paused baritone related modules (listed in BARITONE_MODULES)
                    for (Class<? extends Module> klass : BARITONE_MODULES) {
                 Module module = Modules.get().get(klass);
 
