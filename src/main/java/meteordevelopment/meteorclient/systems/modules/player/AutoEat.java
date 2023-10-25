@@ -16,7 +16,7 @@ import meteordevelopment.meteorclient.systems.modules.combat.AnchorAura;
 import meteordevelopment.meteorclient.systems.modules.combat.BedAura;
 import meteordevelopment.meteorclient.systems.modules.combat.CrystalAura;
 import meteordevelopment.meteorclient.systems.modules.combat.KillAura;
-import meteordevelopment.meteorclient.systems.modules.player.AutoEat.ThresholdMode;
+import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.SlotUtils;
