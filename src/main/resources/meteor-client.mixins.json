@@ -45,6 +45,7 @@
     "ChatInputSuggestorMixin",
     "ChatScreenMixin",
     "ChunkAccessor",
+    "ChunkBorderDebugRendererMixin",
     "ChunkOcclusionDataBuilderMixin",
     "ChunkSkyLightProviderMixin",
     "ClientChunkManagerAccessor",
