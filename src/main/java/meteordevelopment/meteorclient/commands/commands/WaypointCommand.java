@@ -5,8 +5,10 @@
 
 package meteordevelopment.meteorclient.commands.commands;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.context.CommandContext;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.WaypointArgumentType;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
@@ -14,6 +16,7 @@ import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.BlockPos;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
@@ -45,20 +48,16 @@ public class WaypointCommand extends Command {
             return SINGLE_SUCCESS;
         })));
 
-        builder.then(literal("add").then(argument("waypoint", StringArgumentType.greedyString()).executes(context -> {
-            if (mc.player == null) return -1;
-
-            Waypoint waypoint = new Waypoint.Builder()
-                .name(StringArgumentType.getString(context, "waypoint"))
-                .pos(mc.player.getBlockPos().up(2))
-                .dimension(PlayerUtils.getDimension())
-                .build();
-
-            Waypoints.get().add(waypoint);
-
-            info("Created waypoint with name: (highlight)%s(default)", waypoint.name.get());
-            return SINGLE_SUCCESS;
-        })));
+        builder.then(literal("add")
+            .then(argument("x", IntegerArgumentType.integer())
+                .then(argument("y", IntegerArgumentType.integer())
+                    .then(argument("z", IntegerArgumentType.integer())
+                        .then(argument("waypoint", StringArgumentType.greedyString()).executes(context -> addWaypoint(context, true)))
+                    )
+                )
+            )
+            .then(argument("waypoint", StringArgumentType.greedyString()).executes(context -> addWaypoint(context, false)))
+        );
 
         builder.then(literal("delete").then(argument("waypoint", WaypointArgumentType.create()).executes(context -> {
             Waypoint waypoint = WaypointArgumentType.get(context);
@@ -84,6 +83,21 @@ public class WaypointCommand extends Command {
     }
 
     private String waypointFullPos(Waypoint waypoint) {
-        return "X: " + waypoint.pos.get().getX() +  ", Y: " + waypoint.pos.get().getY() + ", Z: " + waypoint.pos.get().getZ();
+        return "X: " + waypoint.pos.get().getX() + ", Y: " + waypoint.pos.get().getY() + ", Z: " + waypoint.pos.get().getZ();
+    }
+
+    private int addWaypoint(CommandContext<CommandSource> context, boolean withCoords) {
+        if (mc.player == null) return -1;
+
+        Waypoint waypoint = new Waypoint.Builder()
+            .name(StringArgumentType.getString(context, "waypoint"))
+            .pos(withCoords ? BlockPos.ofFloored(IntegerArgumentType.getInteger(context, "x"), IntegerArgumentType.getInteger(context, "y"), IntegerArgumentType.getInteger(context, "z")) : mc.player.getBlockPos().up(2))
+            .dimension(PlayerUtils.getDimension())
+            .build();
+
+        Waypoints.get().add(waypoint);
+
+        info("Created waypoint with name: (highlight)%s(default)", waypoint.name.get());
+        return SINGLE_SUCCESS;
     }
 }
