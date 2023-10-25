@@ -99,7 +99,9 @@ processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version,
             "devbuild": project.findProperty("devbuild") ?: "",
-            "commit": project.findProperty("commit") ?: ""
+            "commit": project.findProperty("commit") ?: "",
+            "minecraft_version": project.minecraft_version,
+            "loader_version": project.loader_version
     }
 }
 
