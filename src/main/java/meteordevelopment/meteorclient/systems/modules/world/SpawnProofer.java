@@ -167,7 +167,10 @@ public class SpawnProofer extends Module {
             block instanceof AbstractPressurePlateBlock ||
             block instanceof TransparentBlock ||
             block instanceof TripwireBlock ||
-            block instanceof CarpetBlock;
+            block instanceof CarpetBlock ||
+            block instanceof LeverBlock ||
+            block instanceof AbstractRedstoneGateBlock ||
+            block instanceof AbstractRailBlock;
     }
 
     private boolean isLightSource(Block block) {
