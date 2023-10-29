@@ -31,9 +31,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
@@ -118,14 +116,12 @@ public abstract class ChatHudMixin implements IChatHud {
         }
     }
 
-    @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V",
-        slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/client/gui/hud/ChatHud;visibleMessages:Ljava/util/List;")), at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    private int addMessageListSizeProxy(int size) {
-        if (Modules.get() == null) return size;
+    //modify max lengths for messages and visible messages
+    @ModifyConstant(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", constant = @Constant(intValue = 100))
+    private int maxLength(int size) {
+        if (Modules.get() == null || !getBetterChat().isLongerChat()) return size;
 
-        BetterChat betterChat = getBetterChat();
-        if (betterChat.isLongerChat() && betterChat.getChatLength() >= 100) return size - betterChat.getChatLength();
-        return size;
+        return size + betterChat.getExtraChatLines();
     }
 
     // Player Heads
@@ -163,10 +159,10 @@ public abstract class ChatHudMixin implements IChatHud {
     private void onRemoveMessage(Text message, MessageSignatureData signature, int ticks, MessageIndicator indicator, boolean refresh, CallbackInfo ci) {
         if (Modules.get() == null) return;
 
-        BetterChat betterChat = getBetterChat();
-        int size = betterChat.lines.size() - (betterChat.isLongerChat() && betterChat.getChatLength() >= 100 ? betterChat.getChatLength() : 0);
+        int extra = getBetterChat().isLongerChat() ? getBetterChat().getExtraChatLines() : 0;
+        int size = betterChat.lines.size();
 
-        while (size > 100) {
+        while (size > 100 + extra) {
             betterChat.lines.removeInt(size - 1);
             size--;
         }
