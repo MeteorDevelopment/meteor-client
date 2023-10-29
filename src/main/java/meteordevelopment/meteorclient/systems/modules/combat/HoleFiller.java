@@ -343,7 +343,7 @@ public class HoleFiller extends Module {
         targets.clear();
 
         for (PlayerEntity player : mc.world.getPlayers()) {
-            if (player.squaredDistanceTo(mc.player) > targetRange.get() * targetRange.get() ||
+            if (player.squaredDistanceTo(mc.player) > Math.pow(targetRange.get(), 2) ||
                 player.isCreative() ||
                 player == mc.player ||
                 player.isDead() ||
