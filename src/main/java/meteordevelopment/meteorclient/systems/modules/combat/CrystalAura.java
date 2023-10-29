@@ -1206,7 +1206,7 @@ public class CrystalAura extends Module {
         for (PlayerEntity player : mc.world.getPlayers()) {
             if (player.getAbilities().creativeMode || player == mc.player) continue;
             if (!player.isAlive() || !Friends.get().shouldAttack(player)) continue;
-            if (player.distanceTo(mc.player) > targetRange.get()) continue;
+            if (player.squaredDistanceTo(mc.player) > Math.pow(targetRange.get(), 2)) continue;
 
             if (ignoreNakeds.get()) {
                 if (player.getOffHandStack().isEmpty()

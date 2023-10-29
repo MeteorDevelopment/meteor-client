@@ -116,7 +116,7 @@ public class EntityUtils {
     public static BlockPos getCityBlock(PlayerEntity player) {
         if (player == null) return null;
 
-        double bestDistance = 6;
+        double bestDistanceSquared = 6 * 6;
         Direction bestDirection = null;
 
         for (Direction direction : Direction.HORIZONTAL) {
@@ -126,9 +126,9 @@ public class EntityUtils {
             if (block != Blocks.OBSIDIAN && block != Blocks.NETHERITE_BLOCK && block != Blocks.CRYING_OBSIDIAN
             && block != Blocks.RESPAWN_ANCHOR && block != Blocks.ANCIENT_DEBRIS) continue;
 
-            double testDistance = PlayerUtils.distanceTo(testPos);
-            if (testDistance < bestDistance) {
-                bestDistance = testDistance;
+            double testDistanceSquared = PlayerUtils.squaredDistanceTo(testPos);
+            if (testDistanceSquared < bestDistanceSquared) {
+                bestDistanceSquared = testDistanceSquared;
                 bestDirection = direction;
             }
         }
