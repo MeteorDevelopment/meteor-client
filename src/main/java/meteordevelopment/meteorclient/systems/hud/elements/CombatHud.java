@@ -57,7 +57,7 @@ public class CombatHud extends HudElement {
         .defaultValue(2)
         .min(1)
         .sliderRange(1, 5)
-        .onChanged(this::onResize)
+        .onChanged(aDouble -> calculateSize())
         .build()
     );
 
@@ -178,10 +178,12 @@ public class CombatHud extends HudElement {
 
     public CombatHud() {
         super(INFO);
+
+        calculateSize();
     }
 
-    private void onResize(double newScale) {
-        setSize(175 * newScale, 95 * newScale);
+    private void calculateSize() {
+        setSize(175 * scale.get(), 95 * scale.get());
     }
 
     @Override

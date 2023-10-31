@@ -31,7 +31,7 @@ public class PlayerModelHud extends HudElement {
         .defaultValue(2)
         .min(1)
         .sliderRange(1, 5)
-        .onChanged(this::onResize)
+        .onChanged(aDouble -> calculateSize())
         .build()
     );
 
@@ -88,6 +88,8 @@ public class PlayerModelHud extends HudElement {
 
     public PlayerModelHud() {
         super(INFO);
+
+        calculateSize();
     }
 
     @Override
@@ -111,7 +113,7 @@ public class PlayerModelHud extends HudElement {
         }
     }
 
-    private void onResize(double newScale) {
-        setSize(50 * newScale, 75 * newScale);
+    private void calculateSize() {
+        setSize(50 * scale.get(), 75 * scale.get());
     }
 }
