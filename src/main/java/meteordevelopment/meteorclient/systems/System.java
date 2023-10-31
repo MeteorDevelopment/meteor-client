@@ -15,13 +15,16 @@ import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
 
 public abstract class System<T> implements ISerializable<T> {
     private final String name;
     private File file;
 
     protected boolean isFirstInit;
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss", Locale.ROOT);
 
     public System(String name) {
         this.name = name;
@@ -70,7 +73,7 @@ public abstract class System<T> implements ISerializable<T> {
                 try {
                     fromTag(NbtIo.read(file));
                 } catch (CrashException e) {
-                    String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + LocalDate.now() + ".backup.nbt";
+                    String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + ZonedDateTime.now().format(DATE_TIME_FORMATTER) + ".backup.nbt";
                     File backup = new File(file.getParentFile(), backupName);
                     StreamUtils.copy(file, backup);
                     MeteorClient.LOG.error("Error loading " + this.name + ". Possibly corrupted?");
