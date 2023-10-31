@@ -50,7 +50,7 @@ public class InventoryHud extends HudElement {
         .name("background")
         .description("Background of inventory viewer.")
         .defaultValue(Background.Texture)
-            .onChanged(bg -> calculateSize())
+        .onChanged(bg -> calculateSize())
         .build()
     );
 
