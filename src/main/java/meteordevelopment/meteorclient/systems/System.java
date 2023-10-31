@@ -10,9 +10,12 @@ import meteordevelopment.meteorclient.utils.files.StreamUtils;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtIo;
+import net.minecraft.util.crash.CrashException;
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDate;
 
 public abstract class System<T> implements ISerializable<T> {
     private final String name;
@@ -64,7 +67,16 @@ public abstract class System<T> implements ISerializable<T> {
             if (folder != null) file = new File(folder, file.getName());
 
             if (file.exists()) {
-                fromTag(NbtIo.read(file));
+                try {
+                    fromTag(NbtIo.read(file));
+                } catch (CrashException e) {
+                    String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + LocalDate.now() + ".backup.nbt";
+                    File backup = new File(file.getParentFile(), backupName);
+                    StreamUtils.copy(file, backup);
+                    MeteorClient.LOG.error("Error loading " + this.name + ". Possibly corrupted?");
+                    MeteorClient.LOG.info("Saved settings backup to '" + backup + "'.");
+                    e.printStackTrace();
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();
