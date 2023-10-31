@@ -30,6 +30,7 @@ public class PlayerModelHud extends HudElement {
         .defaultValue(2)
         .min(1)
         .sliderRange(1, 5)
+        .onChanged(this::onResize)
         .build()
     );
 
@@ -90,8 +91,6 @@ public class PlayerModelHud extends HudElement {
 
     @Override
     public void render(HudRenderer renderer) {
-        setSize(50 * scale.get(), 75 * scale.get());
-
         renderer.post(() -> {
             PlayerEntity player = mc.player;
             if (player == null) return;
@@ -102,8 +101,12 @@ public class PlayerModelHud extends HudElement {
             InventoryScreen.drawEntity(renderer.drawContext, x, y, (int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), 0, -yaw, -pitch, player);
         });
 
-        if (background.get()) {
+        if (background.get() || mc.player == null) {
             renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
         }
+    }
+
+    private void onResize(double newScale) {
+        setSize(50 * newScale, 75 * newScale);
     }
 }
