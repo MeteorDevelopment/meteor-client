@@ -10,6 +10,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElement;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudRenderer;
+import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.player.PlayerEntity;
@@ -101,8 +102,12 @@ public class PlayerModelHud extends HudElement {
             InventoryScreen.drawEntity(renderer.drawContext, x, y, (int) (x + (25 * scale.get())), (int) (y + (66 * scale.get())), (int) (30 * scale.get()), 0, -yaw, -pitch, player);
         });
 
-        if (background.get() || mc.player == null) {
+        if (background.get()) {
             renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+        } else if (mc.player == null) {
+            renderer.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
+            renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
+            renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
         }
     }
 

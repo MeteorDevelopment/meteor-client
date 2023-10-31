@@ -204,7 +204,13 @@ public class CombatHud extends HudElement {
             Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
             Renderer2D.COLOR.render(null);
 
-            if (playerEntity == null) return;
+            if (playerEntity == null) {
+                if (isInEditor()) {
+                    renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
+                    renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
+                }
+                return;
+            }
 
             // Player Model
             InventoryScreen.drawEntity(
