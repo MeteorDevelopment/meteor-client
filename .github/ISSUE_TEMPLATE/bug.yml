@@ -8,8 +8,10 @@ body:
       label: Describe the bug
       description: |
         A clear and concise description of what the issue is.
-        Provide as much information as possible, videos, crash reports, etc.
-        DO NOT PASTE A CRASH REPORT HERE!!!!
+        Provide as much information as possible, videos, images, etc.
+      placeholder: |
+          This module is broken / not working as intended.
+          It should do X but it does Y instead.
     validations:
       required: true
   - type: textarea
@@ -17,23 +19,23 @@ body:
     attributes:
       label: Steps to reproduce
       description: How do you trigger this bug?
-      render: bash
+      placeholder: |
+          1. I did this thing;
+          2. Then I did this other thing, which caused the bug.
     validations:
       required: true
-  - type: input
-    id: crash-report
-    attributes:
-      label: Link to crash report/log if applicable (https://mclo.gs)
   - type: input
     id: meteor-version
     attributes:
       label: Meteor Version
+      placeholder: Meteor X.Y.Z (or X.Y.Z-build_number)
     validations:
       required: true
   - type: input
     id: mc-version
     attributes:
       label: Minecraft Version
+      placeholder: MC X.Y.Z
     validations:
       required: true
   - type: dropdown

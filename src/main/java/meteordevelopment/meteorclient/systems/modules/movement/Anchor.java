@@ -112,7 +112,7 @@ public class Anchor extends Module {
 
         for (int i = 0; i < maxHeight.get(); i++) {
             y--;
-            if (y <= 0 || !isAir(x, y, z)) break;
+            if (y <= mc.world.getBottomY() || !isAir(x, y, z)) break;
 
             if (isHole(x, y, z)) {
                 foundHole = true;

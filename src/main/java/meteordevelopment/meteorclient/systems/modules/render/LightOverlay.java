@@ -93,16 +93,11 @@ public class LightOverlay extends Module {
         for (Cross cross : crosses) crossPool.free(cross);
         crosses.clear();
 
+        int spawnLightLevel = newMobSpawnLightLevel.get() ? 0 : 7;
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-            switch (BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get())) {
-                case Never:
-                    break;
-                case Potential:
-                    crosses.add(crossPool.get().set(blockPos, true));
-                    break;
-                case Always:
-                    crosses.add((crossPool.get().set(blockPos, false)));
-                    break;
+            switch (BlockUtils.isValidMobSpawn(blockPos, blockState, spawnLightLevel)) {
+                case Potential -> crosses.add(crossPool.get().set(blockPos, true));
+                case Always -> crosses.add((crossPool.get().set(blockPos, false)));
             }
         });
     }

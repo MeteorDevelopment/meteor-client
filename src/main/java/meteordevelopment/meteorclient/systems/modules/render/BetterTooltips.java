@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
@@ -236,7 +236,7 @@ public class BetterTooltips extends Module {
                             NbtCompound effectTag = effects.getCompound(i);
                             byte effectId = effectTag.getByte("EffectId");
                             int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
-                            StatusEffect type = StatusEffect.byRawId(effectId);
+                            StatusEffect type = Registries.STATUS_EFFECT.get(effectId);
 
                             if (type != null) {
                                 StatusEffectInstance effect = new StatusEffectInstance(type, effectDuration, 0);
@@ -325,7 +325,8 @@ public class BetterTooltips extends Module {
 
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
-            event.tooltipData = new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR);
+            event.tooltipData = EChestMemory.isKnown() ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
+                : new TextTooltipComponent(Text.literal("Unknown ender chest inventory.").formatted(Formatting.DARK_RED));
         }
 
         // Map preview
@@ -436,7 +437,7 @@ public class BetterTooltips extends Module {
 
         try {
             return Text.Serializer.fromLenientJson(pages.getString(0));
-        } catch (JsonSyntaxException e) {
+        } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }
     }

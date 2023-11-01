@@ -56,7 +56,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Random;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -64,16 +67,16 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Utils {
+    public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
+    public static final Color WHITE = new Color(255, 255, 255);
+
     private static final Random random = new Random();
     public static boolean firstTimeTitleScreen = true;
     public static boolean isReleasingTrident;
-    public static final Color WHITE = new Color(255, 255, 255);
     public static boolean rendering3D = true;
     public static double frameTime;
     public static Screen screenToOpen;
     public static VertexSorter vertexSorter;
-
-    public static final Pattern FILE_NAME_INVALID_CHARS_PATTERN = Pattern.compile("[\\s\\\\/:*?\"<>|]");
 
     @PreInit
     public static void init() {
@@ -336,7 +339,7 @@ public class Utils {
 
         // Multiplayer
         if (mc.getCurrentServerEntry() != null) {
-            return mc.isConnectedToRealms() ? "realms" : mc.getCurrentServerEntry().address;
+            return mc.getCurrentServerEntry().isRealm() ? "realms" : mc.getCurrentServerEntry().address;
         }
 
         return "";

@@ -26,6 +26,7 @@ public class CustomTextRenderer implements TextRenderer {
 
     private boolean building;
     private boolean scaleOnly;
+    private double fontScale = 1;
     private double scale = 1;
 
     public CustomTextRenderer(FontFace fontFace) {
@@ -71,7 +72,7 @@ public class CustomTextRenderer implements TextRenderer {
         this.building = true;
         this.scaleOnly = scaleOnly;
 
-        double fontScale = font.getHeight() / 18.0;
+        this.fontScale = font.getHeight() / 18.0;
         this.scale = 1 + (scale - fontScale) / fontScale;
     }
 
@@ -80,7 +81,7 @@ public class CustomTextRenderer implements TextRenderer {
         if (text.isEmpty()) return 0;
 
         Font font = building ? this.font : fonts[0];
-        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale + (shadow ? 1 : 0);
+        return (font.getWidth(text, length) + (shadow ? 1 : 0)) * scale;
     }
 
     @Override
@@ -99,7 +100,7 @@ public class CustomTextRenderer implements TextRenderer {
             int preShadowA = SHADOW_COLOR.a;
             SHADOW_COLOR.a = (int) (color.a / 255.0 * preShadowA);
 
-            width = font.render(mesh, text, x + 1, y + 1, SHADOW_COLOR, scale);
+            width = font.render(mesh, text, x + fontScale * scale, y + fontScale * scale, SHADOW_COLOR, scale);
             font.render(mesh, text, x, y, color, scale);
 
             SHADOW_COLOR.a = preShadowA;

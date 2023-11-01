@@ -7,12 +7,13 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 
 import com.mojang.authlib.Environment;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.utils.network.Http;
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
 
 import java.util.Optional;
 
@@ -20,8 +21,8 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EasyMCAccount extends Account<EasyMCAccount> {
 
-    private static final Environment ENVIRONMENT = Environment.create("https://authserver.mojang.com", "https://api.mojang.com", "https://sessionserver.easymc.io", "https://api.minecraftservices.com", "EasyMC");
-    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "", ENVIRONMENT);
+    private static final Environment ENVIRONMENT = new Environment("https://authserver.mojang.com",  "https://sessionserver.easymc.io", "https://api.minecraftservices.com", "EasyMC");
+    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
 
     public EasyMCAccount(String token) {
         super(AccountType.EasyMC, token);
@@ -50,8 +51,8 @@ public class EasyMCAccount extends Account<EasyMCAccount> {
 
     @Override
     public boolean login() {
-        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE, ENVIRONMENT));
-        setSession(new Session(cache.username, cache.uuid, name, Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
+        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
+        setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), name, Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
         cache.loadHead();
         return true;

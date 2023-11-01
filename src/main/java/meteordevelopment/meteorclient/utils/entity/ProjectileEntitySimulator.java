@@ -131,9 +131,12 @@ public class ProjectileEntitySimulator {
             set(entity, 0.5, 0.05, 0.8, accurate, tickDelta);
         } else if (entity instanceof WitherSkullEntity || entity instanceof FireballEntity || entity instanceof DragonFireballEntity) {
             set(entity, 0.95, 0, 0.8, accurate, tickDelta);
-        }
-        else {
+        }  else {
             return false;
+        }
+
+        if (entity.hasNoGravity()) {
+            this.gravity = 0;
         }
 
         return true;

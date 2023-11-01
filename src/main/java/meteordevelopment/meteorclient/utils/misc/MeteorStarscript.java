@@ -11,6 +11,8 @@ import baritone.api.process.IBaritoneProcess;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
@@ -69,7 +71,7 @@ public class MeteorStarscript {
     private static final BlockPos.Mutable BP = new BlockPos.Mutable();
     private static final StringBuilder SB = new StringBuilder();
 
-    @PreInit
+    @PreInit(dependencies = PathManagers.class)
     public static void init() {
         StandardLib.init(ss);
 
@@ -78,6 +80,7 @@ public class MeteorStarscript {
         ss.set("fps", () -> Value.number(MinecraftClientAccessor.getFps()));
         ss.set("ping", MeteorStarscript::ping);
         ss.set("time", () -> Value.string(LocalTime.now().format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT))));
+        ss.set("cps", () -> Value.number(CPSUtils.getCpsAverage()));
 
         // Meteor
         ss.set("meteor", new ValueMap()
@@ -91,13 +94,15 @@ public class MeteorStarscript {
         );
 
         // Baritone
-        ss.set("baritone", new ValueMap()
-            .set("is_pathing", () -> Value.bool(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()))
-            .set("distance_to_goal", MeteorStarscript::baritoneDistanceToGoal)
-            .set("process", MeteorStarscript::baritoneProcess)
-            .set("process_name", MeteorStarscript::baritoneProcessName)
-            .set("eta", MeteorStarscript::baritoneETA)
-        );
+        if (BaritoneUtils.IS_AVAILABLE) {
+            ss.set("baritone", new ValueMap()
+                .set("is_pathing", () -> Value.bool(BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing()))
+                .set("distance_to_goal", MeteorStarscript::baritoneDistanceToGoal)
+                .set("process", MeteorStarscript::baritoneProcess)
+                .set("process_name", MeteorStarscript::baritoneProcessName)
+                .set("eta", MeteorStarscript::baritoneETA)
+            );
+        }
 
         // Camera
         ss.set("camera", new ValueMap()
@@ -125,7 +130,7 @@ public class MeteorStarscript {
             .set("health", () -> Value.number(mc.player != null ? mc.player.getHealth() : 0))
             .set("absorption", () -> Value.number(mc.player != null ? mc.player.getAbsorptionAmount() : 0))
             .set("hunger", () -> Value.number(mc.player != null ? mc.player.getHungerManager().getFoodLevel() : 0))
-            
+
             .set("speed", () -> Value.number(Utils.getPlayerSpeed().horizontalLength()))
             .set("speed_all", new ValueMap()
                 .set("_toString", () -> Value.string(mc.player != null ? Utils.getPlayerSpeed().toString() : ""))

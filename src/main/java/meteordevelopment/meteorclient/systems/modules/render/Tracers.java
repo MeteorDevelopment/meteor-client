@@ -52,6 +52,13 @@ public class Tracers extends Module {
         .build()
     );
 
+    private final Setting<Boolean> ignoreSelf = sgGeneral.add(new BoolSetting.Builder()
+        .name("ignore-self")
+        .description("Doesn't draw tracers to yourself when in third person or freecam.")
+        .defaultValue(false)
+        .build()
+    );
+
     public final Setting<Boolean> ignoreFriends = sgGeneral.add(new BoolSetting.Builder()
         .name("ignore-friends")
         .description("Doesn't draw tracers to friends.")
@@ -211,7 +218,7 @@ public class Tracers extends Module {
     }
 
     private boolean shouldBeIgnored(Entity entity) {
-        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
+        return !PlayerUtils.isWithin(entity, maxDist.get()) || (!Modules.get().isActive(Freecam.class) && entity == mc.player) || !entities.get().contains(entity.getType()) || (ignoreSelf.get() && entity == mc.player) || (ignoreFriends.get() && entity instanceof PlayerEntity && Friends.get().isFriend((PlayerEntity) entity)) || (!showInvis.get() && entity.isInvisible()) | !EntityUtils.isInRenderDistance(entity);
     }
 
     private Color getEntityColor(Entity entity) {

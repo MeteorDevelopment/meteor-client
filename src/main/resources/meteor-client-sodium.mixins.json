@@ -4,11 +4,12 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "meteordevelopment.meteorclient.MixinPlugin",
   "client": [
-    "LightDataAccessMixin",
+    "SodiumLightDataAccessMixin",
     "MeshVertexConsumerMixin",
     "SodiumBlockOcclusionCacheMixin",
     "SodiumBlockRendererMixin",
-    "SodiumFluidRendererMixin"
+    "SodiumFluidRendererMixin",
+    "SodiumBiomeColorCacheMixin"
   ],
   "injectors": {
     "defaultRequire": 1
