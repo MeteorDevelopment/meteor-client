@@ -126,7 +126,7 @@ public class DamageUtils {
         if (entity.getBlockY() >= surface) {
             int fallHeight = (int) (entity.getPos().y - surface + entity.fallDistance - 3d);
             if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
-            
+
             return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
         }
 
@@ -225,18 +225,16 @@ public class DamageUtils {
     private static float getExposure(Vec3d source, Box box, @Nullable BlockPos override, @Nullable BlockState overrideState) {
         double xStep = 1 / ((box.maxX - box.minX) * 2 + 1);
         double yStep = 1 / ((box.maxY - box.minY) * 2 + 1);
-        double zStep = 1 / ((box.maxZ - box.minZ) * 2 + 1);
 
-        if (xStep > 0 && yStep > 0 && zStep > 0) {
+        if (xStep > 0 && yStep > 0) {
             int misses = 0;
             int hits = 0;
 
             xStep = xStep * (box.maxX - box.minX);
             yStep = yStep * (box.maxY - box.minY);
-            zStep = zStep * (box.maxZ - box.minZ);
 
             double xOffset = (1 - Math.floor(1 / xStep) * xStep) / 2;
-            double zOffset = (1 - Math.floor(1 / zStep) * zStep) / 2;
+            double zOffset = (1 - Math.floor(1 / yStep) * yStep) / 2;
 
             double startX = box.minX + xOffset;
             double startY = box.minY;
@@ -249,7 +247,7 @@ public class DamageUtils {
 
             for (double x = startX; x <= endX; x += xStep) {
                 for (double y = startY; y <= endY; y += yStep) {
-                    for (double z = startZ; z <= endZ; z += zStep) {
+                    for (double z = startZ; z <= endZ; z += xStep) {
                         ((IVec3d) position).set(x, y, z);
 
                         if ((override != null ? raycast(position, source, override, overrideState) : raycast(position, source)) == HitResult.Type.MISS) misses++;
