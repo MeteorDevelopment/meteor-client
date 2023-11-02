@@ -220,7 +220,6 @@ public class PlayerUtils {
         if (fall) {
             if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
                 float damage = DamageUtils.fallDamage(mc.player);
-                float damage = mc.player.fallDistance * 0.5f;
 
                 if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
                     damageTaken = damage;
