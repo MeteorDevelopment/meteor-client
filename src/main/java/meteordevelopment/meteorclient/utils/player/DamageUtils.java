@@ -146,8 +146,7 @@ public class DamageUtils {
 
         // Simple reverse armor reduction
         float armor = getArmor(entity);
-        float g = armor * 0.2f;
-        survivableHeight /= 1f - g * 0.04f;
+        survivableHeight /= 1f - armor * 0.008f;
 
         survivableHeight += (float) EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
 
