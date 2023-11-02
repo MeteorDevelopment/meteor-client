@@ -21,6 +21,8 @@ import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
@@ -35,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
-    private static final DamageSource explosion = new DamageSource(mc.getNetworkHandler().getRegistryManager().get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.EXPLOSION));
+    private static final DamageSource explosion = new DamageSource(DynamicRegistryManager.of(Registries.REGISTRIES).get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.EXPLOSION));
 
     // Explosion damage
 
