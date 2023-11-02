@@ -144,10 +144,11 @@ public class DamageUtils {
             survivableHeight /= 1f - lvl * 0.2f;
         }
 
-        // Simple reverse armor reduction
+        // Naive reverse armor reduction
         float armor = getArmor(entity);
         survivableHeight /= 1f - armor * 0.008f;
 
+        // Naive reverse toughness reduction
         survivableHeight += (float) EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
 
         if (jumpBoostInstance != null) survivableHeight += jumpBoostInstance.getAmplifier() + 1;
@@ -156,6 +157,7 @@ public class DamageUtils {
 
         int raycastLength = MathHelper.ceil(survivableHeight - entity.fallDistance);
 
+        // Yes all of this is to calculate the maximum raycast length
         BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(entity.getPos(), entity.getPos().subtract(0, raycastLength, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, entity));
         if (raycastResult.getType() == HitResult.Type.MISS) return totalHealth;
 
