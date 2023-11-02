@@ -258,8 +258,8 @@ public class BedAura extends Module {
 
                 BlockPos centerPos = target.getBlockPos().up(i);
 
-                double headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
-                double offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir.toDirection())));
+                float headSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos));
+                float offsetSelfDamage = DamageUtils.bedDamage(mc.player, Utils.vec3d(centerPos.offset(dir.toDirection())));
 
                 if (mc.world.getBlockState(centerPos).isReplaceable()
                     && BlockUtils.canPlace(centerPos.offset(dir.toDirection()))

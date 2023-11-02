@@ -181,23 +181,23 @@ public class PlayerUtils {
         return air < 2;
     }
 
-    public static double possibleHealthReductions() {
+    public static float possibleHealthReductions() {
         return possibleHealthReductions(true, true);
     }
 
-    public static double possibleHealthReductions(boolean entities, boolean fall) {
-        double damageTaken = 0;
+    public static float possibleHealthReductions(boolean entities, boolean fall) {
+        float damageTaken = 0;
 
         if (entities) {
             for (Entity entity : mc.world.getEntities()) {
                 // Check for end crystals
                 if (entity instanceof EndCrystalEntity) {
-                    double crystalDamage = DamageUtils.crystalDamage(mc.player, entity.getPos());
+                    float crystalDamage = DamageUtils.crystalDamage(mc.player, entity.getPos());
                     if (crystalDamage > damageTaken) damageTaken = crystalDamage;
                 }
                 // Check for players holding swords
                 else if (entity instanceof PlayerEntity player && !Friends.get().isFriend(player) && isWithin(entity, 5)) {
-                    double attackDamage = DamageUtils.getAttackDamage(player, mc.player);
+                    float attackDamage = DamageUtils.getAttackDamage(player, mc.player);
                     if (attackDamage > damageTaken) damageTaken = attackDamage;
                 }
             }
@@ -209,7 +209,7 @@ public class PlayerUtils {
                     Vec3d pos = new Vec3d(bp.getX(), bp.getY(), bp.getZ());
 
                     if (blockEntity instanceof BedBlockEntity) {
-                        double explosionDamage = DamageUtils.bedDamage(mc.player, pos);
+                        float explosionDamage = DamageUtils.bedDamage(mc.player, pos);
                         if (explosionDamage > damageTaken) damageTaken = explosionDamage;
                     }
                 }
@@ -219,7 +219,8 @@ public class PlayerUtils {
         // Check for fall distance with water check
         if (fall) {
             if (!Modules.get().isActive(NoFall.class) && mc.player.fallDistance > 3) {
-                double damage = mc.player.fallDistance * 0.5;
+                float damage = DamageUtils.fallDamage(mc.player);
+                float damage = mc.player.fallDistance * 0.5f;
 
                 if (damage > damageTaken && !EntityUtils.isAboveWater(mc.player)) {
                     damageTaken = damage;
@@ -346,7 +347,7 @@ public class PlayerUtils {
         return playerListEntry.getGameMode();
     }
 
-    public static double getTotalHealth() {
+    public static float getTotalHealth() {
         return mc.player.getHealth() + mc.player.getAbsorptionAmount();
     }
 
