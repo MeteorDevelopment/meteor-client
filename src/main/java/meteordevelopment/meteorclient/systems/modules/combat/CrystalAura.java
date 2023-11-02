@@ -785,7 +785,7 @@ public class CrystalAura extends Module {
         // Check damage to targets and face place
         double damage = getDamageToTargets(entity.getPos(), blockPos, true, false);
         boolean shouldFacePlace = shouldFacePlace();
-        double minimumDamage = Math.min(minDamage.get(), shouldFacePlace ? 1.5 : minDamage.get());
+        double minimumDamage = shouldFacePlace ? Math.min(minDamage.get(), 1.5d) : minDamage.get();
 
         if (damage < minimumDamage) return 0;
 
