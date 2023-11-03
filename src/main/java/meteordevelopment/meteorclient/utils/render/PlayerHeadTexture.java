@@ -77,12 +77,8 @@ public class PlayerHeadTexture extends Texture {
                 IntBuffer comp = stack.mallocInt(1);
 
                 ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 3);
-                Runnable action = () -> {
-                    upload(8, 8, image, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest, false);
-                    STBImage.stbi_image_free(image);
-                };
-                if (RenderSystem.isOnRenderThread()) action.run();
-                else RenderSystem.recordRenderCall(action::run);
+                upload(image);
+                RenderSystem.recordRenderCall(() -> STBImage.stbi_image_free(image));
             }
             MemoryUtil.memFree(data);
         }
