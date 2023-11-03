@@ -78,7 +78,7 @@ public class PlayerHeadTexture extends Texture {
 
                 ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 3);
                 upload(image);
-                RenderSystem.recordRenderCall(() -> STBImage.stbi_image_free(image));
+                STBImage.stbi_image_free(image);
             }
             MemoryUtil.memFree(data);
         }
