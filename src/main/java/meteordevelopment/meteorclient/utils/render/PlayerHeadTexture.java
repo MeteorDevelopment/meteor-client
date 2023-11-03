@@ -8,10 +8,12 @@ import meteordevelopment.meteorclient.utils.network.Http;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.stb.STBImage;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -65,8 +67,8 @@ public class PlayerHeadTexture extends Texture {
     }
 
     public PlayerHeadTexture() {
-        try {
-            ByteBuffer data = TextureUtil.readResource(mc.getResourceManager().getResource(new MeteorIdentifier("textures/steve.png")).get().getInputStream());
+        try (InputStream inputStream = mc.getResourceManager().getResource(new MeteorIdentifier("textures/steve.png")).get().getInputStream()) {
+            ByteBuffer data = TextureUtil.readResource(inputStream);
             data.rewind();
 
             try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -75,9 +77,14 @@ public class PlayerHeadTexture extends Texture {
                 IntBuffer comp = stack.mallocInt(1);
 
                 ByteBuffer image = STBImage.stbi_load_from_memory(data, width, height, comp, 3);
-                upload(image);
-                STBImage.stbi_image_free(image);
+                Runnable action = () -> {
+                    upload(8, 8, image, Texture.Format.RGB, Texture.Filter.Nearest, Texture.Filter.Nearest, false);
+                    STBImage.stbi_image_free(image);
+                };
+                if (RenderSystem.isOnRenderThread()) action.run();
+                else RenderSystem.recordRenderCall(action::run);
             }
+            MemoryUtil.memFree(data);
         }
         catch (IOException e) {
             e.printStackTrace();
