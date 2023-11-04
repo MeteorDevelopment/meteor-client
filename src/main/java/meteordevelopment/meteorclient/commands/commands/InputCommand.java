@@ -14,12 +14,16 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.command.CommandSource;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class InputCommand extends Command {
+    private static final List<KeypressHandler> activeHandlers = new ArrayList<>();
+
     private static final Map<KeyBinding, String> keys = Map.of(
         mc.options.forwardKey, "forwards",
         mc.options.backKey, "backwards",
@@ -41,20 +45,55 @@ public class InputCommand extends Command {
             builder.then(literal(keyBinding.getValue())
                 .then(argument("ticks", IntegerArgumentType.integer(1))
                     .executes(context -> {
-                        new KeypressHandler(keyBinding.getKey(), context.getArgument("ticks", Integer.class));
+                        activeHandlers.add(new KeypressHandler(keyBinding.getKey(), context.getArgument("ticks", Integer.class)));
                         return SINGLE_SUCCESS;
                     })
                 )
             );
         }
+
+        builder.then(literal("clear").executes(ctx -> {
+            if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
+            else {
+                info("Cleared all keypress handlers.");
+                activeHandlers.forEach(MeteorClient.EVENT_BUS::unsubscribe);
+                activeHandlers.clear();
+            }
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("list").executes(ctx -> {
+            if (activeHandlers.isEmpty()) warning("No active keypress handlers.");
+            else {
+                info("Active keypress handlers: ");
+                for (int i = 0; i < activeHandlers.size(); i++) {
+                    KeypressHandler handler = activeHandlers.get(i);
+                    info("(highlight)%d(default) - (highlight)%s %d(default) ticks left out of (highlight)%d(default).", i, keys.get(handler.key), handler.ticks, handler.totalTicks);
+                }
+            }
+            return SINGLE_SUCCESS;
+        }));
+
+        builder.then(literal("remove").then(argument("index", IntegerArgumentType.integer(0)).executes(ctx -> {
+            int index = IntegerArgumentType.getInteger(ctx, "index");
+            if (index >= activeHandlers.size()) warning("Index out of range.");
+            else {
+                info("Removed keypress handler.");
+                MeteorClient.EVENT_BUS.unsubscribe(activeHandlers.get(index));
+                activeHandlers.remove(index);
+            }
+            return SINGLE_SUCCESS;
+        })));
     }
 
     private static class KeypressHandler {
         private final KeyBinding key;
+        private final int totalTicks;
         private int ticks;
 
         public KeypressHandler(KeyBinding key, int ticks) {
             this.key = key;
+            this.totalTicks = ticks;
             this.ticks = ticks;
 
             MeteorClient.EVENT_BUS.subscribe(this);
@@ -66,6 +105,7 @@ public class InputCommand extends Command {
             else {
                 key.setPressed(false);
                 MeteorClient.EVENT_BUS.unsubscribe(this);
+                activeHandlers.remove(this);
             }
         }
     }
