@@ -123,13 +123,5 @@ public class PacketDelay extends Module {
         packet.apply((T) mc.getNetworkHandler().getConnection().getPacketListener());
     }
 
-    private static class PacketAndTime {
-        private final Packet<?> packet;
-        private final long time;
-
-        PacketAndTime(Packet<?> packet, long time) {
-            this.packet = packet;
-            this.time = time;
-        }
-    }
+    private record PacketAndTime(Packet<?> packet, long time) {}
 }
