@@ -19,6 +19,7 @@ import org.spongepowered.asm.mixin.injection.At;
 public class CapeFeatureRendererMixin {
     @ModifyExpressionValue(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/util/SkinTextures;capeTexture()Lnet/minecraft/util/Identifier;"))
     private Identifier modifyCapeTexture(Identifier original, MatrixStack matrixStack, VertexConsumerProvider vertexConsumerProvider, int i, AbstractClientPlayerEntity abstractClientPlayerEntity, float f, float g, float h, float j, float k, float l) {
-        return Capes.get(abstractClientPlayerEntity);
+        Identifier id = Capes.get(abstractClientPlayerEntity);
+        return id == null ? original : id;
     }
 }
