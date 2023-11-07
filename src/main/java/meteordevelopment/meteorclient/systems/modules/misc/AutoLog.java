@@ -112,23 +112,25 @@ public class AutoLog extends Module {
             if (toggleOff.get()) this.toggle();
         }
 
-        for (Entity entity : mc.world.getEntities()) {
-            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
-                if (onlyTrusted.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
-                        disconnect("A non-trusted player appeared in your render distance.");
+        if (onlyTrusted.get() || instantDeath.get() || crystalLog.get()) { // only check all entities if needed
+            for (Entity entity : mc.world.getEntities()) {
+                if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
+                    if (onlyTrusted.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
+                            disconnect("A non-trusted player appeared in your render distance.");
+                            if (toggleOff.get()) this.toggle();
+                            break;
+                    }
+                    if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
+                            > playerHealth + mc.player.getAbsorptionAmount()) {
+                        disconnect("Anti-32k measures.");
                         if (toggleOff.get()) this.toggle();
                         break;
+                    }
                 }
-                if (PlayerUtils.isWithin(entity, 8) && instantDeath.get() && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
-                        > playerHealth + mc.player.getAbsorptionAmount()) {
-                    disconnect("Anti-32k measures.");
+                if (crystalLog.get() && entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get())) {
+                    disconnect("End Crystal appeared within specified range.");
                     if (toggleOff.get()) this.toggle();
-                    break;
                 }
-            }
-            if (entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get()) && crystalLog.get()) {
-                disconnect("End Crystal appeared within specified range.");
-                if (toggleOff.get()) this.toggle();
             }
         }
     }
