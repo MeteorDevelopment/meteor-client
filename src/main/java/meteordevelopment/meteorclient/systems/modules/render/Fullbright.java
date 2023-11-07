@@ -20,6 +20,9 @@ public class Fullbright extends Module {
         .name("mode")
         .description("The mode to use for Fullbright.")
         .defaultValue(Mode.Gamma)
+        .onChanged(mode -> {
+            if (mc.worldRenderer != null && isActive()) mc.worldRenderer.reload();
+        })
         .build()
     );
 
