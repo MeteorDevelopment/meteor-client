@@ -1,3 +1,5 @@
+package meteordevelopment.meteorclient.systems.modules.combat;
+
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
@@ -21,7 +23,7 @@ import java.util.Set;
 
 public class TriggerBot extends Module {
 	public TriggerBot() {
-		super(MeteorPlus.CATEGORY, "Trigger-bot", "Attacks specified entities around you.");
+		super(Categories.Combat, "Trigger-bot", "Attacks specified entities around you.");
 	}
 
 	@Override
