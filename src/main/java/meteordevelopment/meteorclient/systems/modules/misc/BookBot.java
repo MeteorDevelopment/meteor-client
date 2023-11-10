@@ -165,7 +165,7 @@ public class BookBot extends Module {
     @EventHandler
     private void onTick(TickEvent.Post event) {
         Predicate<ItemStack> bookPredicate = i ->
-            i.getItem() == Items.WRITABLE_BOOK && (i.getNbt() == null || i.getNbt().get("pages").asString().isEmpty());
+            i.getItem() == Items.WRITABLE_BOOK && (i.getNbt() == null || i.getNbt().get("pages") == null || ((NbtList) i.getNbt().get("pages")).isEmpty());
 
         FindItemResult writableBook = InvUtils.find(bookPredicate);
 
