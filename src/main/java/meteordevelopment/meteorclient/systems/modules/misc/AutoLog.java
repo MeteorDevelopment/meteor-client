@@ -137,7 +137,7 @@ public class AutoLog extends Module {
     }
 
     private void disconnect(String reason) {
-        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal(reason)));
+        mc.player.networkHandler.onDisconnect(new DisconnectS2CPacket(Text.literal("[AutoLog] " + reason)));
     }
 
     private class StaticListener {
