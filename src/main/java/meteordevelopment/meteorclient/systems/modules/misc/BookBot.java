@@ -52,21 +52,6 @@ public class BookBot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> sign = sgGeneral.add(new BoolSetting.Builder()
-        .name("sign")
-        .description("Whether to sign the book.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
-        .name("name")
-        .description("The name you want to give your books.")
-        .defaultValue("Meteor on Crack!")
-        .visible(sign::get)
-        .build()
-    );
-
     private final Setting<Integer> pages = sgGeneral.add(new IntSetting.Builder()
         .name("pages")
         .description("The number of pages to write per book.")
@@ -85,20 +70,35 @@ public class BookBot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
-        .name("append-count")
-        .description("Whether to append the number of the book to the title.")
-        .defaultValue(true)
-        .visible(sign::get)
-        .build()
-    );
-
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("The amount of delay between writing books.")
         .defaultValue(20)
         .min(1)
         .sliderRange(1, 200)
+        .build()
+    );
+
+    private final Setting<Boolean> sign = sgGeneral.add(new BoolSetting.Builder()
+        .name("sign")
+        .description("Whether to sign the book.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
+        .name("name")
+        .description("The name you want to give your books.")
+        .defaultValue("Meteor on Crack!")
+        .visible(sign::get)
+        .build()
+    );
+
+    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
+        .name("append-count")
+        .description("Whether to append the number of the book to the title.")
+        .defaultValue(true)
+        .visible(sign::get)
         .build()
     );
 
