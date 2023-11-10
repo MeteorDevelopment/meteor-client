@@ -57,6 +57,7 @@ public class CombatHud extends HudElement {
         .defaultValue(2)
         .min(1)
         .sliderRange(1, 5)
+        .onChanged(aDouble -> calculateSize())
         .build()
     );
 
@@ -177,10 +178,11 @@ public class CombatHud extends HudElement {
 
     public CombatHud() {
         super(INFO);
+
+        calculateSize();
     }
 
-    @Override
-    public void tick(HudRenderer renderer) {
+    private void calculateSize() {
         setSize(175 * scale.get(), 95 * scale.get());
     }
 
@@ -202,9 +204,16 @@ public class CombatHud extends HudElement {
             // Background
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
-            Renderer2D.COLOR.render(null);
 
-            if (playerEntity == null) return;
+            if (playerEntity == null) {
+                if (isInEditor()) {
+                    renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
+                    renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
+                    Renderer2D.COLOR.render(null); // i know, ill fix it soon
+                }
+                return;
+            }
+            Renderer2D.COLOR.render(null);
 
             // Player Model
             InventoryScreen.drawEntity(
