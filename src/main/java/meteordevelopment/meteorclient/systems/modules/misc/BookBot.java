@@ -19,7 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
@@ -39,10 +39,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.PrimitiveIterator;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class BookBot extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -51,13 +49,6 @@ public class BookBot extends Module {
         .name("mode")
         .description("What kind of text to write.")
         .defaultValue(Mode.Random)
-        .build()
-    );
-
-    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
-        .name("name")
-        .description("The name you want to give your books.")
-        .defaultValue("Meteor on Crack!")
         .build()
     );
 
@@ -79,19 +70,35 @@ public class BookBot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
-        .name("append-count")
-        .description("Whether to append the number of the book to the title.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("The amount of delay between writing books.")
         .defaultValue(20)
         .min(1)
         .sliderRange(1, 200)
+        .build()
+    );
+
+    private final Setting<Boolean> sign = sgGeneral.add(new BoolSetting.Builder()
+        .name("sign")
+        .description("Whether to sign the book.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
+        .name("name")
+        .description("The name you want to give your books.")
+        .defaultValue("Meteor on Crack!")
+        .visible(sign::get)
+        .build()
+    );
+
+    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
+        .name("append-count")
+        .description("Whether to append the number of the book to the title.")
+        .defaultValue(true)
+        .visible(sign::get)
         .build()
     );
 
@@ -157,7 +164,10 @@ public class BookBot extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        FindItemResult writableBook = InvUtils.find(Items.WRITABLE_BOOK);
+        Predicate<ItemStack> bookPredicate = i ->
+            i.getItem() == Items.WRITABLE_BOOK && (i.getNbt() == null || i.getNbt().get("pages") == null || ((NbtList) i.getNbt().get("pages")).isEmpty());
+
+        FindItemResult writableBook = InvUtils.find(bookPredicate);
 
         // Check if there is a book to write
         if (!writableBook.found()) {
@@ -166,7 +176,7 @@ public class BookBot extends Module {
         }
 
         // Move the book into hand
-        if (!InvUtils.testInMainHand(Items.WRITABLE_BOOK)) {
+        if (!InvUtils.testInMainHand(bookPredicate)) {
             InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().selectedSlot);
             return;
         }
@@ -291,7 +301,7 @@ public class BookBot extends Module {
         if (!pages.isEmpty()) mc.player.getMainHandStack().setSubNbt("pages", pageNbt);
 
         // Send book update to server
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, Optional.of(title)));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, sign.get() ? Optional.of(title) : Optional.empty()));
 
         bookCount++;
     }
