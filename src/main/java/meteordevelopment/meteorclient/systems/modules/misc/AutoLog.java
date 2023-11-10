@@ -107,30 +107,31 @@ public class AutoLog extends Module {
             }
         }
 
-        if(smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
+        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
             disconnect("Health was going to be lower than " + health.get() + ".");
             if (toggleOff.get()) this.toggle();
         }
 
-        if (onlyTrusted.get() || instantDeath.get() || crystalLog.get()) { // only check all entities if needed
-            for (Entity entity : mc.world.getEntities()) {
-                if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
-                    if (onlyTrusted.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
-                            disconnect("A non-trusted player appeared in your render distance.");
-                            if (toggleOff.get()) this.toggle();
-                            break;
-                    }
-                    if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
-                            > playerHealth + mc.player.getAbsorptionAmount()) {
-                        disconnect("Anti-32k measures.");
+
+        if (!onlyTrusted.get() && !instantDeath.get() && !crystalLog.get()) return; // only check all entities if needed
+
+        for (Entity entity : mc.world.getEntities()) {
+            if (entity instanceof PlayerEntity && entity.getUuid() != mc.player.getUuid()) {
+                if (onlyTrusted.get() && entity != mc.player && !Friends.get().isFriend((PlayerEntity) entity)) {
+                        disconnect("A non-trusted player appeared in your render distance.");
                         if (toggleOff.get()) this.toggle();
                         break;
-                    }
                 }
-                if (crystalLog.get() && entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get())) {
-                    disconnect("End Crystal appeared within specified range.");
+                if (instantDeath.get() && PlayerUtils.isWithin(entity, 8) && DamageUtils.getSwordDamage((PlayerEntity) entity, true)
+                        > playerHealth + mc.player.getAbsorptionAmount()) {
+                    disconnect("Anti-32k measures.");
                     if (toggleOff.get()) this.toggle();
+                    break;
                 }
+            }
+            if (crystalLog.get() && entity instanceof EndCrystalEntity && PlayerUtils.isWithin(entity, range.get())) {
+                disconnect("End Crystal appeared within specified range.");
+                if (toggleOff.get()) this.toggle();
             }
         }
     }
@@ -155,10 +156,11 @@ public class AutoLog extends Module {
 
     private final StaticListener staticListener = new StaticListener();
 
-    private void enableHealthListener(){
+    private void enableHealthListener() {
         MeteorClient.EVENT_BUS.subscribe(staticListener);
     }
-    private void disableHealthListener(){
+
+    private void disableHealthListener() {
         MeteorClient.EVENT_BUS.unsubscribe(staticListener);
     }
 }
