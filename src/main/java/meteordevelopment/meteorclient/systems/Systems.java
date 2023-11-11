@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems;
 
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
@@ -20,13 +21,12 @@ import meteordevelopment.orbit.EventHandler;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Systems {
     @SuppressWarnings("rawtypes")
-    private static final Map<Class<? extends System>, System<?>> systems = new HashMap<>();
+    private static final Map<Class<? extends System>, System<?>> systems = new Reference2ReferenceOpenHashMap<>();
     private static final List<Runnable> preLoadTasks = new ArrayList<>(1);
 
     public static void addPreLoadTask(Runnable task) {
