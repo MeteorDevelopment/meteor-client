@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
-import net.minecraft.command.CommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EyeOfEnderEntity;
 import net.minecraft.item.ItemStack;
@@ -34,9 +34,6 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class LocateCommand extends Command {
     private Vec3d firstStart;
@@ -65,7 +62,7 @@ public class LocateCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(literal("buried_treasure").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {

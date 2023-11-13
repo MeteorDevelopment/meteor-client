@@ -7,11 +7,8 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DismountCommand extends Command {
     public DismountCommand() {
@@ -19,7 +16,7 @@ public class DismountCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.executes(context -> {
             mc.getNetworkHandler().sendPacket(new PlayerInputC2SPacket(0, 0, false, true));
             return SINGLE_SUCCESS;

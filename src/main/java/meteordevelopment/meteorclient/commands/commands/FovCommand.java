@@ -9,10 +9,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixininterface.ISimpleOption;
-import net.minecraft.command.CommandSource;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class FovCommand extends Command {
     public FovCommand() {
@@ -20,7 +17,7 @@ public class FovCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(argument("fov", IntegerArgumentType.integer(0, 180)).executes(context -> {
             ((ISimpleOption) (Object) mc.options.getFov()).set(context.getArgument("fov", Integer.class));
             return SINGLE_SUCCESS;

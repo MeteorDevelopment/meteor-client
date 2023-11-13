@@ -12,8 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
-import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
@@ -24,9 +24,6 @@ import net.minecraft.text.Text;
 
 import java.util.function.Function;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class EnchantCommand extends Command {
     private final static SimpleCommandExceptionType NOT_IN_CREATIVE = new SimpleCommandExceptionType(Text.literal("You must be in creative mode to use this."));
     private final static SimpleCommandExceptionType NOT_HOLDING_ITEM = new SimpleCommandExceptionType(Text.literal("You need to hold some item to enchant."));
@@ -36,7 +33,7 @@ public class EnchantCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(literal("one").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT))
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
                 one(context, enchantment -> context.getArgument("level", Integer.class));
@@ -88,7 +85,7 @@ public class EnchantCommand extends Command {
         })));
     }
 
-    private void one(CommandContext<CommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
+    private void one(CommandContext<FabricClientCommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
         RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);

@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -19,15 +19,13 @@ import net.minecraft.util.Formatting;
 
 import java.util.List;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-
 public class BindsCommand extends Command {
     public BindsCommand() {
         super("binds", "List of all bound modules.");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.executes(context -> {
             // Modules
             List<Module> modules = Modules.get().getAll().stream()

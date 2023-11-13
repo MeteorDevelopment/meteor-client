@@ -11,8 +11,8 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.starscript.Script;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
-import net.minecraft.command.CommandSource;
 import net.minecraft.network.encryption.NetworkEncryptionUtils;
 import net.minecraft.network.message.LastSeenMessagesCollector;
 import net.minecraft.network.message.MessageBody;
@@ -21,16 +21,13 @@ import net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket;
 
 import java.time.Instant;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class SayCommand extends Command {
     public SayCommand() {
         super("say", "Sends messages in chat.");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
             String msg = context.getArgument("message", String.class);
             Script script = MeteorStarscript.compile(msg);

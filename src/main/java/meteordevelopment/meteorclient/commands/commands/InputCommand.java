@@ -11,15 +11,12 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.orbit.EventHandler;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.option.KeyBinding;
-import net.minecraft.command.CommandSource;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class InputCommand extends Command {
     private static final List<KeypressHandler> activeHandlers = new ArrayList<>();
@@ -40,7 +37,7 @@ public class InputCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         for (Map.Entry<KeyBinding, String> keyBinding : keys.entrySet()) {
             builder.then(literal(keyBinding.getValue())
                 .then(argument("ticks", IntegerArgumentType.integer(1))

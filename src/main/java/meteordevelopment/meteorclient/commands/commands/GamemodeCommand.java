@@ -7,11 +7,8 @@ package meteordevelopment.meteorclient.commands.commands;
 
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.world.GameMode;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class GamemodeCommand extends Command {
     public GamemodeCommand() {
@@ -19,7 +16,7 @@ public class GamemodeCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         for (GameMode gameMode : GameMode.values()) {
             builder.then(literal(gameMode.getName()).executes(context -> {
                 mc.interactionManager.setGameMode(gameMode);

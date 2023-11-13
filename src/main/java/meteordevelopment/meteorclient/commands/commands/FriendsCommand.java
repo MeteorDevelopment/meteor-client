@@ -13,10 +13,8 @@ import meteordevelopment.meteorclient.commands.arguments.PlayerListEntryArgument
 import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.util.Formatting;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 
 public class FriendsCommand extends Command {
     public FriendsCommand() {
@@ -24,7 +22,7 @@ public class FriendsCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(literal("add")
             .then(argument("player", PlayerListEntryArgumentType.create())
                 .executes(context -> {

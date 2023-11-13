@@ -15,9 +15,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.minecraft.command.CommandSource;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class ResetCommand extends Command {
 
@@ -26,7 +24,7 @@ public class ResetCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(literal("settings")
                 .then(argument("module", ModuleArgumentType.create()).executes(context -> {
                     Module module = context.getArgument("module", Module.class);

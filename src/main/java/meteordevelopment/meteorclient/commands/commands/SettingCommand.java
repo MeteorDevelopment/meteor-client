@@ -17,9 +17,7 @@ import meteordevelopment.meteorclient.gui.tabs.Tabs;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.minecraft.command.CommandSource;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 
 public class SettingCommand extends Command {
     public SettingCommand() {
@@ -27,7 +25,7 @@ public class SettingCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(
             literal("hud")
                 .executes(context -> {

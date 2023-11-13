@@ -14,8 +14,8 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.network.PlayerListEntry;
-import net.minecraft.command.CommandSource;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 
@@ -24,16 +24,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.UUID;
 
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
-
 public class NameHistoryCommand extends Command {
     public NameHistoryCommand() {
         super("name-history", "Provides a list of a players previous names from the laby.net api.", "history", "names");
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             MeteorExecutor.execute(() -> {
                 PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);

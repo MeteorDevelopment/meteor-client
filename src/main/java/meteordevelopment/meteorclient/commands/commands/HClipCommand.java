@@ -8,12 +8,9 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.minecraft.command.CommandSource;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
-
-import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class HClipCommand extends Command {
     public HClipCommand() {
@@ -21,7 +18,7 @@ public class HClipCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<CommandSource> builder) {
+    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(context -> {
             double blocks = context.getArgument("blocks", Double.class);
             Vec3d forward = Vec3d.fromPolar(0, mc.player.getYaw()).normalize();
