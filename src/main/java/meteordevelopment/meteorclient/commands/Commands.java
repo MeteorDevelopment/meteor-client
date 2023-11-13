@@ -24,7 +24,7 @@ public class Commands {
     public static final CommandDispatcher<FabricClientCommandSource> DISPATCHER = new CommandDispatcher<>();
     public static final List<Command> COMMANDS = new ArrayList<>();
 
-    @PostInit(dependencies = PathManagers.class)
+    @PostInit
     public static void init() {
         add(new VClipCommand());
         add(new HClipCommand());
