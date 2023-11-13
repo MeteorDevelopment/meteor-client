@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.systems.friends.Friend;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.utils.network.Capes;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 
 public class ReloadCommand extends Command {
     public ReloadCommand() {
@@ -21,7 +21,7 @@ public class ReloadCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.executes(context -> {
             warning("Reloading systems, this may take a while.");
 

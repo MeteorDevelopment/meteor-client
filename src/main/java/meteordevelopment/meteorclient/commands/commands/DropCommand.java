@@ -10,7 +10,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.command.argument.ItemStackArgumentType;
 import net.minecraft.item.ItemStack;
@@ -26,7 +26,7 @@ public class DropCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         // Main Hand
         builder.then(literal("hand").executes(context -> drop(player -> player.dropSelectedItem(true))));
 

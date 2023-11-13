@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket;
 
@@ -18,7 +18,7 @@ public class VClipCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(argument("blocks", DoubleArgumentType.doubleArg()).executes(context -> {
 
             double blocks = context.getArgument("blocks", Double.class);

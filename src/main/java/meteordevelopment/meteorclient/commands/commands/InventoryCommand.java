@@ -9,8 +9,8 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.network.ClientCommandSource;
 
 public class InventoryCommand extends Command {
     public InventoryCommand() {
@@ -18,7 +18,7 @@ public class InventoryCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(argument("player", PlayerArgumentType.create()).executes(context -> {
             Utils.screenToOpen = new InventoryScreen(PlayerArgumentType.get(context));
             return SINGLE_SUCCESS;

@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.commands.arguments.WaypointArgumentType;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoint;
 import meteordevelopment.meteorclient.systems.waypoints.Waypoints;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.argument.PosArgument;
 import net.minecraft.command.argument.Vec3ArgumentType;
 import net.minecraft.util.Formatting;
@@ -25,7 +25,7 @@ public class WaypointCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("list").executes(context -> {
             if (Waypoints.get().waypoints.isEmpty()) error("No created waypoints.");
             else {
@@ -81,7 +81,7 @@ public class WaypointCommand extends Command {
         return "X: " + waypoint.pos.get().getX() + ", Y: " + waypoint.pos.get().getY() + ", Z: " + waypoint.pos.get().getZ();
     }
 
-    private int addWaypoint(CommandContext<FabricClientCommandSource> context, boolean withCoords) {
+    private int addWaypoint(CommandContext<ClientCommandSource> context, boolean withCoords) {
         if (mc.player == null) return -1;
 
         BlockPos pos = withCoords ? context.getArgument("pos", PosArgument.class).toAbsoluteBlockPos(mc.player.getCommandSource()) : mc.player.getBlockPos().up(2);

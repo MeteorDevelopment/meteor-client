@@ -10,7 +10,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ProfileArgumentType;
 import meteordevelopment.meteorclient.systems.profiles.Profile;
 import meteordevelopment.meteorclient.systems.profiles.Profiles;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 
 public class ProfilesCommand extends Command {
 
@@ -19,7 +19,7 @@ public class ProfilesCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("load").then(argument("profile", ProfileArgumentType.create()).executes(context -> {
             Profile profile = ProfileArgumentType.get(context);
 

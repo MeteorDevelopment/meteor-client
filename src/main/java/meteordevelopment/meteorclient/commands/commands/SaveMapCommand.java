@@ -10,7 +10,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.MapRendererAccessor;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.render.MapRenderer;
 import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
@@ -47,7 +47,7 @@ public class SaveMapCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.executes(context -> {
 
             MapState state = getMapState();

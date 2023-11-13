@@ -8,7 +8,7 @@ package meteordevelopment.meteorclient.commands.commands;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 
@@ -18,7 +18,7 @@ public class EnderChestCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.executes(context -> {
             Utils.openContainer(Items.ENDER_CHEST.getDefaultStack(), new ItemStack[27], true);
             return SINGLE_SUCCESS;

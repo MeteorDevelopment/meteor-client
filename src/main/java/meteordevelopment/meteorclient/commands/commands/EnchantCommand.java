@@ -12,8 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.utils.Utils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.argument.RegistryEntryArgumentType;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
@@ -33,7 +33,7 @@ public class EnchantCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("one").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT))
             .then(literal("level").then(argument("level", IntegerArgumentType.integer()).executes(context -> {
                 one(context, enchantment -> context.getArgument("level", Integer.class));
@@ -85,7 +85,7 @@ public class EnchantCommand extends Command {
         })));
     }
 
-    private void one(CommandContext<FabricClientCommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
+    private void one(CommandContext<ClientCommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
         RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);

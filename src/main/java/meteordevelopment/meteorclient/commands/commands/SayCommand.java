@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
 import meteordevelopment.meteorclient.utils.misc.MeteorStarscript;
 import meteordevelopment.starscript.Script;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.encryption.NetworkEncryptionUtils;
 import net.minecraft.network.message.LastSeenMessagesCollector;
@@ -27,7 +27,7 @@ public class SayCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(argument("message", StringArgumentType.greedyString()).executes(context -> {
             String msg = context.getArgument("message", String.class);
             Script script = MeteorStarscript.compile(msg);

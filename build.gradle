@@ -48,7 +48,6 @@ dependencies {
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
     modInclude fabricApi.module("fabric-resource-loader-v0", project.fapi_version)
-    modInclude fabricApi.module("fabric-command-api-v2", project.fapi_version)
 
     // Compat fixes
     modCompileOnly fabricApi.module("fabric-renderer-indigo", project.fapi_version)

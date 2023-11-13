@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
@@ -24,7 +24,7 @@ public class CommandsCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.executes(context -> {
             ChatUtils.info("--- Commands ((highlight)%d(default)) ---", Commands.COMMANDS.size());
 

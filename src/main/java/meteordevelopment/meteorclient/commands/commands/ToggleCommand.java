@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 
 import java.util.ArrayList;
 
@@ -21,7 +21,7 @@ public class ToggleCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder
             .then(literal("all")
                 .then(literal("on")

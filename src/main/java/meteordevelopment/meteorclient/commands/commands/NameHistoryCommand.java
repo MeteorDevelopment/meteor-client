@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -30,7 +30,7 @@ public class NameHistoryCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(argument("player", PlayerListEntryArgumentType.create()).executes(context -> {
             MeteorExecutor.execute(() -> {
                 PlayerListEntry lookUpTarget = PlayerListEntryArgumentType.get(context);

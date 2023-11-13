@@ -17,8 +17,8 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.Notebot;
 import meteordevelopment.meteorclient.utils.notebot.song.Note;
 import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.enums.Instrument;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
@@ -43,7 +43,7 @@ public class NotebotCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("help").executes(ctx -> {
             Util.getOperatingSystem().open("https://github.com/MeteorDevelopment/meteor-client/wiki/Notebot-Guide");
             return SINGLE_SUCCESS;

@@ -15,9 +15,9 @@ import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.EyeOfEnderEntity;
 import net.minecraft.item.ItemStack;
@@ -62,7 +62,7 @@ public class LocateCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("buried_treasure").executes(s -> {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
             if (stack.getItem() != Items.FILLED_MAP) {

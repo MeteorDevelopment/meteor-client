@@ -9,7 +9,7 @@ import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.DirectionArgumentType;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.MathHelper;
 
@@ -19,7 +19,7 @@ public class RotationCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder
             .then(literal("set")
                 .then(argument("direction", DirectionArgumentType.create())

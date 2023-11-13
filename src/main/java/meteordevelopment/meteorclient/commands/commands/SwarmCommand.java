@@ -21,7 +21,7 @@ import meteordevelopment.meteorclient.systems.modules.misc.swarm.SwarmConnection
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.SwarmWorker;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -40,7 +40,7 @@ public class SwarmCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("disconnect").executes(context -> {
             Swarm swarm = Modules.get().get(Swarm.class);
             if (swarm.isActive()) {

@@ -11,7 +11,7 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.orbit.EventHandler;
-import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.minecraft.client.network.ClientCommandSource;
 import net.minecraft.text.Text;
 
 public class SpectateCommand extends Command {
@@ -23,7 +23,7 @@ public class SpectateCommand extends Command {
     }
 
     @Override
-    public void build(LiteralArgumentBuilder<FabricClientCommandSource> builder) {
+    public void build(LiteralArgumentBuilder<ClientCommandSource> builder) {
         builder.then(literal("reset").executes(context -> {
             mc.setCameraEntity(mc.player);
             return SINGLE_SUCCESS;
