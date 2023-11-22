@@ -15,8 +15,10 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.client.gui.screen.DisconnectedScreen;
+import net.minecraft.client.network.PlayerListEntry;
 import org.apache.commons.lang3.RandomStringUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Spam extends Module {
@@ -76,16 +78,14 @@ public class Spam extends Module {
         .build()
     );
 
-    // PMspam button
     private final Setting<Boolean> PMspam = sgGeneral.add(new BoolSetting.Builder()
         .name("PMspam")
-        .description("Parses playersList and /msg them")
+        .description("Parses the player list and /msg them")
         .defaultValue(false)
         .build()
     );
 
-
-    private int messageI, timer;
+    private int messageI, timer, playerIndex = 0;
 
     public Spam() {
         super(Categories.Misc, "spam", "Spams specified messages in chat.");
@@ -109,15 +109,6 @@ public class Spam extends Module {
         if (disableOnLeave.get()) toggle();
     }
 
-
-    /**
-     * Iterator through player list<br>
-     * Declared globally to save its value<br><br>
-     * *Will be reset if (it > playerNames.length)
-     */
-    int it = 0;
-
-
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (messages.get().isEmpty()) return;
@@ -132,46 +123,23 @@ public class Spam extends Module {
                 i = messageI++;
             }
 
-
-            /* This var will be reassigned and outputted at the end
-             * The struct looks like this:
-             * /msg + playerNames[it] + text + bypass
-             */
             String text = messages.get().get(i);
 
-            // PMspam REALIZATION   ///////////////////////////////////////////////////////////////////////////////////////
-            // If our button is toggled         // TODO: List caching
-            if (PMspam.get()) {
-                if(mc.player != null) {
-                    // Var to store String[] of names
-                    String[] playerNames = new String[0];
+            if (PMspam.get() && mc.getNetworkHandler() != null) {
+                List<PlayerListEntry> playerNames = new ArrayList<>(mc.getNetworkHandler().getPlayerList());
 
-                    // if LOCAL SERVER
-                    if (mc.getServer() != null && mc.isConnectedToLocalServer()) {
-                        playerNames = mc.getServer().getPlayerNames();
-                    }
-                    // if MULTIPLAYER
-                    else if (mc.player.getEntityWorld().getPlayers() != null) {
-                        playerNames = mc.player.networkHandler.getCommandSource().getPlayerNames().toArray(new String[0]);
-                    }
-                    // to avoid out of bound
-                    if (playerNames.length > 0) {
-                        if (it >= playerNames.length) { it = 0; }
+                if (playerNames.size() > 0) {
+                    if (playerIndex >= playerNames.size()) playerIndex = 0;
 
-                        // Exclude our name // TODO: Friends name (&& if NPC????)
-                        if (playerNames[it].equals(mc.player.getEntityName()) && playerNames.length != 1) {
-                            it++;
-                        }
+                    // Exclude our name     // TODO: Friends name
+                    if (playerNames.get(playerIndex).getProfile().getName().equals(mc.getSession().getUsername()) && playerNames.size() != 1) playerIndex++;
 
-                        if (it < playerNames.length) {
-                            text = "/msg " + playerNames[it] + " " + text;
-                            it++;
-                        }
+                    if (playerIndex < playerNames.size()) {
+                        text = "/msg " + playerNames.get(playerIndex).getProfile().getName() + " " + text;
+                        playerIndex++;
                     }
                 }
             }
-            // PMspam END OF REALIZATION    ///////////////////////////////////////////////////////////////////////////////
-
 
             if (bypass.get()) {
                 text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
