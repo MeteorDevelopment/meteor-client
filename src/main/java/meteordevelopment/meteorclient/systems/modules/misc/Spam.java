@@ -76,6 +76,15 @@ public class Spam extends Module {
         .build()
     );
 
+    // PMspam button
+    private final Setting<Boolean> PMspam = sgGeneral.add(new BoolSetting.Builder()
+        .name("PMspam")
+        .description("Parses playersList and /msg them")
+        .defaultValue(false)
+        .build()
+    );
+
+
     private int messageI, timer;
 
     public Spam() {
@@ -100,6 +109,15 @@ public class Spam extends Module {
         if (disableOnLeave.get()) toggle();
     }
 
+
+    /**
+     * Iterator through player list<br>
+     * Declared globally to save its value<br><br>
+     * *Will be reset if (it > playerNames.length)
+     */
+    int it = 0;
+
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         if (messages.get().isEmpty()) return;
@@ -114,7 +132,47 @@ public class Spam extends Module {
                 i = messageI++;
             }
 
+
+            /* This var will be reassigned and outputted at the end
+             * The struct looks like this:
+             * /msg + playerNames[it] + text + bypass
+             */
             String text = messages.get().get(i);
+
+            // PMspam REALIZATION   ///////////////////////////////////////////////////////////////////////////////////////
+            // If our button is toggled         // TODO: List caching
+            if (PMspam.get()) {
+                if(mc.player != null) {
+                    // Var to store String[] of names
+                    String[] playerNames = new String[0];
+
+                    // if LOCAL SERVER
+                    if (mc.getServer() != null && mc.isConnectedToLocalServer()) {
+                        playerNames = mc.getServer().getPlayerNames();
+                    }
+                    // if MULTIPLAYER
+                    else if (mc.player.getEntityWorld().getPlayers() != null) {
+                        playerNames = mc.player.networkHandler.getCommandSource().getPlayerNames().toArray(new String[0]);
+                    }
+                    // to avoid out of bound
+                    if (playerNames.length > 0) {
+                        if (it >= playerNames.length) { it = 0; }
+
+                        // Exclude our name // TODO: Friends name (&& if NPC????)
+                        if (playerNames[it].equals(mc.player.getEntityName()) && playerNames.length != 1) {
+                            it++;
+                        }
+
+                        if (it < playerNames.length) {
+                            text = "/msg " + playerNames[it] + " " + text;
+                            it++;
+                        }
+                    }
+                }
+            }
+            // PMspam END OF REALIZATION    ///////////////////////////////////////////////////////////////////////////////
+
+
             if (bypass.get()) {
                 text += " " + RandomStringUtils.randomAlphabetic(length.get()).toLowerCase();
             }
