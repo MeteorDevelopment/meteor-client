@@ -128,16 +128,16 @@ public class Spam extends Module {
             if (PMspam.get() && mc.getNetworkHandler() != null) {
                 List<PlayerListEntry> playerNames = new ArrayList<>(mc.getNetworkHandler().getPlayerList());
 
-                if (playerNames.size() > 0) {
+                if (!playerNames.isEmpty()) {
                     if (playerIndex >= playerNames.size()) playerIndex = 0;
 
                     // Exclude our name     // TODO: Friends name
                     if (playerNames.get(playerIndex).getProfile().getName().equals(mc.getSession().getUsername()) && playerNames.size() != 1) playerIndex++;
 
-                    if (playerIndex < playerNames.size()) {
-                        text = "/msg " + playerNames.get(playerIndex).getProfile().getName() + " " + text;
-                        playerIndex++;
-                    }
+                    if (playerIndex >= playerNames.size()) playerIndex = 0;
+                    // Get player name by index and remove "color formatting" symbols in it:    /msg cleanName text
+                    text = "/msg " + playerNames.get(playerIndex).getProfile().getName().replaceAll("§", "") + " " + text;
+                    playerIndex++;
                 }
             }
 
