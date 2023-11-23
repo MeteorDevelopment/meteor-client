@@ -134,10 +134,10 @@ public class Spam extends Module {
                     // Exclude our name     // TODO: Friends name
                     if (playerNames.get(playerIndex).getProfile().getName().equals(mc.getSession().getUsername()) && playerNames.size() != 1) playerIndex++;
 
-                    if (playerIndex < playerNames.size()) {
-                        text = "/msg " + playerNames.get(playerIndex).getProfile().getName() + " " + text;
-                        playerIndex++;
-                    }
+                    if (playerIndex >= playerNames.size()) playerIndex = 0;
+                    // Get player name by index and remove "color formatting" symbols in it:    /msg cleanName text
+                    text = "/msg " + playerNames.get(playerIndex).getProfile().getName().replaceAll("\u00A7", "") + " " + text;
+                    playerIndex++;
                 }
             }
 
