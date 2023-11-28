@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.renderer;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.platform.GlStateManager;
 import meteordevelopment.meteorclient.mixin.BufferRendererAccessor;
 import meteordevelopment.meteorclient.mixininterface.ICapabilityTracker;
@@ -18,6 +17,7 @@ import org.lwjgl.BufferUtils;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 import static org.lwjgl.opengl.GL32C.*;
@@ -133,7 +133,7 @@ public class GL {
     }
 
     public static void shaderSource(int shader, String source) {
-        GlStateManager.glShaderSource(shader, ImmutableList.of(source));
+        GlStateManager.glShaderSource(shader, List.of(source));
     }
 
     public static String compileShader(int shader) {

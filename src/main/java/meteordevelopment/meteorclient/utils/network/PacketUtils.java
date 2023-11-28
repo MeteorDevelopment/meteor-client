@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
@@ -19,10 +18,11 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.stream.Stream;
 
-public class PacketUtils {
+public abstract class PacketUtils {
     public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();
 
     private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();
@@ -498,7 +498,7 @@ public class PacketUtils {
         @NotNull
         @Override
         public Iterator<Class<? extends Packet<?>>> iterator() {
-            return Iterators.concat(S2C_PACKETS.keySet().iterator(), C2S_PACKETS.keySet().iterator());
+            return Stream.concat(S2C_PACKETS.keySet().stream(), C2S_PACKETS.keySet().stream()).iterator();
         }
 
         @Override
@@ -508,7 +508,7 @@ public class PacketUtils {
 
         @Override
         public Set<Map.Entry<RegistryKey<Class<? extends Packet<?>>>, Class<? extends Packet<?>>>> getEntrySet() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
@@ -569,7 +569,7 @@ public class PacketUtils {
 
         @Override
         public Set<RegistryKey<Class<? extends Packet<?>>>> getKeys() {
-            return null;
+            return Collections.emptySet();
         }
     }
 }
