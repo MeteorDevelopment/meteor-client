@@ -19,6 +19,7 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.font.TextHandler;
 import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
@@ -246,44 +247,59 @@ public class BookBot extends Module {
 
     private void writeBook(PrimitiveIterator.OfInt chars) {
         ArrayList<String> pages = new ArrayList<>();
+        TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever();
 
-        for (int pageI = 0; pageI < (mode.get() == Mode.File ? 100 : this.pages.get()); pageI++) {
-            // Check if the stream is empty before creating a new page
-            if (!chars.hasNext()) break;
+        int maxPages = mode.get() == Mode.File ? 100 : this.pages.get();
 
-            StringBuilder page = new StringBuilder();
+        int pageIndex = 0;
+        int lineIndex = 0;
 
-            for (int lineI = 0; lineI < 13; lineI++) {
-                // Check if the stream is empty before creating a new line
-                if (!chars.hasNext()) break;
+        final StringBuilder page = new StringBuilder();
 
-                double lineWidth = 0;
-                StringBuilder line = new StringBuilder();
+        float lineWidth = 0;
 
-                while (true) {
-                    // Check if the stream is empty
-                    if (!chars.hasNext()) break;
+        while (chars.hasNext()) {
+            int c = chars.nextInt();
 
-                    // Get the next character
-                    int nextChar = chars.nextInt();
+            if (c == '\r' || c == '\n') {
+                page.append('\n');
+                lineWidth = 0;
+                lineIndex++;
+            } else {
+                float charWidth = widthRetriever.getWidth(c, Style.EMPTY);
 
-                    // Ignore newline chars when writing lines, should already be organised
-                    if (nextChar == '\r' || nextChar == '\n') break;
-
-                    // Make sure the character will fit on the line
-                    double charWidth = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
-                    if (lineWidth + charWidth > 114) break;
-
-                    // Append it to the line
-                    line.appendCodePoint(nextChar);
+                // Reached end of line
+                if (lineWidth + charWidth > 114f) {
+                    page.append('\n');
+                    lineWidth = charWidth;
+                    lineIndex++;
+                    // Wrap to next line, unless wrapping to next page
+                    if (lineIndex != 14) page.appendCodePoint(c);
+                } else {
                     lineWidth += charWidth;
+                    page.appendCodePoint(c);
                 }
-
-                // Append the line to the page
-                page.append(line).append('\n');
             }
 
-            // Append page to the page list
+            // Reached end of page
+            if (lineIndex == 14) {
+                pages.add(page.toString());
+                page.setLength(0);
+                pageIndex++;
+                lineIndex = 0;
+
+                // No more pages
+                if (pageIndex == maxPages) break;
+
+                // Wrap to next page
+                if (c != '\r' && c != '\n') {
+                    page.appendCodePoint(c);
+                }
+            }
+        }
+
+        // No more characters, end current page
+        if (!page.isEmpty() && pageIndex != maxPages) {
             pages.add(page.toString());
         }
 
