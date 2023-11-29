@@ -125,7 +125,7 @@ public class Spam extends Module {
 
             String text = messages.get().get(i);
 
-            if (PMspam.get() && mc.getNetworkHandler() != null) {
+            if (PMspam.get()) {
                 List<PlayerListEntry> playerNames = new ArrayList<>(mc.getNetworkHandler().getPlayerList());
 
                 if (!playerNames.isEmpty()) {
