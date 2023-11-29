@@ -275,6 +275,8 @@ public class BookBot extends Module {
                     lineIndex++;
                     // Wrap to next line, unless wrapping to next page
                     if (lineIndex != 14) page.appendCodePoint(c);
+                } else if (lineWidth == 0f && c == ' ') {
+                    continue; // Prevent leading space from text wrapping
                 } else {
                     lineWidth += charWidth;
                     page.appendCodePoint(c);
