@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(ItemStack.class)
+@Mixin(value = ItemStack.class, priority = 999)
 public interface ItemStackAccessor {
     @Mutable
     @Accessor("item")
