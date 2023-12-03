@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient;
 
+import io.github.racoondog.norbit.EventBus;
 import meteordevelopment.meteorclient.addons.AddonManager;
 import meteordevelopment.meteorclient.addons.MeteorAddon;
 import meteordevelopment.meteorclient.events.game.OpenScreenEvent;
@@ -27,7 +28,6 @@ import meteordevelopment.meteorclient.utils.misc.Version;
 import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.meteorclient.utils.misc.input.KeyBinds;
 import meteordevelopment.meteorclient.utils.network.OnlinePlayers;
-import meteordevelopment.orbit.EventBus;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import meteordevelopment.orbit.IEventBus;
@@ -53,7 +53,7 @@ public class MeteorClient implements ClientModInitializer {
     public static MeteorAddon ADDON;
 
     public static MinecraftClient mc;
-    public static final IEventBus EVENT_BUS = new EventBus();
+    public static final IEventBus EVENT_BUS = EventBus.threadSafe();
     public static final File FOLDER = FabricLoader.getInstance().getGameDir().resolve(MOD_ID).toFile();
     public static final Logger LOG;
 

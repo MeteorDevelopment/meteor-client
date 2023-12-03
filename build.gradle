@@ -61,6 +61,7 @@ dependencies {
     modCompileOnly "meteordevelopment:baritone:${project.minecraft_version}-SNAPSHOT"
 
     // Libraries
+    library "io.github.racoondog:norbit:1.0.2"
     library "meteordevelopment:orbit:${project.orbit_version}"
     library "meteordevelopment:starscript:${project.starscript_version}"
     library "meteordevelopment:discord-ipc:${project.discordipc_version}"
