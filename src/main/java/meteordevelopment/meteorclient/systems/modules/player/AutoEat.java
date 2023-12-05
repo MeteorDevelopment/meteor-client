@@ -116,6 +116,7 @@ public class AutoEat extends Module {
     private void onTick(TickEvent.Pre event) {
         // Skip if Auto Gap is already eating
         if (Modules.get().get(AutoGap.class).isEating()) return;
+	if (mc.options.useKey.isPressed()) return;
 
         if (eating) {
             // If we are eating check if we should still be still eating
@@ -188,6 +189,7 @@ public class AutoEat extends Module {
     private void eat() {
         changeSlot(slot);
         setPressed(true);
+	if(eating == false) setPressed(false);
         if (!mc.player.isUsingItem()) Utils.rightClick();
 
         eating = true;
