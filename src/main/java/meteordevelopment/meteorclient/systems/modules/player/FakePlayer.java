@@ -56,7 +56,7 @@ public class FakePlayer extends Module {
 
     private void fillTable(GuiTheme theme, WTable table) {
         for (FakePlayerEntity fakePlayer : FakePlayerManager.getFakePlayers()) {
-            table.add(theme.label(fakePlayer.getEntityName()));
+            table.add(theme.label(fakePlayer.getName().getString()));
             WMinus delete = table.add(theme.minus()).expandCellX().right().widget();
             delete.action = () -> {
                 FakePlayerManager.remove(fakePlayer);

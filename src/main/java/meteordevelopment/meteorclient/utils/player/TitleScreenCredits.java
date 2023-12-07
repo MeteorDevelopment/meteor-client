@@ -13,11 +13,10 @@ import meteordevelopment.meteorclient.gui.GuiThemes;
 import meteordevelopment.meteorclient.gui.screens.CommitsScreen;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
-import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
+import net.minecraft.text.MutableText;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -25,11 +24,7 @@ import java.util.List;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class TitleScreenCredits {
-    private static final int WHITE = Color.fromRGBA(255, 255, 255, 255);
-    private static final int GRAY = Color.fromRGBA(175, 175, 175, 255);
-    private static final int RED = Color.fromRGBA(225, 25, 25, 255);
-
+public abstract class TitleScreenCredits {
     private static final List<Credit> credits = new ArrayList<>();
 
     private static void init() {
@@ -38,7 +33,7 @@ public class TitleScreenCredits {
         for (MeteorAddon addon : AddonManager.ADDONS) add(addon);
 
         // Sort by width (Meteor always first)
-        credits.sort(Comparator.comparingInt(value -> value.sections.get(0).text.equals("Meteor Client ") ? Integer.MIN_VALUE : -value.width));
+        credits.sort(Comparator.comparingInt(value -> value.addon == MeteorClient.ADDON ? Integer.MIN_VALUE : -mc.textRenderer.getWidth(value.text)));
 
         // Check for latest commits
         MeteorExecutor.execute(() -> {
@@ -46,13 +41,10 @@ public class TitleScreenCredits {
                 if (credit.addon.getRepo() == null || credit.addon.getCommit() == null) continue;
 
                 GithubRepo repo = credit.addon.getRepo();
-                Response res = Http.get(String.format("https://api.github.com/repos/%s/branches/%s", repo.getOwnerName(), repo.branch())).sendJson(Response.class);
+                Response res = Http.get("https://api.github.com/repos/%s/branches/%s".formatted(repo.getOwnerName(), repo.branch())).sendJson(Response.class);
 
                 if (res != null && !credit.addon.getCommit().equals(res.commit.sha)) {
-                    synchronized (credit.sections) {
-                        credit.sections.add(1, new Section("*", RED));
-                        credit.calculateWidth();
-                    }
+                    credit.text.append(Text.literal("*").formatted(Formatting.RED));
                 }
             }
         });
@@ -61,18 +53,17 @@ public class TitleScreenCredits {
     private static void add(MeteorAddon addon) {
         Credit credit = new Credit(addon);
 
-        credit.sections.add(new Section(addon.name, addon.color.getPacked()));
-        credit.sections.add(new Section(" by ", GRAY));
+        credit.text.append(Text.literal(addon.name).styled(style -> style.withColor(addon.color.getPacked())));
+        credit.text.append(Text.literal(" by ").formatted(Formatting.GRAY));
 
         for (int i = 0; i < addon.authors.length; i++) {
             if (i > 0) {
-                credit.sections.add(new Section(i == addon.authors.length - 1 ? " & " : ", ", GRAY));
+                credit.text.append(Text.literal(i == addon.authors.length - 1 ? " & " : ", ").formatted(Formatting.GRAY));
             }
 
-            credit.sections.add(new Section(addon.authors[i], WHITE));
+            credit.text.append(Text.literal(addon.authors[i]).formatted(Formatting.WHITE));
         }
 
-        credit.calculateWidth();
         credits.add(credit);
     }
 
@@ -81,14 +72,9 @@ public class TitleScreenCredits {
 
         int y = 3;
         for (Credit credit : credits) {
-            int x = mc.currentScreen.width - 3 - credit.width;
+            int x = mc.currentScreen.width - 3 - mc.textRenderer.getWidth(credit.text);
 
-            synchronized (credit.sections) {
-                for (Section section : credit.sections) {
-                    context.drawTextWithShadow(mc.textRenderer, section.text, x, y, section.color);
-                    x += section.width;
-                }
-            }
+            context.drawTextWithShadow(mc.textRenderer, credit.text, x, y, -1);
 
             y += mc.textRenderer.fontHeight + 2;
         }
@@ -97,9 +83,9 @@ public class TitleScreenCredits {
     public static boolean onClicked(double mouseX, double mouseY) {
         int y = 3;
         for (Credit credit : credits) {
-            int x = mc.currentScreen.width - 3 - credit.width;
+            int x = mc.currentScreen.width - 3 - mc.textRenderer.getWidth(credit.text);
 
-            if (mouseX >= x && mouseX <= x + credit.width && mouseY >= y && mouseY <= y + mc.textRenderer.fontHeight + 2) {
+            if (mouseX >= x && mouseX <= x + mc.textRenderer.getWidth(credit.text) && mouseY >= y && mouseY <= y + mc.textRenderer.fontHeight + 2) {
                 if (credit.addon.getRepo() != null && credit.addon.getCommit() != null) {
                     mc.setScreen(new CommitsScreen(GuiThemes.get(), credit.addon));
                     return true;
@@ -114,27 +100,10 @@ public class TitleScreenCredits {
 
     private static class Credit {
         public final MeteorAddon addon;
-        public final List<Section> sections = new ArrayList<>();
-        public int width;
+        public final MutableText text = Text.empty();
 
         public Credit(MeteorAddon addon) {
             this.addon = addon;
-        }
-
-        public void calculateWidth() {
-            width = 0;
-            for (Section section : sections) width += section.width;
-        }
-    }
-
-    private static class Section {
-        public final String text;
-        public final int color, width;
-
-        public Section(String text, int color) {
-            this.text = text;
-            this.color = color;
-            this.width = mc.textRenderer.getWidth(text);
         }
     }
 
