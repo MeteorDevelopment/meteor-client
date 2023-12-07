@@ -432,6 +432,7 @@ public class Utils {
     }
 
     public static byte[] readBytes(InputStream in) {
+        byte[] result = new byte[0];
         try {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -440,14 +441,13 @@ public class Utils {
             while ((read = in.read(buffer)) > 0) out.write(buffer, 0, read);
 
             in.close();
-            byte[] result = out.toByteArray();
+            result = out.toByteArray();
             out.close();
-            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return new byte[0];
+        return result;
     }
 
     public static boolean canUpdate() {
