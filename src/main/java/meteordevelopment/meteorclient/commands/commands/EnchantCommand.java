@@ -80,6 +80,7 @@ public class EnchantCommand extends Command {
 
         builder.then(literal("remove").then(argument("enchantment", RegistryEntryArgumentType.registryEntry(REGISTRY_ACCESS, RegistryKeys.ENCHANTMENT)).executes(context -> {
             ItemStack itemStack = tryGetItemStack();
+            @SuppressWarnings("unchecked")
             RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
             Utils.removeEnchantment(itemStack, enchantment.value());
 
@@ -91,6 +92,7 @@ public class EnchantCommand extends Command {
     private void one(CommandContext<CommandSource> context, Function<Enchantment, Integer> level) throws CommandSyntaxException {
         ItemStack itemStack = tryGetItemStack();
 
+        @SuppressWarnings("unchecked")
         RegistryEntry.Reference<Enchantment> enchantment = context.getArgument("enchantment", RegistryEntry.Reference.class);
         Utils.addEnchantment(itemStack, enchantment.value(), level.apply(enchantment.value()));
 
