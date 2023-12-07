@@ -440,7 +440,9 @@ public class Utils {
             while ((read = in.read(buffer)) > 0) out.write(buffer, 0, read);
 
             in.close();
-            return out.toByteArray();
+            byte[] result = out.toByteArray();
+            out.close();
+            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }

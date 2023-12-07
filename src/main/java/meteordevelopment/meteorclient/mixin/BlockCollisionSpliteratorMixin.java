@@ -25,7 +25,8 @@ public class BlockCollisionSpliteratorMixin {
     private VoxelShape onComputeNextCollisionBox(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         VoxelShape shape = state.getCollisionShape(world, pos, context);
 
-        if (world != MinecraftClient.getInstance().world)
+        MinecraftClient instance = MinecraftClient.getInstance();
+        if (world != instance.world)
             return shape;
 
         CollisionShapeEvent event = MeteorClient.EVENT_BUS.post(CollisionShapeEvent.get(state, pos, shape));
