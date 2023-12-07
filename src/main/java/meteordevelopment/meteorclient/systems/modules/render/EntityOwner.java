@@ -110,7 +110,7 @@ public class EntityOwner extends Module {
     private String getOwnerName(UUID uuid) {
         // Check if the player is online
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
-        if (player != null) return player.getEntityName();
+        if (player != null) return player.getName().getString();
 
         // Check cache
         String name = uuidToName.get(uuid);
