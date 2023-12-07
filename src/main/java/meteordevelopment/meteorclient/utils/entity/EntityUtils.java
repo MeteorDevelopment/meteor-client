@@ -77,7 +77,9 @@ public class EntityUtils {
         for (int i = 0; i < 64; i++) {
             BlockState state = mc.world.getBlockState(blockPos);
 
-            if (state.blocksMovement()) break;
+            // the following is based on blockMovement(), which is deprecated because it uses the deprecated isSolid().
+            Block block = state.getBlock();
+            if (block != Blocks.COBWEB && block != Blocks.BAMBOO_SAPLING && state.isSolidBlock(mc.world, blockPos)) break;
 
             Fluid fluid = state.getFluidState().getFluid();
             if (fluid == Fluids.WATER || fluid == Fluids.FLOWING_WATER) {
