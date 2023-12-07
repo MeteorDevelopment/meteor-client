@@ -14,11 +14,7 @@ import meteordevelopment.meteorclient.gui.screens.CommitsScreen;
 import meteordevelopment.meteorclient.utils.network.Http;
 import meteordevelopment.meteorclient.utils.network.MeteorExecutor;
 import meteordevelopment.meteorclient.utils.render.color.Color;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.render.BufferBuilder;
-import net.minecraft.client.render.VertexConsumerProvider;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
