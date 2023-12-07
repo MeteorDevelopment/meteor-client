@@ -104,7 +104,7 @@ public class SwarmCommand extends Command {
             Swarm swarm = Modules.get().get(Swarm.class);
             if (swarm.isActive()) {
                 if (swarm.isHost()) {
-                    swarm.host.sendMessage(context.getInput() + " " + mc.player.getEntityName());
+                    swarm.host.sendMessage(context.getInput() + " " + mc.player.getName().getString());
                 }
                 else if (swarm.isWorker()) {
                     error("The follow host command must be used by the host.");
@@ -124,7 +124,7 @@ public class SwarmCommand extends Command {
                     swarm.host.sendMessage(context.getInput());
                 }
                 else if (swarm.isWorker() && playerEntity != null) {
-                    PathManagers.get().follow(entity -> entity.getEntityName().equalsIgnoreCase(playerEntity.getEntityName()));
+                    PathManagers.get().follow(entity -> entity.getName().getString().equalsIgnoreCase(playerEntity.getName().getString()));
                 }
             }
             else {
