@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.authlib.minecraft.UserApiService;
 import com.mojang.authlib.yggdrasil.ServicesKeyType;
