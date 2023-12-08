@@ -68,7 +68,11 @@ public abstract class Account<T extends Account<?>> implements ISerializable<T> 
         MinecraftClientAccessor mca = (MinecraftClientAccessor) mc;
         mca.setSession(session);
         UserApiService apiService;
-        apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
+        try {
+            apiService = mca.getAuthenticationService().createUserApiService(session.getAccessToken());
+        } catch (AuthenticationException e) {
+            apiService = UserApiService.OFFLINE;
+        }
         mca.setUserApiService(apiService);
         mca.setSocialInteractionsManager(new SocialInteractionsManager(mc, apiService));
         mca.setProfileKeys(ProfileKeys.create(apiService, session, mc.runDirectory.toPath()));

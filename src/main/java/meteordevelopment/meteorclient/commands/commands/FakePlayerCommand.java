@@ -50,7 +50,7 @@ public class FakePlayerCommand extends Command {
                     }
 
                     FakePlayerManager.remove(fp);
-                    info("Removed Fake Player %s.".formatted(fp.getName().getString()));
+                    info("Removed Fake Player %s.".formatted(fp.getEntityName()));
 
                     return SINGLE_SUCCESS;
                 })
@@ -67,7 +67,7 @@ public class FakePlayerCommand extends Command {
         builder.then(literal("list")
             .executes(context -> {
                 info("--- Fake Players ((highlight)%s(default)) ---", FakePlayerManager.count());
-                FakePlayerManager.forEach(fp -> ChatUtils.info("(highlight)%s".formatted(fp.getName().getString())));
+                FakePlayerManager.forEach(fp -> ChatUtils.info("(highlight)%s".formatted(fp.getEntityName())));
                 return SINGLE_SUCCESS;
             })
         );

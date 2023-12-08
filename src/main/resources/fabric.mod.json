@@ -19,6 +19,9 @@
   "icon": "assets/meteor-client/icon.png",
   "environment": "client",
   "entrypoints": {
+    "preLaunch": [
+      "com.llamalad7.mixinextras.MixinExtrasBootstrap::init"
+    ],
     "client": [
       "meteordevelopment.meteorclient.MeteorClient"
     ]
@@ -45,7 +48,7 @@
   },
   "depends": {
     "java": ">=17",
-    "minecraft": ["1.20.3", "1.20.4"],
+    "minecraft": "${minecraft_version}",
     "fabricloader": ">=${loader_version}"
   },
   "breaks": {

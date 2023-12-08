@@ -43,7 +43,7 @@ public class MessageAura extends Module {
         if (!(event.entity instanceof PlayerEntity) || event.entity.getUuid().equals(mc.player.getUuid())) return;
 
         if (!ignoreFriends.get() || (ignoreFriends.get() && !Friends.get().isFriend((PlayerEntity)event.entity))) {
-            ChatUtils.sendPlayerMsg("/msg " + event.entity.getName().getString() + " " + message.get());
+            ChatUtils.sendPlayerMsg("/msg " + event.entity.getEntityName() + " " + message.get());
         }
     }
 }

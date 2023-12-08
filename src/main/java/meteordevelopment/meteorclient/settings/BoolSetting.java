@@ -5,13 +5,14 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NbtCompound;
 
 import java.util.List;
 import java.util.function.Consumer;
 
 public class BoolSetting extends Setting<Boolean> {
-    private static final List<String> SUGGESTIONS = List.of("true", "false", "toggle");
+    private static final List<String> SUGGESTIONS = ImmutableList.of("true", "false", "toggle");
 
     private BoolSetting(String name, String description, Boolean defaultValue, Consumer<Boolean> onChanged, Consumer<Setting<Boolean>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);

@@ -21,7 +21,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class EasyMCAccount extends Account<EasyMCAccount> {
 
-    private static final Environment ENVIRONMENT = new Environment("https://sessionserver.easymc.io", "https://authserver.mojang.com", "EasyMC");
+    private static final Environment ENVIRONMENT = new Environment("https://authserver.mojang.com",  "https://sessionserver.easymc.io", "https://api.minecraftservices.com", "EasyMC");
     private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
 
     public EasyMCAccount(String token) {
