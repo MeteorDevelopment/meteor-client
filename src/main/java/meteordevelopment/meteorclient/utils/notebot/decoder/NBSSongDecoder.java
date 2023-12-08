@@ -91,7 +91,6 @@ public class NBSSongDecoder extends SongDecoder {
                 if (jumpLayers == 0) {
                     break;
                 }
-                layer += jumpLayers;
                 //System.out.println("Layer: " + layer);
                 byte instrument = dataInputStream.readByte();
 
