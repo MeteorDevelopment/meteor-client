@@ -152,7 +152,6 @@ public class Offhand extends Module {
         else if (ticks > delayTicks.get()) {
             boolean low = mc.player.getHealth() + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions(explosion.get(), falling.get()) <= minHealth.get();
             boolean ely = elytra.get() && mc.player.getEquippedStack(EquipmentSlot.CHEST).getItem() == Items.ELYTRA && mc.player.isFallFlying();
-            FindItemResult item = InvUtils.find(itemStack -> itemStack.getItem() == currentItem.item, 0, 35);
 
             // Calculates Damage from Falling, Explosions + Elyta
             locked = (low || ely);
