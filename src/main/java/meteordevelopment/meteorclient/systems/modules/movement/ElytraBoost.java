@@ -51,6 +51,7 @@ public class ElytraBoost extends Module {
         .build()
     );
 
+    @SuppressWarnings("unused")
     private final Setting<Keybind> keybind = sgGeneral.add(new KeybindSetting.Builder()
         .name("keybind")
         .description("The keybind to boost.")

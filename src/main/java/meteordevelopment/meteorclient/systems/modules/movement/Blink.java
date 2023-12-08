@@ -32,7 +32,8 @@ public class Blink extends Module {
         .defaultValue(true)
         .build()
     );
-
+    
+    @SuppressWarnings("unused")
     private final Setting<Keybind> cancelBlink = sgGeneral.add(new KeybindSetting.Builder()
         .name("cancel-blink")
         .description("Cancels sending packets and sends you back to your original position.")

@@ -38,6 +38,7 @@ public class CuboidMarker extends BaseMarker {
 
     // Render
 
+    @SuppressWarnings("unused")
     private final Setting<Mode> mode = sgRender.add(new EnumSetting.Builder<Mode>()
         .name("mode")
         .description("What mode to use for this marker.")
