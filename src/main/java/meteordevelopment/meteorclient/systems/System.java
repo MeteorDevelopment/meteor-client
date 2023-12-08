@@ -46,7 +46,7 @@ public abstract class System<T> implements ISerializable<T> {
 
         try {
             File tempFile = File.createTempFile(MeteorClient.MOD_ID, file.getName());
-            NbtIo.write(tag, tempFile.toPath());
+            NbtIo.write(tag, tempFile);
 
             if (folder != null) file = new File(folder, file.getName());
 
@@ -71,7 +71,7 @@ public abstract class System<T> implements ISerializable<T> {
 
             if (file.exists()) {
                 try {
-                    fromTag(NbtIo.read(file.toPath()));
+                    fromTag(NbtIo.read(file));
                 } catch (CrashException e) {
                     String backupName = FilenameUtils.removeExtension(file.getName()) + "-" + ZonedDateTime.now().format(DATE_TIME_FORMATTER) + ".backup.nbt";
                     File backup = new File(file.getParentFile(), backupName);

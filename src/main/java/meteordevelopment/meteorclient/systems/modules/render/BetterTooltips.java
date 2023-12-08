@@ -417,10 +417,10 @@ public class BetterTooltips extends Module {
     private MutableText getStatusText(StatusEffectInstance effect) {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1).getString()));
         }
         else {
-            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
+            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1).getString()));
         }
 
         if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
@@ -436,7 +436,7 @@ public class BetterTooltips extends Module {
         if (stack.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getString(0));
 
         try {
-            return Text.Serialization.fromLenientJson(pages.getString(0));
+            return Text.Serializer.fromLenientJson(pages.getString(0));
         } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }

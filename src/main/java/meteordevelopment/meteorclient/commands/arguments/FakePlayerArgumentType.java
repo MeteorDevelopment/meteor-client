@@ -38,7 +38,7 @@ public class FakePlayerArgumentType implements ArgumentType<String> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return suggestMatching(FakePlayerManager.stream().map(fakePlayerEntity -> fakePlayerEntity.getName().getString()), builder);
+        return suggestMatching(FakePlayerManager.stream().map(FakePlayerEntity::getEntityName), builder);
     }
 
     @Override

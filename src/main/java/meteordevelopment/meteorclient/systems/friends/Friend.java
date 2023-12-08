@@ -31,7 +31,7 @@ public class Friend implements ISerializable<Friend>, Comparable<Friend> {
     }
 
     public Friend(PlayerEntity player) {
-        this(player.getName().getString(), player.getUuid());
+        this(player.getEntityName(), player.getUuid());
     }
     public Friend(String name) {
         this(name, null);

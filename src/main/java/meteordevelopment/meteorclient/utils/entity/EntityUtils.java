@@ -139,7 +139,7 @@ public class EntityUtils {
 
     public static String getName(Entity entity) {
         if (entity == null) return null;
-        if (entity instanceof PlayerEntity) return entity.getName().getString();
+        if (entity instanceof PlayerEntity) return entity.getEntityName();
         return entity.getType().getName().getString();
     }
 

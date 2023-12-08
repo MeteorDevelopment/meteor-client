@@ -14,7 +14,6 @@ import me.jellysquid.mods.sodium.client.world.WorldSlice;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Xray;
 import meteordevelopment.meteorclient.systems.modules.world.Ambience;
-import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.caffeinemc.mods.sodium.api.util.ColorABGR;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.registry.tag.FluidTags;
@@ -32,8 +31,7 @@ import java.util.Arrays;
 
 @Mixin(value = FluidRenderer.class, remap = false)
 public class SodiumFluidRendererMixin {
-    @Final
-    @Shadow
+    @Final @Shadow
     private int[] quadColors;
 
     @Unique
@@ -55,8 +53,7 @@ public class SodiumFluidRendererMixin {
     private void onUpdateQuad(ModelQuadView quad, WorldSlice world, BlockPos pos, LightPipeline lighter, Direction dir, float brightness, ColorProvider<FluidState> colorProvider, FluidState fluidState, CallbackInfo info) {
         // Ambience
         if (ambience.isActive() && ambience.customLavaColor.get() && fluidState.isIn(FluidTags.LAVA)) {
-            Color c = ambience.lavaColor.get();
-            Arrays.fill(quadColors, ColorABGR.pack(c.r, c.g, c.b, c.a));
+            Arrays.fill(quadColors, ColorABGR.withAlpha(ambience.lavaColor.get().getPacked(), 255));
         }
     }
 }

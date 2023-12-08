@@ -23,7 +23,7 @@ public class FakePlayerManager {
 
     public static FakePlayerEntity get(String name) {
         for (FakePlayerEntity fp : ENTITIES) {
-            if (fp.getName().getString().equals(name)) return fp;
+            if (fp.getEntityName().equals(name)) return fp;
         }
 
         return null;
@@ -39,7 +39,7 @@ public class FakePlayerManager {
 
     public static void remove(FakePlayerEntity fp) {
         ENTITIES.removeIf(fp1 -> {
-            if (fp1.getName().getString().equals(fp.getName().getString())) {
+            if (fp1.getEntityName().equals(fp.getEntityName())) {
                 fp1.despawn();
                 return true;
             }

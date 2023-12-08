@@ -98,11 +98,11 @@ public class MiddleClickExtra extends Module {
 
             if (!Friends.get().isFriend(player)) {
                 Friends.get().add(new Friend(player));
-                info("Added %s to friends", player.getName().getString());
-                if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getName() + " I just friended you on Meteor.");
+                info("Added %s to friends", player.getEntityName());
+                if (message.get()) ChatUtils.sendPlayerMsg("/msg " + player.getEntityName() + " I just friended you on Meteor.");
             } else {
                 Friends.get().remove(Friends.get().get(player));
-                info("Removed %s from friends", player.getName().getString());
+                info("Removed %s from friends", player.getEntityName());
             }
 
             return;

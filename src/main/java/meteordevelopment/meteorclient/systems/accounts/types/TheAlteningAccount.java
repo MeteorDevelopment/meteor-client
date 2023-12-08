@@ -21,7 +21,7 @@ import java.util.Optional;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> {
-    private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "The Altening");
+    private static final Environment ENVIRONMENT = new Environment("http://authserver.thealtening.com", "http://sessionserver.thealtening.com", "https://api.minecraftservices.com", "The Altening");
     private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
 
     public TheAlteningAccount(String token) {
@@ -68,7 +68,7 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
     }
 
     private WaybackAuthLib getAuth() {
-        WaybackAuthLib auth = new WaybackAuthLib(ENVIRONMENT.servicesHost());
+        WaybackAuthLib auth = new WaybackAuthLib(ENVIRONMENT.accountsHost());
 
         auth.setUsername(name);
         auth.setPassword("Meteor on Crack!");
