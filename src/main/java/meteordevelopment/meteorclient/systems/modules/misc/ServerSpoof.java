@@ -100,12 +100,12 @@ public class ServerSpoof extends Module {
                 if (!(event.packet instanceof ResourcePackSendS2CPacket packet)) return;
                 event.cancel();
                 MutableText msg = Text.literal("This server has ");
-                msg.append(packet.isRequired() ? "a required " : "an optional ");
+                msg.append(packet.required() ? "a required " : "an optional ");
                 MutableText link = Text.literal("resource pack");
                 link.setStyle(link.getStyle()
                     .withColor(Formatting.BLUE)
                     .withUnderline(true)
-                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.getUrl()))
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, packet.url()))
                     .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to download")))
                 );
                 msg.append(link);

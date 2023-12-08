@@ -65,7 +65,7 @@ public class Friends extends System<Friends> implements Iterable<Friend> {
     }
 
     public Friend get(PlayerEntity player) {
-        return get(player.getEntityName());
+        return get(player.getName().getString());
     }
 
     public Friend get(PlayerListEntry player) {
