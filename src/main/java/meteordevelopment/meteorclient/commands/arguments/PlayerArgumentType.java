@@ -41,7 +41,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
         PlayerEntity playerEntity = null;
 
         for (PlayerEntity p : mc.world.getPlayers()) {
-            if (p.getEntityName().equalsIgnoreCase(argument)) {
+            if (p.getName().getString().equalsIgnoreCase(argument)) {
                 playerEntity = p;
                 break;
             }
@@ -53,7 +53,7 @@ public class PlayerArgumentType implements ArgumentType<PlayerEntity> {
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> context, SuggestionsBuilder builder) {
-        return CommandSource.suggestMatching(mc.world.getPlayers().stream().map(PlayerEntity::getEntityName), builder);
+        return CommandSource.suggestMatching(mc.world.getPlayers().stream().map(abstractClientPlayerEntity -> abstractClientPlayerEntity.getName().getString()), builder);
     }
 
     @Override
