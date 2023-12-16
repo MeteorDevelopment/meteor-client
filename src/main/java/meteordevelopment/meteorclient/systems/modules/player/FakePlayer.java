@@ -42,6 +42,14 @@ public class FakePlayer extends Module {
         .build()
     );
 
+    public final Setting<Boolean> allowDamage = sgGeneral.add(new BoolSetting.Builder()
+        .name("Allow Damage")
+        .description("Allows FakePlayer taking Damage and Popping Totems")
+        .defaultValue(true)
+        .build()
+    );
+
+
     public FakePlayer() {
         super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages. No need to be active.");
     }
@@ -68,7 +76,7 @@ public class FakePlayer extends Module {
 
         WButton spawn = table.add(theme.button("Spawn")).expandCellX().right().widget();
         spawn.action = () -> {
-            FakePlayerManager.add(name.get(), health.get(), copyInv.get());
+            FakePlayerManager.add(name.get(), health.get(), copyInv.get(), allowDamage.get());
             table.clear();
             fillTable(theme, table);
         };
