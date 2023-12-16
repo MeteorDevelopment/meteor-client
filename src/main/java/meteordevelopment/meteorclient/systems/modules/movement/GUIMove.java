@@ -7,6 +7,7 @@ package meteordevelopment.meteorclient.systems.modules.movement;
 
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
+import meteordevelopment.meteorclient.events.render.Render3DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.WidgetScreen;
 import meteordevelopment.meteorclient.mixin.CreativeInventoryScreenAccessor;
@@ -87,6 +88,8 @@ public class GUIMove extends Module {
         .build()
     );
 
+    long lastRotateTime = System.currentTimeMillis();
+
     public GUIMove() {
         super(Categories.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
@@ -118,16 +121,30 @@ public class GUIMove extends Module {
         if (sneak.get()) set(mc.options.sneakKey, Input.isPressed(mc.options.sneakKey));
         if (sprint.get()) set(mc.options.sprintKey, Input.isPressed(mc.options.sprintKey));
 
+    }
+
+    @EventHandler
+    private void onRender3D(Render3DEvent event) {
+        if (skip()) return;
+        if (screens.get() == Screens.GUI && !(mc.currentScreen instanceof WidgetScreen)) return;
+        if (screens.get() == Screens.Inventory && mc.currentScreen instanceof WidgetScreen) return;
+
+        // Intervals between calls of Render3DEvent are not constant, so it is necessary to calculate the time difference between the last tick and the current tick
+        long time = System.currentTimeMillis();
+        long timeDelta = time - lastRotateTime;
+        lastRotateTime = time;
+
+        float rotationDelta = Math.min((float) (rotateSpeed.get() * timeDelta / 50f), 100);
+
         if (arrowsRotate.get()) {
             float yaw = mc.player.getYaw();
             float pitch = mc.player.getPitch();
 
-            for (int i = 0; i < (rotateSpeed.get() * 2); i++) {
-                if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= 0.5;
-                if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += 0.5;
-                if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= 0.5;
-                if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += 0.5;
-            }
+            if (Input.isKeyPressed(GLFW_KEY_LEFT)) yaw -= rotationDelta;
+            if (Input.isKeyPressed(GLFW_KEY_RIGHT)) yaw += rotationDelta;
+            if (Input.isKeyPressed(GLFW_KEY_UP)) pitch -= rotationDelta;
+            if (Input.isKeyPressed(GLFW_KEY_DOWN)) pitch += rotationDelta;
+
 
             pitch = MathHelper.clamp(pitch, -90, 90);
 
