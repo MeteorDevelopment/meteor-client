@@ -43,8 +43,8 @@ public class FakePlayer extends Module {
     );
 
     public final Setting<Boolean> allowDamage = sgGeneral.add(new BoolSetting.Builder()
-        .name("Allow Damage")
-        .description("Allows FakePlayer taking Damage and Popping Totems")
+        .name("allow-damage")
+        .description("Allows the fake player spawned to take damage and pop totems")
         .defaultValue(true)
         .build()
     );
