@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -15,6 +16,10 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerManager;
+import meteordevelopment.meteorclient.utils.player.PlayerPosition;
+import meteordevelopment.orbit.EventHandler;
+
+import java.util.ArrayList;
 
 public class FakePlayer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -49,9 +54,36 @@ public class FakePlayer extends Module {
         .build()
     );
 
+    public final Setting<Boolean> loop = sgGeneral.add(new BoolSetting.Builder()
+        .name("loop-recording")
+        .description("Automatically replays the current recording everytime it ends")
+        .defaultValue(true)
+        .build()
+    );
+
+    public boolean recording = false;
+    public boolean playing = false;
+
+    public ArrayList<PlayerPosition> playerPositionsList = new ArrayList<>();
+
 
     public FakePlayer() {
         super(Categories.Player, "fake-player", "Spawns a client-side fake player for testing usages. No need to be active.");
+    }
+
+    @EventHandler
+    public void onTick(TickEvent.Post event) {
+        if (recording) {
+            playerPositionsList.add(new PlayerPosition(mc.player.getPos(), mc.player.getYaw(), mc.player.getPitch()));
+        } if (playing) {
+            if (!playerPositionsList.isEmpty()) {
+                if (loop.get()) playerPositionsList.add(playerPositionsList.get(0));
+                PlayerPosition playerPosition = playerPositionsList.remove(0);
+                FakePlayerManager.forEach(entity -> {entity.updateTrackedPositionAndAngles(playerPosition.pos().x, playerPosition.pos().y, playerPosition.pos().z, playerPosition.yaw(), playerPosition.pitch(), 3);
+                    entity.updateTrackedHeadRotation(playerPosition.yaw(), 3);
+                });
+            } else playing = false;
+        }
     }
 
     @Override
@@ -76,9 +108,22 @@ public class FakePlayer extends Module {
 
         WButton spawn = table.add(theme.button("Spawn")).expandCellX().right().widget();
         spawn.action = () -> {
+            if (!this.isActive()) return;
             FakePlayerManager.add(name.get(), health.get(), copyInv.get(), allowDamage.get());
             table.clear();
             fillTable(theme, table);
+        };
+
+        WButton record = table.add(theme.button("Record")).right().widget();
+        record.action = () -> {
+            if (!recording) {
+                playerPositionsList.clear();
+            }
+            recording = !recording;
+        };
+        WButton play = table.add(theme.button("Play")).right().widget();
+        play.action = () -> {
+            playing = !playing;
         };
 
         WButton clear = table.add(theme.button("Clear All")).right().widget();
