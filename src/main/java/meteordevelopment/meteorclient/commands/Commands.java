@@ -29,6 +29,7 @@ public class Commands {
         add(new VClipCommand());
         add(new HClipCommand());
         add(new DismountCommand());
+        add(new DisconnectCommand());
         add(new DamageCommand());
         add(new DropCommand());
         add(new EnchantCommand());
