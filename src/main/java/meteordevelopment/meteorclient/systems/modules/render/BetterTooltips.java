@@ -229,7 +229,7 @@ public class BetterTooltips extends Module {
                 NbtCompound tag = event.itemStack.getNbt();
 
                 if (tag != null) {
-                    NbtList effects = tag.getList("Effects", 10);
+                    NbtList effects = tag.getList("effects", 10);
 
                     if (effects != null) {
                         for (int i = 0; i < effects.size(); i++) {
