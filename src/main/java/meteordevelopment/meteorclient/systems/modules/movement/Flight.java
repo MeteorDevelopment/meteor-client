@@ -146,8 +146,6 @@ public class Flight extends Module {
 
         switch (mode.get()) {
             case Velocity -> {
-                // TODO: deal with underwater movement, find a way to "spoof" not being in water
-
                 mc.player.getAbilities().flying = false;
                 mc.player.setVelocity(0, 0, 0);
                 Vec3d initialVelocity = mc.player.getVelocity();
