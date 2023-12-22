@@ -79,8 +79,8 @@ public class FakePlayer extends Module {
             if (!playerPositionsList.isEmpty()) {
                 if (loop.get()) playerPositionsList.add(playerPositionsList.get(0));
                 PlayerPosition playerPosition = playerPositionsList.remove(0);
-                FakePlayerManager.forEach(entity -> {entity.updateTrackedPositionAndAngles(playerPosition.pos().x, playerPosition.pos().y, playerPosition.pos().z, playerPosition.yaw(), playerPosition.pitch(), 3);
-                    entity.updateTrackedHeadRotation(playerPosition.yaw(), 3);
+                FakePlayerManager.forEach(entity -> {entity.updateTrackedPositionAndAngles(playerPosition.pos().x, playerPosition.pos().y, playerPosition.pos().z, playerPosition.yaw(), playerPosition.pitch(),1);
+                    entity.updateTrackedHeadRotation(playerPosition.yaw(), 2);
                 });
             } else playing = false;
         }
@@ -118,12 +118,23 @@ public class FakePlayer extends Module {
         record.action = () -> {
             if (!recording) {
                 playerPositionsList.clear();
-            }
+                this.info("Recording started.");
+            } else this.info("Recording stopped.");
             recording = !recording;
         };
         WButton play = table.add(theme.button("Play")).right().widget();
         play.action = () -> {
+            if (!playing) {
+                if (playerPositionsList.isEmpty()) {
+                    this.info("Cannot play an empty recording.");
+                    return;
+                } else this.info("Recording now playing.");
+            } else this.info("Recording stopped playing.");
             playing = !playing;
+            if (recording && playing) {
+                playing = false;
+                this.info("Cannot play while recording.");
+            }
         };
 
         WButton clear = table.add(theme.button("Clear All")).right().widget();

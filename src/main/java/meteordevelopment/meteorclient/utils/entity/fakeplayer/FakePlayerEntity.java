@@ -100,6 +100,7 @@ public class FakePlayerEntity extends OtherClientPlayerEntity {
         // Gets Sword Damage
         if ((mc.options.attackKey.isPressed() && mc.targetedEntity == this && mc.player.handSwinging)) {
             if (ticks < 10) return;
+            if (!allowDamage) return;
 
             if (canCrit()) {
                 mc.particleManager.addEmitter(this, ParticleTypes.CRIT);
