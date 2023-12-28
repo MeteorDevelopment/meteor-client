@@ -338,8 +338,7 @@ public class GL {
             capStateField.setAccessible(true);
             return (ICapabilityTracker) capStateField.get(state);
         } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException("Could not find GL state tracker '" + fieldName + "'", e);
         }
     }
 }
