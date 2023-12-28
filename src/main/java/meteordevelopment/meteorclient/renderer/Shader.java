@@ -61,8 +61,7 @@ public class Shader {
         try {
             return IOUtils.toString(mc.getResourceManager().getResource(new MeteorIdentifier("shaders/" + path)).get().getInputStream(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            e.printStackTrace();
-            return "";
+            throw new IllegalStateException("Could not read shader '" + path + "'", e);
         }
     }
 
