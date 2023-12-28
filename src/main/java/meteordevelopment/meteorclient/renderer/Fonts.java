@@ -56,7 +56,10 @@ public class Fonts {
     }
 
     public static void load(FontFace fontFace) {
-        if (RENDERER != null && RENDERER.fontFace.equals(fontFace)) return;
+        if (RENDERER != null) {
+            if (RENDERER.fontFace.equals(fontFace)) return;
+            else RENDERER.destroy();
+        }
 
         try {
             RENDERER = new CustomTextRenderer(fontFace);
