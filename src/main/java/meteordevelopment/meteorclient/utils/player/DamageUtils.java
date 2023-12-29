@@ -122,48 +122,20 @@ public class DamageUtils {
         if (entity instanceof PlayerEntity player && player.getAbilities().flying) return 0f;
         if (StatusEffectManager.hasStatusEffect(entity, StatusEffects.SLOW_FALLING) || StatusEffectManager.hasStatusEffect(entity, StatusEffects.LEVITATION)) return 0f;
 
-        StatusEffectInstance jumpBoostInstance = StatusEffectManager.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
-
+        // Fast path - Above the surface
         int surface = mc.world.getWorldChunk(entity.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(entity.getBlockX(), entity.getBlockZ());
-        if (entity.getBlockY() >= surface) {
-            int fallHeight = (int) (entity.getPos().y - surface + entity.fallDistance - 3d);
-            if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
+        if (entity.getBlockY() >= surface) return fallDamageReductions(entity, surface);
 
-            return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
-        }
+        // Under the surface
+        BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(entity.getPos(), new Vec3d(entity.getX(), mc.world.getBottomY(), entity.getZ()), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, entity));
+        if (raycastResult.getType() == HitResult.Type.MISS) return 0;
 
-        float totalHealth = entity.getHealth() + entity.getAbsorptionAmount();
-        float survivableHeight = totalHealth;
+        return fallDamageReductions(entity, raycastResult.getBlockPos().getY());
+    }
 
-        // Reverse protection reduction
-        int protection = Math.min(EnchantmentHelper.getProtectionAmount(entity.getArmorItems(), mc.world.getDamageSources().fall()), 20);
-        survivableHeight /= 1f - protection * 0.04f;
-
-        // Reverse resistance reduction
-        StatusEffectInstance resistance = StatusEffectManager.getStatusEffect(entity, StatusEffects.RESISTANCE);
-        if (resistance != null) {
-            int lvl = resistance.getAmplifier() + 1;
-            survivableHeight /= 1f - lvl * 0.2f;
-        }
-
-        // Naive reverse armor reduction
-        float armor = getArmor(entity);
-        survivableHeight /= 1f - armor * 0.008f;
-
-        // Naive reverse toughness reduction
-        survivableHeight += (float) EntityAttributeManager.getAttributeValue(entity, EntityAttributes.GENERIC_ARMOR_TOUGHNESS);
-
-        if (jumpBoostInstance != null) survivableHeight += jumpBoostInstance.getAmplifier() + 1;
-
-        survivableHeight += 3f;
-
-        int raycastLength = MathHelper.ceil(survivableHeight - entity.fallDistance);
-
-        // Yes all of this is to calculate the maximum raycast length
-        BlockHitResult raycastResult = mc.world.raycast(new RaycastContext(entity.getPos(), entity.getPos().subtract(0, raycastLength, 0), RaycastContext.ShapeType.COLLIDER, RaycastContext.FluidHandling.WATER, entity));
-        if (raycastResult.getType() == HitResult.Type.MISS) return totalHealth;
-
-        float fallHeight = (float) (entity.getPos().y - raycastResult.getBlockPos().getY() + entity.fallDistance - 3d);
+    private static float fallDamageReductions(LivingEntity entity, int surface) {
+        int fallHeight = (int) (entity.getY() - surface + entity.fallDistance - 3d);
+        @Nullable StatusEffectInstance jumpBoostInstance = StatusEffectManager.getStatusEffect(entity, StatusEffects.JUMP_BOOST);
         if (jumpBoostInstance != null) fallHeight -= jumpBoostInstance.getAmplifier() + 1;
 
         return calculateReductions(fallHeight, entity, mc.world.getDamageSources().fall());
