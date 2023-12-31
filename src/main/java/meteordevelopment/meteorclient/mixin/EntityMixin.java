@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.events.entity.player.JumpVelocityMultiplie
 import meteordevelopment.meteorclient.events.entity.player.PlayerMoveEvent;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.combat.Hitboxes;
+import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoFall;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
 import meteordevelopment.meteorclient.systems.modules.movement.Velocity;
@@ -58,17 +59,20 @@ public abstract class EntityMixin {
 
     @Inject(method = "isTouchingWater", at = @At(value = "HEAD"), cancellable = true)
     private void isTouchingWater(CallbackInfoReturnable<Boolean> info) {
+        if ((Object) this == mc.player && Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
         if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
     }
 
     @Inject(method = "isInLava", at = @At(value = "HEAD"), cancellable = true)
     private void isInLava(CallbackInfoReturnable<Boolean> info) {
+        if ((Object) this == mc.player && Modules.get().get(Flight.class).isActive()) info.setReturnValue(false);
         if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) info.setReturnValue(false);
     }
 
     @ModifyExpressionValue(method = "updateSwimming", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSubmergedInWater()Z"))
     private boolean isSubmergedInWater(boolean submerged) {
         if ((Object) this == mc.player && Modules.get().get(NoSlow.class).fluidDrag()) return false;
+        if ((Object) this == mc.player && Modules.get().get(Flight.class).isActive()) return false;
         return submerged;
     }
 

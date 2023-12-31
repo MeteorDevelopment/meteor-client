@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import net.minecraft.client.util.math.MatrixStack;
 import org.lwjgl.BufferUtils;
 
-import java.nio.Buffer;
 import java.nio.ByteBuffer;
 
 public class CustomTextRenderer implements TextRenderer {
@@ -33,11 +32,10 @@ public class CustomTextRenderer implements TextRenderer {
         this.fontFace = fontFace;
 
         byte[] bytes = Utils.readBytes(fontFace.toStream());
-        ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes);
+        ByteBuffer buffer = BufferUtils.createByteBuffer(bytes.length).put(bytes).flip();
 
         fonts = new Font[5];
         for (int i = 0; i < fonts.length; i++) {
-            ((Buffer) buffer).flip();
             fonts[i] = new Font(buffer, (int) Math.round(18 * ((i * 0.5) + 1)));
         }
     }
@@ -131,5 +129,9 @@ public class CustomTextRenderer implements TextRenderer {
 
         building = false;
         scale = 1;
+    }
+
+    public void destroy() {
+        mesh.destroy();
     }
 }
