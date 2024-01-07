@@ -144,15 +144,20 @@ public class Freecam extends Module {
         Utils.set(pos, mc.gameRenderer.getCamera().getPos());
         Utils.set(prevPos, mc.gameRenderer.getCamera().getPos());
 
+        if (mc.options.getPerspective() == Perspective.THIRD_PERSON_FRONT) {
+            yaw += 180;
+            pitch *= -1;
+        }
+
         prevYaw = yaw;
         prevPitch = pitch;
 
-        forward = false;
-        backward = false;
-        right = false;
-        left = false;
-        up = false;
-        down = false;
+        forward = mc.options.forwardKey.isPressed();
+        backward = mc.options.backKey.isPressed();
+        right = mc.options.rightKey.isPressed();
+        left = mc.options.leftKey.isPressed();
+        up = mc.options.jumpKey.isPressed();
+        down = mc.options.sneakKey.isPressed();
 
         unpress();
         if (reloadChunks.get()) mc.worldRenderer.reload();
