@@ -28,6 +28,7 @@ import net.minecraft.fluid.Fluids;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
+import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.MathHelper;
@@ -188,7 +189,14 @@ public class Jesus extends Module {
         }
 
         if (mc.player.isTouchingWater() && !waterShouldBeSolid()) return;
+        if (mc.player.isInSwimmingPose()) return;
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
+
+        // Move up in bubble columns
+        if (isTouchingBubbleColumn()) {
+            if (mc.options.jumpKey.isPressed() && mc.player.getVelocity().getY() < 0.11) ((IVec3d) mc.player.getVelocity()).setY(0.11);
+            return;
+        }
 
         // Move up
         if (mc.player.isTouchingWater() || mc.player.isInLava()) {
@@ -197,15 +205,24 @@ public class Jesus extends Module {
             return;
         }
 
+        BlockState blockBelowState = mc.world.getBlockState(mc.player.getBlockPos().down());
+        boolean waterLogger = false;
+        try {
+            waterLogger = blockBelowState.get(Properties.WATERLOGGED);
+        } catch (Exception ignored) {}
+
+
         // Simulate jumping out of water
         if (tickTimer == 0) ((IVec3d) mc.player.getVelocity()).setY(0.30);
-        else if (tickTimer == 1) ((IVec3d) mc.player.getVelocity()).setY(0);
+        else if (tickTimer == 1 && (blockBelowState == Blocks.WATER.getDefaultState() || blockBelowState == Blocks.LAVA.getDefaultState() || waterLogger))
+            ((IVec3d) mc.player.getVelocity()).setY(0);
 
         tickTimer++;
     }
 
     @EventHandler
     private void onCanWalkOnFluid(CanWalkOnFluidEvent event) {
+        if (mc.player != null && mc.player.isInSwimmingPose()) return;
         if ((event.fluidState.getFluid() == Fluids.WATER || event.fluidState.getFluid() == Fluids.FLOWING_WATER) && waterShouldBeSolid()) {
             event.walkOnFluid = true;
         }
@@ -218,9 +235,9 @@ public class Jesus extends Module {
     private void onFluidCollisionShape(CollisionShapeEvent event) {
         if (event.state.getFluidState().isEmpty()) return;
 
-        if ((event.state.getBlock() == Blocks.WATER | event.state.getFluidState().getFluid() == Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
+        if ((event.state.getBlock() == Blocks.WATER | event.state.getFluidState().getFluid() == Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid() && event.pos.getY() <= mc.player.getY() - 1) {
             event.shape = VoxelShapes.fullCube();
-        } else if (event.state.getBlock() == Blocks.LAVA && !mc.player.isInLava() && lavaShouldBeSolid()) {
+        } else if (event.state.getBlock() == Blocks.LAVA && !mc.player.isInLava() && lavaShouldBeSolid() && (!lavaIsSafe() || event.pos.getY() <= mc.player.getY() - 1)) {
             event.shape = VoxelShapes.fullCube();
         }
     }
@@ -324,6 +341,31 @@ public class Jesus extends Module {
         }
 
         return foundLiquid && !foundSolid;
+    }
+
+
+    private boolean isTouchingBubbleColumn() {
+        // Get the bounding box of the player, it's necessary to slightly to avoid false positives
+        Box box = mc.player.getBoundingBox().contract(0.001);
+
+        double xStep = (box.maxX - box.minX) / 2;
+        double yStep = (box.maxY - box.minY) / 2;
+        double zStep = (box.maxZ - box.minZ) / 2;
+
+        // Scans all corners and in mid-edges positions and checks whether the block is a bubble column or not
+        for (int x = 0; x < 3; x++) {
+            for (int y = 0; y < 3; y++) {
+                for (int z = 0; z < 3; z++) {
+                    BlockPos blockPos = new BlockPos((int) Math.floor(box.minX + xStep * x), (int) Math.floor(box.minY + yStep * y), (int) Math.floor(box.minZ + zStep * z));
+                    BlockState blockState = mc.world.getBlockState(blockPos);
+                    if (blockState.getBlock() == Blocks.BUBBLE_COLUMN) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     public enum Mode {
