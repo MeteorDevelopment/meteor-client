@@ -150,6 +150,8 @@ public class Jesus extends Module {
     private boolean prePathManagerWalkOnWater;
     private boolean prePathManagerWalkOnLava;
 
+    public boolean isInBubbleColumn = false;
+
     public Jesus() {
         super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.");
     }
@@ -171,6 +173,9 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        boolean bubbleColumn = isInBubbleColumn;
+        isInBubbleColumn = false;
+
         if ((waterMode.get() == Mode.Bob && mc.player.isTouchingWater()) || (lavaMode.get() == Mode.Bob && mc.player.isInLava())) {
             double fluidHeight;
             if (mc.player.isInLava()) fluidHeight = mc.player.getFluidHeight(FluidTags.LAVA);
@@ -193,7 +198,7 @@ public class Jesus extends Module {
         if (mc.player.isInLava() && !lavaShouldBeSolid()) return;
 
         // Move up in bubble columns
-        if (isTouchingBubbleColumn()) {
+        if (bubbleColumn) {
             if (mc.options.jumpKey.isPressed() && mc.player.getVelocity().getY() < 0.11) ((IVec3d) mc.player.getVelocity()).setY(0.11);
             return;
         }
@@ -341,31 +346,6 @@ public class Jesus extends Module {
         }
 
         return foundLiquid && !foundSolid;
-    }
-
-
-    private boolean isTouchingBubbleColumn() {
-        // Get the bounding box of the player, it's necessary to slightly to avoid false positives
-        Box box = mc.player.getBoundingBox().contract(0.001);
-
-        double xStep = (box.maxX - box.minX) / 2;
-        double yStep = (box.maxY - box.minY) / 2;
-        double zStep = (box.maxZ - box.minZ) / 2;
-
-        // Scans all corners and in mid-edges positions and checks whether the block is a bubble column or not
-        for (int x = 0; x < 3; x++) {
-            for (int y = 0; y < 3; y++) {
-                for (int z = 0; z < 3; z++) {
-                    BlockPos blockPos = new BlockPos((int) Math.floor(box.minX + xStep * x), (int) Math.floor(box.minY + yStep * y), (int) Math.floor(box.minZ + zStep * z));
-                    BlockState blockState = mc.world.getBlockState(blockPos);
-                    if (blockState.getBlock() == Blocks.BUBBLE_COLUMN) {
-                        return true;
-                    }
-                }
-            }
-        }
-
-        return false;
     }
 
     public enum Mode {
