@@ -50,6 +50,14 @@ public class Flight extends Module {
         .build()
     );
 
+    private final Setting<Boolean> noSneak = sgGeneral.add(new BoolSetting.Builder()
+        .name("no-sneak")
+        .description("Prevents you from sneaking while flying.")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Velocity)
+        .build()
+    );
+
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
         .description("The mode for anti kick.")
@@ -148,11 +156,15 @@ public class Flight extends Module {
             case Velocity -> {
                 mc.player.getAbilities().flying = false;
                 mc.player.setVelocity(0, 0, 0);
-                Vec3d initialVelocity = mc.player.getVelocity();
+                Vec3d playerVelocity = mc.player.getVelocity();
                 if (mc.options.jumpKey.isPressed())
-                    mc.player.setVelocity(initialVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+                    playerVelocity = playerVelocity.add(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
                 if (mc.options.sneakKey.isPressed())
-                    mc.player.setVelocity(initialVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0));
+                    playerVelocity = playerVelocity.subtract(0, speed.get() * (verticalSpeedMatch.get() ? 10f : 5f), 0);
+                mc.player.setVelocity(playerVelocity);
+                if (noSneak.get()) {
+                    mc.player.setOnGround(false);
+                }
             }
             case Abilities -> {
                 if (mc.player.isSpectator()) return;
@@ -236,6 +248,10 @@ public class Flight extends Module {
 
         if (!isActive() || mode.get() != Mode.Velocity) return -1;
         return speed.get().floatValue() * (mc.player.isSprinting() ? 15f : 10f);
+    }
+
+    public boolean noSneak() {
+        return isActive() && mode.get() == Mode.Velocity && noSneak.get();
     }
 
     public enum Mode {
