@@ -22,7 +22,6 @@ import net.minecraft.block.FallingBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
@@ -159,8 +158,6 @@ public class Scaffold extends Module {
     );
 
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
-    private final BlockPos.Mutable prevBp = new BlockPos.Mutable();
-
 
     public Scaffold() {
         super(Categories.Movement, "scaffold", "Automatically places blocks under you.");
@@ -181,45 +178,32 @@ public class Scaffold extends Module {
         if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed() && mc.player.getY() + vec.y > -1) {
             bp.set(bp.getX(), bp.getY() - 1, bp.getZ());
         }
+        BlockPos targetBlock = bp.toImmutable();
 
-        if (!airPlace.get() && BlockUtils.getPlaceSide(bp) == null) {
+        if (!airPlace.get() && (BlockUtils.getPlaceSide(bp) == null)) {
             Vec3d pos = mc.player.getPos();
             pos = pos.add(0, -0.98f, 0);
             pos.add(mc.player.getVelocity());
 
-            if (!PlayerUtils.isWithin(prevBp, placeRange.get())) {
-                List<BlockPos> blockPosArray = new ArrayList<>();
-
-                for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
-                    for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
-                        for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
-                            bp.set(x, y, z);
-                            if (!mc.world.getBlockState(bp).isAir()) blockPosArray.add(new BlockPos(bp));
-                        }
+            List<BlockPos> blockPosArray = new ArrayList<>();
+            for (int x = (int) (mc.player.getX() - placeRange.get()); x < mc.player.getX() + placeRange.get(); x++) {
+                for (int z = (int) (mc.player.getZ() - placeRange.get()); z < mc.player.getZ() + placeRange.get(); z++) {
+                    for (int y = (int) Math.max(mc.world.getBottomY(), mc.player.getY() - placeRange.get()); y < Math.min(mc.world.getTopY(), mc.player.getY() + placeRange.get()); y++) {
+                        bp.set(x, y, z);
+                        if (BlockUtils.getPlaceSide(bp) == null) continue;
+                        if (!BlockUtils.canPlace(bp)) continue;
+                        if (mc.player.getEyePos().squaredDistanceTo(Vec3d.ofCenter(bp.offset(BlockUtils.getClosestPlaceSide(bp)))) > 36) continue;
+                        blockPosArray.add(new BlockPos(bp));
                     }
                 }
-                if (blockPosArray.size() == 0) {
-                    return;
-                }
-
-                blockPosArray.sort(Comparator.comparingDouble(PlayerUtils::squaredDistanceTo));
-
-                prevBp.set(blockPosArray.get(0));
+            }
+            if (blockPosArray.size() == 0) {
+                return;
             }
 
-            Vec3d vecPrevBP = new Vec3d((double) prevBp.getX() + 0.5f,
-                (double) prevBp.getY() + 0.5f,
-                (double) prevBp.getZ() + 0.5f);
+            blockPosArray.sort(Comparator.comparingDouble((blockPos) -> blockPos.getSquaredDistance(targetBlock)));
 
-            Vec3d sub = pos.subtract(vecPrevBP);
-            Direction facing;
-            if (sub.getY() < -0.5f) {
-                facing = Direction.DOWN;
-            } else if (sub.getY() > 0.5f) {
-                facing = Direction.UP;
-            } else facing = Direction.getFacing(sub.getX(), 0, sub.getZ());
-
-            bp.set(prevBp.offset(facing));
+            bp.set(blockPosArray.get(0));
         }
 
         fastTower(false, null);
@@ -251,9 +235,6 @@ public class Scaffold extends Module {
             }
         } else {
             if (place(bp)) fastTower(true, bp);
-            if (!mc.world.getBlockState(bp).isAir()) {
-                prevBp.set(bp);
-            }
         }
     }
 
