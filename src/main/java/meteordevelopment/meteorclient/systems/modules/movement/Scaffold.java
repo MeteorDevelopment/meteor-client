@@ -161,29 +161,28 @@ public class Scaffold extends Module {
     private final BlockPos.Mutable bp = new BlockPos.Mutable();
     private final BlockPos.Mutable prevBp = new BlockPos.Mutable();
 
-    private boolean lastWasSneaking;
-    private double lastSneakingY;
 
     public Scaffold() {
         super(Categories.Movement, "scaffold", "Automatically places blocks under you.");
     }
 
-    @Override
-    public void onActivate() {
-        lastWasSneaking = mc.options.sneakKey.isPressed();
-        if (lastWasSneaking) lastSneakingY = mc.player.getY();
-    }
 
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (onlyOnClick.get() && !mc.options.useKey.isPressed()) return;
 
+        Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.75, 0);
         if (airPlace.get()) {
-            Vec3d vec = mc.player.getPos().add(mc.player.getVelocity()).add(0, -0.5f, 0);
             bp.set(vec.getX(), vec.getY(), vec.getZ());
-        } else if (BlockUtils.getPlaceSide(mc.player.getBlockPos().down()) != null) {
-            bp.set(mc.player.getBlockPos().down());
         } else {
+            Vec3d pos = mc.player.getPos();
+            bp.set(pos.x, vec.y, pos.z);
+        }
+        if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed() && mc.player.getY() + vec.y > -1) {
+            bp.set(bp.getX(), bp.getY() - 1, bp.getZ());
+        }
+
+        if (!airPlace.get() && BlockUtils.getPlaceSide(bp) == null) {
             Vec3d pos = mc.player.getPos();
             pos = pos.add(0, -0.98f, 0);
             pos.add(mc.player.getVelocity());
@@ -223,24 +222,16 @@ public class Scaffold extends Module {
             bp.set(prevBp.offset(facing));
         }
 
-        // Move down if shifting
-        if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed()) {
-            if (lastSneakingY - mc.player.getY() < 0.1) {
-                lastWasSneaking = false;
-                return;
-            }
-        } else {
-            lastWasSneaking = false;
-        }
-        if (!lastWasSneaking) lastSneakingY = mc.player.getY();
-
         fastTower(false, null);
 
         if (airPlace.get()) {
             List<BlockPos> blocks = new ArrayList<>();
-            for (int x = (int) (mc.player.getX() - radius.get()); x < mc.player.getX() + radius.get(); x++) {
-                for (int z = (int) (mc.player.getZ() - radius.get()); z < mc.player.getZ() + radius.get(); z++) {
-                    blocks.add(BlockPos.ofFloored(x, mc.player.getY() - 0.5, z));
+            for (int x = (int) (bp.getX() - radius.get()); x <= bp.getX() + radius.get(); x++) {
+                for (int z = (int) (bp.getZ() - radius.get()); z <= bp.getZ() + radius.get(); z++) {
+                    BlockPos blockPos = BlockPos.ofFloored(x, bp.getY(), z);
+                    if (mc.player.getPos().distanceTo(Vec3d.ofCenter(blockPos)) <= radius.get() || (x == bp.getX() && z == bp.getZ())) {
+                        blocks.add(blockPos);
+                    }
                 }
             }
 
