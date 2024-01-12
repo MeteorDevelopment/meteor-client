@@ -97,6 +97,16 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Double> aheadDistance = sgGeneral.add(new DoubleSetting.Builder()
+        .name("ahead-distance")
+        .description("How far ahead to place blocks.")
+        .defaultValue(0)
+        .min(0)
+        .sliderMax(1)
+        .visible(() -> !airPlace.get())
+        .build()
+    );
+
     private final Setting<Double> placeRange = sgGeneral.add(new DoubleSetting.Builder()
         .name("closest-block-range")
         .description("How far can scaffold place blocks when you are in air.")
@@ -175,6 +185,13 @@ public class Scaffold extends Module {
             bp.set(vec.getX(), vec.getY(), vec.getZ());
         } else {
             Vec3d pos = mc.player.getPos();
+            if (aheadDistance.get() != 0 && !towering() && !mc.world.getBlockState(mc.player.getBlockPos().down()).getCollisionShape(mc.world, mc.player.getBlockPos()).isEmpty()) {
+                Vec3d dir = Vec3d.fromPolar(0, mc.player.getYaw()).multiply(aheadDistance.get(), 0, aheadDistance.get());
+                if (mc.options.forwardKey.isPressed()) pos = pos.add(dir.x, 0, dir.z);
+                if (mc.options.backKey.isPressed()) pos = pos.add(-dir.x, 0, -dir.z);
+                if (mc.options.leftKey.isPressed()) pos = pos.add(dir.z, 0, -dir.x);
+                if (mc.options.rightKey.isPressed()) pos = pos.add(-dir.z, 0, dir.x);
+            }
             bp.set(pos.x, vec.y, pos.z);
         }
         if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed() && mc.player.getY() + vec.y > -1) {
