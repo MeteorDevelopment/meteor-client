@@ -280,7 +280,8 @@ public class Scaffold extends Module {
 
     public boolean towering() {
         return isActive() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
-            (whileMoving.get() || (!mc.options.forwardKey.isPressed() && !mc.options.backKey.isPressed() && !mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed()));
+            (whileMoving.get() || (!mc.options.forwardKey.isPressed() && !mc.options.backKey.isPressed() && !mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed())) &&
+            (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.useKey.isPressed()));
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {
