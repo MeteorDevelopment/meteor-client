@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
@@ -22,6 +23,7 @@ import net.minecraft.block.FallingBlock;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
 import java.util.ArrayList;
@@ -52,9 +54,9 @@ public class Scaffold extends Module {
         .build()
     );
 
-    private final Setting<Boolean> cancelVelocity = sgGeneral.add(new BoolSetting.Builder()
-        .name("cancel-velocity")
-        .description("Whether or not to cancel velocity when towering.")
+    private final Setting<Boolean> whileMoving = sgGeneral.add(new BoolSetting.Builder()
+        .name("while-moving")
+        .description("Allows you to tower while moving.")
         .defaultValue(false)
         .visible(fastTower::get)
         .build()
@@ -176,7 +178,10 @@ public class Scaffold extends Module {
             bp.set(pos.x, vec.y, pos.z);
         }
         if (mc.options.sneakKey.isPressed() && !mc.options.jumpKey.isPressed() && mc.player.getY() + vec.y > -1) {
-            bp.set(bp.getX(), bp.getY() - 1, bp.getZ());
+            bp.setY(bp.getY() - 1);
+        }
+        if (bp.getY() >= mc.player.getBlockPos().getY()) {
+            bp.setY(mc.player.getBlockPos().getY() - 1);
         }
         BlockPos targetBlock = bp.toImmutable();
 
@@ -206,8 +211,6 @@ public class Scaffold extends Module {
             bp.set(blockPosArray.get(0));
         }
 
-        fastTower(false, null);
-
         if (airPlace.get()) {
             List<BlockPos> blocks = new ArrayList<>();
             for (int x = (int) (bp.getX() - radius.get()); x <= bp.getX() + radius.get(); x++) {
@@ -224,7 +227,6 @@ public class Scaffold extends Module {
                 int counter = 0;
                 for (BlockPos block : blocks) {
                     if (place(block)) {
-                        fastTower(true, block);
                         counter++;
                     }
 
@@ -234,12 +236,34 @@ public class Scaffold extends Module {
                 }
             }
         } else {
-            if (place(bp)) fastTower(true, bp);
+            place(bp);
+        }
+
+        if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed()) {
+            Vec3d velocity = mc.player.getVelocity();
+            Box playerBox = mc.player.getBoundingBox();
+            if (Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, 1, 0))).toList().isEmpty() /*||
+                !Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, -1, 0))).toList().isEmpty()*/) {
+                // If there is no block above the player: move the player up, so he can place another block
+                if (whileMoving.get() || (!mc.options.forwardKey.isPressed() && !mc.options.backKey.isPressed() && !mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed())) {
+                    velocity = new Vec3d(velocity.x, 0.5, velocity.z);
+                }
+                mc.player.setVelocity(velocity);
+            } else {
+                // If there is a block above the player: move the player down, so he's on top of the placed block
+                mc.player.setVelocity(velocity.x, Math.ceil(mc.player.getY()) - mc.player.getY(), velocity.z);
+                mc.player.setOnGround(true);
+            }
         }
     }
 
     public boolean scaffolding() {
         return isActive() && (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.useKey.isPressed()));
+    }
+
+    public boolean towering() {
+        return isActive() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
+            (whileMoving.get() || (!mc.options.forwardKey.isPressed() && !mc.options.backKey.isPressed() && !mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed()));
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {
@@ -267,22 +291,6 @@ public class Scaffold extends Module {
             return true;
         }
         return false;
-    }
-
-    private void fastTower(boolean down, BlockPos checkBlock) {
-        if (down) {
-            // Move player down so they are on top of the placed block ready to jump again
-            if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && !mc.player.isOnGround()) {
-                // The chunk hasn't updated yet so we check the block we were standing on
-                if (!mc.world.getBlockState(checkBlock.down()).isReplaceable())
-                    mc.player.setVelocity(0, -0.28f, 0);
-            }
-        } else {
-            if (mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && fastTower.get() && InvUtils.testInHotbar(stack -> validItem(stack, mc.player.getBlockPos()))) {
-                Vec3d vel = mc.player.getVelocity();
-                mc.player.setVelocity(cancelVelocity.get() ? 0 : vel.x, 0.42, cancelVelocity.get() ? 0 : vel.z);
-            }
-        }
     }
 
     public enum ListMode {
