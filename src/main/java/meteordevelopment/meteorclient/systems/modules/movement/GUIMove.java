@@ -106,6 +106,13 @@ public class GUIMove extends Module {
         if (sprint.get()) set(mc.options.sprintKey, false);
     }
 
+    public boolean disableSpace() {
+        return isActive() && jump.get() && mc.options.jumpKey.isDefault();
+    }
+    public boolean disableArrows() {
+        return isActive() && arrowsRotate.get();
+    }
+
     @EventHandler
     private void onTick(TickEvent.Pre event) {
         if (skip()) return;
