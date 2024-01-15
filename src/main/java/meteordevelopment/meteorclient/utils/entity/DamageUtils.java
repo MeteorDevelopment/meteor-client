@@ -6,9 +6,6 @@
 package meteordevelopment.meteorclient.utils.entity;
 
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
-import meteordevelopment.meteorclient.utils.entity.EntityAttributeManager;
-import meteordevelopment.meteorclient.utils.entity.EntityUtils;
-import meteordevelopment.meteorclient.utils.entity.StatusEffectManager;
 import meteordevelopment.meteorclient.utils.entity.fakeplayer.FakePlayerEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
