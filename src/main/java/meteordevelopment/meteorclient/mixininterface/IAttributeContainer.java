@@ -10,7 +10,7 @@ import net.minecraft.entity.attribute.EntityAttributeInstance;
 
 public interface IAttributeContainer {
     /**
-     * Adds the {@link EntityAttributeInstance} of the other {@link AttributeContainer} to this one, making a union of their modifiers if there's a duplicate
+     * Copy the {@link EntityAttributeInstance} of the other {@link AttributeContainer} into this one, copying their modifiers if there's a duplicate
      */
-    void meteor$union(AttributeContainer other);
+    void meteor$copyFrom(AttributeContainer other);
 }

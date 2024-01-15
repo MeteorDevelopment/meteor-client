@@ -24,7 +24,7 @@ public abstract class AttributeContainerMixin implements IAttributeContainer {
     @Shadow @Final private Set<EntityAttributeInstance> tracked;
 
     @Override
-    public void meteor$union(AttributeContainer other) {
+    public void meteor$copyFrom(AttributeContainer other) {
         for (var otherInstance : ((AttributeContainerMixin) (Object) other).custom.values()) {
             @Nullable EntityAttributeInstance instance = custom.get(otherInstance.getAttribute());
             if (instance != null) {

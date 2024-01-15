@@ -14,7 +14,6 @@ import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.mob.ShulkerEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +41,7 @@ public class EntityAttributeManager {
         handleSpecialCases(entity, attributes::getCustomInstance);
 
         // Copy tracked attributes
-        ((IAttributeContainer) attributes).meteor$union(entity.getAttributes());
+        ((IAttributeContainer) attributes).meteor$copyFrom(entity.getAttributes());
 
         return attributes;
     }
