@@ -35,7 +35,7 @@ public class StatusEffectBruteForce {
     private static final TrackedData<Integer> POTION_SWIRLS_COLOR = LivingEntityAccessor.meteor$getPotionSwirlsColor();
     private static final TrackedData<Boolean> POTION_SWRISL_AMBIENT = LivingEntityAccessor.meteor$getPotionSwirlsAmbient();
     private static final int EMPTY_COLOR = 3694022;
-    public static int MAX_DEPTH = 3;
+    private static final int MAX_DEPTH = 3;
     public static final Set<StatusEffectEntry> ALL_ENTRIES = new ReferenceOpenHashSet<>();
     public static final Set<StatusEffectEntry> BEACON_ENTRIES = new ReferenceOpenHashSet<>();
     private static final Map<LivingEntity, EntityEffectCache> PLAYER_EFFECT_MAP = new Object2ObjectOpenHashMap<>();
