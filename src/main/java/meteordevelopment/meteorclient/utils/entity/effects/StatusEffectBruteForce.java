@@ -39,7 +39,8 @@ public class StatusEffectBruteForce {
     private static final TrackedData<Boolean> POTION_SWRISL_AMBIENT = LivingEntityAccessor.meteor$getPotionSwirlsAmbient();
     private static final int EMPTY_COLOR = 3694022;
     public static int MAX_DEPTH = 3;
-    public static final Set<StatusEffectEntry> ENTRIES = new ReferenceOpenHashSet<>();
+    public static final Set<StatusEffectEntry> ALL_ENTRIES = new ReferenceOpenHashSet<>();
+    public static final Set<StatusEffectEntry> BEACON_ENTRIES = new ReferenceOpenHashSet<>();
     private static final Map<LivingEntity, EntityEffectCache> PLAYER_EFFECT_MAP = new Object2ObjectOpenHashMap<>();
     private static final Int2ObjectOpenHashMap<Map<StatusEffect, StatusEffectInstance>> EFFECT_CACHE_MAP = new Int2ObjectOpenHashMap<>();
     private static final IntSet NULL_COLORS = new IntOpenHashSet();
@@ -53,46 +54,55 @@ public class StatusEffectBruteForce {
     public static void initEntries() {
         MeteorClient.EVENT_BUS.subscribe(StatusEffectManager.class);
 
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.SPEED, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.SPEED, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOWNESS, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOWNESS, 4));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOWNESS, 6));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.HASTE, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.HASTE, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.MINING_FATIGUE, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.JUMP_BOOST, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.JUMP_BOOST, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.NAUSEA, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.REGENERATION, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.REGENERATION, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.RESISTANCE, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.RESISTANCE, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.FIRE_RESISTANCE, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.WATER_BREATHING, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.INVISIBILITY, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.BLINDNESS, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.NIGHT_VISION, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.HUNGER, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.WEAKNESS, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.POISON, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.POISON, 2));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.WITHER, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.HEALTH_BOOST, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 4));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.GLOWING, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.LEVITATION, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.LUCK, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.UNLUCK, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOW_FALLING, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.CONDUIT_POWER, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.DOLPHINS_GRACE, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.BAD_OMEN, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.HERO_OF_THE_VILLAGE, 1));
-        ENTRIES.add(StatusEffectEntry.of(StatusEffects.DARKNESS, 1));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 1));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 2));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.JUMP_BOOST, 1));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.JUMP_BOOST, 2));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.REGENERATION, 1));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.REGENERATION, 2));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.RESISTANCE, 1));
+        BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.RESISTANCE, 2));
+
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.SPEED, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.SPEED, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOWNESS, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOWNESS, 4));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOWNESS, 6));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HASTE, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HASTE, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.MINING_FATIGUE, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.JUMP_BOOST, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.JUMP_BOOST, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.NAUSEA, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.REGENERATION, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.REGENERATION, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.RESISTANCE, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.RESISTANCE, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.FIRE_RESISTANCE, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.WATER_BREATHING, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.INVISIBILITY, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.BLINDNESS, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.NIGHT_VISION, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HUNGER, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.WEAKNESS, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.POISON, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.POISON, 2));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.WITHER, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HEALTH_BOOST, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 4));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.GLOWING, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.LEVITATION, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.LUCK, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.UNLUCK, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.SLOW_FALLING, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.CONDUIT_POWER, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.DOLPHINS_GRACE, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.BAD_OMEN, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HERO_OF_THE_VILLAGE, 1));
+        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.DARKNESS, 1));
 
         for (var statusEffectEntry : Registries.STATUS_EFFECT.getEntrySet()) {
             if (statusEffectEntry.getValue().isInstant()) continue;
@@ -100,7 +110,7 @@ public class StatusEffectBruteForce {
 
             // Primitive modded compat
             if (!statusEffectEntry.getKey().getValue().getNamespace().equals("minecraft")) {
-                ENTRIES.add(StatusEffectEntry.of(statusEffectEntry.getValue(), 1));
+                ALL_ENTRIES.add(StatusEffectEntry.of(statusEffectEntry.getValue(), 1));
             }
         }
     }
@@ -129,7 +139,7 @@ public class StatusEffectBruteForce {
         EffectAttributeModifier[] possibleModifiers;
 
         if (entity.getDataTracker().get(POTION_SWRISL_AMBIENT)) { // entity is only affected by effects from beacons
-            possibleEntries = ENTRIES;
+            possibleEntries = BEACON_ENTRIES;
             possibleModifiers = EffectAttributeModifier.BEACON;
         } else {
             // find status effects based on entity flags
@@ -145,11 +155,11 @@ public class StatusEffectBruteForce {
             // find status effects based on tracked data
             int absorptionLevel = Math.round(entity.getAbsorptionAmount() / 4f);
             if (absorptionLevel <= 4) {
-                possibleEntries = new ReferenceOpenHashSet<>(ENTRIES);
+                possibleEntries = new ReferenceOpenHashSet<>(ALL_ENTRIES);
                 possibleEntries.add(ABSORPTION_STRONG);
                 if (absorptionLevel <= 1) possibleEntries.add(ABSORPTION);
             } else {
-                possibleEntries = ENTRIES;
+                possibleEntries = ALL_ENTRIES;
             }
 
             possibleModifiers = EffectAttributeModifier.ALL;
