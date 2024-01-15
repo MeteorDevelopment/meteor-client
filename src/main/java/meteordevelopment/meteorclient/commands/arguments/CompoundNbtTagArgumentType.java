@@ -18,15 +18,18 @@ import java.util.Collection;
 import static net.minecraft.nbt.StringNbtReader.EXPECTED_VALUE;
 
 public class CompoundNbtTagArgumentType implements ArgumentType<NbtCompound> {
+    private static final CompoundNbtTagArgumentType INSTANCE = new CompoundNbtTagArgumentType();
     private static final Collection<String> EXAMPLES = Arrays.asList("{foo:bar}", "{foo:[aa, bb],bar:15}");
 
     public static CompoundNbtTagArgumentType create() {
-        return new CompoundNbtTagArgumentType();
+        return INSTANCE;
     }
 
     public static NbtCompound get(CommandContext<?> context) {
         return context.getArgument("nbt", NbtCompound.class);
     }
+
+    private CompoundNbtTagArgumentType() {}
 
     @Override
     public NbtCompound parse(StringReader reader) throws CommandSyntaxException {
