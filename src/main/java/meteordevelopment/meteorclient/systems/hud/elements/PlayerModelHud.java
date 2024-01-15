@@ -46,13 +46,6 @@ public class PlayerModelHud extends HudElement {
         .build()
     );
 
-    private final Setting<Boolean> copyPitch = sgGeneral.add(new BoolSetting.Builder()
-        .name("copy-pitch")
-        .description("Makes the player model's pitch equal to yours.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<Integer> customYaw = sgGeneral.add(new IntSetting.Builder()
         .name("custom-yaw")
         .description("Custom yaw for when copy yaw is off.")
@@ -63,10 +56,10 @@ public class PlayerModelHud extends HudElement {
         .build()
     );
 
-    private final Setting<CenterOrientation> centerOrientation = sgGeneral.add(new EnumSetting.Builder<CenterOrientation>()
-        .name("center-orientation")
-        .description("Which direction the player faces when the HUD model faces directly forward.")
-        .defaultValue(CenterOrientation.South)
+    private final Setting<Boolean> copyPitch = sgGeneral.add(new BoolSetting.Builder()
+        .name("copy-pitch")
+        .description("Makes the player model's pitch equal to yours.")
+        .defaultValue(true)
         .build()
     );
 
@@ -77,6 +70,13 @@ public class PlayerModelHud extends HudElement {
         .range(-90, 90)
         .sliderRange(-90, 90)
         .visible(() -> !copyPitch.get())
+        .build()
+    );
+
+    private final Setting<CenterOrientation> centerOrientation = sgGeneral.add(new EnumSetting.Builder<CenterOrientation>()
+        .name("center-orientation")
+        .description("Which direction the player faces when the HUD model faces directly forward.")
+        .defaultValue(CenterOrientation.South)
         .build()
     );
 
@@ -140,14 +140,14 @@ public class PlayerModelHud extends HudElement {
      */
     private void drawEntity(DrawContext context, int x, int y, int size, float yaw, float pitch, LivingEntity entity) {
 
-        float tanYaw = (float)Math.atan((yaw) / 40.0f);
-        float tanPitch = (float)Math.atan((pitch) / 40.0f);
+        float tanYaw = (float) Math.atan((yaw) / 40.0f);
+        float tanPitch = (float) Math.atan((pitch) / 40.0f);
 
         // By default, the origin of the drawEntity command is the top-center, facing down and straight to the south.
         // This means that the player model is upside-down. We'll apply a rotation of PI radians (180 degrees) to fix this.
         // This does have the downside of setting the origin to the bottom-center corner, though, so we'll have
         // to compensate for this later.
-        Quaternionf quaternion = new Quaternionf().rotateZ((float)Math.PI);
+        Quaternionf quaternion = new Quaternionf().rotateZ((float) Math.PI);
 
         // The drawEntity command draws the entity using some entity parameters, so we'll have to manipulate some of
         // those to draw as we want. But first, we'll save the previous values, so we can restore them later.
@@ -181,8 +181,7 @@ public class PlayerModelHud extends HudElement {
         entity.headYaw = prevHeadYaw;
     }
 
-    private enum CenterOrientation
-    {
+    private enum CenterOrientation {
         North,
         South
     }
