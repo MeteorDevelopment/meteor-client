@@ -18,13 +18,17 @@ import net.minecraft.util.Identifier;
 import java.util.concurrent.CompletableFuture;
 
 public class SettingValueArgumentType implements ArgumentType<String> {
+    private static final SettingValueArgumentType INSTANCE = new SettingValueArgumentType();
+
     public static SettingValueArgumentType create() {
-        return new SettingValueArgumentType();
+        return INSTANCE;
     }
 
     public static String get(CommandContext<?> context) {
         return context.getArgument("value", String.class);
     }
+
+    private SettingValueArgumentType() {}
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
