@@ -31,4 +31,9 @@ public interface LivingEntityAccessor {
     static TrackedData<Integer> meteor$getPotionSwirlsColor() {
         throw new AssertionError();
     }
+
+    @Accessor("POTION_SWIRLS_AMBIENT")
+    static TrackedData<Boolean> meteor$getPotionSwirlsAmbient() {
+        throw new AssertionError();
+    }
 }
