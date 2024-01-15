@@ -154,7 +154,7 @@ public class PlayerModelHud extends HudElement {
         float previousBodyYaw = entity.bodyYaw;
         float previousYaw = entity.getYaw();
         float previousPitch = entity.getPitch();
-        float previousPrevHeadYaw = entity.prevHeadYaw; // Yeah, this name's kinda funny
+        float previousPrevHeadYaw = entity.prevHeadYaw; // A perplexing name, I know!
         float prevHeadYaw = entity.headYaw;
 
         // Apply the rotation parameters
