@@ -135,7 +135,7 @@ public class NbtCommand extends Command {
             ItemStack stack = mc.player.getInventory().getMainHandStack();
 
             if (validBasic(stack)) {
-                stack.setNbt(new CompoundNbtTagArgumentType().parse(new StringReader(mc.keyboard.getClipboard())));
+                stack.setNbt(CompoundNbtTagArgumentType.create().parse(new StringReader(mc.keyboard.getClipboard())));
                 setStack(stack);
             }
 

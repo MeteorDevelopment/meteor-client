@@ -22,6 +22,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 public class ModuleArgumentType implements ArgumentType<Module> {
+    private static final ModuleArgumentType INSTANCE = new ModuleArgumentType();
     private static final DynamicCommandExceptionType NO_SUCH_MODULE = new DynamicCommandExceptionType(name -> Text.literal("Module with name " + name + " doesn't exist."));
 
     private static final Collection<String> EXAMPLES = Modules.get().getAll()
@@ -31,12 +32,14 @@ public class ModuleArgumentType implements ArgumentType<Module> {
             .collect(Collectors.toList());
 
     public static ModuleArgumentType create() {
-        return new ModuleArgumentType();
+        return INSTANCE;
     }
 
     public static Module get(CommandContext<?> context) {
         return context.getArgument("module", Module.class);
     }
+
+    private ModuleArgumentType() {}
 
     @Override
     public Module parse(StringReader reader) throws CommandSyntaxException {

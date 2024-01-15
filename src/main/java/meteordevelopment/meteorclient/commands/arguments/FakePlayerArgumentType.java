@@ -21,15 +21,18 @@ import java.util.concurrent.CompletableFuture;
 import static net.minecraft.command.CommandSource.suggestMatching;
 
 public class FakePlayerArgumentType implements ArgumentType<String> {
+    private static final FakePlayerArgumentType INSTANCE = new FakePlayerArgumentType();
     private static final Collection<String> EXAMPLES = List.of("seasnail8169", "MineGame159");
 
     public static FakePlayerArgumentType create() {
-        return new FakePlayerArgumentType();
+        return INSTANCE;
     }
 
     public static FakePlayerEntity get(CommandContext<?> context) {
         return FakePlayerManager.get(context.getArgument("fp", String.class));
     }
+
+    private FakePlayerArgumentType() {}
 
     @Override
     public String parse(StringReader reader) throws CommandSyntaxException {
