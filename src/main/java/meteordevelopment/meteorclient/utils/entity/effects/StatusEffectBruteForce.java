@@ -6,12 +6,8 @@
 package meteordevelopment.meteorclient.utils.entity.effects;
 
 import com.google.common.collect.Sets;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
-import it.unimi.dsi.fastutil.ints.IntSet;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
@@ -42,8 +38,8 @@ public class StatusEffectBruteForce {
     public static final Set<StatusEffectEntry> ALL_ENTRIES = new ReferenceOpenHashSet<>();
     public static final Set<StatusEffectEntry> BEACON_ENTRIES = new ReferenceOpenHashSet<>();
     private static final Map<LivingEntity, EntityEffectCache> PLAYER_EFFECT_MAP = new Object2ObjectOpenHashMap<>();
-    private static final Int2ObjectOpenHashMap<Map<StatusEffect, StatusEffectInstance>> EFFECT_CACHE_MAP = new Int2ObjectOpenHashMap<>();
-    private static final IntSet NULL_COLORS = new IntOpenHashSet();
+    private static final Object2ObjectMap<IntObjectPair<MutableParticleColor>, Map<StatusEffect, StatusEffectInstance>> EFFECT_CACHE_MAP = new Object2ObjectOpenHashMap<>();
+    private static final Set<IntObjectPair<MutableParticleColor>> NULL_COLORS = new ObjectOpenHashSet<>();
 
     // status effects
 
@@ -106,7 +102,8 @@ public class StatusEffectBruteForce {
 
         for (var statusEffectEntry : Registries.STATUS_EFFECT.getEntrySet()) {
             if (statusEffectEntry.getValue().isInstant()) continue;
-            EFFECT_CACHE_MAP.put(statusEffectEntry.getValue().getColor(), Map.of(statusEffectEntry.getValue(), new StatusEffectInstance(statusEffectEntry.getValue())));
+            IntObjectPair<MutableParticleColor> cacheKey = new IntObjectImmutablePair<>(statusEffectEntry.getValue().getColor(), MutableParticleColor.EMPTY);
+            EFFECT_CACHE_MAP.put(cacheKey, Map.of(statusEffectEntry.getValue(), new StatusEffectInstance(statusEffectEntry.getValue())));
 
             // Primitive modded compat
             if (!statusEffectEntry.getKey().getValue().getNamespace().equals("minecraft")) {
@@ -130,9 +127,6 @@ public class StatusEffectBruteForce {
     private static void update(int particleColor, LivingEntity entity, EntityEffectCache container) {
         container.statusEffects.clear();
         container.particleColor = particleColor;
-
-        // Map#computeIfAbsent(Object, Function) cannot cache null return values, so we use a separate cache for those
-        if (NULL_COLORS.contains(particleColor)) return;
 
         MutableParticleColor initialColor = new MutableParticleColor();
         Set<StatusEffectEntry> possibleEntries;
@@ -176,11 +170,17 @@ public class StatusEffectBruteForce {
             }
         }
 
-        @Nullable Map<StatusEffect, StatusEffectInstance> match = EFFECT_CACHE_MAP.computeIfAbsent(particleColor, _color -> {
+        // In order to minimize collisions, we hash both the particle color, and the initial state (attributes, tracked data, etc.) via the initial color
+        IntObjectPair<MutableParticleColor> cacheKey = new IntObjectImmutablePair<>(particleColor, initialColor);
+
+        // Map#computeIfAbsent(Object, Function) cannot cache null return values, so we use a separate cache for those
+        if (NULL_COLORS.contains(cacheKey)) return;
+
+        @Nullable Map<StatusEffect, StatusEffectInstance> match = EFFECT_CACHE_MAP.computeIfAbsent(cacheKey, key -> {
             for (int depth = 2; depth <= MAX_DEPTH; depth++) {
                 for (var combination : Sets.combinations(possibleEntries, depth)) {
                     int color = blend(initialColor, combination);
-                    if (color == _color) {
+                    if (color == particleColor) {
                         // If the amplifiers of all applied effects match, then it cannot be inferred and should be assumed to be 1
                         boolean assumeLowestAmplifier = combination.stream().mapToInt(o -> o.amplifier).reduce((i1, i2) -> i1 == i2 ? i1 : -1).orElse(-1) != -1;
 
@@ -197,7 +197,7 @@ public class StatusEffectBruteForce {
             return null;
         });
         if (match != null) container.statusEffects.putAll(match);
-        else NULL_COLORS.add(particleColor);
+        else NULL_COLORS.add(cacheKey);
     }
 
     @EventHandler
