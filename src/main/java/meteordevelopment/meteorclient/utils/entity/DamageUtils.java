@@ -13,14 +13,10 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.*;
 import net.minecraft.entity.attribute.*;
 import net.minecraft.entity.damage.DamageSource;
-import net.minecraft.entity.damage.DamageTypes;
 import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.*;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryKeys;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.*;
@@ -34,8 +30,6 @@ import org.jetbrains.annotations.Nullable;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class DamageUtils {
-    private static final DamageSource explosion = new DamageSource(DynamicRegistryManager.of(Registries.REGISTRIES).get(RegistryKeys.DAMAGE_TYPE).entryOf(DamageTypes.EXPLOSION));
-
     // Explosion damage
 
     public static float explosionDamage(LivingEntity target, Vec3d origin, float power, boolean predictMovement, BlockPos override, BlockState overrideState) {
@@ -54,7 +48,7 @@ public class DamageUtils {
         double impact = (1 - (modDistance / power)) * exposure;
         float damage = (int) ((impact * impact + impact) / 2 * 7 * 12 + 1);
 
-        return calculateReductions(damage, target, explosion);
+        return calculateReductions(damage, target, mc.world.getDamageSources().explosion(null));
     }
 
     public static float crystalDamage(LivingEntity target, Vec3d crystal, boolean predictMovement, BlockPos obsidianPos) {
