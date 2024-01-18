@@ -1,7 +1,6 @@
 package meteordevelopment.meteorclient.utils.render;
 
 import com.google.gson.Gson;
-import com.mojang.util.UUIDTypeAdapter;
 import meteordevelopment.meteorclient.systems.accounts.TexturesJson;
 import meteordevelopment.meteorclient.systems.accounts.UuidToProfileResponse;
 import meteordevelopment.meteorclient.utils.PostInit;
@@ -26,7 +25,7 @@ public class PlayerHeadUtils {
     }
 
     public static String getSkinUrl(UUID id) {
-        UuidToProfileResponse res2 = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + UUIDTypeAdapter.fromUUID(id)).sendJson(UuidToProfileResponse.class);
+        UuidToProfileResponse res2 = Http.get("https://sessionserver.mojang.com/session/minecraft/profile/" + id).sendJson(UuidToProfileResponse.class);
         if (res2 == null) return null;
 
         String base64Textures = res2.getPropertyValue("textures");

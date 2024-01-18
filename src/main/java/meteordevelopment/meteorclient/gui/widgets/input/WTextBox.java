@@ -319,25 +319,24 @@ public abstract class WTextBox extends WWidget {
             return true;
         }
         else if (key == GLFW_KEY_DELETE) {
-            if (cursor < text.length()) {
                 if (cursor == selectionStart && cursor == selectionEnd) {
-                    String preText = text;
+                    if (cursor < text.length()) {
+                        String preText = text;
 
-                    int count = mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
-                        ? text.length() - cursor
-                        : (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
-                        ? countToNextSpace(false)
-                        : 1;
+                        int count = mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_ALT : MinecraftClient.IS_SYSTEM_MAC ? GLFW_MOD_SUPER : GLFW_MOD_CONTROL)
+                            ? text.length() - cursor
+                            : (mods == (SystemUtils.IS_OS_WINDOWS ? GLFW_MOD_CONTROL : GLFW_MOD_ALT))
+                            ? countToNextSpace(false)
+                            : 1;
 
-                    text = text.substring(0, cursor) + text.substring(cursor + count);
+                        text = text.substring(0, cursor) + text.substring(cursor + count);
 
-                    if (!text.equals(preText)) runAction();
+                        if (!text.equals(preText)) runAction();
+                    }
                 }
                 else {
                     clearSelection();
                 }
-            }
-
             return true;
         }
         else if (key == GLFW_KEY_LEFT) {

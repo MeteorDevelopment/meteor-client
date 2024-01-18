@@ -5,10 +5,11 @@
 
 package meteordevelopment.meteorclient.systems.accounts.types;
 
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
 import meteordevelopment.meteorclient.systems.accounts.MicrosoftLogin;
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
 
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public class MicrosoftAccount extends Account<MicrosoftAccount> {
 
         cache.loadHead();
 
-        setSession(new Session(cache.username, cache.uuid, token, Optional.empty(), Optional.empty(), Session.AccountType.MSA));
+        setSession(new Session(cache.username, UndashedUuid.fromStringLenient(cache.uuid), token, Optional.empty(), Optional.empty(), Session.AccountType.MSA));
         return true;
     }
 

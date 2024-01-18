@@ -57,6 +57,7 @@ public class CombatHud extends HudElement {
         .defaultValue(2)
         .min(1)
         .sliderRange(1, 5)
+        .onChanged(aDouble -> calculateSize())
         .build()
     );
 
@@ -177,10 +178,11 @@ public class CombatHud extends HudElement {
 
     public CombatHud() {
         super(INFO);
+
+        calculateSize();
     }
 
-    @Override
-    public void tick(HudRenderer renderer) {
+    private void calculateSize() {
         setSize(175 * scale.get(), 95 * scale.get());
     }
 
@@ -202,18 +204,29 @@ public class CombatHud extends HudElement {
             // Background
             Renderer2D.COLOR.begin();
             Renderer2D.COLOR.quad(x, y, getWidth(), getHeight(), backgroundColor.get());
-            Renderer2D.COLOR.render(null);
 
-            if (playerEntity == null) return;
+            if (playerEntity == null) {
+                if (isInEditor()) {
+                    renderer.line(x, y, x + getWidth(), y + getHeight(), Color.GRAY);
+                    renderer.line(x + getWidth(), y, x, y + getHeight(), Color.GRAY);
+                    Renderer2D.COLOR.render(null); // i know, ill fix it soon
+                }
+                return;
+            }
+            Renderer2D.COLOR.render(null);
 
             // Player Model
             InventoryScreen.drawEntity(
                 renderer.drawContext,
+                (int) x,
+                (int) y,
                 (int) (x + (25 * scale.get())),
                 (int) (y + (66 * scale.get())),
                 (int) (30 * scale.get()),
+                0,
                 -MathHelper.wrapDegrees(playerEntity.prevYaw + (playerEntity.getYaw() - playerEntity.prevYaw) * mc.getTickDelta()),
-                -playerEntity.getPitch(), playerEntity
+                -playerEntity.getPitch(),
+                playerEntity
             );
 
             // Moving pos to past player model
@@ -224,7 +237,7 @@ public class CombatHud extends HudElement {
             String breakText = " | ";
 
             // Name
-            String nameText = playerEntity.getEntityName();
+            String nameText = playerEntity.getName().getString();
             Color nameColor = PlayerUtils.getPlayerColor(playerEntity, primaryColor);
 
             // Ping
@@ -254,8 +267,7 @@ public class CombatHud extends HudElement {
             if (Friends.get().isFriend(playerEntity)) {
                 friendText = "Friend";
                 friendColor = Config.get().friendColor.get();
-            }
-            else {
+            } else {
                 boolean naked = true;
 
                 for (int position = 3; position >= 0; position--) {
@@ -267,8 +279,7 @@ public class CombatHud extends HudElement {
                 if (naked) {
                     friendText = "Naked";
                     friendColor = GREEN;
-                }
-                else {
+                } else {
                     boolean threat = false;
 
                     for (int position = 5; position >= 0; position--) {

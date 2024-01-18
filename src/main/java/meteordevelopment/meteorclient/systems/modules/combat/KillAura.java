@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.combat;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
@@ -149,10 +149,10 @@ public class KillAura extends Module {
         .build()
     );
 
-    private final Setting<Boolean> ignoreBabies = sgTargeting.add(new BoolSetting.Builder()
-        .name("ignore-babies")
-        .description("Whether or not to attack baby variants of the entity.")
-        .defaultValue(true)
+    private final Setting<EntityAge> mobAgeFilter = sgTargeting.add(new EnumSetting.Builder<EntityAge>()
+        .name("mob-age-filter")
+        .description("Determines the age of the mobs to target (baby, adult, or both).")
+        .defaultValue(EntityAge.Adult)
         .build()
     );
 
@@ -233,7 +233,6 @@ public class KillAura extends Module {
         .build()
     );
 
-    CrystalAura ca = Modules.get().get(CrystalAura.class);
     private final List<Entity> targets = new ArrayList<>();
     private int switchTimer, hitTimer;
     private boolean wasPathing = false;
@@ -253,7 +252,7 @@ public class KillAura extends Module {
         if (pauseOnUse.get() && (mc.interactionManager.isBreakingBlock() || mc.player.isUsingItem())) return;
         if (onlyOnClick.get() && !mc.options.attackKey.isPressed()) return;
         if (TickRate.INSTANCE.getTimeSinceLastTick() >= 1f && pauseOnLag.get()) return;
-        if (pauseOnCA.get() && ca.isActive() && ca.kaTimer > 0) return;
+        if (pauseOnCA.get() && Modules.get().get(CrystalAura.class).isActive() && Modules.get().get(CrystalAura.class).kaTimer > 0) return;
 
         if (onlyOnLook.get()) {
             Entity targeted = mc.targetedEntity;
@@ -270,7 +269,7 @@ public class KillAura extends Module {
 
         if (targets.isEmpty()) {
             if (wasPathing) {
-                BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+                PathManagers.get().resume();
                 wasPathing = false;
             }
             return;
@@ -298,8 +297,8 @@ public class KillAura extends Module {
         if (!itemInHand()) return;
 
         if (rotation.get() == RotationMode.Always) Rotations.rotate(Rotations.getYaw(primary), Rotations.getPitch(primary, Target.Body));
-        if (pauseOnCombat.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasPathing) {
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+        if (pauseOnCombat.get() && PathManagers.get().isPathing() && !wasPathing) {
+            PathManagers.get().pause();
             wasPathing = true;
         }
 
@@ -327,7 +326,7 @@ public class KillAura extends Module {
 
     private boolean entityCheck(Entity entity) {
         if (entity.equals(mc.player) || entity.equals(mc.cameraEntity)) return false;
-        if ((entity instanceof LivingEntity && ((LivingEntity) entity).isDead()) || !entity.isAlive()) return false;
+        if ((entity instanceof LivingEntity livingEntity && livingEntity.isDead()) || !entity.isAlive()) return false;
 
         Box hitbox = entity.getBoundingBox();
         if (!PlayerUtils.isWithin(
@@ -357,7 +356,14 @@ public class KillAura extends Module {
             if (!Friends.get().shouldAttack(player)) return false;
             if (shieldMode.get() == ShieldMode.Ignore && player.blockedByShield(mc.world.getDamageSources().playerAttack(mc.player))) return false;
         }
-        return !(entity instanceof AnimalEntity animal) || !ignoreBabies.get() || !animal.isBaby();
+        if (entity instanceof AnimalEntity animal) {
+            return switch (mobAgeFilter.get()) {
+                case Baby -> animal.isBaby();
+                case Adult -> !animal.isBaby();
+                case Both -> true;
+            };
+        }
+        return true;
     }
 
     private boolean delayCheck() {
@@ -425,5 +431,11 @@ public class KillAura extends Module {
         Ignore,
         Break,
         None
+    }
+
+    public enum EntityAge {
+        Baby,
+        Adult,
+        Both
     }
 }

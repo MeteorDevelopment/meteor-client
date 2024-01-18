@@ -137,7 +137,7 @@ public class PathFinder {
         if (target != null && mc.player != null) {
             if (!PlayerUtils.isWithin(target, 3)) {
                 if (currentPathBlock == null) currentPathBlock = getNextPathBlock();
-                if (mc.player.getPos().distanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .1)
+                if (mc.player.getPos().squaredDistanceTo(new Vec3d(currentPathBlock.blockPos.getX(), currentPathBlock.blockPos.getY(), currentPathBlock.blockPos.getZ())) < .01)
                     currentPathBlock = getNextPathBlock();
                 lookAtDestination(currentPathBlock);
                 if (!mc.options.forwardKey.isPressed())

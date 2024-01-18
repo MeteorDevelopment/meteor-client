@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.accounts;
 
-import com.mojang.util.UUIDTypeAdapter;
+import com.mojang.util.UndashedUuid;
 import meteordevelopment.meteorclient.utils.misc.ISerializable;
 import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.render.PlayerHeadTexture;
@@ -23,7 +23,7 @@ public class AccountCache implements ISerializable<AccountCache> {
 
     public void loadHead() {
         if (uuid == null || uuid.isBlank()) return;
-        headTexture = PlayerHeadUtils.fetchHead(UUIDTypeAdapter.fromString(uuid));
+        headTexture = PlayerHeadUtils.fetchHead(UndashedUuid.fromStringLenient(uuid));
     }
 
     @Override

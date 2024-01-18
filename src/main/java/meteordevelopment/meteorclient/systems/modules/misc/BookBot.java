@@ -19,7 +19,8 @@ import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.item.Items;
+import net.minecraft.client.font.TextHandler;
+import net.minecraft.item.*;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
@@ -39,10 +40,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Optional;
-import java.util.PrimitiveIterator;
-import java.util.Random;
+import java.util.*;
+import java.util.function.Predicate;
 
 public class BookBot extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -51,13 +50,6 @@ public class BookBot extends Module {
         .name("mode")
         .description("What kind of text to write.")
         .defaultValue(Mode.Random)
-        .build()
-    );
-
-    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
-        .name("name")
-        .description("The name you want to give your books.")
-        .defaultValue("Meteor on Crack!")
         .build()
     );
 
@@ -79,19 +71,35 @@ public class BookBot extends Module {
         .build()
     );
 
-    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
-        .name("append-count")
-        .description("Whether to append the number of the book to the title.")
-        .defaultValue(true)
-        .build()
-    );
-
     private final Setting<Integer> delay = sgGeneral.add(new IntSetting.Builder()
         .name("delay")
         .description("The amount of delay between writing books.")
         .defaultValue(20)
         .min(1)
         .sliderRange(1, 200)
+        .build()
+    );
+
+    private final Setting<Boolean> sign = sgGeneral.add(new BoolSetting.Builder()
+        .name("sign")
+        .description("Whether to sign the book.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<String> name = sgGeneral.add(new StringSetting.Builder()
+        .name("name")
+        .description("The name you want to give your books.")
+        .defaultValue("Meteor on Crack!")
+        .visible(sign::get)
+        .build()
+    );
+
+    private final Setting<Boolean> count = sgGeneral.add(new BoolSetting.Builder()
+        .name("append-count")
+        .description("Whether to append the number of the book to the title.")
+        .defaultValue(true)
+        .visible(sign::get)
         .build()
     );
 
@@ -157,7 +165,10 @@ public class BookBot extends Module {
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        FindItemResult writableBook = InvUtils.find(Items.WRITABLE_BOOK);
+        Predicate<ItemStack> bookPredicate = i ->
+            i.getItem() == Items.WRITABLE_BOOK && (i.getNbt() == null || i.getNbt().get("pages") == null || ((NbtList) i.getNbt().get("pages")).isEmpty());
+
+        FindItemResult writableBook = InvUtils.find(bookPredicate);
 
         // Check if there is a book to write
         if (!writableBook.found()) {
@@ -166,7 +177,7 @@ public class BookBot extends Module {
         }
 
         // Move the book into hand
-        if (!InvUtils.testInMainHand(Items.WRITABLE_BOOK)) {
+        if (!InvUtils.testInMainHand(bookPredicate)) {
             InvUtils.move().from(writableBook.slot()).toHotbar(mc.player.getInventory().selectedSlot);
             return;
         }
@@ -236,44 +247,61 @@ public class BookBot extends Module {
 
     private void writeBook(PrimitiveIterator.OfInt chars) {
         ArrayList<String> pages = new ArrayList<>();
+        TextHandler.WidthRetriever widthRetriever = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever();
 
-        for (int pageI = 0; pageI < (mode.get() == Mode.File ? 100 : this.pages.get()); pageI++) {
-            // Check if the stream is empty before creating a new page
-            if (!chars.hasNext()) break;
+        int maxPages = mode.get() == Mode.File ? 100 : this.pages.get();
 
-            StringBuilder page = new StringBuilder();
+        int pageIndex = 0;
+        int lineIndex = 0;
 
-            for (int lineI = 0; lineI < 13; lineI++) {
-                // Check if the stream is empty before creating a new line
-                if (!chars.hasNext()) break;
+        final StringBuilder page = new StringBuilder();
 
-                double lineWidth = 0;
-                StringBuilder line = new StringBuilder();
+        float lineWidth = 0;
 
-                while (true) {
-                    // Check if the stream is empty
-                    if (!chars.hasNext()) break;
+        while (chars.hasNext()) {
+            int c = chars.nextInt();
 
-                    // Get the next character
-                    int nextChar = chars.nextInt();
+            if (c == '\r' || c == '\n') {
+                page.append('\n');
+                lineWidth = 0;
+                lineIndex++;
+            } else {
+                float charWidth = widthRetriever.getWidth(c, Style.EMPTY);
 
-                    // Ignore newline chars when writing lines, should already be organised
-                    if (nextChar == '\r' || nextChar == '\n') break;
-
-                    // Make sure the character will fit on the line
-                    double charWidth = ((TextHandlerAccessor) mc.textRenderer.getTextHandler()).getWidthRetriever().getWidth(nextChar, Style.EMPTY);
-                    if (lineWidth + charWidth > 114) break;
-
-                    // Append it to the line
-                    line.appendCodePoint(nextChar);
+                // Reached end of line
+                if (lineWidth + charWidth > 114f) {
+                    page.append('\n');
+                    lineWidth = charWidth;
+                    lineIndex++;
+                    // Wrap to next line, unless wrapping to next page
+                    if (lineIndex != 14) page.appendCodePoint(c);
+                } else if (lineWidth == 0f && c == ' ') {
+                    continue; // Prevent leading space from text wrapping
+                } else {
                     lineWidth += charWidth;
+                    page.appendCodePoint(c);
                 }
-
-                // Append the line to the page
-                page.append(line).append('\n');
             }
 
-            // Append page to the page list
+            // Reached end of page
+            if (lineIndex == 14) {
+                pages.add(page.toString());
+                page.setLength(0);
+                pageIndex++;
+                lineIndex = 0;
+
+                // No more pages
+                if (pageIndex == maxPages) break;
+
+                // Wrap to next page
+                if (c != '\r' && c != '\n') {
+                    page.appendCodePoint(c);
+                }
+            }
+        }
+
+        // No more characters, end current page
+        if (!page.isEmpty() && pageIndex != maxPages) {
             pages.add(page.toString());
         }
 
@@ -291,7 +319,7 @@ public class BookBot extends Module {
         if (!pages.isEmpty()) mc.player.getMainHandStack().setSubNbt("pages", pageNbt);
 
         // Send book update to server
-        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, Optional.of(title)));
+        mc.player.networkHandler.sendPacket(new BookUpdateC2SPacket(mc.player.getInventory().selectedSlot, pages, sign.get() ? Optional.of(title) : Optional.empty()));
 
         bookCount++;
     }

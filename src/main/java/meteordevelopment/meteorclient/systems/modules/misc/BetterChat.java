@@ -147,8 +147,8 @@ public class BetterChat extends Module {
         .name("extra-lines")
         .description("The amount of extra chat lines.")
         .defaultValue(1000)
-        .min(100)
-        .sliderRange(100, 1000)
+        .min(0)
+        .sliderRange(0, 1000)
         .visible(longerChatHistory::get)
         .build()
     );
@@ -394,7 +394,8 @@ public class BetterChat extends Module {
         int startOffset = 0;
 
         try {
-            startOffset = TIMESTAMP_REGEX.matcher(text).end();
+            Matcher m = TIMESTAMP_REGEX.matcher(text);
+            if (m.find()) startOffset = m.end() + 1;
         }
         catch (IllegalStateException ignored) {}
 
@@ -413,7 +414,7 @@ public class BetterChat extends Module {
         PlayerListEntry entry = mc.getNetworkHandler().getPlayerListEntry(sender.getId());
         if (entry == null) return;
 
-        Identifier skin = entry.getSkinTexture();
+        Identifier skin = entry.getSkinTextures().texture();
 
         context.drawTexture(skin, 0, y, 8, 8, 8, 8, 8, 8, 64, 64);
         context.drawTexture(skin, 0, y, 8, 8, 40, 8, 8, 8, 64, 64);
@@ -540,7 +541,7 @@ public class BetterChat extends Module {
 
     public boolean keepHistory() { return isActive() && keepHistory.get(); }
 
-    public int getChatLength() {
+    public int getExtraChatLines() {
         return longerChatLines.get();
     }
 }

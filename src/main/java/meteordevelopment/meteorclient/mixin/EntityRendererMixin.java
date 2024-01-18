@@ -22,6 +22,7 @@ import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.LightType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -51,7 +52,12 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
 
     @ModifyReturnValue(method = "getSkyLight", at = @At("RETURN"))
     private int onGetSkyLight(int original) {
-        return Math.max(Modules.get().get(Fullbright.class).getLuminance(), original);
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.SKY), original);
+    }
+
+    @ModifyReturnValue(method = "getBlockLight", at = @At("RETURN"))
+    private int onGetBlockLight(int original) {
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), original);
     }
 
     @Override

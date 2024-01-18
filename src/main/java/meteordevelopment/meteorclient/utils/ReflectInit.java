@@ -66,7 +66,7 @@ public class ReflectInit {
         try {
             task.invoke(null);
         } catch (IllegalAccessException | InvocationTargetException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Error running @%s task '%s.%s'".formatted(annotation.getSimpleName(), task.getDeclaringClass().getSimpleName(), task.getName()), e);
         } catch (NullPointerException e) {
             throw new RuntimeException("Method \"%s\" using Init annotations from non-static context".formatted(task.getName()), e);
         }

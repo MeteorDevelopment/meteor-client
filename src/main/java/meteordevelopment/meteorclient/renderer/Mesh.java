@@ -103,7 +103,7 @@ public class Mesh {
     }
 
     public void begin() {
-        if (building) throw new IllegalStateException("Mesh.end() called while already building.");
+        if (building) throw new IllegalStateException("Mesh.begin() called while already building.");
 
         verticesPointer = verticesPointerStart;
         vertexI = 0;

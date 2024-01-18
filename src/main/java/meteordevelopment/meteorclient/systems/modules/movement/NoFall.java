@@ -5,12 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
 import meteordevelopment.meteorclient.mixininterface.IPlayerMoveC2SPacket;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.EnumSetting;
 import meteordevelopment.meteorclient.settings.Setting;
@@ -92,7 +92,7 @@ public class NoFall extends Module {
     private boolean placedWater;
     private BlockPos targetPos;
     private int timer;
-    private int preBaritoneFallHeight;
+    private boolean prePathManagerNoFall;
 
     public NoFall() {
         super(Categories.Movement, "no-fall", "Attempts to prevent you from taking fall damage.");
@@ -100,14 +100,15 @@ public class NoFall extends Module {
 
     @Override
     public void onActivate() {
-        preBaritoneFallHeight = BaritoneAPI.getSettings().maxFallHeightNoWater.value;
-        if (mode.get() == Mode.Packet) BaritoneAPI.getSettings().maxFallHeightNoWater.value = 255;
+        prePathManagerNoFall = PathManagers.get().getSettings().getNoFall().get();
+        if (mode.get() == Mode.Packet) PathManagers.get().getSettings().getNoFall().set(true);
+
         placedWater = false;
     }
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().maxFallHeightNoWater.value = preBaritoneFallHeight;
+        PathManagers.get().getSettings().getNoFall().set(prePathManagerNoFall);
     }
 
     @EventHandler

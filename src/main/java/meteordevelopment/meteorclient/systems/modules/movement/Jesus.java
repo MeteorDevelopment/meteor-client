@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -13,14 +12,17 @@ import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.ProtectionEnchantment;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
 import net.minecraft.network.packet.Packet;
@@ -144,8 +146,8 @@ public class Jesus extends Module {
     private int tickTimer = 10;
     private int packetTimer = 0;
 
-    private boolean preBaritoneAssumeWalkOnWater;
-    private boolean preBaritoneAssumeWalkOnLava;
+    private boolean prePathManagerWalkOnWater;
+    private boolean prePathManagerWalkOnLava;
 
     public Jesus() {
         super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.");
@@ -153,17 +155,17 @@ public class Jesus extends Module {
 
     @Override
     public void onActivate() {
-        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
-        preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
+        prePathManagerWalkOnWater = PathManagers.get().getSettings().getWalkOnWater().get();
+        prePathManagerWalkOnLava = PathManagers.get().getSettings().getWalkOnLava().get();
 
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = waterMode.get() == Mode.Solid;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = lavaMode.get() == Mode.Solid;
+        PathManagers.get().getSettings().getWalkOnWater().set(waterMode.get() == Mode.Solid);
+        PathManagers.get().getSettings().getWalkOnLava().set(lavaMode.get() == Mode.Solid);
     }
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
+        PathManagers.get().getSettings().getWalkOnWater().set(prePathManagerWalkOnWater);
+        PathManagers.get().getSettings().getWalkOnLava().set(prePathManagerWalkOnLava);
     }
 
     @EventHandler
@@ -268,6 +270,15 @@ public class Jesus extends Module {
 
     private boolean waterShouldBeSolid() {
         if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
+
+
+        if (mc.player.getVehicle() != null) {
+            EntityType<?> vehicle = mc.player.getVehicle().getType();
+            if (vehicle == EntityType.BOAT || vehicle == EntityType.CHEST_BOAT) return false;
+        }
+
+        if (Modules.get().get(Flight.class).isActive()) return false;
+
 
         if (dipIfBurning.get() && mc.player.isOnFire()) return false;
 

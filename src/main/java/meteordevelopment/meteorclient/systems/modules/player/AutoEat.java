@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import baritone.api.BaritoneAPI;
 import meteordevelopment.meteorclient.events.entity.player.ItemUseCrosshairTargetEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -179,9 +179,9 @@ public class AutoEat extends Module {
         }
 
         // Pause baritone
-        if (pauseBaritone.get() && BaritoneAPI.getProvider().getPrimaryBaritone().getPathingBehavior().isPathing() && !wasBaritone) {
+        if (pauseBaritone.get() && PathManagers.get().isPathing() && !wasBaritone) {
             wasBaritone = true;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("pause");
+            PathManagers.get().pause();
         }
     }
 
@@ -213,7 +213,7 @@ public class AutoEat extends Module {
         // Resume baritone
         if (pauseBaritone.get() && wasBaritone) {
             wasBaritone = false;
-            BaritoneAPI.getProvider().getPrimaryBaritone().getCommandManager().execute("resume");
+            PathManagers.get().resume();
         }
     }
 

@@ -244,14 +244,20 @@ public class BlockUtils {
     }
 
     public static MobSpawn isValidMobSpawn(BlockPos blockPos, boolean newMobSpawnLightLevel) {
-        int spawnLightLimit = newMobSpawnLightLevel ? 0 : 7;
-        if (!(mc.world.getBlockState(blockPos).getBlock() instanceof AirBlock) ||
-            mc.world.getBlockState(blockPos.down()).getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
+        return isValidMobSpawn(blockPos, mc.world.getBlockState(blockPos), newMobSpawnLightLevel ? 0 : 7);
+    }
 
-        if (!topSurface(mc.world.getBlockState(blockPos.down()))) {
-            if (mc.world.getBlockState(blockPos.down()).getCollisionShape(mc.world, blockPos.down()) != VoxelShapes.fullCube())
+    public static MobSpawn isValidMobSpawn(BlockPos blockPos, BlockState blockState, int spawnLightLimit) {
+        if (!(blockState.getBlock() instanceof AirBlock)) return MobSpawn.Never;
+
+        BlockPos down = blockPos.down();
+        BlockState downState = mc.world.getBlockState(down);
+        if (downState.getBlock() == Blocks.BEDROCK) return MobSpawn.Never;
+
+        if (!topSurface(downState)) {
+            if (downState.getCollisionShape(mc.world, down) != VoxelShapes.fullCube())
                 return MobSpawn.Never;
-            if (mc.world.getBlockState(blockPos.down()).isTransparent(mc.world, blockPos.down())) return MobSpawn.Never;
+            if (downState.isTransparent(mc.world, down)) return MobSpawn.Never;
         }
 
         if (mc.world.getLightLevel(blockPos, 0) <= spawnLightLimit) return MobSpawn.Potential;
