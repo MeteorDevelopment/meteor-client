@@ -28,7 +28,7 @@ public abstract class AttributeContainerMixin implements IAttributeContainer {
         for (var otherInstance : ((AttributeContainerMixin) (Object) other).custom.values()) {
             @Nullable EntityAttributeInstance instance = custom.get(otherInstance.getAttribute());
             if (instance != null) {
-                ((IEntityAttributeInstance) instance).meteor$union(otherInstance);
+                ((IEntityAttributeInstance) instance).meteor$copyFrom(otherInstance);
             } else {
                 custom.put(otherInstance.getAttribute(), otherInstance);
                 if (otherInstance.getAttribute().isTracked()) tracked.add(otherInstance);

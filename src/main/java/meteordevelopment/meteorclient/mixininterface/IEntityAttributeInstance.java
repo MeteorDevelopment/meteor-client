@@ -11,5 +11,5 @@ public interface IEntityAttributeInstance {
     /**
      * Adds the modifiers of the other {@link EntityAttributeInstance} to this one, replacing them if there's a duplicate
      */
-    void meteor$union(EntityAttributeInstance other);
+    void meteor$copyFrom(EntityAttributeInstance other);
 }

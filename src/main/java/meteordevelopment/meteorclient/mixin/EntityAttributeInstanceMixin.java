@@ -25,7 +25,7 @@ public abstract class EntityAttributeInstanceMixin implements IEntityAttributeIn
     @Shadow protected abstract void onUpdate();
 
     @Override
-    public void meteor$union(EntityAttributeInstance other) {
+    public void meteor$copyFrom(EntityAttributeInstance other) {
         for (var modifier : other.getModifiers()) {
             @Nullable EntityAttributeModifier old = idToModifiers.put(modifier.getId(), modifier);
             if (old != null) {

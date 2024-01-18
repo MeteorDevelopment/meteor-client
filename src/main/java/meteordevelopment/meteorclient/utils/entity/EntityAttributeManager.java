@@ -72,7 +72,7 @@ public class EntityAttributeManager {
 
         // Copy tracked modifiers
         EntityAttributeInstance trackedInstance = entity.getAttributeInstance(attribute);
-        if (trackedInstance != null) ((IEntityAttributeInstance) attributeInstance).meteor$union(trackedInstance);
+        if (trackedInstance != null) ((IEntityAttributeInstance) attributeInstance).meteor$copyFrom(trackedInstance);
 
         return attributeInstance;
     }
