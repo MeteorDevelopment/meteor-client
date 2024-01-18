@@ -19,7 +19,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
-public class EntityAttributeManager {
+public class EntityAttributeHelper {
     /**
      * @see LivingEntity#getAttributes()
      */
@@ -33,7 +33,7 @@ public class EntityAttributeManager {
         }
 
         // Status effects
-        for (var statusEffect : StatusEffectManager.getStatusEffects(entity)) {
+        for (var statusEffect : StatusEffectHelper.getStatusEffects(entity)) {
             statusEffect.getEffectType().onApplied(attributes, statusEffect.getAmplifier());
         }
 
@@ -61,7 +61,7 @@ public class EntityAttributeManager {
         }
 
         // Status effects
-        for (var statusEffect : StatusEffectManager.getStatusEffects(entity)) {
+        for (var statusEffect : StatusEffectHelper.getStatusEffects(entity)) {
             AttributeModifierCreator factory = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
             if (factory != null) attributeInstance.addPersistentModifier(factory.createAttributeModifier(statusEffect.getAmplifier()));
         }

@@ -16,7 +16,7 @@ import java.util.*;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class StatusEffectManager {
+public class StatusEffectHelper {
     @Nullable
     public static StatusEffectInstance getStatusEffect(LivingEntity entity, StatusEffect effect) {
         if (entity == mc.player) return entity.getStatusEffect(effect);

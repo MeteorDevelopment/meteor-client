@@ -13,7 +13,7 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
 import meteordevelopment.meteorclient.utils.PreInit;
-import meteordevelopment.meteorclient.utils.entity.StatusEffectManager;
+import meteordevelopment.meteorclient.utils.entity.StatusEffectHelper;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.attribute.AttributeContainer;
@@ -49,7 +49,7 @@ public class StatusEffectBruteForce {
 
     @PreInit
     public static void initEntries() {
-        MeteorClient.EVENT_BUS.subscribe(StatusEffectManager.class);
+        MeteorClient.EVENT_BUS.subscribe(StatusEffectHelper.class);
 
         BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 1));
         BEACON_ENTRIES.add(StatusEffectEntry.of(StatusEffects.STRENGTH, 2));
