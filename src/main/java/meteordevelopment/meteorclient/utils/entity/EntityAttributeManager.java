@@ -24,8 +24,7 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributes()
      */
     public static AttributeContainer getAttributes(LivingEntity entity) {
-        @SuppressWarnings("unchecked")
-        AttributeContainer attributes = new AttributeContainer(DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()));
+        AttributeContainer attributes = new AttributeContainer(getDefaultForEntity(entity));
 
         // Equipment
         for (var equipmentSlot : EquipmentSlot.values()) {
@@ -50,8 +49,7 @@ public class EntityAttributeManager {
      * @see LivingEntity#getAttributeInstance(EntityAttribute)
      */
     public static EntityAttributeInstance getAttributeInstance(LivingEntity entity, EntityAttribute attribute) {
-        @SuppressWarnings("unchecked")
-        double baseValue = DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType()).getBaseValue(attribute);
+        double baseValue = getDefaultForEntity(entity).getBaseValue(attribute);
         EntityAttributeInstance attributeInstance = new EntityAttributeInstance(attribute, o1 -> {});
         attributeInstance.setBaseValue(baseValue);
 
@@ -91,5 +89,10 @@ public class EntityAttributeManager {
                 if (attributeInstance != null) attributeInstance.addPersistentModifier(ShulkerEntityAccessor.meteor$getCoveredArmorBonus());
             }
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T extends LivingEntity> DefaultAttributeContainer getDefaultForEntity(T entity) {
+        return DefaultAttributeRegistry.get((EntityType<? extends LivingEntity>) entity.getType());
     }
 }
