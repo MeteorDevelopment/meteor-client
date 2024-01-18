@@ -35,7 +35,7 @@ public class EntityAttributeManager {
 
         // Status effects
         for (var statusEffect : StatusEffectManager.getStatusEffects(entity)) {
-            statusEffect.getEffectType().onApplied(entity, attributes, statusEffect.getAmplifier());
+            statusEffect.getEffectType().onApplied(attributes, statusEffect.getAmplifier());
         }
 
         handleSpecialCases(entity, attributes::getCustomInstance);
@@ -64,9 +64,8 @@ public class EntityAttributeManager {
 
         // Status effects
         for (var statusEffect : StatusEffectManager.getStatusEffects(entity)) {
-            EntityAttributeModifier modifier = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
-            if (modifier == null) continue;
-            attributeInstance.addPersistentModifier(new EntityAttributeModifier(modifier.getId(), statusEffect.getTranslationKey() + " " + statusEffect.getAmplifier(), statusEffect.getEffectType().adjustModifierAmount(statusEffect.getAmplifier(), modifier), modifier.getOperation()));
+            AttributeModifierCreator factory = statusEffect.getEffectType().getAttributeModifiers().get(attribute);
+            if (factory != null) attributeInstance.addPersistentModifier(factory.createAttributeModifier(statusEffect.getAmplifier()));
         }
 
         handleSpecialCases(entity, someAttribute -> someAttribute == attribute ? attributeInstance : null);
