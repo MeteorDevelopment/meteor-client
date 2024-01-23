@@ -256,7 +256,7 @@ public class Scaffold extends Module {
             place(bp);
         }
 
-        if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed()) {
+        if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp)).found()) {
             Vec3d velocity = mc.player.getVelocity();
             Box playerBox = mc.player.getBoundingBox();
             if (Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, 1, 0))).toList().isEmpty() /*||
