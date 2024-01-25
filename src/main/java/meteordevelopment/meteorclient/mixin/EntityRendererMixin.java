@@ -9,7 +9,7 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
-import meteordevelopment.meteorclient.systems.modules.render.Nametags;
+import meteordevelopment.meteorclient.systems.modules.render.nametags.Nametags;
 import meteordevelopment.meteorclient.systems.modules.render.NoRender;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.render.postprocess.PostProcessShaders;
