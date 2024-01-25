@@ -64,6 +64,7 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
         factories.put(StorageBlockListSetting.class, (table, setting) -> storageBlockListW(table, (StorageBlockListSetting) setting));
         factories.put(ScreenHandlerListSetting.class, (table, setting) -> screenHandlerListW(table, (ScreenHandlerListSetting) setting));
         factories.put(BlockDataSetting.class, (table, setting) -> blockDataW(table, (BlockDataSetting<?>) setting));
+        factories.put(EntityTypeDataSetting.class, (table, setting) -> entityTypeDataW(table, (EntityTypeDataSetting<?>) setting));
         factories.put(PotionSetting.class, (table, setting) -> potionW(table, (PotionSetting) setting));
         factories.put(StringListSetting.class, (table, setting) -> stringListW(table, (StringListSetting) setting));
         factories.put(BlockPosSetting.class, (table, setting) -> blockPosW(table, (BlockPosSetting) setting));
@@ -337,6 +338,13 @@ public class DefaultSettingsWidgetFactory extends SettingsWidgetFactory {
     private void blockDataW(WTable table, BlockDataSetting<?> setting) {
         WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
         button.action = () -> mc.setScreen(new BlockDataSettingScreen(theme, setting));
+
+        reset(table, setting, null);
+    }
+
+    private void entityTypeDataW(WTable table, EntityTypeDataSetting<?> setting) {
+        WButton button = table.add(theme.button(GuiRenderer.EDIT)).expandCellX().widget();
+        button.action = () -> mc.setScreen(new EntityTypeDataSettingScreen(theme, setting));
 
         reset(table, setting, null);
     }
