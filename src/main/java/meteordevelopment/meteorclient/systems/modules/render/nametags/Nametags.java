@@ -314,7 +314,7 @@ public class Nametags extends Module {
         Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
 
         ((IVec3d) vec1).set(cameraPos.x, cameraPos.y, cameraPos.z);
-        ((IVec3d) vec2).set(entity.getX(), entity.getY() + entity.getStandingEyeHeight(), entity.getZ());
+        ((IVec3d) vec2).set(entity.getX(), entity.getEyeY(), entity.getZ());
 
         return mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.VISUAL, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
     }
