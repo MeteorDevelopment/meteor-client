@@ -5,11 +5,10 @@
 
 package meteordevelopment.meteorclient.utils.network;
 
-import com.google.common.collect.Iterators;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.SimpleRegistry;
@@ -19,10 +18,11 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import org.jetbrains.annotations.NotNull;
+
 import java.util.*;
 import java.util.stream.Stream;
 
-public class PacketUtils {
+public abstract class PacketUtils {
     public static final Registry<Class<? extends Packet<?>>> REGISTRY = new PacketRegistry();
 
     private static final Map<Class<? extends Packet<?>>, String> S2C_PACKETS = new HashMap<>();
@@ -36,6 +36,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("ClientStatusC2SPacket", net.minecraft.network.packet.c2s.play.ClientStatusC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket.class, "PlayerInteractItemC2SPacket");
         C2S_PACKETS_R.put("PlayerInteractItemC2SPacket", net.minecraft.network.packet.c2s.play.PlayerInteractItemC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.login.EnterConfigurationC2SPacket.class, "EnterConfigurationC2SPacket");
+        C2S_PACKETS_R.put("EnterConfigurationC2SPacket", net.minecraft.network.packet.c2s.login.EnterConfigurationC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class, "SelectMerchantTradeC2SPacket");
         C2S_PACKETS_R.put("SelectMerchantTradeC2SPacket", net.minecraft.network.packet.c2s.play.SelectMerchantTradeC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket.class, "PlayerActionC2SPacket");
@@ -56,20 +58,20 @@ public class PacketUtils {
         C2S_PACKETS_R.put("UpdatePlayerAbilitiesC2SPacket", net.minecraft.network.packet.c2s.play.UpdatePlayerAbilitiesC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket.class, "RequestCommandCompletionsC2SPacket");
         C2S_PACKETS_R.put("RequestCommandCompletionsC2SPacket", net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket.class, "AcknowledgeReconfigurationC2SPacket");
+        C2S_PACKETS_R.put("AcknowledgeReconfigurationC2SPacket", net.minecraft.network.packet.c2s.play.AcknowledgeReconfigurationC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.query.QueryRequestC2SPacket.class, "QueryRequestC2SPacket");
         C2S_PACKETS_R.put("QueryRequestC2SPacket", net.minecraft.network.packet.c2s.query.QueryRequestC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class, "UpdateCommandBlockC2SPacket");
         C2S_PACKETS_R.put("UpdateCommandBlockC2SPacket", net.minecraft.network.packet.c2s.play.UpdateCommandBlockC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket.class, "CustomPayloadC2SPacket");
-        C2S_PACKETS_R.put("CustomPayloadC2SPacket", net.minecraft.network.packet.c2s.play.CustomPayloadC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.HandSwingC2SPacket.class, "HandSwingC2SPacket");
         C2S_PACKETS_R.put("HandSwingC2SPacket", net.minecraft.network.packet.c2s.play.HandSwingC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket.class, "AdvancementTabC2SPacket");
         C2S_PACKETS_R.put("AdvancementTabC2SPacket", net.minecraft.network.packet.c2s.play.AdvancementTabC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket.class, "ClickSlotC2SPacket");
         C2S_PACKETS_R.put("ClickSlotC2SPacket", net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket.class, "ClientSettingsC2SPacket");
-        C2S_PACKETS_R.put("ClientSettingsC2SPacket", net.minecraft.network.packet.c2s.play.ClientSettingsC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket.class, "AcknowledgeChunksC2SPacket");
+        C2S_PACKETS_R.put("AcknowledgeChunksC2SPacket", net.minecraft.network.packet.c2s.play.AcknowledgeChunksC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class, "SpectatorTeleportC2SPacket");
         C2S_PACKETS_R.put("SpectatorTeleportC2SPacket", net.minecraft.network.packet.c2s.play.SpectatorTeleportC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.login.LoginKeyC2SPacket.class, "LoginKeyC2SPacket");
@@ -84,20 +86,30 @@ public class PacketUtils {
         C2S_PACKETS_R.put("UpdateSelectedSlotC2SPacket", net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.RecipeCategoryOptionsC2SPacket.class, "RecipeCategoryOptionsC2SPacket");
         C2S_PACKETS_R.put("RecipeCategoryOptionsC2SPacket", net.minecraft.network.packet.c2s.play.RecipeCategoryOptionsC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket.class, "ResourcePackStatusC2SPacket");
+        C2S_PACKETS_R.put("ResourcePackStatusC2SPacket", net.minecraft.network.packet.c2s.common.ResourcePackStatusC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket.class, "PlayerMoveC2SPacket");
         C2S_PACKETS_R.put("PlayerMoveC2SPacket", net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.ClientOptionsC2SPacket.class, "ClientOptionsC2SPacket");
+        C2S_PACKETS_R.put("ClientOptionsC2SPacket", net.minecraft.network.packet.c2s.common.ClientOptionsC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PickFromInventoryC2SPacket.class, "PickFromInventoryC2SPacket");
         C2S_PACKETS_R.put("PickFromInventoryC2SPacket", net.minecraft.network.packet.c2s.play.PickFromInventoryC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket.class, "CustomPayloadC2SPacket");
+        C2S_PACKETS_R.put("CustomPayloadC2SPacket", net.minecraft.network.packet.c2s.common.CustomPayloadC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerSessionC2SPacket.class, "PlayerSessionC2SPacket");
         C2S_PACKETS_R.put("PlayerSessionC2SPacket", net.minecraft.network.packet.c2s.play.PlayerSessionC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket.class, "CloseHandledScreenC2SPacket");
         C2S_PACKETS_R.put("CloseHandledScreenC2SPacket", net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket.class, "SlotChangedStateC2SPacket");
+        C2S_PACKETS_R.put("SlotChangedStateC2SPacket", net.minecraft.network.packet.c2s.play.SlotChangedStateC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.config.ReadyC2SPacket.class, "ReadyC2SPacket");
+        C2S_PACKETS_R.put("ReadyC2SPacket", net.minecraft.network.packet.c2s.config.ReadyC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.BoatPaddleStateC2SPacket.class, "BoatPaddleStateC2SPacket");
         C2S_PACKETS_R.put("BoatPaddleStateC2SPacket", net.minecraft.network.packet.c2s.play.BoatPaddleStateC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket.class, "ButtonClickC2SPacket");
-        C2S_PACKETS_R.put("ButtonClickC2SPacket", net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket.class, "ChatMessageC2SPacket");
         C2S_PACKETS_R.put("ChatMessageC2SPacket", net.minecraft.network.packet.c2s.play.ChatMessageC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket.class, "ButtonClickC2SPacket");
+        C2S_PACKETS_R.put("ButtonClickC2SPacket", net.minecraft.network.packet.c2s.play.ButtonClickC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class, "UpdateBeaconC2SPacket");
         C2S_PACKETS_R.put("UpdateBeaconC2SPacket", net.minecraft.network.packet.c2s.play.UpdateBeaconC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateSignC2SPacket.class, "UpdateSignC2SPacket");
@@ -108,8 +120,8 @@ public class PacketUtils {
         C2S_PACKETS_R.put("UpdateStructureBlockC2SPacket", net.minecraft.network.packet.c2s.play.UpdateStructureBlockC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.UpdateCommandBlockMinecartC2SPacket.class, "UpdateCommandBlockMinecartC2SPacket");
         C2S_PACKETS_R.put("UpdateCommandBlockMinecartC2SPacket", net.minecraft.network.packet.c2s.play.UpdateCommandBlockMinecartC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.KeepAliveC2SPacket.class, "KeepAliveC2SPacket");
-        C2S_PACKETS_R.put("KeepAliveC2SPacket", net.minecraft.network.packet.c2s.play.KeepAliveC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.CommonPongC2SPacket.class, "CommonPongC2SPacket");
+        C2S_PACKETS_R.put("CommonPongC2SPacket", net.minecraft.network.packet.c2s.common.CommonPongC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket.class, "PlayerInputC2SPacket");
         C2S_PACKETS_R.put("PlayerInputC2SPacket", net.minecraft.network.packet.c2s.play.PlayerInputC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ClientCommandC2SPacket.class, "ClientCommandC2SPacket");
@@ -118,12 +130,10 @@ public class PacketUtils {
         C2S_PACKETS_R.put("UpdateJigsawC2SPacket", net.minecraft.network.packet.c2s.play.UpdateJigsawC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.query.QueryPingC2SPacket.class, "QueryPingC2SPacket");
         C2S_PACKETS_R.put("QueryPingC2SPacket", net.minecraft.network.packet.c2s.query.QueryPingC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.PlayPongC2SPacket.class, "PlayPongC2SPacket");
-        C2S_PACKETS_R.put("PlayPongC2SPacket", net.minecraft.network.packet.c2s.play.PlayPongC2SPacket.class);
-        C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket.class, "ResourcePackStatusC2SPacket");
-        C2S_PACKETS_R.put("ResourcePackStatusC2SPacket", net.minecraft.network.packet.c2s.play.ResourcePackStatusC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.MessageAcknowledgmentC2SPacket.class, "MessageAcknowledgmentC2SPacket");
         C2S_PACKETS_R.put("MessageAcknowledgmentC2SPacket", net.minecraft.network.packet.c2s.play.MessageAcknowledgmentC2SPacket.class);
+        C2S_PACKETS.put(net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket.class, "KeepAliveC2SPacket");
+        C2S_PACKETS_R.put("KeepAliveC2SPacket", net.minecraft.network.packet.c2s.common.KeepAliveC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket.class, "CreativeInventoryActionC2SPacket");
         C2S_PACKETS_R.put("CreativeInventoryActionC2SPacket", net.minecraft.network.packet.c2s.play.CreativeInventoryActionC2SPacket.class);
         C2S_PACKETS.put(net.minecraft.network.packet.c2s.play.VehicleMoveC2SPacket.class, "VehicleMoveC2SPacket");
@@ -153,10 +163,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("WorldBorderSizeChangedS2CPacket", net.minecraft.network.packet.s2c.play.WorldBorderSizeChangedS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.AdvancementUpdateS2CPacket.class, "AdvancementUpdateS2CPacket");
         S2C_PACKETS_R.put("AdvancementUpdateS2CPacket", net.minecraft.network.packet.s2c.play.AdvancementUpdateS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.FeaturesS2CPacket.class, "FeaturesS2CPacket");
-        S2C_PACKETS_R.put("FeaturesS2CPacket", net.minecraft.network.packet.s2c.play.FeaturesS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket.class, "CustomPayloadS2CPacket");
-        S2C_PACKETS_R.put("CustomPayloadS2CPacket", net.minecraft.network.packet.s2c.play.CustomPayloadS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.WorldBorderInterpolateSizeS2CPacket.class, "WorldBorderInterpolateSizeS2CPacket");
         S2C_PACKETS_R.put("WorldBorderInterpolateSizeS2CPacket", net.minecraft.network.packet.s2c.play.WorldBorderInterpolateSizeS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChunkLoadDistanceS2CPacket.class, "ChunkLoadDistanceS2CPacket");
@@ -173,6 +179,10 @@ public class PacketUtils {
         S2C_PACKETS_R.put("RemoveMessageS2CPacket", net.minecraft.network.packet.s2c.play.RemoveMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SetCameraEntityS2CPacket.class, "SetCameraEntityS2CPacket");
         S2C_PACKETS_R.put("SetCameraEntityS2CPacket", net.minecraft.network.packet.s2c.play.SetCameraEntityS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket.class, "ResourcePackSendS2CPacket");
+        S2C_PACKETS_R.put("ResourcePackSendS2CPacket", net.minecraft.network.packet.s2c.common.ResourcePackSendS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.DamageTiltS2CPacket.class, "DamageTiltS2CPacket");
+        S2C_PACKETS_R.put("DamageTiltS2CPacket", net.minecraft.network.packet.s2c.play.DamageTiltS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.CraftFailedResponseS2CPacket.class, "CraftFailedResponseS2CPacket");
         S2C_PACKETS_R.put("CraftFailedResponseS2CPacket", net.minecraft.network.packet.s2c.play.CraftFailedResponseS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.StatisticsS2CPacket.class, "StatisticsS2CPacket");
@@ -183,14 +193,16 @@ public class PacketUtils {
         S2C_PACKETS_R.put("VehicleMoveS2CPacket", net.minecraft.network.packet.s2c.play.VehicleMoveS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket.class, "EntityAttributesS2CPacket");
         S2C_PACKETS_R.put("EntityAttributesS2CPacket", net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TickStepS2CPacket.class, "TickStepS2CPacket");
+        S2C_PACKETS_R.put("TickStepS2CPacket", net.minecraft.network.packet.s2c.play.TickStepS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.StopSoundS2CPacket.class, "StopSoundS2CPacket");
         S2C_PACKETS_R.put("StopSoundS2CPacket", net.minecraft.network.packet.s2c.play.StopSoundS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScoreboardObjectiveUpdateS2CPacket.class, "ScoreboardObjectiveUpdateS2CPacket");
         S2C_PACKETS_R.put("ScoreboardObjectiveUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScoreboardObjectiveUpdateS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.StartChunkSendS2CPacket.class, "StartChunkSendS2CPacket");
+        S2C_PACKETS_R.put("StartChunkSendS2CPacket", net.minecraft.network.packet.s2c.play.StartChunkSendS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket.class, "EntitySetHeadYawS2CPacket");
         S2C_PACKETS_R.put("EntitySetHeadYawS2CPacket", net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.KeepAliveS2CPacket.class, "KeepAliveS2CPacket");
-        S2C_PACKETS_R.put("KeepAliveS2CPacket", net.minecraft.network.packet.s2c.play.KeepAliveS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SelectAdvancementTabS2CPacket.class, "SelectAdvancementTabS2CPacket");
         S2C_PACKETS_R.put("SelectAdvancementTabS2CPacket", net.minecraft.network.packet.s2c.play.SelectAdvancementTabS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SetTradeOffersS2CPacket.class, "SetTradeOffersS2CPacket");
@@ -199,14 +211,16 @@ public class PacketUtils {
         S2C_PACKETS_R.put("PlaySoundS2CPacket", net.minecraft.network.packet.s2c.play.PlaySoundS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BlockEventS2CPacket.class, "BlockEventS2CPacket");
         S2C_PACKETS_R.put("BlockEventS2CPacket", net.minecraft.network.packet.s2c.play.BlockEventS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket.class, "HealthUpdateS2CPacket");
-        S2C_PACKETS_R.put("HealthUpdateS2CPacket", net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket.class, "PlayerPositionLookS2CPacket");
         S2C_PACKETS_R.put("PlayerPositionLookS2CPacket", net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayPingS2CPacket.class, "PlayPingS2CPacket");
-        S2C_PACKETS_R.put("PlayPingS2CPacket", net.minecraft.network.packet.s2c.play.PlayPingS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChunkSentS2CPacket.class, "ChunkSentS2CPacket");
+        S2C_PACKETS_R.put("ChunkSentS2CPacket", net.minecraft.network.packet.s2c.play.ChunkSentS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket.class, "HealthUpdateS2CPacket");
+        S2C_PACKETS_R.put("HealthUpdateS2CPacket", net.minecraft.network.packet.s2c.play.HealthUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.WorldEventS2CPacket.class, "WorldEventS2CPacket");
         S2C_PACKETS_R.put("WorldEventS2CPacket", net.minecraft.network.packet.s2c.play.WorldEventS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.SynchronizeTagsS2CPacket.class, "SynchronizeTagsS2CPacket");
+        S2C_PACKETS_R.put("SynchronizeTagsS2CPacket", net.minecraft.network.packet.s2c.common.SynchronizeTagsS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ServerMetadataS2CPacket.class, "ServerMetadataS2CPacket");
         S2C_PACKETS_R.put("ServerMetadataS2CPacket", net.minecraft.network.packet.s2c.play.ServerMetadataS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.UpdateSelectedSlotS2CPacket.class, "UpdateSelectedSlotS2CPacket");
@@ -221,10 +235,10 @@ public class PacketUtils {
         S2C_PACKETS_R.put("CooldownUpdateS2CPacket", net.minecraft.network.packet.s2c.play.CooldownUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket.class, "OpenScreenS2CPacket");
         S2C_PACKETS_R.put("OpenScreenS2CPacket", net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class, "EntityAnimationS2CPacket");
-        S2C_PACKETS_R.put("EntityAnimationS2CPacket", net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class, "ExperienceOrbSpawnS2CPacket");
         S2C_PACKETS_R.put("ExperienceOrbSpawnS2CPacket", net.minecraft.network.packet.s2c.play.ExperienceOrbSpawnS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class, "EntityAnimationS2CPacket");
+        S2C_PACKETS_R.put("EntityAnimationS2CPacket", net.minecraft.network.packet.s2c.play.EntityAnimationS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket.class, "PlayerAbilitiesS2CPacket");
         S2C_PACKETS_R.put("PlayerAbilitiesS2CPacket", net.minecraft.network.packet.s2c.play.PlayerAbilitiesS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.WorldBorderWarningBlocksChangedS2CPacket.class, "WorldBorderWarningBlocksChangedS2CPacket");
@@ -249,64 +263,74 @@ public class PacketUtils {
         S2C_PACKETS_R.put("DifficultyS2CPacket", net.minecraft.network.packet.s2c.play.DifficultyS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.LookAtS2CPacket.class, "LookAtS2CPacket");
         S2C_PACKETS_R.put("LookAtS2CPacket", net.minecraft.network.packet.s2c.play.LookAtS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScoreboardScoreUpdateS2CPacket.class, "ScoreboardScoreUpdateS2CPacket");
+        S2C_PACKETS_R.put("ScoreboardScoreUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScoreboardScoreUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TitleS2CPacket.class, "TitleS2CPacket");
         S2C_PACKETS_R.put("TitleS2CPacket", net.minecraft.network.packet.s2c.play.TitleS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket.class, "OpenHorseScreenS2CPacket");
-        S2C_PACKETS_R.put("OpenHorseScreenS2CPacket", net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScreenHandlerPropertyUpdateS2CPacket.class, "ScreenHandlerPropertyUpdateS2CPacket");
         S2C_PACKETS_R.put("ScreenHandlerPropertyUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScreenHandlerPropertyUpdateS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket.class, "OpenHorseScreenS2CPacket");
+        S2C_PACKETS_R.put("OpenHorseScreenS2CPacket", net.minecraft.network.packet.s2c.play.OpenHorseScreenS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SimulationDistanceS2CPacket.class, "SimulationDistanceS2CPacket");
         S2C_PACKETS_R.put("SimulationDistanceS2CPacket", net.minecraft.network.packet.s2c.play.SimulationDistanceS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatSuggestionsS2CPacket.class, "ChatSuggestionsS2CPacket");
         S2C_PACKETS_R.put("ChatSuggestionsS2CPacket", net.minecraft.network.packet.s2c.play.ChatSuggestionsS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EnterCombatS2CPacket.class, "EnterCombatS2CPacket");
         S2C_PACKETS_R.put("EnterCombatS2CPacket", net.minecraft.network.packet.s2c.play.EnterCombatS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket.class, "DeathMessageS2CPacket");
-        S2C_PACKETS_R.put("DeathMessageS2CPacket", net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ProfilelessChatMessageS2CPacket.class, "ProfilelessChatMessageS2CPacket");
         S2C_PACKETS_R.put("ProfilelessChatMessageS2CPacket", net.minecraft.network.packet.s2c.play.ProfilelessChatMessageS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket.class, "DeathMessageS2CPacket");
+        S2C_PACKETS_R.put("DeathMessageS2CPacket", net.minecraft.network.packet.s2c.play.DeathMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket.class, "MapUpdateS2CPacket");
         S2C_PACKETS_R.put("MapUpdateS2CPacket", net.minecraft.network.packet.s2c.play.MapUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket.class, "ScreenHandlerSlotUpdateS2CPacket");
         S2C_PACKETS_R.put("ScreenHandlerSlotUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScreenHandlerSlotUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket.class, "BlockEntityUpdateS2CPacket");
         S2C_PACKETS_R.put("BlockEntityUpdateS2CPacket", net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SynchronizeTagsS2CPacket.class, "SynchronizeTagsS2CPacket");
-        S2C_PACKETS_R.put("SynchronizeTagsS2CPacket", net.minecraft.network.packet.s2c.play.SynchronizeTagsS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket.class, "PlayerSpawnPositionS2CPacket");
         S2C_PACKETS_R.put("PlayerSpawnPositionS2CPacket", net.minecraft.network.packet.s2c.play.PlayerSpawnPositionS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket.class, "EntityStatusEffectS2CPacket");
         S2C_PACKETS_R.put("EntityStatusEffectS2CPacket", net.minecraft.network.packet.s2c.play.EntityStatusEffectS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ClearTitleS2CPacket.class, "ClearTitleS2CPacket");
+        S2C_PACKETS_R.put("ClearTitleS2CPacket", net.minecraft.network.packet.s2c.play.ClearTitleS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.login.LoginCompressionS2CPacket.class, "LoginCompressionS2CPacket");
         S2C_PACKETS_R.put("LoginCompressionS2CPacket", net.minecraft.network.packet.s2c.login.LoginCompressionS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket.class, "CommandTreeS2CPacket");
         S2C_PACKETS_R.put("CommandTreeS2CPacket", net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ClearTitleS2CPacket.class, "ClearTitleS2CPacket");
-        S2C_PACKETS_R.put("ClearTitleS2CPacket", net.minecraft.network.packet.s2c.play.ClearTitleS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.CommonPingS2CPacket.class, "CommonPingS2CPacket");
+        S2C_PACKETS_R.put("CommonPingS2CPacket", net.minecraft.network.packet.s2c.common.CommonPingS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScoreboardScoreResetS2CPacket.class, "ScoreboardScoreResetS2CPacket");
+        S2C_PACKETS_R.put("ScoreboardScoreResetS2CPacket", net.minecraft.network.packet.s2c.play.ScoreboardScoreResetS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket.class, "TitleFadeS2CPacket");
         S2C_PACKETS_R.put("TitleFadeS2CPacket", net.minecraft.network.packet.s2c.play.TitleFadeS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket.class, "PlayerSpawnS2CPacket");
-        S2C_PACKETS_R.put("PlayerSpawnS2CPacket", net.minecraft.network.packet.s2c.play.PlayerSpawnS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.query.PingResultS2CPacket.class, "PingResultS2CPacket");
+        S2C_PACKETS_R.put("PingResultS2CPacket", net.minecraft.network.packet.s2c.query.PingResultS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.UpdateTickRateS2CPacket.class, "UpdateTickRateS2CPacket");
+        S2C_PACKETS_R.put("UpdateTickRateS2CPacket", net.minecraft.network.packet.s2c.play.UpdateTickRateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.InventoryS2CPacket.class, "InventoryS2CPacket");
         S2C_PACKETS_R.put("InventoryS2CPacket", net.minecraft.network.packet.s2c.play.InventoryS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerActionResponseS2CPacket.class, "PlayerActionResponseS2CPacket");
         S2C_PACKETS_R.put("PlayerActionResponseS2CPacket", net.minecraft.network.packet.s2c.play.PlayerActionResponseS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket.class, "ResourcePackSendS2CPacket");
-        S2C_PACKETS_R.put("ResourcePackSendS2CPacket", net.minecraft.network.packet.s2c.play.ResourcePackSendS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChunkBiomeDataS2CPacket.class, "ChunkBiomeDataS2CPacket");
+        S2C_PACKETS_R.put("ChunkBiomeDataS2CPacket", net.minecraft.network.packet.s2c.play.ChunkBiomeDataS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.WorldBorderWarningTimeChangedS2CPacket.class, "WorldBorderWarningTimeChangedS2CPacket");
         S2C_PACKETS_R.put("WorldBorderWarningTimeChangedS2CPacket", net.minecraft.network.packet.s2c.play.WorldBorderWarningTimeChangedS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ScoreboardPlayerUpdateS2CPacket.class, "ScoreboardPlayerUpdateS2CPacket");
-        S2C_PACKETS_R.put("ScoreboardPlayerUpdateS2CPacket", net.minecraft.network.packet.s2c.play.ScoreboardPlayerUpdateS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.query.QueryPongS2CPacket.class, "QueryPongS2CPacket");
-        S2C_PACKETS_R.put("QueryPongS2CPacket", net.minecraft.network.packet.s2c.query.QueryPongS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityDamageS2CPacket.class, "EntityDamageS2CPacket");
+        S2C_PACKETS_R.put("EntityDamageS2CPacket", net.minecraft.network.packet.s2c.play.EntityDamageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class, "ChatMessageS2CPacket");
         S2C_PACKETS_R.put("ChatMessageS2CPacket", net.minecraft.network.packet.s2c.play.ChatMessageS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket.class, "KeepAliveS2CPacket");
+        S2C_PACKETS_R.put("KeepAliveS2CPacket", net.minecraft.network.packet.s2c.common.KeepAliveS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.OpenWrittenBookS2CPacket.class, "OpenWrittenBookS2CPacket");
         S2C_PACKETS_R.put("OpenWrittenBookS2CPacket", net.minecraft.network.packet.s2c.play.OpenWrittenBookS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.ResourcePackRemoveS2CPacket.class, "ResourcePackRemoveS2CPacket");
+        S2C_PACKETS_R.put("ResourcePackRemoveS2CPacket", net.minecraft.network.packet.s2c.common.ResourcePackRemoveS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket.class, "PlaySoundFromEntityS2CPacket");
         S2C_PACKETS_R.put("PlaySoundFromEntityS2CPacket", net.minecraft.network.packet.s2c.play.PlaySoundFromEntityS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket.class, "WorldTimeUpdateS2CPacket");
         S2C_PACKETS_R.put("WorldTimeUpdateS2CPacket", net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.config.FeaturesS2CPacket.class, "FeaturesS2CPacket");
+        S2C_PACKETS_R.put("FeaturesS2CPacket", net.minecraft.network.packet.s2c.config.FeaturesS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SignEditorOpenS2CPacket.class, "SignEditorOpenS2CPacket");
         S2C_PACKETS_R.put("SignEditorOpenS2CPacket", net.minecraft.network.packet.s2c.play.SignEditorOpenS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExplosionS2CPacket.class, "ExplosionS2CPacket");
@@ -319,8 +343,6 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EndCombatS2CPacket", net.minecraft.network.packet.s2c.play.EndCombatS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.class, "PlayerListS2CPacket");
         S2C_PACKETS_R.put("PlayerListS2CPacket", net.minecraft.network.packet.s2c.play.PlayerListS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.DisconnectS2CPacket.class, "DisconnectS2CPacket");
-        S2C_PACKETS_R.put("DisconnectS2CPacket", net.minecraft.network.packet.s2c.play.DisconnectS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket.class, "ChunkRenderDistanceCenterS2CPacket");
         S2C_PACKETS_R.put("ChunkRenderDistanceCenterS2CPacket", net.minecraft.network.packet.s2c.play.ChunkRenderDistanceCenterS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.ExperienceBarUpdateS2CPacket.class, "ExperienceBarUpdateS2CPacket");
@@ -337,10 +359,12 @@ public class PacketUtils {
         S2C_PACKETS_R.put("ScoreboardDisplayS2CPacket", net.minecraft.network.packet.s2c.play.ScoreboardDisplayS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.login.LoginSuccessS2CPacket.class, "LoginSuccessS2CPacket");
         S2C_PACKETS_R.put("LoginSuccessS2CPacket", net.minecraft.network.packet.s2c.login.LoginSuccessS2CPacket.class);
-        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.GameMessageS2CPacket.class, "GameMessageS2CPacket");
-        S2C_PACKETS_R.put("GameMessageS2CPacket", net.minecraft.network.packet.s2c.play.GameMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BlockBreakingProgressS2CPacket.class, "BlockBreakingProgressS2CPacket");
         S2C_PACKETS_R.put("BlockBreakingProgressS2CPacket", net.minecraft.network.packet.s2c.play.BlockBreakingProgressS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.DisconnectS2CPacket.class, "DisconnectS2CPacket");
+        S2C_PACKETS_R.put("DisconnectS2CPacket", net.minecraft.network.packet.s2c.common.DisconnectS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.GameMessageS2CPacket.class, "GameMessageS2CPacket");
+        S2C_PACKETS_R.put("GameMessageS2CPacket", net.minecraft.network.packet.s2c.play.GameMessageS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket.class, "EntityPassengersSetS2CPacket");
         S2C_PACKETS_R.put("EntityPassengersSetS2CPacket", net.minecraft.network.packet.s2c.play.EntityPassengersSetS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.login.LoginHelloS2CPacket.class, "LoginHelloS2CPacket");
@@ -355,6 +379,10 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EntityTrackerUpdateS2CPacket", net.minecraft.network.packet.s2c.play.EntityTrackerUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket.class, "EntityStatusS2CPacket");
         S2C_PACKETS_R.put("EntityStatusS2CPacket", net.minecraft.network.packet.s2c.play.EntityStatusS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.config.DynamicRegistriesS2CPacket.class, "DynamicRegistriesS2CPacket");
+        S2C_PACKETS_R.put("DynamicRegistriesS2CPacket", net.minecraft.network.packet.s2c.config.DynamicRegistriesS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket.class, "CustomPayloadS2CPacket");
+        S2C_PACKETS_R.put("CustomPayloadS2CPacket", net.minecraft.network.packet.s2c.common.CustomPayloadS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.SubtitleS2CPacket.class, "SubtitleS2CPacket");
         S2C_PACKETS_R.put("SubtitleS2CPacket", net.minecraft.network.packet.s2c.play.SubtitleS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.NbtQueryResponseS2CPacket.class, "NbtQueryResponseS2CPacket");
@@ -363,6 +391,10 @@ public class PacketUtils {
         S2C_PACKETS_R.put("EntityEquipmentUpdateS2CPacket", net.minecraft.network.packet.s2c.play.EntityEquipmentUpdateS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.UnloadChunkS2CPacket.class, "UnloadChunkS2CPacket");
         S2C_PACKETS_R.put("UnloadChunkS2CPacket", net.minecraft.network.packet.s2c.play.UnloadChunkS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.config.ReadyS2CPacket.class, "ReadyS2CPacket");
+        S2C_PACKETS_R.put("ReadyS2CPacket", net.minecraft.network.packet.s2c.config.ReadyS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EnterReconfigurationS2CPacket.class, "EnterReconfigurationS2CPacket");
+        S2C_PACKETS_R.put("EnterReconfigurationS2CPacket", net.minecraft.network.packet.s2c.play.EnterReconfigurationS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityAttachS2CPacket.class, "EntityAttachS2CPacket");
         S2C_PACKETS_R.put("EntityAttachS2CPacket", net.minecraft.network.packet.s2c.play.EntityAttachS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BossBarS2CPacket.class, "BossBarS2CPacket");
@@ -373,6 +405,8 @@ public class PacketUtils {
         S2C_PACKETS_R.put("ChunkDataS2CPacket", net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket.class, "GameStateChangeS2CPacket");
         S2C_PACKETS_R.put("GameStateChangeS2CPacket", net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket.class);
+        S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.BundleS2CPacket.class, "BundleS2CPacket");
+        S2C_PACKETS_R.put("BundleS2CPacket", net.minecraft.network.packet.s2c.play.BundleS2CPacket.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityS2CPacket.RotateAndMoveRelative.class, "EntityS2CPacket.RotateAndMoveRelative");
         S2C_PACKETS_R.put("EntityS2CPacket.RotateAndMoveRelative", net.minecraft.network.packet.s2c.play.EntityS2CPacket.RotateAndMoveRelative.class);
         S2C_PACKETS.put(net.minecraft.network.packet.s2c.play.EntityS2CPacket.Rotate.class, "EntityS2CPacket.Rotate");
@@ -464,7 +498,7 @@ public class PacketUtils {
         @NotNull
         @Override
         public Iterator<Class<? extends Packet<?>>> iterator() {
-            return Iterators.concat(S2C_PACKETS.keySet().iterator(), C2S_PACKETS.keySet().iterator());
+            return Stream.concat(S2C_PACKETS.keySet().stream(), C2S_PACKETS.keySet().stream()).iterator();
         }
 
         @Override
@@ -474,7 +508,7 @@ public class PacketUtils {
 
         @Override
         public Set<Map.Entry<RegistryKey<Class<? extends Packet<?>>>, Class<? extends Packet<?>>>> getEntrySet() {
-            return null;
+            return Collections.emptySet();
         }
 
         @Override
@@ -535,7 +569,7 @@ public class PacketUtils {
 
         @Override
         public Set<RegistryKey<Class<? extends Packet<?>>>> getKeys() {
-            return null;
+            return Collections.emptySet();
         }
     }
 }

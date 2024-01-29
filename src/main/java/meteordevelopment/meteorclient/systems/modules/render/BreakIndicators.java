@@ -30,10 +30,10 @@ public class BreakIndicators extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<ShapeMode> shapeMode = sgGeneral.add(new EnumSetting.Builder<ShapeMode>()
-            .name("shape-mode")
-            .description("How the shapes are rendered.")
-            .defaultValue(ShapeMode.Both)
-            .build()
+        .name("shape-mode")
+        .description("How the shapes are rendered.")
+        .defaultValue(ShapeMode.Both)
+        .build()
     );
 
     public final Setting<Boolean> packetMine = sgGeneral.add(new BoolSetting.Builder()
@@ -129,14 +129,14 @@ public class BreakIndicators extends Module {
 
     private void renderBlock(Render3DEvent event, Box orig, BlockPos pos, double shrinkFactor, double progress) {
         Box box = orig.shrink(
-            orig.getXLength() * shrinkFactor,
-            orig.getYLength() * shrinkFactor,
-            orig.getZLength() * shrinkFactor
+            orig.getLengthX() * shrinkFactor,
+            orig.getLengthY() * shrinkFactor,
+            orig.getLengthZ() * shrinkFactor
         );
 
-        double xShrink = (orig.getXLength() * shrinkFactor) / 2;
-        double yShrink = (orig.getYLength() * shrinkFactor) / 2;
-        double zShrink = (orig.getZLength() * shrinkFactor) / 2;
+        double xShrink = (orig.getLengthX() * shrinkFactor) / 2;
+        double yShrink = (orig.getLengthY() * shrinkFactor) / 2;
+        double zShrink = (orig.getLengthZ() * shrinkFactor) / 2;
 
         double x1 = pos.getX() + box.minX + xShrink;
         double y1 = pos.getY() + box.minY + yShrink;

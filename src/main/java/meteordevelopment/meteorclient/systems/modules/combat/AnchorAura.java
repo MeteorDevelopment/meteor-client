@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
@@ -323,6 +322,12 @@ public class AnchorAura extends Module {
                 if (isValidPlace(targetPlacePos.down())) return targetPlacePos.down();
                 else if (isValidPlace(targetPlacePos.up(2))) return targetPlacePos.up(2);
                 break;
+            case Around:
+                if (isValidPlace(targetPlacePos.north())) return targetPlacePos.north();
+                else if (isValidPlace(targetPlacePos.east())) return targetPlacePos.east();
+                else if (isValidPlace(targetPlacePos.west())) return targetPlacePos.west();
+                else if (isValidPlace(targetPlacePos.south())) return targetPlacePos.south();
+                break;
         }
         return null;
     }
@@ -342,15 +347,15 @@ public class AnchorAura extends Module {
     }
 
     private boolean getDamagePlace(BlockPos pos) {
-        return placeMode.get() == Safety.Suicide || DamageUtils.bedDamage(mc.player, Utils.vec3d(pos.add(0.5, 0.5, 0.5))) <= maxDamage.get();
+        return placeMode.get() == Safety.Suicide || DamageUtils.bedDamage(mc.player, pos.toCenterPos()) <= maxDamage.get();
     }
 
     private boolean getDamageBreak(BlockPos pos) {
-        return breakMode.get() == Safety.Suicide || DamageUtils.anchorDamage(mc.player, Utils.vec3d(pos.add(0.5, 0.5, 0.5))) <= maxDamage.get();
+        return breakMode.get() == Safety.Suicide || DamageUtils.anchorDamage(mc.player, pos.toCenterPos()) <= maxDamage.get();
     }
 
     private boolean isValidPlace(BlockPos pos) {
-        return (mc.world.getBlockState(pos).isAir() || mc.world.getBlockState(pos).getFluidState().getFluid() instanceof FlowableFluid) && Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pos)) <= placeRange.get() && getDamagePlace(pos);
+        return Math.sqrt(mc.player.getBlockPos().getSquaredDistance(pos)) <= placeRange.get() && getDamagePlace(pos) && BlockUtils.canPlace(pos, true);
     }
 
     private boolean isValidBreak(BlockPos pos) {
@@ -386,6 +391,7 @@ public class AnchorAura extends Module {
 
     public enum PlaceMode {
         Above,
+        Around,
         AboveAndBelow,
         All
     }

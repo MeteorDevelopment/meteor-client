@@ -17,6 +17,7 @@ import meteordevelopment.meteorclient.systems.hud.Hud;
 import meteordevelopment.meteorclient.systems.hud.HudElementInfo;
 import meteordevelopment.meteorclient.systems.hud.HudGroup;
 import meteordevelopment.meteorclient.utils.Utils;
+import net.minecraft.client.gui.DrawContext;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -103,6 +104,7 @@ public class AddHudElementScreen extends WindowScreen {
     }
 
     private void runObject(Object object) {
+        if (object == null) return;
         if (object instanceof HudElementInfo.Preset preset) {
             Hud.get().add(preset, x, y);
             close();
@@ -124,8 +126,8 @@ public class AddHudElementScreen extends WindowScreen {
     }
 
     @Override
-    protected void onRenderBefore(float delta) {
-        HudEditorScreen.renderElements();
+    protected void onRenderBefore(DrawContext drawContext, float delta) {
+        HudEditorScreen.renderElements(drawContext);
     }
 
     private record Item(String title, String description, Object object) {}

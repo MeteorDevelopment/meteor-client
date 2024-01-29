@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -55,7 +55,7 @@ public class Step extends Module {
     );
 
     private float prevStepHeight;
-    private boolean prevBaritoneAssumeStep;
+    private boolean prevPathManagerStep;
 
     public Step() {
         super(Categories.Movement, "step", "Allows you to walk up full blocks instantly.");
@@ -63,10 +63,10 @@ public class Step extends Module {
 
     @Override
     public void onActivate() {
-        prevStepHeight = mc.player.stepHeight;
-        prevBaritoneAssumeStep = BaritoneAPI.getSettings().assumeStep.value;
+        prevStepHeight = mc.player.getStepHeight();
 
-        BaritoneAPI.getSettings().assumeStep.value = true;
+        prevPathManagerStep = PathManagers.get().getSettings().getStep().get();
+        PathManagers.get().getSettings().getStep().set(true);
     }
 
     @EventHandler
@@ -74,17 +74,18 @@ public class Step extends Module {
         boolean work = (activeWhen.get() == ActiveWhen.Always) || (activeWhen.get() == ActiveWhen.Sneaking && mc.player.isSneaking()) || (activeWhen.get() == ActiveWhen.NotSneaking && !mc.player.isSneaking());
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, 1, 0));
         if (work && (!safeStep.get() || (getHealth() > stepHealth.get() && getHealth() - getExplosionDamage() > stepHealth.get()))){
-            mc.player.stepHeight = height.get().floatValue();
+            mc.player.setStepHeight(height.get().floatValue());
         } else {
-            mc.player.stepHeight = prevStepHeight;
+            mc.player.setStepHeight(prevStepHeight);
         }
         mc.player.setBoundingBox(mc.player.getBoundingBox().offset(0, -1, 0));
     }
 
     @Override
     public void onDeactivate() {
-        mc.player.stepHeight = prevStepHeight;
-        BaritoneAPI.getSettings().assumeStep.value = prevBaritoneAssumeStep;
+        mc.player.setStepHeight(prevStepHeight);
+
+        PathManagers.get().getSettings().getStep().set(prevPathManagerStep);
     }
 
     private float getHealth(){

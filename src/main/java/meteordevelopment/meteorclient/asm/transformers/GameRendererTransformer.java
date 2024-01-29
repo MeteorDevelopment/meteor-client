@@ -24,10 +24,11 @@ public class GameRendererTransformer extends AsmTransformer {
     public void transform(ClassNode klass) {
         // Modify GameRenderer.getFov()
         MethodNode method = getMethod(klass, getFovMethod);
-        if (method == null) throw new RuntimeException("[Meteor Client] Could not find method GameRenderer.getFov()");
+        if (method == null) error("[Meteor Client] Could not find method GameRenderer.getFov()");
 
         int injectionCount = 0;
 
+        //noinspection DataFlowIssue
         for (AbstractInsnNode insn : method.instructions) {
             if (insn instanceof LdcInsnNode in && in.cst instanceof Double && (double) in.cst == 90) {
                 InsnList insns = new InsnList();
@@ -52,7 +53,7 @@ public class GameRendererTransformer extends AsmTransformer {
             }
         }
 
-        if (injectionCount < 2) throw new RuntimeException("[Meteor Client] Failed to modify GameRenderer.getFov()");
+        if (injectionCount < 2) error("[Meteor Client] Failed to modify GameRenderer.getFov()");
     }
 
     private void generateEventCall(InsnList insns, AbstractInsnNode loadPreviousFov) {

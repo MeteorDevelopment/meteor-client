@@ -39,18 +39,18 @@ public class EntityOwner extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-            .name("scale")
-            .description("The scale of the text.")
-            .defaultValue(1)
-            .min(0)
-            .build()
+        .name("scale")
+        .description("The scale of the text.")
+        .defaultValue(1)
+        .min(0)
+        .build()
     );
 
     private final Setting<Boolean> projectiles = sgGeneral.add(new BoolSetting.Builder()
-            .name("projectiles")
-            .description("Display owner names of projectiles.")
-            .defaultValue(false)
-            .build()
+        .name("projectiles")
+        .description("Display owner names of projectiles.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Vector3d pos = new Vector3d();
@@ -110,7 +110,7 @@ public class EntityOwner extends Module {
     private String getOwnerName(UUID uuid) {
         // Check if the player is online
         PlayerEntity player = mc.world.getPlayerByUuid(uuid);
-        if (player != null) return player.getEntityName();
+        if (player != null) return player.getName().getString();
 
         // Check cache
         String name = uuidToName.get(uuid);

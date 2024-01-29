@@ -5,10 +5,10 @@
 
 package meteordevelopment.meteorclient.systems;
 
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.systems.accounts.Accounts;
-import meteordevelopment.meteorclient.systems.commands.Commands;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.hud.Hud;
@@ -21,13 +21,12 @@ import meteordevelopment.orbit.EventHandler;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Systems {
     @SuppressWarnings("rawtypes")
-    private static final Map<Class<? extends System>, System<?>> systems = new HashMap<>();
+    private static final Map<Class<? extends System>, System<?>> systems = new Reference2ReferenceOpenHashMap<>();
     private static final List<Runnable> preLoadTasks = new ArrayList<>(1);
 
     public static void addPreLoadTask(Runnable task) {
@@ -35,13 +34,16 @@ public class Systems {
     }
 
     public static void init() {
-        System<?> config = add(new Config());
-        config.init();
-        config.load();
+        Config config = new Config();
+        System<?> configSystem = add(config);
+        configSystem.init();
+        configSystem.load();
+
+        // Registers the colors from config tab. This allows rainbow colours to work for friends.
+        config.settings.registerColorSettings(null);
 
         add(new Modules());
         add(new Macros());
-        add(new Commands());
         add(new Friends());
         add(new Accounts());
         add(new Waypoints());

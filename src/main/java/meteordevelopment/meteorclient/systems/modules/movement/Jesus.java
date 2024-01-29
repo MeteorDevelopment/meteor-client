@@ -5,7 +5,6 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
-import baritone.api.BaritoneAPI;
 import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.entity.player.CanWalkOnFluidEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
@@ -13,16 +12,20 @@ import meteordevelopment.meteorclient.events.world.CollisionShapeEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
 import meteordevelopment.meteorclient.mixininterface.IVec3d;
+import meteordevelopment.meteorclient.pathing.PathManagers;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.block.Material;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.enchantment.ProtectionEnchantment;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.fluid.Fluids;
-import net.minecraft.network.Packet;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
@@ -143,8 +146,8 @@ public class Jesus extends Module {
     private int tickTimer = 10;
     private int packetTimer = 0;
 
-    private boolean preBaritoneAssumeWalkOnWater;
-    private boolean preBaritoneAssumeWalkOnLava;
+    private boolean prePathManagerWalkOnWater;
+    private boolean prePathManagerWalkOnLava;
 
     public Jesus() {
         super(Categories.Movement, "jesus", "Walk on liquids and powder snow like Jesus.");
@@ -152,17 +155,17 @@ public class Jesus extends Module {
 
     @Override
     public void onActivate() {
-        preBaritoneAssumeWalkOnWater = BaritoneAPI.getSettings().assumeWalkOnWater.value;
-        preBaritoneAssumeWalkOnLava = BaritoneAPI.getSettings().assumeWalkOnLava.value;
+        prePathManagerWalkOnWater = PathManagers.get().getSettings().getWalkOnWater().get();
+        prePathManagerWalkOnLava = PathManagers.get().getSettings().getWalkOnLava().get();
 
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = waterMode.get() == Mode.Solid;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = lavaMode.get() == Mode.Solid;
+        PathManagers.get().getSettings().getWalkOnWater().set(waterMode.get() == Mode.Solid);
+        PathManagers.get().getSettings().getWalkOnLava().set(lavaMode.get() == Mode.Solid);
     }
 
     @Override
     public void onDeactivate() {
-        BaritoneAPI.getSettings().assumeWalkOnWater.value = preBaritoneAssumeWalkOnWater;
-        BaritoneAPI.getSettings().assumeWalkOnLava.value = preBaritoneAssumeWalkOnLava;
+        PathManagers.get().getSettings().getWalkOnWater().set(prePathManagerWalkOnWater);
+        PathManagers.get().getSettings().getWalkOnLava().set(prePathManagerWalkOnLava);
     }
 
     @EventHandler
@@ -213,11 +216,11 @@ public class Jesus extends Module {
 
     @EventHandler
     private void onFluidCollisionShape(CollisionShapeEvent event) {
-        if (event.type != CollisionShapeEvent.CollisionType.FLUID) return;
-        if (event.state.getMaterial() == Material.WATER && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
+        if (event.state.getFluidState().isEmpty()) return;
+
+        if ((event.state.getBlock() == Blocks.WATER | event.state.getFluidState().getFluid() == Fluids.WATER) && !mc.player.isTouchingWater() && waterShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
-        }
-        else if (event.state.getMaterial() == Material.LAVA && !mc.player.isInLava() && lavaShouldBeSolid()) {
+        } else if (event.state.getBlock() == Blocks.LAVA && !mc.player.isInLava() && lavaShouldBeSolid()) {
             event.shape = VoxelShapes.fullCube();
         }
     }
@@ -268,6 +271,15 @@ public class Jesus extends Module {
     private boolean waterShouldBeSolid() {
         if (EntityUtils.getGameMode(mc.player) == GameMode.SPECTATOR || mc.player.getAbilities().flying) return false;
 
+
+        if (mc.player.getVehicle() != null) {
+            EntityType<?> vehicle = mc.player.getVehicle().getType();
+            if (vehicle == EntityType.BOAT || vehicle == EntityType.CHEST_BOAT) return false;
+        }
+
+        if (Modules.get().get(Flight.class).isActive()) return false;
+
+
         if (dipIfBurning.get() && mc.player.isOnFire()) return false;
 
         if (dipOnSneakWater.get() && mc.options.sneakKey.isPressed()) return false;
@@ -304,10 +316,11 @@ public class Jesus extends Module {
 
         for (Box bb : blockCollisions) {
             blockPos.set(MathHelper.lerp(0.5D, bb.minX, bb.maxX), MathHelper.lerp(0.5D, bb.minY, bb.maxY), MathHelper.lerp(0.5D, bb.minZ, bb.maxZ));
-            Material material = mc.world.getBlockState(blockPos).getMaterial();
+            BlockState blockState = mc.world.getBlockState(blockPos);
 
-            if (material == Material.WATER || material == Material.LAVA) foundLiquid = true;
-            else if (material != Material.AIR) foundSolid = true;
+            if ((blockState.getBlock() == Blocks.WATER | blockState.getFluidState().getFluid() == Fluids.WATER) || blockState.getBlock() == Blocks.LAVA)
+                foundLiquid = true;
+            else if (!blockState.isAir()) foundSolid = true;
         }
 
         return foundLiquid && !foundSolid;

@@ -14,6 +14,8 @@ import meteordevelopment.meteorclient.gui.widgets.input.WTextBox;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.entity.effect.StatusEffect;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
@@ -25,7 +27,6 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
 
     private WTable table;
 
-    private WTextBox filter;
     private String filterText = "";
 
     public StatusEffectAmplifierMapSettingScreen(GuiTheme theme, Setting<Object2IntMap<StatusEffect>> setting) {
@@ -36,7 +37,7 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
 
     @Override
     public void initWidgets() {
-        filter = add(theme.textBox("")).minWidth(400).expandX().widget();
+        WTextBox filter = add(theme.textBox("")).minWidth(400).expandX().widget();
         filter.setFocused(true);
         filter.action = () -> {
             filterText = filter.get().trim();
@@ -46,6 +47,7 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
         };
 
         table = add(theme.table()).expandX().widget();
+
         initTable();
     }
 
@@ -57,7 +59,7 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
             String name = Names.get(statusEffect);
             if (!StringUtils.containsIgnoreCase(name, filterText)) continue;
 
-            table.add(theme.label(name)).expandCellX();
+            table.add(theme.itemWithLabel(getPotionStack(statusEffect), name)).expandCellX();
 
             WIntEdit level = theme.intEdit(setting.get().getInt(statusEffect), 0, Integer.MAX_VALUE, true);
             level.action = () -> {
@@ -68,5 +70,11 @@ public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
             table.add(level).minWidth(50);
             table.row();
         }
+    }
+
+    private ItemStack getPotionStack(StatusEffect effect) {
+        ItemStack potion = Items.POTION.getDefaultStack();
+        potion.getOrCreateNbt().putInt("CustomPotionColor", effect.getColor());
+        return potion;
     }
 }

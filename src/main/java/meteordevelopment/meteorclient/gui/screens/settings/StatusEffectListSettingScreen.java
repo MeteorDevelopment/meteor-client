@@ -10,11 +10,8 @@ import meteordevelopment.meteorclient.gui.widgets.WWidget;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.utils.misc.Names;
 import net.minecraft.entity.effect.StatusEffect;
-import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtil;
 import net.minecraft.registry.Registries;
 
 import java.util.List;
@@ -36,7 +33,7 @@ public class StatusEffectListSettingScreen extends LeftRightListSettingScreen<St
 
     private ItemStack getPotionStack(StatusEffect effect) {
         ItemStack potion = Items.POTION.getDefaultStack();
-        potion.getOrCreateNbt().putInt("CustomPotionColor", PotionUtil.getColor(new Potion(new StatusEffectInstance(effect))));
+        potion.getOrCreateNbt().putInt("CustomPotionColor", effect.getColor());
         return potion;
     }
 }

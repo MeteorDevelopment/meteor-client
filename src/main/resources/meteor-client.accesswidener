@@ -1,5 +1,6 @@
 accessWidener	v1	named
 
+accessible   class   net/minecraft/client/texture/PlayerSkinProvider$FileCache
 accessible   class   net/minecraft/client/render/RenderLayer$OutlineMode
 accessible   class   net/minecraft/client/particle/FireworksSparkParticle$Explosion
 accessible   class   net/minecraft/network/packet/c2s/play/PlayerInteractEntityC2SPacket$InteractType
@@ -70,4 +71,7 @@ accessible   class   net/minecraft/client/resource/ResourceReloadLogger$ReloadSt
 accessible   field   net/minecraft/block/AbstractBlock collidable Z
 accessible field net/minecraft/util/math/Direction HORIZONTAL [Lnet/minecraft/util/math/Direction;
 
-accessible   field   net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/item/ItemGroup;
+accessible field net/minecraft/item/ItemGroups INVENTORY Lnet/minecraft/registry/RegistryKey;
+
+accessible field net/minecraft/client/render/item/ItemRenderer TRIDENT Lnet/minecraft/client/util/ModelIdentifier;
+accessible field net/minecraft/client/render/item/ItemRenderer SPYGLASS Lnet/minecraft/client/util/ModelIdentifier;

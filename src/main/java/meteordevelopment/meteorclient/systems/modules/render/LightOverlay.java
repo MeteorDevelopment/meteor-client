@@ -26,61 +26,55 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LightOverlay extends Module {
-    public enum Spawn {
-        Never,
-        Potential,
-        Always
-    }
-
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgColors = settings.createGroup("Colors");
 
     // General
 
     private final Setting<Integer> horizontalRange = sgGeneral.add(new IntSetting.Builder()
-            .name("horizontal-range")
-            .description("Horizontal range in blocks.")
-            .defaultValue(8)
-            .min(0)
-            .build()
+        .name("horizontal-range")
+        .description("Horizontal range in blocks.")
+        .defaultValue(8)
+        .min(0)
+        .build()
     );
 
     private final Setting<Integer> verticalRange = sgGeneral.add(new IntSetting.Builder()
-            .name("vertical-range")
-            .description("Vertical range in blocks.")
-            .defaultValue(4)
-            .min(0)
-            .build()
+        .name("vertical-range")
+        .description("Vertical range in blocks.")
+        .defaultValue(4)
+        .min(0)
+        .build()
     );
 
     private final Setting<Boolean> seeThroughBlocks = sgGeneral.add(new BoolSetting.Builder()
-            .name("see-through-blocks")
-            .description("Allows you to see the lines through blocks.")
-            .defaultValue(false)
-            .build()
+        .name("see-through-blocks")
+        .description("Allows you to see the lines through blocks.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Boolean> newMobSpawnLightLevel = sgGeneral.add(new BoolSetting.Builder()
-            .name("new-mob-spawn-light-level")
-            .description("Use the new (1.18+) mob spawn behavior")
-            .defaultValue(true)
-            .build()
+        .name("new-mob-spawn-light-level")
+        .description("Use the new (1.18+) mob spawn behavior")
+        .defaultValue(true)
+        .build()
     );
 
     // Colors
 
     private final Setting<SettingColor> color = sgColors.add(new ColorSetting.Builder()
-            .name("color")
-            .description("Color of places where mobs can currently spawn.")
-            .defaultValue(new SettingColor(225, 25, 25))
-            .build()
+        .name("color")
+        .description("Color of places where mobs can currently spawn.")
+        .defaultValue(new SettingColor(225, 25, 25))
+        .build()
     );
 
     private final Setting<SettingColor> potentialColor = sgColors.add(new ColorSetting.Builder()
-            .name("potential-color")
-            .description("Color of places where mobs can potentially spawn (eg at night).")
-            .defaultValue(new SettingColor(225, 225, 25))
-            .build()
+        .name("potential-color")
+        .description("Color of places where mobs can potentially spawn (eg at night).")
+        .defaultValue(new SettingColor(225, 225, 25))
+        .build()
     );
 
     private final Pool<Cross> crossPool = new Pool<>(Cross::new);
@@ -99,16 +93,11 @@ public class LightOverlay extends Module {
         for (Cross cross : crosses) crossPool.free(cross);
         crosses.clear();
 
+        int spawnLightLevel = newMobSpawnLightLevel.get() ? 0 : 7;
         BlockIterator.register(horizontalRange.get(), verticalRange.get(), (blockPos, blockState) -> {
-            switch (BlockUtils.isValidMobSpawn(blockPos, newMobSpawnLightLevel.get())) {
-                case Never:
-                    break;
-                case Potential:
-                    crosses.add(crossPool.get().set(blockPos, true));
-                    break;
-                case Always:
-                    crosses.add((crossPool.get().set(blockPos, false)));
-                    break;
+            switch (BlockUtils.isValidMobSpawn(blockPos, blockState, spawnLightLevel)) {
+                case Potential -> crosses.add(crossPool.get().set(blockPos, true));
+                case Always -> crosses.add((crossPool.get().set(blockPos, false)));
             }
         });
     }
@@ -153,5 +142,11 @@ public class LightOverlay extends Module {
             line(x, y, z, x + 1, y, z + 1, c);
             line(x + 1, y, z, x, y, z + 1, c);
         }
+    }
+
+    public enum Spawn {
+        Never,
+        Potential,
+        Always
     }
 }

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.mojang.blaze3d.systems.RenderSystem;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.render.Render3DEvent;
@@ -30,7 +31,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.MathHelper;
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.spongepowered.asm.mixin.Final;
@@ -53,7 +53,7 @@ public abstract class GameRendererMixin {
     @Unique private Renderer3D renderer;
 
     @Inject(method = "renderWorld", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/util/profiler/Profiler;swap(Ljava/lang/String;)V", args = { "ldc=hand" }), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo info, boolean bl, Camera camera, MatrixStack matrixStack, double d, float f, float g, Matrix4f matrix4f, Matrix3f matrix3f) {
+    private void onRenderWorld(float tickDelta, long limitTime, MatrixStack matrices, CallbackInfo ci, boolean bl, Camera camera, Entity entity, MatrixStack matrixStack, double d, float f, float g, Matrix4f matrix4f, Matrix3f matrix3f) {
         if (!Utils.canUpdate()) return;
 
         client.getProfiler().push(MeteorClient.MOD_ID + "_render");
@@ -96,11 +96,6 @@ public abstract class GameRendererMixin {
         return entity.raycast(maxDistance, tickDelta, includeFluids);
     }
 
-    @Inject(method = "bobViewWhenHurt", at = @At("HEAD"), cancellable = true)
-    private void onBobViewWhenHurt(MatrixStack matrixStack, float f, CallbackInfo info) {
-        if (Modules.get().get(NoRender.class).noHurtCam()) info.cancel();
-    }
-
     @Inject(method = "showFloatingItem", at = @At("HEAD"), cancellable = true)
     private void onShowFloatingItem(ItemStack floatingItem, CallbackInfo info) {
         if (floatingItem.getItem() == Items.TOTEM_OF_UNDYING && Modules.get().get(NoRender.class).noTotemAnimation()) {
@@ -108,10 +103,9 @@ public abstract class GameRendererMixin {
         }
     }
 
-    @Redirect(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
-    private float applyCameraTransformationsMathHelperLerpProxy(float delta, float first, float second) {
-        if (Modules.get().get(NoRender.class).noNausea()) return 0;
-        return MathHelper.lerp(delta, first, second);
+    @ModifyExpressionValue(method = "renderWorld", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/math/MathHelper;lerp(FFF)F"))
+    private float applyCameraTransformationsMathHelperLerpProxy(float original) {
+        return Modules.get().get(NoRender.class).noNausea() ? 0 : original;
     }
 
     // Freecam
@@ -175,15 +169,14 @@ public abstract class GameRendererMixin {
             info.cancel();
     }
 
-    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 3))
+    @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 6))
     private double updateTargetedEntityModifySurvivalReach(double d) {
-        Reach reach = Modules.get().get(Reach.class);
-        return reach.isActive() ? reach.getReach() : d;
+        return Modules.get().get(Reach.class).entityReach();
     }
 
     @ModifyConstant(method = "updateTargetedEntity", constant = @Constant(doubleValue = 9))
     private double updateTargetedEntityModifySquaredMaxReach(double d) {
         Reach reach = Modules.get().get(Reach.class);
-        return reach.isActive() ? reach.getReach() * reach.getReach() : d;
+        return reach.entityReach() * reach.entityReach();
     }
 }

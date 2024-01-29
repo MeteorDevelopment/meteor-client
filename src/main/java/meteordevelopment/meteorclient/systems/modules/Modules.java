@@ -5,9 +5,9 @@
 
 package meteordevelopment.meteorclient.systems.modules;
 
-import com.google.common.collect.Ordering;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Lifecycle;
+import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameJoinedEvent;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
@@ -16,6 +16,7 @@ import meteordevelopment.meteorclient.events.meteor.ActiveModulesChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.KeyEvent;
 import meteordevelopment.meteorclient.events.meteor.ModuleBindChangedEvent;
 import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
+import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.System;
@@ -28,8 +29,8 @@ import meteordevelopment.meteorclient.systems.modules.movement.elytrafly.ElytraF
 import meteordevelopment.meteorclient.systems.modules.movement.speed.Speed;
 import meteordevelopment.meteorclient.systems.modules.player.*;
 import meteordevelopment.meteorclient.systems.modules.render.*;
-import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.render.blockesp.BlockESP;
+import meteordevelopment.meteorclient.systems.modules.render.marker.Marker;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
 import meteordevelopment.meteorclient.systems.modules.world.*;
 import meteordevelopment.meteorclient.utils.Utils;
@@ -67,8 +68,8 @@ public class Modules extends System<Modules> {
     private static final List<Category> CATEGORIES = new ArrayList<>();
 
     private final List<Module> modules = new ArrayList<>();
-    private final Map<Class<? extends Module>, Module> moduleInstances = new HashMap<>();
-    private final Map<Category, List<Module>> groups = new HashMap<>();
+    private final Map<Class<? extends Module>, Module> moduleInstances = new Reference2ReferenceOpenHashMap<>();
+    private final Map<Category, List<Module>> groups = new Reference2ReferenceOpenHashMap<>();
 
     private final List<Module> active = new ArrayList<>();
     private Module moduleToBind;
@@ -168,7 +169,7 @@ public class Modules extends System<Modules> {
     }
 
     public Set<Module> searchTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
         for (Module module : this.moduleInstances.values()) {
             int score = Utils.searchLevenshteinDefault(module.title, text, false);
@@ -179,7 +180,7 @@ public class Modules extends System<Modules> {
     }
 
     public Set<Module> searchSettingTitles(String text) {
-        Map<Module, Integer> modules = new ValueComparableMap<>(Ordering.natural());
+        Map<Module, Integer> modules = new ValueComparableMap<>(Comparator.naturalOrder());
 
         for (Module module : this.moduleInstances.values()) {
             int lowest = Integer.MAX_VALUE;
@@ -381,9 +382,7 @@ public class Modules extends System<Modules> {
     }
 
     private void initCombat() {
-        add(new AimAssist());
         add(new AnchorAura());
-//        add(new AntiAnchor());
         add(new AntiAnvil());
         add(new AntiBed());
         add(new ArrowDodge());
@@ -532,7 +531,6 @@ public class Modules extends System<Modules> {
         add(new EChestFarmer());
         add(new EndermanLook());
         add(new Flamethrower());
-        add(new InfinityMiner());
         add(new LiquidFiller());
         add(new MountBypass());
         add(new NoGhostBlocks());
@@ -542,6 +540,11 @@ public class Modules extends System<Modules> {
         add(new Timer());
         add(new VeinMiner());
         add(new HighwayBuilder());
+
+        if (BaritoneUtils.IS_AVAILABLE) {
+            add(new Excavator());
+            add(new InfinityMiner());
+        }
     }
 
     private void initMisc() {
@@ -557,7 +560,6 @@ public class Modules extends System<Modules> {
         add(new BookBot());
         add(new DiscordPresence());
         add(new MessageAura());
-        add(new MiddleClickFriend());
         add(new NameProtect());
         add(new Notebot());
         add(new Notifier());

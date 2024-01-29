@@ -18,9 +18,11 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.CursorStyle;
 import meteordevelopment.meteorclient.utils.misc.input.Input;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,12 +151,12 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
         if (locked) return false;
 
-        root.mouseScrolled(amount);
+        root.mouseScrolled(verticalAmount);
 
-        return super.mouseScrolled(mouseX, mouseY, amount);
+        return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
     @Override
@@ -195,8 +197,7 @@ public abstract class WidgetScreen extends Screen {
                     textBox.setCursorMax();
 
                     done.set(true);
-                }
-                else {
+                } else {
                     if (textBox.isFocused()) {
                         textBox.setFocused(false);
                         foundFocused.set(true);
@@ -218,8 +219,7 @@ public abstract class WidgetScreen extends Screen {
 
         if (control && keyCode == GLFW_KEY_C && toClipboard()) {
             return true;
-        }
-        else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
+        } else if (control && keyCode == GLFW_KEY_V && fromClipboard()) {
             reload();
             if (parent instanceof WidgetScreen wScreen) {
                 wScreen.reload();
@@ -244,35 +244,37 @@ public abstract class WidgetScreen extends Screen {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
-        if (!Utils.canUpdate()) renderBackground(matrices);
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
+        if (!Utils.canUpdate()) renderBackground(context, mouseX, mouseY, delta);
 
         double s = mc.getWindow().getScaleFactor();
         mouseX *= s;
         mouseY *= s;
 
         animProgress += delta / 20 * 14;
-        animProgress = Utils.clamp(animProgress, 0, 1);
+        animProgress = MathHelper.clamp(animProgress, 0, 1);
 
         GuiKeyEvents.canUseKeys = true;
 
         // Apply projection without scaling
         Utils.unscaledProjection();
 
-        onRenderBefore(delta);
+        onRenderBefore(context, delta);
 
         RENDERER.theme = theme;
         theme.beforeRender();
 
-        RENDERER.begin(matrices);
+        RENDERER.begin(context);
         RENDERER.setAlpha(animProgress);
         root.render(RENDERER, mouseX, mouseY, delta / 20);
         RENDERER.setAlpha(1);
-        RENDERER.end(matrices);
+        RENDERER.end();
 
-        boolean tooltip = RENDERER.renderTooltip(mouseX, mouseY, delta / 20, matrices);
+        boolean tooltip = RENDERER.renderTooltip(context, mouseX, mouseY, delta / 20);
 
         if (debug) {
+            MatrixStack matrices = context.getMatrices();
+
             DEBUG_RENDERER.render(root, matrices);
             if (tooltip) DEBUG_RENDERER.render(RENDERER.tooltipWidget, matrices);
         }
@@ -289,7 +291,7 @@ public abstract class WidgetScreen extends Screen {
         }
     }
 
-    protected void onRenderBefore(float delta) {}
+    protected void onRenderBefore(DrawContext drawContext, float delta) {}
 
     @Override
     public void resize(MinecraftClient client, int width, int height) {
@@ -318,10 +320,7 @@ public abstract class WidgetScreen extends Screen {
             Input.setCursorStyle(CursorStyle.Default);
 
             loopWidgets(root, widget -> {
-                if (widget instanceof WTextBox textBox) {
-
-                    if (textBox.isFocused()) textBox.setFocused(false);
-                }
+                if (widget instanceof WTextBox textBox && textBox.isFocused()) textBox.setFocused(false);
             });
 
             MeteorClient.EVENT_BUS.unsubscribe(this);

@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import meteordevelopment.meteorclient.mixininterface.IEntityRenderer;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.Fullbright;
@@ -21,6 +22,7 @@ import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.LightType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,9 +50,14 @@ public abstract class EntityRendererMixin<T extends Entity> implements IEntityRe
         if (Modules.get().get(NoRender.class).noFallingBlocks() && entity instanceof FallingBlockEntity) cir.cancel();
     }
 
-    @Inject(method = "getSkyLight", at = @At("RETURN"), cancellable = true)
-    private void onGetSkyLight(CallbackInfoReturnable<Integer> info) {
-        info.setReturnValue(Math.max(Modules.get().get(Fullbright.class).getLuminance(), info.getReturnValueI()));
+    @ModifyReturnValue(method = "getSkyLight", at = @At("RETURN"))
+    private int onGetSkyLight(int original) {
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.SKY), original);
+    }
+
+    @ModifyReturnValue(method = "getBlockLight", at = @At("RETURN"))
+    private int onGetBlockLight(int original) {
+        return Math.max(Modules.get().get(Fullbright.class).getLuminance(LightType.BLOCK), original);
     }
 
     @Override

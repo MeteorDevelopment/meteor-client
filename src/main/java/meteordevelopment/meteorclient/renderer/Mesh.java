@@ -103,7 +103,7 @@ public class Mesh {
     }
 
     public void begin() {
-        if (building) throw new IllegalStateException("Mesh.end() called while already building.");
+        if (building) throw new IllegalStateException("Mesh.begin() called while already building.");
 
         verticesPointer = verticesPointerStart;
         vertexI = 0;
@@ -183,6 +183,17 @@ public class Mesh {
         memPutInt(p + 20, i1);
 
         indicesCount += 6;
+        growIfNeeded();
+    }
+
+    public void triangle(int i1, int i2, int i3) {
+        long p = indicesPointer + indicesCount * 4L;
+
+        memPutInt(p, i1);
+        memPutInt(p + 4, i2);
+        memPutInt(p + 8, i3);
+
+        indicesCount += 3;
         growIfNeeded();
     }
 

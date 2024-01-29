@@ -5,28 +5,24 @@
 
 package meteordevelopment.meteorclient.systems.accounts.types;
 
-import com.mojang.authlib.Agent;
 import com.mojang.authlib.Environment;
-import com.mojang.authlib.exceptions.AuthenticationException;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.authlib.yggdrasil.YggdrasilMinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilUserAuthentication;
+import de.florianmichael.waybackauthlib.InvalidCredentialsException;
+import de.florianmichael.waybackauthlib.WaybackAuthLib;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
+import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
-import meteordevelopment.meteorclient.systems.accounts.AccountUtils;
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
 
 import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class TheAlteningAccount extends Account<TheAlteningAccount> {
-    private static final String AUTH = "http://authserver.thealtening.com";
-    private static final String ACCOUNT = "https://api.mojang.com";
-    private static final String SESSION = "http://sessionserver.thealtening.com";
-    private static final String SERVICES = "https://api.minecraftservices.com";
+    private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "The Altening");
+    private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
 
     public TheAlteningAccount(String token) {
         super(AccountType.TheAltening, token);
@@ -34,45 +30,45 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
 
     @Override
     public boolean fetchInfo() {
-        YggdrasilUserAuthentication auth = getAuth();
+        WaybackAuthLib auth = getAuth();
 
         try {
             auth.logIn();
 
-            cache.username = auth.getSelectedProfile().getName();
-            cache.uuid = auth.getSelectedProfile().getId().toString();
+            cache.username = auth.getCurrentProfile().getName();
+            cache.uuid = auth.getCurrentProfile().getId().toString();
 
             return true;
-        } catch (AuthenticationException e) {
+        } catch (Exception e) {
             return false;
         }
     }
 
     @Override
     public boolean login() {
-        YggdrasilMinecraftSessionService service = (YggdrasilMinecraftSessionService) mc.getSessionService();
-        AccountUtils.setBaseUrl(service, SESSION + "/session/minecraft/");
-        AccountUtils.setJoinUrl(service, SESSION + "/session/minecraft/join");
-        AccountUtils.setCheckUrl(service, SESSION + "/session/minecraft/hasJoined");
+        applyLoginEnvironment(SERVICE, YggdrasilMinecraftSessionServiceAccessor.createYggdrasilMinecraftSessionService(SERVICE.getServicesKeySet(), SERVICE.getProxy(), ENVIRONMENT));
 
-        YggdrasilUserAuthentication auth = getAuth();
+        WaybackAuthLib auth = getAuth();
 
         try {
             auth.logIn();
-            setSession(new Session(auth.getSelectedProfile().getName(), auth.getSelectedProfile().getId().toString(), auth.getAuthenticatedToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
+            setSession(new Session(auth.getCurrentProfile().getName(), auth.getCurrentProfile().getId(), auth.getAccessToken(), Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
 
-            cache.username = auth.getSelectedProfile().getName();
+            cache.username = auth.getCurrentProfile().getName();
             cache.loadHead();
 
             return true;
-        } catch (AuthenticationException e) {
+        } catch (InvalidCredentialsException e) {
+            MeteorClient.LOG.error("Invalid TheAltening credentials.");
+            return false;
+        } catch (Exception e) {
             MeteorClient.LOG.error("Failed to login with TheAltening.");
             return false;
         }
     }
 
-    private YggdrasilUserAuthentication getAuth() {
-        YggdrasilUserAuthentication auth = (YggdrasilUserAuthentication) new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), "", Environment.create(AUTH, ACCOUNT, SESSION, SERVICES, "The Altening")).createUserAuthentication(Agent.MINECRAFT);
+    private WaybackAuthLib getAuth() {
+        WaybackAuthLib auth = new WaybackAuthLib(ENVIRONMENT.servicesHost());
 
         auth.setUsername(name);
         auth.setPassword("Meteor on Crack!");

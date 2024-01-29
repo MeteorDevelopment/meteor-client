@@ -164,16 +164,21 @@ public class ModulesScreen extends TabScreen {
     }
 
     protected boolean createFavoritesW(WWindow w) {
-        boolean hasFavorites = false;
+        List<Module> modules = new ArrayList<>();
 
         for (Module module : Modules.get().getAll()) {
             if (module.favorite) {
-                w.add(theme.module(module)).expandX();
-                hasFavorites = true;
+                modules.add(module);
             }
         }
 
-        return hasFavorites;
+        modules.sort((o1, o2) -> String.CASE_INSENSITIVE_ORDER.compare(o1.name, o2.name));
+
+        for (Module module : modules) {
+            w.add(theme.module(module)).expandX();
+        }
+
+        return !modules.isEmpty();
     }
 
     @Override

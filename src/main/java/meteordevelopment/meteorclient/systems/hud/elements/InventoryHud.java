@@ -42,6 +42,7 @@ public class InventoryHud extends HudElement {
         .defaultValue(2)
         .min(1)
         .sliderRange(1, 5)
+        .onChanged(aDouble -> calculateSize())
         .build()
     );
 
@@ -49,6 +50,7 @@ public class InventoryHud extends HudElement {
         .name("background")
         .description("Background of inventory viewer.")
         .defaultValue(Background.Texture)
+        .onChanged(bg -> calculateSize())
         .build()
     );
 
@@ -64,12 +66,12 @@ public class InventoryHud extends HudElement {
 
     private InventoryHud() {
         super(INFO);
+
+        calculateSize();
     }
 
     @Override
     public void render(HudRenderer renderer) {
-        setSize(background.get().width * scale.get(), background.get().height * scale.get());
-
         double x = this.x, y = this.y;
 
         ItemStack container = getContainer();
@@ -81,7 +83,9 @@ public class InventoryHud extends HudElement {
             drawBackground(renderer, (int) x, (int) y, drawColor);
         }
 
-        if (mc.player != null) {
+        if (mc.player == null) return;
+
+        renderer.post(() -> {
             for (int row = 0; row < 3; row++) {
                 for (int i = 0; i < 9; i++) {
                     int index = row * 9 + i;
@@ -91,10 +95,14 @@ public class InventoryHud extends HudElement {
                     int itemX = background.get() == Background.Texture ? (int) (x + (8 + i * 18) * scale.get()) : (int) (x + (1 + i * 18) * scale.get());
                     int itemY = background.get() == Background.Texture ? (int) (y + (7 + row * 18) * scale.get()) : (int) (y + (1 + row * 18) * scale.get());
 
-                    RenderUtils.drawItem(stack, itemX, itemY, scale.get(), true);
+                    renderer.item(stack, itemX, itemY, scale.get().floatValue(), true);
                 }
             }
-        }
+        });
+    }
+
+    private void calculateSize() {
+        setSize(background.get().width * scale.get(), background.get().height * scale.get());
     }
 
     private void drawBackground(HudRenderer renderer, int x, int y, Color color) {
@@ -108,7 +116,7 @@ public class InventoryHud extends HudElement {
     }
 
     private ItemStack getContainer() {
-        if (isInEditor()) return null;
+        if (isInEditor() || mc.player == null) return null;
 
         ItemStack stack = mc.player.getOffHandStack();
         if (Utils.hasItems(stack) || stack.getItem() == Items.ENDER_CHEST) return stack;

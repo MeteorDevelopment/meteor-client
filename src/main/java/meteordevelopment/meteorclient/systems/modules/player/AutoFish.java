@@ -25,37 +25,37 @@ public class AutoFish extends Module {
     // General
 
     private final Setting<Boolean> autoCast = sgGeneral.add(new BoolSetting.Builder()
-            .name("auto-cast")
-            .description("Automatically casts when not fishing.")
-            .defaultValue(true)
-            .build()
+        .name("auto-cast")
+        .description("Automatically casts when not fishing.")
+        .defaultValue(true)
+        .build()
     );
 
     private final Setting<Integer> ticksAutoCast = sgGeneral.add(new IntSetting.Builder()
-            .name("ticks-auto-cast")
-            .description("The amount of ticks to wait before recasting automatically.")
-            .defaultValue(10)
-            .min(0)
-            .sliderMax(60)
-            .build()
+        .name("ticks-auto-cast")
+        .description("The amount of ticks to wait before recasting automatically.")
+        .defaultValue(10)
+        .min(0)
+        .sliderMax(60)
+        .build()
     );
 
     private final Setting<Integer> ticksCatch = sgGeneral.add(new IntSetting.Builder()
-            .name("catch-delay")
-            .description("The amount of ticks to wait before catching the fish.")
-            .defaultValue(6)
-            .min(0)
-            .sliderMax(60)
-            .build()
+        .name("catch-delay")
+        .description("The amount of ticks to wait before catching the fish.")
+        .defaultValue(6)
+        .min(0)
+        .sliderMax(60)
+        .build()
     );
 
     private final Setting<Integer> ticksThrow = sgGeneral.add(new IntSetting.Builder()
-            .name("throw-delay")
-            .description("The amount of ticks to wait before throwing the bobber.")
-            .defaultValue(14)
-            .min(0)
-            .sliderMax(60)
-            .build()
+        .name("throw-delay")
+        .description("The amount of ticks to wait before throwing the bobber.")
+        .defaultValue(14)
+        .min(0)
+        .sliderMax(60)
+        .build()
     );
 
     private final Setting<Boolean> antiBreak = sgGeneral.add(new BoolSetting.Builder()
@@ -68,18 +68,18 @@ public class AutoFish extends Module {
     // Splash Detection
 
     private final Setting<Boolean> splashDetectionRangeEnabled = sgSplashRangeDetection.add(new BoolSetting.Builder()
-            .name("splash-detection-range-enabled")
-            .description("Allows you to use multiple accounts next to each other.")
-            .defaultValue(false)
-            .build()
+        .name("splash-detection-range-enabled")
+        .description("Allows you to use multiple accounts next to each other.")
+        .defaultValue(false)
+        .build()
     );
 
     private final Setting<Double> splashDetectionRange = sgSplashRangeDetection.add(new DoubleSetting.Builder()
-            .name("splash-detection-range")
-            .description("The detection range of a splash. Lower values will not work when the TPS is low.")
-            .defaultValue(10)
-            .min(0)
-            .build()
+        .name("splash-detection-range")
+        .description("The detection range of a splash. Lower values will not work when the TPS is low.")
+        .defaultValue(10)
+        .min(0)
+        .build()
     );
 
     private boolean ticksEnabled;

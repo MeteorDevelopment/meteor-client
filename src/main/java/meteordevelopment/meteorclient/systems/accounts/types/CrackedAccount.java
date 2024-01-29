@@ -7,7 +7,8 @@ package meteordevelopment.meteorclient.systems.accounts.types;
 
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
-import net.minecraft.client.util.Session;
+import net.minecraft.client.session.Session;
+import net.minecraft.util.Uuids;
 
 import java.util.Optional;
 
@@ -27,7 +28,7 @@ public class CrackedAccount extends Account<CrackedAccount> {
         super.login();
 
         cache.loadHead();
-        setSession(new Session(name, "", "", Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
+        setSession(new Session(name, Uuids.getOfflinePlayerUuid(name), "", Optional.empty(), Optional.empty(), Session.AccountType.MOJANG));
         return true;
     }
 

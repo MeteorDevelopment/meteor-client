@@ -23,10 +23,10 @@ public class AutoBrewer extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
     private final Setting<MyPotion> potion = sgGeneral.add(new PotionSetting.Builder()
-            .name("potion")
-            .description("The type of potion to brew.")
-            .defaultValue(MyPotion.Strength)
-            .build()
+        .name("potion")
+        .description("The type of potion to brew.")
+        .defaultValue(MyPotion.Strength)
+        .build()
     );
 
     private int ingredientI;
@@ -159,7 +159,7 @@ public class AutoBrewer extends Module {
 
     private boolean takePotions(BrewingStandScreenHandler c) {
         for (int i = 0; i < 3; i++) {
-            InvUtils.quickMove().slotId(i);
+            InvUtils.shiftClick().slotId(i);
 
             if (!c.slots.get(i).getStack().isEmpty()) {
                 error("You do not have a sufficient amount of inventory space... disabling.");

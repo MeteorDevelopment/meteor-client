@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.JsonParseException;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import meteordevelopment.meteorclient.events.game.ItemStackTooltipEvent;
@@ -229,14 +229,14 @@ public class BetterTooltips extends Module {
                 NbtCompound tag = event.itemStack.getNbt();
 
                 if (tag != null) {
-                    NbtList effects = tag.getList("Effects", 10);
+                    NbtList effects = tag.getList("effects", 10);
 
                     if (effects != null) {
                         for (int i = 0; i < effects.size(); i++) {
                             NbtCompound effectTag = effects.getCompound(i);
                             byte effectId = effectTag.getByte("EffectId");
                             int effectDuration = effectTag.contains("EffectDuration") ? effectTag.getInt("EffectDuration") : 160;
-                            StatusEffect type = StatusEffect.byRawId(effectId);
+                            StatusEffect type = Registries.STATUS_EFFECT.get(effectId);
 
                             if (type != null) {
                                 StatusEffectInstance effect = new StatusEffectInstance(type, effectDuration, 0);
@@ -299,7 +299,7 @@ public class BetterTooltips extends Module {
         }
 
         // Hold to preview tooltip
-        if ((Utils.hasItems(event.itemStack) && shulkers.get() && !previewShulkers())
+        if ((shulkers.get() && !previewShulkers() && Utils.hasItems(event.itemStack))
             || (event.itemStack.getItem() == Items.ENDER_CHEST && echest.get() && !previewEChest())
             || (event.itemStack.getItem() == Items.FILLED_MAP && maps.get() && !previewMaps())
             || (event.itemStack.getItem() == Items.WRITABLE_BOOK && books.get() && !previewBooks())
@@ -316,7 +316,7 @@ public class BetterTooltips extends Module {
     @EventHandler
     private void getTooltipData(TooltipDataEvent event) {
         // Container preview
-        if (Utils.hasItems(event.itemStack) && previewShulkers()) {
+        if (previewShulkers() && Utils.hasItems(event.itemStack)) {
             NbtCompound compoundTag = event.itemStack.getSubNbt("BlockEntityTag");
             DefaultedList<ItemStack> itemStacks = DefaultedList.ofSize(27, ItemStack.EMPTY);
             Inventories.readNbt(compoundTag, itemStacks);
@@ -325,7 +325,8 @@ public class BetterTooltips extends Module {
 
         // EChest preview
         else if (event.itemStack.getItem() == Items.ENDER_CHEST && previewEChest()) {
-            event.tooltipData = new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR);
+            event.tooltipData = EChestMemory.isKnown() ? new ContainerTooltipComponent(EChestMemory.ITEMS, ECHEST_COLOR)
+                : new TextTooltipComponent(Text.literal("Unknown ender chest inventory.").formatted(Formatting.DARK_RED));
         }
 
         // Map preview
@@ -345,7 +346,9 @@ public class BetterTooltips extends Module {
             event.tooltipData = new BannerTooltipComponent(event.itemStack);
         }
         else if (event.itemStack.getItem() instanceof BannerPatternItem patternItem && previewBanners()) {
-            RegistryEntry<BannerPattern> bannerPattern = (Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() ? Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
+            boolean present = Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).isPresent() && Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().size() != 0;
+
+            RegistryEntry<BannerPattern> bannerPattern = (present ? Registries.BANNER_PATTERN.getEntryList(patternItem.getPattern()).get().get(0) : null);
             if (bannerPattern != null) event.tooltipData = new BannerTooltipComponent(createBannerFromPattern(bannerPattern));
         }
         else if (event.itemStack.getItem() == Items.SHIELD && previewBanners()) {
@@ -414,10 +417,10 @@ public class BetterTooltips extends Module {
     private MutableText getStatusText(StatusEffectInstance effect) {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.durationToString(effect, 1)));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
         else {
-            text.append(String.format(" (%s)", StatusEffectUtil.durationToString(effect, 1)));
+            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
 
         if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
@@ -433,8 +436,8 @@ public class BetterTooltips extends Module {
         if (stack.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getString(0));
 
         try {
-            return Text.Serializer.fromLenientJson(pages.getString(0));
-        } catch (JsonSyntaxException e) {
+            return Text.Serialization.fromLenientJson(pages.getString(0));
+        } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }
     }

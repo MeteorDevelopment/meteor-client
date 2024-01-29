@@ -11,7 +11,6 @@ import meteordevelopment.meteorclient.renderer.ShapeMode;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
-import meteordevelopment.meteorclient.systems.modules.world.PacketMine;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.SortPriority;
 import meteordevelopment.meteorclient.utils.entity.TargetUtils;
@@ -150,7 +149,7 @@ public class AutoCity extends Module {
         }
 
         targetPos = EntityUtils.getCityBlock(target);
-        if (targetPos == null || PlayerUtils.distanceTo(targetPos) > breakRange.get()) {
+        if (targetPos == null || PlayerUtils.squaredDistanceTo(targetPos) > Math.pow(breakRange.get(), 2)) {
             if (chatInfo.get()) error("Couldn't find a good block, disabling.");
             toggle();
             return;
@@ -158,7 +157,7 @@ public class AutoCity extends Module {
 
         if (support.get()) {
             BlockPos supportPos = targetPos.down();
-            if (!(PlayerUtils.distanceTo(supportPos) > placeRange.get())) {
+            if (!(PlayerUtils.squaredDistanceTo(supportPos) > Math.pow(placeRange.get(), 2))) {
                 BlockUtils.place(supportPos, InvUtils.findInHotbar(Items.OBSIDIAN), rotate.get(), 0, true);
             }
         }
@@ -187,7 +186,7 @@ public class AutoCity extends Module {
             return;
         }
 
-        if (PlayerUtils.distanceTo(targetPos) > breakRange.get()) {
+        if (PlayerUtils.squaredDistanceTo(targetPos) > Math.pow(breakRange.get(), 2)) {
             if (chatInfo.get()) error("Couldn't find a target, disabling.");
             toggle();
             return;
@@ -212,7 +211,7 @@ public class AutoCity extends Module {
         InvUtils.swap(pick.slot(), switchMode.get() == SwitchMode.Silent);
         if (rotate.get()) Rotations.rotate(Rotations.getYaw(targetPos), Rotations.getPitch(targetPos));
 
-        Direction direction = (mc.player.getY() > targetPos.getY()) ? Direction.UP : Direction.DOWN;
+        Direction direction = BlockUtils.getDirection(targetPos);
         if (!done) mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.START_DESTROY_BLOCK, targetPos, direction));
         mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, targetPos, direction));
 
