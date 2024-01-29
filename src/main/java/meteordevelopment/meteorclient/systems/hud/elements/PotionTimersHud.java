@@ -14,7 +14,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.util.StringHelper;
+import net.minecraft.entity.effect.StatusEffectUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -241,7 +241,7 @@ public class PotionTimersHud extends HudElement {
     }
 
     private String getString(StatusEffectInstance statusEffectInstance) {
-        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType()), statusEffectInstance.getAmplifier() + 1, statusEffectInstance.isInfinite() ? "inf" : StringHelper.formatTicks(statusEffectInstance.getDuration(), mc.world.getTickManager().getTickRate())); //todo remove "inf" when font rendering can use symbols
+        return String.format("%s %d (%s)", Names.get(statusEffectInstance.getEffectType()), statusEffectInstance.getAmplifier() + 1, StatusEffectUtil.getDurationText(statusEffectInstance, 1, mc.world.getTickManager().getTickRate()).getString());
     }
 
     private double getScale() {
