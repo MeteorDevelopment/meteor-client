@@ -25,17 +25,17 @@ public class SodiumBiomeColorCacheMixin {
         ambience = Modules.get().get(Ambience.class);
     }
 
-    @ModifyExpressionValue(method = "updateColorBuffers", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/ColorResolver;getColor(Lnet/minecraft/world/biome/Biome;DD)I", ordinal = 0, remap = true))
+    @ModifyExpressionValue(method = "getColor(Lme/jellysquid/mods/sodium/client/world/biome/BiomeColorSource;III)I", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/world/biome/BiomeColorCache;getColor(Lnet/minecraft/world/biome/ColorResolver;III)I", ordinal = 0, remap = true))
     private int modify_getGrassColorAt(int color) {
         return ambience.isActive() && ambience.customGrassColor.get() ? ambience.grassColor.get().getPacked() : color;
     }
 
-    @ModifyExpressionValue(method = "updateColorBuffers", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/ColorResolver;getColor(Lnet/minecraft/world/biome/Biome;DD)I", ordinal = 1, remap = true))
+    @ModifyExpressionValue(method = "getColor(Lme/jellysquid/mods/sodium/client/world/biome/BiomeColorSource;III)I", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/world/biome/BiomeColorCache;getColor(Lnet/minecraft/world/biome/ColorResolver;III)I", ordinal = 1, remap = true))
     private int modify_getFoliageColor(int color) {
         return ambience.isActive() && ambience.customFoliageColor.get() ? ambience.foliageColor.get().getPacked() : color;
     }
 
-    @ModifyExpressionValue(method = "updateColorBuffers", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/ColorResolver;getColor(Lnet/minecraft/world/biome/Biome;DD)I", ordinal = 2, remap = true))
+    @ModifyExpressionValue(method = "getColor(Lme/jellysquid/mods/sodium/client/world/biome/BiomeColorSource;III)I", at = @At(value = "INVOKE", target = "Lme/jellysquid/mods/sodium/client/world/biome/BiomeColorCache;getColor(Lnet/minecraft/world/biome/ColorResolver;III)I", ordinal = 2, remap = true))
     private int modify_getWaterColor(int color) {
         return ambience.isActive() && ambience.customWaterColor.get() ? ambience.waterColor.get().getPacked() : color;
     }
