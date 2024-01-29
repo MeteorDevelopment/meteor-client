@@ -53,7 +53,7 @@
     "feather": "*",
     "origins": "*",
     "wurst": "*",
-    "sodium": "<0.5.4",
+    "sodium": "<0.5.6",
     "morechathistory": "*"
   }
 }
