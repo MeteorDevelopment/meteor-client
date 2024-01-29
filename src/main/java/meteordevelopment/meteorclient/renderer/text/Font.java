@@ -102,7 +102,8 @@ public class Font {
 
         for (int i = 0; i < length; i++) {
             int cp = string.charAt(i);
-            CharData c = (charMap.containsKey(cp) ? charMap.get(cp) : charMap.get(32));
+            CharData c = charMap.get(cp);
+            if (c == null) c = charMap.get(32);
 
             width += c.xAdvance;
         }
@@ -119,7 +120,8 @@ public class Font {
 
         for (int i = 0; i < string.length(); i++) {
             int cp = string.charAt(i);
-            CharData c = (charMap.containsKey(cp) ? charMap.get(cp) : charMap.get(32));
+            CharData c = charMap.get(cp);
+            if (c == null) c = charMap.get(32);
 
             mesh.quad(
                 mesh.vec2(x + c.x0 * scale, y + c.y0 * scale).vec2(c.u0, c.v0).color(color).next(),
