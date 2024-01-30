@@ -260,10 +260,10 @@ public class BlockUtils {
             if (downState.isTransparent(mc.world, down)) return MobSpawn.Never;
         }
 
-        if (mc.world.getLightLevel(blockPos, 0) <= spawnLightLimit) return MobSpawn.Potential;
-        else if (mc.world.getLightLevel(LightType.BLOCK, blockPos) <= spawnLightLimit) return MobSpawn.Always;
+        if (mc.world.getLightLevel(LightType.BLOCK, blockPos) > spawnLightLimit) return MobSpawn.Never;
+        else if (mc.world.getLightLevel(LightType.SKY, blockPos) > spawnLightLimit) return  MobSpawn.Potential;
 
-        return MobSpawn.Never;
+        return MobSpawn.Always;
     }
 
     public static boolean topSurface(BlockState blockState) {
