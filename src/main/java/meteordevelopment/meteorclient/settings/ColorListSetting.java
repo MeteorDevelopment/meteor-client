@@ -23,7 +23,7 @@ public class ColorListSetting extends Setting<List<SettingColor>> {
     protected List<SettingColor> parseImpl(String str) {
         List<SettingColor> colors = new ArrayList<>();
         try {
-            String[] colorsStr = str.split(";");
+            String[] colorsStr = str..replaceAll("\\s+", "").split(";");
             for (String colorStr : colorsStr) {
                 String[] strs = colorStr.split(",");
                 colors.add(new SettingColor(Integer.parseInt(strs[0]), Integer.parseInt(strs[1]), Integer.parseInt(strs[2]), Integer.parseInt(strs[3])));
