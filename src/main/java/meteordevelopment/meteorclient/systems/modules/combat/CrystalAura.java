@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.friends.Friends;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.entity.DamageUtils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.entity.Target;
 import meteordevelopment.meteorclient.utils.misc.Keybind;
@@ -81,14 +82,6 @@ public class CrystalAura extends Module {
         .defaultValue(false)
         .build()
     );
-
-    private final Setting<Boolean> ignoreTerrain = sgGeneral.add(new BoolSetting.Builder()
-        .name("ignore-terrain")
-        .description("Completely ignores terrain if it can be blown up by end crystals.")
-        .defaultValue(true)
-        .build()
-    );
-
 
     private final Setting<Double> minDamage = sgGeneral.add(new DoubleSetting.Builder()
         .name("min-damage")
@@ -717,7 +710,7 @@ public class CrystalAura extends Module {
         }
 
         if (fastBreak.get() && !didRotateThisTick && attacks < attackFrequency.get()) {
-            double damage = getBreakDamage(event.entity, true);
+            float damage = getBreakDamage(event.entity, true);
             if (damage > minDamage.get()) doBreak(event.entity);
         }
     }
@@ -750,12 +743,12 @@ public class CrystalAura extends Module {
         if (!doBreak.get() || breakTimer > 0 || switchTimer > 0 || attacks >= attackFrequency.get()) return;
         if (shouldPause(PauseMode.Break)) return;
 
-        double bestDamage = 0;
+        float bestDamage = 0;
         Entity crystal = null;
 
         // Find best crystal to break
         for (Entity entity : mc.world.getEntities()) {
-            double damage = getBreakDamage(entity, true);
+            float damage = getBreakDamage(entity, true);
 
             if (damage > bestDamage) {
                 bestDamage = damage;
@@ -767,7 +760,7 @@ public class CrystalAura extends Module {
         if (crystal != null) doBreak(crystal);
     }
 
-    private double getBreakDamage(Entity entity, boolean checkCrystalAge) {
+    private float getBreakDamage(Entity entity, boolean checkCrystalAge) {
         if (!(entity instanceof EndCrystalEntity)) return 0;
 
         // Check only break own
@@ -787,15 +780,15 @@ public class CrystalAura extends Module {
 
         // Check damage to self and anti suicide
         blockPos.set(entity.getBlockPos()).move(0, -1, 0);
-        double selfDamage = DamageUtils.crystalDamage(mc.player, entity.getPos(), predictMovement.get(), blockPos, ignoreTerrain.get());
+        float selfDamage = DamageUtils.crystalDamage(mc.player, entity.getPos(), predictMovement.get(), blockPos);
         if (selfDamage > maxDamage.get() || (antiSuicide.get() && selfDamage >= EntityUtils.getTotalHealth(mc.player))) return 0;
 
         // Check damage to targets and face place
-        double damage = getDamageToTargets(entity.getPos(), blockPos, true, false);
+        float damage = getDamageToTargets(entity.getPos(), blockPos, true, false);
         boolean shouldFacePlace = shouldFacePlace();
-        double minimumDamage = Math.min(minDamage.get(), shouldFacePlace ? 1.5 : minDamage.get());
+        double minimumDamage = shouldFacePlace ? Math.min(minDamage.get(), 1.5d) : minDamage.get();
 
-        if (damage < minimumDamage) return 0;
+        if (damage < minimumDamage) return 0f;
 
         return damage;
     }
@@ -931,11 +924,11 @@ public class CrystalAura extends Module {
             if (isOutOfRange(vec3d, blockPos, true)) return;
 
             // Check damage to self and anti suicide
-            double selfDamage = DamageUtils.crystalDamage(mc.player, vec3d, predictMovement.get(), bp, ignoreTerrain.get());
+            float selfDamage = DamageUtils.crystalDamage(mc.player, vec3d, predictMovement.get(), bp);
             if (selfDamage > maxDamage.get() || (antiSuicide.get() && selfDamage >= EntityUtils.getTotalHealth(mc.player))) return;
 
             // Check damage to targets and face place
-            double damage = getDamageToTargets(vec3d, bp, false, !hasBlock && support.get() == SupportMode.Fast);
+            float damage = getDamageToTargets(vec3d, bp, false, !hasBlock && support.get() == SupportMode.Fast);
 
             boolean shouldFacePlace = shouldFacePlace();
             double minimumDamage = Math.min(minDamage.get(), shouldFacePlace ? 1.5 : minDamage.get());
@@ -1167,18 +1160,18 @@ public class CrystalAura extends Module {
         return nearestTarget;
     }
 
-    private double getDamageToTargets(Vec3d vec3d, BlockPos obsidianPos, boolean breaking, boolean fast) {
-        double damage = 0;
+    private float getDamageToTargets(Vec3d vec3d, BlockPos obsidianPos, boolean breaking, boolean fast) {
+        float damage = 0;
 
         if (fast) {
             PlayerEntity target = getNearestTarget();
-            if (!(smartDelay.get() && breaking && target.hurtTime > 0)) damage = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos, ignoreTerrain.get());
+            if (!(smartDelay.get() && breaking && target.hurtTime > 0)) damage = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos);
         }
         else {
             for (PlayerEntity target : targets) {
                 if (smartDelay.get() && breaking && target.hurtTime > 0) continue;
 
-                double dmg = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos, ignoreTerrain.get());
+                float dmg = DamageUtils.crystalDamage(target, vec3d, predictMovement.get(), obsidianPos);
 
                 // Update best target
                 if (dmg > bestTargetDamage) {

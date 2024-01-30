@@ -342,4 +342,11 @@ public class BlockUtils {
 
         return speed;
     }
+
+    /**
+     * Mutates a {@link BlockPos.Mutable} around an origin
+     */
+    public static BlockPos.Mutable mutateAround(BlockPos.Mutable mutable, BlockPos origin, int xOffset, int yOffset, int zOffset) {
+        return mutable.set(origin.getX() + xOffset, origin.getY() + yOffset, origin.getZ() + zOffset);
+    }
 }
