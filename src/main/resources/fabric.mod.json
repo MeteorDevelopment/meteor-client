@@ -54,6 +54,7 @@
     "origins": "*",
     "wurst": "*",
     "sodium": "<0.5.6",
-    "morechathistory": "*"
+    "morechathistory": "*",
+    "quilt_loader": "<0.23.0"
   }
 }
