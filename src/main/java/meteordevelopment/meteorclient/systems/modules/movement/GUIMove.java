@@ -87,9 +87,7 @@ public class GUIMove extends Module {
         .min(0)
         .build()
     );
-
-    long lastRotateTime = System.currentTimeMillis();
-
+    
     public GUIMove() {
         super(Categories.Movement, "gui-move", "Allows you to perform various actions while in GUIs.");
     }
@@ -136,12 +134,7 @@ public class GUIMove extends Module {
         if (screens.get() == Screens.GUI && !(mc.currentScreen instanceof WidgetScreen)) return;
         if (screens.get() == Screens.Inventory && mc.currentScreen instanceof WidgetScreen) return;
 
-        // Intervals between calls of Render3DEvent are not constant, so it is necessary to calculate the time difference between the last tick and the current tick
-        long time = System.currentTimeMillis();
-        long timeDelta = time - lastRotateTime;
-        lastRotateTime = time;
-
-        float rotationDelta = Math.min((float) (rotateSpeed.get() * timeDelta / 50f), 100);
+        float rotationDelta = Math.min((float) (rotateSpeed.get() * event.frameTime * 20f), 100);
 
         if (arrowsRotate.get()) {
             float yaw = mc.player.getYaw();
