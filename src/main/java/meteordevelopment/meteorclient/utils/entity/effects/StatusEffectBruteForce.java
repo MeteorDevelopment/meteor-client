@@ -122,7 +122,6 @@ public class StatusEffectBruteForce {
         return container;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private static void update(int particleColor, LivingEntity entity, EntityEffectCache container) {
         container.statusEffects.clear();
         container.particleColor = particleColor;
