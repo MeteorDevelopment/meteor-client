@@ -114,7 +114,7 @@ public class DamageUtils {
         if (StatusEffectHelper.hasStatusEffect(entity, StatusEffects.SLOW_FALLING) || StatusEffectHelper.hasStatusEffect(entity, StatusEffects.LEVITATION)) return 0f;
 
         // Fast path - Above the surface
-        int surface = mc.world.getWorldChunk(entity.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(entity.getBlockX(), entity.getBlockZ());
+        int surface = mc.world.getWorldChunk(entity.getBlockPos()).getHeightmap(Heightmap.Type.MOTION_BLOCKING).get(entity.getBlockX() & 15, entity.getBlockZ() & 15);
         if (entity.getBlockY() >= surface) return fallDamageReductions(entity, surface);
 
         // Under the surface
