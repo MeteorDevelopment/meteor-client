@@ -229,7 +229,7 @@ public class BetterTooltips extends Module {
                 NbtCompound tag = event.itemStack.getNbt();
 
                 if (tag != null) {
-                    NbtList effects = tag.getList("Effects", 10);
+                    NbtList effects = tag.getList("effects", 10);
 
                     if (effects != null) {
                         for (int i = 0; i < effects.size(); i++) {
@@ -417,10 +417,10 @@ public class BetterTooltips extends Module {
     private MutableText getStatusText(StatusEffectInstance effect) {
         MutableText text = Text.translatable(effect.getTranslationKey());
         if (effect.getAmplifier() != 0) {
-            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1).getString()));
+            text.append(String.format(" %d (%s)", effect.getAmplifier() + 1, StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
         else {
-            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1).getString()));
+            text.append(String.format(" (%s)", StatusEffectUtil.getDurationText(effect, 1, mc.world.getTickManager().getTickRate()).getString()));
         }
 
         if (effect.getEffectType().isBeneficial()) return text.formatted(Formatting.BLUE);
@@ -436,7 +436,7 @@ public class BetterTooltips extends Module {
         if (stack.getItem() == Items.WRITABLE_BOOK) return Text.literal(pages.getString(0));
 
         try {
-            return Text.Serializer.fromLenientJson(pages.getString(0));
+            return Text.Serialization.fromLenientJson(pages.getString(0));
         } catch (JsonParseException e) {
             return Text.literal("Invalid book data");
         }

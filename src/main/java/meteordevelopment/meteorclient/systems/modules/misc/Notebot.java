@@ -571,7 +571,8 @@ public class Notebot extends Module {
         WButton alignCenter = table.add(theme.button("Align Center")).expandX().minWidth(100).widget();
         alignCenter.action = () -> {
             if (mc.player == null) return;
-            mc.player.setPosition(Vec3d.ofBottomCenter(mc.player.getBlockPos()));
+            Vec3d pos = Vec3d.ofBottomCenter(mc.player.getBlockPos());
+            mc.player.setPosition(pos.x, mc.player.getY(), pos.z);
         };
 
         table.row();
