@@ -262,7 +262,7 @@ public class Scaffold extends Module {
             if (Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, 1, 0))).toList().isEmpty() /*||
                 !Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, -1, 0))).toList().isEmpty()*/) {
                 // If there is no block above the player: move the player up, so he can place another block
-                if (whileMoving.get() || (!mc.options.forwardKey.isPressed() && !mc.options.backKey.isPressed() && !mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed())) {
+                if (whileMoving.get() || !PlayerUtils.isMoving()) {
                     velocity = new Vec3d(velocity.x, 0.5, velocity.z);
                 }
                 mc.player.setVelocity(velocity);
@@ -280,7 +280,7 @@ public class Scaffold extends Module {
 
     public boolean towering() {
         return isActive() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
-            (whileMoving.get() || (!mc.options.forwardKey.isPressed() && !mc.options.backKey.isPressed() && !mc.options.leftKey.isPressed() && !mc.options.rightKey.isPressed())) &&
+            (whileMoving.get() || !PlayerUtils.isMoving()) &&
             (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.useKey.isPressed()));
     }
 
