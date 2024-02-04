@@ -288,9 +288,8 @@ public class Scaffold extends Module {
     }
 
     public boolean towering() {
-        return isActive() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
-            (whileMoving.get() || !PlayerUtils.isMoving()) &&
-            (!onlyOnClick.get() || (onlyOnClick.get() && mc.options.useKey.isPressed()));
+        return scaffolding() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
+            (whileMoving.get() || !PlayerUtils.isMoving()) && InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp)).found();
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {
