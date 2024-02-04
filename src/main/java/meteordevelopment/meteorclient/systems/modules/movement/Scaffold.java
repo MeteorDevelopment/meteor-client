@@ -266,7 +266,8 @@ public class Scaffold extends Module {
             place(bp);
         }
 
-        if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp)).found()) {
+        FindItemResult result = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
+        if (fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() && result.found() && (autoSwitch.get() || result.getHand() != null)) {
             Vec3d velocity = mc.player.getVelocity();
             Box playerBox = mc.player.getBoundingBox();
             if (Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, 1, 0))).toList().isEmpty()) {
@@ -288,8 +289,9 @@ public class Scaffold extends Module {
     }
 
     public boolean towering() {
+        FindItemResult result = InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp));
         return scaffolding() && fastTower.get() && mc.options.jumpKey.isPressed() && !mc.options.sneakKey.isPressed() &&
-            (whileMoving.get() || !PlayerUtils.isMoving()) && InvUtils.findInHotbar(itemStack -> validItem(itemStack, bp)).found();
+            (whileMoving.get() || !PlayerUtils.isMoving()) && result.found() && (autoSwitch.get() || result.getHand() != null);
     }
 
     private boolean validItem(ItemStack itemStack, BlockPos pos) {
