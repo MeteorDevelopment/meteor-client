@@ -54,6 +54,16 @@ public class Scaffold extends Module {
         .build()
     );
 
+    private final Setting<Double> towerSpeed = sgGeneral.add(new DoubleSetting.Builder()
+        .name("tower-speed")
+        .description("The speed at which to tower.")
+        .defaultValue(0.5)
+        .min(0)
+        .sliderMax(1)
+        .visible(fastTower::get)
+        .build()
+    );
+
     private final Setting<Boolean> whileMoving = sgGeneral.add(new BoolSetting.Builder()
         .name("while-moving")
         .description("Allows you to tower while moving.")
@@ -262,7 +272,7 @@ public class Scaffold extends Module {
             if (Streams.stream(mc.world.getBlockCollisions(mc.player, playerBox.offset(0, 1, 0))).toList().isEmpty()) {
                 // If there is no block above the player: move the player up, so he can place another block
                 if (whileMoving.get() || !PlayerUtils.isMoving()) {
-                    velocity = new Vec3d(velocity.x, 0.5, velocity.z);
+                    velocity = new Vec3d(velocity.x, towerSpeed.get(), velocity.z);
                 }
                 mc.player.setVelocity(velocity);
             } else {
