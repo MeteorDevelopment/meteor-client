@@ -162,6 +162,33 @@ public class BlockUtils {
         return null;
     }
 
+    public static Direction getClosestPlaceSide(BlockPos blockPos) {
+        return getClosestPlaceSide(blockPos, mc.player.getEyePos());
+    }
+    public static Direction getClosestPlaceSide(BlockPos blockPos, Vec3d pos) {
+        Direction closestSide = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (Direction side : Direction.values()) {
+            BlockPos neighbor = blockPos.offset(side);
+            BlockState state = mc.world.getBlockState(neighbor);
+
+            // Check if neighbour isn't empty
+            if (state.isAir() || isClickable(state.getBlock())) continue;
+
+            // Check if neighbour is a fluid
+            if (!state.getFluidState().isEmpty()) continue;
+
+            double distance = pos.squaredDistanceTo(neighbor.getX(), neighbor.getY(), neighbor.getZ());
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestSide = side;
+            }
+        }
+
+        return closestSide;
+    }
+
     // Breaking
 
     @EventHandler(priority = EventPriority.HIGHEST + 100)
