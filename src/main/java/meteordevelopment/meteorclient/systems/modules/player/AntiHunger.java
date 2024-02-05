@@ -34,16 +34,7 @@ public class AntiHunger extends Module {
         .build()
     );
 
-    private final Setting<Boolean> waterCheck = sgGeneral.add(new BoolSetting.Builder()
-        .name("water-check")
-        .description("Pauses the module if you are in water")
-        .defaultValue(true)
-        .build()
-    );
-
-    private boolean lastOnGround;
-    private boolean sendOnGroundTruePacket;
-    private boolean ignorePacket;
+    private boolean lastOnGround, ignorePacket;
 
     public AntiHunger() {
         super(Categories.Player, "anti-hunger", "Reduces (does NOT remove) hunger consumption.");
@@ -52,40 +43,30 @@ public class AntiHunger extends Module {
     @Override
     public void onActivate() {
         lastOnGround = mc.player.isOnGround();
-        sendOnGroundTruePacket = true;
     }
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (ignorePacket) return;
-
-        if (event.packet instanceof ClientCommandC2SPacket && sprint.get()) {
-            ClientCommandC2SPacket.Mode mode = ((ClientCommandC2SPacket) event.packet).getMode();
-
-            if (mode == ClientCommandC2SPacket.Mode.START_SPRINTING) {
-                event.cancel();
-            }
+        if (ignorePacket) {
+            ignorePacket = false;
+            return;
         }
 
-        if (event.packet instanceof PlayerMoveC2SPacket && onGround.get() && mc.player.isOnGround() && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
-            ((PlayerMoveC2SPacketAccessor) event.packet).setOnGround(false);
+        if (mc.player.hasVehicle() || mc.player.isTouchingWater() || mc.player.isSubmergedInWater()) return;
+
+        if (event.packet instanceof ClientCommandC2SPacket packet && sprint.get()) {
+            if (packet.getMode() == ClientCommandC2SPacket.Mode.START_SPRINTING) event.cancel();
+        }
+
+        if (event.packet instanceof PlayerMoveC2SPacket packet && onGround.get() && mc.player.isOnGround() && mc.player.fallDistance <= 0.0 && !mc.interactionManager.isBreakingBlock()) {
+            ((PlayerMoveC2SPacketAccessor) packet).setOnGround(false);
         }
     }
 
     @EventHandler
-    private void onTick(TickEvent.Post event) {
-        if (waterCheck.get() && mc.player.isTouchingWater()) {
-            ignorePacket = true;
-            return;
-        }
-        if (mc.player.isOnGround() && !lastOnGround && !sendOnGroundTruePacket) sendOnGroundTruePacket = true;
-
-        if (mc.player.isOnGround() && sendOnGroundTruePacket && onGround.get()) {
-            ignorePacket = true;
-            mc.getNetworkHandler().sendPacket(new PlayerMoveC2SPacket.OnGroundOnly(true));
-            ignorePacket = false;
-
-            sendOnGroundTruePacket = false;
+    private void onTick(TickEvent.Pre event) {
+        if (mc.player.isOnGround() && !lastOnGround && onGround.get()) {
+            ignorePacket = true; // prevents you from not taking fall damage
         }
 
         lastOnGround = mc.player.isOnGround();
