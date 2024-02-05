@@ -88,8 +88,6 @@ public class StatusEffectBruteForce {
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.POISON, 2));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.WITHER, 1));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HEALTH_BOOST, 1));
-        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 1));
-        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 4));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.GLOWING, 1));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.LEVITATION, 1));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.LUCK, 1));
@@ -124,7 +122,6 @@ public class StatusEffectBruteForce {
         return container;
     }
 
-    @SuppressWarnings("UnstableApiUsage")
     private static void update(int particleColor, LivingEntity entity, EntityEffectCache container) {
         container.statusEffects.clear();
         container.particleColor = particleColor;
