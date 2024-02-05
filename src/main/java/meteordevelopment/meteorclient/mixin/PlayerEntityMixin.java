@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.movement.Anchor;
 import meteordevelopment.meteorclient.systems.modules.movement.Flight;
 import meteordevelopment.meteorclient.systems.modules.movement.NoSlow;
+import meteordevelopment.meteorclient.systems.modules.movement.Scaffold;
 import meteordevelopment.meteorclient.systems.modules.player.SpeedMine;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import net.minecraft.block.BlockState;
@@ -85,6 +86,7 @@ public abstract class PlayerEntityMixin extends LivingEntity {
 
         Anchor module = Modules.get().get(Anchor.class);
         if (module.isActive() && module.cancelJump) info.cancel();
+        else if (Modules.get().get(Scaffold.class).towering()) info.cancel();
     }
 
     @ModifyReturnValue(method = "getMovementSpeed", at = @At("RETURN"))
