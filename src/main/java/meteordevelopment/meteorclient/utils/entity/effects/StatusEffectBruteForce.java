@@ -88,8 +88,8 @@ public class StatusEffectBruteForce {
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.POISON, 2));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.WITHER, 1));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.HEALTH_BOOST, 1));
-        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 1));
-        ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 4));
+        // ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 1));
+        // ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.ABSORPTION, 4));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.GLOWING, 1));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.LEVITATION, 1));
         ALL_ENTRIES.add(StatusEffectEntry.of(StatusEffects.LUCK, 1));
@@ -151,8 +151,11 @@ public class StatusEffectBruteForce {
             int absorptionLevel = Math.round(entity.getAbsorptionAmount() / 4f);
             if (absorptionLevel <= 4) {
                 possibleEntries = new ReferenceOpenHashSet<>(ALL_ENTRIES);
-                possibleEntries.add(ABSORPTION_STRONG);
-                if (absorptionLevel <= 1) possibleEntries.add(ABSORPTION);
+                if (absorptionLevel <= 1) {
+                    possibleEntries.add(ABSORPTION);
+                } else {
+                    possibleEntries.add(ABSORPTION_STRONG);
+                }
             } else {
                 possibleEntries = ALL_ENTRIES;
             }
