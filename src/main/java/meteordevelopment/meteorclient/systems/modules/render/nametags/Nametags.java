@@ -3,10 +3,11 @@
  * Copyright (c) Meteor Development.
  */
 
-package meteordevelopment.meteorclient.systems.modules.render;
+package meteordevelopment.meteorclient.systems.modules.render.nametags;
 
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixininterface.IVec3d;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
 import meteordevelopment.meteorclient.renderer.text.TextRenderer;
 import meteordevelopment.meteorclient.settings.*;
@@ -16,6 +17,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
+import meteordevelopment.meteorclient.systems.modules.render.Freecam;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
@@ -31,9 +33,11 @@ import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameMode;
+import net.minecraft.world.RaycastContext;
 import org.joml.Vector3d;
 
 import java.util.*;
@@ -53,11 +57,25 @@ public class Nametags extends Module {
         .build()
     );
 
-    private final Setting<Double> scale = sgGeneral.add(new DoubleSetting.Builder()
-        .name("scale")
-        .description("The scale of the nametag.")
-        .defaultValue(1.1)
-        .min(0.1)
+    private final Setting<NametagsEntityTypeData> defaultEntitySettings = sgGeneral.add(new GenericSetting.Builder<NametagsEntityTypeData>()
+        .name("default-entity-settings")
+        .description("The default settings for each entity type.")
+        .defaultValue(
+            new NametagsEntityTypeData(
+                1.1,
+                true,
+                false,
+                20,
+                50
+            )
+        )
+        .build()
+    );
+
+    private final Setting<Map<EntityType, NametagsEntityTypeData>> entitySettings = sgGeneral.add(new EntityTypeDataSetting.Builder<NametagsEntityTypeData>()
+        .name("entity-settings")
+        .description("The settings for each entity type.")
+        .defaultData(defaultEntitySettings)
         .build()
     );
 
@@ -84,18 +102,8 @@ public class Nametags extends Module {
 
     private final Setting<Boolean> culling = sgGeneral.add(new BoolSetting.Builder()
         .name("culling")
-        .description("Only render a certain number of nametags at a certain distance.")
+        .description("Only render a certain number of nametags.")
         .defaultValue(false)
-        .build()
-    );
-
-    private final Setting<Double> maxCullRange = sgGeneral.add(new DoubleSetting.Builder()
-        .name("culling-range")
-        .description("Only render nametags within this distance of your player.")
-        .defaultValue(20)
-        .min(0)
-        .sliderMax(200)
-        .visible(culling::get)
         .build()
     );
 
@@ -279,6 +287,7 @@ public class Nametags extends Module {
     private final double[] itemWidths = new double[6];
 
     private final List<Entity> entityList = new ArrayList<>();
+    private final Map<Class<? extends EntityType>, Integer> entityCountMap = new HashMap<>();
 
     public Nametags() {
         super(Categories.Render, "nametags", "Displays customizable nametags above players.");
@@ -298,9 +307,33 @@ public class Nametags extends Module {
         }
     }
 
+    private boolean isBehindWall(Entity entity) {
+        Vec3d vec1 = new Vec3d(0, 0, 0);
+        Vec3d vec2 = new Vec3d(0, 0, 0);
+
+        Vec3d cameraPos = mc.gameRenderer.getCamera().getPos();
+
+        ((IVec3d) vec1).set(cameraPos.x, cameraPos.y, cameraPos.z);
+        ((IVec3d) vec2).set(entity.getX(), entity.getEyeY(), entity.getZ());
+
+        return mc.world.raycast(new RaycastContext(vec1, vec2, RaycastContext.ShapeType.VISUAL, RaycastContext.FluidHandling.NONE, mc.player)).getType() == HitResult.Type.MISS;
+    }
+
+    private Integer entityCountIncrement(Class<? extends EntityType> entityClass) {
+        int count = entityCountMap.getOrDefault(entityClass, 0);
+        entityCountMap.put(entityClass, count + 1);
+        return count + 1;
+    }
+
+    NametagsEntityTypeData getEntityTypeData(EntityType entityType) {
+        NametagsEntityTypeData entityTypeData = entitySettings.get().get(entityType);
+        return entityTypeData == null ? defaultEntitySettings.get() : entityTypeData;
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
         entityList.clear();
+        entityCountMap.clear();
 
         boolean freecamNotActive = !Modules.get().isActive(Freecam.class);
         boolean notThirdPerson = mc.options.getPerspective().isFirstPerson();
@@ -310,15 +343,20 @@ public class Nametags extends Module {
             EntityType<?> type = entity.getType();
             if (!entities.get().contains(type)) continue;
 
+            NametagsEntityTypeData entityData = getEntityTypeData(type);
+            if (!entityData.throughWalls && !isBehindWall(entity)) continue;
+            if (entityData.culling) {
+                if (entityData.maxCullCount <= entityCountIncrement(type.getClass())) continue;
+                if (!PlayerUtils.isWithinCamera(entity, entityData.maxCullRange)) continue;
+            }
+
             if (type == EntityType.PLAYER) {
                 if ((ignoreSelf.get() || (freecamNotActive && notThirdPerson)) && entity == mc.player) continue;
                 if (EntityUtils.getGameMode((PlayerEntity) entity) == null && ignoreBots.get()) continue;
                 if (Friends.get().isFriend((PlayerEntity) entity) && ignoreFriends.get()) continue;
             }
 
-            if (!culling.get() || PlayerUtils.isWithinCamera(entity, maxCullRange.get())) {
-                entityList.add(entity);
-            }
+            entityList.add(entity);
         }
 
         entityList.sort(Comparator.comparing(e -> e.squaredDistanceTo(cameraPos)));
@@ -337,7 +375,7 @@ public class Nametags extends Module {
 
             EntityType<?> type = entity.getType();
 
-            if (NametagUtils.to2D(pos, scale.get())) {
+            if (NametagUtils.to2D(pos, getEntityTypeData(type).scale)) {
                 if (type == EntityType.PLAYER) renderNametagPlayer(event, (PlayerEntity) entity, shadow);
                 else if (type == EntityType.ITEM) renderNametagItem(((ItemEntity) entity).getStack(), shadow);
                 else if (type == EntityType.ITEM_FRAME)
@@ -391,7 +429,7 @@ public class Nametags extends Module {
         String name;
         Color nameColor = PlayerUtils.getPlayerColor(player, this.nameColor.get());
 
-        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getName().getString());
+        if (player == mc.player) name = Modules.get().get(NameProtect.class).getName(player.getGameProfile().getName());
         else name = player.getName().getString();
 
         // Health
