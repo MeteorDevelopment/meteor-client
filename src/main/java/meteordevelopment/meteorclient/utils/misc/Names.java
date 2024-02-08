@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.events.game.ResourcePacksReloadedEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.client.sound.WeightedSoundSet;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
@@ -54,23 +55,23 @@ public class Names {
     }
 
     public static String get(StatusEffect effect) {
-        return statusEffectNames.computeIfAbsent(effect, effect1 -> StringHelper.stripTextFormat(effect1.getName().getString()));
+        return statusEffectNames.computeIfAbsent(effect, effect1 -> StringHelper.stripTextFormat(I18n.translate(effect1.getTranslationKey())));
     }
 
     public static String get(Item item) {
-        return itemNames.computeIfAbsent(item, item1 -> StringHelper.stripTextFormat(item1.getName().getString()));
+        return itemNames.computeIfAbsent(item, item1 -> StringHelper.stripTextFormat(I18n.translate(item1.getTranslationKey())));
     }
 
     public static String get(Block block) {
-        return blockNames.computeIfAbsent(block, block1 -> StringHelper.stripTextFormat(block1.getName().getString()));
+        return blockNames.computeIfAbsent(block, block1 -> StringHelper.stripTextFormat(I18n.translate(block1.getTranslationKey())));
     }
 
     public static String get(Enchantment enchantment) {
-        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(Text.translatable(enchantment1.getTranslationKey()).getString()));
+        return enchantmentNames.computeIfAbsent(enchantment, enchantment1 -> StringHelper.stripTextFormat(I18n.translate(enchantment1.getTranslationKey())));
     }
 
     public static String get(EntityType<?> entityType) {
-        return entityTypeNames.computeIfAbsent(entityType, entityType1 -> StringHelper.stripTextFormat(entityType1.getName().getString()));
+        return entityTypeNames.computeIfAbsent(entityType, entityType1 -> StringHelper.stripTextFormat(I18n.translate(entityType1.getTranslationKey())));
     }
 
     public static String get(ParticleType<?> type) {
