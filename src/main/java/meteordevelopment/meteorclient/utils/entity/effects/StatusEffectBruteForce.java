@@ -12,6 +12,7 @@ import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.game.GameLeftEvent;
 import meteordevelopment.meteorclient.mixin.LivingEntityAccessor;
+import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.entity.StatusEffectHelper;
 import meteordevelopment.orbit.EventHandler;
@@ -35,7 +36,6 @@ public class StatusEffectBruteForce {
     private static final TrackedData<Integer> POTION_SWIRLS_COLOR = LivingEntityAccessor.meteor$getPotionSwirlsColor();
     private static final TrackedData<Boolean> POTION_SWRISL_AMBIENT = LivingEntityAccessor.meteor$getPotionSwirlsAmbient();
     private static final int EMPTY_COLOR = 3694022;
-    private static final int MAX_DEPTH = 4;
     public static final Set<StatusEffectEntry> ALL_ENTRIES = new ReferenceOpenHashSet<>();
     public static final Set<StatusEffectEntry> BEACON_ENTRIES = new ReferenceOpenHashSet<>();
     private static final Map<LivingEntity, EntityEffectCache> PLAYER_EFFECT_MAP = new Object2ObjectOpenHashMap<>();
@@ -174,28 +174,36 @@ public class StatusEffectBruteForce {
         // Map#computeIfAbsent(Object, Function) cannot cache null return values, so we use a separate cache for those
         if (NULL_COLORS.contains(cacheKey)) return;
 
-        @Nullable Map<StatusEffect, StatusEffectInstance> match = EFFECT_CACHE_MAP.computeIfAbsent(cacheKey, key -> {
-            for (int depth = 2; depth <= MAX_DEPTH; depth++) {
-                for (var combination : Sets.combinations(possibleEntries, depth)) {
-                    int color = blend(initialColor, combination);
-                    if (color == particleColor) {
-                        // If the amplifiers of all applied effects match, then it cannot be inferred and should be assumed to be 1
-                        boolean assumeLowestAmplifier = combination.stream().mapToInt(o -> o.amplifier).reduce((i1, i2) -> i1 == i2 ? i1 : -1).orElse(-1) != -1;
+        @Nullable Map<StatusEffect, StatusEffectInstance> match = EFFECT_CACHE_MAP.get(cacheKey);
+        if (match == null && Config.get().heuristicCombatUtils.get()) {
+            match = bruteForce(possibleEntries, initialColor, particleColor);
+            if (match == null) NULL_COLORS.add(cacheKey);
+        }
 
-                        Map<StatusEffect, StatusEffectInstance> map = new Reference2ObjectOpenHashMap<>();
+        if (match != null) container.statusEffects.putAll(match);
+    }
 
-                        for (var entry : combination) {
-                            map.put(entry.effect, new StatusEffectInstance(entry.effect, 0, assumeLowestAmplifier ? 0 : entry.amplifier - 1));
-                        }
+    @Nullable
+    private static Map<StatusEffect, StatusEffectInstance> bruteForce(Set<StatusEffectEntry> entries, MutableParticleColor initialColor, int particleColor) {
+        int maxDepth = Config.get().heuristicDepth.get();
+        for (int depth = 2; depth <= maxDepth; depth++) {
+            for (var combination : Sets.combinations(entries, depth)) {
+                int color = blend(initialColor, combination);
+                if (color == particleColor) {
+                    // If the amplifiers of all applied effects match, then it cannot be inferred and should be assumed to be 1
+                    boolean assumeLowestAmplifier = combination.stream().mapToInt(o -> o.amplifier).reduce((i1, i2) -> i1 == i2 ? i1 : -1).orElse(-1) != -1;
 
-                        return map;
+                    Map<StatusEffect, StatusEffectInstance> map = new Reference2ObjectOpenHashMap<>();
+
+                    for (var entry : combination) {
+                        map.put(entry.effect, new StatusEffectInstance(entry.effect, 0, assumeLowestAmplifier ? 0 : entry.amplifier - 1));
                     }
+
+                    return map;
                 }
             }
-            return null;
-        });
-        if (match != null) container.statusEffects.putAll(match);
-        else NULL_COLORS.add(cacheKey);
+        }
+        return null;
     }
 
     @EventHandler
