@@ -2,7 +2,9 @@ plugins {
     id "java"
 }
 
-sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
-
 group "meteordevelopment"
 version "0.1.0"
+
+java {
+    sourceCompatibility = targetCompatibility = JavaVersion.VERSION_1_8
+}
