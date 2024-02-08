@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.StatusEffectInstanceAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -23,7 +23,7 @@ import static net.minecraft.entity.effect.StatusEffects.*;
 public class PotionSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
 
-    private final Setting<Object2IntMap<StatusEffect>> spoofPotions = sgGeneral.add(new StatusEffectAmplifierMapSetting.Builder()
+    private final Setting<Reference2IntMap<StatusEffect>> spoofPotions = sgGeneral.add(new StatusEffectAmplifierMapSetting.Builder()
         .name("spoofed-potions")
         .description("Potions to add.")
         .defaultValue(Utils.createStatusEffectMap())
