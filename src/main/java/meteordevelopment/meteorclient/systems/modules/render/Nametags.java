@@ -18,13 +18,13 @@ import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.NameProtect;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.entity.EntityUtils;
+import meteordevelopment.meteorclient.utils.misc.Names;
 import meteordevelopment.meteorclient.utils.player.PlayerUtils;
 import meteordevelopment.meteorclient.utils.render.NametagUtils;
 import meteordevelopment.meteorclient.utils.render.RenderUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.resource.language.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
@@ -551,7 +551,7 @@ public class Nametags extends Module {
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
-        String name = stack.hasNbt() ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
+        String name = Names.get(stack);
         String count = " x" + stack.getCount();
 
         double nameWidth = text.getWidth(name, shadow);

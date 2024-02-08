@@ -17,6 +17,8 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.effect.StatusEffect;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtElement;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.text.Text;
@@ -89,5 +91,9 @@ public class Names {
 
             return StringHelper.stripTextFormat(text.getString());
         });
+    }
+
+    public static String get(ItemStack stack) {
+        return stack.hasNbt() && stack.getNbt().contains("display", NbtElement.COMPOUND_TYPE) ? stack.getName().getString() : I18n.translate(stack.getTranslationKey());
     }
 }
