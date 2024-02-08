@@ -7,10 +7,7 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntMap;
-import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
+import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
@@ -245,7 +242,7 @@ public class Utils {
     }
 
     public static Reference2IntMap<StatusEffect> createStatusEffectMap() {
-        return new Reference2IntOpenHashMap<>(StatusEffectAmplifierMapSetting.EMPTY_STATUS_EFFECT_MAP);
+        return new Reference2IntArrayMap<>(StatusEffectAmplifierMapSetting.EMPTY_STATUS_EFFECT_MAP);
     }
 
     public static String getEnchantSimpleName(Enchantment enchantment, int length) {

@@ -64,24 +64,24 @@ public class PotionSpoof extends Module {
     public void onDeactivate() {
         if (!clearEffects.get() || !Utils.canUpdate()) return;
 
-        for (StatusEffect effect : spoofPotions.get().keySet()) {
-            if (spoofPotions.get().getInt(effect) <= 0) continue;
-            if (mc.player.hasStatusEffect(effect)) mc.player.removeStatusEffect(effect);
+        for (Reference2IntMap.Entry<StatusEffect> entry : spoofPotions.get().reference2IntEntrySet()) {
+            if (entry.getIntValue() <= 0) continue;
+            if (mc.player.hasStatusEffect(entry.getKey())) mc.player.removeStatusEffect(entry.getKey());
         }
     }
 
     @EventHandler
     private void onTick(TickEvent.Post event) {
-        for (StatusEffect statusEffect : spoofPotions.get().keySet()) {
-            int level = spoofPotions.get().getInt(statusEffect);
+        for (Reference2IntMap.Entry<StatusEffect> entry : spoofPotions.get().reference2IntEntrySet()) {
+            int level = entry.getIntValue();
             if (level <= 0) continue;
 
-            if (mc.player.hasStatusEffect(statusEffect)) {
-                StatusEffectInstance instance = mc.player.getStatusEffect(statusEffect);
+            if (mc.player.hasStatusEffect(entry.getKey())) {
+                StatusEffectInstance instance = mc.player.getStatusEffect(entry.getKey());
                 ((StatusEffectInstanceAccessor) instance).setAmplifier(level - 1);
                 if (instance.getDuration() < 20) ((StatusEffectInstanceAccessor) instance).setDuration(20);
             } else {
-                mc.player.addStatusEffect(new StatusEffectInstance(statusEffect, 20, level - 1));
+                mc.player.addStatusEffect(new StatusEffectInstance(entry.getKey(), 20, level - 1));
             }
         }
     }

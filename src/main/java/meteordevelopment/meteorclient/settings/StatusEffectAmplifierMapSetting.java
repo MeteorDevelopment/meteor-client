@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.settings;
 
+import it.unimi.dsi.fastutil.objects.Reference2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import it.unimi.dsi.fastutil.objects.Reference2IntOpenHashMap;
 import net.minecraft.entity.effect.StatusEffect;
@@ -63,7 +64,7 @@ public class StatusEffectAmplifierMapSetting extends Setting<Reference2IntMap<St
     }
 
     private static Reference2IntMap<StatusEffect> createStatusEffectMap() {
-        Reference2IntMap<StatusEffect> map = new Reference2IntOpenHashMap<>(Registries.STATUS_EFFECT.getIds().size());
+        Reference2IntMap<StatusEffect> map = new Reference2IntArrayMap<>(Registries.STATUS_EFFECT.getIds().size());
 
         Registries.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
 
