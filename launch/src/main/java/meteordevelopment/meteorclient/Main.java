@@ -28,7 +28,7 @@ public class Main {
         );
 
         switch (option) {
-            case 0: getOS().open("https://meteorclient.com/installation"); break;
+            case 0: getOS().open("https://meteorclient.com/faq/installation"); break;
             case 1: {
                 String path;
 
