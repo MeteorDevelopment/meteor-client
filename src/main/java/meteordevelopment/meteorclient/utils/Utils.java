@@ -32,6 +32,7 @@ import net.minecraft.client.gui.screen.TitleScreen;
 import net.minecraft.client.gui.screen.multiplayer.MultiplayerScreen;
 import net.minecraft.client.gui.screen.world.SelectWorldScreen;
 import net.minecraft.client.resource.ResourceReloadLogger;
+import net.minecraft.client.resource.language.I18n;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.effect.StatusEffect;
@@ -250,7 +251,7 @@ public class Utils {
     }
 
     public static String getEnchantSimpleName(Enchantment enchantment, int length) {
-        return enchantment.getName(0).getString().substring(0, length);
+        return I18n.translate(enchantment.getTranslationKey()).substring(0, length);
     }
 
     public static boolean searchTextDefault(String text, String filter, boolean caseSensitive) {
