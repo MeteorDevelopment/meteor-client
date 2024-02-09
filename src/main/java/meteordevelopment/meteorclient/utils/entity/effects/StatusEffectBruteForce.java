@@ -34,7 +34,7 @@ import java.util.Set;
  */
 public class StatusEffectBruteForce {
     private static final TrackedData<Integer> POTION_SWIRLS_COLOR = LivingEntityAccessor.meteor$getPotionSwirlsColor();
-    private static final TrackedData<Boolean> POTION_SWRISL_AMBIENT = LivingEntityAccessor.meteor$getPotionSwirlsAmbient();
+    private static final TrackedData<Boolean> POTION_SWIRLS_AMBIENT = LivingEntityAccessor.meteor$getPotionSwirlsAmbient();
     private static final int EMPTY_COLOR = 3694022;
     public static final Set<StatusEffectEntry> ALL_ENTRIES = new ReferenceOpenHashSet<>();
     public static final Set<StatusEffectEntry> BEACON_ENTRIES = new ReferenceOpenHashSet<>();
@@ -130,7 +130,7 @@ public class StatusEffectBruteForce {
         Set<StatusEffectEntry> possibleEntries;
         EffectAttributeModifier[] possibleModifiers;
 
-        if (entity.getDataTracker().get(POTION_SWRISL_AMBIENT)) { // entity is only affected by effects from beacons
+        if (entity.getDataTracker().get(POTION_SWIRLS_AMBIENT)) { // entity is only affected by effects from beacons
             possibleEntries = BEACON_ENTRIES;
             possibleModifiers = EffectAttributeModifier.BEACON;
         } else {
