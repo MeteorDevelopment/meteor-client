@@ -47,7 +47,7 @@ public class AntiHunger extends Module {
 
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (ignorePacket) {
+        if (ignorePacket && event.packet instanceof PlayerMoveC2SPacket) {
             ignorePacket = false;
             return;
         }
