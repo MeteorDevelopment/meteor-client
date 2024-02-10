@@ -1,0 +1,38 @@
+# gradle
+
+.gradle/
+build/
+out/
+classes/
+
+# idea
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# vscode
+
+.settings/
+.vscode/
+bin/
+.classpath
+.project
+
+# fabric
+
+run/*
+
+# macOS
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# lithium
+
+testserver/*
+
+src/main/resources/assets/lithium/lithium-mixin-config-default.properties
+src/main/resources/assets/lithium/lithium-mixin-config-dependencies.properties

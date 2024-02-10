@@ -1,0 +1,5 @@
+before_install:
+    - export SDKMAN_DIR="/home/jitpack/.sdkman/"
+    - source "/home/jitpack/.sdkman/bin/sdkman-init.sh"
+    - sdk install java 17.0.1-open
+    - sdk use java 17.0.1-open

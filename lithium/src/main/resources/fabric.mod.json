@@ -1,0 +1,35 @@
+{
+    "schemaVersion": 1,
+    "id": "lithium",
+    "version": "${version}",
+    "name": "Lithium",
+    "description": "Lithium is a free and open-source optimization mod for Minecraft which makes a wide range of performance improvements to the game.",
+    "authors": [
+      "JellySquid",
+      "2No2Name"
+    ],
+    "contact": {
+      "homepage": "https://jellysquid.me/projects/",
+      "sources": "https://github.com/CaffeineMC/lithium-fabric",
+      "issues": "https://github.com/CaffeineMC/lithium-fabric/issues"
+    },
+    "license": "LGPL-3.0-only",
+    "icon": "assets/lithium/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "me.jellysquid.mods.lithium.common.LithiumMod"
+        ]
+    },
+    "mixins": [
+        "lithium.mixins.json"
+    ],
+    "accessWidener": "lithium.accesswidener",
+    "depends": {
+      "fabricloader": ">=0.12.11",
+      "minecraft": "1.20.4"
+    },
+    "breaks": {
+        "optifabric": "*"
+    }
+}

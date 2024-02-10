@@ -1,0 +1,38 @@
+
+apply plugin: "java"
+apply plugin: "java-gradle-plugin"
+
+archivesBaseName = 'mixin-config-plugin'
+version = '1.0-SNAPSHOT'
+group = 'net.caffeinemc'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+}
+
+gradlePlugin {
+    // Define the plugin
+    plugins {
+        compiler {
+            id = 'net.caffeinemc.mixin-config-plugin'
+            implementationClass = 'net.caffeinemc.gradle.GradleMixinConfigPlugin'
+        }
+    }
+}
+
+sourceCompatibility = JavaVersion.VERSION_17
+targetCompatibility = JavaVersion.VERSION_17
+
+// ensure that the encoding is set to UTF-8, no matter what the system default is
+// this fixes some edge cases with special characters not displaying correctly
+// see http://yodaconditions.net/blog/fix-for-java-file-encoding-problems-with-gradle.html
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+jar {
+    from "${rootProject.projectDir}/LICENSE.txt"
+}

@@ -1,0 +1,23 @@
+name: gradle-ci
+
+on: [ pull_request ]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+            -   uses: actions/checkout@v2
+            -   name: Set up JDK 17
+                uses: actions/setup-java@v2
+                with:
+                    distribution: 'adopt'
+                    java-version: 17
+            -   name: Grant execute permission for gradlew
+                run: chmod +x gradlew
+            -   name: Build with Gradle
+                run: ./gradlew build
+
+            -   name: run test server
+                timeout-minutes: 5
+                run: ./gradlew runAutoTestServer
