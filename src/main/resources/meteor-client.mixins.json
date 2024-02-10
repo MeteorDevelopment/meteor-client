@@ -63,6 +63,7 @@
     "CloseHandledScreenC2SPacketAccessor",
     "CobwebBlockMixin",
     "CompassAnglePredicateProviderMixin",
+    "ConnectScreenAccessor",
     "ConnectScreenMixin",
     "CrashReportMixin",
     "CreativeInventoryScreenAccessor",
