@@ -1,3 +1,5 @@
+# <p align="center"> THIS VERSION OF SODIUM IS MODIFIED FROM THE ORIGINAL! A PRE-COMPILED BINARY OF THIS MODIFIED VERSION IS INCLUDED IN THE RELEASES SECTION OF THIS REPOSITORY </p>
+
 <img src="src/main/resources/assets/sodium/icon.png" width="128">
 
 # Sodium (for Fabric)
