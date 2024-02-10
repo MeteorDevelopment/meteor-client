@@ -13,13 +13,21 @@ import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
+import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
+import meteordevelopment.meteorclient.mixin.ConnectScreenAccessor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
+import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
+import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
+import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
+import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
+import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.integrated.IntegratedServer;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
@@ -30,21 +38,31 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
 
 import static com.mojang.brigadier.Command.SINGLE_SUCCESS;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class ServerCommand extends Command {
     private static final List<String> ANTICHEAT_LIST = Arrays.asList("nocheatplus", "negativity", "warden", "horizon", "illegalstack", "coreprotect", "exploitsx", "vulcan", "abc", "spartan", "kauri", "anticheatreloaded", "witherac", "godseye", "matrix", "wraith", "antixrayheuristics", "grimac");
-    private static final String completionStarts = "/:abcdefghijklmnopqrstuvwxyz0123456789-";
+    private static final String[] VERSION_ALIASES = {"version", "ver", "about", "bukkit:version", "bukkit:ver", "bukkit:about"}; // aliases for bukkit:version
+    private String alias;
     private int ticks = 0;
-    private boolean bukkitMode = false;
+    private boolean tick = false;
     private final List<String> plugins = new ArrayList<>();
+    private final List<String> commandTreePlugins = new ArrayList<>();
+    private static final Random RANDOM = new Random();
+
+    private ClientConnection connection;
 
 
     public ServerCommand() {
         super("server", "Prints server information");
+
+        MeteorClient.EVENT_BUS.subscribe(this);
     }
 
     @Override
@@ -59,16 +77,16 @@ public class ServerCommand extends Command {
             return SINGLE_SUCCESS;
         }));
 
-        builder.then(literal("plugins")
-            .then(literal("BukkitVer").executes(ctx -> {
-                getPlugins(true);
-                return SINGLE_SUCCESS;
-            }))
-            .then(literal("MassScan").executes(ctx -> {
-                getPlugins(false);
-                return SINGLE_SUCCESS;
-            }))
-        );
+        builder.then(literal("plugins").executes(ctx -> {
+            plugins.addAll(commandTreePlugins);
+
+            if (alias != null) {
+                mc.getNetworkHandler().sendPacket(new RequestCommandCompletionsC2SPacket(RANDOM.nextInt(200), alias + " "));
+                tick = true;
+            } else printPlugins();
+
+            return SINGLE_SUCCESS;
+        }));
 
         builder.then(literal("tps").executes(ctx -> {
             float tps = TickRate.INSTANCE.getTickRate();
@@ -79,50 +97,6 @@ public class ServerCommand extends Command {
             info("Current TPS: %s%.2f(default).", color, tps);
             return SINGLE_SUCCESS;
         }));
-    }
-
-    private void getPlugins(boolean bukkit) {
-        bukkitMode = bukkit;
-        ticks = 0;
-        plugins.clear();
-        Random random = new Random();
-        MeteorClient.EVENT_BUS.subscribe(this);
-
-        if (bukkit) {
-            if (mc.isIntegratedServerRunning()) { // don't bother if we're in singleplayer
-                printPlugins();
-                return;
-            }
-            mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), "bukkit:ver "));
-        } else {
-            info("Please wait around 5 seconds...");
-            (new Thread(() -> completionStarts.chars().forEach(i -> {
-                mc.player.networkHandler.sendPacket(new RequestCommandCompletionsC2SPacket(random.nextInt(200), Character.toString(i)));
-                try {
-                    Thread.sleep(100);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }))).start();
-        }
-    }
-
-    private void printPlugins() {
-        Collections.sort(plugins);
-
-        for (int i = 0; i < plugins.size(); i++) {
-            plugins.set(i, formatName(plugins.get(i)));
-        }
-
-        if (!plugins.isEmpty()) {
-            info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
-        } else {
-            error("No plugins found.");
-        }
-
-        ticks = 0;
-        plugins.clear();
-        MeteorClient.EVENT_BUS.unsubscribe(this);
     }
 
     private void basicInfo() {
@@ -209,60 +183,120 @@ public class ServerCommand extends Command {
         info("Permission level: %s", formatPerms());
     }
 
+    public String formatPerms() {
+        int p = 5;
+        while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
+
+        return switch (p) {
+            case 0 -> "0 (No Perms)";
+            case 1 -> "1 (No Perms)";
+            case 2 -> "2 (Player Command Access)";
+            case 3 -> "3 (Server Command Access)";
+            case 4 -> "4 (Operator)";
+            default -> p + " (Unknown)";
+        };
+    }
+
+
+    // plugin scanning
+
+    private void printPlugins() {
+        plugins.sort(String.CASE_INSENSITIVE_ORDER);
+        plugins.replaceAll(this::formatName);
+
+        if (!plugins.isEmpty()) {
+            info("Plugins (%d): %s ", plugins.size(), Strings.join(plugins.toArray(new String[0]), ", "));
+        } else {
+            error("No plugins found.");
+        }
+
+        tick = false;
+        ticks = 0;
+        plugins.clear();
+    }
+
     @EventHandler
     private void onTick(TickEvent.Post event) {
+        if (!tick) return;
         ticks++;
 
-        if (bukkitMode) {
-            if (ticks >= 200) {
-                error("Plugins check timed out. Either the packet has been dropped, or you dont have access to the bukkit:ver command.");
-                MeteorClient.EVENT_BUS.unsubscribe(this);
-                ticks = 0;
-            }
-        }
-        else {
-            if (ticks >= 100) {
-                printPlugins();
-            }
-        }
+        if (ticks >= 100) printPlugins();
+    }
+
+    @EventHandler
+    private void onSendPacket(PacketEvent.Send event) {
+        if (tick && event.packet instanceof RequestCommandCompletionsC2SPacket) event.cancel();
     }
 
     @EventHandler
     private void onReadPacket(PacketEvent.Receive event) {
+        // should return the same set of plugins that command completing '/' would
+        // the rationale is that since we should get this packet whenever we log into the server, we can capture it
+        // straight away and not need to send a command completion packet for essentially the same results
+        if (event.packet instanceof CommandTreeS2CPacket packet) {
+            ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) getNetworkHandler();
+            commandTreePlugins.clear();
+            alias = null;
+
+            // This gets the root node of the command tree. From there, all of its children have to be of type
+            // LiteralCommandNode, so we don't need to worry about checking or casting and can just grab the name
+            packet.getCommandTree(CommandRegistryAccess.of((RegistryWrapper.WrapperLookup) handler.getCombinedDynamicRegistries(), handler.getEnabledFeatures())).getChildren().forEach(node -> {
+                String[] split = node.getName().split(":");
+                if (split.length > 1) {
+                    if (!commandTreePlugins.contains(split[0])) commandTreePlugins.add(split[0]);
+                }
+
+                // checking if any of the bukkit:version commands are available, which we can also grab plugins from
+                if (alias == null) {
+                    for (String a : VERSION_ALIASES) {
+                        if (node.getName().equals(a)) alias = a;
+                    }
+                }
+            });
+
+        }
+
+        if (!tick) return;
+
         try {
             if (event.packet instanceof CommandSuggestionsS2CPacket packet) {
-
                 Suggestions matches = packet.getSuggestions();
 
                 if (matches == null) {
-                    error("Invalid Packet.");
+                    error("An error occurred while trying to find plugins.");
                     return;
                 }
 
                 for (Suggestion suggestion : matches.getList()) {
-                    if (bukkitMode) {
-                        String pluginName = suggestion.getText();
-                        if (!plugins.contains(pluginName)) {
-                            plugins.add(pluginName);
-                        }
-                    }
-                    else {
-                        String[] command = suggestion.getText().split(":");
-                        if (command.length > 1) {
-                            String pluginName = command[0].replace("/", "");
-
-                            if (!plugins.contains(pluginName)) {
-                                plugins.add(pluginName);
-                            }
-                        }
-                    }
+                    String pluginName = suggestion.getText();
+                    if (!plugins.contains(pluginName.toLowerCase())) plugins.add(pluginName);
                 }
 
-                if (bukkitMode) printPlugins();
+                printPlugins();
             }
         } catch (Exception e) {
             error("An error occurred while trying to find plugins.");
         }
+    }
+
+    private ClientPlayNetworkHandler getNetworkHandler() {
+        ClientPlayNetworkHandler handler = mc.getNetworkHandler();
+
+        // mc.getNetworkHandler is null early in the login sequence
+        if (handler == null) {
+            if (connection != null && connection.getPacketListener() instanceof ClientPlayNetworkHandler listener) handler = listener;
+
+            else if (mc.currentScreen instanceof ConnectScreen screen) {
+                ConnectScreenAccessor screenAccessor = (ConnectScreenAccessor) screen;
+
+                if (screenAccessor.getConnection().getPacketListener() instanceof ClientPlayNetworkHandler listener) {
+                    connection = screenAccessor.getConnection();
+                    handler = listener;
+                }
+            }
+        }
+
+        return handler;
     }
 
     private String formatName(String name) {
@@ -275,18 +309,4 @@ public class ServerCommand extends Command {
 
         return String.format("(highlight)%s(default)", name);
     }
-
-    public String formatPerms() {
-		int p = 5;
-		while (!mc.player.hasPermissionLevel(p) && p > 0) p--;
-
-		return switch (p) {
-			case 0 -> "0 (No Perms)";
-			case 1 -> "1 (No Perms)";
-			case 2 -> "2 (Player Command Access)";
-			case 3 -> "3 (Server Command Access)";
-			case 4 -> "4 (Operator)";
-			default -> p + " (Unknown)";
-		};
-	}
 }
