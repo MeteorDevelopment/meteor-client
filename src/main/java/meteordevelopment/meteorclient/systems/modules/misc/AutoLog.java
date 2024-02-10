@@ -107,12 +107,6 @@ public class AutoLog extends Module {
             }
         }
 
-        if (smart.get() && playerHealth + mc.player.getAbsorptionAmount() - PlayerUtils.possibleHealthReductions() < health.get()){
-            disconnect("Health was going to be lower than " + health.get() + ".");
-            if (toggleOff.get()) this.toggle();
-        }
-
-
         if (!onlyTrusted.get() && !instantDeath.get() && !crystalLog.get()) return; // only check all entities if needed
 
         for (Entity entity : mc.world.getEntities()) {
@@ -134,6 +128,7 @@ public class AutoLog extends Module {
                 if (toggleOff.get()) this.toggle();
             }
         }
+
     }
 
     private void disconnect(String reason) {
