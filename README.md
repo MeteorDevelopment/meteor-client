@@ -59,3 +59,10 @@ If you use **ANY** code from the source:
 - Your application must also be licensed under the same license.
 
 *If you have any other questions, check our [FAQ](https://meteorclient.com/faq) or ask in our [Discord](https://meteorclient.com/discord) server.*
+
+# <p align="center"> ADDITIONS I MADE: </p>
+
+ I included the source for the slightly customised versions of sodium and lithium I use on my client (lithium, sodium folder). You can install the latest (1.10.2) version of Baritone as well if you like.
+ You will need Fabric for Minecraft 1.20.4 with loader version 0.15.1. The fabric universal installer can be found online if you do not have it.
+
+ 
