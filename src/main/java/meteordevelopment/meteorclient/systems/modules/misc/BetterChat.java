@@ -22,6 +22,7 @@ import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.meteorclient.utils.misc.MeteorIdentifier;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.orbit.EventHandler;
@@ -518,7 +519,7 @@ public class BetterChat extends Module {
 
         sendButton.setStyle(sendButton.getStyle()
             .withFormatting(Formatting.DARK_RED)
-            .withClickEvent(new ClickEvent(
+            .withClickEvent(new MeteorClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
                 Commands.get("say").toString(message)
             ))

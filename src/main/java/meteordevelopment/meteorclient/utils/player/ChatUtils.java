@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.mixininterface.IChatHud;
 import meteordevelopment.meteorclient.pathing.BaritoneUtils;
 import meteordevelopment.meteorclient.systems.config.Config;
 import meteordevelopment.meteorclient.utils.PostInit;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Pair;
@@ -248,7 +249,7 @@ public class ChatUtils {
         ));
 
         if (BaritoneUtils.IS_AVAILABLE) {
-            style = style.withClickEvent(new ClickEvent(
+            style = style.withClickEvent(new MeteorClickEvent(
                 ClickEvent.Action.RUN_COMMAND,
                 String.format("%sgoto %d %d %d", BaritoneUtils.getPrefix(), (int) pos.x, (int) pos.y, (int) pos.z)
             ));
