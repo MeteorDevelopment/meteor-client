@@ -33,7 +33,7 @@ public class OffhandCrash extends Module {
 
     private final Setting<Integer> speed = sgGeneral.add(new IntSetting.Builder()
         .name("speed")
-        .description("The amount of swaps measured in ticks.")
+        .description("The amount of swaps per tick.")
         .defaultValue(2000)
         .min(1)
         .sliderRange(1, 10000)
