@@ -41,7 +41,7 @@ public class SwarmWorker extends Thread {
             while (!isInterrupted()) {
                 String read = in.readUTF();
 
-                if (!read.equals("")) {
+                if (read.startsWith("swarm")) {
                     ChatUtils.infoPrefix("Swarm", "Received command: (highlight)%s", read);
 
                     try {
