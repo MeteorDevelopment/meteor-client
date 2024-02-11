@@ -10,6 +10,8 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import it.unimi.dsi.fastutil.objects.ObjectIntImmutablePair;
+import it.unimi.dsi.fastutil.objects.ObjectIntPair;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.ModuleArgumentType;
 import meteordevelopment.meteorclient.commands.arguments.PlayerArgumentType;
@@ -20,13 +22,18 @@ import meteordevelopment.meteorclient.systems.modules.misc.swarm.Swarm;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.SwarmConnection;
 import meteordevelopment.meteorclient.systems.modules.misc.swarm.SwarmWorker;
 import meteordevelopment.meteorclient.systems.modules.world.InfinityMiner;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import meteordevelopment.meteorclient.utils.player.ChatUtils;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.BlockStateArgument;
 import net.minecraft.command.argument.BlockStateArgumentType;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Random;
@@ -37,6 +44,7 @@ import static meteordevelopment.meteorclient.MeteorClient.mc;
 public class SwarmCommand extends Command {
 
     private final static SimpleCommandExceptionType SWARM_NOT_ACTIVE = new SimpleCommandExceptionType(Text.literal("The swarm module must be active to use this command."));
+    private @Nullable ObjectIntPair<String> pendingConnection;
 
     public SwarmCommand() {
         super("swarm", "Sends commands to connected swarm workers.");
@@ -60,19 +68,46 @@ public class SwarmCommand extends Command {
                 .then(argument("ip", StringArgumentType.string())
                         .then(argument("port", IntegerArgumentType.integer(0, 65535))
                                 .executes(context -> {
-                                        Swarm swarm = Modules.get().get(Swarm.class);
-                                        if (!swarm.isActive()) swarm.toggle();
+                                    String ip = StringArgumentType.getString(context, "ip");
+                                    int port = IntegerArgumentType.getInteger(context, "port");
 
-                                        swarm.close();
-                                        swarm.mode.set(Swarm.Mode.Worker);
-                                        swarm.worker = new SwarmWorker(StringArgumentType.getString(context, "ip"), IntegerArgumentType.getInteger(context, "port"));
+                                    pendingConnection = new ObjectIntImmutablePair<>(ip, port);
 
-                                        info("Connected to (highlight)%s.", swarm.worker.getConnection());
+                                    info("Are you sure you want to connect to '%s:%s'?", ip, port);
+                                    info(Text.literal("Click here to confirm").setStyle(Style.EMPTY
+                                        .withFormatting(Formatting.UNDERLINE, Formatting.GREEN)
+                                        .withClickEvent(new MeteorClickEvent(ClickEvent.Action.RUN_COMMAND, ".swarm join confirm"))
+                                    ));
 
-                                        return SINGLE_SUCCESS;
+                                    return SINGLE_SUCCESS;
                                 })
                         )
                 )
+                .then(literal("confirm").executes(ctx -> {
+                    if (pendingConnection == null) {
+                        error("No pending swarm connections.");
+                        return SINGLE_SUCCESS;
+                    }
+
+                    Swarm swarm = Modules.get().get(Swarm.class);
+                    if (!swarm.isActive()) swarm.toggle();
+
+                    swarm.close();
+                    swarm.mode.set(Swarm.Mode.Worker);
+                    swarm.worker = new SwarmWorker(pendingConnection.left(), pendingConnection.rightInt());
+
+                    pendingConnection = null;
+
+                    try {
+                        info("Connected to (highlight)%s.", swarm.worker.getConnection());
+                    } catch (NullPointerException e) {
+                        error("Error connecting to swarm host.");
+                        swarm.close();
+                        swarm.toggle();
+                    }
+
+                    return SINGLE_SUCCESS;
+                }))
         );
 
         builder.then(literal("connections").executes(context -> {
