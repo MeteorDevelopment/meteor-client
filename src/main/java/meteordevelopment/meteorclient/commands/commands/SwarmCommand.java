@@ -67,6 +67,8 @@ public class SwarmCommand extends Command {
                                         swarm.mode.set(Swarm.Mode.Worker);
                                         swarm.worker = new SwarmWorker(StringArgumentType.getString(context, "ip"), IntegerArgumentType.getInteger(context, "port"));
 
+                                        info("Connected to (highlight)%s.", swarm.worker.getConnection());
+
                                         return SINGLE_SUCCESS;
                                 })
                         )
