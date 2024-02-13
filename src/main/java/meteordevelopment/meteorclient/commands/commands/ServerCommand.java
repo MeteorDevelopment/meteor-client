@@ -235,6 +235,7 @@ public class ServerCommand extends Command {
         // straight away and not need to send a command completion packet for essentially the same results
         if (event.packet instanceof CommandTreeS2CPacket packet) {
             ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) getNetworkHandler();
+            if(handler==null)return;
             commandTreePlugins.clear();
             alias = null;
 
