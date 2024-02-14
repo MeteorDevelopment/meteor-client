@@ -14,16 +14,12 @@ import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayNetworkHandlerAccessor;
-import meteordevelopment.meteorclient.mixin.ConnectScreenAccessor;
 import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
-import net.minecraft.client.gui.screen.multiplayer.ConnectScreen;
-import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ServerAddress;
 import net.minecraft.client.network.ServerInfo;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.command.CommandSource;
-import net.minecraft.network.ClientConnection;
 import net.minecraft.network.packet.c2s.play.RequestCommandCompletionsC2SPacket;
 import net.minecraft.network.packet.s2c.play.CommandSuggestionsS2CPacket;
 import net.minecraft.network.packet.s2c.play.CommandTreeS2CPacket;
@@ -55,8 +51,6 @@ public class ServerCommand extends Command {
     private final List<String> plugins = new ArrayList<>();
     private final List<String> commandTreePlugins = new ArrayList<>();
     private static final Random RANDOM = new Random();
-
-    private ClientConnection connection;
 
 
     public ServerCommand() {
@@ -234,7 +228,7 @@ public class ServerCommand extends Command {
         // the rationale is that since we should get this packet whenever we log into the server, we can capture it
         // straight away and not need to send a command completion packet for essentially the same results
         if (event.packet instanceof CommandTreeS2CPacket packet) {
-            ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) getNetworkHandler();
+            ClientPlayNetworkHandlerAccessor handler = (ClientPlayNetworkHandlerAccessor) event.packetListener;
             commandTreePlugins.clear();
             alias = null;
 
@@ -277,26 +271,6 @@ public class ServerCommand extends Command {
         } catch (Exception e) {
             error("An error occurred while trying to find plugins.");
         }
-    }
-
-    private ClientPlayNetworkHandler getNetworkHandler() {
-        ClientPlayNetworkHandler handler = mc.getNetworkHandler();
-
-        // mc.getNetworkHandler is null early in the login sequence
-        if (handler == null) {
-            if (connection != null && connection.getPacketListener() instanceof ClientPlayNetworkHandler listener) handler = listener;
-
-            else if (mc.currentScreen instanceof ConnectScreen screen) {
-                ConnectScreenAccessor screenAccessor = (ConnectScreenAccessor) screen;
-
-                if (screenAccessor.getConnection().getPacketListener() instanceof ClientPlayNetworkHandler listener) {
-                    connection = screenAccessor.getConnection();
-                    handler = listener;
-                }
-            }
-        }
-
-        return handler;
     }
 
     private String formatName(String name) {

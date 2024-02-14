@@ -11,6 +11,7 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import meteordevelopment.meteorclient.commands.Command;
 import meteordevelopment.meteorclient.commands.arguments.CompoundNbtTagArgumentType;
 import meteordevelopment.meteorclient.systems.config.Config;
+import meteordevelopment.meteorclient.utils.misc.text.MeteorClickEvent;
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.argument.NbtPathArgumentType;
 import net.minecraft.item.ItemStack;
@@ -84,7 +85,7 @@ public class NbtCommand extends Command {
                 MutableText copyButton = Text.literal("NBT");
                 copyButton.setStyle(copyButton.getStyle()
                         .withFormatting(Formatting.UNDERLINE)
-                        .withClickEvent(new ClickEvent(
+                        .withClickEvent(new MeteorClickEvent(
                                 ClickEvent.Action.RUN_COMMAND,
                                 this.toString("copy")
                         ))
