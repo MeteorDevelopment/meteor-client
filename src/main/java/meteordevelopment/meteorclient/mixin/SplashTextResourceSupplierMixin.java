@@ -40,7 +40,8 @@ public class SplashTextResourceSupplierMixin {
                 "§6MineGame159 §fbased god",
                 "§4meteorclient.com",
                 "§4Meteor on Crack!",
-                "§6Meteor on Crack!"
+                "§6Meteor on Crack!",
+                "Follow @albonec on GitHub!"
         );
     }
 
