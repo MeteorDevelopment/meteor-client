@@ -19,7 +19,7 @@ public class EnumSetting<T extends Enum<?>> extends Setting<T> {
     public EnumSetting(String name, String description, T defaultValue, Consumer<T> onChanged, Consumer<Setting<T>> onModuleActivated, IVisible visible) {
         super(name, description, defaultValue, onChanged, onModuleActivated, visible);
 
-        values = (T[]) defaultValue.getClass().getEnumConstants();
+        values = (T[]) defaultValue.getDeclaringClass().getEnumConstants();
         suggestions = new ArrayList<>(values.length);
         for (T value : values) suggestions.add(value.toString());
     }
