@@ -5,6 +5,7 @@
 
 package meteordevelopment.meteorclient.systems.modules.player;
 
+import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerInteractionManagerAccessor;
 import meteordevelopment.meteorclient.settings.*;
@@ -14,6 +15,7 @@ import meteordevelopment.meteorclient.utils.Utils;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.entity.effect.StatusEffectInstance;
+import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.util.math.BlockPos;
 
 import java.util.List;
@@ -25,7 +27,7 @@ public class SpeedMine extends Module {
 
     public final Setting<Mode> mode = sgGeneral.add(new EnumSetting.Builder<Mode>()
         .name("mode")
-        .defaultValue(Mode.Normal)
+        .defaultValue(Mode.Damage)
         .onChanged(mode -> removeHaste())
         .build()
     );
@@ -73,6 +75,14 @@ public class SpeedMine extends Module {
         .build()
     );
 
+    private final Setting<Boolean> grimBypass = sgGeneral.add(new BoolSetting.Builder()
+        .name("grim-bypass")
+        .description("Bypasses Grim's fastbreak check, working as of 2.3.58")
+        .defaultValue(false)
+        .visible(() -> mode.get() == Mode.Damage)
+        .build()
+    );
+
     public SpeedMine() {
         super(Categories.Player, "speed-mine", "Allows you to quickly mine blocks.");
     }
@@ -101,6 +111,15 @@ public class SpeedMine extends Module {
             if (pos == null || progress <= 0) return;
             if (progress + mc.world.getBlockState(pos).calcBlockBreakingDelta(mc.player, mc.world, pos) >= 0.7f)
                 im.setCurrentBreakingProgress(1f);
+        }
+    }
+
+    @EventHandler
+    private void onPacket(PacketEvent.Send event) {
+        if (!(mode.get() == Mode.Damage) || !grimBypass.get()) return;
+
+        if (event.packet instanceof PlayerActionC2SPacket packet && packet.getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
+            mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(), packet.getDirection()));
         }
     }
 
