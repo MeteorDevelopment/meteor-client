@@ -35,14 +35,10 @@ public class BreakDelay extends Module {
         .build()
     );
 
+    private boolean breakBlockCooldown = false;
+
     public BreakDelay() {
         super(Categories.Player, "break-delay", "Changes the delay between breaking blocks.");
-    }
-
-    boolean breakBlockCooldown = false;
-
-    public boolean preventInstaBreak() {
-        return isActive() && noInstaBreak.get();
     }
 
     @EventHandler
@@ -62,4 +58,7 @@ public class BreakDelay extends Module {
         }
     }
 
+    public boolean preventInstaBreak() {
+        return isActive() && noInstaBreak.get();
+    }
 }
