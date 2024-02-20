@@ -74,6 +74,8 @@ public abstract class ChatHudMixin implements IChatHud {
     @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "NEW", target = "(ILnet/minecraft/text/OrderedText;Lnet/minecraft/client/gui/hud/MessageIndicator;Z)Lnet/minecraft/client/gui/hud/ChatHudLine$Visible;"))
     private ChatHudLine.Visible onAddMessage_modifyChatHudLineVisible(ChatHudLine.Visible line, @Local(ordinal = 2) int j) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
+        if (handler == null) return line;
+
         IChatHudLineVisible meteorLine = (IChatHudLineVisible) (Object) line;
 
         meteorLine.meteor$setSender(handler.meteor$getSender());
@@ -85,6 +87,8 @@ public abstract class ChatHudMixin implements IChatHud {
     @ModifyExpressionValue(method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;ILnet/minecraft/client/gui/hud/MessageIndicator;Z)V", at = @At(value = "NEW", target = "(ILnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)Lnet/minecraft/client/gui/hud/ChatHudLine;"))
     private ChatHudLine onAddMessage_modifyChatHudLine(ChatHudLine line) {
         IMessageHandler handler = (IMessageHandler) client.getMessageHandler();
+        if (handler == null) return line;
+
         ((IChatHudLine) (Object) line).meteor$setSender(handler.meteor$getSender());
         return line;
     }
