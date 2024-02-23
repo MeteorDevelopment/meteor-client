@@ -118,6 +118,7 @@ public class SpeedMine extends Module {
     private void onPacket(PacketEvent.Send event) {
         if (!(mode.get() == Mode.Damage) || !grimBypass.get()) return;
 
+        // https://github.com/GrimAnticheat/Grim/issues/1296
         if (event.packet instanceof PlayerActionC2SPacket packet && packet.getAction() == PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK) {
             mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.ABORT_DESTROY_BLOCK, packet.getPos().up(), packet.getDirection()));
         }
