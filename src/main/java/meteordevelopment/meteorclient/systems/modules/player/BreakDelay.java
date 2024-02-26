@@ -6,12 +6,14 @@
 package meteordevelopment.meteorclient.systems.modules.player;
 
 import meteordevelopment.meteorclient.events.entity.player.BlockBreakingCooldownEvent;
+import meteordevelopment.meteorclient.events.meteor.MouseButtonEvent;
 import meteordevelopment.meteorclient.settings.BoolSetting;
 import meteordevelopment.meteorclient.settings.IntSetting;
 import meteordevelopment.meteorclient.settings.Setting;
 import meteordevelopment.meteorclient.settings.SettingGroup;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
+import meteordevelopment.meteorclient.utils.misc.input.KeyAction;
 import meteordevelopment.orbit.EventHandler;
 
 public class BreakDelay extends Module {
@@ -26,19 +28,37 @@ public class BreakDelay extends Module {
         .build()
     );
 
-    public final Setting<Boolean> noInstaBreak = sgGeneral.add(new BoolSetting.Builder()
+    private final Setting<Boolean> noInstaBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("no-insta-break")
-        .description("Prevent you from breaking blocks instantly.")
+        .description("Prevents you from misbreaking blocks if you can instantly break them.")
         .defaultValue(false)
         .build()
     );
+
+    private boolean breakBlockCooldown = false;
 
     public BreakDelay() {
         super(Categories.Player, "break-delay", "Changes the delay between breaking blocks.");
     }
 
-    @EventHandler()
+    @EventHandler
     private void onBlockBreakingCooldown(BlockBreakingCooldownEvent event) {
-        event.cooldown = cooldown.get();
+        if (breakBlockCooldown) {
+            event.cooldown = 5;
+            breakBlockCooldown = false;
+        } else {
+            event.cooldown = cooldown.get();
+        }
+    }
+
+    @EventHandler
+    private void onClick(MouseButtonEvent event) {
+        if (event.action == KeyAction.Press && noInstaBreak.get()) {
+            breakBlockCooldown = true;
+        }
+    }
+
+    public boolean preventInstaBreak() {
+        return isActive() && noInstaBreak.get();
     }
 }
