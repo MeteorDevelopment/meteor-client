@@ -30,7 +30,7 @@ public class BreakDelay extends Module {
 
     private final Setting<Boolean> noInstaBreak = sgGeneral.add(new BoolSetting.Builder()
         .name("no-insta-break")
-        .description("Prevent you from breaking blocks instantly.")
+        .description("Prevents you from misbreaking blocks if you can instantly break them.")
         .defaultValue(false)
         .build()
     );
