@@ -14,18 +14,23 @@ import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
+import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
+import meteordevelopment.meteorclient.utils.misc.NbtException;
 import net.minecraft.client.session.Session;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class TheAlteningAccount extends Account<TheAlteningAccount> {
+public class TheAlteningAccount extends Account<TheAlteningAccount> implements TokenAccount {
     private static final Environment ENVIRONMENT = new Environment("http://sessionserver.thealtening.com", "http://authserver.thealtening.com", "The Altening");
     private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
+    private String token;
 
     public TheAlteningAccount(String token) {
         super(AccountType.TheAltening, token);
+        this.token = token;
     }
 
     @Override
@@ -74,5 +79,33 @@ public class TheAlteningAccount extends Account<TheAlteningAccount> {
         auth.setPassword("Meteor on Crack!");
 
         return auth;
+    }
+
+    @Override
+    public String getToken() {
+        return token;
+    }
+
+    @Override
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
+
+        tag.putString("type", type.name());
+        tag.putString("name", name);
+        tag.putString("token", token);
+        tag.put("cache", cache.toTag());
+
+        return tag;
+    }
+
+    @Override
+    public TheAlteningAccount fromTag(NbtCompound tag) {
+        if (!tag.contains("name") || !tag.contains("cache") || !tag.contains("token")) throw new NbtException();
+
+        name = tag.getString("name");
+        token = tag.getString("token");
+        cache.fromTag(tag.getCompound("cache"));
+
+        return this;
     }
 }
