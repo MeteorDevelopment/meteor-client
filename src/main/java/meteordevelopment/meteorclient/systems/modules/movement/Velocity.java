@@ -126,6 +126,13 @@ public class Velocity extends Module {
         .build()
     );
 
+    public final Setting<Boolean> fishing = sgGeneral.add(new BoolSetting.Builder()
+        .name("fishing")
+        .description("Prevents you from being pulled by fishing rods.")
+        .defaultValue(false)
+        .build()
+    );
+
     public Velocity() {
         super(Categories.Movement, "velocity", "Prevents you from being moved by external forces.");
     }
