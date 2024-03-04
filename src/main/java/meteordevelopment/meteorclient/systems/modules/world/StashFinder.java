@@ -94,13 +94,13 @@ public class StashFinder extends Module {
     @EventHandler
     private void onChunkData(ChunkDataEvent event) {
         // Check the distance.
-        double chunkXAbs = Math.abs(event.chunk.getPos().x * 16);
-        double chunkZAbs = Math.abs(event.chunk.getPos().z * 16);
+        double chunkXAbs = Math.abs(event.chunk().getPos().x * 16);
+        double chunkZAbs = Math.abs(event.chunk().getPos().z * 16);
         if (Math.sqrt(chunkXAbs * chunkXAbs + chunkZAbs * chunkZAbs) < minimumDistance.get()) return;
 
-        Chunk chunk = new Chunk(event.chunk.getPos());
+        Chunk chunk = new Chunk(event.chunk().getPos());
 
-        for (BlockEntity blockEntity : event.chunk.getBlockEntities().values()) {
+        for (BlockEntity blockEntity : event.chunk().getBlockEntities().values()) {
             if (!storageBlocks.get().contains(blockEntity.getType())) continue;
 
             if (blockEntity instanceof ChestBlockEntity) chunk.chests++;
@@ -133,8 +133,6 @@ public class StashFinder extends Module {
                 }
             }
         }
-
-        ChunkDataEvent.returnChunkDataEvent(event);
     }
 
     @Override
