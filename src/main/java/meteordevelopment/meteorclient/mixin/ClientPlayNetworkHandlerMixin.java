@@ -96,7 +96,7 @@ public abstract class ClientPlayNetworkHandlerMixin extends ClientCommonNetworkH
     @Inject(method = "onChunkData", at = @At("TAIL"))
     private void onChunkData(ChunkDataS2CPacket packet, CallbackInfo info) {
         WorldChunk chunk = client.world.getChunk(packet.getChunkX(), packet.getChunkZ());
-        MeteorClient.EVENT_BUS.post(ChunkDataEvent.get(chunk));
+        MeteorClient.EVENT_BUS.post(new ChunkDataEvent(chunk));
     }
 
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("TAIL"))
