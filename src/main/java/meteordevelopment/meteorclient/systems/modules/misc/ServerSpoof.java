@@ -5,10 +5,19 @@
 
 package meteordevelopment.meteorclient.systems.modules.misc;
 
+import java.util.List;
+
+import org.apache.commons.lang3.StringUtils;
+
 import io.netty.buffer.Unpooled;
 import meteordevelopment.meteorclient.MeteorClient;
+import meteordevelopment.meteorclient.events.game.ClientBrandRetrieverEvent;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
-import meteordevelopment.meteorclient.settings.*;
+import meteordevelopment.meteorclient.settings.BoolSetting;
+import meteordevelopment.meteorclient.settings.Setting;
+import meteordevelopment.meteorclient.settings.SettingGroup;
+import meteordevelopment.meteorclient.settings.StringListSetting;
+import meteordevelopment.meteorclient.settings.StringSetting;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
 import meteordevelopment.orbit.EventHandler;
@@ -22,9 +31,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.List;
 
 public class ServerSpoof extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
@@ -73,6 +79,13 @@ public class ServerSpoof extends Module {
     }
 
     private class Listener {
+    	
+    	@EventHandler
+    	private void onClientBrandRetrive(ClientBrandRetrieverEvent event) {
+    		System.out.println("Listener: " + event.info.getReturnValue());
+    		if (spoofBrand.get()) event.info.setReturnValue(brand.get());
+    	}
+    	
         @EventHandler
         private void onPacketSend(PacketEvent.Send event) {
             if (!isActive()) return;
