@@ -91,8 +91,22 @@ public class ServerSpoof extends Module {
             if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
             Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().id();
 
-            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID))
+            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID)) {
                 event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+                for (String channel : channels.get()) {
+                    if (id.toString().equalsIgnoreCase("fabric:registry/sync")) {
+                        event.cancel();
+                        return;
+                    } else if (id.toString().equalsIgnoreCase("fabric:container/open")) {
+                        event.cancel();
+                        return;
+                    } else if (id.toString().equalsIgnoreCase("fabric-screen-handler-api-v1:open_screen")) {
+                        event.cancel();
+                        return;
+                    } 
+                }
+            	
+            }
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
