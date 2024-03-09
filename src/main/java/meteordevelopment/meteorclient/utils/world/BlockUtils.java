@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.world;
 
+import static meteordevelopment.meteorclient.MeteorClient.mc;
+
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.utils.PreInit;
@@ -13,7 +15,23 @@ import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
-import net.minecraft.block.*;
+import net.minecraft.block.AbstractPressurePlateBlock;
+import net.minecraft.block.AirBlock;
+import net.minecraft.block.AnvilBlock;
+import net.minecraft.block.BedBlock;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.block.BlockWithEntity;
+import net.minecraft.block.Blocks;
+import net.minecraft.block.ButtonBlock;
+import net.minecraft.block.CraftingTableBlock;
+import net.minecraft.block.DoorBlock;
+import net.minecraft.block.FenceGateBlock;
+import net.minecraft.block.NoteBlock;
+import net.minecraft.block.ShapeContext;
+import net.minecraft.block.SlabBlock;
+import net.minecraft.block.StairsBlock;
+import net.minecraft.block.TrapdoorBlock;
 import net.minecraft.block.enums.BlockHalf;
 import net.minecraft.block.enums.SlabType;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -32,8 +50,6 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
-
-import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class BlockUtils {
     public static boolean breaking;
@@ -317,12 +333,31 @@ public class BlockUtils {
 
     private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
 
-    public static boolean isExposed(BlockPos blockPos) {
-        for (Direction direction : Direction.values()) {
-            if (!mc.world.getBlockState(EXPOSED_POS.get().set(blockPos, direction)).isOpaque()) return true;
-        }
+    public static boolean isExposed(BlockPos blockPos, Integer distanceToCheck) {
+    	
+    	boolean isPosExposed = false;
+    	
+    	BlockState currBlockState = mc.world.getBlockState(blockPos);
 
-        return false;
+		outerloop:
+		for (Direction direction : Direction.values()) {
+			boolean foundAir = false;
+			for (int i = 1; i <= distanceToCheck+1; i++) {
+				if(i >= distanceToCheck && foundAir) {
+					isPosExposed = true;
+					break outerloop;
+				}
+				BlockState neighbourBlockState = mc.world.getBlockState(blockPos.offset(direction, i));
+				if(!mc.world.getBlockState(blockPos.offset(direction, i)).isOpaque()) {
+					foundAir = true;
+				} else {
+					break;
+				}
+            }
+		}
+    	
+
+        return isPosExposed;
     }
 
     public static double getBreakDelta(int slot, BlockState state) {
