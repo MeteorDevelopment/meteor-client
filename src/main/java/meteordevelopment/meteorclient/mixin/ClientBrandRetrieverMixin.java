@@ -14,10 +14,7 @@ import net.minecraft.client.ClientBrandRetriever;
 public class ClientBrandRetrieverMixin {
 	@Inject(at = @At("HEAD"), method = "getClientModName", cancellable = true, remap = false)
 	private static void getConfiguredClientBrand(CallbackInfoReturnable<String> info) {
-		System.out.println("info: " + info.getReturnValue());
 		ClientBrandRetrieverEvent event = MeteorClient.EVENT_BUS.post(ClientBrandRetrieverEvent.get(info));
-
-		System.out.println(event.info.getReturnValue());
 		
 		if(event.isCancelled()) {
 			return;

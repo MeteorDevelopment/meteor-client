@@ -82,7 +82,6 @@ public class ServerSpoof extends Module {
     	
     	@EventHandler
     	private void onClientBrandRetrive(ClientBrandRetrieverEvent event) {
-    		System.out.println("Listener: " + event.info.getReturnValue());
     		if (spoofBrand.get()) event.info.setReturnValue(brand.get());
     	}
     	
