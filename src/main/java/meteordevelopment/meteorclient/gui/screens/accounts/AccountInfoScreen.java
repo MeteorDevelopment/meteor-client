@@ -17,8 +17,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
 public class AccountInfoScreen extends WindowScreen {
-
-    Account<?> account;
+    private Account<?> account;
 
     public AccountInfoScreen(GuiTheme theme, Account<?> account) {
         super(theme, account.getUsername() + " details");
@@ -29,8 +28,10 @@ public class AccountInfoScreen extends WindowScreen {
     public void initWidgets() {
         TokenAccount e = (TokenAccount) account;
         WHorizontalList l = add(theme.horizontalList()).expandX().widget();
+        
         WButton copy = theme.button("Copy");
         copy.action = () -> mc.keyboard.setClipboard(e.getToken());
+        
         l.add(theme.label((account.getType() == AccountType.EasyMC ? "EasyMC" : "TheAltening") + " token"));
         l.add(theme.label(e.getToken()).color(Color.GRAY)).pad(5);
         l.add(copy);
