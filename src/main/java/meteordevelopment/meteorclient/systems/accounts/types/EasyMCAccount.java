@@ -12,20 +12,29 @@ import meteordevelopment.meteorclient.mixin.MinecraftClientAccessor;
 import meteordevelopment.meteorclient.mixin.YggdrasilMinecraftSessionServiceAccessor;
 import meteordevelopment.meteorclient.systems.accounts.Account;
 import meteordevelopment.meteorclient.systems.accounts.AccountType;
+import meteordevelopment.meteorclient.systems.accounts.TokenAccount;
+import meteordevelopment.meteorclient.utils.misc.NbtException;
 import meteordevelopment.meteorclient.utils.network.Http;
 import net.minecraft.client.session.Session;
+import net.minecraft.nbt.NbtCompound;
 
 import java.util.Optional;
 
 import static meteordevelopment.meteorclient.MeteorClient.mc;
 
-public class EasyMCAccount extends Account<EasyMCAccount> {
+public class EasyMCAccount extends Account<EasyMCAccount> implements TokenAccount {
 
     private static final Environment ENVIRONMENT = new Environment("https://sessionserver.easymc.io", "https://authserver.mojang.com", "EasyMC");
     private static final YggdrasilAuthenticationService SERVICE = new YggdrasilAuthenticationService(((MinecraftClientAccessor) mc).getProxy(), ENVIRONMENT);
+    private String token;
 
     public EasyMCAccount(String token) {
         super(AccountType.EasyMC, token);
+        this.token = token;
+    }
+
+    public String getToken() {
+        return token;
     }
 
     @Override
@@ -63,5 +72,28 @@ public class EasyMCAccount extends Account<EasyMCAccount> {
         public String uuid;
         public String session;
         public String message;
+    }
+
+    @Override
+    public NbtCompound toTag() {
+        NbtCompound tag = new NbtCompound();
+
+        tag.putString("type", type.name());
+        tag.putString("name", name);
+        tag.putString("token", token);
+        tag.put("cache", cache.toTag());
+
+        return tag;
+    }
+
+    @Override
+    public EasyMCAccount fromTag(NbtCompound tag) {
+        if (!tag.contains("name") || !tag.contains("cache") || !tag.contains("token")) throw new NbtException();
+
+        name = tag.getString("name");
+        token = tag.getString("token");
+        cache.fromTag(tag.getCompound("cache"));
+
+        return this;
     }
 }
