@@ -6,24 +6,26 @@
 package meteordevelopment.meteorclient;
 
 import javax.swing.*;
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Main {
     public static void main(String[] args) throws UnsupportedLookAndFeelException, ClassNotFoundException, InstantiationException, IllegalAccessException {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-
         int option = JOptionPane.showOptionDialog(
                 null,
-                "To install Meteor Client you need to put it in your mods folder and run Fabric for latest Minecraft version.",
+                "To install Meteor Client, you need to put it in your mods folder and run Fabric with the latest Minecraft version\nNeed help? Join our Discord",
                 "Meteor Client",
-                JOptionPane.YES_NO_OPTION,
+                JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.ERROR_MESSAGE,
                 null,
-                new String[] { "Open Wiki", "Open Mods Folder" },
+                new String[] { "Open Wiki", "Open Mods Folder", "Join our Discord" },
                 null
         );
 
@@ -35,7 +37,7 @@ public class Main {
                 switch (getOS()) {
                     case WINDOWS: path = System.getenv("AppData") + "/.minecraft/mods"; break;
                     case OSX:     path = System.getProperty("user.home") + "/Library/Application Support/minecraft/mods"; break;
-                    default:      path = System.getProperty("user.home") + "/.minecraft"; break;
+                    default:      path = System.getProperty("user.home") + "/.minecraft/mods"; break;
                 }
 
                 File mods = new File(path);
@@ -44,6 +46,7 @@ public class Main {
                 getOS().open(mods);
                 break;
             }
+            case 2: getOS().open("https://meteorclient.com/discord"); break;
         }
     }
 
@@ -108,3 +111,4 @@ public class Main {
         }
     }
 }
+
