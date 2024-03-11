@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.utils.misc;
 
+import net.minecraft.util.math.BlockPos;
+
 public enum HorizontalDirection {
     South("South", "Z+", false, 0, 0, 1),
     SouthEast("South East", "X+ Z+", true, -45, 1, 1),
@@ -28,6 +30,10 @@ public enum HorizontalDirection {
         this.yaw = yaw;
         this.offsetX = offsetX;
         this.offsetZ = offsetZ;
+    }
+
+    public BlockPos offset(BlockPos bp) {
+        return bp.add(offsetX, 0, offsetZ);
     }
 
     public HorizontalDirection opposite() {
