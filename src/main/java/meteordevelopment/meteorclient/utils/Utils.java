@@ -346,6 +346,10 @@ public class Utils {
         return "";
     }
 
+    public static String formatEnumName(String enumName) {
+        return Arrays.stream(enumName.split("_")).map(String::toLowerCase).map(StringUtils::capitalize).collect(Collectors.joining(" "));
+    }
+
     public static String nameToTitle(String name) {
         return Arrays.stream(name.split("-")).map(StringUtils::capitalize).collect(Collectors.joining(" "));
     }
