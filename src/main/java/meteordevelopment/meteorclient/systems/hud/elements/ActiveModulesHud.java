@@ -13,6 +13,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class ActiveModulesHud extends HudElement {
@@ -32,6 +33,13 @@ public class ActiveModulesHud extends HudElement {
         .name("sort")
         .description("How to sort active modules.")
         .defaultValue(Sort.Biggest)
+        .build()
+    );
+
+    private final Setting<Boolean> categoryGrouping = sgGeneral.add(new BoolSetting.Builder()
+        .name("category-grouping")
+        .description("Groups modules with the same category together.")
+        .defaultValue(false)
         .build()
     );
 
@@ -135,25 +143,24 @@ public class ActiveModulesHud extends HudElement {
         .build()
     );
 
-    private final Setting<Double> rainbowSaturation = sgGeneral.add(new DoubleSetting.Builder()
-        .name("rainbow-saturation")
+    private final Setting<Double> saturation = sgGeneral.add(new DoubleSetting.Builder()
+        .name("saturation")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
-        .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .visible(() -> colorMode.get() != ColorMode.Flat)
         .build()
     );
 
-    private final Setting<Double> rainbowBrightness = sgGeneral.add(new DoubleSetting.Builder()
-        .name("rainbow-brightness")
+    private final Setting<Double> brightness = sgGeneral.add(new DoubleSetting.Builder()
+        .name("brightness")
         .defaultValue(1.0d)
         .sliderRange(0.0d, 1.0d)
-        .visible(() -> colorMode.get() == ColorMode.Rainbow)
+        .visible(() -> colorMode.get() != ColorMode.Flat)
         .build()
     );
 
     private final List<Module> modules = new ArrayList<>();
 
-    private final Color rainbow = new Color(255, 255, 255);
     private double rainbowHue1;
     private double rainbowHue2;
 
@@ -185,6 +192,8 @@ public class ActiveModulesHud extends HudElement {
             case Biggest -> Double.compare(getModuleWidth(renderer, e2), getModuleWidth(renderer, e1));
             case Smallest -> Double.compare(getModuleWidth(renderer, e1), getModuleWidth(renderer, e2));
         });
+
+        if (categoryGrouping.get()) modules.sort(Comparator.comparing(module -> module.category.name));
 
         double width = 0;
         double height = 0;
@@ -231,19 +240,17 @@ public class ActiveModulesHud extends HudElement {
 
     private void renderModule(HudRenderer renderer, List<Module> modules, int index, double x, double y) {
         Module module = modules.get(index);
-        Color color = flatColor.get();
+        Color color;
 
-        switch (colorMode.get()) {
-            case Random -> color = module.color;
+        color = switch (colorMode.get()) {
+            case Category -> module.category.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
+            case Flat -> flatColor.get();
+            case Random -> module.color.copy().saturation(saturation.get().floatValue()).brightness(brightness.get().floatValue());
             case Rainbow -> {
                 rainbowHue2 += rainbowSpread.get();
-                int c = java.awt.Color.HSBtoRGB((float) rainbowHue2, rainbowSaturation.get().floatValue(), rainbowBrightness.get().floatValue());
-                rainbow.r = Color.toRGBAR(c);
-                rainbow.g = Color.toRGBAG(c);
-                rainbow.b = Color.toRGBAB(c);
-                color = rainbow;
+                yield Color.fromHsv(rainbowHue2, saturation.get().floatValue(), brightness.get().floatValue());
             }
-        }
+        };
 
         renderer.text(module.title, x, y, color, shadow.get(), getScale());
 
@@ -318,6 +325,7 @@ public class ActiveModulesHud extends HudElement {
     }
 
     public enum ColorMode {
+        Category,
         Flat,
         Random,
         Rainbow
