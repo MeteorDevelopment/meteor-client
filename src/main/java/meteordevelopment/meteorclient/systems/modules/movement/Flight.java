@@ -5,10 +5,12 @@
 
 package meteordevelopment.meteorclient.systems.modules.movement;
 
+import com.google.common.collect.Streams;
 import meteordevelopment.meteorclient.events.packets.PacketEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.mixin.ClientPlayerEntityAccessor;
 import meteordevelopment.meteorclient.mixin.PlayerMoveC2SPacketAccessor;
+import meteordevelopment.meteorclient.mixin.PlayerPositionLookS2CPacketAccessor;
 import meteordevelopment.meteorclient.settings.*;
 import meteordevelopment.meteorclient.systems.modules.Categories;
 import meteordevelopment.meteorclient.systems.modules.Module;
@@ -17,7 +19,9 @@ import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.network.packet.c2s.play.PlayerMoveC2SPacket;
+import net.minecraft.network.packet.s2c.play.PlayerPositionLookS2CPacket;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
+import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 
 public class Flight extends Module {
@@ -50,6 +54,16 @@ public class Flight extends Module {
         .build()
     );
 
+
+    // Anti Kick
+
+    private final Setting<Boolean> antiRubberbanding = sgAntiKick.add(new BoolSetting.Builder()
+        .name("anti-rubberbanding")
+        .description("Attempts to prevent the server from teleporting us to the ground.")
+        .defaultValue(true)
+        .build()
+    );
+
     private final Setting<AntiKickMode> antiKickMode = sgAntiKick.add(new EnumSetting.Builder<AntiKickMode>()
         .name("mode")
         .description("The mode for anti kick.")
@@ -63,16 +77,17 @@ public class Flight extends Module {
         .defaultValue(20)
         .min(1)
         .sliderMax(200)
+        .visible(() -> antiKickMode.get() != AntiKickMode.Ground)
         .build()
     );
 
-    // Anti Kick
     private final Setting<Integer> offTime = sgAntiKick.add(new IntSetting.Builder()
         .name("off-time")
         .description("The amount of delay, in milliseconds, to fly down a bit to reset floating ticks.")
         .defaultValue(1)
         .min(1)
         .sliderRange(1, 20)
+        .visible(() -> antiKickMode.get() != AntiKickMode.Ground)
         .build()
     );
 
@@ -181,35 +196,60 @@ public class Flight extends Module {
      */
     @EventHandler
     private void onSendPacket(PacketEvent.Send event) {
-        if (!(event.packet instanceof PlayerMoveC2SPacket packet) || antiKickMode.get() != AntiKickMode.Packet) return;
+        if (!(event.packet instanceof PlayerMoveC2SPacket packet)) return;
 
-        double currentY = packet.getY(Double.MAX_VALUE);
-        if (currentY != Double.MAX_VALUE) {
-            antiKickPacket(packet, currentY);
-        } else {
-            // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
-            // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
-            PlayerMoveC2SPacket fullPacket;
-            if (packet.changesLook()) {
-                fullPacket = new PlayerMoveC2SPacket.Full(
-                    mc.player.getX(),
-                    mc.player.getY(),
-                    mc.player.getZ(),
-                    packet.getYaw(0),
-                    packet.getPitch(0),
-                    packet.isOnGround()
-                );
+        if (antiKickMode.get() == AntiKickMode.Packet) {
+            double currentY = packet.getY(Double.MAX_VALUE);
+            if (currentY != Double.MAX_VALUE) {
+                antiKickPacket(packet, currentY);
             } else {
-                fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
-                    mc.player.getX(),
-                    mc.player.getY(),
-                    mc.player.getZ(),
-                    packet.isOnGround()
-                );
+                // if the packet is a LookAndOnGround packet or an OnGroundOnly packet then we need to
+                // make it a Full packet or a PositionAndOnGround packet respectively, so it has a Y value
+                PlayerMoveC2SPacket fullPacket;
+                if (packet.changesLook()) {
+                    fullPacket = new PlayerMoveC2SPacket.Full(
+                        mc.player.getX(),
+                        mc.player.getY(),
+                        mc.player.getZ(),
+                        packet.getYaw(0),
+                        packet.getPitch(0),
+                        packet.isOnGround()
+                    );
+                } else {
+                    fullPacket = new PlayerMoveC2SPacket.PositionAndOnGround(
+                        mc.player.getX(),
+                        mc.player.getY(),
+                        mc.player.getZ(),
+                        packet.isOnGround()
+                    );
+                }
+                event.cancel();
+                antiKickPacket(fullPacket, mc.player.getY());
+                mc.getNetworkHandler().sendPacket(fullPacket);
             }
-            event.cancel();
-            antiKickPacket(fullPacket, mc.player.getY());
-            mc.getNetworkHandler().sendPacket(fullPacket);
+        } else if (antiKickMode.get() == AntiKickMode.Ground) {
+            if (!packet.changesPosition()) return;
+
+            Box adjustBox = mc.player.getBoundingBox().stretch(0, mc.world.getBottomY(), 0).expand(0.0625);
+
+            ((PlayerMoveC2SPacketAccessor) packet).setOnGround(true);
+            Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
+                .mapToDouble(voxelShape -> voxelShape.getBoundingBox().maxY)
+                .max().ifPresent(d -> ((PlayerMoveC2SPacketAccessor) packet).setY(d));
+        }
+    }
+
+    @EventHandler
+    private void onPacketReceive(PacketEvent.Receive event) {
+        if (antiRubberbanding.get() && event.packet instanceof PlayerPositionLookS2CPacket packet) {
+            mc.player.setPosition(packet.getX(), packet.getY(), packet.getZ());
+
+            Box adjustBox = mc.player.getBoundingBox().stretch(0, mc.world.getBottomY(), 0).expand(0.0625);
+
+            Streams.stream(mc.world.getBlockCollisions(mc.player, adjustBox))
+                .mapToDouble(voxelShape -> voxelShape.getBoundingBox().maxY)
+                .max()
+                .ifPresent(d -> ((PlayerPositionLookS2CPacketAccessor) packet).setY(Math.max(mc.player.prevY, d)));
         }
     }
 
@@ -246,6 +286,7 @@ public class Flight extends Module {
     public enum AntiKickMode {
         Normal,
         Packet,
+        Ground,
         None
     }
 }
