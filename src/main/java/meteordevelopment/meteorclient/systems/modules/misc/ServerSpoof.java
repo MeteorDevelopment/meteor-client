@@ -90,23 +90,23 @@ public class ServerSpoof extends Module {
             if (!isActive()) return;
             if (!(event.packet instanceof CustomPayloadC2SPacket)) return;
             Identifier id = ((CustomPayloadC2SPacket) event.packet).payload().id();
-
-            if (spoofBrand.get() && id.equals(BrandCustomPayload.ID)) {
-                event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
-                for (String channel : channels.get()) {
-                    if (id.toString().equalsIgnoreCase("fabric:registry/sync")) {
-                        event.cancel();
-                        return;
-                    } else if (id.toString().equalsIgnoreCase("fabric:container/open")) {
-                        event.cancel();
-                        return;
-                    } else if (id.toString().equalsIgnoreCase("fabric-screen-handler-api-v1:open_screen")) {
-                        event.cancel();
-                        return;
-                    } 
-                }
-            	
+            
+            if(spoofBrand.get()) {
+            	if (id.equals(BrandCustomPayload.ID)) {
+                    event.packet.write(new PacketByteBuf(Unpooled.buffer()).writeString(brand.get()));
+                } else if (StringUtils.containsIgnoreCase(id.toString(), "fabric:registry/sync")) {
+	                event.cancel();
+	                return;
+	            } else if (StringUtils.containsIgnoreCase(id.toString(), "fabric:container/open")) {
+	                event.cancel();
+	                return;
+	            } else if (StringUtils.containsIgnoreCase(id.toString(), "fabric-screen-handler-api-v1:open_screen")) {
+	                event.cancel();
+	                return;
+	            }
             }
+
+            
 
             if (blockChannels.get()) {
                 for (String channel : channels.get()) {
