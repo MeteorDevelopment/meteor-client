@@ -330,34 +330,23 @@ public class BlockUtils {
         Potential,
         Always
     }
-
+    
     private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
 
-    public static boolean isExposed(BlockPos blockPos, Integer distanceToCheck) {
-    	
-    	boolean isPosExposed = false;
-    	
-    	BlockState currBlockState = mc.world.getBlockState(blockPos);
-
-		outerloop:
-		for (Direction direction : Direction.values()) {
-			boolean foundAir = false;
-			for (int i = 1; i <= distanceToCheck+1; i++) {
-				if(i >= distanceToCheck && foundAir) {
-					isPosExposed = true;
-					break outerloop;
-				}
-				BlockState neighbourBlockState = mc.world.getBlockState(blockPos.offset(direction, i));
-				if(!mc.world.getBlockState(blockPos.offset(direction, i)).isOpaque()) {
-					foundAir = true;
-				} else {
-					break;
-				}
+public static boolean isExposed(BlockPos blockPos, Integer distanceToCheck) {
+	
+	outerloop:
+        for (Direction direction : Direction.values()) {
+        	EXPOSED_POS.get().set(blockPos);
+            for (int i = 1; i <= distanceToCheck; i++) {
+                BlockState neighbourBlockState = mc.world.getBlockState(EXPOSED_POS.get().move(direction, 1));
+                if(neighbourBlockState.isOpaque()) {
+                    continue outerloop;
+                }
             }
-		}
-    	
-
-        return isPosExposed;
+            return true;
+        }
+        return false;
     }
 
     public static double getBreakDelta(int slot, BlockState state) {
