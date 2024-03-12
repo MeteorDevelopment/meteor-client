@@ -333,9 +333,9 @@ public class BlockUtils {
     
     private static final ThreadLocal<BlockPos.Mutable> EXPOSED_POS = ThreadLocal.withInitial(BlockPos.Mutable::new);
 
-public static boolean isExposed(BlockPos blockPos, Integer distanceToCheck) {
+    public static boolean isExposed(BlockPos blockPos, Integer distanceToCheck) {
 	
-	outerloop:
+    	outerloop:
         for (Direction direction : Direction.values()) {
         	EXPOSED_POS.get().set(blockPos);
             for (int i = 1; i <= distanceToCheck; i++) {
