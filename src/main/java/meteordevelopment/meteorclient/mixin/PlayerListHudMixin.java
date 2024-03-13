@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.mixin;
 
+import com.llamalad7.mixinextras.sugar.Local;
+import com.llamalad7.mixinextras.sugar.ref.LocalIntRef;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.misc.BetterTab;
 import net.minecraft.client.MinecraftClient;
@@ -42,10 +44,20 @@ public class PlayerListHudMixin {
         return module.isActive() && module.accurateLatency.get() ? width + 30 : width;
     }
 
-    @ModifyConstant(constant = @Constant(intValue = 20), method = "render")
-    private int modifyHeight(int height) {
+    @Inject(method = "render", at = @At(value = "INVOKE", target = "Ljava/lang/Math;min(II)I", shift = At.Shift.BEFORE))
+    private void modifyHeight(CallbackInfo ci, @Local(ordinal = 5)LocalIntRef o, @Local(ordinal = 6)LocalIntRef p) {
         BetterTab module = Modules.get().get(BetterTab.class);
-        return module.isActive() ? module.tabHeight.get() : height;
+        if (!module.isActive()) return;
+
+        int newO;
+        int newP = 1;
+        int totalPlayers = newO = module.tabSize.get();
+        while (newO > module.tabHeight.get()) {
+            newO = (totalPlayers + ++newP - 1) / newP;
+        }
+
+        o.set(newO);
+        p.set(newP);
     }
 
     @Inject(method = "renderLatencyIcon", at = @At("HEAD"), cancellable = true)
