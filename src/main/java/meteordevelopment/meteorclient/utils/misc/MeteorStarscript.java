@@ -60,6 +60,7 @@ import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -90,6 +91,7 @@ public class MeteorStarscript {
             .set("active_modules", () -> Value.number(Modules.get().getActive().size()))
             .set("is_module_active", MeteorStarscript::isModuleActive)
             .set("get_module_info", MeteorStarscript::getModuleInfo)
+            .set("get_module_setting", MeteorStarscript::getModuleSetting)
             .set("prefix", MeteorStarscript::getMeteorPrefix)
         );
 
@@ -346,6 +348,33 @@ public class MeteorStarscript {
         }
 
         return Value.string("");
+    }
+
+    private static Value getModuleSetting(Starscript ss, int argCount) {
+        if (argCount != 2) ss.error("meteor.get_module_setting() requires 2 arguments, got %d.", argCount);
+
+        var settingName = ss.popString("Second argument to meteor.get_module_setting() needs to be a string.");
+        var moduleName = ss.popString("First argument to meteor.get_module_setting() needs to be a string.");
+        Module module = Modules.get().get(moduleName);
+        if (module == null) {
+            ss.error("Unable to get module %s for meteor.get_module_setting()", moduleName);
+        }
+        var setting = module.settings.get(settingName);
+        if (setting == null) {
+            ss.error("Unable to get setting %s for module %s for meteor.get_module_setting()", settingName, moduleName);
+        }
+        var value = setting.get();
+        if (value instanceof Double) {
+            return Value.number((Double) value);
+        } else if (value instanceof Integer) {
+            return Value.number((Integer) value);
+        } else if (value instanceof Boolean) {
+            return Value.bool((Boolean) value);
+        } else if (value instanceof List) {
+            return Value.number(((List<?>) value).size());
+        } else {
+            return Value.string(value.toString());
+        }
     }
 
     private static Value isModuleActive(Starscript ss, int argCount) {
