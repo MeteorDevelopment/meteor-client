@@ -17,12 +17,18 @@ import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.List;
+
 @Mixin(PlayerListHud.class)
-public class PlayerListHudMixin {
+public abstract class PlayerListHudMixin {
+    @Shadow
+    protected abstract List<PlayerListEntry> collectPlayerEntries();
+
     @ModifyConstant(constant = @Constant(longValue = 80L), method = "collectPlayerEntries")
     private long modifyCount(long count) {
         BetterTab module = Modules.get().get(BetterTab.class);
@@ -51,7 +57,7 @@ public class PlayerListHudMixin {
 
         int newO;
         int newP = 1;
-        int totalPlayers = newO = module.tabSize.get();
+        int totalPlayers = newO = this.collectPlayerEntries().size();
         while (newO > module.tabHeight.get()) {
             newO = (totalPlayers + ++newP - 1) / newP;
         }
