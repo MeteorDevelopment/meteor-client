@@ -46,6 +46,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.EmptyBlockView;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -64,7 +65,7 @@ public class HighwayBuilder extends Module {
         Place(false, true),
         Both(true, true);
 
-        public boolean mine, place;
+        public final boolean mine, place;
 
         Rotation(boolean mine, boolean place) {
             this.mine = mine;
@@ -131,7 +132,7 @@ public class HighwayBuilder extends Module {
         .name("blocks-to-place")
         .description("Blocks it is allowed to place.")
         .defaultValue(Blocks.OBSIDIAN)
-        .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(mc.world, ZERO)))
+        .filter(block -> Block.isShapeFullCube(block.getDefaultState().getCollisionShape(EmptyBlockView.INSTANCE, ZERO)))
         .build()
     );
 
@@ -343,7 +344,7 @@ public class HighwayBuilder extends Module {
                     it.restore();
                 }
 
-                event.renderer.box(posRender2.getMcPos(), sideColor, lineColor, shapeMode, excludeDir);
+                event.renderer.box(posRender2.getBlockPos(), sideColor, lineColor, shapeMode, excludeDir);
             }
         }
     }
@@ -374,11 +375,11 @@ public class HighwayBuilder extends Module {
 
     private boolean canMine(MBlockPos pos, boolean ignoreBlocksToPlace) {
         BlockState state = pos.getState();
-        return BlockUtils.canBreak(pos.getMcPos(), state) && (ignoreBlocksToPlace || !blocksToPlace.get().contains(state.getBlock()));
+        return BlockUtils.canBreak(pos.getBlockPos(), state) && (ignoreBlocksToPlace || !blocksToPlace.get().contains(state.getBlock()));
     }
 
     private boolean canPlace(MBlockPos pos, boolean liquids) {
-        return liquids ? !pos.getState().getFluidState().isEmpty() : pos.getState().isAir();
+        return liquids ? !pos.getState().getFluidState().isEmpty() : BlockUtils.canPlace(pos.getBlockPos());
     }
 
     private void disconnect(String message, Object... args) {
@@ -443,16 +444,26 @@ public class HighwayBuilder extends Module {
 
         Forward {
             @Override
+            protected void start(HighwayBuilder b) {
+                b.mc.player.setYaw(b.dir.yaw);
+                checkTasks(b);
+            }
+
+            @Override
             protected void tick(HighwayBuilder b) {
                 b.mc.player.setYaw(b.dir.yaw);
 
+                checkTasks(b);
+                if (b.state == Forward) b.input.pressingForward = true; // Move
+            }
+
+            private void checkTasks(HighwayBuilder b) {
                 if (needsToPlace(b, b.blockPosProvider.getLiquids(), true)) b.setState(FillLiquids); // Fill Liquids
                 else if (needsToMine(b, b.blockPosProvider.getFront(), true)) b.setState(MineFront); // Mine Front
                 else if (b.floor.get() == Floor.Replace && needsToMine(b, b.blockPosProvider.getFloor(), false)) b.setState(MineFloor); // Mine Floor
                 else if (b.railings.get() && needsToMine(b, b.blockPosProvider.getRailings(true), false)) b.setState(MineRailings); // Mine Railings
                 else if (b.railings.get() && needsToPlace(b, b.blockPosProvider.getRailings(false), false)) b.setState(PlaceRailings); // Place Railings
                 else if (needsToPlace(b, b.blockPosProvider.getFloor(), false)) b.setState(PlaceFloor); // Place Floor
-                else b.input.pressingForward = true; // Move
             }
 
             private boolean needsToMine(HighwayBuilder b, MBPIterator it, boolean ignoreBlocksToPlace) {
@@ -683,18 +694,19 @@ public class HighwayBuilder extends Module {
                 }
 
                 // Check block state
-                BlockState blockState = b.mc.world.getBlockState(pos.getMcPos());
+                BlockState blockState = b.mc.world.getBlockState(pos.getBlockPos());
 
                 if (blockState.getBlock() == Blocks.ENDER_CHEST) {
                     // Mine ender chest
-                    int slot = findAndMoveBestToolToHotbar(b, blockState, true, false);
+                    int slot = findAndMoveBestToolToHotbar(b, blockState, true);
                     if (slot == -1) {
-                        b.error("Cannot find pickaxe with silk touch to mine ender chests.");
+                        b.error("Cannot find pickaxe without silk touch to mine ender chests.");
                         return;
                     }
 
                     InvUtils.swap(slot, false);
-                    BlockUtils.breakBlock(pos.getMcPos(), true);
+                    if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(pos.getBlockPos()), Rotations.getPitch(pos.getBlockPos()), () -> BlockUtils.breakBlock(pos.getBlockPos(), true));
+                    else BlockUtils.breakBlock(pos.getBlockPos(), true);
                 }
                 else {
                     // Place ender chest
@@ -710,7 +722,7 @@ public class HighwayBuilder extends Module {
                         first = false;
                     }
 
-                    BlockUtils.place(pos.getMcPos(), Hand.MAIN_HAND, slot, true, 0, true, true, false);
+                    BlockUtils.place(pos.getBlockPos(), Hand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, false);
                 }
             }
         };
@@ -726,14 +738,14 @@ public class HighwayBuilder extends Module {
                 BlockState state = pos.getState();
                 if (state.isAir() || (!ignoreBlocksToPlace && b.blocksToPlace.get().contains(state.getBlock()))) continue;
 
-                int slot = findAndMoveBestToolToHotbar(b, state, false, true);
+                int slot = findAndMoveBestToolToHotbar(b, state, false);
                 if (slot == -1) return;
 
                 InvUtils.swap(slot, false);
 
-                BlockPos mcPos = pos.getMcPos();
+                BlockPos mcPos = pos.getBlockPos();
                 if (BlockUtils.canBreak(mcPos)) {
-                    if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(pos.getMcPos(), true));
+                    if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(mcPos), Rotations.getPitch(mcPos), () -> BlockUtils.breakBlock(pos.getBlockPos(), true));
                     else BlockUtils.breakBlock(mcPos, true);
 
                     breaking = true;
@@ -760,7 +772,7 @@ public class HighwayBuilder extends Module {
             boolean placed = false;
 
             for (MBlockPos pos : it) {
-                if (BlockUtils.place(pos.getMcPos(), Hand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, true)) {
+                if (BlockUtils.place(pos.getBlockPos(), Hand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, true)) {
                     placed = true;
                     b.blocksPlaced++;
                     break;
@@ -855,7 +867,7 @@ public class HighwayBuilder extends Module {
             return hotbarSlot;
         }
 
-        protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch, boolean error) {
+        protected int findAndMoveBestToolToHotbar(HighwayBuilder b, BlockState blockState, boolean noSilkTouch) {
             // Check for creative
             if (b.mc.player.isCreative()) return b.mc.player.getInventory().selectedSlot;
 
@@ -875,11 +887,7 @@ public class HighwayBuilder extends Module {
                 }
             }
 
-            // Stop if not found
-            if (bestSlot == -1) {
-                if (error) b.error("Failed to find suitable tool for mining.");
-                return -1;
-            }
+            if (bestSlot == -1) return b.mc.player.getInventory().selectedSlot;
 
             // Check if the tool is already in hotbar
             if (bestSlot < 9) return bestSlot;
