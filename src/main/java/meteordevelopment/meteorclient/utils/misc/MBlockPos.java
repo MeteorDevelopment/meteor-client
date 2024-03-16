@@ -51,12 +51,12 @@ public class MBlockPos {
         return this;
     }
 
-    public BlockPos getMcPos() {
+    public BlockPos getBlockPos() {
         return POS.set(x, y, z);
     }
 
     public BlockState getState() {
-        return mc.world.getBlockState(getMcPos());
+        return mc.world.getBlockState(getBlockPos());
     }
 
     @Override

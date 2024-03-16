@@ -11,6 +11,7 @@ import meteordevelopment.meteorclient.utils.PreInit;
 import meteordevelopment.meteorclient.utils.player.FindItemResult;
 import meteordevelopment.meteorclient.utils.player.InvUtils;
 import meteordevelopment.meteorclient.utils.player.Rotations;
+import meteordevelopment.meteorclient.utils.player.SlotUtils;
 import meteordevelopment.orbit.EventHandler;
 import meteordevelopment.orbit.EventPriority;
 import net.minecraft.block.*;
@@ -20,6 +21,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.effect.StatusEffectUtil;
 import net.minecraft.entity.effect.StatusEffects;
+import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.HandSwingC2SPacket;
 import net.minecraft.registry.tag.FluidTags;
@@ -77,7 +79,11 @@ public class BlockUtils {
 
     public static boolean place(BlockPos blockPos, Hand hand, int slot, boolean rotate, int rotationPriority, boolean swingHand, boolean checkEntities, boolean swapBack) {
         if (slot < 0 || slot > 8) return false;
-        if (!canPlace(blockPos, checkEntities)) return false;
+
+        Block toPlace = Blocks.OBSIDIAN;
+        ItemStack i = hand == Hand.MAIN_HAND ? mc.player.getInventory().getStack(slot) : mc.player.getInventory().getStack(SlotUtils.OFFHAND);
+        if (i.getItem() instanceof BlockItem blockItem) toPlace = blockItem.getBlock();
+        if (!canPlaceBlock(blockPos, checkEntities, toPlace)) return false;
 
         Vec3d hitPos = Vec3d.ofCenter(blockPos);
 
@@ -128,7 +134,7 @@ public class BlockUtils {
         mc.player.input.sneaking = wasSneaking;
     }
 
-    public static boolean canPlace(BlockPos blockPos, boolean checkEntities) {
+    public static boolean canPlaceBlock(BlockPos blockPos, boolean checkEntities, Block block) {
         if (blockPos == null) return false;
 
         // Check y level
@@ -138,7 +144,11 @@ public class BlockUtils {
         if (!mc.world.getBlockState(blockPos).isReplaceable()) return false;
 
         // Check if intersects entities
-        return !checkEntities || mc.world.canPlace(Blocks.OBSIDIAN.getDefaultState(), blockPos, ShapeContext.absent());
+        return !checkEntities || mc.world.canPlace(block.getDefaultState(), blockPos, ShapeContext.absent());
+    }
+
+    public static boolean canPlace(BlockPos blockPos, boolean checkEntities) {
+        return canPlaceBlock(blockPos, checkEntities, Blocks.OBSIDIAN);
     }
 
     public static boolean canPlace(BlockPos blockPos) {
