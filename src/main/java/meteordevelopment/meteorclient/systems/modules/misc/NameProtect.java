@@ -42,10 +42,11 @@ public class NameProtect extends Module {
         .build()
     );
 
+    @SuppressWarnings("unused")
     private final Setting<String> customSkinUuid = sgGeneral.add(new StringSetting.Builder()
         .name("custom-skin-url")
         .description("The UUID to use as the source of the skin.")
-        .defaultValue("f5dda056a6dd4614a343e84cd2f30c38")
+        .defaultValue("3aa4fb57-2ef7-4304-b4d7-bd2187f48e1f")
         .visible(() -> skinProtect.get() == SkinProtect.CustomSkin)
         .onChanged(this::updateSkin)
         .build()
