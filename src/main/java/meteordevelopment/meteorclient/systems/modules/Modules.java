@@ -52,6 +52,7 @@ import net.minecraft.registry.entry.RegistryEntryList;
 import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.glfw.GLFW;
 
@@ -424,6 +425,7 @@ public class Modules extends System<Modules> {
         add(new FakePlayer());
         add(new FastUse());
         add(new GhostHand());
+        add(new InstaMine());
         add(new LiquidInteract());
         add(new MiddleClickExtra());
         add(new BreakDelay());
@@ -631,7 +633,7 @@ public class Modules extends System<Modules> {
         }
 
         @Override
-        public Iterator<Module> iterator() {
+        public @NotNull Iterator<Module> iterator() {
             return new ModuleIterator();
         }
 
