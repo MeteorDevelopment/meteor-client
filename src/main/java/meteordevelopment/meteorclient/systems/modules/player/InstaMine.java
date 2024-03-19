@@ -80,7 +80,7 @@ public class InstaMine extends Module {
         .build()
     );
 
-    private final BlockPos.Mutable blockPos = new BlockPos.Mutable(0, Integer.MIN_VALUE, 0);
+    public final BlockPos.Mutable blockPos = new BlockPos.Mutable(0, Integer.MIN_VALUE, 0);
     private int ticks;
     private Direction direction;
 
@@ -106,9 +106,8 @@ public class InstaMine extends Module {
             ticks = 0;
 
             if (shouldMine()) {
-                if (rotate.get())
-                    Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), () -> mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction)));
-                else mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+                if (rotate.get()) Rotations.rotate(Rotations.getYaw(blockPos), Rotations.getPitch(blockPos), this::sendPacket);
+                else sendPacket();
 
                 mc.getNetworkHandler().sendPacket(new HandSwingC2SPacket(Hand.MAIN_HAND));
             }
@@ -117,7 +116,11 @@ public class InstaMine extends Module {
         }
     }
 
-    private boolean shouldMine() {
+    public void sendPacket() {
+        mc.getNetworkHandler().sendPacket(new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, blockPos, direction));
+    }
+
+    public boolean shouldMine() {
         if (mc.world.isOutOfHeightLimit(blockPos) || !BlockUtils.canBreak(blockPos)) return false;
 
         return !pick.get() || mc.player.getMainHandStack().getItem() instanceof PickaxeItem;

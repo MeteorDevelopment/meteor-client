@@ -133,7 +133,7 @@ public class Scaffold extends Module {
         .defaultValue(0)
         .min(0)
         .max(6)
-        .visible(() -> airPlace.get())
+        .visible(airPlace::get)
         .build()
     );
 
@@ -142,7 +142,7 @@ public class Scaffold extends Module {
         .description("How many blocks to place in one tick.")
         .defaultValue(3)
         .min(1)
-        .visible(() -> airPlace.get())
+        .visible(airPlace::get)
         .build()
     );
 
@@ -229,9 +229,7 @@ public class Scaffold extends Module {
                     }
                 }
             }
-            if (blockPosArray.size() == 0) {
-                return;
-            }
+            if (blockPosArray.isEmpty()) return;
 
             blockPosArray.sort(Comparator.comparingDouble((blockPos) -> blockPos.getSquaredDistance(targetBlock)));
 
