@@ -62,7 +62,7 @@ public class VeinMiner extends Module {
     private final Setting<ListMode> mode = sgGeneral.add(new EnumSetting.Builder<ListMode>()
         .name("mode")
         .description("Selection mode.")
-        .defaultValue(ListMode.Whitelist)
+        .defaultValue(ListMode.Blacklist)
         .build()
     );
 
