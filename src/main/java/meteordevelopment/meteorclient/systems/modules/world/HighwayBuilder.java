@@ -26,6 +26,7 @@ import meteordevelopment.meteorclient.utils.render.color.Color;
 import meteordevelopment.meteorclient.utils.render.color.SettingColor;
 import meteordevelopment.meteorclient.utils.world.BlockUtils;
 import meteordevelopment.meteorclient.utils.world.Dir;
+import meteordevelopment.meteorclient.utils.world.TickRate;
 import meteordevelopment.orbit.EventHandler;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -155,6 +156,15 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
+    private final Setting<Integer> instamineDelay = sgGeneral.add(new IntSetting.Builder()
+        .name("instamine-delay")
+        .description("Delay between instamine attempts.")
+        .defaultValue(0)
+        .sliderMax(20)
+        .visible(() -> mineEnderChests.get() && instamineEchests.get())
+        .build()
+    );
+
     private final Setting<Boolean> disconnectOnToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect-on-toggle")
         .description("Automatically disconnects when the module is turned off, for example for not having enough blocks.")
@@ -165,14 +175,14 @@ public class HighwayBuilder extends Module {
     private final Setting<Boolean> taskSpeedup = sgGeneral.add(new BoolSetting.Builder()
         .name("task-shortcut")
         .description("Shortcuts to the next task by not double checking that you actually finished it. Disable if you get errors.")
-        .defaultValue(true)
+        .defaultValue(false)
         .build()
     );
 
-    private final Setting<Boolean> tick = sgGeneral.add(new BoolSetting.Builder()
-        .name("tick")
-        .description("")
-        .defaultValue(false)
+    private final Setting<Boolean> pauseOnLag = sgGeneral.add(new BoolSetting.Builder()
+        .name("pause-on-lag")
+        .description("Pauses the current process while the server stops responding.")
+        .defaultValue(true)
         .build()
     );
 
@@ -385,7 +395,7 @@ public class HighwayBuilder extends Module {
         if (Modules.get().get(AutoEat.class).eating) return;
         if (Modules.get().get(AutoGap.class).isEating()) return;
 
-        if (tick.get()) info("\n" + mc.player.age);
+        if (pauseOnLag.get() && TickRate.INSTANCE.getTimeSinceLastTick() >= 1.0f) return;
 
         count = 0;
 
@@ -439,7 +449,6 @@ public class HighwayBuilder extends Module {
     }
 
     private void setState(State state) {
-        info(state.toString());
         lastState = this.state;
         this.state = state;
 
@@ -719,13 +728,10 @@ public class HighwayBuilder extends Module {
 
         MineEnderChests {
             private static final MBlockPos pos = new MBlockPos();
-
             private int minimumObsidian;
             private boolean first, primed;
-            private int moveTimer;
-
             private boolean stopTimerEnabled;
-            private int stopTimer;
+            private int stopTimer, moveTimer, instamineTimer;
 
             @Override
             protected void start(HighwayBuilder b) {
@@ -758,6 +764,7 @@ public class HighwayBuilder extends Module {
                 moveTimer = 0;
 
                 stopTimerEnabled = false;
+                primed = false;
             }
 
             @Override
@@ -817,7 +824,13 @@ public class HighwayBuilder extends Module {
                     InvUtils.swap(slot, false);
 
                     if (b.instamineEchests.get() && primed) {
+                        if (instamineTimer > 0) {
+                            instamineTimer--;
+                            return;
+                        }
+
                         PlayerActionC2SPacket p = new PlayerActionC2SPacket(PlayerActionC2SPacket.Action.STOP_DESTROY_BLOCK, bp, BlockUtils.getDirection(bp));
+                        instamineTimer = b.instamineDelay.get();
 
                         if (b.rotation.get().mine) Rotations.rotate(Rotations.getYaw(bp), Rotations.getPitch(bp), () -> b.mc.getNetworkHandler().sendPacket(p));
                         else b.mc.getNetworkHandler().sendPacket(p);
@@ -880,7 +893,9 @@ public class HighwayBuilder extends Module {
                     }
 
                     b.count++;
-                    if (b.blocksPerTick.get() == 1 || !BlockUtils.canInstaBreak(mcPos) || b.rotation.get().mine) break; // can only multi break if we aren't rotating and the block can be instamined
+
+                    // can only multi break if we aren't rotating and the block can be instamined
+                    if (b.blocksPerTick.get() == 1 || !BlockUtils.canInstaBreak(mcPos) || b.rotation.get().mine) break;
                 }
 
                 if (!it.hasNext() && BlockUtils.canInstaBreak(mcPos) && b.taskSpeedup.get()) finishedBreaking = true;
@@ -1603,12 +1618,13 @@ public class HighwayBuilder extends Module {
                         default -> pos.offset(dir2);
                         case 1 -> pos.offset(dir2.rotateLeftSkipOne());
                         case 2 -> pos.offset(dir2.rotateLeftSkipOne().opposite());
+                        case 3 -> pos.offset(dir2.opposite(), 2);
                     };
                 }
 
                 @Override
                 public boolean hasNext() {
-                    return i < 3 && y < 2;
+                    return i < 4 && y < 2;
                 }
 
                 @Override
