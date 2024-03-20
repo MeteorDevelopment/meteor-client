@@ -5,6 +5,8 @@
 
 package meteordevelopment.meteorclient.systems.modules.render;
 
+import it.unimi.dsi.fastutil.ints.AbstractIntSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import meteordevelopment.meteorclient.events.render.Render2DEvent;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.renderer.Renderer2D;
@@ -31,6 +33,7 @@ import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.*;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
@@ -221,6 +224,44 @@ public class Nametags extends Module {
         .defaultValue(true)
         .build()
     );
+
+    private final Setting<Boolean> filterItems = sgItems.add(new BoolSetting.Builder()
+        .name("filter-items")
+        .description("Only show nametags for specific items types.")
+        .defaultValue(false)
+        .build()
+    );
+
+    private final Setting<ListMode> shownItemFilterType = sgItems.add(new EnumSetting.Builder<ListMode>()
+        .name("selection-mode")
+        .description("Shown item filter mode")
+        .defaultValue(ListMode.None)
+        .visible(filterItems::get)
+        .build()
+    );
+
+    private final AbstractIntSet shownItemIds = new IntOpenHashSet();
+    private final Setting<List<Item>> shownItems = sgItems.add(new ItemListSetting.Builder()
+        .name("item-selection")
+        .description("Select items to render nametags for.")
+        .defaultValue()
+        .onChanged(items -> {
+            shownItemIds.clear();
+            shownItemIds.addAll(items.stream().map(Item::getRawId).toList());
+        })
+        .visible(() -> filterItems.get() && shownItemFilterType.get() != ListMode.None)
+        .build()
+    );
+
+    private final Setting<Boolean> alwaysShowNamed = sgItems.add(new BoolSetting.Builder()
+        .name("always-show-named")
+        .description("Display for named items regardless of being included in list.")
+        .defaultValue(false)
+        .visible(filterItems::get)
+        .build()
+    );
+
+
 
     // Render
 
@@ -548,6 +589,16 @@ public class Nametags extends Module {
     }
 
     private void renderNametagItem(ItemStack stack, boolean shadow) {
+        boolean showCustomNamed = stack.hasCustomName() && alwaysShowNamed.get();
+
+        boolean showInList = !filterItems.get()
+                || (shownItemFilterType.get() == ListMode.Whitelist && shownItemIds.contains(Item.getRawId(stack.getItem())))
+                || (shownItemFilterType.get() == ListMode.Blacklist && !shownItemIds.contains(Item.getRawId(stack.getItem())));
+
+        if (!showCustomNamed && !showInList) {
+            return;
+        }
+
         TextRenderer text = TextRenderer.get();
         NametagUtils.begin(pos);
 
@@ -672,5 +723,11 @@ public class Nametags extends Module {
 
     public boolean playerNametags() {
         return isActive() && entities.get().contains(EntityType.PLAYER);
+    }
+
+    public enum ListMode {
+        Whitelist,
+        Blacklist,
+        None
     }
 }
