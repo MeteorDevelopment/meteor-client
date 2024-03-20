@@ -5,7 +5,7 @@
 
 package meteordevelopment.meteorclient.gui.screens.settings;
 
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import meteordevelopment.meteorclient.gui.GuiTheme;
 import meteordevelopment.meteorclient.gui.WindowScreen;
 import meteordevelopment.meteorclient.gui.widgets.containers.WTable;
@@ -23,13 +23,13 @@ import java.util.Comparator;
 import java.util.List;
 
 public class StatusEffectAmplifierMapSettingScreen extends WindowScreen {
-    private final Setting<Object2IntMap<StatusEffect>> setting;
+    private final Setting<Reference2IntMap<StatusEffect>> setting;
 
     private WTable table;
 
     private String filterText = "";
 
-    public StatusEffectAmplifierMapSettingScreen(GuiTheme theme, Setting<Object2IntMap<StatusEffect>> setting) {
+    public StatusEffectAmplifierMapSettingScreen(GuiTheme theme, Setting<Reference2IntMap<StatusEffect>> setting) {
         super(theme, "Modify Amplifiers");
 
         this.setting = setting;

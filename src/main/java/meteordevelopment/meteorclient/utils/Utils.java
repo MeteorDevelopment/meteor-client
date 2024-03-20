@@ -7,13 +7,13 @@ package meteordevelopment.meteorclient.utils;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.systems.VertexSorter;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.*;
 import meteordevelopment.meteorclient.MeteorClient;
 import meteordevelopment.meteorclient.events.world.TickEvent;
 import meteordevelopment.meteorclient.gui.tabs.TabScreen;
 import meteordevelopment.meteorclient.mixin.*;
 import meteordevelopment.meteorclient.mixininterface.IMinecraftClient;
+import meteordevelopment.meteorclient.settings.StatusEffectAmplifierMapSetting;
 import meteordevelopment.meteorclient.systems.modules.Modules;
 import meteordevelopment.meteorclient.systems.modules.render.BetterTooltips;
 import meteordevelopment.meteorclient.systems.modules.world.Timer;
@@ -242,12 +242,8 @@ public class Utils {
         return compoundTag != null && compoundTag.contains("Items", 9);
     }
 
-    public static Object2IntMap<StatusEffect> createStatusEffectMap() {
-        Object2IntMap<StatusEffect> map = new Object2IntArrayMap<>(Registries.STATUS_EFFECT.getIds().size());
-
-        Registries.STATUS_EFFECT.forEach(potion -> map.put(potion, 0));
-
-        return map;
+    public static Reference2IntMap<StatusEffect> createStatusEffectMap() {
+        return new Reference2IntArrayMap<>(StatusEffectAmplifierMapSetting.EMPTY_STATUS_EFFECT_MAP);
     }
 
     public static String getEnchantSimpleName(Enchantment enchantment, int length) {
