@@ -36,10 +36,7 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.item.*;
 import net.minecraft.network.packet.c2s.play.PlayerActionC2SPacket;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -82,6 +79,7 @@ public class HighwayBuilder extends Module {
     private final SettingGroup sgGeneral = settings.getDefaultGroup();
     private final SettingGroup sgDigging = settings.createGroup("Digging");
     private final SettingGroup sgPaving = settings.createGroup("Paving");
+    private final SettingGroup sgInventory = settings.createGroup("Inventory");
     private final SettingGroup sgRenderDigging = settings.createGroup("Render Digging");
     private final SettingGroup sgRenderPaving = settings.createGroup("Render Paving");
 
@@ -134,37 +132,6 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
-    private final Setting<List<Item>> trashItems = sgGeneral.add(new ItemListSetting.Builder()
-        .name("trash-items")
-        .description("Items that are considered trash and can be thrown out.")
-        .defaultValue(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GOLDEN_SWORD, Items.GLOWSTONE_DUST, Items.GLOWSTONE, Items.BLACKSTONE, Items.BASALT, Items.GHAST_TEAR, Items.SOUL_SAND, Items.SOUL_SOIL)
-        .build()
-    );
-
-    private final Setting<Boolean> mineEnderChests = sgGeneral.add(new BoolSetting.Builder()
-        .name("mine-ender-chests")
-        .description("Mines ender chests for obsidian.")
-        .defaultValue(true)
-        .build()
-    );
-
-    private final Setting<Boolean> instamineEchests = sgGeneral.add(new BoolSetting.Builder()
-        .name("instamine-echests")
-        .description("Whether or not to use the instamine exploit to break echests.")
-        .defaultValue(false)
-        .visible(mineEnderChests::get)
-        .build()
-    );
-
-    private final Setting<Integer> instamineDelay = sgGeneral.add(new IntSetting.Builder()
-        .name("instamine-delay")
-        .description("Delay between instamine attempts.")
-        .defaultValue(0)
-        .sliderMax(20)
-        .visible(() -> mineEnderChests.get() && instamineEchests.get())
-        .build()
-    );
-
     private final Setting<Boolean> disconnectOnToggle = sgGeneral.add(new BoolSetting.Builder()
         .name("disconnect-on-toggle")
         .description("Automatically disconnects when the module is turned off, for example for not having enough blocks.")
@@ -195,6 +162,16 @@ public class HighwayBuilder extends Module {
         .build()
     );
 
+    private final Setting<Integer> savePickaxes = sgDigging.add(new IntSetting.Builder()
+        .name("save-pickaxes")
+        .description("How many pickaxes to ensure are saved.")
+        .defaultValue(0)
+        .range(0, 36)
+        .sliderRange(0, 36)
+        .visible(() -> !dontBreakTools.get())
+        .build()
+    );
+
     private final Setting<Integer> breakDelay = sgDigging.add(new IntSetting.Builder()
         .name("break-delay")
         .description("The delay between breaking blocks.")
@@ -207,7 +184,7 @@ public class HighwayBuilder extends Module {
         .name("blocks-per-tick")
         .description("The maximum amount of blocks that can be mined in a tick. Only applies to blocks instantly breakable.")
         .defaultValue(1)
-        .range(1, 50)
+        .range(1, 100)
         .sliderRange(1, 25)
         .build()
     );
@@ -235,6 +212,49 @@ public class HighwayBuilder extends Module {
         .description("The maximum amount of blocks that can be placed in a tick.")
         .defaultValue(1)
         .min(1)
+        .build()
+    );
+
+    // Inventory
+
+    private final Setting<List<Item>> trashItems = sgInventory.add(new ItemListSetting.Builder()
+        .name("trash-items")
+        .description("Items that are considered trash and can be thrown out.")
+        .defaultValue(Items.NETHERRACK, Items.QUARTZ, Items.GOLD_NUGGET, Items.GOLDEN_SWORD, Items.GLOWSTONE_DUST, Items.GLOWSTONE, Items.BLACKSTONE, Items.BASALT, Items.GHAST_TEAR, Items.SOUL_SAND, Items.SOUL_SOIL)
+        .build()
+    );
+
+    private final Setting<Boolean> mineEnderChests = sgInventory.add(new BoolSetting.Builder()
+        .name("mine-ender-chests")
+        .description("Mines ender chests for obsidian.")
+        .defaultValue(true)
+        .build()
+    );
+
+    private final Setting<Integer> saveEchests = sgInventory.add(new IntSetting.Builder()
+        .name("save-ender-chests")
+        .description("How many ender chests to ensure are saved.")
+        .defaultValue(1)
+        .range(0, 64)
+        .sliderRange(0, 64)
+        .visible(mineEnderChests::get)
+        .build()
+    );
+
+    private final Setting<Boolean> instamineEchests = sgInventory.add(new BoolSetting.Builder()
+        .name("instamine-echests")
+        .description("Whether or not to use the instamine exploit to break echests.")
+        .defaultValue(false)
+        .visible(mineEnderChests::get)
+        .build()
+    );
+
+    private final Setting<Integer> instamineDelay = sgInventory.add(new IntSetting.Builder()
+        .name("instamine-delay")
+        .description("Delay between instamine attempts.")
+        .defaultValue(0)
+        .sliderMax(20)
+        .visible(() -> mineEnderChests.get() && instamineEchests.get())
         .build()
     );
 
@@ -320,11 +340,12 @@ public class HighwayBuilder extends Module {
     }
 
     /*todo
-        separate digging and paving more effectively
-        better inventory management
+        - separate digging and paving more effectively
+        - better inventory management
             - getting echests and picks from shulker boxes - refactor echest blockade to be more general purpose?
             - access to your ec
-        separate walking forwards from the current state to speed up actions
+        - separate walking forwards from the current state to speed up actions
+        - stops randomly while walking, flashing as if to break and place blocks when the highway is perfectly fine - seems random, is it directional? diagonal only?
      */
 
     @Override
@@ -693,6 +714,11 @@ public class HighwayBuilder extends Module {
                     return;
                 }
 
+                if (!b.mc.player.currentScreenHandler.getCursorStack().isEmpty()) {
+                    InvUtils.dropHand();
+                    return;
+                }
+
                 for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
                     if (i == skipSlot) continue;
 
@@ -814,6 +840,12 @@ public class HighwayBuilder extends Module {
                 BlockState blockState = b.mc.world.getBlockState(bp);
 
                 if (blockState.getBlock() == Blocks.ENDER_CHEST) {
+                    if (first) {
+                        moveTimer = 8;
+                        first = false;
+                        return;
+                    }
+
                     // Mine ender chest
                     int slot = findAndMoveBestToolToHotbar(b, blockState, true);
                     if (slot == -1) {
@@ -843,16 +875,13 @@ public class HighwayBuilder extends Module {
                 else {
                     // Place ender chest
                     int slot = findAndMoveToHotbar(b, itemStack -> itemStack.getItem() == Items.ENDER_CHEST, false);
-                    if (slot == -1) {
+                    if (slot == -1 || countItem(b, stack -> stack.getItem().equals(Items.ENDER_CHEST)) <= b.saveEchests.get()) {
                         stopTimerEnabled = true;
                         stopTimer = 4;
                         return;
                     }
 
-                    if (first) {
-                        moveTimer = 8;
-                        first = false;
-                    } else primed = true;
+                    if (!first) primed = true;
 
                     BlockUtils.place(bp, Hand.MAIN_HAND, slot, b.rotation.get().place, 0, true, true, false);
                 }
@@ -987,6 +1016,16 @@ public class HighwayBuilder extends Module {
             return false;
         }
 
+        protected int countItem(HighwayBuilder b, Predicate<ItemStack> predicate) {
+            int count = 0;
+            for (int i = 0; i < b.mc.player.getInventory().main.size(); i++) {
+                ItemStack stack = b.mc.player.getInventory().getStack(i);
+                if (predicate.test(stack)) count += stack.getCount();
+            }
+
+            return count;
+        }
+
         protected int findAndMoveToHotbar(HighwayBuilder b, Predicate<ItemStack> predicate, boolean required) {
             // Check hotbar
             int slot = findSlot(b, predicate, true);
@@ -1037,6 +1076,12 @@ public class HighwayBuilder extends Module {
 
             if (bestSlot == -1) return b.mc.player.getInventory().selectedSlot;
 
+            if (b.mc.player.getInventory().getStack(bestSlot).getItem() instanceof PickaxeItem ){
+                int count = countItem(b, stack -> stack.getItem() instanceof PickaxeItem);
+
+                if (count <= b.savePickaxes.get()) b.error("Found less than the selected amount of pickaxes required: " + count + "/"  + (b.savePickaxes.get() + 1));
+            }
+
             // Check if the tool is already in hotbar
             if (bestSlot < 9) return bestSlot;
 
@@ -1055,7 +1100,7 @@ public class HighwayBuilder extends Module {
             int slot = findAndMoveToHotbar(b, itemStack -> itemStack.getItem() instanceof BlockItem blockItem && b.blocksToPlace.get().contains(blockItem.getBlock()), false);
 
             if (slot == -1) {
-                if (!b.mineEnderChests.get() || !hasItem(b, Items.ENDER_CHEST)) {
+                if (!b.mineEnderChests.get() || !hasItem(b, Items.ENDER_CHEST) || countItem(b, stack -> stack.getItem().equals(Items.ENDER_CHEST)) <= b.saveEchests.get()) {
                     b.error("Out of blocks to place.");
                 }
                 else b.setState(MineEnderChests);
