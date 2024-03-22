@@ -345,7 +345,6 @@ public class HighwayBuilder extends Module {
             - getting echests and picks from shulker boxes - refactor echest blockade to be more general purpose?
             - access to your ec
         - separate walking forwards from the current state to speed up actions
-        - stops randomly while walking, flashing as if to break and place blocks when the highway is perfectly fine - seems random, is it directional? diagonal only?
      */
 
     @Override
@@ -529,6 +528,8 @@ public class HighwayBuilder extends Module {
                 boolean isZ = Math.abs(z) <= 0.1;
 
                 if (isX && isZ) {
+                    b.input.stop();
+                    b.mc.player.setVelocity(0, 0, 0);
                     b.mc.player.setPosition((int) b.mc.player.getX() + (b.mc.player.getX() < 0 ? -0.5 : 0.5), b.mc.player.getY(), (int) b.mc.player.getZ() + (b.mc.player.getZ() < 0 ? -0.5 : 0.5));
                     b.setState(b.lastState);
                 }
